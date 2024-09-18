@@ -1,0 +1,259 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using ecocraft.Models
+@using ecocraft.Data
+@inject EcoCraftDbContext DbContext
+@inject UserSkillService UserSkillService
+@inject UserService UserService
+@inject SkillService SkillService
+@inject CraftingTableService CraftingTableService
+@inject UserCraftingTableService UserCraftingTableService
+@inject RecipeService RecipeService
+
+<PageTitle>Eco Calc</PageTitle>
+
+<MudContainer>
+
+	<MudGrid>
+		<!-- Première Colonne -->
+		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
+				@foreach (var skill in skills)
+				{
+					<MudSelectItem T="Skill" Value="@skill">@skill.Name</MudSelectItem>
+				}
+			</MudSelect>
+
+			<MudTable Items="userSkills" Dense="true">
+				<HeaderContent>
+					<MudTh>Name</MudTh>
+					<MudTh>Niveau</MudTh>
+					<MudTh></MudTh>
+				</HeaderContent>
+				<RowTemplate>
+					<MudTd>@context.Skill.Name</MudTd>
+						<MudTd>
+							<MudNumericField HideSpinButtons="true" T="int" Value=@context.Level Variant="Variant.Text" Min="0" Max="7" Style="width: 24px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
+						</MudTd>
+						<MudTd>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+
+				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
+					@foreach (var table in tables)
+				{
+					<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
+				}
+				</MudSelect>
+
+			  <MudTable Items="userCraftingTables" Dense="true">
+				<HeaderContent>
+					<MudTh>Name</MudTh>
+					<MudTh>Upgrade</MudTh>
+					<MudTh></MudTh>
+				</HeaderContent>
+				<RowTemplate>
+					<MudTd>@context.CraftingTable.Name</MudTd>
+						 <MudTd>
+							<MudSelect T="Upgrade" Text="Choisissez un upgrade" Value="context.Upgrade" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(Upgrade newUpgrade) => OnSelectedUpgradeChanged(context, newUpgrade)">
+								@foreach (var craftingTableUpgrade in context.CraftingTable.CraftingTableUpgrades)
+							{
+								<MudSelectItem T="Upgrade" Value="@craftingTableUpgrade.Upgrade">@craftingTableUpgrade.Upgrade.Name</MudSelectItem>
+							}
+						</MudSelect> 
+					</MudTd>
+					<MudTd>
+						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
+					</MudTd>
+				</RowTemplate>
+			</MudTable> 
+		</MudItem>
+
+		<!-- Deuxième Colonne -->
+		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
+				@foreach (var user in users)
+				{
+					<MudSelectItem T="User" Value="@user">@user.Name</MudSelectItem>
+				}
+			</MudSelect>
+			<MudStack>
+				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+					<MudText>Price per 1000 calories</MudText>
+					<div>
+						<MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" />
+					</div>
+				</MudStack>
+				<MudStack Justify="Justify.SpaceBetween" Row="true" Spacing="3" AlignItems="AlignItems.Center">
+					<MudText>Profit percentage</MudText>
+					<div>
+						<MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.ProfitMargin" HideSpinButtons="true" Variant="Variant.Text" Style="width: 40px;" />
+					</div>
+				</MudStack>
+			</MudStack>
+
+			@* <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+				<MudTable Items="userRecipes" Dense="true">
+					<HeaderContent>
+						<MudTh>Name</MudTh>
+						<MudTh>Upgrade</MudTh>
+						<MudTh></MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@context.Name</MudTd>
+						<MudTd>
+						</MudTd>
+						<MudTd>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+			</MudItem> *@
+		</MudItem>
+
+		<!-- Troisième Colonne -->
+		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudTable Items="userRecipes" Dense="true">
+				<HeaderContent>
+					<MudTh>Name</MudTh>
+					<MudTh>Upgrade</MudTh>
+					<MudTh></MudTh>
+				</HeaderContent>
+				<RowTemplate>
+					<MudTd>@context.Name</MudTd>
+					<MudTd>
+					</MudTd>
+				<MudTd>
+					<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
+				</MudTd>
+			</RowTemplate>
+		</MudTable>
+		</MudItem>
+
+	</MudGrid>
+
+
+
+
+	</MudContainer>
+
+	@code {
+
+	private List<Skill> skills;
+	private List<CraftingTable> tables;
+	private List<Recipe> recipes;
+
+	private List<User> users;
+	private User user = new User();
+
+	private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
+	private IEnumerable<UserSkill> userSkills { get; set; } = new HashSet<UserSkill>();
+
+	private IEnumerable<CraftingTable> selectedCraftingTables { get; set; } = new HashSet<CraftingTable>();
+	private IEnumerable<UserCraftingTable> userCraftingTables { get; set; } = new HashSet<UserCraftingTable>();
+
+	private IEnumerable<Recipe> userRecipes { get; set; } = new HashSet<Recipe>();
+
+	private int SkillsValue { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		// Charger toutes les compétences disponibles
+		skills = await SkillService.GetAllSkillsAsync();
+
+		tables = await CraftingTableService.GetAllCraftingTablesAsync();
+
+		users = await UserService.GetAllUsersAsync();
+
+		recipes = await RecipeService.GetAllRecipesAsync();
+	}
+
+	private async Task UpdateUser()
+	{
+		await UserService.UpdateUserAsync(user);
+	}
+
+	private async Task OnSelectedSkillsChanged(IEnumerable<Skill> newSelectedSkills)
+	{
+		// Mettre à jour la sélection localement
+		selectedSkills = newSelectedSkills;
+
+		// Mettre à jour les compétences dans la base de données (conversion en List)
+		await UserSkillService.UpdateUserSkillsAsync(user, selectedSkills.ToList());
+
+		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+
+		// Récupère la liste des tables de craft correspondant aux skills sélectionné
+		var selectedTable = userSkills
+			.SelectMany(us => us.Skill.CraftingTableSkills)
+			.Select(y => y.CraftingTable)
+			.Distinct();
+
+		selectedCraftingTables = selectedTable;
+
+		// Mettre à jour les compétences dans la base de données (conversion en List)
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
+
+		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+
+	}
+
+	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
+	{
+		// Mettre à jour la sélection localement
+		selectedCraftingTables = newSelectedCraftingTables;
+
+		// Mettre à jour les compétences dans la base de données (conversion en List)
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
+
+		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+	}
+
+	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
+	{
+		// Mettre à jour le niveau de la compétence dans la base de données
+		userSkill.Level = newLevel;
+		await UserSkillService.UpdateUserSkillAsync(userSkill);
+	}
+
+	private async Task OnSelectedUpgradeChanged(UserCraftingTable userCraftingTable, Upgrade newUpgrade)
+	{
+		userCraftingTable.Upgrade = newUpgrade;
+		// Mettre à jour le niveau de la compétence dans la base de données
+		await UserCraftingTableService.UpdateUserCraftingTableAsync(userCraftingTable);
+	}
+
+	private async Task OnSelectedUserChanged()
+	{
+		// Mettre à jour l'utilisateur
+		if (user is not null)
+		{
+			// Charger les compétences de l'utilisateur à partir de l'objet user
+			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+
+			// Initialiser selectedSkills en tant que HashSet
+			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
+
+			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
+
+			userRecipes = await RecipeService.GetRecipesForUserAsync(user);
+		}
+	}
+
+	/*private async Task DeleteUserSkill(int userSkillId)
+		{
+		// Appel au service pour supprimer la compétence de l'utilisateur
+		await UserSkillService.DeleteUserSkillAsync(userSkillId);
+
+		// Charger les compétences de l'utilisateur à partir de l'objet user
+		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+
+		// Initialiser selectedSkills en tant que HashSet
+		selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
+				}*/
+}

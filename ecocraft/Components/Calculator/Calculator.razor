@@ -1,0 +1,37 @@
+﻿@page "/calculator"
+
+<PageTitle>Calculator</PageTitle>
+
+
+<MudContainer>
+    <MudGrid>
+        <!-- Première Colonne -->
+        <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+            <Skills />
+        </MudItem>
+
+        <!-- Deuxième Colonne -->
+        <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+            <Inputs />
+        </MudItem>
+
+        <!-- Troisième Colonne -->
+        <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+            <Outputs />
+        </MudItem>
+
+    </MudGrid>
+</MudContainer>
+
+
+
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
