@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using ecocraft.Extensions
 @using ecocraft.Models
-@using ecocraft.Data
+@using ecocraft.Services
 @inject EcoCraftDbContext DbContext
 @inject UserSkillService UserSkillService
 @inject UserService UserService
@@ -18,7 +18,7 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
+			@* <MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
 				@foreach (var skill in skills)
 				{
 					<MudSelectItem T="Skill" Value="@skill">@skill.Name</MudSelectItem>
@@ -72,11 +72,11 @@
 					</MudTd>
 				</RowTemplate>
 			</MudTable> 
-		</MudItem>
+ *@		</MudItem>
 
 		<!-- Deuxième Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
+			@* <MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
 				@foreach (var user in users)
 				{
 					<MudSelectItem T="User" Value="@user">@user.Name</MudSelectItem>
@@ -95,29 +95,12 @@
 						<MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.ProfitMargin" HideSpinButtons="true" Variant="Variant.Text" Style="width: 40px;" />
 					</div>
 				</MudStack>
-			</MudStack>
+			</MudStack> *@
 
-			@* <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-				<MudTable Items="userRecipes" Dense="true">
-					<HeaderContent>
-						<MudTh>Name</MudTh>
-						<MudTh>Upgrade</MudTh>
-						<MudTh></MudTh>
-					</HeaderContent>
-					<RowTemplate>
-						<MudTd>@context.Name</MudTd>
-						<MudTd>
-						</MudTd>
-						<MudTd>
-							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
-						</MudTd>
-					</RowTemplate>
-				</MudTable>
-			</MudItem> *@
 		</MudItem>
 
 		<!-- Troisième Colonne -->
-		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+		@* <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
 			<MudTable Items="userRecipes" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
@@ -133,7 +116,7 @@
 				</MudTd>
 			</RowTemplate>
 		</MudTable>
-		</MudItem>
+		</MudItem> *@
 
 	</MudGrid>
 
@@ -172,7 +155,7 @@
 
 		recipes = await RecipeService.GetAllRecipesAsync();
 	}
-
+	/*
 	private async Task UpdateUser()
 	{
 		await UserService.UpdateUserAsync(user);
@@ -223,9 +206,9 @@
 		await UserSkillService.UpdateUserSkillAsync(userSkill);
 	}
 
-	private async Task OnSelectedUpgradeChanged(UserCraftingTable userCraftingTable, Upgrade newUpgrade)
+	private async Task OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
 	{
-		userCraftingTable.Upgrade = newUpgrade;
+		userCraftingTable.PluginModule = newUpgrade;
 		// Mettre à jour le niveau de la compétence dans la base de données
 		await UserCraftingTableService.UpdateUserCraftingTableAsync(userCraftingTable);
 	}
@@ -247,7 +230,7 @@
 			userRecipes = user.GetAvailableRecipes();
 		}
 	}
-
+	*/
 	/*private async Task DeleteUserSkill(int userSkillId)
 		{
 		// Appel au service pour supprimer la compétence de l'utilisateur

@@ -1,203 +1,371 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ecocraft.Models
 {
-    // User Model
-    public class User
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
+	// User Model
+	public class User
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Pseudo { get; set; }
+		public Guid SecretId { get; set; } // Guid for secure identification
 
-        // Global parameters
-        public decimal CalorieCost { get; set; } // Cost per thousand calories
-        public decimal ProfitMargin { get; set; } // Profit percentage
+		// Navigation Properties
+		public ICollection<UserSkill> UserSkills { get; set; }
+		public ICollection<UserServer> UserServers { get; set; }
+		public ICollection<UserProduct> UserProducts { get; set; }
+		public ICollection<UserPrice> UserPrices { get; set; }
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
+		public ICollection<UserSetting> UserSettings { get; set; }
+	}
 
-        public ICollection<UserSkill> UserSkills { get; set; }
-        public ICollection<UserCraftingTable> UserCraftingTables { get; set; } // Nouvelle relation avec UserCraftingTables
-        public ICollection<UserInputPrice> UserInputPrices { get; set; }
+	public class UserSetting
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
 
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
+		public float CalorieCost { get; set; }
+		public float Margin { get; set; }
+		public float TimeFee { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	public class UserServer
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
+
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+		
 		
 	}
 
-    // Skill Model
-    public class Skill
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
+	public class Server
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
+		public string SecretId { get; set; }
 
-        public ICollection<UserSkill> UserSkills { get; set; }
-        public ICollection<Recipe> Recipes { get; set; }
+		// Navigation Properties
 
-        // Relation Many-to-Many avec CraftingTable via CraftingTableSkill
-        public ICollection<CraftingTableSkill> CraftingTableSkills { get; set; }
-    }
+		// UserServer
+		public ICollection<UserServer> UserServers { get; set; } = new List<UserServer>();
 
-    // UserSkill Model
-    public class UserSkill
-    {
-        [Key]
-        public int Id { get; set; }
+		// CraftingTable
+		public ICollection<CraftingTable> CraftingTables { get; set; } = new List<CraftingTable>();
 
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+		// PluginModule
+		public ICollection<PluginModule> PluginModules { get; set; } = new List<PluginModule>();
 
-        [ForeignKey("Skill")]
-        public int SkillId { get; set; }
-        public Skill Skill { get; set; }
+		// Skill
+		public ICollection<Skill> Skills { get; set; } = new List<Skill>();
 
-        public int Level { get; set; } // From 0 to 7
-    }
+		// UserPrice
+		public ICollection<UserPrice> UserPrices { get; set; } = new List<UserPrice>();
 
-    // CraftingTable Model
-    public class CraftingTable
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
+		// ItemOrTag
+		public ICollection<ItemOrTag> ItemOrTags { get; set; } = new List<ItemOrTag>();
 
-        public ICollection<Recipe> Recipes { get; set; }
-        public ICollection<CraftingTableUpgrade> CraftingTableUpgrades { get; set; }
+		// ItemTagAssoc
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; } = new List<ItemTagAssoc>();
 
-        // Relation Many-to-Many avec Skill via CraftingTableSkill
-        public ICollection<CraftingTableSkill> CraftingTableSkills { get; set; }
-    }
+		// Recipe
+		public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
 
-    public class CraftingTableSkill
-    {
-        // ForeignKey vers CraftingTable
-        [ForeignKey("CraftingTable")]
-        public int CraftingTableId { get; set; }
-        public CraftingTable CraftingTable { get; set; }
+		// Ingredient
+		public ICollection<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
 
-        // ForeignKey vers Skill
-        [ForeignKey("Skill")]
-        public int SkillId { get; set; }
-        public Skill Skill { get; set; }
-    }
+		// Product
+		public ICollection<Product> Products { get; set; } = new List<Product>();
 
-    // Recipe Model
-    public class Recipe
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
+		// UserSetting
+		public ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
 
-        // Foreign key to CraftingTable
-        [ForeignKey("CraftingTable")]
-        public int CraftingTableId { get; set; }
-        public CraftingTable CraftingTable { get; set; }
+		// CraftingTablePluginModule
+		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
+	}
 
-        // Calories required for crafting
-        public int CaloriesRequired { get; set; }
+	public class UserCraftingTable
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
 
-        // Foreign key to Skill
-        [ForeignKey("Skill")]
-        public int SkillId { get; set; }
-        public Skill Skill { get; set; }
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
 
-        // Minimum skill level required
-        public int MinimumSkillLevel { get; set; }
+		[ForeignKey("CraftingTable")]
+		public Guid CraftingTableId { get; set; } // Clé étrangère vers CraftingTable
+		public CraftingTable CraftingTable { get; set; }
 
-        // Collection of RecipeMaterials
-        public ICollection<RecipeMaterial> RecipeMaterials { get; set; }
+		[ForeignKey("PluginModule")]
+		public Guid PluginModuleId { get; set; } // Clé étrangère vers CraftingTable
+		public PluginModule PluginModule { get; set; }
 
-        // Collection of RecipeOutputs
-        public ICollection<RecipeOutput> RecipeOutputs { get; set; }
-    }
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
 
-    // RecipeMaterial Model
-    public class RecipeMaterial
-    {
-        [Key]
-        public int Id { get; set; }
+	public class CraftingTable
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
 
-        [ForeignKey("Recipe")]
-        public int RecipeId { get; set; }
-        public Recipe Recipe { get; set; }
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
 
-        public string MaterialName { get; set; }
-        public int Quantity { get; set; }
-        public bool IsFixedQuantity { get; set; } // Whether the material amount is affected by upgrades
-    }
+		// Navigation Properties
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
+		public ICollection<Recipe> Recipes { get; set; }
+		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; }
+	}
 
-    // RecipeOutput Model
-    public class RecipeOutput
-    {
-        [Key]
-        public int Id { get; set; }
+	public class CraftingTablePluginModule
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
 
-        [ForeignKey("Recipe")]
-        public int RecipeId { get; set; }
-        public Recipe Recipe { get; set; }
+		[ForeignKey("CraftingTable")]
+		public Guid CraftingTableId { get; set; } // Clé étrangère vers CraftingTable
 
-        public string OutputName { get; set; }
-        public int Quantity { get; set; }
-    }
+		[ForeignKey("PluginModule")]
+		public Guid PluginModuleId { get; set; } // Clé étrangère vers PluginModule
 
-    // Upgrade Model
-    public class Upgrade
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public CraftingTable CraftingTable { get; set; }
+		public PluginModule PluginModule { get; set; }
+		public Server Server { get; set; }
+	}
 
-        public string Description { get; set; }
-        public float CostReduction { get; set; } // Reduction percentage for both resource and calorie cost
+	public class Recipe
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
+		public string FamilyName { get; set; }
+		public float CraftMinutes { get; set; }
 
-        public ICollection<CraftingTableUpgrade> CraftingTableUpgrades { get; set; } // For crafting tables using this upgrade
-    }
+		[ForeignKey("Skill")]
+		public Guid SkillId { get; set; } // Clé étrangère vers Skill
+		public Skill Skill { get; set; }
 
-    // CraftingTableUpgrade Model
-    public class CraftingTableUpgrade
-    {
-        [Key]
-        public int Id { get; set; }
+		public int RequiredSkillLevel { get; set; }
+		public bool IsBlueprint { get; set; }
+		public bool IsDefault { get; set; }
+		public float Labor { get; set; }
 
-        [ForeignKey("CraftingTable")]
-        public int CraftingTableId { get; set; }
-        public CraftingTable CraftingTable { get; set; }
+		[ForeignKey("CraftingTable")]
+		public Guid CraftingTableId { get; set; } // Clé étrangère vers Skill
+		public CraftingTable CraftingTable { get; set; }
 
-        [ForeignKey("Upgrade")]
-        public int UpgradeId { get; set; }
-        public Upgrade Upgrade { get; set; }
-    }
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
 
-    // UserCraftingTable Model
-    public class UserCraftingTable
-    {
-        [Key]
-        public int Id { get; set; }
+		// Navigation Properties
+		public ICollection<Product> Products { get; set; }
+		public ICollection<Ingredient> Ingredients { get; set; }
+	}
 
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+	public class PluginModule
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
+		public float Percent { get; set; }
 
-        [ForeignKey("CraftingTable")]
-        public int CraftingTableId { get; set; }
-        public CraftingTable CraftingTable { get; set; }
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
 
-        [ForeignKey("Upgrade")]
-        public int UpgradeId { get; set; }
-        public Upgrade Upgrade { get; set; }
-    }
+		// Navigation Properties
+		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; }
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
+	}
 
-    // UserInputPrice Model
-    public class UserInputPrice
-    {
-        [Key]
-        public int Id { get; set; }
+	public class Skill
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
 
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
 
-        public string InputName { get; set; }
-        public decimal Price { get; set; } // Price of the input material for the user
-    }
+		// Navigation Properties
+		public ICollection<Recipe> Recipes { get; set; }
+		public ICollection<UserSkill> UserSkills { get; set; }
+	}
+
+	public class UserSkill
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+
+		[ForeignKey("Skill")]
+		public Guid SkillId { get; set; } // Clé étrangère vers Skill
+		public User User { get; set; }
+		public Skill Skill { get; set; }
+		public int Level { get; set; }
+		public bool HasLavishTalent { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	public class UserProduct
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
+
+		[ForeignKey("Product")]
+		public Guid ProductId { get; set; } // Clé étrangère vers Product
+		public Product Product { get; set; }
+		public float Share { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	public class Product
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("Recipe")]
+		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
+		public Recipe Recipe { get; set; }
+
+		[ForeignKey("ItemOrTag")]
+		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag		
+		public ItemOrTag ItemOrTag { get; set; }
+
+		public bool LavishTalent { get; set; }
+		public float Quantity { get; set; }
+		public bool IsStatic { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+
+		// Navigation Properties
+		public ICollection<UserProduct> UserProducts { get; set; }
+	}
+
+	public class Ingredient
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("Recipe")]
+		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
+
+		[ForeignKey("ItemOrTag")]
+		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag
+		public Recipe Recipe { get; set; }
+		public ItemOrTag ItemOrTag { get; set; }
+		public float Quantity { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	public class ItemOrTag
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+		public string Name { get; set; }
+		public bool IsTag { get; set; }
+		public float MinPrice { get; set; }
+		public float MaxPrice { get; set; } // Bouger dans une table d'association
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+
+		// Navigation Properties
+		public ICollection<Product> Products { get; set; }
+		public ICollection<Ingredient> Ingredients { get; set; }
+		public ICollection<UserPrice> UserPrices { get; set; }
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
+	}
+
+	public class UserPrice
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+
+		[ForeignKey("ItemOrTag")]
+		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag
+		public User User { get; set; }
+		public ItemOrTag ItemOrTag { get; set; }
+		public float Price { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	public class ItemTagAssoc
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("Item")]
+		public Guid ItemId { get; set; } // Clé étrangère vers ItemOrTag
+
+		[ForeignKey("Tag")]
+		public Guid TagId { get; set; } // Clé étrangère vers ItemOrTag
+		public ItemOrTag Item { get; set; }
+		public ItemOrTag Tag { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
 }

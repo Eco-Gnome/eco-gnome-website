@@ -1,5 +1,4 @@
-﻿using ecocraft.Components.Calculator;
-using ecocraft.Models;
+﻿using ecocraft.Models;
 
 namespace ecocraft.Extensions
 {

@@ -1,8 +1,7 @@
 using ecocraft.Components;
-using ecocraft.Models;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
-using ecocraft.Data;
+using ecocraft.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,13 +16,23 @@ builder.Services.AddDbContext<EcoCraftDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-builder.Services.AddScoped<CraftingTableService>();
-builder.Services.AddScoped<UserCraftingTableService>();
-builder.Services.AddScoped<SkillService>();
-builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<UserSettingService>();
+builder.Services.AddScoped<UserServerService>();
+builder.Services.AddScoped<ServerService>();
+builder.Services.AddScoped<UserCraftingTableService>();
+builder.Services.AddScoped<CraftingTableService>();
+builder.Services.AddScoped<CraftingTablePluginModuleService>();
+builder.Services.AddScoped<RecipeService>();
+builder.Services.AddScoped<PluginModuleService>();
+builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<UserSkillService>();
-builder.Services.AddScoped<UserInputPriceService>();
+builder.Services.AddScoped<UserProductService>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<IngredientService>();
+builder.Services.AddScoped<ItemOrTagService>();
+builder.Services.AddScoped<UserPriceService>();
+builder.Services.AddScoped<ItemTagAssocService>();
 
 
 var app = builder.Build();
