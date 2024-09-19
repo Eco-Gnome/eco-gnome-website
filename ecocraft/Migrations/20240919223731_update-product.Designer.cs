@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240919223731_update-product")]
+    partial class updateproduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -71,6 +74,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ItemOrTagId1")
+                        .HasColumnType("TEXT");
+
                     b.Property<float>("Quantity")
                         .HasColumnType("REAL");
 
@@ -83,6 +89,8 @@ namespace ecocraft.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ItemOrTagId");
+
+                    b.HasIndex("ItemOrTagId1");
 
                     b.HasIndex("RecipeId");
 
@@ -199,9 +207,6 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ServerId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("TagId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
@@ -209,8 +214,6 @@ namespace ecocraft.Migrations
                     b.HasIndex("RecipeId");
 
                     b.HasIndex("ServerId");
-
-                    b.HasIndex("TagId");
 
                     b.ToTable("Products");
                 });
@@ -361,6 +364,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("ItemOrTagId1")
+                        .HasColumnType("TEXT");
+
                     b.Property<float>("Price")
                         .HasColumnType("REAL");
 
@@ -373,6 +379,8 @@ namespace ecocraft.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ItemOrTagId");
+
+                    b.HasIndex("ItemOrTagId1");
 
                     b.HasIndex("ServerId");
 
@@ -563,9 +571,15 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.Ingredient", b =>
                 {
-                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                    b.HasOne("ecocraft.Models.ItemOrTag", null)
                         .WithMany("Ingredients")
                         .HasForeignKey("ItemOrTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                        .WithMany()
+                        .HasForeignKey("ItemOrTagId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -640,6 +654,12 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Product", b =>
                 {
                     b.HasOne("ecocraft.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", null)
                         .WithMany("Products")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -656,10 +676,6 @@ namespace ecocraft.Migrations
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("ecocraft.Models.Tag", null)
-                        .WithMany("Products")
-                        .HasForeignKey("TagId");
 
                     b.Navigation("Item");
 
@@ -743,9 +759,15 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.UserPrice", b =>
                 {
-                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                    b.HasOne("ecocraft.Models.ItemOrTag", null)
                         .WithMany("UserPrices")
                         .HasForeignKey("ItemOrTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                        .WithMany()
+                        .HasForeignKey("ItemOrTagId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -889,6 +911,8 @@ namespace ecocraft.Migrations
 
                     b.Navigation("Items");
 
+                    b.Navigation("Products");
+
                     b.Navigation("Tags");
 
                     b.Navigation("UserPrices");
@@ -965,15 +989,11 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Item", b =>
                 {
                     b.Navigation("ItemTagAssocs");
-
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Tag", b =>
                 {
                     b.Navigation("ItemTagAssocs");
-
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

@@ -177,9 +177,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(p => p.RecipeId);
 
 		modelBuilder.Entity<Product>()
-			.HasOne(p => p.ItemOrTag)
+			.HasOne(p => p.Item)
 			.WithMany(iot => iot.Products)
-			.HasForeignKey(p => p.ItemOrTagId);
+			.HasForeignKey(p => p.ItemId);
 
 		modelBuilder.Entity<Product>()
 			.HasOne(p => p.Server)
@@ -244,7 +244,7 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ita => ita.ServerId); // Clé étrangère vers Server
 
 		// Relation entre ItemOrTag et ses produits, ingrédients et prix
-		modelBuilder.Entity<ItemOrTag>()
+		/*modelBuilder.Entity<ItemOrTag>()
 			.HasMany(iot => iot.Products) // ItemOrTag a plusieurs Products
 			.WithOne() // Navigation inverse non nécessaire ici
 			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié
@@ -257,7 +257,7 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<ItemOrTag>()
 			.HasMany(iot => iot.UserPrices) // ItemOrTag a plusieurs UserPrices
 			.WithOne() // Navigation inverse non nécessaire ici
-			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié
+			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié*/
 
 	}
 

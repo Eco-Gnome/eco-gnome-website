@@ -15,7 +15,7 @@ namespace ecocraft.Services
 		public async Task<IEnumerable<Product>> GetAllAsync()
 		{
 			return await _context.Products.Include(p => p.Recipe)
-										  .Include(p => p.ItemOrTag)
+										  .Include(p => p.Item)
 										  .Include(p => p.UserProducts)
 										  .Include(p => p.Server)
 										  .ToListAsync();
@@ -24,7 +24,7 @@ namespace ecocraft.Services
 		public async Task<Product> GetByIdAsync(Guid id)
 		{
 			return await _context.Products.Include(p => p.Recipe)
-										  .Include(p => p.ItemOrTag)
+										  .Include(p => p.Item)
 										  .Include(p => p.UserProducts)
 										  .Include(p => p.Server)
 										  .FirstOrDefaultAsync(p => p.Id == id);

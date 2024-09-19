@@ -273,9 +273,9 @@ namespace ecocraft.Models
 		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
 		public Recipe Recipe { get; set; }
 
-		[ForeignKey("ItemOrTag")]
-		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag		
-		public ItemOrTag ItemOrTag { get; set; }
+		[ForeignKey("Item")]
+		public Guid ItemId { get; set; } // Clé étrangère vers Item		
+		public Item Item { get; set; }
 
 		public bool LavishTalent { get; set; }
 		public float Quantity { get; set; }
@@ -357,8 +357,8 @@ namespace ecocraft.Models
 
 	public class Item : ItemOrTag
 	{
-		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		//[Key]
+		//public Guid Id { get; set; } // Clé primaire
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -371,8 +371,8 @@ namespace ecocraft.Models
 
 	public class Tag : ItemOrTag
 	{
-		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		//[Key]
+		//public Guid Id { get; set; } // Clé primaire
 
 		// Reference to Server
 		[ForeignKey("Server")]
