@@ -229,11 +229,12 @@ namespace ecocraft.Models
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
 
 		[ForeignKey("Skill")]
-		public Guid SkillId { get; set; } // Clé étrangère vers Skill
-		public User User { get; set; }
+		public Guid SkillId { get; set; } // Clé étrangère vers Skill		
 		public Skill Skill { get; set; }
+
 		public int Level { get; set; }
 		public bool HasLavishTalent { get; set; }
 
@@ -296,12 +297,36 @@ namespace ecocraft.Models
 
 		[ForeignKey("Recipe")]
 		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
+		public Recipe Recipe { get; set; }
 
 		[ForeignKey("ItemOrTag")]
-		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag
-		public Recipe Recipe { get; set; }
+		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag		
 		public ItemOrTag ItemOrTag { get; set; }
+
 		public float Quantity { get; set; }
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+	}
+
+	
+
+	public class UserPrice
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		[ForeignKey("User")]
+		public Guid UserId { get; set; } // Clé étrangère vers User
+		public User User { get; set; }
+
+		[ForeignKey("ItemOrTag")]
+		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag		
+		public ItemOrTag ItemOrTag { get; set; }
+
+		public float Price { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -314,7 +339,6 @@ namespace ecocraft.Models
 		[Key]
 		public Guid Id { get; set; } // Clé primaire
 		public string Name { get; set; }
-		public bool IsTag { get; set; }
 		public float MinPrice { get; set; }
 		public float MaxPrice { get; set; } // Bouger dans une table d'association
 
@@ -327,27 +351,36 @@ namespace ecocraft.Models
 		public ICollection<Product> Products { get; set; }
 		public ICollection<Ingredient> Ingredients { get; set; }
 		public ICollection<UserPrice> UserPrices { get; set; }
-		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
+		public ICollection<Item> Items { get; set; }
+		public ICollection<Tag> Tags { get; set; }
 	}
 
-	public class UserPrice
+	public class Item : ItemOrTag
 	{
 		[Key]
 		public Guid Id { get; set; } // Clé primaire
-
-		[ForeignKey("User")]
-		public Guid UserId { get; set; } // Clé étrangère vers User
-
-		[ForeignKey("ItemOrTag")]
-		public Guid ItemOrTagId { get; set; } // Clé étrangère vers ItemOrTag
-		public User User { get; set; }
-		public ItemOrTag ItemOrTag { get; set; }
-		public float Price { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
 		public Guid ServerId { get; set; } // Clé étrangère vers Server
 		public Server Server { get; set; }
+
+		// Navigation Properties
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
+	}
+
+	public class Tag : ItemOrTag
+	{
+		[Key]
+		public Guid Id { get; set; } // Clé primaire
+
+		// Reference to Server
+		[ForeignKey("Server")]
+		public Guid ServerId { get; set; } // Clé étrangère vers Server
+		public Server Server { get; set; }
+
+		// Navigation Properties
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
 	}
 
 	public class ItemTagAssoc
@@ -357,11 +390,11 @@ namespace ecocraft.Models
 
 		[ForeignKey("Item")]
 		public Guid ItemId { get; set; } // Clé étrangère vers ItemOrTag
+		public Item Item { get; set; }
 
 		[ForeignKey("Tag")]
-		public Guid TagId { get; set; } // Clé étrangère vers ItemOrTag
-		public ItemOrTag Item { get; set; }
-		public ItemOrTag Tag { get; set; }
+		public Guid TagId { get; set; } // Clé étrangère vers ItemOrTag		
+		public Tag Tag { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]

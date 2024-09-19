@@ -14,18 +14,20 @@ namespace ecocraft.Services
 
 		public async Task<IEnumerable<ItemTagAssoc>> GetAllAsync()
 		{
-			return await _context.ItemTagAssocs.Include(ita => ita.Item)
-												.Include(ita => ita.Tag)
-												.Include(ita => ita.Server)
-												.ToListAsync();
+			return await _context.ItemTagAssocs
+				.Include(ita => ita.Item)
+				.Include(ita => ita.Tag)
+				.Include(ita => ita.Server)
+				.ToListAsync();
 		}
 
 		public async Task<ItemTagAssoc> GetByIdAsync(Guid id)
 		{
-			return await _context.ItemTagAssocs.Include(ita => ita.Item)
-												.Include(ita => ita.Tag)
-												.Include(ita => ita.Server)
-												.FirstOrDefaultAsync(ita => ita.Id == id);
+			return await _context.ItemTagAssocs
+				.Include(ita => ita.Item)
+				.Include(ita => ita.Tag)
+				.Include(ita => ita.Server)
+				.FirstOrDefaultAsync(ita => ita.Id == id);
 		}
 
 		public async Task AddAsync(ItemTagAssoc itemTagAssoc)
@@ -50,5 +52,4 @@ namespace ecocraft.Services
 			}
 		}
 	}
-
 }

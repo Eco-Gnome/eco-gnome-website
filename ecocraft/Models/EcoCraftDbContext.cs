@@ -3,6 +3,12 @@ using ecocraft.Models;
 
 public class EcoCraftDbContext : DbContext
 {
+
+	public EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options)
+			: base(options)
+	{
+	}
+
 	public DbSet<User> Users { get; set; }
 	public DbSet<UserSetting> UserSettings { get; set; }
 	public DbSet<UserServer> UserServers { get; set; }
@@ -20,6 +26,8 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<ItemOrTag> ItemOrTags { get; set; }
 	public DbSet<UserPrice> UserPrices { get; set; }
 	public DbSet<ItemTagAssoc> ItemTagAssocs { get; set; }
+	public DbSet<Item> Items { get; set; }
+	public DbSet<Tag> Tags { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -194,27 +202,6 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(s => s.Ingredients)
 			.HasForeignKey(i => i.ServerId);
 
-		// ItemOrTag
-		modelBuilder.Entity<ItemOrTag>()
-			.HasMany(iot => iot.Products)
-			.WithOne(p => p.ItemOrTag)
-			.HasForeignKey(p => p.ItemOrTagId);
-
-		modelBuilder.Entity<ItemOrTag>()
-			.HasMany(iot => iot.Ingredients)
-			.WithOne(i => i.ItemOrTag)
-			.HasForeignKey(i => i.ItemOrTagId);
-
-		modelBuilder.Entity<ItemOrTag>()
-			.HasMany(iot => iot.UserPrices)
-			.WithOne(up => up.ItemOrTag)
-			.HasForeignKey(up => up.ItemOrTagId);
-
-		modelBuilder.Entity<ItemOrTag>()
-			.HasMany(iot => iot.ItemTagAssocs)
-			.WithOne(ita => ita.Item)
-			.HasForeignKey(ita => ita.ItemId);
-
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.ItemOrTag)
@@ -226,21 +213,52 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(s => s.UserPrices)
 			.HasForeignKey(up => up.ServerId);
 
-		// ItemTagAssoc
-		modelBuilder.Entity<ItemTagAssoc>()
-			.HasOne(ita => ita.Item)
-			.WithMany(iot => iot.ItemTagAssocs)
+		// Configuration pour Item
+		modelBuilder.Entity<Item>()
+			.HasMany(i => i.ItemTagAssocs)
+			.WithOne(ita => ita.Item)
 			.HasForeignKey(ita => ita.ItemId);
 
-		modelBuilder.Entity<ItemTagAssoc>()
-			.HasOne(ita => ita.Tag)
-			.WithMany(iot => iot.ItemTagAssocs)
+		// Configuration pour Tag
+		modelBuilder.Entity<Tag>()
+			.HasMany(t => t.ItemTagAssocs)
+			.WithOne(ita => ita.Tag)
 			.HasForeignKey(ita => ita.TagId);
 
+		// Relation entre Item et ItemTagAssoc
 		modelBuilder.Entity<ItemTagAssoc>()
-			.HasOne(ita => ita.Server)
-			.WithMany(s => s.ItemTagAssocs)
-			.HasForeignKey(ita => ita.ServerId);
+			.HasOne(ita => ita.Item) // Un ItemTagAssoc a un Item
+			.WithMany(i => i.ItemTagAssocs) // Un Item peut avoir plusieurs associations
+			.HasForeignKey(ita => ita.ItemId); // Clé étrangère vers Item
+
+		// Relation entre Tag et ItemTagAssoc
+		modelBuilder.Entity<ItemTagAssoc>()
+			.HasOne(ita => ita.Tag) // Un ItemTagAssoc a un Tag
+			.WithMany(t => t.ItemTagAssocs) // Un Tag peut avoir plusieurs associations
+			.HasForeignKey(ita => ita.TagId); // Clé étrangère vers Tag
+
+		// Relation entre ItemTagAssoc et Server
+		modelBuilder.Entity<ItemTagAssoc>()
+			.HasOne(ita => ita.Server) // Un ItemTagAssoc a un Server
+			.WithMany(s => s.ItemTagAssocs) // Un Server peut avoir plusieurs associations
+			.HasForeignKey(ita => ita.ServerId); // Clé étrangère vers Server
+
+		// Relation entre ItemOrTag et ses produits, ingrédients et prix
+		modelBuilder.Entity<ItemOrTag>()
+			.HasMany(iot => iot.Products) // ItemOrTag a plusieurs Products
+			.WithOne() // Navigation inverse non nécessaire ici
+			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié
+
+		modelBuilder.Entity<ItemOrTag>()
+			.HasMany(iot => iot.Ingredients) // ItemOrTag a plusieurs Ingredients
+			.WithOne() // Navigation inverse non nécessaire ici
+			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié
+
+		modelBuilder.Entity<ItemOrTag>()
+			.HasMany(iot => iot.UserPrices) // ItemOrTag a plusieurs UserPrices
+			.WithOne() // Navigation inverse non nécessaire ici
+			.OnDelete(DeleteBehavior.Cascade); // Choisissez le comportement de suppression approprié
+
 	}
 
 }

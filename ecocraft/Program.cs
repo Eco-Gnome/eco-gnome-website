@@ -33,6 +33,8 @@ builder.Services.AddScoped<IngredientService>();
 builder.Services.AddScoped<ItemOrTagService>();
 builder.Services.AddScoped<UserPriceService>();
 builder.Services.AddScoped<ItemTagAssocService>();
+builder.Services.AddScoped<ItemService>();
+builder.Services.AddScoped<TagService>();
 
 
 var app = builder.Build();
