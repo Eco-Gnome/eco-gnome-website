@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
+@using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Data
 @inject EcoCraftDbContext DbContext
@@ -200,6 +201,8 @@
 
 		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
 
+		userRecipes = user.GetAvailableRecipes();
+
 	}
 
 	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
@@ -241,7 +244,7 @@
 			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
 			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
 
-			userRecipes = await RecipeService.GetRecipesForUserAsync(user);
+			userRecipes = user.GetAvailableRecipes();
 		}
 	}
 

@@ -19,7 +19,9 @@ namespace ecocraft.Models
         public ICollection<UserSkill> UserSkills { get; set; }
         public ICollection<UserCraftingTable> UserCraftingTables { get; set; } // Nouvelle relation avec UserCraftingTables
         public ICollection<UserInputPrice> UserInputPrices { get; set; }
-    }
+
+		
+	}
 
     // Skill Model
     public class Skill

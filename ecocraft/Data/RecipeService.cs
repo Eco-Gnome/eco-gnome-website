@@ -78,37 +78,5 @@ namespace ecocraft.Data
 			return false;
 		}
 
-		public async Task<IEnumerable<Recipe>> GetRecipesForUserAsync(User user)
-		{
-
-			if (user == null)
-			{
-				// Retourner une liste vide ou lever une exception personnalisée
-				return new List<Recipe>();
-			}
-
-			// Récupération des compétences et des tables
-			var selectedSkills = user.UserSkills?.Select(us => us.Skill) ?? Enumerable.Empty<Skill>();
-			var selectedCraftingTables = user.UserCraftingTables?.Select(uct => uct.CraftingTable) ?? Enumerable.Empty<CraftingTable>();
-
-
-			if (!selectedSkills.Any() && !selectedCraftingTables.Any())
-			{
-				// Si aucune compétence ou table d'artisanat n'est disponible, retourner une liste vide
-				return new List<Recipe>();
-			}
-
-			// Requête pour récupérer les recettes qui correspondent aux compétences et tables sélectionnées
-			var userRecipes = await _dbContext.Recipes
-				.Where(r => selectedSkills.Any(s => s == r.Skill) &&
-							selectedCraftingTables.Any(ct => ct == r.CraftingTable))
-				.Include(r => r.RecipeMaterials) // Inclure les relations nécessaires
-				.Include(r => r.RecipeOutputs)
-				.Include(r => r.CraftingTable)
-				.Include(r => r.Skill)
-				.ToListAsync();
-
-			return userRecipes;
-		}
 	}
 }
