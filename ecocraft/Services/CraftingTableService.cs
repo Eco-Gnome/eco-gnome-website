@@ -1,5 +1,7 @@
 ﻿using ecocraft.Models;
+using ecocraft.Services.ImportData;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace ecocraft.Services
 {
@@ -12,22 +14,30 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<CraftingTable>> GetAllAsync()
+		public async Task<List<CraftingTable>> GetAllAsync()
 		{
-			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
+			return await _context.CraftingTables//Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
-												 .Include(ct => ct.CraftingTablePluginModules)
+												 //.Include(ct => ct.CraftingTablePluginModules)
 												 .Include(ct => ct.Server)
 												 .ToListAsync();
 		}
 
 		public async Task<CraftingTable> GetByIdAsync(Guid id)
 		{
-			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
+			return await _context.CraftingTables//.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
-												 .Include(ct => ct.CraftingTablePluginModules)
+												 //.Include(ct => ct.CraftingTablePluginModules)
 												 .Include(ct => ct.Server)
 												 .FirstOrDefaultAsync(ct => ct.Id == id);
+		}
+		public async Task<CraftingTable> GetByNameAsync(string name)
+		{
+			return await _context.CraftingTables//.Include(ct => ct.UserCraftingTables)
+												 .Include(ct => ct.Recipes)
+												 //.Include(ct => ct.CraftingTablePluginModules)
+												 .Include(ct => ct.Server)
+												 .FirstOrDefaultAsync(ct => ct.Name == name);
 		}
 
 		public async Task AddAsync(CraftingTable craftingTable)

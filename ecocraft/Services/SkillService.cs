@@ -12,18 +12,18 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<Skill>> GetAllAsync()
+		public async Task<List<Skill>> GetAllAsync()
 		{
-			return await _context.Skills.Include(s => s.Recipes)
-										 .Include(s => s.UserSkills)
+			return await _context.Skills//.Include(s => s.Recipes)
+										 //.Include(s => s.UserSkills)
 										 .Include(s => s.Server)
 										 .ToListAsync();
 		}
 
 		public async Task<Skill> GetByIdAsync(Guid id)
 		{
-			return await _context.Skills.Include(s => s.Recipes)
-										 .Include(s => s.UserSkills)
+			return await _context.Skills//.Include(s => s.Recipes)
+										 //.Include(s => s.UserSkills)
 										 .Include(s => s.Server)
 										 .FirstOrDefaultAsync(s => s.Id == id);
 		}

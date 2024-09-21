@@ -12,11 +12,11 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<Product>> GetAllAsync()
+		public async Task<List<Product>> GetAllAsync()
 		{
 			return await _context.Products.Include(p => p.Recipe)
 										  .Include(p => p.Item)
-										  .Include(p => p.UserProducts)
+										  //.Include(p => p.UserProducts)
 										  .Include(p => p.Server)
 										  .ToListAsync();
 		}
@@ -25,7 +25,7 @@ namespace ecocraft.Services
 		{
 			return await _context.Products.Include(p => p.Recipe)
 										  .Include(p => p.Item)
-										  .Include(p => p.UserProducts)
+										  //.Include(p => p.UserProducts)
 										  .Include(p => p.Server)
 										  .FirstOrDefaultAsync(p => p.Id == id);
 		}

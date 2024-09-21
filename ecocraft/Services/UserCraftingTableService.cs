@@ -12,7 +12,7 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<UserCraftingTable>> GetAllAsync()
+		public async Task<List<UserCraftingTable>> GetAllAsync()
 		{
 			return await _context.UserCraftingTables.Include(uct => uct.User)
 													 .Include(uct => uct.CraftingTable)

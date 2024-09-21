@@ -1,8 +1,10 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
+@using System.Text.Json
 @using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Services.ImportData
 @inject EcoCraftDbContext DbContext
 @inject UserSkillService UserSkillService
 @inject UserService UserService
@@ -10,6 +12,7 @@
 @inject CraftingTableService CraftingTableService
 @inject UserCraftingTableService UserCraftingTableService
 @inject RecipeService RecipeService
+@inject PluginModuleService PluginModuleService
 
 <PageTitle>Eco Calc</PageTitle>
 
@@ -18,14 +21,27 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			@* <MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
+
+			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
+				<ButtonTemplate>
+					<MudButton HtmlTag="label"
+							   Variant="Variant.Filled"
+							   Color="Color.Primary"
+							   StartIcon="@Icons.Material.Filled.CloudUpload"
+							   for="@fileInput">
+						Upload Files
+					</MudButton>
+				</ButtonTemplate>
+			</MudFileUpload>
+
+			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
 				@foreach (var skill in skills)
 				{
 					<MudSelectItem T="Skill" Value="@skill">@skill.Name</MudSelectItem>
 				}
 			</MudSelect>
 
-			<MudTable Items="userSkills" Dense="true">
+			@* <MudTable Items="userSkills" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Niveau</MudTh>
@@ -76,6 +92,7 @@
 
 		<!-- Deuxième Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+
 			@* <MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
 				@foreach (var user in users)
 				{
@@ -125,13 +142,14 @@
 
 	</MudContainer>
 
-	@code {
+@code {
 
 	private List<Skill> skills;
 	private List<CraftingTable> tables;
 	private List<Recipe> recipes;
-
 	private List<User> users;
+	private List<PluginModule> pluginModules;
+
 	private User user = new User();
 
 	private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
@@ -147,18 +165,151 @@
 	protected override async Task OnInitializedAsync()
 	{
 		// Charger toutes les compétences disponibles
-		//skills = await SkillService.GetAllSkillsAsync();
+		skills = await SkillService.GetAllAsync();
 
-		//tables = await CraftingTableService.GetAllCraftingTablesAsync();
+		tables = await CraftingTableService.GetAllAsync();
 
-		//users = await UserService.GetAllUsersAsync();
+		users = await UserService.GetAllAsync();
 
-		//recipes = await RecipeService.GetAllRecipesAsync();
+		recipes = await RecipeService.GetAllAsync();
+
+		pluginModules = await PluginModuleService.GetAllAsync();
 	}
-	/*
+
+	IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+	private async Task UploadFiles(IBrowserFile file)
+	{
+		//var file = e.File;
+		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
+		if (file != null && file.ContentType == "application/json")
+		{
+			// On lit le fichier JSON en mémoire
+			using var stream = file.OpenReadStream(2000000);
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+
+			memoryStream.Position = 0; // Repositionner au début pour la lecture
+			using var reader = new StreamReader(memoryStream);
+			string jsonContent = await reader.ReadToEndAsync();
+
+			try
+			{
+				// Désérialiser le contenu JSON dans un objet C#
+				ImportDataDto ImportedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
+
+				ImportSkills(ImportedData.skills);
+
+				ImportPluginModules(ImportedData.pluginModules);
+
+				ImportCraftingTables(ImportedData.craftingTables);
+
+			}
+			catch (JsonException ex)
+			{
+				Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
+			}
+		}
+	}
+
+	public void ImportSkills(List<SkillDto> SkillDtos)
+	{
+		var namesToCheck = SkillDtos.Select(dto => dto.Name).ToList();
+
+		// Récupère les noms qui existent déjà dans la base
+		var existingNames = skills
+			.Where(ct => namesToCheck.Contains(ct.Name))
+			.Select(ct => ct.Name);
+
+		// Ajouter uniquement les objets qui n'existent pas
+		foreach (var dto in SkillDtos)
+		{
+			if (!existingNames.Contains(dto.Name))
+			{
+				var newSkill = new Skill
+					{
+						Name = dto.Name,
+					};
+
+				skills.Add(newSkill);
+			}
+		}
+	}
+
+
+	public void ImportPluginModules(List<PluginModuleDto> PluginModuleDtos)
+	{
+		var namesToCheck = PluginModuleDtos.Select(dto => dto.Name).ToList();
+
+		// Récupère les noms qui existent déjà dans la base
+		var existingNames = pluginModules
+			.Where(ct => namesToCheck.Contains(ct.Name))
+			.Select(ct => ct.Name);
+
+		// Ajouter uniquement les objets qui n'existent pas
+		foreach (var dto in PluginModuleDtos)
+		{
+			if (!existingNames.Contains(dto.Name))
+			{
+				var newPluginModule = new PluginModule
+					{
+						Name = dto.Name,
+						Percent = dto.Percent,
+					};
+
+				pluginModules.Add(newPluginModule);
+			}
+		}
+	}
+
+
+	public void ImportCraftingTables(List<CraftingTableDto> craftingTableDtos)
+	{
+		var namesToCheck = craftingTableDtos.Select(dto => dto.Name).ToList();
+
+		// Récupère les noms qui existent déjà dans la base
+		var existingNames = tables
+			.Where(ct => namesToCheck.Contains(ct.Name))
+			.Select(ct => ct.Name);
+
+		// Ajouter uniquement les objets qui n'existent pas
+		foreach (var dto in craftingTableDtos)
+		{
+			if (!existingNames.Contains(dto.Name))
+			{
+				var newCraftingTable = new CraftingTable
+					{
+						Name = dto.Name,
+						// Autres propriétés...
+					};
+
+				foreach (var module in dto.CraftingTablePluginModules)
+				{
+					newCraftingTable.CraftingTablePluginModules.Add(new CraftingTablePluginModule { CraftingTable = newCraftingTable, PluginModule = pluginModules.FirstOrDefault(pm => pm.Name == module) });
+				}
+
+				tables.Add(newCraftingTable);
+			}
+		}
+	}
+
+	private async Task UpdateAll()
+	{
+		await SkillService.UpdateAsync(skills);
+
+		await CraftingTableService.UpdateAsync(tables);
+
+		await UserService.UpdateAsync(users);
+
+		await RecipeService.UpdateAsync(recipes);
+
+		await PluginModuleService.UpdateAsync(pluginModules);
+	}
+
+	
 	private async Task UpdateUser()
 	{
-		await UserService.UpdateUserAsync(user);
+		await UserService.UpdateAsync(user);
 	}
 
 	private async Task OnSelectedSkillsChanged(IEnumerable<Skill> newSelectedSkills)
@@ -167,27 +318,27 @@
 		selectedSkills = newSelectedSkills;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserSkillService.UpdateUserSkillsAsync(user, selectedSkills.ToList());
+		/*await UserSkillService.UpdateAsync(user, selectedSkills.ToList());
 
-		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);*/
 
 		// Récupère la liste des tables de craft correspondant aux skills sélectionné
-		var selectedTable = userSkills
+		/*var selectedTable = userSkills
 			.SelectMany(us => us.Skill.CraftingTableSkills)
 			.Select(y => y.CraftingTable)
 			.Distinct();
 
-		selectedCraftingTables = selectedTable;
+		selectedCraftingTables = selectedTable;*/
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
+		/*await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
 
 		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
 
-		userRecipes = user.GetAvailableRecipes();
+		userRecipes = user.GetAvailableRecipes();*/
 
 	}
-
+	/*
 	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
 	{
 		// Mettre à jour la sélection localement

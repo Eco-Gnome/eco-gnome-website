@@ -113,10 +113,10 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ita => ita.ServerId);
 
 		// CraftingTable
-		modelBuilder.Entity<CraftingTable>()
+		/*modelBuilder.Entity<CraftingTable>()
 			.HasMany(ct => ct.UserCraftingTables)
 			.WithOne(uct => uct.CraftingTable)
-			.HasForeignKey(uct => uct.CraftingTableId);
+			.HasForeignKey(uct => uct.CraftingTableId);*/
 
 		modelBuilder.Entity<CraftingTable>()
 			.HasMany(ct => ct.Recipes)
@@ -134,10 +134,10 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(ct => ct.CraftingTablePluginModules)
 			.HasForeignKey(ctpm => ctpm.CraftingTableId);
 
-		modelBuilder.Entity<CraftingTablePluginModule>()
+		/*modelBuilder.Entity<CraftingTablePluginModule>()
 			.HasOne(ctpm => ctpm.PluginModule)
 			.WithMany(pm => pm.CraftingTablePluginModules)
-			.HasForeignKey(ctpm => ctpm.PluginModuleId);
+			.HasForeignKey(ctpm => ctpm.PluginModuleId);*/
 
 		modelBuilder.Entity<CraftingTablePluginModule>()
 			.HasOne(ctpm => ctpm.Server)
@@ -145,10 +145,10 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ctpm => ctpm.ServerId);
 
 		// Recipe
-		modelBuilder.Entity<Recipe>()
+		/*modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.Skill)
 			.WithMany(s => s.Recipes)
-			.HasForeignKey(r => r.SkillId);
+			.HasForeignKey(r => r.SkillId);*/
 
 		modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.CraftingTable)

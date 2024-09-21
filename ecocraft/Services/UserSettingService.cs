@@ -12,7 +12,7 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<UserSetting>> GetAllAsync()
+		public async Task<List<UserSetting>> GetAllAsync()
 		{
 			return await _context.UserSettings.Include(us => us.User)
 											   .Include(us => us.Server)

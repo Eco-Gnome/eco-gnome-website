@@ -7,23 +7,23 @@ namespace ecocraft.Models
 	public class User
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Pseudo { get; set; }
 		public Guid SecretId { get; set; } // Guid for secure identification
 
 		// Navigation Properties
-		public ICollection<UserSkill> UserSkills { get; set; }
-		public ICollection<UserServer> UserServers { get; set; }
-		public ICollection<UserProduct> UserProducts { get; set; }
-		public ICollection<UserPrice> UserPrices { get; set; }
-		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
-		public ICollection<UserSetting> UserSettings { get; set; }
+		public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+		public ICollection<UserServer> UserServers { get; set; } = new List<UserServer>();
+		public ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
+		public ICollection<UserPrice> UserPrices { get; set; } = new List<UserPrice>();	
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
+		public ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
 	}
 
 	public class UserSetting
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -41,7 +41,7 @@ namespace ecocraft.Models
 	public class UserServer
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -57,9 +57,9 @@ namespace ecocraft.Models
 	public class Server
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
-		public string Name { get; set; }
-		public string SecretId { get; set; }
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
+		public string Name { get; set; } = string.Empty;
+		public string SecretId { get; set; } = string.Empty;
 
 		// Navigation Properties
 
@@ -103,7 +103,7 @@ namespace ecocraft.Models
 	public class UserCraftingTable
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -125,7 +125,7 @@ namespace ecocraft.Models
 	public class CraftingTable
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Name { get; set; }
 
 		// Reference to Server
@@ -134,15 +134,15 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
-		public ICollection<Recipe> Recipes { get; set; }
-		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; }
+		//public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
+		public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
+		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
 	}
 
 	public class CraftingTablePluginModule
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("CraftingTable")]
 		public Guid CraftingTableId { get; set; } // Clé étrangère vers CraftingTable
@@ -161,10 +161,10 @@ namespace ecocraft.Models
 	public class Recipe
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Name { get; set; }
 		public string FamilyName { get; set; }
-		public float CraftMinutes { get; set; }
+		public double CraftMinutes { get; set; }
 
 		[ForeignKey("Skill")]
 		public Guid SkillId { get; set; } // Clé étrangère vers Skill
@@ -173,7 +173,7 @@ namespace ecocraft.Models
 		public int RequiredSkillLevel { get; set; }
 		public bool IsBlueprint { get; set; }
 		public bool IsDefault { get; set; }
-		public float Labor { get; set; }
+		public double Labor { get; set; }
 
 		[ForeignKey("CraftingTable")]
 		public Guid CraftingTableId { get; set; } // Clé étrangère vers Skill
@@ -185,16 +185,16 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<Product> Products { get; set; }
-		public ICollection<Ingredient> Ingredients { get; set; }
+		public ICollection<Product> Products { get; set; } = new List<Product>();
+		public ICollection<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
 	}
 
 	public class PluginModule
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Name { get; set; }
-		public float Percent { get; set; }
+		public double Percent { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -202,14 +202,14 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; }
-		public ICollection<UserCraftingTable> UserCraftingTables { get; set; }
+		//public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
+		//public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
 	}
 
 	public class Skill
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Name { get; set; }
 
 		// Reference to Server
@@ -218,14 +218,14 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<Recipe> Recipes { get; set; }
-		public ICollection<UserSkill> UserSkills { get; set; }
+		//public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
+		//public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
 	}
 
 	public class UserSkill
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -247,7 +247,7 @@ namespace ecocraft.Models
 	public class UserProduct
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -256,7 +256,7 @@ namespace ecocraft.Models
 		[ForeignKey("Product")]
 		public Guid ProductId { get; set; } // Clé étrangère vers Product
 		public Product Product { get; set; }
-		public float Share { get; set; }
+		public double Share { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -267,7 +267,7 @@ namespace ecocraft.Models
 	public class Product
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("Recipe")]
 		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
@@ -279,7 +279,7 @@ namespace ecocraft.Models
 
 		public bool LavishTalent { get; set; }
 		public float Quantity { get; set; }
-		public bool IsStatic { get; set; }
+		public bool IsDynamic { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -287,13 +287,13 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<UserProduct> UserProducts { get; set; }
+		//public ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
 	}
 
 	public class Ingredient
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("Recipe")]
 		public Guid RecipeId { get; set; } // Clé étrangère vers Recipe
@@ -304,6 +304,7 @@ namespace ecocraft.Models
 		public ItemOrTag ItemOrTag { get; set; }
 
 		public float Quantity { get; set; }
+		public bool IsDynamic { get; set; }
 
 		// Reference to Server
 		[ForeignKey("Server")]
@@ -316,7 +317,7 @@ namespace ecocraft.Models
 	public class UserPrice
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 
 		[ForeignKey("User")]
 		public Guid UserId { get; set; } // Clé étrangère vers User
@@ -334,10 +335,10 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 	}
 
-	public class ItemOrTag
+	public abstract class ItemOrTag
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid(); // Clé primaire
 		public string Name { get; set; }
 		public float MinPrice { get; set; }
 		public float MaxPrice { get; set; } // Bouger dans une table d'association
@@ -348,11 +349,11 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<Product> Products { get; set; }
-		public ICollection<Ingredient> Ingredients { get; set; }
-		public ICollection<UserPrice> UserPrices { get; set; }
-		public ICollection<Item> Items { get; set; }
-		public ICollection<Tag> Tags { get; set; }
+		public ICollection<Product> Products { get; set; } = new List<Product>();
+		public ICollection<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
+		public ICollection<UserPrice> UserPrices { get; set; } = new List<UserPrice>();
+		public ICollection<Item> Items { get; set; } = new List<Item>();
+		public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 	}
 
 	public class Item : ItemOrTag
@@ -366,7 +367,7 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; } = new List<ItemTagAssoc>();
 	}
 
 	public class Tag : ItemOrTag
@@ -380,13 +381,13 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; }
+		public ICollection<ItemTagAssoc> ItemTagAssocs { get; set; } = new List<ItemTagAssoc>();
 	}
 
 	public class ItemTagAssoc
 	{
 		[Key]
-		public Guid Id { get; set; } // Clé primaire
+		public Guid Id { get; set; } = Guid.NewGuid();// Clé primaire
 
 		[ForeignKey("Item")]
 		public Guid ItemId { get; set; } // Clé étrangère vers ItemOrTag

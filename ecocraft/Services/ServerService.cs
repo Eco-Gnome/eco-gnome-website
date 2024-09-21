@@ -12,7 +12,7 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<Server>> GetAllAsync()
+		public async Task<List<Server>> GetAllAsync()
 		{
 			return await _context.Servers.ToListAsync();
 		}

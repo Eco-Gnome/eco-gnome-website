@@ -12,20 +12,28 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<PluginModule>> GetAllAsync()
+		public async Task<List<PluginModule>> GetAllAsync()
 		{
-			return await _context.PluginModules.Include(pm => pm.CraftingTablePluginModules)
-												.Include(pm => pm.UserCraftingTables)
+			return await _context.PluginModules//.Include(pm => pm.CraftingTablePluginModules)
+												//.Include(pm => pm.UserCraftingTables)
 												.Include(pm => pm.Server)
 												.ToListAsync();
 		}
 
 		public async Task<PluginModule> GetByIdAsync(Guid id)
 		{
-			return await _context.PluginModules.Include(pm => pm.CraftingTablePluginModules)
-												.Include(pm => pm.UserCraftingTables)
+			return await _context.PluginModules//.Include(pm => pm.UserCraftingTables)
+												//.Include(pm => pm.CraftingTablePluginModules)
 												.Include(pm => pm.Server)
 												.FirstOrDefaultAsync(pm => pm.Id == id);
+		}
+
+		public async Task<PluginModule> GetByNameAsync(string name)
+		{
+			return await _context.PluginModules//.Include(pm => pm.UserCraftingTables)
+											   //.Include(pm => pm.CraftingTablePluginModules)
+												.Include(pm => pm.Server)
+												.FirstOrDefaultAsync(pm => pm.Name == name);
 		}
 
 		public async Task AddAsync(PluginModule pluginModule)

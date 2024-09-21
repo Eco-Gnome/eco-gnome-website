@@ -12,7 +12,7 @@ namespace ecocraft.Services
 			_context = context;
 		}
 
-		public async Task<IEnumerable<Tag>> GetAllAsync()
+		public async Task<List<Tag>> GetAllAsync()
 		{
 			return await _context.Tags
 				.Include(t => t.ItemTagAssocs)
