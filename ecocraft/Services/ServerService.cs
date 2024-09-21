@@ -17,6 +17,11 @@ namespace ecocraft.Services
 			return await _context.Servers.ToListAsync();
 		}
 
+		public async Task<Server> GetFirstAsync()
+		{
+			return await _context.Servers.FirstOrDefaultAsync();
+		}
+
 		public async Task<Server> GetByIdAsync(Guid id)
 		{
 			return await _context.Servers.Include(s => s.UserServers)

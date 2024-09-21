@@ -1,9 +1,10 @@
 ﻿using ecocraft.Models;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class CraftingTablePluginModuleService
+	public class CraftingTablePluginModuleService : IGenericService<CraftingTablePluginModule>
 	{
 		private readonly EcoCraftDbContext _context;
 
@@ -55,6 +56,12 @@ namespace ecocraft.Services
 				_context.CraftingTablePluginModules.Remove(craftingTablePluginModule);
 				await _context.SaveChangesAsync();
 			}
+		}
+
+		public async Task AddAsync(CraftingTablePluginModule CraftingTablePluginModule)
+		{
+			await _context.CraftingTablePluginModules.AddAsync(CraftingTablePluginModule);
+			await _context.SaveChangesAsync();
 		}
 	}
 }

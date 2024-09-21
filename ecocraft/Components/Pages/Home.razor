@@ -13,6 +13,8 @@
 @inject UserCraftingTableService UserCraftingTableService
 @inject RecipeService RecipeService
 @inject PluginModuleService PluginModuleService
+@inject ServerService ServerService
+@inject CraftingTablePluginModuleService CraftingTablePluginModuleService
 
 <PageTitle>Eco Calc</PageTitle>
 
@@ -162,8 +164,11 @@
 
 	private int SkillsValue { get; set; }
 
+	private Server server = new Server();
+
 	protected override async Task OnInitializedAsync()
 	{
+		server = await ServerService.GetFirstAsync();
 		// Charger toutes les compétences disponibles
 		skills = await SkillService.GetAllAsync();
 
@@ -209,10 +214,12 @@
 			{
 				Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
 			}
+
+			//UpdateAll();
 		}
 	}
 
-	public void ImportSkills(List<SkillDto> SkillDtos)
+	public async void ImportSkills(List<SkillDto> SkillDtos)
 	{
 		var namesToCheck = SkillDtos.Select(dto => dto.Name).ToList();
 
@@ -229,15 +236,17 @@
 				var newSkill = new Skill
 					{
 						Name = dto.Name,
+						ServerId = server.Id,
 					};
 
 				skills.Add(newSkill);
+				await SkillService.AddAsync(newSkill);
 			}
 		}
 	}
 
 
-	public void ImportPluginModules(List<PluginModuleDto> PluginModuleDtos)
+	public async void ImportPluginModules(List<PluginModuleDto> PluginModuleDtos)
 	{
 		var namesToCheck = PluginModuleDtos.Select(dto => dto.Name).ToList();
 
@@ -255,15 +264,17 @@
 					{
 						Name = dto.Name,
 						Percent = dto.Percent,
+						ServerId = server.Id,
 					};
 
 				pluginModules.Add(newPluginModule);
+				await PluginModuleService.AddAsync(newPluginModule);
 			}
 		}
 	}
 
 
-	public void ImportCraftingTables(List<CraftingTableDto> craftingTableDtos)
+	public async void ImportCraftingTables(List<CraftingTableDto> craftingTableDtos)
 	{
 		var namesToCheck = craftingTableDtos.Select(dto => dto.Name).ToList();
 
@@ -280,30 +291,36 @@
 				var newCraftingTable = new CraftingTable
 					{
 						Name = dto.Name,
+						ServerId = server.Id,
 						// Autres propriétés...
-					};
+					};				
 
 				foreach (var module in dto.CraftingTablePluginModules)
 				{
-					newCraftingTable.CraftingTablePluginModules.Add(new CraftingTablePluginModule { CraftingTable = newCraftingTable, PluginModule = pluginModules.FirstOrDefault(pm => pm.Name == module) });
+					PluginModule plugin = pluginModules.FirstOrDefault(pm => pm.Name == module);
+					CraftingTablePluginModule ctpm = new CraftingTablePluginModule { CraftingTableId = newCraftingTable.Id, PluginModuleId = plugin.Id, ServerId = server.Id };
+					newCraftingTable.CraftingTablePluginModules.Add(ctpm);
+					await CraftingTablePluginModuleService.AddAsync(ctpm);
 				}
 
 				tables.Add(newCraftingTable);
+				await CraftingTableService.AddAsync(newCraftingTable);
 			}
 		}
 	}
 
 	private async Task UpdateAll()
 	{
-		await SkillService.UpdateAsync(skills);
-
+		foreach(var skill in skills)
+			await SkillService.UpdateAsync(skill);
+/*
 		await CraftingTableService.UpdateAsync(tables);
 
 		await UserService.UpdateAsync(users);
 
 		await RecipeService.UpdateAsync(recipes);
 
-		await PluginModuleService.UpdateAsync(pluginModules);
+		await PluginModuleService.UpdateAsync(pluginModules);*/
 	}
 
 	
