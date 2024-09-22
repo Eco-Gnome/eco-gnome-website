@@ -4,6 +4,8 @@ using System.Text.Json;
 
 namespace ecocraft.Services.ImportData
 {
+
+
 	public class ImportDataDto
 	{
 		public List<RecipeDto> recipes { get; set; }

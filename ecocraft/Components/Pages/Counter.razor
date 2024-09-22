@@ -1,4 +1,5 @@
 ﻿@page "/counter"
+@using ecocraft.Services.ImportData
 
 <PageTitle>Counter</PageTitle>
 
@@ -6,11 +7,11 @@
 <MudText Class="mb-4">Current count: @currentCount</MudText>
 <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
 
-@code {
+    @code {
     private int currentCount = 0;
 
     private void IncrementCount()
     {
-        currentCount++;
+         currentCount++;
     }
 }
