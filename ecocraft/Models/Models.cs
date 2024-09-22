@@ -134,7 +134,7 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		//public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
 		public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
 		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
 	}
@@ -167,10 +167,10 @@ namespace ecocraft.Models
 		public double CraftMinutes { get; set; }
 
 		[ForeignKey("Skill")]
-		public Guid SkillId { get; set; } // Clé étrangère vers Skill
-		public Skill Skill { get; set; }
+		public Guid? SkillId { get; set; } // Clé étrangère vers Skill
+		public Skill? Skill { get; set; }
 
-		public int RequiredSkillLevel { get; set; }
+		public long RequiredSkillLevel { get; set; }
 		public bool IsBlueprint { get; set; }
 		public bool IsDefault { get; set; }
 		public double Labor { get; set; }
@@ -202,8 +202,8 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		//public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
-		//public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
+		public ICollection<CraftingTablePluginModule> CraftingTablePluginModules { get; set; } = new List<CraftingTablePluginModule>();
+		public ICollection<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
 	}
 
 	public class Skill
@@ -218,8 +218,8 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		//public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
-		//public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+		public ICollection<Recipe> Recipes { get; set; } = new List<Recipe>();
+		public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
 	}
 
 	public class UserSkill
@@ -287,7 +287,7 @@ namespace ecocraft.Models
 		public Server Server { get; set; }
 
 		// Navigation Properties
-		//public ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
+		public ICollection<UserProduct> UserProducts { get; set; } = new List<UserProduct>();
 	}
 
 	public class Ingredient

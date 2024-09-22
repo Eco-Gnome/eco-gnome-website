@@ -14,18 +14,26 @@ namespace ecocraft.Services
 
 		public async Task<List<Skill>> GetAllAsync()
 		{
-			return await _context.Skills//.Include(s => s.Recipes)
-										 //.Include(s => s.UserSkills)
+			return await _context.Skills.Include(s => s.Recipes)
+										 .Include(s => s.UserSkills)
 										 .Include(s => s.Server)
 										 .ToListAsync();
 		}
 
 		public async Task<Skill> GetByIdAsync(Guid id)
 		{
-			return await _context.Skills//.Include(s => s.Recipes)
-										 //.Include(s => s.UserSkills)
+			return await _context.Skills.Include(s => s.Recipes)
+										 .Include(s => s.UserSkills)
 										 .Include(s => s.Server)
 										 .FirstOrDefaultAsync(s => s.Id == id);
+		}
+
+		public async Task<Skill> GetByNameAsync(string name)
+		{
+			return await _context.Skills.Include(s => s.Recipes)
+										 .Include(s => s.UserSkills)
+										 .Include(s => s.Server)
+										 .FirstOrDefaultAsync(s => s.Name == name);
 		}
 
 		public async Task AddAsync(Skill skill)

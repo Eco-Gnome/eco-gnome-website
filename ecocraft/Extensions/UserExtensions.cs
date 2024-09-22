@@ -12,16 +12,17 @@ namespace ecocraft.Extensions
 			var recipes = new HashSet<Recipe>();
 
 			// Ajouter les recettes en fonction des compétences
-			/*foreach (var skill in skills)
+			foreach (var skill in skills)
 			{
-				recipes.UnionWith(skill.Recipes);
-			}*/
+				var userSkilllevel = @this.UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
+				recipes.UnionWith(skill.Recipes.Where(r => r.RequiredSkillLevel <= userSkilllevel));
+			}
 
 			// Ajouter les recettes en fonction des tables d'artisanat
-			foreach (var table in craftingTables)
+			/*foreach (var table in craftingTables)
 			{
 				recipes.UnionWith(table.Recipes);
-			}
+			}*/
 
 			return recipes;
 		}

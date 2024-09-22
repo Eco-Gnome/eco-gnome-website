@@ -1,14 +1,18 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
+
+
 namespace ecocraft.Services
 {
 	public class UserCraftingTableService : IGenericService<UserCraftingTable>
 	{
 		private readonly EcoCraftDbContext _context;
+		private readonly PluginModuleService _pluginModuleService;
 
-		public UserCraftingTableService(EcoCraftDbContext context)
+		public UserCraftingTableService(PluginModuleService pluginModuleService, EcoCraftDbContext context)
 		{
+			_pluginModuleService = pluginModuleService;
 			_context = context;
 		}
 
@@ -53,7 +57,7 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour mettre à jour les CraftingTables d'un utilisateur
-		public async Task UpdateUserCraftingTablesAsync(User user, List<CraftingTable> newCraftingTables)
+		public async Task UpdateUserCraftingTablesAsync(User user, Server server, List<CraftingTable> newCraftingTables)
 		{
 			// Charger les UserCraftingTables existantes pour cet utilisateur
 			var existingUserCraftingTables = await _context.UserCraftingTables
@@ -69,6 +73,8 @@ namespace ecocraft.Services
 				}
 			}
 
+			PluginModule defaultModule = await _pluginModuleService.GetByNameAsync("NoUpgrade");
+
 			// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
 			foreach (var craftingTable in newCraftingTables)
 			{
@@ -76,10 +82,12 @@ namespace ecocraft.Services
 				{
 					var newUserCraftingTable = new UserCraftingTable
 					{
-						UserId = user.Id,
-						CraftingTableId = craftingTable.Id,
+						User = user,
+						CraftingTable = craftingTable,
+						Server = server,
 						// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
 						//UpgradeId = 5
+						PluginModule = defaultModule
 					};
 					_context.UserCraftingTables.Add(newUserCraftingTable);
 				}
@@ -94,9 +102,9 @@ namespace ecocraft.Services
 		{
 			return await _context.UserCraftingTables
 				.Include(uct => uct.CraftingTable)
-				//.ThenInclude(ct => ct.CraftingTableUpgrades)
-				//.ThenInclude(ctu => ctu.Upgrade)
-				//.Include(uct => uct.Upgrade)
+				.ThenInclude(ct => ct.CraftingTablePluginModules)
+				.ThenInclude(ctu => ctu.PluginModule)
+				.Include(uct => uct.PluginModule)
 				.Where(uct => uct.UserId == user.Id)
 				.ToListAsync();
 		}

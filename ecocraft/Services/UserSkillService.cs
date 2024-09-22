@@ -51,7 +51,7 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour mettre à jour les compétences de l'utilisateur
-		public async Task UpdateUserSkillsAsync(User user, List<Skill> selectedSkills)
+		public async Task UpdateUserSkillsAsync(User user, Server server, List<Skill> selectedSkills)
 		{
 			// Récupérer les compétences actuelles de l'utilisateur
 			var existingUserSkills = await _context.UserSkills
@@ -69,13 +69,15 @@ namespace ecocraft.Services
 				{
 					var newUserSkill = new UserSkill
 					{
-						UserId = user.Id,
-						SkillId = skill.Id,
+						User = user,
+						Skill = skill,
+						Server = server,
 						Level = 0 // Ajuster le niveau si nécessaire
 					};
 					_context.UserSkills.Add(newUserSkill);
 				}
 			}
+			await _context.SaveChangesAsync();
 		}
 
 		// Méthode pour récupérer les compétences d'un utilisateur via l'objet utilisateur

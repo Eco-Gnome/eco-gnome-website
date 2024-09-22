@@ -62,14 +62,14 @@
 
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
-				@* <MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
+				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
 					@foreach (var table in tables)
 				{
 					<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
 				}
-				</MudSelect> *@
+				</MudSelect>
 
-			  @* <MudTable Items="userCraftingTables" Dense="true">
+			  <MudTable Items="userCraftingTables" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Upgrade</MudTh>
@@ -78,10 +78,10 @@
 				<RowTemplate>
 					<MudTd>@context.CraftingTable.Name</MudTd>
 						 <MudTd>
-							<MudSelect T="Upgrade" Text="Choisissez un upgrade" Value="context.Upgrade" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(Upgrade newUpgrade) => OnSelectedUpgradeChanged(context, newUpgrade)">
-								@foreach (var craftingTableUpgrade in context.CraftingTable.CraftingTableUpgrades)
+							<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value="context.PluginModule" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)">
+								@foreach (var craftingTablePluginModule in context.CraftingTable.CraftingTablePluginModules)
 							{
-								<MudSelectItem T="Upgrade" Value="@craftingTableUpgrade.Upgrade">@craftingTableUpgrade.Upgrade.Name</MudSelectItem>
+								<MudSelectItem T="PluginModule" Value="@craftingTablePluginModule.PluginModule">@craftingTablePluginModule.PluginModule.Name</MudSelectItem>
 							}
 						</MudSelect> 
 					</MudTd>
@@ -89,7 +89,7 @@
 						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
 					</MudTd>
 				</RowTemplate>
-			</MudTable>  *@
+			</MudTable> 
  		</MudItem>
 
 		<!-- Deuxième Colonne -->
@@ -119,23 +119,30 @@
 		</MudItem>
 
 		<!-- Troisième Colonne -->
-		@* <MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudSelect T="Recipe" Text="Choisissez vos recettes" SelectedValues=selectedRecipes Label="Choisissez vos recettes" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedRecipesChanged">
+				@foreach (var recipe in recipes)
+				{
+					<MudSelectItem T="Recipe" Value="@recipe">@recipe.Name</MudSelectItem>
+				}
+			</MudSelect>
+
 			<MudTable Items="userRecipes" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
-					<MudTh>Upgrade</MudTh>
-					<MudTh></MudTh>
+					<MudTh>Price</MudTh>
+					<MudTh>Hide</MudTh>
 				</HeaderContent>
 				<RowTemplate>
 					<MudTd>@context.Name</MudTd>
 					<MudTd>
 					</MudTd>
-				<MudTd>
-					<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
-				</MudTd>
+					<MudTd>
+						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
+					</MudTd>
 			</RowTemplate>
 		</MudTable>
-		</MudItem> *@
+		</MudItem>
 
 	</MudGrid>
 
@@ -144,7 +151,7 @@
 
 	</MudContainer>
 
-@code {
+	@code {
 
 	private List<Skill> skills;
 	private List<CraftingTable> tables;
@@ -155,6 +162,7 @@
 	private User user = new User();
 
 	private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
+	private IEnumerable<Recipe> selectedRecipes { get; set; } = new HashSet<Recipe>();
 	private IEnumerable<UserSkill> userSkills { get; set; } = new HashSet<UserSkill>();
 
 	private IEnumerable<CraftingTable> selectedCraftingTables { get; set; } = new HashSet<CraftingTable>();
@@ -209,13 +217,13 @@
 
 				ImportCraftingTables(ImportedData.craftingTables);
 
+				ImportRecipes(ImportedData.recipes);
+
 			}
 			catch (JsonException ex)
 			{
 				Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
 			}
-
-			//UpdateAll();
 		}
 	}
 
@@ -236,7 +244,7 @@
 				var newSkill = new Skill
 					{
 						Name = dto.Name,
-						ServerId = server.Id,
+						Server = server,
 					};
 
 				skills.Add(newSkill);
@@ -264,13 +272,18 @@
 					{
 						Name = dto.Name,
 						Percent = dto.Percent,
-						ServerId = server.Id,
+						Server = server,
 					};
 
 				pluginModules.Add(newPluginModule);
 				await PluginModuleService.AddAsync(newPluginModule);
 			}
 		}
+
+		var existinguserSkill = pluginModules.FirstOrDefault(pm => pm.Name.Contains("NoUpgrade") && pm.Server.Id == server.Id);
+		if (existinguserSkill == null)
+			await PluginModuleService.AddAsync(new PluginModule{Name = "NoUpgrade", Percent = 0.0, Server = server});
+
 	}
 
 
@@ -291,7 +304,7 @@
 				var newCraftingTable = new CraftingTable
 					{
 						Name = dto.Name,
-						ServerId = server.Id,
+						Server = server,
 						// Autres propriétés...
 					};			
 
@@ -301,30 +314,50 @@
 				foreach (var module in dto.CraftingTablePluginModules)
 				{
 					PluginModule plugin = pluginModules.FirstOrDefault(pm => pm.Name == module);
-					CraftingTablePluginModule ctpm = new CraftingTablePluginModule { CraftingTableId = newCraftingTable.Id, PluginModuleId = plugin.Id, ServerId = server.Id };
-					//newCraftingTable.CraftingTablePluginModules.Add(ctpm);
+					CraftingTablePluginModule ctpm = new CraftingTablePluginModule { CraftingTable = newCraftingTable, PluginModule = plugin, Server = server };
 					await CraftingTablePluginModuleService.AddAsync(ctpm);
 				}
+
+
 
 
 			}
 		}
 	}
 
-	private async Task UpdateAll()
+	public async void ImportRecipes(List<RecipeDto> RecipeDtos)
 	{
-		foreach(var skill in skills)
-			await SkillService.UpdateAsync(skill);
-		/*
-		await CraftingTableService.UpdateAsync(tables);
+		var namesToCheck = RecipeDtos.Select(dto => dto.Name).ToList();
 
-		await UserService.UpdateAsync(users);
+		// Récupère les noms qui existent déjà dans la base
+		var existingNames = recipes
+			.Where(ct => namesToCheck.Contains(ct.Name))
+			.Select(ct => ct.Name);
 
-		await RecipeService.UpdateAsync(recipes);
+		// Ajouter uniquement les objets qui n'existent pas
+		foreach (var dto in RecipeDtos)
+		{
+			if (!existingNames.Contains(dto.Name))
+			{
+				var newRecipe = new Recipe
+					{
+						Name = dto.Name,
+						FamilyName = dto.FamilyName,
+						CraftMinutes = dto.CraftMinutes,
+						Skill = await SkillService.GetByNameAsync(dto.RequiredSkill),// ?? new Skill(),
+						RequiredSkillLevel = dto.RequiredSkillLevel,
+						IsBlueprint = dto.IsBlueprint,
+						IsDefault = dto.IsDefault,
+						Labor = dto.Labor,
+						CraftingTable = await CraftingTableService.GetByNameAsync(dto.CraftingTable),
+						Server = server,
+					};
 
-		await PluginModuleService.UpdateAsync(pluginModules);*/
+				recipes.Add(newRecipe);
+				await RecipeService.AddAsync(newRecipe);
+			}
+		}
 	}
-
 
 	private async Task UpdateUser()
 	{
@@ -336,57 +369,61 @@
 		// Mettre à jour la sélection localement
 		selectedSkills = newSelectedSkills;
 
-		/*foreach (var skill in newSelectedSkills)
-			await UserSkillService.AddAsync(new UserSkill { UserId = user.Id, SkillId = skill.Id });*/
-
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		//await UserSkillService.UpdateUserSkillsAsync(user, selectedSkills.ToList());
+		await UserSkillService.UpdateUserSkillsAsync(user, server, selectedSkills.ToList());
 
-		//userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
 
 		// Récupère la liste des tables de craft correspondant aux skills sélectionné
-		/*var selectedTable = userSkills
-			.SelectMany(us => us.Skill.CraftingTableSkills)
+		var selectedTable = userSkills
+			.SelectMany(us => us.Skill.Recipes)
 			.Select(y => y.CraftingTable)
 			.Distinct();
 
-		selectedCraftingTables = selectedTable;*/
+		selectedCraftingTables = selectedTable.ToList();
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		/*await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, server, selectedCraftingTables.ToList());
 
 		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
 
-		userRecipes = user.GetAvailableRecipes();*/
+		userRecipes = user.GetAvailableRecipes();
 
 	}
-	/*
+
+	private async Task OnSelectedRecipesChanged(IEnumerable<Recipe> newSelectedRecipes)
+	{
+		selectedRecipes = newSelectedRecipes;
+	}
+
 	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
-		{
+	{
 		// Mettre à jour la sélection localement
 		selectedCraftingTables = newSelectedCraftingTables;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, selectedCraftingTables.ToList());
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, server, selectedCraftingTables.ToList());
 
 		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
 	}
-	*/
+
 
 	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
 	{
 		// Mettre à jour le niveau de la compétence dans la base de données
 		userSkill.Level = newLevel;
 		await UserSkillService.UpdateAsync(userSkill);
+
+		userRecipes = user.GetAvailableRecipes();
 	}
 
-	/*
+
 	private async Task OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
 	{
 		userCraftingTable.PluginModule = newUpgrade;
 		// Mettre à jour le niveau de la compétence dans la base de données
-		await UserCraftingTableService.UpdateUserCraftingTableAsync(userCraftingTable);
-	}*/
+		await UserCraftingTableService.UpdateAsync(userCraftingTable);
+	}
 
 	private async Task OnSelectedUserChanged()
 	{
