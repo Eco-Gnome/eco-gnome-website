@@ -16,7 +16,6 @@ namespace ecocraft.Services
 		{
 			return await _context.UserPrices.Include(up => up.User)
 											.Include(up => up.ItemOrTag)
-											.Include(up => up.Server)
 											.ToListAsync();
 		}
 
@@ -24,7 +23,6 @@ namespace ecocraft.Services
 		{
 			return await _context.UserPrices.Include(up => up.User)
 											.Include(up => up.ItemOrTag)
-											.Include(up => up.Server)
 											.FirstOrDefaultAsync(up => up.Id == id);
 		}
 

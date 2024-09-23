@@ -15,7 +15,7 @@ namespace ecocraft.Extensions
 			foreach (var skill in skills)
 			{
 				var userSkilllevel = @this.UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
-				recipes.UnionWith(skill.Recipes.Where(r => r.RequiredSkillLevel <= userSkilllevel));
+				recipes.UnionWith(skill.Recipes.Where(r => r.SkillLevel <= userSkilllevel));
 			}
 
 			// Ajouter les recettes en fonction des tables d'artisanat

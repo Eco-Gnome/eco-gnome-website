@@ -18,7 +18,7 @@ namespace ecocraft.Services
 		{
 			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
-												 .Include(ct => ct.CraftingTablePluginModules)
+												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)
 												 .ToListAsync();
 		}
@@ -27,7 +27,7 @@ namespace ecocraft.Services
 		{
 			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
-												 .Include(ct => ct.CraftingTablePluginModules)
+												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)
 												 .FirstOrDefaultAsync(ct => ct.Id == id);
 		}
@@ -35,7 +35,7 @@ namespace ecocraft.Services
 		{
 			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
-												 .Include(ct => ct.CraftingTablePluginModules)
+												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)
 												 .FirstOrDefaultAsync(ct => ct.Name == name);
 		}

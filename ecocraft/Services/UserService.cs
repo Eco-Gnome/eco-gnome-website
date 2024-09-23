@@ -17,8 +17,8 @@ namespace ecocraft.Services
 		public async Task<List<User>> GetAllAsync()
 		{
 			return await _context.Users.Include(u => u.UserSkills)
-										.Include(u => u.UserServers)
-										.Include(u => u.UserProducts)
+										.Include(u => u.Servers)
+										.Include(u => u.UserElements)
 										.Include(u => u.UserPrices)
 										.Include(u => u.UserCraftingTables)
 										.Include(u => u.UserSettings)
@@ -28,8 +28,8 @@ namespace ecocraft.Services
 		public async Task<User> GetByIdAsync(Guid id)
 		{
 			return await _context.Users.Include(u => u.UserSkills)
-										.Include(u => u.UserServers)
-										.Include(u => u.UserProducts)
+										.Include(u => u.Servers)
+										.Include(u => u.UserElements)
 										.Include(u => u.UserPrices)
 										.Include(u => u.UserCraftingTables)
 										.Include(u => u.UserSettings)

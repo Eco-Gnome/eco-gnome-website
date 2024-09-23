@@ -15,11 +15,7 @@ namespace ecocraft.Services
 		public async Task<List<ItemOrTag>> GetAllAsync()
 		{
 			return await _context.ItemOrTags
-				.Include(i => i.Products)
-				.Include(i => i.Ingredients)
 				.Include(i => i.UserPrices)
-				.Include(i => i.Items) // Association avec ItemTagAssoc
-				.Include(i => i.Tags)          // Association avec Tags
 				.Include(i => i.Server)
 				.ToListAsync();
 		}
@@ -27,13 +23,16 @@ namespace ecocraft.Services
 		public async Task<ItemOrTag> GetByIdAsync(Guid id)
 		{
 			return await _context.ItemOrTags
-				.Include(i => i.Products)
-				.Include(i => i.Ingredients)
 				.Include(i => i.UserPrices)
-				.Include(i => i.Items)
-				.Include(i => i.Tags)
 				.Include(i => i.Server)
 				.FirstOrDefaultAsync(i => i.Id == id);
+		}
+		
+		public async Task<ItemOrTag?> GetByNameAsync(string name)
+		{
+			return await _context.ItemOrTags
+				.Include(s => s.Server)
+				.FirstOrDefaultAsync(s => s.Name == name);
 		}
 
 		public async Task AddAsync(ItemOrTag itemOrTag)

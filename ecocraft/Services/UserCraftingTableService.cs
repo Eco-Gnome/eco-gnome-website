@@ -21,7 +21,6 @@ namespace ecocraft.Services
 			return await _context.UserCraftingTables.Include(uct => uct.User)
 													 .Include(uct => uct.CraftingTable)
 													 .Include(uct => uct.PluginModule)
-													 .Include(uct => uct.Server)
 													 .ToListAsync();
 		}
 
@@ -30,7 +29,6 @@ namespace ecocraft.Services
 			return await _context.UserCraftingTables.Include(uct => uct.User)
 													 .Include(uct => uct.CraftingTable)
 													 .Include(uct => uct.PluginModule)
-													 .Include(uct => uct.Server)
 													 .FirstOrDefaultAsync(uct => uct.Id == id);
 		}
 
@@ -84,7 +82,6 @@ namespace ecocraft.Services
 					{
 						User = user,
 						CraftingTable = craftingTable,
-						Server = server,
 						// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
 						//UpgradeId = 5
 						PluginModule = defaultModule
@@ -102,8 +99,6 @@ namespace ecocraft.Services
 		{
 			return await _context.UserCraftingTables
 				.Include(uct => uct.CraftingTable)
-				.ThenInclude(ct => ct.CraftingTablePluginModules)
-				.ThenInclude(ctu => ctu.PluginModule)
 				.Include(uct => uct.PluginModule)
 				.Where(uct => uct.UserId == user.Id)
 				.ToListAsync();

@@ -19,21 +19,21 @@ namespace ecocraft.Services.ImportData
 	{
 		public string Name { get; set; }
 		public string FamilyName { get; set; }
-		public double CraftMinutes { get; set; }
+		public float CraftMinutes { get; set; }
 		public string RequiredSkill { get; set; }  // Change enum to string
 		public long RequiredSkillLevel { get; set; }
 		public bool IsBlueprint { get; set; }
 		public bool IsDefault { get; set; }
-		public double Labor { get; set; }
+		public float Labor { get; set; }
 		public string CraftingTable { get; set; }
-		public List<IngredientDto> Ingredients { get; set; }
-		public List<IngredientDto> Products { get; set; }
+		public List<ElementDto> Ingredients { get; set; }
+		public List<ElementDto> Products { get; set; }
 	}
 
-	public class IngredientDto
+	public class ElementDto
 	{
 		public string ItemOrTag { get; set; }
-		public double Quantity { get; set; }
+		public float Quantity { get; set; }
 		public bool IsDynamic { get; set; }
 		public string Skill { get; set; }
 		public bool LavishTalent { get; set; }
@@ -54,7 +54,7 @@ namespace ecocraft.Services.ImportData
 	public class PluginModuleDto
 	{
 		public string Name { get; set; }
-		public double Percent { get; set; }
+		public float Percent { get; set; }
 	}
 
 	public class SkillDto

@@ -18,23 +18,17 @@ builder.Services.AddDbContext<EcoCraftDbContext>(options =>
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserSettingService>();
-builder.Services.AddScoped<UserServerService>();
 builder.Services.AddScoped<ServerService>();
 builder.Services.AddScoped<UserCraftingTableService>();
 builder.Services.AddScoped<CraftingTableService>();
-builder.Services.AddScoped<CraftingTablePluginModuleService>();
 builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<PluginModuleService>();
 builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<UserSkillService>();
-builder.Services.AddScoped<UserProductService>();
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<IngredientService>();
+builder.Services.AddScoped<UserElementService>();
+builder.Services.AddScoped<ElementService>();
 builder.Services.AddScoped<ItemOrTagService>();
 builder.Services.AddScoped<UserPriceService>();
-builder.Services.AddScoped<ItemTagAssocService>();
-builder.Services.AddScoped<ItemService>();
-builder.Services.AddScoped<TagService>();
 
 
 var app = builder.Build();

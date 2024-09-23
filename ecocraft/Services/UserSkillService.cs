@@ -16,7 +16,6 @@ namespace ecocraft.Services
 		{
 			return await _context.UserSkills.Include(us => us.User)
 											.Include(us => us.Skill)
-											.Include(us => us.Server)
 											.ToListAsync();
 		}
 
@@ -24,7 +23,6 @@ namespace ecocraft.Services
 		{
 			return await _context.UserSkills.Include(us => us.User)
 											.Include(us => us.Skill)
-											.Include(us => us.Server)
 											.FirstOrDefaultAsync(us => us.Id == id);
 		}
 
@@ -71,7 +69,6 @@ namespace ecocraft.Services
 					{
 						User = user,
 						Skill = skill,
-						Server = server,
 						Level = 0 // Ajuster le niveau si nécessaire
 					};
 					_context.UserSkills.Add(newUserSkill);

@@ -12,9 +12,11 @@
 @inject CraftingTableService CraftingTableService
 @inject UserCraftingTableService UserCraftingTableService
 @inject RecipeService RecipeService
+@inject ItemOrTagService ItemOrTagService
+@inject ElementService ElementService
 @inject PluginModuleService PluginModuleService
 @inject ServerService ServerService
-@inject CraftingTablePluginModuleService CraftingTablePluginModuleService
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Eco Calc</PageTitle>
 
@@ -23,7 +25,7 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-
+			<MudTextField @bind-Value="serverName" Label="Server Name"></MudTextField>
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
@@ -63,7 +65,7 @@
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
 				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
-					@foreach (var table in tables)
+					@foreach (var table in craftingTables)
 				{
 					<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
 				}
@@ -79,9 +81,9 @@
 					<MudTd>@context.CraftingTable.Name</MudTd>
 						 <MudTd>
 							<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value="context.PluginModule" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)">
-								@foreach (var craftingTablePluginModule in context.CraftingTable.CraftingTablePluginModules)
+								@foreach (var pluginModule in context.CraftingTable.PluginModules)
 							{
-								<MudSelectItem T="PluginModule" Value="@craftingTablePluginModule.PluginModule">@craftingTablePluginModule.PluginModule.Name</MudSelectItem>
+								<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
 							}
 						</MudSelect> 
 					</MudTd>
@@ -154,10 +156,13 @@
 	@code {
 
 	private List<Skill> skills;
-	private List<CraftingTable> tables;
+	private List<CraftingTable> craftingTables;
 	private List<Recipe> recipes;
+	private List<Element> elements;
+	private List<ItemOrTag> itemOrTags;
 	private List<User> users;
 	private List<PluginModule> pluginModules;
+	private List<Server> servers;
 
 	private User user = new User();
 
@@ -171,28 +176,59 @@
 	private IEnumerable<Recipe> userRecipes { get; set; } = new HashSet<Recipe>();
 
 	private int SkillsValue { get; set; }
-
-	private Server server = new Server();
+	
+	private string serverName = "";
+	private Server? server;
 
 	protected override async Task OnInitializedAsync()
 	{
-		server = await ServerService.GetFirstAsync();
-		// Charger toutes les compétences disponibles
+		// TODO: move to a better location
+		await DbContext.Database.EnsureCreatedAsync();
+		
+		// TODO: retieve only from current server
+		servers = await ServerService.GetAllAsync();
+		
 		skills = await SkillService.GetAllAsync();
-
-		tables = await CraftingTableService.GetAllAsync();
+		
+		craftingTables = await CraftingTableService.GetAllAsync();
 
 		users = await UserService.GetAllAsync();
 
 		recipes = await RecipeService.GetAllAsync();
+		
+		elements = await ElementService.GetAllAsync();
+
+		itemOrTags = await ItemOrTagService.GetAllAsync();
 
 		pluginModules = await PluginModuleService.GetAllAsync();
 	}
 
 	IList<IBrowserFile> _files = new List<IBrowserFile>();
 
-	private async Task UploadFiles(IBrowserFile file)
+	private async Task UploadFiles(IBrowserFile? file)
 	{
+		if (serverName == "")
+		{
+			await JsRuntime.InvokeVoidAsync("alert", "Le server name ne peut pas être vide !"); // Alert
+			return;
+		}
+
+		var foundServer = await ServerService.GetByNameAsync(serverName);
+
+		if (foundServer is null)
+		{
+			server = new Server
+			{
+				Name = serverName,
+			};
+
+			await ServerService.AddAsync(server);
+		}
+		else
+		{
+			server = foundServer;
+		}
+		
 		//var file = e.File;
 		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
 		if (file != null && file.ContentType == "application/json")
@@ -217,8 +253,9 @@
 
 				ImportCraftingTables(ImportedData.craftingTables);
 
-				ImportRecipes(ImportedData.recipes);
+				ImportRecipes(ImportedData.recipes, ImportedData.itemTagAssoc);
 
+				ImportItemTagAssoc(ImportedData.itemTagAssoc);
 			}
 			catch (JsonException ex)
 			{
@@ -282,7 +319,7 @@
 
 		var existinguserSkill = pluginModules.FirstOrDefault(pm => pm.Name.Contains("NoUpgrade") && pm.Server.Id == server.Id);
 		if (existinguserSkill == null)
-			await PluginModuleService.AddAsync(new PluginModule{Name = "NoUpgrade", Percent = 0.0, Server = server});
+			await PluginModuleService.AddAsync(new PluginModule{Name = "NoUpgrade", Percent = 0, Server = server});
 
 	}
 
@@ -292,7 +329,7 @@
 		var namesToCheck = craftingTableDtos.Select(dto => dto.Name).ToList();
 
 		// Récupère les noms qui existent déjà dans la base
-		var existingNames = tables
+		var existingNames = craftingTables
 			.Where(ct => namesToCheck.Contains(ct.Name))
 			.Select(ct => ct.Name);
 
@@ -305,56 +342,112 @@
 					{
 						Name = dto.Name,
 						Server = server,
-						// Autres propriétés...
-					};			
+						PluginModules = dto.CraftingTablePluginModules.Select(ctpm => pluginModules.FirstOrDefault(pm => pm.Name == ctpm)).ToList()
+					};
 
-				tables.Add(newCraftingTable);
+				craftingTables.Add(newCraftingTable);
 				await CraftingTableService.AddAsync(newCraftingTable);
-
-				foreach (var module in dto.CraftingTablePluginModules)
-				{
-					PluginModule plugin = pluginModules.FirstOrDefault(pm => pm.Name == module);
-					CraftingTablePluginModule ctpm = new CraftingTablePluginModule { CraftingTable = newCraftingTable, PluginModule = plugin, Server = server };
-					await CraftingTablePluginModuleService.AddAsync(ctpm);
-				}
-
-
-
-
 			}
 		}
 	}
 
-	public async void ImportRecipes(List<RecipeDto> RecipeDtos)
+	public async void ImportRecipes(List<RecipeDto> recipeDtos, List<ItemTagAssocDto> itemTagAssoc)
 	{
-		var namesToCheck = RecipeDtos.Select(dto => dto.Name).ToList();
+		var namesToCheck = recipeDtos.Select(dto => dto.Name).ToList();
 
 		// Récupère les noms qui existent déjà dans la base
-		var existingNames = recipes
+		var existingRecipeNames = recipes
 			.Where(ct => namesToCheck.Contains(ct.Name))
+			.Select(ct => ct.Name);
+		
+		// Récupère les itemsOrTag qui existent déjà dans la base
+		var existingItemOrTags = itemOrTags
 			.Select(ct => ct.Name);
 
 		// Ajouter uniquement les objets qui n'existent pas
-		foreach (var dto in RecipeDtos)
+		foreach (var recipeDto in recipeDtos)
 		{
-			if (!existingNames.Contains(dto.Name))
+			if (!existingRecipeNames.Contains(recipeDto.Name))
 			{
 				var newRecipe = new Recipe
 					{
-						Name = dto.Name,
-						FamilyName = dto.FamilyName,
-						CraftMinutes = dto.CraftMinutes,
-						Skill = await SkillService.GetByNameAsync(dto.RequiredSkill),// ?? new Skill(),
-						RequiredSkillLevel = dto.RequiredSkillLevel,
-						IsBlueprint = dto.IsBlueprint,
-						IsDefault = dto.IsDefault,
-						Labor = dto.Labor,
-						CraftingTable = await CraftingTableService.GetByNameAsync(dto.CraftingTable),
+						Name = recipeDto.Name,
+						FamilyName = recipeDto.FamilyName,
+						CraftMinutes = recipeDto.CraftMinutes,
+						Skill = skills.FirstOrDefault(s => s.Name == recipeDto.RequiredSkill),
+						SkillLevel = recipeDto.RequiredSkillLevel,
+						IsBlueprint = recipeDto.IsBlueprint,
+						IsDefault = recipeDto.IsDefault,
+						Labor = recipeDto.Labor,
+						CraftingTable = craftingTables.FirstOrDefault(c => c.Name == recipeDto.CraftingTable),
 						Server = server,
 					};
 
 				recipes.Add(newRecipe);
 				await RecipeService.AddAsync(newRecipe);
+
+				// Si l'item or tag n'existe pas actuellement, on le crée, avant de créer l'element
+				foreach (var recipeItem in recipeDto.Ingredients.Concat(recipeDto.Products))
+				{
+					if (!existingItemOrTags.Contains(recipeItem.ItemOrTag))
+					{
+						var itemOrTag = new ItemOrTag
+						{
+							Name = recipeItem.ItemOrTag,
+							IsTag = itemTagAssoc.Select(t => t.Tag).Contains(recipeItem.ItemOrTag),
+							Server = server,
+						};
+						
+						itemOrTags.Add(itemOrTag);
+						await ItemOrTagService.AddAsync(itemOrTag);
+					}
+				}
+				
+				foreach (var recipeDtoIngredient in recipeDto.Ingredients)
+				{
+					recipeDtoIngredient.Quantity *= -1;
+				}
+				
+				foreach (var element in recipeDto.Ingredients.Concat(recipeDto.Products))
+				{
+					var itemOrTag = await ItemOrTagService.GetByNameAsync(element.ItemOrTag);
+					var skill = skills.FirstOrDefault(s => s.Name == element.Skill);
+
+					var ing = new Element
+					{
+						Recipe = newRecipe,
+						ItemOrTag = itemOrTag,
+						Quantity = element.Quantity,
+						IsDynamic = element.IsDynamic,
+						Skill = skill,
+						LavishTalent = element.LavishTalent,
+					};
+					
+					await ElementService.AddAsync(ing);
+				}
+			}
+		}
+	}
+
+	public async void ImportItemTagAssoc(List<ItemTagAssocDto> itemTagAssoc)
+	{
+		foreach (var itemTag in itemTagAssoc)
+		{
+			var tag = itemOrTags.FirstOrDefault(i => i.Name == itemTag.Tag);
+
+			if (tag is not null)
+			{
+				foreach (var type in itemTag.Types)
+				{
+					var item = itemOrTags.FirstOrDefault(i => i.Name == type);
+
+					if (item is not null)
+					{
+						tag.AssociatedItemOrTags.Add(item);
+					}
+				}
+				
+				await ItemOrTagService.UpdateAsync(tag);
 			}
 		}
 	}

@@ -14,8 +14,7 @@ namespace ecocraft.Services
 
 		public async Task<List<Recipe>> GetAllAsync()
 		{
-			return await _context.Recipes.Include(r => r.Products)
-										  .Include(r => r.Ingredients)
+			return await _context.Recipes.Include(r => r.Elements)
 										  .Include(r => r.Skill)
 										  .Include(r => r.CraftingTable)
 										  .Include(r => r.Server)
@@ -24,8 +23,7 @@ namespace ecocraft.Services
 
 		public async Task<Recipe> GetByIdAsync(Guid id)
 		{
-			return await _context.Recipes.Include(r => r.Products)
-										  .Include(r => r.Ingredients)
+			return await _context.Recipes.Include(r => r.Elements)
 										  .Include(r => r.Skill)
 										  .Include(r => r.CraftingTable)
 										  .Include(r => r.Server)
