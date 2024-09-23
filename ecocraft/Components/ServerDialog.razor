@@ -1,0 +1,25 @@
+﻿<MudDialogContent>
+    <MudText Typo="Typo.h6">Entrer le nom du serveur à créer</MudText>
+    <MudTextField @bind-Value="ServerName" Label="Nom du serveur" />
+</MudDialogContent>
+
+<MudDialogActions>
+    <MudButton OnClick="Submit" Color="Color.Primary">Valider</MudButton>
+    <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
+</MudDialogActions>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public string ServerName { get; set; }
+
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(ServerName));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

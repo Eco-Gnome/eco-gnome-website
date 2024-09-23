@@ -17,6 +17,7 @@
 @inject PluginModuleService PluginModuleService
 @inject ServerService ServerService
 @inject IJSRuntime JsRuntime
+@inject IDialogService DialogService
 
 <PageTitle>Eco Calc</PageTitle>
 
@@ -25,6 +26,15 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+					<MudSelect T="Server" Text="Choisissez un serveur" Label="Choisissez un serveur" @bind-Value="server" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged">
+						@foreach (var server in servers)
+					{
+						<MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+					}
+				</MudSelect>
+				<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create Server" OnClick="OpenServerDialog" />
+			</MudStack>
 			<MudTextField @bind-Value="serverName" Label="Server Name"></MudTextField>
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
@@ -96,13 +106,15 @@
 
 		<!-- Deuxième Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-
-			<MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
-				@foreach (var user in users)
-				{
-					<MudSelectItem T="User" Value="@user">@user.Pseudo</MudSelectItem>
-				}
-			</MudSelect>
+			<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+				<MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
+					@foreach (var user in users)
+					{
+						<MudSelectItem T="User" Value="@user">@user.Pseudo</MudSelectItem>
+					}
+				</MudSelect>
+				<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create User" OnClick="OpenUserDialog" />
+			</MudStack>
 			@* <MudStack>
 				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 					<MudText>Price per 1000 calories</MudText>
@@ -176,7 +188,7 @@
 	private IEnumerable<Recipe> userRecipes { get; set; } = new HashSet<Recipe>();
 
 	private int SkillsValue { get; set; }
-	
+
 	private string serverName = "";
 	private Server? server;
 
@@ -184,18 +196,18 @@
 	{
 		// TODO: move to a better location
 		await DbContext.Database.EnsureCreatedAsync();
-		
+
 		// TODO: retieve only from current server
 		servers = await ServerService.GetAllAsync();
-		
+
 		skills = await SkillService.GetAllAsync();
-		
+
 		craftingTables = await CraftingTableService.GetAllAsync();
 
 		users = await UserService.GetAllAsync();
 
 		recipes = await RecipeService.GetAllAsync();
-		
+
 		elements = await ElementService.GetAllAsync();
 
 		itemOrTags = await ItemOrTagService.GetAllAsync();
@@ -228,7 +240,7 @@
 		{
 			server = foundServer;
 		}
-		
+
 		//var file = e.File;
 		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
 		if (file != null && file.ContentType == "application/json")
@@ -359,7 +371,7 @@
 		var existingRecipeNames = recipes
 			.Where(ct => namesToCheck.Contains(ct.Name))
 			.Select(ct => ct.Name);
-		
+
 		// Récupère les itemsOrTag qui existent déjà dans la base
 		var existingItemOrTags = itemOrTags
 			.Select(ct => ct.Name);
@@ -397,17 +409,17 @@
 							IsTag = itemTagAssoc.Select(t => t.Tag).Contains(recipeItem.ItemOrTag),
 							Server = server,
 						};
-						
+
 						itemOrTags.Add(itemOrTag);
 						await ItemOrTagService.AddAsync(itemOrTag);
 					}
 				}
-				
+
 				foreach (var recipeDtoIngredient in recipeDto.Ingredients)
 				{
 					recipeDtoIngredient.Quantity *= -1;
 				}
-				
+
 				foreach (var element in recipeDto.Ingredients.Concat(recipeDto.Products))
 				{
 					var itemOrTag = await ItemOrTagService.GetByNameAsync(element.ItemOrTag);
@@ -422,7 +434,7 @@
 						Skill = skill,
 						LavishTalent = element.LavishTalent,
 					};
-					
+
 					await ElementService.AddAsync(ing);
 				}
 			}
@@ -446,7 +458,7 @@
 						tag.AssociatedItemOrTags.Add(item);
 					}
 				}
-				
+
 				await ItemOrTagService.UpdateAsync(tag);
 			}
 		}
@@ -533,6 +545,58 @@
 			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
 
 			userRecipes = user.GetAvailableRecipes();
+		}
+	}
+
+	private async Task OnSelectedServerChanged()
+	{
+		if (server is not null && user is not null)
+		{
+			// Charger les compétences de l'utilisateur à partir de l'objet user
+			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+
+			// Initialiser selectedSkills en tant que HashSet
+			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
+
+			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
+
+			userRecipes = user.GetAvailableRecipes();
+		}
+	}
+
+	private async Task OpenUserDialog()
+	{
+		var parameters = new DialogParameters();
+		var dialog = DialogService.Show<UserDialog>("Créer un utilisateur", parameters);
+
+		var result = await dialog.Result;
+
+		if (!result.Cancelled)
+		{
+			User newUser = new User { Pseudo = result.Data.ToString() };
+			await UserService.AddAsync(newUser);
+			user = newUser;
+			//userName = result.Data.ToString(); // Récupère le nom de l'utilisateur saisi
+			users = await UserService.GetAllAsync();
+			OnSelectedUserChanged();
+		}
+	}
+
+	private async Task OpenServerDialog()
+	{
+		var parameters = new DialogParameters();
+		var dialog = DialogService.Show<ServerDialog>("Créer un serveur", parameters);
+
+		var result = await dialog.Result;
+
+		if (!result.Cancelled)
+		{
+			Server newServer = new Server { Name = result.Data.ToString() };
+			await ServerService.AddAsync(newServer);
+			server = newServer;
+			servers = await ServerService.GetAllAsync();
+			OnSelectedUserChanged();
 		}
 	}
 	

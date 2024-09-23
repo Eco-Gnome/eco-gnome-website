@@ -30,7 +30,6 @@ builder.Services.AddScoped<ElementService>();
 builder.Services.AddScoped<ItemOrTagService>();
 builder.Services.AddScoped<UserPriceService>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

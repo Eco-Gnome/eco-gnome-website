@@ -1,0 +1,25 @@
+﻿<MudDialogContent>
+    <MudText Typo="Typo.h6">Entrer le nom de l'utilisateur</MudText>
+    <MudTextField @bind-Value="UserName" Label="Nom de l'utilisateur" />
+</MudDialogContent>
+
+<MudDialogActions>
+    <MudButton OnClick="Submit" Color="Color.Primary">Valider</MudButton>
+    <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
+</MudDialogActions>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } // Injecter le MudDialogInstance via un paramètre en cascade
+
+    public string UserName { get; set; }
+
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(UserName)); // Retourne le nom de l'utilisateur
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
