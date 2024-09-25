@@ -575,6 +575,7 @@
 		if (!result.Cancelled)
 		{
 			User newUser = new User { Pseudo = result.Data.ToString() };
+			newUser.UserSettings.Add(new UserSetting { User = newUser, Server = server});
 			await UserService.AddAsync(newUser);
 			user = newUser;
 			//userName = result.Data.ToString(); // Récupère le nom de l'utilisateur saisi
