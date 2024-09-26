@@ -14,14 +14,14 @@ namespace ecocraft.Services
 
 		public async Task<List<UserElement>> GetAllAsync()
 		{
-			return await _context.UserElements.Include(ue => ue.User)
+			return await _context.UserElements.Include(ue => ue.UserServer)
 											  .Include(ue => ue.Element)
 											  .ToListAsync();
 		}
 
 		public async Task<UserElement> GetByIdAsync(Guid id)
 		{
-			return await _context.UserElements.Include(ue => ue.User)
+			return await _context.UserElements.Include(ue => ue.UserServer)
 											  .Include(ue => ue.Element)
 											  .FirstOrDefaultAsync(ue => ue.Id == id);
 		}

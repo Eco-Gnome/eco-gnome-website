@@ -109,33 +109,18 @@ public class EcoCraftDbContext : DbContext
 		
 		// * User Data
 		// User
-		modelBuilder.Entity<User>()
-			.HasMany(u => u.Servers)
-			.WithMany(s => s.Users)
-			.UsingEntity(
-				"UserServer",
-				r => r.HasOne(typeof(Server)).WithMany().HasForeignKey("ServerId")
-					.HasPrincipalKey(nameof(Server.Id)),
-				l => l.HasOne(typeof(User)).WithMany().HasForeignKey("UserId")
-					.HasPrincipalKey(nameof(User.Id)),
-				j => j.HasKey("UserId", "ServerId"));
 		
 		// UserSetting
 		modelBuilder.Entity<UserSetting>()
-			.HasOne(us => us.User)
-			.WithMany(u => u.UserSettings)
-			.HasForeignKey(us => us.UserId);
-		
-		modelBuilder.Entity<UserSetting>()
-			.HasOne(us => us.Server)
-			.WithMany(s => s.UserSettings)
-			.HasForeignKey(us => us.ServerId);
+			.HasOne(us => us.UserServer)
+			.WithMany(us => us.UserSettings)
+			.HasForeignKey(us => us.UserServerId);
 		
 		// UserCraftingTable
 		modelBuilder.Entity<UserCraftingTable>()
-			.HasOne(uct => uct.User)
-			.WithMany(u => u.UserCraftingTables)
-			.HasForeignKey(uct => uct.UserId);
+			.HasOne(uct => uct.UserServer)
+			.WithMany(us => us.UserCraftingTables)
+			.HasForeignKey(uct => uct.UserServerId);
 		
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(uct => uct.CraftingTable)
@@ -154,9 +139,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(us => us.SkillId);
 		
 		modelBuilder.Entity<UserSkill>()
-			.HasOne(us => us.User)
-			.WithMany(u => u.UserSkills)
-			.HasForeignKey(us => us.UserId);
+			.HasOne(us => us.UserServer)
+			.WithMany(use => use.UserSkills)
+			.HasForeignKey(us => us.UserServerId);
 		
 		// UserElement
 		modelBuilder.Entity<UserElement>()
@@ -165,9 +150,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ue => ue.ElementId);
 		
 		modelBuilder.Entity<UserElement>()
-			.HasOne(ue => ue.User)
-			.WithMany(u => u.UserElements)
-			.HasForeignKey(ue => ue.UserId);
+			.HasOne(ue => ue.UserServer)
+			.WithMany(us => us.UserElements)
+			.HasForeignKey(ue => ue.UserServerId);
 		
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
@@ -176,10 +161,21 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ue => ue.ItemOrTagId);
 		
 		modelBuilder.Entity<UserPrice>()
-			.HasOne(up => up.User)
-			.WithMany(u => u.UserPrices)
-			.HasForeignKey(ue => ue.UserId);
+			.HasOne(up => up.UserServer)
+			.WithMany(us => us.UserPrices)
+			.HasForeignKey(ue => ue.UserServerId);
 		
+		// UserServer
+		modelBuilder.Entity<UserServer>()
+			.HasOne(us => us.User)
+			.WithMany(u => u.UserServers)
+			.HasForeignKey(us => us.UserId);
+			
+		modelBuilder.Entity<UserServer>()
+			.HasOne(us => us.Server)
+			.WithMany(s => s.UserServers)
+			.HasForeignKey(us => us.ServerId);
+
 		// * Server Data
 		// Server
 	}
