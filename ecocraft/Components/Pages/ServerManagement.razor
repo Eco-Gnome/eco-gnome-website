@@ -1,0 +1,63 @@
+﻿@page "/server-management"
+@attribute [Authorize(Policy = "IsServerAdmin")]
+@using ecocraft.Services
+@using ecocraft.Services.ImportData
+@using Microsoft.AspNetCore.Authorization
+@inject ImportDataService ImportDataService
+@inject ContextService ContextService
+
+<PageTitle>Server Management</PageTitle>
+
+<!--<AuthorizeView Policy="IsServerAdmin">
+	<NotAuthorized>
+		<h2 class="mt-5">You are not authorized to view this page</h2>
+	</NotAuthorized>
+	<Authorized>-->
+<MudContainer>
+	<MudGrid>
+		<MudItem sm="12" Class="border-solid border-2 mud-border-primary pa-4">
+			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
+				<ButtonTemplate>
+					<MudButton HtmlTag="label"
+							   Variant="Variant.Filled"
+							   Color="Color.Primary"
+							   StartIcon="@Icons.Material.Filled.CloudUpload"
+							   for="@fileInput">
+						Upload Files
+					</MudButton>
+				</ButtonTemplate>
+			</MudFileUpload>
+ 		</MudItem>
+	</MudGrid>
+</MudContainer>
+	<!--</Authorized>
+</AuthorizeView>-->
+
+@code {
+	// TODO: Handle an update of server data
+	private async Task UploadFiles(IBrowserFile? file)
+	{
+		//var file = e.File;
+		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
+		if (file != null && file.ContentType == "application/json")
+		{
+			// On lit le fichier JSON en mémoire
+			using var stream = file.OpenReadStream(2000000);
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+
+			memoryStream.Position = 0; // Repositionner au début pour la lecture
+			using var reader = new StreamReader(memoryStream);
+			string jsonContent = await reader.ReadToEndAsync();
+
+			if (ContextService.CurrentServer is not null)
+			{
+				await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer);
+			}
+			else
+			{
+				throw new Exception("ContextService.CurrentServer is null !");
+			}
+		}
+	}
+}

@@ -5,35 +5,42 @@ using System.Linq;
 
 namespace ecocraft.Services
 {
-	public class CraftingTableService : IGenericService<CraftingTable>
+	public class CraftingTableDbService : IGenericDbService<CraftingTable>
 	{
 		private readonly EcoCraftDbContext _context;
 
-		public CraftingTableService(EcoCraftDbContext context)
+		public CraftingTableDbService(EcoCraftDbContext context)
 		{
 			_context = context;
 		}
 
-		public async Task<List<CraftingTable>> GetAllAsync()
+		public Task<List<CraftingTable>> GetAllAsync()
 		{
-			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
+			return _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
 												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)
 												 .ToListAsync();
 		}
 
-		public async Task<CraftingTable> GetByIdAsync(Guid id)
+		public Task<List<CraftingTable>> GetByServerAsync(Server server)
 		{
-			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
+			return _context.CraftingTables.Include(c => c.PluginModules)
+												.Where(s => s.ServerId == server.Id)
+												.ToListAsync();
+		}
+
+		public Task<CraftingTable?> GetByIdAsync(Guid id)
+		{
+			return _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
 												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)
 												 .FirstOrDefaultAsync(ct => ct.Id == id);
 		}
-		public async Task<CraftingTable> GetByNameAsync(string name)
+		public Task<CraftingTable?> GetByNameAsync(string name)
 		{
-			return await _context.CraftingTables.Include(ct => ct.UserCraftingTables)
+			return _context.CraftingTables.Include(ct => ct.UserCraftingTables)
 												 .Include(ct => ct.Recipes)
 												 .Include(ct => ct.PluginModules)
 												 .Include(ct => ct.Server)

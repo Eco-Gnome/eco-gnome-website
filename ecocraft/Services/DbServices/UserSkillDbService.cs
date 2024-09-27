@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserSkillService : IGenericService<UserSkill>
+	public class UserSkillDbService : IGenericDbService<UserSkill>
 	{
 		private readonly EcoCraftDbContext _context;
 
-		public UserSkillService(EcoCraftDbContext context)
+		public UserSkillDbService(EcoCraftDbContext context)
 		{
 			_context = context;
 		}
@@ -17,6 +17,13 @@ namespace ecocraft.Services
 			return await _context.UserSkills.Include(us => us.UserServer)
 											.Include(us => us.Skill)
 											.ToListAsync();
+		}
+
+		public Task<List<UserSkill>> GetByUserServerAsync(UserServer userServer)
+		{
+			return _context.UserSkills
+				.Where(s => s.UserServerId == userServer.Id)
+				.ToListAsync();
 		}
 
 		public async Task<UserSkill> GetByIdAsync(Guid id)

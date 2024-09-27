@@ -177,7 +177,8 @@ namespace ecocraft.Models
     public class Server
     {
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
+        public bool IsDefault { get; set; }
 
         public List<UserServer> UserServers { get; set; } = new List<UserServer>();
         public List<CraftingTable> CraftingTables { get; set; } = new List<CraftingTable>();

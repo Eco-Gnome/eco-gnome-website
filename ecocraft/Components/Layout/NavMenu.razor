@@ -1,7 +1,10 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <!--<MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>-->
-    <!--<MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Weather</MudNavLink>-->
-    <MudNavLink Href="calculator" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Calculator</MudNavLink>
+﻿@using ecocraft.Services
+@inject ContextService ContextService
 
+<MudNavMenu>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Calculate">Price Calculator</MudNavLink>
+    @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
+    {
+        <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">Server Management</MudNavLink>
+    }
 </MudNavMenu>

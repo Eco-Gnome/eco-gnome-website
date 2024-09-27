@@ -1,5 +1,5 @@
 ﻿<MudDialogContent>
-    <MudText Typo="Typo.h6">Entrer le nom du serveur à créer</MudText>
+    <MudText Typo="Typo.h6">Nom du serveur</MudText>
     <MudTextField @bind-Value="ServerName" Label="Nom du serveur" />
 </MudDialogContent>
 
@@ -9,9 +9,9 @@
 </MudDialogActions>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
 
-    public string ServerName { get; set; }
+    public string ServerName = "";
 
     private void Submit()
     {

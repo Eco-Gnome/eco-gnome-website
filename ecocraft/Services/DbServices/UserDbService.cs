@@ -5,11 +5,11 @@ namespace ecocraft.Services
 {
 
 
-	public class UserService : IGenericService<User>
+	public class UserDbService : IGenericDbService<User>
 	{
 		private readonly EcoCraftDbContext _context;
 
-		public UserService(EcoCraftDbContext context)
+		public UserDbService(EcoCraftDbContext context)
 		{
 			_context = context;
 		}
@@ -20,7 +20,7 @@ namespace ecocraft.Services
 										.ToListAsync();
 		}
 
-		public async Task<User> GetByIdAsync(Guid id)
+		public async Task<User?> GetByIdAsync(Guid id)
 		{
 			return await _context.Users.Include(u => u.UserServers)
 										.FirstOrDefaultAsync(u => u.Id == id);
