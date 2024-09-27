@@ -1,19 +1,12 @@
 ﻿@page "/"
-@using ecocraft.Components.Dialog
 @using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
 @inject EcoCraftDbContext DbContext
 @inject UserSkillDbService UserSkillDbService
-@inject UserDbService UserDbService
-@inject SkillDbService SkillDbService
-@inject CraftingTableDbService CraftingTableDbService
 @inject UserCraftingTableDbService UserCraftingTableDbService
-@inject RecipeDbService RecipeDbService
-@inject ItemOrTagDbService ItemOrTagDbService
-@inject ElementDbService ElementDbService
-@inject PluginModuleDbService PluginModuleDbService
-@inject IDialogService DialogService
+@inject ContextService ContextService
+@inject ServerDataService ServerDataService
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -22,7 +15,7 @@
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
 			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
-				@foreach (var skill in skills)
+				@foreach (var skill in ServerDataService.Skills)
 				{
 					<MudSelectItem T="Skill" Value="@skill">@skill.Name</MudSelectItem>
 				}
@@ -48,7 +41,7 @@
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
 				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
-					@foreach (var table in craftingTables)
+					@foreach (var table in ServerDataService.CraftingTables)
 				{
 					<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
 				}
@@ -79,15 +72,7 @@
 
 		<!-- Deuxième Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-				<MudSelect T="User" Text="Choisissez un utilisateur" Label="Choisissez un utilisateur" @bind-Value="_user" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedUserChanged">
-					@foreach (var user in users)
-					{
-						<MudSelectItem T="User" Value="@user">@user.Pseudo</MudSelectItem>
-					}
-				</MudSelect>
-				<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create User" OnClick="OpenUserDialog" />
-			</MudStack>
+
 			@* <MudStack>
 				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 					<MudText>Price per 1000 calories</MudText>
@@ -108,7 +93,7 @@
 		<!-- Troisième Colonne -->
 		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
 			<MudSelect T="Recipe" Text="Choisissez vos recettes" SelectedValues=selectedRecipes Label="Choisissez vos recettes" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedRecipesChanged">
-				@foreach (var recipe in recipes)
+				@foreach (var recipe in ServerDataService.Recipes)
 				{
 					<MudSelectItem T="Recipe" Value="@recipe">@recipe.Name</MudSelectItem>
 				}
@@ -150,20 +135,15 @@
 		await DbContext.Database.EnsureCreatedAsync();
 	}
 
-	private async Task UpdateUser()
-	{
-		await UserDbService.UpdateAsync(_user);
-	}
-
 	private async Task OnSelectedSkillsChanged(IEnumerable<Skill> newSelectedSkills)
 	{
 		// Mettre à jour la sélection localement
 		selectedSkills = newSelectedSkills;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserSkillDbService.UpdateUserSkillsAsync(_user.UserServers[0], selectedSkills.ToList());
+		await UserSkillDbService.UpdateUserSkillsAsync(ContextService.CurrentUserServer, selectedSkills.ToList());
 
-		userSkills = await UserSkillDbService.GetUserSkillsByUserAsync(_user.UserServers[0]);
+		userSkills = await UserSkillDbService.GetUserSkillsByUserAsync(ContextService.CurrentUserServer);
 
 		// Récupère la liste des tables de craft correspondant aux skills sélectionné
 		var selectedTable = userSkills
@@ -174,11 +154,11 @@
 		selectedCraftingTables = selectedTable.ToList();
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(_user.UserServers[0], selectedCraftingTables.ToList());
+		await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(ContextService.CurrentUserServer, selectedCraftingTables.ToList());
 
-		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(_user.UserServers[0]);
+		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(ContextService.CurrentUserServer);
 
-		userRecipes = _user.GetAvailableRecipes();
+		userRecipes = ContextService.CurrentUser.GetAvailableRecipes();
 
 	}
 
@@ -193,9 +173,9 @@
 		selectedCraftingTables = newSelectedCraftingTables;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(_user.UserServers[0], selectedCraftingTables.ToList());
+		await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(ContextService.CurrentUserServer, selectedCraftingTables.ToList());
 
-		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(_user.UserServers[0]);
+		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(ContextService.CurrentUserServer);
 	}
 
 	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
@@ -204,7 +184,7 @@
 		userSkill.Level = newLevel;
 		await UserSkillDbService.UpdateAsync(userSkill);
 
-		userRecipes = _user.GetAvailableRecipes();
+		userRecipes = ContextService.CurrentUser.GetAvailableRecipes();
 	}
 
 	private async Task OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
@@ -212,60 +192,6 @@
 		userCraftingTable.PluginModule = newUpgrade;
 		// Mettre à jour le niveau de la compétence dans la base de données
 		await UserCraftingTableDbService.UpdateAsync(userCraftingTable);
-	}
-
-	private async Task OnSelectedUserChanged()
-	{
-		// Mettre à jour l'utilisateur
-		if (_user is not null)
-		{
-			// Charger les compétences de l'utilisateur à partir de l'objet user
-			userSkills = await UserSkillDbService.GetUserSkillsByUserAsync(_user.UserServers[0]);
-
-			// Initialiser selectedSkills en tant que HashSet
-			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
-
-			userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(_user.UserServers[0]);
-			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
-
-			userRecipes = _user.GetAvailableRecipes();
-		}
-	}
-
-	private async Task OnSelectedServerChanged()
-	{
-		if (_server is not null && _user is not null)
-		{
-			// Charger les compétences de l'utilisateur à partir de l'objet user
-			userSkills = await UserSkillDbService.GetUserSkillsByUserAsync(_user.UserServers[0]);
-
-			// Initialiser selectedSkills en tant que HashSet
-			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
-
-			userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(_user.UserServers[0]);
-			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
-
-			userRecipes = _user.GetAvailableRecipes();
-		}
-	}
-
-	private async Task OpenUserDialog()
-	{
-		var parameters = new DialogParameters();
-		var dialog = DialogService.Show<UserDialog>("Créer un utilisateur", parameters);
-
-		var result = await dialog.Result;
-
-		if (!result.Cancelled)
-		{
-			User newUser = new User { Pseudo = result.Data.ToString() };
-			// newUser.UserSettings.Add(new UserSetting { User = newUser, Server = server});
-			await UserDbService.AddAsync(newUser);
-			_user = newUser;
-			//userName = result.Data.ToString(); // Récupère le nom de l'utilisateur saisi
-			users = await UserDbService.GetAllAsync();
-			OnSelectedUserChanged();
-		}
 	}
 	
 	/*private async Task DeleteUserSkill(int userSkillId)

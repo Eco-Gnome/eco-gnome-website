@@ -15,9 +15,14 @@
     </MudSelect>
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
-        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Edit Server" OnClick="EditServer"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit Server" OnClick="EditServer"/>
     }
     <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create Server" OnClick="CreateServer" />
+
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Value="@ContextService.CurrentUser?.Pseudo"></MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit User" OnClick="EditUserDialog"/>
+    </MudStack>
 </MudStack>
 
 @code {
@@ -27,7 +32,7 @@
     {
         await ContextService.ChangeServer(servers.First());
     }
-    
+
     private async Task CreateServer()
     {
         var parameters = new DialogParameters();
@@ -47,7 +52,7 @@
             await ContextService.ChangeServer(newServer);
         }
     }
-    
+
     private async Task EditServer()
     {
         var parameters = new DialogParameters();
@@ -59,6 +64,20 @@
         {
             ContextService.CurrentServer.Name = result.Data.ToString();
             await ServerDbService.UpdateAsync(ContextService.CurrentServer);
+        }
+    }
+
+    private async Task EditUserDialog()
+    {
+        var parameters = new DialogParameters();
+        var dialog = DialogService.Show<UserDialog>("Créer un utilisateur", parameters);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            ContextService.CurrentUser.Pseudo = result.Data.ToString();
+            await UserDbService.UpdateAsync(ContextService.CurrentUser);
         }
     }
 
