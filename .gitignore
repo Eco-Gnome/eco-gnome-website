@@ -367,3 +367,4 @@ FodyWeavers.xsd
 # Rider
 .idea
 /ecocraft/ecocraft.db-shm
+/ecocraft/ecocraft.db-wal
