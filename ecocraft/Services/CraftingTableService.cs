@@ -61,11 +61,11 @@ namespace ecocraft.Services
 				await _context.SaveChangesAsync();
 			}
 		}
-		public async Task<List<CraftingTable>> GetCraftingTablesForUserSkillsAsync(User user, Server server, List<Skill> selectedSkill)
+		public async Task<List<CraftingTable>> GetCraftingTablesForUserSkillsAsync(UserServer userServer, List<Skill> selectedSkill)
 		{
 			var craftingTables = await _context.CraftingTables
-				.Where(ct => ct.Server == server &&  // Filtre par serveur
-							 ct.Recipes.Any(r => selectedSkill.Contains(r.Skill) && r.Skill.UserSkills.Any(us => us.User == user)))
+				.Where(ct => ct.ServerId == userServer.ServerId &&  // Filtre par serveur
+							 ct.Recipes.Any(r => selectedSkill.Contains(r.Skill) && r.Skill.UserSkills.Any(us => us.UserServer == userServer)))
 				.ToListAsync();
 
 			return craftingTables;

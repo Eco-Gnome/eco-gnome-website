@@ -14,14 +14,14 @@ namespace ecocraft.Services
 
 		public async Task<List<UserSkill>> GetAllAsync()
 		{
-			return await _context.UserSkills.Include(us => us.User)
+			return await _context.UserSkills.Include(us => us.UserServer)
 											.Include(us => us.Skill)
 											.ToListAsync();
 		}
 
 		public async Task<UserSkill> GetByIdAsync(Guid id)
 		{
-			return await _context.UserSkills.Include(us => us.User)
+			return await _context.UserSkills.Include(us => us.UserServer)
 											.Include(us => us.Skill)
 											.FirstOrDefaultAsync(us => us.Id == id);
 		}
@@ -49,11 +49,11 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour mettre à jour les compétences de l'utilisateur
-		public async Task UpdateUserSkillsAsync(User user, Server server, List<Skill> selectedSkills)
+		public async Task UpdateUserSkillsAsync(UserServer userServer, List<Skill> selectedSkills)
 		{
 			// Récupérer les compétences actuelles de l'utilisateur
 			var existingUserSkills = await _context.UserSkills
-													 .Where(us => us.UserId == user.Id)
+													 .Where(us => us.UserServerId == userServer.Id)
 													 .ToListAsync();
 
 			// Supprimer les compétences non sélectionnées
@@ -67,7 +67,7 @@ namespace ecocraft.Services
 				{
 					var newUserSkill = new UserSkill
 					{
-						User = user,
+						UserServer = userServer,
 						Skill = skill,
 						Level = 0 // Ajuster le niveau si nécessaire
 					};
@@ -78,13 +78,13 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour récupérer les compétences d'un utilisateur via l'objet utilisateur
-		public async Task<List<UserSkill>> GetUserSkillsByUserAsync(User user)
+		public async Task<List<UserSkill>> GetUserSkillsByUserAsync(UserServer userServer)
 		{
 			return await _context.UserSkills
 									.Include(us => us.Skill)
 									//.Include(us => us.Skill.CraftingTableSkills)
 									//.ThenInclude(cts => cts.CraftingTable)
-									.Where(us => us.UserId == user.Id)
+									.Where(us => us.UserServerId == userServer.Id)
 									.ToListAsync();
 		}
 	}

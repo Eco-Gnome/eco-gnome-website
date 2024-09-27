@@ -35,7 +35,6 @@
 				</MudSelect>
 				<MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create Server" OnClick="OpenServerDialog" />
 			</MudStack>
-			<MudTextField @bind-Value="serverName" Label="Server Name"></MudTextField>
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
@@ -165,7 +164,9 @@
 
 	</MudContainer>
 
-	@code {
+@code {
+	
+	
 
 	private List<Skill> skills;
 	private List<CraftingTable> craftingTables;
@@ -189,7 +190,6 @@
 
 	private int SkillsValue { get; set; }
 
-	private string serverName = "";
 	private Server? server;
 
 	protected override async Task OnInitializedAsync()
@@ -197,7 +197,7 @@
 		// TODO: move to a better location
 		await DbContext.Database.EnsureCreatedAsync();
 
-		// TODO: retieve only from current server
+		// TODO: retrieve only from current server
 		servers = await ServerService.GetAllAsync();
 
 		skills = await SkillService.GetAllAsync();
@@ -219,28 +219,6 @@
 
 	private async Task UploadFiles(IBrowserFile? file)
 	{
-		if (serverName == "")
-		{
-			await JsRuntime.InvokeVoidAsync("alert", "Le server name ne peut pas être vide !"); // Alert
-			return;
-		}
-
-		var foundServer = await ServerService.GetByNameAsync(serverName);
-
-		if (foundServer is null)
-		{
-			server = new Server
-			{
-				Name = serverName,
-			};
-
-			await ServerService.AddAsync(server);
-		}
-		else
-		{
-			server = foundServer;
-		}
-
 		//var file = e.File;
 		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
 		if (file != null && file.ContentType == "application/json")
@@ -475,9 +453,9 @@
 		selectedSkills = newSelectedSkills;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserSkillService.UpdateUserSkillsAsync(user, server, selectedSkills.ToList());
+		await UserSkillService.UpdateUserSkillsAsync(user.UserServers[0], selectedSkills.ToList());
 
-		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user.UserServers[0]);
 
 		// Récupère la liste des tables de craft correspondant aux skills sélectionné
 		var selectedTable = userSkills
@@ -488,9 +466,9 @@
 		selectedCraftingTables = selectedTable.ToList();
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, server, selectedCraftingTables.ToList());
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user.UserServers[0], selectedCraftingTables.ToList());
 
-		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user.UserServers[0]);
 
 		userRecipes = user.GetAvailableRecipes();
 
@@ -507,9 +485,9 @@
 		selectedCraftingTables = newSelectedCraftingTables;
 
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user, server, selectedCraftingTables.ToList());
+		await UserCraftingTableService.UpdateUserCraftingTablesAsync(user.UserServers[0], selectedCraftingTables.ToList());
 
-		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+		userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user.UserServers[0]);
 	}
 
 
@@ -536,12 +514,12 @@
 		if (user is not null)
 		{
 			// Charger les compétences de l'utilisateur à partir de l'objet user
-			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user.UserServers[0]);
 
 			// Initialiser selectedSkills en tant que HashSet
 			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
 
-			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user.UserServers[0]);
 			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
 
 			userRecipes = user.GetAvailableRecipes();
@@ -553,12 +531,12 @@
 		if (server is not null && user is not null)
 		{
 			// Charger les compétences de l'utilisateur à partir de l'objet user
-			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
+			userSkills = await UserSkillService.GetUserSkillsByUserAsync(user.UserServers[0]);
 
 			// Initialiser selectedSkills en tant que HashSet
 			selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
 
-			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user);
+			userCraftingTables = await UserCraftingTableService.GetUserCraftingTablesByUserAsync(user.UserServers[0]);
 			selectedCraftingTables = new HashSet<CraftingTable>(userCraftingTables.Select(x => x.CraftingTable));
 
 			userRecipes = user.GetAvailableRecipes();
@@ -575,7 +553,7 @@
 		if (!result.Cancelled)
 		{
 			User newUser = new User { Pseudo = result.Data.ToString() };
-			newUser.UserSettings.Add(new UserSetting { User = newUser, Server = server});
+			// newUser.UserSettings.Add(new UserSetting { User = newUser, Server = server});
 			await UserService.AddAsync(newUser);
 			user = newUser;
 			//userName = result.Data.ToString(); // Récupère le nom de l'utilisateur saisi

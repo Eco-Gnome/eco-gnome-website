@@ -18,7 +18,7 @@ namespace ecocraft.Services
 
 		public async Task<List<UserCraftingTable>> GetAllAsync()
 		{
-			return await _context.UserCraftingTables.Include(uct => uct.User)
+			return await _context.UserCraftingTables.Include(uct => uct.UserServer)
 													 .Include(uct => uct.CraftingTable)
 													 .Include(uct => uct.PluginModule)
 													 .ToListAsync();
@@ -26,7 +26,7 @@ namespace ecocraft.Services
 
 		public async Task<UserCraftingTable> GetByIdAsync(Guid id)
 		{
-			return await _context.UserCraftingTables.Include(uct => uct.User)
+			return await _context.UserCraftingTables.Include(uct => uct.UserServer)
 													 .Include(uct => uct.CraftingTable)
 													 .Include(uct => uct.PluginModule)
 													 .FirstOrDefaultAsync(uct => uct.Id == id);
@@ -55,11 +55,11 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour mettre à jour les CraftingTables d'un utilisateur
-		public async Task UpdateUserCraftingTablesAsync(User user, Server server, List<CraftingTable> newCraftingTables)
+		public async Task UpdateUserCraftingTablesAsync(UserServer userServer, List<CraftingTable> newCraftingTables)
 		{
 			// Charger les UserCraftingTables existantes pour cet utilisateur
 			var existingUserCraftingTables = await _context.UserCraftingTables
-				.Where(uct => uct.UserId == user.Id)
+				.Where(uct => uct.UserServerId == userServer.Id)
 				.ToListAsync();
 
 			// Supprimer les anciennes associations qui ne sont plus dans la liste
@@ -80,7 +80,7 @@ namespace ecocraft.Services
 				{
 					var newUserCraftingTable = new UserCraftingTable
 					{
-						User = user,
+						UserServer = userServer,
 						CraftingTable = craftingTable,
 						// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
 						//UpgradeId = 5
@@ -95,12 +95,12 @@ namespace ecocraft.Services
 		}
 
 		// Méthode pour récupérer les CraftingTables associées à un utilisateur
-		public async Task<List<UserCraftingTable>> GetUserCraftingTablesByUserAsync(User user)
+		public async Task<List<UserCraftingTable>> GetUserCraftingTablesByUserAsync(UserServer userServer)
 		{
 			return await _context.UserCraftingTables
 				.Include(uct => uct.CraftingTable)
 				.Include(uct => uct.PluginModule)
-				.Where(uct => uct.UserId == user.Id)
+				.Where(uct => uct.UserServerId == userServer.Id)
 				.ToListAsync();
 		}
 	}

@@ -96,7 +96,19 @@ namespace ecocraft.Models
         public string Pseudo { get; set; }
         public Guid SecretId { get; set; }
 
-        public List<Server> Servers { get; set; } = new List<Server>();
+        public List<UserServer> UserServers { get; set; } = new List<UserServer>();
+    }
+    
+    public class UserServer
+    {
+        [Key] public Guid Id { get; set; } = Guid.NewGuid();
+        public string Pseudo { get; set; }
+        public bool IsAdmin { get; set; }         
+        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("Server")] public Guid ServerId { get; set; }
+        
+        public User User { get; set; }
+        public Server Server { get; set; }
         public List<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
         public List<UserElement> UserElements { get; set; } = new List<UserElement>();
         public List<UserPrice> UserPrices { get; set; } = new List<UserPrice>();
@@ -107,24 +119,22 @@ namespace ecocraft.Models
     public class UserSetting
     {
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
-        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         public float CalorieCost { get; set; }
         public float Margin { get; set; }
         public float TimeFee { get; set; }
-        [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
-        public User User { get; set; }
-        public Server Server { get; set; }
+
+        public UserServer UserServer { get; set; }
     }
 
     public class UserCraftingTable
     {
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
-        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
         [ForeignKey("PluginModule")] public Guid PluginModuleId { get; set; }
         
-        public User User { get; set; }
+        public UserServer UserServer { get; set; }
         public CraftingTable CraftingTable { get; set; }
         public PluginModule PluginModule { get; set; }
     }
@@ -135,10 +145,10 @@ namespace ecocraft.Models
         [ForeignKey("Skill")] public Guid SkillId { get; set; }		
         public int Level { get; set; }
         public bool HasLavishTalent { get; set; }
-        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
         public Skill Skill { get; set; }
-        public User User { get; set; }
+        public UserServer UserServer { get; set; }
     }
 
     public class UserElement
@@ -146,10 +156,10 @@ namespace ecocraft.Models
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("Element")] public Guid ElementId { get; set; }
         public float Share { get; set; }
-        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
         public Element Element { get; set; }
-        public User User { get; set; }
+        public UserServer UserServer { get; set; }
     }
 
     public class UserPrice
@@ -157,10 +167,10 @@ namespace ecocraft.Models
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
         [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }		
         public float Price { get; set; }         
-        [ForeignKey("User")] public Guid UserId { get; set; }
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
         public ItemOrTag ItemOrTag { get; set; }
-        public User User { get; set; }
+        public UserServer UserServer { get; set; }
     }
     
     // Server Data
@@ -168,14 +178,12 @@ namespace ecocraft.Models
     {
         [Key] public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = string.Empty;
-        public string SecretId { get; set; } = string.Empty;
 
-        public List<User> Users { get; set; } = new List<User>();
+        public List<UserServer> UserServers { get; set; } = new List<UserServer>();
         public List<CraftingTable> CraftingTables { get; set; } = new List<CraftingTable>();
         public List<PluginModule> PluginModules { get; set; } = new List<PluginModule>();
         public List<Skill> Skills { get; set; } = new List<Skill>();
         public List<ItemOrTag> ItemOrTags { get; set; } = new List<ItemOrTag>();
         public List<Recipe> Recipes { get; set; } = new List<Recipe>();
-        public List<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
     }
 }

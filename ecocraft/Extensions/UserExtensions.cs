@@ -7,14 +7,14 @@ namespace ecocraft.Extensions
 		// Méthode pour calculer les recettes disponibles
 		public static IEnumerable<Recipe> GetAvailableRecipes(this User @this)
 		{
-			var skills = @this.UserSkills.Select(us => us.Skill);
-			var craftingTables = @this.UserCraftingTables.Select(uct => uct.CraftingTable);
+			var skills = @this.UserServers[0].UserSkills.Select(us => us.Skill);
+			var craftingTables = @this.UserServers[0].UserCraftingTables.Select(uct => uct.CraftingTable);
 			var recipes = new HashSet<Recipe>();
 
 			// Ajouter les recettes en fonction des compétences
 			foreach (var skill in skills)
 			{
-				var userSkilllevel = @this.UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
+				var userSkilllevel = @this.UserServers[0].UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
 				recipes.UnionWith(skill.Recipes.Where(r => r.SkillLevel <= userSkilllevel));
 			}
 
