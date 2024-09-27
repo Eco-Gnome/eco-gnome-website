@@ -1,0 +1,65 @@
+﻿@using ecocraft.Components.Dialog
+@using ecocraft.Models
+@using ecocraft.Services
+@inject ContextService ContextService
+@inject IDialogService DialogService
+@inject ServerDbService ServerDbService
+@inject UserDbService UserDbService
+
+<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+    <MudSelect T="Server" Text="Choisissez un serveur" Label="Choisissez un serveur" @Value="ContextService.CurrentServer" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged">
+        @foreach (var server in ContextService.AvailableServers)
+        {
+            <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+        }
+    </MudSelect>
+    @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
+    {
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Edit Server" OnClick="EditServer"/>
+    }
+    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create Server" OnClick="CreateServer" />
+</MudStack>
+
+@code {
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+    private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
+    {
+        await ContextService.ChangeServer(servers.First());
+    }
+    
+    private async Task CreateServer()
+    {
+        var parameters = new DialogParameters();
+        var dialog = DialogService.Show<ServerDialog>("Créer un serveur", parameters);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Server newServer = new Server { Name = result.Data.ToString(), IsDefault = false};
+            await ServerDbService.AddAsync(newServer);
+
+            UserServer userServer = new UserServer { UserId = ContextService.CurrentUser.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
+            ContextService.CurrentUser.UserServers.Add(userServer);
+            await UserDbService.UpdateAsync(ContextService.CurrentUser);
+            
+            await ContextService.ChangeServer(newServer);
+        }
+    }
+    
+    private async Task EditServer()
+    {
+        var parameters = new DialogParameters();
+        var dialog = DialogService.Show<ServerDialog>("Editer un serveur", parameters);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            ContextService.CurrentServer.Name = result.Data.ToString();
+            await ServerDbService.UpdateAsync(ContextService.CurrentServer);
+        }
+    }
+
+}

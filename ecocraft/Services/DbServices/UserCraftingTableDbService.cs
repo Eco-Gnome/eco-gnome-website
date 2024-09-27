@@ -1,18 +1,16 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-
-
 namespace ecocraft.Services
 {
-	public class UserCraftingTableService : IGenericService<UserCraftingTable>
+	public class UserCraftingTableDbService : IGenericDbService<UserCraftingTable>
 	{
 		private readonly EcoCraftDbContext _context;
-		private readonly PluginModuleService _pluginModuleService;
+		private readonly PluginModuleDbService _pluginModuleDbService;
 
-		public UserCraftingTableService(PluginModuleService pluginModuleService, EcoCraftDbContext context)
+		public UserCraftingTableDbService(PluginModuleDbService pluginModuleDbService, EcoCraftDbContext context)
 		{
-			_pluginModuleService = pluginModuleService;
+			_pluginModuleDbService = pluginModuleDbService;
 			_context = context;
 		}
 
@@ -22,6 +20,13 @@ namespace ecocraft.Services
 													 .Include(uct => uct.CraftingTable)
 													 .Include(uct => uct.PluginModule)
 													 .ToListAsync();
+		}
+
+		public Task<List<UserCraftingTable>> GetByUserServerAsync(UserServer userServer)
+		{
+			return _context.UserCraftingTables
+				.Where(s => s.UserServerId == userServer.Id)
+				.ToListAsync();
 		}
 
 		public async Task<UserCraftingTable> GetByIdAsync(Guid id)
@@ -71,7 +76,7 @@ namespace ecocraft.Services
 				}
 			}
 
-			PluginModule defaultModule = await _pluginModuleService.GetByNameAsync("NoUpgrade");
+			PluginModule defaultModule = await _pluginModuleDbService.GetByNameAsync("NoUpgrade");
 
 			// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
 			foreach (var craftingTable in newCraftingTables)

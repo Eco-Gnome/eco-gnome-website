@@ -21,5 +21,11 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
+
+  
+  <ItemGroup>
+    <AdditionalFiles Include="Components\Dialog\ServerDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\UserDialog.razor" />
+  </ItemGroup>
   
 </Project>

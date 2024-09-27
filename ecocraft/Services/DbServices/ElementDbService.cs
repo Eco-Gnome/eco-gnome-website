@@ -3,11 +3,11 @@ using ecocraft.Models;
 
 namespace ecocraft.Services
 {
-	public class ElementService : IGenericService<Element>
+	public class ElementDbService : IGenericDbService<Element>
 	{
 		private readonly EcoCraftDbContext _context;
 
-		public ElementService(EcoCraftDbContext context)
+		public ElementDbService(EcoCraftDbContext context)
 		{
 			_context = context;
 		}

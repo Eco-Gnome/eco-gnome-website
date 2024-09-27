@@ -3,11 +3,11 @@ using ecocraft.Models;
 
 namespace ecocraft.Services
 {
-    public class PluginModuleService : IGenericService<PluginModule>
+    public class PluginModuleDbService : IGenericDbService<PluginModule>
     {
         private readonly EcoCraftDbContext _context;
 
-        public PluginModuleService(EcoCraftDbContext context)
+        public PluginModuleDbService(EcoCraftDbContext context)
         {
             _context = context;
         }
@@ -20,7 +20,14 @@ namespace ecocraft.Services
                 .ToListAsync();
         }
 
-        public async Task<PluginModule> GetByIdAsync(Guid id)
+        public Task<List<PluginModule>> GetByServerAsync(Server server)
+        {
+            return _context.PluginModules
+                .Where(s => s.ServerId == server.Id)
+                .ToListAsync();
+        }
+
+        public async Task<PluginModule?> GetByIdAsync(Guid id)
         {
             return await _context.PluginModules
                 .Include(pm => pm.CraftingTables)
@@ -28,7 +35,7 @@ namespace ecocraft.Services
                 .FirstOrDefaultAsync(pm => pm.Id == id);
         }
 
-        public async Task<PluginModule> GetByNameAsync(string name)
+        public async Task<PluginModule?> GetByNameAsync(string name)
         {
             return await _context.PluginModules
                 .Include(pm => pm.CraftingTables)

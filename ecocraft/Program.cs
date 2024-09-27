@@ -2,6 +2,7 @@ using ecocraft.Components;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
 using ecocraft.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,20 +16,32 @@ builder.Services.AddMudServices();
 builder.Services.AddDbContext<EcoCraftDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// DB Services
+builder.Services.AddScoped<UserDbService>();
+builder.Services.AddScoped<UserSettingDbService>();
+builder.Services.AddScoped<ServerDbService>();
+builder.Services.AddScoped<UserCraftingTableDbService>();
+builder.Services.AddScoped<CraftingTableDbService>();
+builder.Services.AddScoped<RecipeDbService>();
+builder.Services.AddScoped<PluginModuleDbService>();
+builder.Services.AddScoped<SkillDbService>();
+builder.Services.AddScoped<UserSkillDbService>();
+builder.Services.AddScoped<UserElementDbService>();
+builder.Services.AddScoped<ElementDbService>();
+builder.Services.AddScoped<ItemOrTagDbService>();
+builder.Services.AddScoped<UserPriceDbService>();
 
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<UserSettingService>();
-builder.Services.AddScoped<ServerService>();
-builder.Services.AddScoped<UserCraftingTableService>();
-builder.Services.AddScoped<CraftingTableService>();
-builder.Services.AddScoped<RecipeService>();
-builder.Services.AddScoped<PluginModuleService>();
-builder.Services.AddScoped<SkillService>();
-builder.Services.AddScoped<UserSkillService>();
-builder.Services.AddScoped<UserElementService>();
-builder.Services.AddScoped<ElementService>();
-builder.Services.AddScoped<ItemOrTagService>();
-builder.Services.AddScoped<UserPriceService>();
+// Util Services
+builder.Services.AddScoped<LocalStorageService>();
+
+// Authorization
+builder.Services.AddSingleton<IAuthorizationHandler, Authorization>();
+builder.Services.AddAuthorization(config =>
+{
+    config.AddPolicy("IsServerAdmin", policy =>
+        policy.Requirements.Add(new IsServerAdminRequirement()));
+});
+
 
 var app = builder.Build();
 
