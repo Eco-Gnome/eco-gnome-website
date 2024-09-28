@@ -14,12 +14,13 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged">
+			<MudSelect T="Skill" Text="Choisissez vos compétences" SelectedValues=selectedSkills Label="Choisissez vos compétences" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedSkillsChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
 				@foreach (var skill in ServerDataService.Skills)
 				{
 					<MudSelectItem T="Skill" Value="@skill">@skill.Name</MudSelectItem>
 				}
 			</MudSelect>
+
 
 			<MudTable Items="userSkills" Dense="true">
 				<HeaderContent>
@@ -40,7 +41,7 @@
 
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
-				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged">
+				<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
 					@foreach (var table in ServerDataService.CraftingTables)
 				{
 					<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
@@ -55,12 +56,12 @@
 				</HeaderContent>
 				<RowTemplate>
 					<MudTd>@context.CraftingTable.Name</MudTd>
-						 <MudTd>
-							<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value="context.PluginModule" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)">
-								@foreach (var pluginModule in context.CraftingTable.PluginModules)
-							{
-								<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
-							}
+					<MudTd>
+						<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value="context.PluginModule" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+							@foreach (var pluginModule in context.CraftingTable.PluginModules)
+						{
+							<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
+						}
 						</MudSelect> 
 					</MudTd>
 					<MudTd>
@@ -92,7 +93,7 @@
 
 		<!-- Troisième Colonne -->
 		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudSelect T="Recipe" Text="Choisissez vos recettes" SelectedValues=selectedRecipes Label="Choisissez vos recettes" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedRecipesChanged">
+			<MudSelect T="Recipe" Text="Choisissez vos recettes" SelectedValues=selectedRecipes Label="Choisissez vos recettes" MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedRecipesChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
 				@foreach (var recipe in ServerDataService.Recipes)
 				{
 					<MudSelectItem T="Recipe" Value="@recipe">@recipe.Name</MudSelectItem>

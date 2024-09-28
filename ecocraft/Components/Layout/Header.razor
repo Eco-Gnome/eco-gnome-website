@@ -8,7 +8,7 @@
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-    <MudSelect T="Server" Label="Select a server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged">
+     <MudSelect T="Server" Label="Select a server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)
         {
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
@@ -26,14 +26,14 @@
     </MudStack>
 </MudStack>
 
-@code {
+    @code {
     IList<IBrowserFile> _files = new List<IBrowserFile>();
-    
+
     protected override void OnInitialized()
     {
         ContextService.OnContextChanged += StateHasChanged;
     }
-    
+
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
@@ -59,7 +59,7 @@
             UserServer userServer = new UserServer { UserId = ContextService.CurrentUser.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
             ContextService.CurrentUser.UserServers.Add(userServer);
             await UserDbService.SaveAsync();
-            
+
             
             await ContextService.ChangeServer(newServer);
         }
