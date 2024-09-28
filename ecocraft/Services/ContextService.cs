@@ -95,7 +95,9 @@ public class ContextService(
                 {
                     CurrentServer = searchedServer;
                     CurrentUserServer = foundUserServer;
-                }
+					await serverDataService.RetrieveServerData(CurrentServer);
+					await userDataService.RetrieveUserData(CurrentUserServer);
+				}
             }
         }
 

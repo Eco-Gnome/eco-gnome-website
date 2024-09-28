@@ -120,7 +120,7 @@
 	</MudGrid>
 </MudContainer>
 
-@code {
+	@code {
 	private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
 	private IEnumerable<Recipe> selectedRecipes { get; set; } = new HashSet<Recipe>();
 	private IEnumerable<UserSkill> userSkills { get; set; } = new HashSet<UserSkill>();
@@ -194,16 +194,6 @@
 		// Mettre à jour le niveau de la compétence dans la base de données
 		await UserCraftingTableDbService.UpdateAsync(userCraftingTable);
 	}
-	
-	/*private async Task DeleteUserSkill(int userSkillId)
-		{
-		// Appel au service pour supprimer la compétence de l'utilisateur
-		await UserSkillService.DeleteUserSkillAsync(userSkillId);
 
-		// Charger les compétences de l'utilisateur à partir de l'objet user
-		userSkills = await UserSkillService.GetUserSkillsByUserAsync(user);
 
-		// Initialiser selectedSkills en tant que HashSet
-		selectedSkills = new HashSet<Skill>(userSkills.Select(x => x.Skill));
-				}*/
 }
