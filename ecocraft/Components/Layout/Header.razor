@@ -1,4 +1,5 @@
-﻿@using ecocraft.Components.Dialog
+﻿@implements IDisposable
+@using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
 @inject ContextService ContextService
@@ -7,7 +8,7 @@
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-    <MudSelect T="Server" Text="Choisissez un serveur" Label="Choisissez un serveur" @Value="ContextService.CurrentServer" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged">
+    <MudSelect T="Server" Label="Select a server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged">
         @foreach (var server in ContextService.AvailableServers)
         {
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
@@ -15,18 +16,28 @@
     </MudSelect>
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit Server" OnClick="EditServer"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit Server" OnClick="EditServer"/>
     }
-    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" aria-label="Create Server" OnClick="CreateServer" />
+    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer"/>
 
     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Value="@ContextService.CurrentUser?.Pseudo"></MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit User" OnClick="EditUserDialog"/>
+        <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
     </MudStack>
 </MudStack>
 
 @code {
     IList<IBrowserFile> _files = new List<IBrowserFile>();
+    
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
     {
@@ -47,7 +58,8 @@
 
             UserServer userServer = new UserServer { UserId = ContextService.CurrentUser.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
             ContextService.CurrentUser.UserServers.Add(userServer);
-            await UserDbService.UpdateAsync(ContextService.CurrentUser);
+            await UserDbService.SaveAsync();
+            
             
             await ContextService.ChangeServer(newServer);
         }
@@ -55,7 +67,10 @@
 
     private async Task EditServer()
     {
-        var parameters = new DialogParameters();
+        var parameters = new DialogParameters
+        {
+            ["ServerName"] = ContextService.CurrentServer?.Name,
+        };
         var dialog = DialogService.Show<ServerDialog>("Editer un serveur", parameters);
 
         var result = await dialog.Result;
@@ -69,7 +84,10 @@
 
     private async Task EditUserDialog()
     {
-        var parameters = new DialogParameters();
+        var parameters = new DialogParameters
+        {
+            ["Pseudo"] = ContextService.CurrentUser.Pseudo,
+        };
         var dialog = DialogService.Show<UserDialog>("Créer un utilisateur", parameters);
 
         var result = await dialog.Result;

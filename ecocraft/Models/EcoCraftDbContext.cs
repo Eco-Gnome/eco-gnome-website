@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ecocraft.Models;
+
+namespace ecocraft.Models;
 
 public class EcoCraftDbContext : DbContext
 {
-
 	public EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options)
-			: base(options)
+		: base(options)
 	{
 	}
 
@@ -16,6 +16,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<CraftingTable> CraftingTables { get; set; }
 	public DbSet<PluginModule> PluginModules { get; set; }
 	public DbSet<User> Users { get; set; }
+	public DbSet<User> UserServers { get; set; }
 	public DbSet<UserSetting> UserSettings { get; set; }
 	public DbSet<UserCraftingTable> UserCraftingTables { get; set; }
 	public DbSet<UserSkill> UserSkills { get; set; }
@@ -29,6 +30,9 @@ public class EcoCraftDbContext : DbContext
 		
 		// * Eco Data
 		// Recipe
+		modelBuilder.Entity<Recipe>()
+			.ToTable("Recipe");
+		
 		modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.Skill)
 			.WithMany(s => s.Recipes)
@@ -45,6 +49,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(r => r.ServerId);
 		
 		// Element
+		modelBuilder.Entity<Element>()
+			.ToTable("Element");
+		
 		modelBuilder.Entity<Element>()
 			.HasOne(e => e.Recipe)
 			.WithMany(r => r.Elements)
@@ -63,6 +70,9 @@ public class EcoCraftDbContext : DbContext
 		
 		// ItemOrTag
 		modelBuilder.Entity<ItemOrTag>()
+			.ToTable("ItemOrTag");
+		
+		modelBuilder.Entity<ItemOrTag>()
 			.HasOne(i => i.Server)
 			.WithMany(s => s.ItemOrTags)
 			.HasForeignKey(i => i.ServerId);
@@ -77,14 +87,20 @@ public class EcoCraftDbContext : DbContext
 				r => r.HasOne(typeof(ItemOrTag)).WithMany().HasForeignKey("ItemId")
 					.HasPrincipalKey(nameof(ItemOrTag.Id)),
 				j => j.HasKey("TagId", "ItemId"));
-
+		
 		// Skill
+		modelBuilder.Entity<Skill>()
+			.ToTable("Skill");
+		
 		modelBuilder.Entity<Skill>()
 			.HasOne(s => s.Server)
 			.WithMany(s => s.Skills)
 			.HasForeignKey(s => s.ServerId);
 		
 		// CraftingTable
+		modelBuilder.Entity<CraftingTable>()
+			.ToTable("CraftingTable");
+		
 		modelBuilder.Entity<CraftingTable>()
 			.HasOne(s => s.Server)
 			.WithMany(s => s.CraftingTables)
@@ -103,20 +119,31 @@ public class EcoCraftDbContext : DbContext
 
 		// PluginModule
 		modelBuilder.Entity<PluginModule>()
+			.ToTable("PluginModule");
+		
+		modelBuilder.Entity<PluginModule>()
 			.HasOne(s => s.Server)
 			.WithMany(s => s.PluginModules)
 			.HasForeignKey(s => s.ServerId);
 		
 		// * User Data
 		// User
+		modelBuilder.Entity<User>()
+			.ToTable("User");
 		
 		// UserSetting
+		modelBuilder.Entity<UserSetting>()
+			.ToTable("UserSetting");
+		
 		modelBuilder.Entity<UserSetting>()
 			.HasOne(us => us.UserServer)
 			.WithMany(us => us.UserSettings)
 			.HasForeignKey(us => us.UserServerId);
 		
 		// UserCraftingTable
+		modelBuilder.Entity<UserCraftingTable>()
+			.ToTable("UserCraftingTable");
+
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(uct => uct.UserServer)
 			.WithMany(us => us.UserCraftingTables)
@@ -134,6 +161,9 @@ public class EcoCraftDbContext : DbContext
 		
 		// UserSkill
 		modelBuilder.Entity<UserSkill>()
+			.ToTable("UserSkill");
+
+		modelBuilder.Entity<UserSkill>()
 			.HasOne(us => us.Skill)
 			.WithMany(s => s.UserSkills)
 			.HasForeignKey(us => us.SkillId);
@@ -144,6 +174,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(us => us.UserServerId);
 		
 		// UserElement
+		modelBuilder.Entity<UserElement>()
+			.ToTable("UserElement");
+
 		modelBuilder.Entity<UserElement>()
 			.HasOne(ue => ue.Element)
 			.WithMany(e => e.UserElements)
@@ -156,6 +189,9 @@ public class EcoCraftDbContext : DbContext
 		
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
+			.ToTable("UserPrice");
+
+		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.ItemOrTag)
 			.WithMany(iot => iot.UserPrices)
 			.HasForeignKey(ue => ue.ItemOrTagId);
@@ -166,6 +202,9 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ue => ue.UserServerId);
 		
 		// UserServer
+		modelBuilder.Entity<UserServer>()
+			.ToTable("UserServer");
+
 		modelBuilder.Entity<UserServer>()
 			.HasOne(us => us.User)
 			.WithMany(u => u.UserServers)
@@ -178,6 +217,7 @@ public class EcoCraftDbContext : DbContext
 
 		// * Server Data
 		// Server
+		modelBuilder.Entity<Server>()
+			.ToTable("Server");
 	}
-
 }

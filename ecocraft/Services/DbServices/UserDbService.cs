@@ -3,39 +3,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-
-
-	public class UserDbService : IGenericDbService<User>
+	public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public UserDbService(EcoCraftDbContext context)
+		public Task<List<User>> GetAllAsync()
 		{
-			_context = context;
+			return context.Users.Include(u => u.UserServers)
+								.ThenInclude(us => us.Server)
+								.ToListAsync();
 		}
 
-		public async Task<List<User>> GetAllAsync()
+		public Task<User?> GetByIdAsync(Guid id)
 		{
-			return await _context.Users.Include(u => u.UserServers)
-										.ToListAsync();
-		}
-
-		public async Task<User?> GetByIdAsync(Guid id)
-		{
-			return await _context.Users.Include(u => u.UserServers)
-										.FirstOrDefaultAsync(u => u.Id == id);
+			return context.Users.Include(u => u.UserServers)
+								.ThenInclude(us => us.Server)
+								.FirstOrDefaultAsync(u => u.Id == id);
 		}
 
 		public async Task AddAsync(User user)
 		{
-			await _context.Users.AddAsync(user);
-			await _context.SaveChangesAsync();
+			await context.Users.AddAsync(user);
+			await context.SaveChangesAsync();
 		}
 
 		public async Task UpdateAsync(User user)
 		{
-			_context.Users.Update(user);
-			await _context.SaveChangesAsync();
+			context.Users.Update(user);
+			await context.SaveChangesAsync();
+		}
+
+		public async Task SaveAsync()
+		{
+			await context.SaveChangesAsync();
 		}
 
 		public async Task DeleteAsync(Guid id)
@@ -43,8 +41,8 @@ namespace ecocraft.Services
 			var user = await GetByIdAsync(id);
 			if (user != null)
 			{
-				_context.Users.Remove(user);
-				await _context.SaveChangesAsync();
+				context.Users.Remove(user);
+				await context.SaveChangesAsync();
 			}
 		}
 	}

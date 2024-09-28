@@ -1,4 +1,5 @@
-﻿@using ecocraft.Services
+﻿@implements IDisposable
+@using ecocraft.Services
 @inject ContextService ContextService
 
 <MudNavMenu>
@@ -8,3 +9,15 @@
         <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">Server Management</MudNavLink>
     }
 </MudNavMenu>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
+}

@@ -1,6 +1,6 @@
 ﻿<MudDialogContent>
     <MudText Typo="Typo.h6">Pseudo</MudText>
-    <MudTextField @bind-Value="UserName" Label="Pseudo" />
+    <MudTextField @bind-Value="Pseudo" Label="Pseudo" />
 </MudDialogContent>
 
 <MudDialogActions>
@@ -9,13 +9,14 @@
 </MudDialogActions>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } // Injecter le MudDialogInstance via un paramètre en cascade
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    public string UserName { get; set; }
+    [Parameter]
+    public string Pseudo { get; set; }
 
     private void Submit()
     {
-        MudDialog.Close(DialogResult.Ok(UserName)); // Retourne le nom de l'utilisateur
+        MudDialog.Close(DialogResult.Ok(Pseudo));
     }
 
     private void Cancel()

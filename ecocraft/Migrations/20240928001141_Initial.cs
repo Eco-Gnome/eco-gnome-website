@@ -6,26 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class synchrozangdar : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Servers",
+                name: "Server",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    SecretId = table.Column<string>(type: "TEXT", nullable: false)
+                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Servers", x => x.Id);
+                    table.PrimaryKey("PK_Server", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -34,11 +34,11 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_User", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "CraftingTables",
+                name: "CraftingTable",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -47,17 +47,17 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CraftingTables", x => x.Id);
+                    table.PrimaryKey("PK_CraftingTable", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CraftingTables_Servers_ServerId",
+                        name: "FK_CraftingTable_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemOrTags",
+                name: "ItemOrTag",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -69,17 +69,17 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemOrTags", x => x.Id);
+                    table.PrimaryKey("PK_ItemOrTag", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ItemOrTags_Servers_ServerId",
+                        name: "FK_ItemOrTag_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PluginModules",
+                name: "PluginModule",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -89,17 +89,17 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PluginModules", x => x.Id);
+                    table.PrimaryKey("PK_PluginModule", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PluginModules_Servers_ServerId",
+                        name: "FK_PluginModule_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Skills",
+                name: "Skill",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -108,11 +108,11 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Skills", x => x.Id);
+                    table.PrimaryKey("PK_Skill", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Skills_Servers_ServerId",
+                        name: "FK_Skill_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -121,50 +121,25 @@ namespace ecocraft.Migrations
                 name: "UserServer",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserServer", x => new { x.UserId, x.ServerId });
-                    table.ForeignKey(
-                        name: "FK_UserServer_Servers_ServerId",
-                        column: x => x.ServerId,
-                        principalTable: "Servers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserServer_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserSettings",
-                columns: table => new
-                {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Pseudo = table.Column<string>(type: "TEXT", nullable: false),
+                    IsAdmin = table.Column<bool>(type: "INTEGER", nullable: false),
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CalorieCost = table.Column<float>(type: "REAL", nullable: false),
-                    Margin = table.Column<float>(type: "REAL", nullable: false),
-                    TimeFee = table.Column<float>(type: "REAL", nullable: false),
                     ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserSettings", x => x.Id);
+                    table.PrimaryKey("PK_UserServer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserSettings_Servers_ServerId",
+                        name: "FK_UserServer_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserSettings_Users_UserId",
+                        name: "FK_UserServer_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -180,41 +155,15 @@ namespace ecocraft.Migrations
                 {
                     table.PrimaryKey("PK_ItemTagAssoc", x => new { x.TagId, x.ItemId });
                     table.ForeignKey(
-                        name: "FK_ItemTagAssoc_ItemOrTags_ItemId",
+                        name: "FK_ItemTagAssoc_ItemOrTag_ItemId",
                         column: x => x.ItemId,
-                        principalTable: "ItemOrTags",
+                        principalTable: "ItemOrTag",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ItemTagAssoc_ItemOrTags_TagId",
+                        name: "FK_ItemTagAssoc_ItemOrTag_TagId",
                         column: x => x.TagId,
-                        principalTable: "ItemOrTags",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserPrices",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Price = table.Column<float>(type: "REAL", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserPrices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserPrices_ItemOrTags_ItemOrTagId",
-                        column: x => x.ItemOrTagId,
-                        principalTable: "ItemOrTags",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserPrices_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "ItemOrTag",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -230,53 +179,21 @@ namespace ecocraft.Migrations
                 {
                     table.PrimaryKey("PK_CraftingTablePluginModule", x => new { x.CraftingTableId, x.PluginModuleId });
                     table.ForeignKey(
-                        name: "FK_CraftingTablePluginModule_CraftingTables_CraftingTableId",
+                        name: "FK_CraftingTablePluginModule_CraftingTable_CraftingTableId",
                         column: x => x.CraftingTableId,
-                        principalTable: "CraftingTables",
+                        principalTable: "CraftingTable",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CraftingTablePluginModule_PluginModules_PluginModuleId",
+                        name: "FK_CraftingTablePluginModule_PluginModule_PluginModuleId",
                         column: x => x.PluginModuleId,
-                        principalTable: "PluginModules",
+                        principalTable: "PluginModule",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserCraftingTables",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CraftingTableId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PluginModuleId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserCraftingTables", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserCraftingTables_CraftingTables_CraftingTableId",
-                        column: x => x.CraftingTableId,
-                        principalTable: "CraftingTables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserCraftingTables_PluginModules_PluginModuleId",
-                        column: x => x.PluginModuleId,
-                        principalTable: "PluginModules",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserCraftingTables_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Recipes",
+                name: "Recipe",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -293,55 +210,134 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Recipes", x => x.Id);
+                    table.PrimaryKey("PK_Recipe", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Recipes_CraftingTables_CraftingTableId",
+                        name: "FK_Recipe_CraftingTable_CraftingTableId",
                         column: x => x.CraftingTableId,
-                        principalTable: "CraftingTables",
+                        principalTable: "CraftingTable",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Recipes_Servers_ServerId",
+                        name: "FK_Recipe_Server_ServerId",
                         column: x => x.ServerId,
-                        principalTable: "Servers",
+                        principalTable: "Server",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Recipes_Skills_SkillId",
+                        name: "FK_Recipe_Skill_SkillId",
                         column: x => x.SkillId,
-                        principalTable: "Skills",
+                        principalTable: "Skill",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserSkills",
+                name: "UserCraftingTable",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CraftingTableId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PluginModuleId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCraftingTable", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserCraftingTable_CraftingTable_CraftingTableId",
+                        column: x => x.CraftingTableId,
+                        principalTable: "CraftingTable",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserCraftingTable_PluginModule_PluginModuleId",
+                        column: x => x.PluginModuleId,
+                        principalTable: "PluginModule",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserCraftingTable_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserPrice",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Price = table.Column<float>(type: "REAL", nullable: false),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPrice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_ItemOrTag_ItemOrTagId",
+                        column: x => x.ItemOrTagId,
+                        principalTable: "ItemOrTag",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSetting",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CalorieCost = table.Column<float>(type: "REAL", nullable: false),
+                    Margin = table.Column<float>(type: "REAL", nullable: false),
+                    TimeFee = table.Column<float>(type: "REAL", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSetting", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserSetting_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSkill",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     SkillId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Level = table.Column<int>(type: "INTEGER", nullable: false),
                     HasLavishTalent = table.Column<bool>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserSkills", x => x.Id);
+                    table.PrimaryKey("PK_UserSkill", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserSkills_Skills_SkillId",
+                        name: "FK_UserSkill_Skill_SkillId",
                         column: x => x.SkillId,
-                        principalTable: "Skills",
+                        principalTable: "Skill",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserSkills_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_UserSkill_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Elements",
+                name: "Element",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -354,51 +350,56 @@ namespace ecocraft.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Elements", x => x.Id);
+                    table.PrimaryKey("PK_Element", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Elements_ItemOrTags_ItemOrTagId",
+                        name: "FK_Element_ItemOrTag_ItemOrTagId",
                         column: x => x.ItemOrTagId,
-                        principalTable: "ItemOrTags",
+                        principalTable: "ItemOrTag",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Elements_Recipes_RecipeId",
+                        name: "FK_Element_Recipe_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recipes",
+                        principalTable: "Recipe",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Elements_Skills_SkillId",
+                        name: "FK_Element_Skill_SkillId",
                         column: x => x.SkillId,
-                        principalTable: "Skills",
+                        principalTable: "Skill",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserElements",
+                name: "UserElement",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ElementId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Share = table.Column<float>(type: "REAL", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserElements", x => x.Id);
+                    table.PrimaryKey("PK_UserElement", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserElements_Elements_ElementId",
+                        name: "FK_UserElement_Element_ElementId",
                         column: x => x.ElementId,
-                        principalTable: "Elements",
+                        principalTable: "Element",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserElements_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_UserElement_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CraftingTable_ServerId",
+                table: "CraftingTable",
+                column: "ServerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CraftingTablePluginModule_PluginModuleId",
@@ -406,28 +407,23 @@ namespace ecocraft.Migrations
                 column: "PluginModuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CraftingTables_ServerId",
-                table: "CraftingTables",
-                column: "ServerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Elements_ItemOrTagId",
-                table: "Elements",
+                name: "IX_Element_ItemOrTagId",
+                table: "Element",
                 column: "ItemOrTagId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Elements_RecipeId",
-                table: "Elements",
+                name: "IX_Element_RecipeId",
+                table: "Element",
                 column: "RecipeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Elements_SkillId",
-                table: "Elements",
+                name: "IX_Element_SkillId",
+                table: "Element",
                 column: "SkillId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemOrTags_ServerId",
-                table: "ItemOrTags",
+                name: "IX_ItemOrTag_ServerId",
+                table: "ItemOrTag",
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
@@ -436,64 +432,64 @@ namespace ecocraft.Migrations
                 column: "ItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PluginModules_ServerId",
-                table: "PluginModules",
+                name: "IX_PluginModule_ServerId",
+                table: "PluginModule",
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recipes_CraftingTableId",
-                table: "Recipes",
+                name: "IX_Recipe_CraftingTableId",
+                table: "Recipe",
                 column: "CraftingTableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recipes_ServerId",
-                table: "Recipes",
+                name: "IX_Recipe_ServerId",
+                table: "Recipe",
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recipes_SkillId",
-                table: "Recipes",
+                name: "IX_Recipe_SkillId",
+                table: "Recipe",
                 column: "SkillId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Skills_ServerId",
-                table: "Skills",
+                name: "IX_Skill_ServerId",
+                table: "Skill",
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserCraftingTables_CraftingTableId",
-                table: "UserCraftingTables",
+                name: "IX_UserCraftingTable_CraftingTableId",
+                table: "UserCraftingTable",
                 column: "CraftingTableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserCraftingTables_PluginModuleId",
-                table: "UserCraftingTables",
+                name: "IX_UserCraftingTable_PluginModuleId",
+                table: "UserCraftingTable",
                 column: "PluginModuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserCraftingTables_UserId",
-                table: "UserCraftingTables",
-                column: "UserId");
+                name: "IX_UserCraftingTable_UserServerId",
+                table: "UserCraftingTable",
+                column: "UserServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserElements_ElementId",
-                table: "UserElements",
+                name: "IX_UserElement_ElementId",
+                table: "UserElement",
                 column: "ElementId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserElements_UserId",
-                table: "UserElements",
-                column: "UserId");
+                name: "IX_UserElement_UserServerId",
+                table: "UserElement",
+                column: "UserServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserPrices_ItemOrTagId",
-                table: "UserPrices",
+                name: "IX_UserPrice_ItemOrTagId",
+                table: "UserPrice",
                 column: "ItemOrTagId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserPrices_UserId",
-                table: "UserPrices",
-                column: "UserId");
+                name: "IX_UserPrice_UserServerId",
+                table: "UserPrice",
+                column: "UserServerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserServer_ServerId",
@@ -501,24 +497,24 @@ namespace ecocraft.Migrations
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserSettings_ServerId",
-                table: "UserSettings",
-                column: "ServerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserSettings_UserId",
-                table: "UserSettings",
+                name: "IX_UserServer_UserId",
+                table: "UserServer",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserSkills_SkillId",
-                table: "UserSkills",
+                name: "IX_UserSetting_UserServerId",
+                table: "UserSetting",
+                column: "UserServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSkill_SkillId",
+                table: "UserSkill",
                 column: "SkillId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserSkills_UserId",
-                table: "UserSkills",
-                column: "UserId");
+                name: "IX_UserSkill_UserServerId",
+                table: "UserSkill",
+                column: "UserServerId");
         }
 
         /// <inheritdoc />
@@ -531,46 +527,46 @@ namespace ecocraft.Migrations
                 name: "ItemTagAssoc");
 
             migrationBuilder.DropTable(
-                name: "UserCraftingTables");
+                name: "UserCraftingTable");
 
             migrationBuilder.DropTable(
-                name: "UserElements");
+                name: "UserElement");
 
             migrationBuilder.DropTable(
-                name: "UserPrices");
+                name: "UserPrice");
+
+            migrationBuilder.DropTable(
+                name: "UserSetting");
+
+            migrationBuilder.DropTable(
+                name: "UserSkill");
+
+            migrationBuilder.DropTable(
+                name: "PluginModule");
+
+            migrationBuilder.DropTable(
+                name: "Element");
 
             migrationBuilder.DropTable(
                 name: "UserServer");
 
             migrationBuilder.DropTable(
-                name: "UserSettings");
+                name: "ItemOrTag");
 
             migrationBuilder.DropTable(
-                name: "UserSkills");
+                name: "Recipe");
 
             migrationBuilder.DropTable(
-                name: "PluginModules");
+                name: "User");
 
             migrationBuilder.DropTable(
-                name: "Elements");
+                name: "CraftingTable");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Skill");
 
             migrationBuilder.DropTable(
-                name: "ItemOrTags");
-
-            migrationBuilder.DropTable(
-                name: "Recipes");
-
-            migrationBuilder.DropTable(
-                name: "CraftingTables");
-
-            migrationBuilder.DropTable(
-                name: "Skills");
-
-            migrationBuilder.DropTable(
-                name: "Servers");
+                name: "Server");
         }
     }
 }

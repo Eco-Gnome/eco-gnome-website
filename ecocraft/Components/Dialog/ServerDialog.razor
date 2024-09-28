@@ -11,7 +11,8 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
 
-    public string ServerName = "";
+    [Parameter]
+    public string ServerName { get; set; }
 
     private void Submit()
     {
