@@ -1,9 +1,9 @@
 using ecocraft.Components;
+using ecocraft.Models;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
 using ecocraft.Services;
-using Microsoft.AspNetCore.Authorization;
-
+using ecocraft.Services.ImportData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,12 +30,16 @@ builder.Services.AddScoped<UserElementDbService>();
 builder.Services.AddScoped<ElementDbService>();
 builder.Services.AddScoped<ItemOrTagDbService>();
 builder.Services.AddScoped<UserPriceDbService>();
+builder.Services.AddScoped<ContextService>();
+builder.Services.AddScoped<ServerDataService>();
+builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<ImportDataService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
 
 // Authorization
-builder.Services.AddSingleton<IAuthorizationHandler, Authorization>();
+builder.Services.AddScoped<Authorization>();
 builder.Services.AddAuthorization(config =>
 {
     config.AddPolicy("IsServerAdmin", policy =>

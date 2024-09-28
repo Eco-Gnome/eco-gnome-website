@@ -4,14 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using ecocraft.Models;
 
 #nullable disable
 
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20240926230603_add-server")]
-    partial class addserver
+    [Migration("20240928001141_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,7 +67,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("ServerId");
 
-                    b.ToTable("CraftingTables");
+                    b.ToTable("CraftingTable", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.Element", b =>
@@ -101,7 +102,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("Elements");
+                    b.ToTable("Element", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.ItemOrTag", b =>
@@ -130,7 +131,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("ServerId");
 
-                    b.ToTable("ItemOrTags");
+                    b.ToTable("ItemOrTag", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.PluginModule", b =>
@@ -153,7 +154,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("ServerId");
 
-                    b.ToTable("PluginModules");
+                    b.ToTable("PluginModule", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
@@ -202,7 +203,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipe", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.Server", b =>
@@ -211,13 +212,16 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Servers");
+                    b.ToTable("Server", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.Skill", b =>
@@ -237,7 +241,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("ServerId");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skill", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.User", b =>
@@ -255,7 +259,7 @@ namespace ecocraft.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
@@ -281,7 +285,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserServerId");
 
-                    b.ToTable("UserCraftingTables");
+                    b.ToTable("UserCraftingTable", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserElement", b =>
@@ -305,7 +309,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserServerId");
 
-                    b.ToTable("UserElements");
+                    b.ToTable("UserElement", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserPrice", b =>
@@ -329,7 +333,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserServerId");
 
-                    b.ToTable("UserPrices");
+                    b.ToTable("UserPrice", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>
@@ -357,7 +361,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserServer");
+                    b.ToTable("UserServer", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserSetting", b =>
@@ -382,7 +386,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserServerId");
 
-                    b.ToTable("UserSettings");
+                    b.ToTable("UserSetting", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserSkill", b =>
@@ -409,7 +413,7 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("UserServerId");
 
-                    b.ToTable("UserSkills");
+                    b.ToTable("UserSkill", (string)null);
                 });
 
             modelBuilder.Entity("CraftingTablePluginModule", b =>
