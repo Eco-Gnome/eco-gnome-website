@@ -35,7 +35,6 @@ public class UserDataService(UserSkillDbService userSkillDbService,
     public void AddUserSkill(UserSkill userSkill)
     {
 		UserSkills.Add(userSkill);
-
 	}
 
     public void RemoveUserSkill(UserSkill userSkill)

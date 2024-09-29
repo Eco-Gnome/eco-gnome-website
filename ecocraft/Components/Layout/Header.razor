@@ -49,7 +49,7 @@
 
     private async Task Save()
     {
-        await UserDbService.SaveAsync();
+        await UserDbService.UpdateAsync(ContextService.CurrentUser);
     }
 
     private async Task CreateServer()
