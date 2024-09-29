@@ -59,45 +59,7 @@ namespace ecocraft.Services
 			}
 		}
 
-		// Méthode pour mettre à jour les CraftingTables d'un utilisateur
-		public async Task UpdateUserCraftingTablesAsync(UserServer userServer, List<CraftingTable> newCraftingTables)
-		{
-			// Charger les UserCraftingTables existantes pour cet utilisateur
-			var existingUserCraftingTables = await _context.UserCraftingTables
-				.Where(uct => uct.UserServerId == userServer.Id)
-				.ToListAsync();
-
-			// Supprimer les anciennes associations qui ne sont plus dans la liste
-			foreach (var existingTable in existingUserCraftingTables)
-			{
-				if (!newCraftingTables.Any(ct => ct.Id == existingTable.CraftingTableId))
-				{
-					_context.UserCraftingTables.Remove(existingTable);
-				}
-			}
-
-			PluginModule defaultModule = await _pluginModuleDbService.GetByNameAsync("NoUpgrade");
-
-			// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
-			foreach (var craftingTable in newCraftingTables)
-			{
-				if (!existingUserCraftingTables.Any(uct => uct.CraftingTableId == craftingTable.Id))
-				{
-					var newUserCraftingTable = new UserCraftingTable
-					{
-						UserServer = userServer,
-						CraftingTable = craftingTable,
-						// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
-						//UpgradeId = 5
-						PluginModule = defaultModule
-					};
-					_context.UserCraftingTables.Add(newUserCraftingTable);
-				}
-			}
-
-			// Sauvegarder les modifications
-			await _context.SaveChangesAsync();
-		}
+		
 
 		// Méthode pour récupérer les CraftingTables associées à un utilisateur
 		public async Task<List<UserCraftingTable>> GetUserCraftingTablesByUserAsync(UserServer userServer)

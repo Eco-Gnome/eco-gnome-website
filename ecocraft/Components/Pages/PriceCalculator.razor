@@ -23,7 +23,6 @@
 				}
 			</MudSelect>
 
-
 			<MudTable Items="UserDataService.UserSkills" Dense="true">
 			<HeaderContent>
 				<MudTh>Name</MudTh>
@@ -43,14 +42,14 @@
 
 			<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
-			@* <MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues=selectedCraftingTables Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+			<MudSelect T="CraftingTable" Text="Choisissez une table..." SelectedValues="UserDataService.UserCraftingTables.Select(uct => uct.CraftingTable)" Label="Choisissez une table..." MultiSelection="true" Dense="true" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedCraftingTablesChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
 				@foreach (var table in ServerDataService.CraftingTables)
 			{
 				<MudSelectItem T="CraftingTable" Value="@table">@table.Name</MudSelectItem>
 			}
 			</MudSelect>
 
-			<MudTable Items="userCraftingTables" Dense="true">
+			<MudTable Items="UserDataService.UserCraftingTables" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Upgrade</MudTh>
@@ -59,7 +58,7 @@
 				<RowTemplate>
 					<MudTd>@context.CraftingTable.Name</MudTd>
 					<MudTd>
-						<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value="context.PluginModule" Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+						<MudSelect T="PluginModule" Text="Choisissez un upgrade" Value=@context.PluginModule Label="Choisissez un upgrade" Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
 							@foreach (var pluginModule in context.CraftingTable.PluginModules)
 						{
 							<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
@@ -70,7 +69,7 @@
 						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
 					</MudTd>
 				</RowTemplate>
-			</MudTable>  *@
+			</MudTable> 
  		</MudItem>
 
 		<!-- Deuxième Colonne -->
@@ -102,7 +101,7 @@
 				}
 			</MudSelect>
 
-			@* <MudTable Items="userRecipes" Dense="true">
+			<MudTable Items="userRecipes" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Price</MudTh>
@@ -116,19 +115,19 @@
 						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small"></MudIconButton>
 					</MudTd>
 				</RowTemplate>
-			</MudTable> *@
+			</MudTable>
 		</MudItem>
 
 	</MudGrid>
 </MudContainer>
 
 	@code {
-	private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
+	//private IEnumerable<Skill> selectedSkills { get; set; } = new HashSet<Skill>();
 	private IEnumerable<Recipe> selectedRecipes { get; set; } = new HashSet<Recipe>();
-	private IEnumerable<UserSkill> userSkills { get; set; } = new HashSet<UserSkill>();
+	//private IEnumerable<UserSkill> userSkills { get; set; } = new HashSet<UserSkill>();
 
-	private IEnumerable<CraftingTable> selectedCraftingTables { get; set; } = new HashSet<CraftingTable>();
-	private IEnumerable<UserCraftingTable> userCraftingTables { get; set; } = new HashSet<UserCraftingTable>();
+	//private IEnumerable<CraftingTable> selectedCraftingTables { get; set; } = new HashSet<CraftingTable>();
+	//private IEnumerable<UserCraftingTable> userCraftingTables { get; set; } = new HashSet<UserCraftingTable>();
 
 	private IEnumerable<Recipe> userRecipes { get; set; } = new HashSet<Recipe>();
 
@@ -147,31 +146,19 @@
 
 	private async Task OnSelectedSkillsChanged(IEnumerable<Skill> newSelectedSkills)
 	{
-		// Mettre à jour la sélection localement
-		selectedSkills = newSelectedSkills;
-
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		//await UserSkillDbService.UpdateUserSkillsAsync(ContextService.CurrentUserServer, selectedSkills.ToList());
-		UserDataService.UpdateUserSkills(ContextService.CurrentUserServer, selectedSkills.ToList()); // CA BOUCLE EN INFINI
-
-		//UserDataService.AddUserSkill()
-		//userSkills = await UserSkillDbService.GetUserSkillsByUserAsync(ContextService.CurrentUserServer);
+		UserDataService.UpdateUserSkills(ContextService.CurrentUserServer, newSelectedSkills.ToList());
 
 		// Récupère la liste des tables de craft correspondant aux skills sélectionné
-		/*var selectedTable = UserDataService.UserSkills
+		var selectedTable = UserDataService.UserSkills
 			.SelectMany(us => us.Skill.Recipes)
 			.Select(y => y.CraftingTable)
 			.Distinct();
 
-		selectedCraftingTables = selectedTable.ToList();*/
-
 		// Mettre à jour les compétences dans la base de données (conversion en List)
-		/*await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(ContextService.CurrentUserServer, selectedCraftingTables.ToList());
+		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer, selectedTable.ToList());
 
-		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(ContextService.CurrentUserServer);
-
-		userRecipes = ContextService.CurrentUser.GetAvailableRecipes();*/
-
+		userRecipes = UserDataService.GetAvailableRecipes();
 	}
 
 	private async Task OnSelectedRecipesChanged(IEnumerable<Recipe> newSelectedRecipes)
@@ -181,13 +168,7 @@
 
 	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
 	{
-		// Mettre à jour la sélection localement
-		selectedCraftingTables = newSelectedCraftingTables;
-
-		// Mettre à jour les compétences dans la base de données (conversion en List)
-		await UserCraftingTableDbService.UpdateUserCraftingTablesAsync(ContextService.CurrentUserServer, selectedCraftingTables.ToList());
-
-		userCraftingTables = await UserCraftingTableDbService.GetUserCraftingTablesByUserAsync(ContextService.CurrentUserServer);
+		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer, newSelectedCraftingTables.ToList());
 	}
 
 	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
@@ -195,14 +176,14 @@
 		// Mettre à jour le niveau de la compétence dans la base de données
 		userSkill.Level = newLevel;
 
-		//userRecipes = ContextService.CurrentUser.GetAvailableRecipes();
+		userRecipes = UserDataService.GetAvailableRecipes();
 	}
 
 	private async Task OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
 	{
 		userCraftingTable.PluginModule = newUpgrade;
 		// Mettre à jour le niveau de la compétence dans la base de données
-		await UserCraftingTableDbService.UpdateAsync(userCraftingTable);
+		//await UserCraftingTableDbService.UpdateAsync(userCraftingTable);
 	}
 
 

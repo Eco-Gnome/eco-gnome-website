@@ -47,7 +47,7 @@ public class UserDataService(UserSkillDbService userSkillDbService,
     public List<UserSkill> UpdateUserSkills(UserServer userServer, List<Skill> selectedSkills)
     {
         // Récupérer les compétences actuelles de l'utilisateur
-        var existingUserSkills = UserSkills.Where(us => us.UserServerId == userServer.Id);
+        var existingUserSkills = UserSkills.Where(us => us.UserServer.Id == userServer.Id);
 
         // Supprimer les compétences non sélectionnées
         var skillsToRemove = existingUserSkills.Where(us => !selectedSkills.Any(s => s.Id == us.SkillId)).ToList();
@@ -63,7 +63,7 @@ public class UserDataService(UserSkillDbService userSkillDbService,
                 {
                     UserServer = userServer,
                     Skill = skill,
-                    Level = 0 // Ajuster le niveau si nécessaire
+                    Level = 1 // Ajuster le niveau si nécessaire
                 };
                 UserSkills.Add(newUserSkill);
             }
@@ -71,5 +71,59 @@ public class UserDataService(UserSkillDbService userSkillDbService,
         return UserSkills;
         //await _context.SaveChangesAsync();
     }
+
+	// Méthode pour mettre à jour les CraftingTables d'un utilisateur
+	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer, List<CraftingTable> newCraftingTables)
+	{
+        // Charger les UserCraftingTables existantes pour cet utilisateur
+        var existingUserCraftingTables = UserCraftingTables.Where(uct => uct.UserServer.Id == userServer.Id);
+
+		var craftingTablesToRemove = existingUserCraftingTables.Where(uct => !newCraftingTables.Any(ct => ct == uct.CraftingTable)).ToList();
+        foreach (var existingTable in craftingTablesToRemove)
+            UserCraftingTables.Remove(existingTable);
+
+        PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
+
+		// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
+		foreach (var craftingTable in newCraftingTables)
+		{
+			if (!existingUserCraftingTables.Any(uct => uct.CraftingTable.Id == craftingTable.Id))
+			{
+				var newUserCraftingTable = new UserCraftingTable
+				{
+					UserServer = userServer,
+					CraftingTable = craftingTable,
+					// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
+					//UpgradeId = 5
+					PluginModule = defaultModule
+				};
+				UserCraftingTables.Add(newUserCraftingTable);
+			}
+		}
+        return UserCraftingTables;
+	}
+
+	// Méthode pour calculer les recettes disponibles
+	public IEnumerable<Recipe> GetAvailableRecipes()
+	{
+		var skills = UserSkills.Select(us => us.Skill);
+		var craftingTables = UserCraftingTables.Select(uct => uct.CraftingTable);
+		var recipes = new HashSet<Recipe>();
+
+		// Ajouter les recettes en fonction des compétences
+		foreach (var skill in skills)
+		{
+			var userSkilllevel = UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
+			recipes.UnionWith(skill.Recipes.Where(r => r.SkillLevel <= userSkilllevel));
+		}
+
+		// Ajouter les recettes en fonction des tables d'artisanat
+		/*foreach (var table in craftingTables)
+		{
+			recipes.UnionWith(table.Recipes);
+		}*/
+
+		return recipes;
+	}
 
 }
