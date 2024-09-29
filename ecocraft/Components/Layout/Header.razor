@@ -8,6 +8,9 @@
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+
+     <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />
+
      <MudSelect T="Server" Label="Select a server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)
         {
@@ -42,6 +45,11 @@
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
     {
         await ContextService.ChangeServer(servers.First());
+    }
+
+    private async Task Save()
+    {
+        await UserDbService.SaveAsync();
     }
 
     private async Task CreateServer()
