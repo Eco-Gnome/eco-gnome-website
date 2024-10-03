@@ -132,9 +132,6 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		// TODO: move to a better location
-		await DbContext.Database.EnsureCreatedAsync();
-
 		ContextService.OnContextChanged += StateHasChanged;
 	}
 
