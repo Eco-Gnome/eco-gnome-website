@@ -17,23 +17,37 @@ namespace ecocraft.Services.ImportData
 		// TODO: Handle an update of server data
 		public async Task ImportServerData(string jsonContent, Server server)
 		{
-			try {
-				ImportDataDto? importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
+			try
+			{
+				var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
 
 				if (importedData is not null)
 				{
+					// TODO: remove middle saves (requires to improve import functions)
 					ImportSkills(server, importedData.skills);
-					ImportPluginModules(server, importedData.pluginModules);
-					ImportCraftingTables(server, importedData.craftingTables);
-					await ImportRecipes(server, importedData.recipes, importedData.itemTagAssoc);
-					ImportItemTagAssoc(importedData.itemTagAssoc);
+					await dbContext.SaveChangesAsync();
 
+					ImportPluginModules(server, importedData.pluginModules);
+					await dbContext.SaveChangesAsync();
+
+					ImportCraftingTables(server, importedData.craftingTables);
+					await dbContext.SaveChangesAsync();
+
+					ImportRecipes(server, importedData.recipes, importedData.itemTagAssoc);
+					await dbContext.SaveChangesAsync();
+
+					ImportItemTagAssoc(importedData.itemTagAssoc);
+					
 					await dbContext.SaveChangesAsync();
 				}
 			}
 			catch (JsonException ex)
 			{
 				Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Erreur durant l'import: {ex.Message} {ex.StackTrace}");
 			}
 		}
 
@@ -128,7 +142,7 @@ namespace ecocraft.Services.ImportData
 			}
 		}
 
-		private async Task ImportRecipes(Server server, List<RecipeDto> recipeDtos, List<ItemTagAssocDto> itemTagAssoc)
+		private void ImportRecipes(Server server, List<RecipeDto> recipeDtos, List<ItemTagAssocDto> itemTagAssoc)
 		{
 			var namesToCheck = recipeDtos.Select(dto => dto.Name).ToList();
 
@@ -189,7 +203,7 @@ namespace ecocraft.Services.ImportData
 					foreach (var element in recipeDto.Ingredients.Concat(recipeDto.Products))
 					{
 						var itemOrTag = itemOrTagDbService.GetByName(element.ItemOrTag)!;
-						var skill = serverDataService.Skills.First(s => s.Name == element.Skill);
+						var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
 
 						var ing = new Element
 						{
