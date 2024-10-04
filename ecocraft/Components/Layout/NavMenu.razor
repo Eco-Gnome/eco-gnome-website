@@ -4,6 +4,7 @@
 
 <MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Calculate">Price Calculator</MudNavLink>
+    <MudNavLink Href="graph-view" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GraphicEq">Graph View</MudNavLink>
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
         <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">Server Management</MudNavLink>

@@ -18,3 +18,26 @@
     --bs-nav-link-color: var(--mud-palette-primary) !important;
     --bs-nav-link-hover-color: var(--mud-palette-primary-darken) !important;
 }
+
+.diagram-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid black; /* Just visual */
+}
+
+.item-node-title {
+    background-color: dodgerblue;
+}
+
+.tag-node-title {
+    background-color: grey;
+}
+
+.recipe-node-title {
+    background-color: darkgreen;
+}
+
+.eco-node {
+    padding: 20px;
+    color: white;
+}

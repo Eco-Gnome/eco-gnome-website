@@ -22,6 +22,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserSkill> UserSkills { get; set; }
 	public DbSet<UserElement> UserElements { get; set; }
 	public DbSet<UserPrice> UserPrices { get; set; }
+	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -194,12 +195,26 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.ItemOrTag)
 			.WithMany(iot => iot.UserPrices)
-			.HasForeignKey(ue => ue.ItemOrTagId);
+			.HasForeignKey(up => up.ItemOrTagId);
 		
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.UserServer)
 			.WithMany(us => us.UserPrices)
-			.HasForeignKey(ue => ue.UserServerId);
+			.HasForeignKey(up => up.UserServerId);
+		
+		// UserRecipe
+		modelBuilder.Entity<UserRecipe>()
+			.ToTable("UserRecipe");
+
+		modelBuilder.Entity<UserRecipe>()
+			.HasOne(up => up.Recipe)
+			.WithMany(r => r.UserRecipes)
+			.HasForeignKey(up => up.RecipeId);
+		
+		modelBuilder.Entity<UserRecipe>()
+			.HasOne(ur => ur.UserServer)
+			.WithMany(us => us.UserRecipes)
+			.HasForeignKey(ur => ur.UserServerId);
 		
 		// UserServer
 		modelBuilder.Entity<UserServer>()
@@ -214,7 +229,7 @@ public class EcoCraftDbContext : DbContext
 			.HasOne(us => us.Server)
 			.WithMany(s => s.UserServers)
 			.HasForeignKey(us => us.ServerId);
-
+		
 		// * Server Data
 		// Server
 		modelBuilder.Entity<Server>()

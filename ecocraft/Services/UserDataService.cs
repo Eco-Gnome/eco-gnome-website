@@ -7,13 +7,15 @@ public class UserDataService(UserSkillDbService userSkillDbService,
     UserCraftingTableDbService userCraftingTableDbService,
     UserSettingDbService userSettingDbService,
     UserElementDbService userElementDbService,
-    UserPriceDbService userPriceDbService)
+    UserPriceDbService userPriceDbService,
+    UserRecipeDbService userRecipeDbService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
     public List<UserSetting> UserSettings { get; private set; } = [];
     public List<UserElement> UserElements { get; private set; } = [];
     public List<UserPrice> UserPrices { get; private set; } = [];
+    public List<UserRecipe> UserRecipes { get; private set; } = [];
 
     public async Task RetrieveUserData(UserServer userServer)
     {
@@ -22,14 +24,16 @@ public class UserDataService(UserSkillDbService userSkillDbService,
         var userSettingsTask = userSettingDbService.GetByUserServerAsync(userServer);
         var userElementsTask = userElementDbService.GetByUserServerAsync(userServer);
         var userPricesTask = userPriceDbService.GetByUserServerAsync(userServer);
+        var userRecipesTask = userRecipeDbService.GetByUserServerAsync(userServer);
         
-        await Task.WhenAll(userSkillsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask);
+        await Task.WhenAll(userSkillsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask, userRecipesTask);
 
         UserSkills = userSkillsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
         UserSettings = userSettingsTask.Result;
         UserElements = userElementsTask.Result;
         UserPrices = userPricesTask.Result;
+        UserRecipes = userRecipesTask.Result;
     }
 
     public void AddUserSkill(UserSkill userSkill)
@@ -78,10 +82,13 @@ public class UserDataService(UserSkillDbService userSkillDbService,
         var existingUserCraftingTables = UserCraftingTables.Where(uct => uct.UserServer.Id == userServer.Id);
 
 		var craftingTablesToRemove = existingUserCraftingTables.Where(uct => !newCraftingTables.Any(ct => ct == uct.CraftingTable)).ToList();
-        foreach (var existingTable in craftingTablesToRemove)
-            UserCraftingTables.Remove(existingTable);
 
-        PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
+		foreach (var existingTable in craftingTablesToRemove)
+		{
+			UserCraftingTables.Remove(existingTable);
+		}
+
+		PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
 
 		// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
 		foreach (var craftingTable in newCraftingTables)
@@ -99,6 +106,7 @@ public class UserDataService(UserSkillDbService userSkillDbService,
 				UserCraftingTables.Add(newUserCraftingTable);
 			}
 		}
+		
         return UserCraftingTables;
 	}
 

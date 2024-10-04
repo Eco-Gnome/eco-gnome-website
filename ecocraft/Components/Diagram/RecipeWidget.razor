@@ -1,0 +1,16 @@
+﻿@using Blazor.Diagrams.Components.Renderers;
+@using ecocraft.Diagram;
+
+<div>
+    <h5 class="eco-node recipe-node-title">@Node.Recipe.Name</h5>
+    
+    @foreach (var port in Node.Ports)
+    {
+        <PortRenderer @key="port" Port="port" />
+    }
+</div>
+
+@code {
+    // This gets filled by the library
+    [Parameter] public RecipeNode Node { get; set; } = null!;
+}

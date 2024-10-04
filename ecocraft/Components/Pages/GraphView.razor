@@ -1,0 +1,155 @@
+﻿@page "/graph-view"
+@using Blazor.Diagrams
+@using Blazor.Diagrams.Components
+@using Blazor.Diagrams.Core.Anchors
+@using Blazor.Diagrams.Core.Models
+@using Blazor.Diagrams.Core.PathGenerators
+@using Blazor.Diagrams.Core.Routers
+@using Blazor.Diagrams.Options
+@using ecocraft.Components.Diagram
+@using ecocraft.Diagram
+@using ecocraft.Models
+@using ecocraft.Services
+@using Blazor.Diagrams.Components.Widgets
+@using Blazor.Diagrams.Core.Geometry
+@inject ServerDataService ServerDataService
+
+<PageTitle>Graph View</PageTitle>
+
+<MudContainer>
+	<MudGrid>
+		<MudItem sm="12" Class="border-solid border-2 mud-border-primary pa-4">
+			<div class="diagram-container">
+				<CascadingValue Value="Diagram" IsFixed="true">
+					<DiagramCanvas>
+						<Widgets>
+							<GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
+						</Widgets>
+					</DiagramCanvas>
+				</CascadingValue>
+			</div>
+		</MudItem>
+	</MudGrid>
+</MudContainer>
+
+@code {
+	private BlazorDiagram Diagram { get; set; } = null!;
+	
+	protected override void OnInitialized()
+	{
+		var options = new BlazorDiagramOptions
+		{
+			AllowMultiSelection = true,
+			AllowPanning = true,
+			Zoom =
+			{
+				Enabled = true,
+			},
+			Links =
+			{
+				DefaultRouter = new NormalRouter(),
+				DefaultPathGenerator = new SmoothPathGenerator()
+			},
+		};
+		
+		Diagram = new BlazorDiagram(options);
+		
+		Diagram.RegisterComponent<TagNode, TagWidget>();
+		Diagram.RegisterComponent<ItemNode, ItemWidget>();
+		Diagram.RegisterComponent<RecipeNode, RecipeWidget>();
+
+		var itemOrTagNodes = new Dictionary<ItemOrTag, NodeModel>();
+
+		var x = 0;
+		var y = 0;
+		
+		foreach (var itemOrTag in ServerDataService.ItemOrTags)
+		{
+			NodeModel node;
+			
+			if (itemOrTag.IsTag)
+			{
+				node = new TagNode
+				{
+					Position = new Point(x, y),
+					ItemOrTag = itemOrTag,
+				};
+			}
+			else
+			{
+				node = Diagram.Nodes.Add(new ItemNode
+				{
+					Position = new Point(x, y),
+					ItemOrTag = itemOrTag,
+				});
+			}
+			
+			itemOrTagNodes.Add(itemOrTag, node);
+			node.AddPort(PortAlignment.Left);
+			node.AddPort(PortAlignment.Right);
+
+			x += 200;
+			
+			if (x > 10000)
+			{
+				y += 200;
+				x = 0;
+			}
+		}
+		
+		foreach (var tag in ServerDataService.ItemOrTags.Where(i => i.IsTag))
+		{
+			foreach (var item in tag.AssociatedItemOrTags)
+			{
+				var itemNode = itemOrTagNodes.GetValueOrDefault(item);
+				var tagNode = itemOrTagNodes.GetValueOrDefault(tag);
+
+				if (itemNode is not null && tagNode is not null)
+				{
+					Diagram.Links.Add(new LinkModel(
+						new ShapeIntersectionAnchor(tagNode), 
+						new SinglePortAnchor(itemNode.Ports.First())
+					));
+				}
+			}
+		}
+
+		x = 0;
+		y = 0;
+		
+		foreach (var recipe in ServerDataService.Recipes)
+		{
+			var node = Diagram.Nodes.Add(new RecipeNode
+			{
+				Position = new Point(x, y),
+				Recipe = recipe,
+			});
+			
+			// node.AddPort(PortAlignment.Left);
+			// node.AddPort(PortAlignment.Right);
+			
+			foreach (var element in recipe.Elements)
+			{
+				var itemOrTagNode = itemOrTagNodes.GetValueOrDefault(element.ItemOrTag);
+
+				if (itemOrTagNode is null) continue;
+				
+				var link = new LinkModel(
+					new ShapeIntersectionAnchor(node),
+					new SinglePortAnchor(itemOrTagNode.Ports[element.IsIngredient() ? 1 : 0])
+				);
+				link.Labels.Add(new LinkLabelModel(link, element.Quantity.ToString()));
+					
+				Diagram.Links.Add(link);
+			}
+			
+			x += 200;
+			
+			if (x > 10000)
+			{
+				y += 200;
+				x = 0;
+			}
+		}
+	}
+}

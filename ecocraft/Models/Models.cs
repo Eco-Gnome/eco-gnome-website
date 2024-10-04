@@ -22,6 +22,7 @@ namespace ecocraft.Models
         public CraftingTable CraftingTable { get; set; }
         public Server Server { get; set; }
         public List<Element> Elements { get; set; } = new List<Element>();
+        public List<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
     }
 
     public class Element
@@ -38,6 +39,16 @@ namespace ecocraft.Models
         public ItemOrTag ItemOrTag { get; set; }
         public Skill? Skill { get; set; }
         public List<UserElement> UserElements { get; set; } = new List<UserElement>();
+
+        public bool IsIngredient()
+        {
+            return Quantity < 0;
+        }
+        
+        public bool IsProduct()
+        {
+            return Quantity > 0;
+        }
     }
 
     public class ItemOrTag
@@ -114,6 +125,7 @@ namespace ecocraft.Models
         public List<UserPrice> UserPrices { get; set; } = new List<UserPrice>();
         public List<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
         public List<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+        public List<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
     }
 
     public class UserSetting
@@ -166,10 +178,20 @@ namespace ecocraft.Models
     {
         [Key] public Guid Id { get; set; }
         [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }		
-        public float Price { get; set; }         
+        public float? Price { get; set; }         
         [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
         public ItemOrTag ItemOrTag { get; set; }
+        public UserServer UserServer { get; set; }
+    }
+
+    public class UserRecipe
+    {
+        [Key] public Guid Id { get; set; }
+        [ForeignKey("Recipe")] public Guid RecipeId { get; set; }		
+        [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+        
+        public Recipe Recipe { get; set; }
         public UserServer UserServer { get; set; }
     }
     
