@@ -3,56 +3,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserPriceDbService : IGenericDbService<UserPrice>
+	public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbService<UserPrice>
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public UserPriceDbService(EcoCraftDbContext context)
+		public Task<List<UserPrice>> GetAllAsync()
 		{
-			_context = context;
-		}
-
-		public async Task<List<UserPrice>> GetAllAsync()
-		{
-			return await _context.UserPrices.Include(up => up.UserServer)
-											.Include(up => up.ItemOrTag)
-											.ToListAsync();
+			return context.UserPrices
+				.ToListAsync();
 		}
 
 		public Task<List<UserPrice>> GetByUserServerAsync(UserServer userServer)
 		{
-			return _context.UserPrices
+			return context.UserPrices
 				.Where(s => s.UserServerId == userServer.Id)
 				.ToListAsync();
 		}
 
-		public async Task<UserPrice> GetByIdAsync(Guid id)
+		public Task<UserPrice?> GetByIdAsync(Guid id)
 		{
-			return await _context.UserPrices.Include(up => up.UserServer)
-											.Include(up => up.ItemOrTag)
-											.FirstOrDefaultAsync(up => up.Id == id);
+			return context.UserPrices
+				.FirstOrDefaultAsync(up => up.Id == id);
 		}
 
-		public async Task AddAsync(UserPrice userPrice)
+		public UserPrice Add(UserPrice userPrice)
 		{
-			await _context.UserPrices.AddAsync(userPrice);
-			await _context.SaveChangesAsync();
+			context.UserPrices.Add(userPrice);
+
+			return userPrice;
 		}
 
-		public async Task UpdateAsync(UserPrice userPrice)
+		public void Update(UserPrice userPrice)
 		{
-			_context.UserPrices.Update(userPrice);
-			await _context.SaveChangesAsync();
+			context.UserPrices.Update(userPrice);
 		}
 
-		public async Task DeleteAsync(Guid id)
+		public void Delete(UserPrice userPrice)
 		{
-			var userPrice = await GetByIdAsync(id);
-			if (userPrice != null)
-			{
-				_context.UserPrices.Remove(userPrice);
-				await _context.SaveChangesAsync();
-			}
+			context.UserPrices.Remove(userPrice);
 		}
 	}
 

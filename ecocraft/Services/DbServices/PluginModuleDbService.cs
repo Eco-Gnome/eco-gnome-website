@@ -1,68 +1,49 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ecocraft.Models;
 
-namespace ecocraft.Services
+namespace ecocraft.Services;
+
+public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbService<PluginModule>
 {
-    public class PluginModuleDbService : IGenericDbService<PluginModule>
+    public Task<List<PluginModule>> GetAllAsync()
     {
-        private readonly EcoCraftDbContext _context;
+        return context.PluginModules
+            .ToListAsync();
+    }
 
-        public PluginModuleDbService(EcoCraftDbContext context)
-        {
-            _context = context;
-        }
+    public Task<List<PluginModule>> GetByServerAsync(Server server)
+    {
+        return context.PluginModules
+            .Where(s => s.ServerId == server.Id)
+            .ToListAsync();
+    }
 
-        public async Task<List<PluginModule>> GetAllAsync()
-        {
-            return await _context.PluginModules
-                .Include(pm => pm.CraftingTables)
-                .Include(pm => pm.Server)
-                .ToListAsync();
-        }
+    public Task<PluginModule?> GetByIdAsync(Guid id)
+    {
+        return context.PluginModules
+            .FirstOrDefaultAsync(pm => pm.Id == id);
+    }
 
-        public Task<List<PluginModule>> GetByServerAsync(Server server)
-        {
-            return _context.PluginModules
-                .Where(s => s.ServerId == server.Id)
-                .ToListAsync();
-        }
+    public Task<PluginModule?> GetByNameAsync(string name)
+    {
+        return context.PluginModules
+            .FirstOrDefaultAsync(pm => pm.Name == name);
+    }
 
-        public async Task<PluginModule?> GetByIdAsync(Guid id)
-        {
-            return await _context.PluginModules
-                .Include(pm => pm.CraftingTables)
-                .Include(pm => pm.Server)
-                .FirstOrDefaultAsync(pm => pm.Id == id);
-        }
+    public PluginModule Add(PluginModule pluginModule)
+    {
+        context.PluginModules.Add(pluginModule);
 
-        public async Task<PluginModule?> GetByNameAsync(string name)
-        {
-            return await _context.PluginModules
-                .Include(pm => pm.CraftingTables)
-                .Include(pm => pm.Server)
-                .FirstOrDefaultAsync(pm => pm.Name == name);
-        }
+        return pluginModule;
+    }
 
-        public async Task AddAsync(PluginModule pluginModule)
-        {
-            await _context.PluginModules.AddAsync(pluginModule);
-            await _context.SaveChangesAsync();
-        }
+    public void Update(PluginModule pluginModule)
+    {
+        context.PluginModules.Update(pluginModule);
+    }
 
-        public async Task UpdateAsync(PluginModule pluginModule)
-        {
-            _context.PluginModules.Update(pluginModule);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            var pluginModule = await GetByIdAsync(id);
-            if (pluginModule != null)
-            {
-                _context.PluginModules.Remove(pluginModule);
-                await _context.SaveChangesAsync();
-            }
-        }
+    public void Delete(PluginModule pluginModule)
+    {
+        context.PluginModules.Remove(pluginModule);
     }
 }

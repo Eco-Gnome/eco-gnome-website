@@ -3,56 +3,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-    public class UserRecipeDbService : IGenericDbService<UserRecipe>
+    public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbService<UserRecipe>
     {
-        private readonly EcoCraftDbContext _context;
-
-        public UserRecipeDbService(EcoCraftDbContext context)
+        public Task<List<UserRecipe>> GetAllAsync()
         {
-            _context = context;
-        }
-
-        public async Task<List<UserRecipe>> GetAllAsync()
-        {
-            return await _context.UserRecipes
-                .Include(up => up.UserServer)
+            return context.UserRecipes
                 .ToListAsync();
         }
 
         public Task<List<UserRecipe>> GetByUserServerAsync(UserServer userServer)
         {
-            return _context.UserRecipes
+            return context.UserRecipes
                 .Where(s => s.UserServerId == userServer.Id)
                 .ToListAsync();
         }
 
         public async Task<UserRecipe?> GetByIdAsync(Guid id)
         {
-            return await _context.UserRecipes
+            return await context.UserRecipes
                 .Include(up => up.UserServer)
                 .FirstOrDefaultAsync(up => up.Id == id);
         }
 
-        public async Task AddAsync(UserRecipe userRecipe)
+        public UserRecipe Add(UserRecipe userRecipe)
         {
-            await _context.UserRecipes.AddAsync(userRecipe);
-            await _context.SaveChangesAsync();
+            context.UserRecipes.Add(userRecipe);
+
+            return userRecipe;
         }
 
-        public async Task UpdateAsync(UserRecipe userRecipe)
+        public void Update(UserRecipe userRecipe)
         {
-            _context.UserRecipes.Update(userRecipe);
-            await _context.SaveChangesAsync();
+            context.UserRecipes.Update(userRecipe);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public void Delete(UserRecipe userRecipe)
         {
-            var userRecipe = await GetByIdAsync(id);
-            if (userRecipe != null)
-            {
-                _context.UserRecipes.Remove(userRecipe);
-                await _context.SaveChangesAsync();
-            }
+            context.UserRecipes.Remove(userRecipe);
         }
     }
 

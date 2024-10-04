@@ -3,56 +3,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserElementDbService : IGenericDbService<UserElement>
+	public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbService<UserElement>
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public UserElementDbService(EcoCraftDbContext context)
+		public Task<List<UserElement>> GetAllAsync()
 		{
-			_context = context;
-		}
-
-		public async Task<List<UserElement>> GetAllAsync()
-		{
-			return await _context.UserElements.Include(ue => ue.UserServer)
-											  .Include(ue => ue.Element)
-											  .ToListAsync();
+			return context.UserElements
+				.ToListAsync();
 		}
 
 		public Task<List<UserElement>> GetByUserServerAsync(UserServer userServer)
 		{
-			return _context.UserElements
+			return context.UserElements
 				.Where(s => s.UserServerId == userServer.Id)
 				.ToListAsync();
 		}
 
-		public async Task<UserElement> GetByIdAsync(Guid id)
+		public Task<UserElement?> GetByIdAsync(Guid id)
 		{
-			return await _context.UserElements.Include(ue => ue.UserServer)
-											  .Include(ue => ue.Element)
-											  .FirstOrDefaultAsync(ue => ue.Id == id);
+			return context.UserElements
+				.FirstOrDefaultAsync(ue => ue.Id == id);
 		}
 
-		public async Task AddAsync(UserElement userElement)
+		public UserElement Add(UserElement userElement)
 		{
-			await _context.UserElements.AddAsync(userElement);
-			await _context.SaveChangesAsync();
+			context.UserElements.Add(userElement);
+
+			return userElement;
 		}
 
-		public async Task UpdateAsync(UserElement userElement)
+		public void Update(UserElement userElement)
 		{
-			_context.UserElements.Update(userElement);
-			await _context.SaveChangesAsync();
+			context.UserElements.Update(userElement);
 		}
 
-		public async Task DeleteAsync(Guid id)
+		public void Delete(UserElement userElement)
 		{
-			var userElement = await GetByIdAsync(id);
-			if (userElement != null)
-			{
-				_context.UserElements.Remove(userElement);
-				await _context.SaveChangesAsync();
-			}
+			context.UserElements.Remove(userElement);
 		}
 	}
 

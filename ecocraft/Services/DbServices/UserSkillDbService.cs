@@ -3,67 +3,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserSkillDbService : IGenericDbService<UserSkill>
+	public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbService<UserSkill>
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public UserSkillDbService(EcoCraftDbContext context)
+		public Task<List<UserSkill>> GetAllAsync()
 		{
-			_context = context;
-		}
-
-		public async Task<List<UserSkill>> GetAllAsync()
-		{
-			return await _context.UserSkills.Include(us => us.UserServer)
-											.Include(us => us.Skill)
-											.ToListAsync();
+			return context.UserSkills
+				.ToListAsync();
 		}
 
 		public Task<List<UserSkill>> GetByUserServerAsync(UserServer userServer)
 		{
-			return _context.UserSkills
+			return context.UserSkills
 				.Where(s => s.UserServerId == userServer.Id)
 				.ToListAsync();
 		}
 
-		public async Task<UserSkill> GetByIdAsync(Guid id)
+		public Task<UserSkill?> GetByIdAsync(Guid id)
 		{
-			return await _context.UserSkills.Include(us => us.UserServer)
-											.Include(us => us.Skill)
-											.FirstOrDefaultAsync(us => us.Id == id);
+			return context.UserSkills
+				.FirstOrDefaultAsync(us => us.Id == id);
 		}
 
-		public async Task AddAsync(UserSkill userSkill)
+		public UserSkill Add(UserSkill userSkill)
 		{
-			await _context.UserSkills.AddAsync(userSkill);
-			await _context.SaveChangesAsync();
+			context.UserSkills.Add(userSkill);
+
+			return userSkill;
 		}
 
-		public async Task UpdateAsync(UserSkill userSkill)
+		public void Update(UserSkill userSkill)
 		{
-			_context.UserSkills.Update(userSkill);
-			await _context.SaveChangesAsync();
+			context.UserSkills.Update(userSkill);
 		}
 
-		public async Task DeleteAsync(Guid id)
+		public void Delete(UserSkill userSkill)
 		{
-			var userSkill = await GetByIdAsync(id);
-			if (userSkill != null)
-			{
-				_context.UserSkills.Remove(userSkill);
-				await _context.SaveChangesAsync();
-			}
-		}
-
-		// Méthode pour récupérer les compétences d'un utilisateur via l'objet utilisateur
-		public async Task<List<UserSkill>> GetUserSkillsByUserAsync(UserServer userServer)
-		{
-			return await _context.UserSkills
-									.Include(us => us.Skill)
-									//.Include(us => us.Skill.CraftingTableSkills)
-									//.ThenInclude(cts => cts.CraftingTable)
-									.Where(us => us.UserServerId == userServer.Id)
-									.ToListAsync();
+			context.UserSkills.Remove(userSkill);
 		}
 	}
 

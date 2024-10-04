@@ -1,9 +1,11 @@
 ﻿using System.Text.Json;
 using ecocraft.Models;
+using ecocraft.Services.DbServices;
 
 namespace ecocraft.Services.ImportData
 {
 	public class ImportDataService(
+		EcoCraftDbContext dbContext,
 		ServerDataService serverDataService,
 		SkillDbService skillDbService, 
 		PluginModuleDbService pluginModuleDbService,
@@ -20,11 +22,13 @@ namespace ecocraft.Services.ImportData
 
 				if (importedData is not null)
 				{
-					await ImportSkills(server, importedData.skills);
-					await ImportPluginModules(server, importedData.pluginModules);
-					await ImportCraftingTables(server, importedData.craftingTables);
+					ImportSkills(server, importedData.skills);
+					ImportPluginModules(server, importedData.pluginModules);
+					ImportCraftingTables(server, importedData.craftingTables);
 					await ImportRecipes(server, importedData.recipes, importedData.itemTagAssoc);
-					await ImportItemTagAssoc(importedData.itemTagAssoc);
+					ImportItemTagAssoc(importedData.itemTagAssoc);
+
+					await dbContext.SaveChangesAsync();
 				}
 			}
 			catch (JsonException ex)
@@ -33,14 +37,15 @@ namespace ecocraft.Services.ImportData
 			}
 		}
 
-		private async Task ImportSkills(Server server, List<SkillDto> skillDtos)
+		private void ImportSkills(Server server, List<SkillDto> skillDtos)
 		{
 			var namesToCheck = skillDtos.Select(dto => dto.Name).ToList();
 
 			// Récupère les noms qui existent déjà dans la base
 			var existingNames = serverDataService.Skills
 				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name);
+				.Select(ct => ct.Name)
+				.ToList();
 
 			// Ajouter uniquement les objets qui n'existent pas
 			foreach (var dto in skillDtos)
@@ -54,19 +59,20 @@ namespace ecocraft.Services.ImportData
 					};
 
 					serverDataService.Skills.Add(newSkill);
-					await skillDbService.AddAsync(newSkill);
+					skillDbService.Add(newSkill);
 				}
 			}
 		}
 
-		private async Task ImportPluginModules(Server server, List<PluginModuleDto> pluginModuleDtos)
+		private void ImportPluginModules(Server server, List<PluginModuleDto> pluginModuleDtos)
 		{
 			var namesToCheck = pluginModuleDtos.Select(dto => dto.Name).ToList();
 
 			// Récupère les noms qui existent déjà dans la base
 			var existingNames = serverDataService.PluginModules
 				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name);
+				.Select(ct => ct.Name)
+				.ToList();
 
 			// Ajouter uniquement les objets qui n'existent pas
 			foreach (var dto in pluginModuleDtos)
@@ -81,26 +87,27 @@ namespace ecocraft.Services.ImportData
 					};
 
 					serverDataService.PluginModules.Add(newPluginModule);
-					await pluginModuleDbService.AddAsync(newPluginModule);
+					pluginModuleDbService.Add(newPluginModule);
 				}
 			}
 
 			var existingUserSkill =
 				serverDataService.PluginModules.FirstOrDefault(pm => pm.Name.Contains("NoUpgrade") && pm.Server.Id == server.Id);
 			if (existingUserSkill == null)
-				await pluginModuleDbService.AddAsync(new PluginModule
+				pluginModuleDbService.Add(new PluginModule
 					{ Name = "NoUpgrade", Percent = 0, Server = server });
 
 		}
 
-		private async Task ImportCraftingTables(Server server, List<CraftingTableDto> craftingTableDtos)
+		private void ImportCraftingTables(Server server, List<CraftingTableDto> craftingTableDtos)
 		{
 			var namesToCheck = craftingTableDtos.Select(dto => dto.Name).ToList();
 
 			// Récupère les noms qui existent déjà dans la base
 			var existingNames = serverDataService.CraftingTables
 				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name);
+				.Select(ct => ct.Name)
+				.ToList();
 
 			// Ajouter uniquement les objets qui n'existent pas
 			foreach (var dto in craftingTableDtos)
@@ -112,11 +119,11 @@ namespace ecocraft.Services.ImportData
 						Name = dto.Name,
 						Server = server,
 						PluginModules = dto.CraftingTablePluginModules
-							.Select(ctpm => serverDataService.PluginModules.FirstOrDefault(pm => pm.Name == ctpm)).ToList()
+							.Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm)).ToList()
 					};
 
 					serverDataService.CraftingTables.Add(newCraftingTable);
-					await craftingTableDbService.AddAsync(newCraftingTable);
+					craftingTableDbService.Add(newCraftingTable);
 				}
 			}
 		}
@@ -128,11 +135,13 @@ namespace ecocraft.Services.ImportData
 			// Récupère les noms qui existent déjà dans la base
 			var existingRecipeNames = serverDataService.Recipes
 				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name);
+				.Select(ct => ct.Name)
+				.ToList();
 
 			// Récupère les itemsOrTag qui existent déjà dans la base
 			var existingItemOrTags = serverDataService.ItemOrTags
-				.Select(ct => ct.Name);
+				.Select(ct => ct.Name)
+				.ToList();
 
 			// Ajouter uniquement les objets qui n'existent pas
 			foreach (var recipeDto in recipeDtos)
@@ -149,28 +158,27 @@ namespace ecocraft.Services.ImportData
 						IsBlueprint = recipeDto.IsBlueprint,
 						IsDefault = recipeDto.IsDefault,
 						Labor = recipeDto.Labor,
-						CraftingTable = serverDataService.CraftingTables.FirstOrDefault(c => c.Name == recipeDto.CraftingTable),
+						CraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipeDto.CraftingTable),
 						Server = server,
 					};
 
 					serverDataService.Recipes.Add(newRecipe);
-					await recipeDbService.AddAsync(newRecipe);
+					recipeDbService.Add(newRecipe);
 
 					// Si l'item or tag n'existe pas actuellement, on le crée, avant de créer l'element
 					foreach (var recipeItem in recipeDto.Ingredients.Concat(recipeDto.Products))
 					{
-						if (!existingItemOrTags.Contains(recipeItem.ItemOrTag))
+						if (existingItemOrTags.Contains(recipeItem.ItemOrTag)) continue;
+						
+						var itemOrTag = new ItemOrTag
 						{
-							var itemOrTag = new ItemOrTag
-							{
-								Name = recipeItem.ItemOrTag,
-								IsTag = itemTagAssoc.Select(t => t.Tag).Contains(recipeItem.ItemOrTag),
-								Server = server,
-							};
+							Name = recipeItem.ItemOrTag,
+							IsTag = itemTagAssoc.Select(t => t.Tag).Contains(recipeItem.ItemOrTag),
+							Server = server,
+						};
 
-							serverDataService.ItemOrTags.Add(itemOrTag);
-							await itemOrTagDbService.AddAsync(itemOrTag);
-						}
+						serverDataService.ItemOrTags.Add(itemOrTag);
+						itemOrTagDbService.Add(itemOrTag);
 					}
 
 					foreach (var recipeDtoIngredient in recipeDto.Ingredients)
@@ -180,8 +188,8 @@ namespace ecocraft.Services.ImportData
 
 					foreach (var element in recipeDto.Ingredients.Concat(recipeDto.Products))
 					{
-						var itemOrTag = await itemOrTagDbService.GetByNameAsync(element.ItemOrTag);
-						var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
+						var itemOrTag = itemOrTagDbService.GetByName(element.ItemOrTag)!;
+						var skill = serverDataService.Skills.First(s => s.Name == element.Skill);
 
 						var ing = new Element
 						{
@@ -193,13 +201,13 @@ namespace ecocraft.Services.ImportData
 							LavishTalent = element.LavishTalent,
 						};
 
-						await elementDbService.AddAsync(ing);
+						elementDbService.Add(ing);
 					}
 				}
 			}
 		}
 
-		private async Task ImportItemTagAssoc(List<ItemTagAssocDto> itemTagAssoc)
+		private void ImportItemTagAssoc(List<ItemTagAssocDto> itemTagAssoc)
 		{
 			foreach (var itemTag in itemTagAssoc)
 			{
@@ -217,7 +225,7 @@ namespace ecocraft.Services.ImportData
 						}
 					}
 
-					await itemOrTagDbService.UpdateAsync(tag);
+					itemOrTagDbService.Update(tag);
 				}
 			}
 		}

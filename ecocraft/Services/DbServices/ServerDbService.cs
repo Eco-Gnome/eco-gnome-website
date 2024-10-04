@@ -1,66 +1,56 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services
+namespace ecocraft.Services.DbServices;
+
+public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Server>
 {
-	public class ServerDbService : IGenericDbService<Server>
+	public async Task<List<Server>> GetAllAsync()
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public ServerDbService(EcoCraftDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<List<Server>> GetAllAsync()
-		{
-			return await _context.Servers.ToListAsync();
-		}
-
-		public async Task<List<Server>> GetAllDefaultAsync()
-		{
-			return await _context.Servers.Where(s => s.IsDefault).ToListAsync();
-		}
-
-		public async Task<Server?> GetFirstAsync()
-		{
-			return await _context.Servers.FirstOrDefaultAsync();
-		}
-
-		public async Task<Server?> GetByIdAsync(Guid id)
-		{
-			return await _context.Servers.Include(s => s.UserServers)
-										  .FirstOrDefaultAsync(s => s.Id == id);
-		}
-
-		public async Task<Server?> GetByNameAsync(String name)
-		{
-			return await _context.Servers.Include(s => s.UserServers)
-										  .FirstOrDefaultAsync(s => s.Name == name);
-		}
-
-		public async Task AddAsync(Server server)
-		{
-			await _context.Servers.AddAsync(server);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task UpdateAsync(Server server)
-		{
-			_context.Servers.Update(server);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task DeleteAsync(Guid id)
-		{
-			var server = await GetByIdAsync(id);
-			if (server != null)
-			{
-				_context.Servers.Remove(server);
-				await _context.SaveChangesAsync();
-			}
-		}
+		return await context.Servers.ToListAsync();
 	}
 
+	public async Task<List<Server>> GetAllDefaultAsync()
+	{
+		return await context.Servers.Where(s => s.IsDefault).ToListAsync();
+	}
 
+	public async Task<Server?> GetByIdAsync(Guid id)
+	{
+		return await context.Servers.Include(s => s.UserServers)
+			.FirstOrDefaultAsync(s => s.Id == id);
+	}
+
+	public Server Add(Server server)
+	{
+		context.Servers.Add(server);
+
+		return server;
+	}
+
+	public void Update(Server server)
+	{
+		context.Servers.Update(server);
+	}
+
+	public async Task<Server> AddAndSave(Server server)
+	{
+		context.Servers.Add(server);
+
+		await context.SaveChangesAsync();
+
+		return server;
+	}
+
+	public Task UpdateAndSave(Server server)
+	{
+		context.Servers.Update(server);
+		
+		return context.SaveChangesAsync();
+	}
+
+	public void Delete(Server server)
+	{
+		context.Servers.Remove(server);
+	}
 }

@@ -3,54 +3,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserSettingDbService : IGenericDbService<UserSetting>
+	public class UserSettingDbService(EcoCraftDbContext context) : IGenericUserDbService<UserSetting>
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public UserSettingDbService(EcoCraftDbContext context)
+		public Task<List<UserSetting>> GetAllAsync()
 		{
-			_context = context;
-		}
-
-		public async Task<List<UserSetting>> GetAllAsync()
-		{
-			return await _context.UserSettings.Include(us => us.UserServer)
-											   .ToListAsync();
+			return context.UserSettings
+				.ToListAsync();
 		}
 
 		public Task<List<UserSetting>> GetByUserServerAsync(UserServer userServer)
 		{
-			return _context.UserSettings
+			return context.UserSettings
 				.Where(s => s.UserServerId == userServer.Id)
 				.ToListAsync();
 		}
 
-		public async Task<UserSetting> GetByIdAsync(Guid id)
+		public Task<UserSetting?> GetByIdAsync(Guid id)
 		{
-			return await _context.UserSettings.Include(us => us.UserServer)
-											   .FirstOrDefaultAsync(us => us.Id == id);
+			return context.UserSettings
+				.FirstOrDefaultAsync(us => us.Id == id);
 		}
 
-		public async Task AddAsync(UserSetting userSetting)
+		public UserSetting Add(UserSetting userSetting)
 		{
-			await _context.UserSettings.AddAsync(userSetting);
-			await _context.SaveChangesAsync();
+			context.UserSettings.Add(userSetting);
+
+			return userSetting;
 		}
 
-		public async Task UpdateAsync(UserSetting userSetting)
+		public void Update(UserSetting userSetting)
 		{
-			_context.UserSettings.Update(userSetting);
-			await _context.SaveChangesAsync();
+			context.UserSettings.Update(userSetting);
 		}
 
-		public async Task DeleteAsync(Guid id)
+		public void Delete(UserSetting userSetting)
 		{
-			var userSetting = await GetByIdAsync(id);
-			if (userSetting != null)
-			{
-				_context.UserSettings.Remove(userSetting);
-				await _context.SaveChangesAsync();
-			}
+			context.UserSettings.Remove(userSetting);
 		}
 	}
 

@@ -1,4 +1,5 @@
 ﻿using ecocraft.Models;
+using ecocraft.Services.DbServices;
 
 namespace ecocraft.Services;
 
@@ -39,7 +40,7 @@ public class ContextService(
                 UserId = CurrentUser.Id,
             };
             CurrentUser.UserServers.Add(userServer);
-            await userDbService.UpdateAsync(CurrentUser);
+            await userDbService.UpdateAndSave(CurrentUser);
         }
 
         CurrentUserServer = userServer;
@@ -67,16 +68,11 @@ public class ContextService(
             }
         }
 
-        if (CurrentUser is null)
+        CurrentUser ??= await userDbService.AddAndSave(new User
         {
-            CurrentUser = new User
-            {
-                Id = new Guid(),
-                Pseudo = "John Doe",
-                SecretId = new Guid(),
-            };
-            await userDbService.AddAsync(CurrentUser);
-        }
+            Pseudo = "John Doe",
+            SecretId = new Guid(),
+        });
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         DefaultServers.AddRange(await serverDbService.GetAllDefaultAsync());

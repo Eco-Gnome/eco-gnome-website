@@ -2,6 +2,8 @@
 @using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Services.DbServices
+@inject EcoCraftDbContext EcoCraftDbContext
 @inject ContextService ContextService
 @inject IDialogService DialogService
 @inject ServerDbService ServerDbService
@@ -49,25 +51,24 @@
 
     private async Task Save()
     {
-        await UserDbService.UpdateAsync(ContextService.CurrentUser);
+        await UserDbService.UpdateAndSave(ContextService.CurrentUser!);
     }
 
     private async Task CreateServer()
     {
         var parameters = new DialogParameters();
-        var dialog = DialogService.Show<ServerDialog>("Créer un serveur", parameters);
+        var dialog = DialogService.Show<ServerDialog>("Create server", parameters);
 
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            Server newServer = new Server { Name = result.Data.ToString(), IsDefault = false};
-            await ServerDbService.AddAsync(newServer);
+            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false};
+            await ServerDbService.AddAndSave(newServer);
 
-            UserServer userServer = new UserServer { UserId = ContextService.CurrentUser.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
+            UserServer userServer = new UserServer { UserId = ContextService.CurrentUser!.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
             ContextService.CurrentUser.UserServers.Add(userServer);
-            await UserDbService.SaveAsync();
-
+            await EcoCraftDbContext.SaveChangesAsync();
             
             await ContextService.ChangeServer(newServer);
         }
@@ -79,14 +80,14 @@
         {
             ["ServerName"] = ContextService.CurrentServer?.Name,
         };
-        var dialog = DialogService.Show<ServerDialog>("Editer un serveur", parameters);
+        var dialog = DialogService.Show<ServerDialog>("Edit server", parameters);
 
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            ContextService.CurrentServer.Name = result.Data.ToString();
-            await ServerDbService.UpdateAsync(ContextService.CurrentServer);
+            ContextService.CurrentServer!.Name = result.Data.ToString()!;
+            await ServerDbService.UpdateAndSave(ContextService.CurrentServer);
         }
     }
 
@@ -94,16 +95,16 @@
     {
         var parameters = new DialogParameters
         {
-            ["Pseudo"] = ContextService.CurrentUser.Pseudo,
+            ["Pseudo"] = ContextService.CurrentUser!.Pseudo,
         };
-        var dialog = DialogService.Show<UserDialog>("Créer un utilisateur", parameters);
+        var dialog = DialogService.Show<UserDialog>("Create user", parameters);
 
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            ContextService.CurrentUser.Pseudo = result.Data.ToString();
-            await UserDbService.UpdateAsync(ContextService.CurrentUser);
+            ContextService.CurrentUser.Pseudo = result.Data.ToString()!;
+            await UserDbService.UpdateAndSave(ContextService.CurrentUser);
         }
     }
 

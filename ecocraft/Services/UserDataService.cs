@@ -3,12 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
-public class UserDataService(UserSkillDbService userSkillDbService,
+public class UserDataService(
+	UserSkillDbService userSkillDbService,
     UserCraftingTableDbService userCraftingTableDbService,
     UserSettingDbService userSettingDbService,
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
-    UserRecipeDbService userRecipeDbService)
+    UserRecipeDbService userRecipeDbService,
+    ServerDataService serverDataService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
@@ -39,11 +41,37 @@ public class UserDataService(UserSkillDbService userSkillDbService,
     public void AddUserSkill(UserSkill userSkill)
     {
 		UserSkills.Add(userSkill);
+		userSkillDbService.Add(userSkill);
 	}
 
     public void RemoveUserSkill(UserSkill userSkill)
     {
         UserSkills.Remove(userSkill);
+        userSkillDbService.Delete(userSkill);
+    }
+
+    public void AddUserCraftingTable(UserCraftingTable userCraftingTable)
+    {
+		UserCraftingTables.Add(userCraftingTable);
+		userCraftingTableDbService.Add(userCraftingTable);
+	}
+
+    public void RemoveUserCraftingTable(UserCraftingTable userCraftingTable)
+    {
+        UserCraftingTables.Remove(userCraftingTable);
+        userCraftingTableDbService.Delete(userCraftingTable);
+    }
+
+    public void AddUserRecipe(UserRecipe userRecipe)
+    {
+		UserRecipes.Add(userRecipe);
+		userRecipeDbService.Add(userRecipe);
+	}
+
+    public void RemoveUserRecipe(UserRecipe userRecipe)
+    {
+        UserRecipes.Remove(userRecipe);
+        userRecipeDbService.Delete(userRecipe);
     }
 
     // Méthode pour mettre à jour les compétences de l'utilisateur
@@ -87,9 +115,9 @@ public class UserDataService(UserSkillDbService userSkillDbService,
 		{
 			UserCraftingTables.Remove(existingTable);
 		}
-
+		
 		PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
-
+		
 		// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
 		foreach (var craftingTable in newCraftingTables)
 		{
@@ -109,28 +137,39 @@ public class UserDataService(UserSkillDbService userSkillDbService,
 		
         return UserCraftingTables;
 	}
-
-	// Méthode pour calculer les recettes disponibles
-	public IEnumerable<Recipe> GetAvailableRecipes()
+	
+	public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
 	{
 		var skills = UserSkills.Select(us => us.Skill);
-		var craftingTables = UserCraftingTables.Select(uct => uct.CraftingTable);
 		var recipes = new HashSet<Recipe>();
-
-		// Ajouter les recettes en fonction des compétences
+		
 		foreach (var skill in skills)
 		{
-			var userSkilllevel = UserSkills.FirstOrDefault(us => us.Skill == skill).Level;
-			recipes.UnionWith(skill.Recipes.Where(r => r.SkillLevel <= userSkilllevel));
+			var userSkillLevel = skill.UserSkills.First().Level;
+			var foundRecipes = skill.Recipes.Where(r => r.Skill == skill);
+			
+			recipes.UnionWith(limitToSkillLevelRecipes ? foundRecipes.Where(r => r.SkillLevel <= userSkillLevel) : foundRecipes);
 		}
-
-		// Ajouter les recettes en fonction des tables d'artisanat
-		/*foreach (var table in craftingTables)
+		
+		if (addNonSkilledRecipes)
 		{
-			recipes.UnionWith(table.Recipes);
-		}*/
-
-		return recipes;
+			recipes.UnionWith(UserRecipes.Select(ucr => ucr.Recipe).Where(r => r.Skill is null));
+		}
+		
+		return recipes.ToList();
 	}
-
+	
+	public List<Skill> GetAvailableSkills()
+	{
+		var userSkills = UserSkills.Select(us => us.Skill);
+		
+		return serverDataService.Skills.Where(s => !userSkills.Contains(s)).ToList();
+	}
+	
+	public List<CraftingTable> GetAvailableCraftingTables()
+	{
+		var userCraftingTables = UserCraftingTables.Select(us => us.CraftingTable);
+		
+		return serverDataService.CraftingTables.Where(c => !userCraftingTables.Contains(c)).ToList();
+	}
 }

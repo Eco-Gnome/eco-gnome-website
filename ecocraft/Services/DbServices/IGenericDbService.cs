@@ -8,9 +8,9 @@
 	{
 		Task<List<T>> GetAllAsync();
 		Task<T?> GetByIdAsync(Guid id);
-		Task AddAsync(T entity);
-		Task UpdateAsync(T entity);
-		Task DeleteAsync(Guid id);
+		T Add(T entity);
+		void Update(T entity);
+		void Delete(T entity);
 	}
 
 }

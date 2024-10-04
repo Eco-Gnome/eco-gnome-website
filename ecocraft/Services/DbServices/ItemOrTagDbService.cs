@@ -1,68 +1,55 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services
+namespace ecocraft.Services;
+
+public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbService<ItemOrTag>
 {
-	public class ItemOrTagDbService : IGenericDbService<ItemOrTag>
+	public Task<List<ItemOrTag>> GetAllAsync()
 	{
-		private readonly EcoCraftDbContext _context;
+		return context.ItemOrTags
+			.ToListAsync();
+	}
 
-		public ItemOrTagDbService(EcoCraftDbContext context)
-		{
-			_context = context;
-		}
+	public Task<List<ItemOrTag>> GetByServerAsync(Server server)
+	{
+		return context.ItemOrTags
+			.Where(s => s.ServerId == server.Id)
+			.ToListAsync();
+	}
 
-		public async Task<List<ItemOrTag>> GetAllAsync()
-		{
-			return await _context.ItemOrTags
-				.Include(i => i.UserPrices)
-				.Include(i => i.Server)
-				.ToListAsync();
-		}
-
-		public Task<List<ItemOrTag>> GetByServerAsync(Server server)
-		{
-			return _context.ItemOrTags
-				.Include(i => i.AssociatedItemOrTags)
-				.Where(s => s.ServerId == server.Id)
-				.ToListAsync();
-		}
-
-		public async Task<ItemOrTag?> GetByIdAsync(Guid id)
-		{
-			return await _context.ItemOrTags
-				.Include(i => i.UserPrices)
-				.Include(i => i.Server)
-				.FirstOrDefaultAsync(i => i.Id == id);
-		}
+	public Task<ItemOrTag?> GetByIdAsync(Guid id)
+	{
+		return context.ItemOrTags
+			.FirstOrDefaultAsync(i => i.Id == id);
+	}
 		
-		public async Task<ItemOrTag?> GetByNameAsync(string name)
-		{
-			return await _context.ItemOrTags
-				.Include(s => s.Server)
-				.FirstOrDefaultAsync(s => s.Name == name);
-		}
+	public Task<ItemOrTag?> GetByNameAsync(string name)
+	{
+		return context.ItemOrTags
+			.FirstOrDefaultAsync(s => s.Name == name);
+	}
+		
+	public ItemOrTag? GetByName(string name)
+	{
+		return context.ItemOrTags
+			.FirstOrDefault(s => s.Name == name);
+	}
 
-		public async Task AddAsync(ItemOrTag itemOrTag)
-		{
-			await _context.ItemOrTags.AddAsync(itemOrTag);
-			await _context.SaveChangesAsync();
-		}
+	public ItemOrTag Add(ItemOrTag itemOrTag)
+	{
+		context.ItemOrTags.Add(itemOrTag);
 
-		public async Task UpdateAsync(ItemOrTag itemOrTag)
-		{
-			_context.ItemOrTags.Update(itemOrTag);
-			await _context.SaveChangesAsync();
-		}
+		return itemOrTag;
+	}
 
-		public async Task DeleteAsync(Guid id)
-		{
-			var itemOrTag = await GetByIdAsync(id);
-			if (itemOrTag != null)
-			{
-				_context.ItemOrTags.Remove(itemOrTag);
-				await _context.SaveChangesAsync();
-			}
-		}
+	public void Update(ItemOrTag itemOrTag)
+	{
+		context.ItemOrTags.Update(itemOrTag);
+	}
+
+	public void Delete(ItemOrTag itemOrTag)
+	{
+		context.ItemOrTags.Remove(itemOrTag);
 	}
 }

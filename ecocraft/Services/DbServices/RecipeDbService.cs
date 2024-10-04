@@ -1,64 +1,53 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services
+namespace ecocraft.Services;
+
+public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService<Recipe>
 {
-	public class RecipeDbService : IGenericDbService<Recipe>
+	public async Task<List<Recipe>> GetAllAsync()
 	{
-		private readonly EcoCraftDbContext _context;
-
-		public RecipeDbService(EcoCraftDbContext context)
-		{
-			_context = context;
-		}
-
-		public async Task<List<Recipe>> GetAllAsync()
-		{
-			return await _context.Recipes.Include(r => r.Elements)
-										  .Include(r => r.Skill)
-										  .Include(r => r.CraftingTable)
-										  .Include(r => r.Server)
-										  .ToListAsync();
-		}
-
-		public Task<List<Recipe>> GetByServerAsync(Server server)
-		{
-			return _context.Recipes.Include(c => c.Elements)
-				.Where(s => s.ServerId == server.Id)
-				.ToListAsync();
-		}
-
-		public async Task<Recipe> GetByIdAsync(Guid id)
-		{
-			return await _context.Recipes.Include(r => r.Elements)
-										  .Include(r => r.Skill)
-										  .Include(r => r.CraftingTable)
-										  .Include(r => r.Server)
-										  .FirstOrDefaultAsync(r => r.Id == id);
-		}
-
-		public async Task AddAsync(Recipe recipe)
-		{
-			await _context.Recipes.AddAsync(recipe);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task UpdateAsync(Recipe recipe)
-		{
-			_context.Recipes.Update(recipe);
-			await _context.SaveChangesAsync();
-		}
-
-		public async Task DeleteAsync(Guid id)
-		{
-			var recipe = await GetByIdAsync(id);
-			if (recipe != null)
-			{
-				_context.Recipes.Remove(recipe);
-				await _context.SaveChangesAsync();
-			}
-		}
+		return await context.Recipes
+			.Include(r => r.Elements)
+			.ToListAsync();
 	}
 
+	public Task<List<Recipe>> GetByServerAsync(Server server)
+	{
+		return context.Recipes
+			.Include(c => c.Elements)
+			.Where(s => s.ServerId == server.Id)
+			.ToListAsync();
+	}
 
+	public Task<Recipe?> GetByNameAsync(string name)
+	{
+		return context.Recipes
+			.Include(r => r.Elements)
+			.FirstOrDefaultAsync(r => r.Name == name);
+	}
+
+	public Task<Recipe?> GetByIdAsync(Guid id)
+	{
+		return context.Recipes
+			.Include(r => r.Elements)
+			.FirstOrDefaultAsync(r => r.Id == id);
+	}
+
+	public Recipe Add(Recipe recipe)
+	{
+		context.Recipes.Add(recipe);
+
+		return recipe;
+	}
+
+	public void Update(Recipe recipe)
+	{
+		context.Recipes.Update(recipe);
+	}
+
+	public void Delete(Recipe recipe)
+	{
+		context.Recipes.Remove(recipe);
+	}
 }

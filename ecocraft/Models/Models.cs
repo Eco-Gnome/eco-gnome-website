@@ -23,6 +23,11 @@ namespace ecocraft.Models
         public Server Server { get; set; }
         public List<Element> Elements { get; set; } = new List<Element>();
         public List<UserRecipe> UserRecipes { get; set; } = new List<UserRecipe>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class Element
@@ -49,6 +54,11 @@ namespace ecocraft.Models
         {
             return Quantity > 0;
         }
+
+        public override string ToString()
+        {
+            return ItemOrTag.Name;
+        }
     }
 
     public class ItemOrTag
@@ -64,6 +74,11 @@ namespace ecocraft.Models
         public List<Element> Elements { get; set; } = new List<Element>();
         public List<UserPrice> UserPrices { get; set; } = new List<UserPrice>();
         public List<ItemOrTag> AssociatedItemOrTags { get; set; } = new List<ItemOrTag>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class Skill
@@ -75,6 +90,11 @@ namespace ecocraft.Models
         public Server Server { get; set; }
         public List<Recipe> Recipes { get; set; } = new List<Recipe>();
         public List<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class CraftingTable
@@ -87,6 +107,11 @@ namespace ecocraft.Models
         public List<UserCraftingTable> UserCraftingTables { get; set; } = new List<UserCraftingTable>();
         public List<Recipe> Recipes { get; set; } = new List<Recipe>();
         public List<PluginModule> PluginModules { get; set; } = new List<PluginModule>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class PluginModule
@@ -98,6 +123,11 @@ namespace ecocraft.Models
         
         public Server Server { get; set; }
         public List<CraftingTable> CraftingTables { get; set; } = new List<CraftingTable>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     // User Data
