@@ -150,7 +150,7 @@
 	{
 		ContextService.OnContextChanged -= StateHasChanged;
 	}
-	
+
 	private Task<IEnumerable<Skill>> SearchSkills(string value)
 	{
 		IEnumerable<Skill> result;
@@ -165,14 +165,14 @@
 				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
-		
+
 		return Task.FromResult(result);
 	}
-	
+
 	private Task<IEnumerable<Recipe>> SearchRecipes(string value)
 	{
 		IEnumerable<Recipe> result;
-		
+
 		if (string.IsNullOrEmpty(value))
 		{
 			result = UserDataService.GetAvailableRecipes();
@@ -186,7 +186,7 @@
 
 		return Task.FromResult(result);
 	}
-	
+
 	private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value)
 	{
 		IEnumerable<CraftingTable> result;
@@ -211,22 +211,24 @@
 		{
 			return;
 		}
-		
+
 		var userSkill = new UserSkill
 		{
 			Skill = skill,
 			UserServer = ContextService.CurrentUserServer!,
 			Level = 1,
 		};
-		
+
 		UserDataService.AddUserSkill(userSkill);
-		
+		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
+
 		_emptySkill = null;
 	}
 
 	private void RemoveUserSkill(UserSkill skill)
 	{
 		UserDataService.RemoveUserSkill(skill);
+		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserCraftingTable(CraftingTable? craftingTable)
@@ -236,10 +238,13 @@
 			return;
 		}
 		
+
+		PluginModule defaultModule = ContextService.CurrentUserServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
 		var userCraftingTable = new UserCraftingTable
 		{
 			CraftingTable = craftingTable,
 			UserServer = ContextService.CurrentUserServer!,
+			PluginModule = defaultModule
 		};
 		
 		UserDataService.AddUserCraftingTable(userCraftingTable);

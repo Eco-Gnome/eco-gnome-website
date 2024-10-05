@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace ecocraft.Services;
 
@@ -103,23 +104,40 @@ public class UserDataService(
         //await _context.SaveChangesAsync();
     }
 
-	// Méthode pour mettre à jour les CraftingTables d'un utilisateur
-	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer, List<CraftingTable> newCraftingTables)
+	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer)
 	{
-        // Charger les UserCraftingTables existantes pour cet utilisateur
-        var existingUserCraftingTables = UserCraftingTables.Where(uct => uct.UserServer.Id == userServer.Id);
+		// 1. Récupérer les compétences actuelles de l'utilisateur
+		var userSkills = UserSkills.Where(us => us.UserServer.Id == userServer.Id).Select(us => us.Skill).ToList();
 
-		var craftingTablesToRemove = existingUserCraftingTables.Where(uct => !newCraftingTables.Any(ct => ct == uct.CraftingTable)).ToList();
+		// 2. Récupérer toutes les CraftingTables disponibles en fonction des compétences de l'utilisateur
+		var availableCraftingTables = new List<CraftingTable>();
+		foreach (var skill in userSkills)
+		{
+			// Ajouter toutes les CraftingTables liées aux recettes que l'utilisateur peut réaliser via ses compétences
+			var craftingTables = skill.Recipes
+				.Select(r => r.CraftingTable)
+				.Distinct()
+				.ToList();
+			availableCraftingTables.AddRange(craftingTables);
+		}
+
+		// 3. Charger les UserCraftingTables existantes pour cet utilisateur
+		var existingUserCraftingTables = UserCraftingTables.Where(uct => uct.UserServer.Id == userServer.Id).ToList();
+
+		// 4. Retirer les UserCraftingTables qui ne sont plus accessibles via les compétences
+		var craftingTablesToRemove = existingUserCraftingTables
+			.Where(uct => !availableCraftingTables.Any(ct => ct.Id == uct.CraftingTable.Id))
+			.ToList();
 
 		foreach (var existingTable in craftingTablesToRemove)
 		{
 			UserCraftingTables.Remove(existingTable);
 		}
-		
+
+		// 5. Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées à l'utilisateur
 		PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
-		
-		// Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées
-		foreach (var craftingTable in newCraftingTables)
+
+		foreach (var craftingTable in availableCraftingTables)
 		{
 			if (!existingUserCraftingTables.Any(uct => uct.CraftingTable.Id == craftingTable.Id))
 			{
@@ -127,17 +145,17 @@ public class UserDataService(
 				{
 					UserServer = userServer,
 					CraftingTable = craftingTable,
-					// Associer un Upgrade si nécessaire (ici, initialisation avec "no upgrade" par défaut)
-					//UpgradeId = 5
-					PluginModule = defaultModule
+					PluginModule = defaultModule // Associer un PluginModule par défaut
 				};
 				UserCraftingTables.Add(newUserCraftingTable);
 			}
 		}
-		
-        return UserCraftingTables;
+
+		// Retourner la liste mise à jour des UserCraftingTables
+		return UserCraftingTables;
 	}
-	
+
+
 	public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
 	{
 		var skills = UserSkills.Select(us => us.Skill);
@@ -168,8 +186,8 @@ public class UserDataService(
 	
 	public List<CraftingTable> GetAvailableCraftingTables()
 	{
-		var userCraftingTables = UserCraftingTables.Select(us => us.CraftingTable);
+		var userCraftingTables = UserCraftingTables.Select(uct => uct.CraftingTable);
 		
-		return serverDataService.CraftingTables.Where(c => !userCraftingTables.Contains(c)).ToList();
+		return serverDataService.CraftingTables.Where(ct => !userCraftingTables.Contains(ct)).ToList();
 	}
 }
