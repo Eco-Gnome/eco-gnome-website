@@ -1,4 +1,5 @@
 ﻿using ecocraft.Models;
+using ecocraft.Services.DbServices;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -11,7 +12,8 @@ public class UserDataService(
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
-    ServerDataService serverDataService)
+    ServerDataService serverDataService,
+	UserDbService userDbService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
@@ -39,7 +41,21 @@ public class UserDataService(
         UserRecipes = userRecipesTask.Result;
     }
 
-    public void AddUserSkill(UserSkill userSkill)
+	public async Task SaveUserData(UserServer userServer)
+	{
+		userServer.UserSkills = UserSkills;
+		userServer.UserCraftingTables = UserCraftingTables;
+		userServer.UserSettings = UserSettings;
+		userServer.UserElements = UserElements;
+		userServer.UserPrices = UserPrices;
+		userServer.UserRecipes = UserRecipes;
+
+		await userDbService.UpdateAndSave(userServer.User);
+
+    }
+
+
+	public void AddUserSkill(UserSkill userSkill)
     {
 		UserSkills.Add(userSkill);
 		userSkillDbService.Add(userSkill);

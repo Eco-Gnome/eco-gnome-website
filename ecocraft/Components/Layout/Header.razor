@@ -7,6 +7,7 @@
 @inject ContextService ContextService
 @inject IDialogService DialogService
 @inject ServerDbService ServerDbService
+@inject UserDataService UserDataService
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
@@ -51,7 +52,8 @@
 
     private async Task Save()
     {
-        await UserDbService.UpdateAndSave(ContextService.CurrentUser!);
+        //await UserDbService.UpdateAndSave(ContextService.CurrentUser!);
+        await UserDataService.SaveUserData(ContextService.CurrentUserServer!);
     }
 
     private async Task CreateServer()
