@@ -221,6 +221,8 @@
 
 		UserDataService.AddUserSkill(userSkill);
 		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
+		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+
 
 		_emptySkill = null;
 	}
@@ -229,6 +231,7 @@
 	{
 		UserDataService.RemoveUserSkill(skill);
 		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
+		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserCraftingTable(CraftingTable? craftingTable)
@@ -248,6 +251,7 @@
 		};
 		
 		UserDataService.AddUserCraftingTable(userCraftingTable);
+		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 		
 		_emptyCraftingTable = null;
 	}
@@ -255,6 +259,7 @@
 	private void RemoveUserCraftingTable(UserCraftingTable craftingTable)
 	{
 		UserDataService.RemoveUserCraftingTable(craftingTable);
+		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserRecipe(Recipe? recipe)
@@ -280,39 +285,13 @@
 		UserDataService.RemoveUserRecipe(recipe);
 	}
 
-	/*private async Task OnSelectedSkillsChanged(IEnumerable<Skill> newSelectedSkills)
-	{
-		// Mettre à jour les compétences dans la base de données (conversion en List)
-		UserDataService.UpdateUserSkills(ContextService.CurrentUserServer, newSelectedSkills.ToList());
-
-		// Récupère la liste des tables de craft correspondant aux skills sélectionné
-		var selectedTable = UserDataService.UserSkills
-			.SelectMany(us => us.Skill.Recipes)
-			.Select(y => y.CraftingTable)
-			.Distinct();
-
-		// Mettre à jour les compétences dans la base de données (conversion en List)
-		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer, selectedTable.ToList());
-
-		userRecipes = UserDataService.GetAvailableRecipes();
-	}
-
-	private async Task OnSelectedRecipesChanged(IEnumerable<Recipe> newSelectedRecipes)
-	{
-		selectedRecipes = newSelectedRecipes;
-	}
-
-	private async Task OnSelectedCraftingTablesChanged(IEnumerable<CraftingTable> newSelectedCraftingTables)
-	{
-		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer, newSelectedCraftingTables.ToList());
-	}*/
-
 	private void OnLevelChanged(UserSkill userSkill, int newLevel)
 	{
 		// Mettre à jour le niveau de la compétence dans la base de données
 		userSkill.Level = newLevel;
 		// Comment gère-t-on l'argument limitToSkillLevelRecipes ?
-		// userRecipes = UserDataService.GetAvailableRecipes();
+
+		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)

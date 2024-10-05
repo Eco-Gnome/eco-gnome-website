@@ -75,35 +75,6 @@ public class UserDataService(
         userRecipeDbService.Delete(userRecipe);
     }
 
-    // Méthode pour mettre à jour les compétences de l'utilisateur
-    public List<UserSkill> UpdateUserSkills(UserServer userServer, List<Skill> selectedSkills)
-    {
-        // Récupérer les compétences actuelles de l'utilisateur
-        var existingUserSkills = UserSkills.Where(us => us.UserServer.Id == userServer.Id);
-
-        // Supprimer les compétences non sélectionnées
-        var skillsToRemove = existingUserSkills.Where(us => !selectedSkills.Any(s => s.Id == us.SkillId)).ToList();
-        foreach(var userSkill in skillsToRemove)
-            UserSkills.Remove(userSkill);            
-
-        // Ajouter les nouvelles compétences sélectionnées
-        foreach (var skill in selectedSkills)
-        {
-            if (!existingUserSkills.Any(us => us.SkillId == skill.Id))
-            {
-                var newUserSkill = new UserSkill
-                {
-                    UserServer = userServer,
-                    Skill = skill,
-                    Level = 1 // Ajuster le niveau si nécessaire
-                };
-                UserSkills.Add(newUserSkill);
-            }
-        }
-        return UserSkills;
-        //await _context.SaveChangesAsync();
-    }
-
 	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer)
 	{
 		// 1. Récupérer les compétences actuelles de l'utilisateur
@@ -154,6 +125,67 @@ public class UserDataService(
 		// Retourner la liste mise à jour des UserCraftingTables
 		return UserCraftingTables;
 	}
+
+	public List<UserRecipe> UpdateUserRecipes(UserServer userServer)
+	{
+		// 1. Récupérer les compétences actuelles de l'utilisateur et leur niveau
+		var userSkills = UserSkills.Where(us => us.UserServer.Id == userServer.Id).ToList();
+
+		// 2. Récupérer les CraftingTables disponibles pour cet utilisateur
+		var craftingTables = UserCraftingTables
+			.Where(uct => uct.UserServer.Id == userServer.Id)
+			.Select(uct => uct.CraftingTable)
+			.ToList();
+
+		// 3. Charger les UserRecipes existants pour cet utilisateur
+		var existingUserRecipes = UserRecipes.Where(ur => ur.UserServer.Id == userServer.Id).ToList();
+
+		// Liste pour les nouvelles recettes
+		var availableRecipes = new List<Recipe>();
+
+		// 4. Récupérer les recettes disponibles en fonction des compétences de l'utilisateur et des CraftingTables
+		foreach (var userSkill in userSkills)
+		{
+			var skill = userSkill.Skill;
+			var skillLevel = userSkill.Level;
+
+			// Ajouter les recettes qui correspondent au niveau de compétence de l'utilisateur
+			var validRecipes = skill.Recipes
+				.Where(r => r.SkillLevel <= skillLevel) // Limité au niveau de compétence
+				.Where(r => craftingTables.Any(ct => ct.Id == r.CraftingTable.Id)) // Table d'artisanat disponible
+				.ToList();
+
+			availableRecipes.AddRange(validRecipes);
+		}
+
+		// 5. Supprimer les UserRecipes qui ne sont plus accessibles
+		var recipesToRemove = existingUserRecipes
+			.Where(ur => !availableRecipes.Any(ar => ar.Id == ur.Recipe.Id))
+			.ToList();
+
+		foreach (var recipeToRemove in recipesToRemove)
+		{
+			UserRecipes.Remove(recipeToRemove);
+		}
+
+		// 6. Ajouter les nouvelles UserRecipes qui ne sont pas déjà associées à l'utilisateur
+		foreach (var recipe in availableRecipes)
+		{
+			if (!existingUserRecipes.Any(ur => ur.Recipe.Id == recipe.Id))
+			{
+				var newUserRecipe = new UserRecipe
+				{
+					UserServer = userServer,
+					Recipe = recipe
+				};
+				UserRecipes.Add(newUserRecipe);
+			}
+		}
+
+		// Retourner la liste mise à jour des UserRecipes
+		return UserRecipes;
+	}
+
 
 
 	public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
