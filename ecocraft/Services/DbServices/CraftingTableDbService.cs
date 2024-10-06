@@ -14,7 +14,8 @@ public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDb
 	public Task<List<CraftingTable>> GetByServerAsync(Server server)
 	{
 		return context.CraftingTables
-			.Where(s => s.ServerId == server.Id)
+			.Where(ct => ct.ServerId == server.Id)
+			.Include(ct => ct.PluginModules)
 			.ToListAsync();
 	}
 

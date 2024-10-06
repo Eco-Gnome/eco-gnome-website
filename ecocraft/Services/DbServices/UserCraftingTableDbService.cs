@@ -18,7 +18,7 @@ namespace ecocraft.Services
 		{
 			return context.UserCraftingTables
 				.Where(s => s.UserServerId == userServer.Id)
-				.ToListAsync();
+                .ToListAsync();
 		}
 
 		public async Task<UserCraftingTable?> GetByIdAsync(Guid id)
