@@ -52,7 +52,6 @@
 
     private async Task Save()
     {
-        //await UserDbService.UpdateAndSave(ContextService.CurrentUser!);
         await UserDataService.SaveUserData(ContextService.CurrentUserServer!);
     }
 

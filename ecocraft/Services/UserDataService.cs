@@ -78,8 +78,19 @@ public class UserDataService(
         UserCraftingTables.Remove(userCraftingTable);
         userCraftingTableDbService.Delete(userCraftingTable);
     }
+	public void AddUserSetting(UserSetting userSetting)
+	{
+		UserSettings.Add(userSetting);
+		userSettingDbService.Add(userSetting);
+	}
 
-    public void AddUserRecipe(UserRecipe userRecipe)
+	public void RemoveUserSetting(UserSetting userSetting)
+	{
+		UserSettings.Remove(userSetting);
+		userSettingDbService.Delete(userSetting);
+	}
+
+	public void AddUserRecipe(UserRecipe userRecipe)
     {
 		UserRecipes.Add(userRecipe);
 		userRecipeDbService.Add(userRecipe);
