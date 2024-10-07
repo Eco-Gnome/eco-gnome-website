@@ -85,6 +85,7 @@ namespace ecocraft.Models
     {
         [Key] public Guid Id { get; set; }
         public string Name { get; set; }
+        public string? Profession { get; set; }
         [ForeignKey("Server")] public Guid ServerId { get; set; }
         
         public Server Server { get; set; }

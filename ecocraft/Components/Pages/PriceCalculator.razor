@@ -11,16 +11,26 @@
 	<MudGrid>
 		<!-- Première Colonne -->
 		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudAutocomplete T="Skill" 
-			                 Value="_emptySkill" 
-			                 SearchFunc="SearchSkills" 
-			                 ValueChanged="AddUserSkill" 
-			                 Placeholder="Choose skills" 
-			                 Dense="true" 
+			<MudAutocomplete T="Skill"
+			                 Value="_emptySkill"
+			                 SearchFunc="SearchSkills"
+			                 ValueChanged="AddUserSkill"
+			                 Placeholder="Choose skills"
+			                 Dense="true"
 			                 MaxItems="null"
-			                 Variant="Variant.Outlined" 
-			                 AnchorOrigin="Origin.BottomLeft" 
+			                 Variant="Variant.Outlined"
+			                 AnchorOrigin="Origin.BottomLeft"
 			                 TransformOrigin="Origin.TopLeft">
+				<ItemTemplate>
+					@if (!string.IsNullOrEmpty(context.Profession) && previousProfession != context.Profession)
+					{
+						<MudText Color="Color.Primary" Typo="Typo.caption">@context.Profession</MudText>
+					}
+					<MudText>@context.Name</MudText>
+					@{
+						previousProfession = context.Profession;
+					}
+				</ItemTemplate>
 			</MudAutocomplete>
 
 			<MudTable Items="UserServerDataService.UserSkills" Dense="true">
@@ -145,6 +155,7 @@
 	private Skill? _emptySkill = null;
 	private Recipe? _emptyRecipe = null;
 	private CraftingTable? _emptyCraftingTable = null;
+	private string previousProfession = null;
 
 	protected override Task OnInitializedAsync()
 	{
@@ -173,6 +184,8 @@
 				.ToList();
 		}
 
+		result = result.Where(s => s.Profession is not null).OrderBy(s => s.Profession);
+
 		return Task.FromResult(result);
 	}
 
@@ -191,6 +204,8 @@
 				.ToList();
 		}
 
+		result = result.OrderBy(r => r.Name);
+
 		return Task.FromResult(result);
 	}
 
@@ -208,6 +223,8 @@
 				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
+
+		result = result.OrderBy(c => c.Name);
 
 		return Task.FromResult(result);
 	}

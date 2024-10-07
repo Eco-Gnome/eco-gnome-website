@@ -8,8 +8,6 @@ public class ElementDbService(EcoCraftDbContext context) : IGenericDbService<Ele
 	public Task<List<Element>> GetAllAsync()
 	{
 		return context.Elements.Include(p => p.Recipe)
-			.Include(p => p.ItemOrTag)
-			.Include(p => p.UserElements)
 			.ToListAsync();
 	}
 

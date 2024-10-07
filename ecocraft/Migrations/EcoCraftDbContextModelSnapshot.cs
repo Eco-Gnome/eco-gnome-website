@@ -34,15 +34,15 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ItemTagAssoc", b =>
                 {
-                    b.Property<Guid>("TagId")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("ItemId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("TagId", "ItemId");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("TEXT");
 
-                    b.HasIndex("ItemId");
+                    b.HasKey("ItemId", "TagId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("ItemTagAssoc");
                 });
@@ -229,6 +229,9 @@ namespace ecocraft.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Profession")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ServerId")

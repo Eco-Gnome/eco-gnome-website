@@ -83,11 +83,11 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.UsingEntity(
 				"ItemTagAssoc",
-				l => l.HasOne(typeof(ItemOrTag)).WithMany().HasForeignKey("TagId")
-					.HasPrincipalKey(nameof(ItemOrTag.Id)),
 				r => r.HasOne(typeof(ItemOrTag)).WithMany().HasForeignKey("ItemId")
 					.HasPrincipalKey(nameof(ItemOrTag.Id)),
-				j => j.HasKey("TagId", "ItemId"));
+				l => l.HasOne(typeof(ItemOrTag)).WithMany().HasForeignKey("TagId")
+					.HasPrincipalKey(nameof(ItemOrTag.Id)),
+				j => j.HasKey("ItemId", "TagId"));
 		
 		// Skill
 		modelBuilder.Entity<Skill>()

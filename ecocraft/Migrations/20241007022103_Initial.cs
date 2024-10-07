@@ -104,6 +104,7 @@ namespace ecocraft.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Profession = table.Column<string>(type: "TEXT", nullable: true),
                     ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -148,12 +149,12 @@ namespace ecocraft.Migrations
                 name: "ItemTagAssoc",
                 columns: table => new
                 {
-                    TagId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ItemId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    ItemId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    TagId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemTagAssoc", x => new { x.TagId, x.ItemId });
+                    table.PrimaryKey("PK_ItemTagAssoc", x => new { x.ItemId, x.TagId });
                     table.ForeignKey(
                         name: "FK_ItemTagAssoc_ItemOrTag_ItemId",
                         column: x => x.ItemId,
@@ -451,9 +452,9 @@ namespace ecocraft.Migrations
                 column: "ServerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemTagAssoc_ItemId",
+                name: "IX_ItemTagAssoc_TagId",
                 table: "ItemTagAssoc",
-                column: "ItemId");
+                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PluginModule_ServerId",

@@ -15,12 +15,12 @@ namespace ecocraft.Services.ImportData
 
                 if (importedData is not null)
                 {
-                    ImportSkills(server, importedData.skills);
+                    ImportSkills(server, importedData.skills, importedData.itemTagAssoc);
                     ImportPluginModules(server, importedData.pluginModules);
                     ImportCraftingTables(server, importedData.craftingTables);
                     ImportItemTag(server, importedData.itemTagAssoc);
                     ImportRecipes(server, importedData.recipes);
-
+                    
                     await dbContext.SaveChangesAsync();
                 }
             }
@@ -34,7 +34,7 @@ namespace ecocraft.Services.ImportData
             }
         }
 
-        private void ImportSkills(Server server, List<SkillDto> newSkills)
+        private void ImportSkills(Server server, List<SkillDto> newSkills, List<ItemTagAssocDto> newItemTagAssocs)
         {
             foreach (var newSkill in newSkills)
             {
@@ -42,9 +42,12 @@ namespace ecocraft.Services.ImportData
 
                 if (dbSkill is null)
                 {
-                    serverDataService.ImportSkill(server, newSkill.Name);
+                    serverDataService.ImportSkill(server, newSkill.Name, newSkill.Profession);
                 }
-                // Else, do nothing because Skill does not have anything else to save
+                else
+                {
+                    serverDataService.RefreshSkill(dbSkill, newSkill.Profession);
+                }
             }
         }
 
@@ -99,32 +102,12 @@ namespace ecocraft.Services.ImportData
         {
             foreach (var newItemOrTag in newItemOrTags)
             {
-                var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag);
-
-                if (dbTag is null)
-                {
-                    dbTag = serverDataService.ImportItemOrTag(server, newItemOrTag.Tag, true);
-                }
-                else
-                {
-                    serverDataService.RefreshItemOrTag(dbTag, true);
-                }
-
+                var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag) ?? serverDataService.ImportItemOrTag(server, newItemOrTag.Tag, true);
                 dbTag.AssociatedItemOrTags.Clear();
 
                 foreach (var item in newItemOrTag.Types)
                 {
-                    var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item);
-
-                    if (itemDb is null)
-                    {
-                        itemDb = serverDataService.ImportItemOrTag(server, dbTag.Name, false);
-                    }
-                    else
-                    {
-                        serverDataService.RefreshItemOrTag(itemDb, true);
-                    }
-
+                    var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item) ?? serverDataService.ImportItemOrTag(server, item, false);
                     dbTag.AssociatedItemOrTags.Add(itemDb);
                 }
             }
@@ -262,6 +245,7 @@ namespace ecocraft.Services.ImportData
         private class SkillDto
         {
             public string Name { get; set; }
+            public string? Profession { get; set; }
         }
     }
 }

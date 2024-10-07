@@ -35,11 +35,12 @@ public class ServerDataService(
         ItemOrTags = itemOrTagsTask.Result;
     }
 
-    public Skill ImportSkill(Server server, string name)
+    public Skill ImportSkill(Server server, string name, string? profession)
     {
         var skill = new Skill
         {
             Name = name,
+            Profession = profession,
             Server = server,
         };
 
@@ -47,6 +48,12 @@ public class ServerDataService(
         skillDbService.Add(skill);
 
         return skill;
+    }
+
+    public void RefreshSkill(Skill skill, string? profession)
+    {
+        skill.Profession = profession;
+        skillDbService.Update(skill);
     }
 
     public PluginModule ImportPluginModule(Server server, string name, float percent)
