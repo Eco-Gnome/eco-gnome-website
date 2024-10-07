@@ -11,7 +11,7 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241007022103_Initial")]
+    [Migration("20241007160000_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
