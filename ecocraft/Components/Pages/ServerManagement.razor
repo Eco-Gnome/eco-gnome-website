@@ -5,28 +5,57 @@
 @using Microsoft.AspNetCore.Authorization
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
+@inject NavigationManager Navigation
 
 <PageTitle>Server Management</PageTitle>
 
 <MudContainer>
 	<MudGrid>
-		<MudItem sm="12" Class="border-solid border-2 mud-border-primary pa-4">
+		<MudItem sm="6" Class="pa-4">
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
-							   Variant="Variant.Filled"
-							   Color="Color.Primary"
-							   StartIcon="@Icons.Material.Filled.CloudUpload"
-							   for="@fileInput">
-						Upload Files
+					           Variant="Variant.Filled"
+					           Color="Color.Primary"
+					           StartIcon="@Icons.Material.Filled.CloudUpload"
+					           for="@fileInput">
+						Upload Server Data
 					</MudButton>
 				</ButtonTemplate>
 			</MudFileUpload>
- 		</MudItem>
+		</MudItem>
+		<MudItem sm="6" Class="pa-4">
+			<MudButton HtmlTag="label"
+			           Variant="Variant.Filled"
+			           Color="Color.Warning"
+			           StartIcon="@Icons.Material.Filled.DeleteForever"
+			           OnClick="DeleteServer">
+				Delete Server
+			</MudButton>
+			 @if (_askDeleteConfirmation)
+			{
+				<MudButton HtmlTag="label"
+				           Variant="Variant.Filled"
+				           Color="Color.Secondary"
+				           StartIcon="@Icons.Material.Filled.Close"
+				           OnClick="CancelDeleteServer">
+					Delete Server
+				</MudButton>
+				<MudButton HtmlTag="label"
+				           Variant="Variant.Filled"
+				           Color="Color.Tertiary"
+				           StartIcon="@Icons.Material.Filled.Check"
+				           OnClick="ConfirmDeleteServer">
+					Delete Server
+				</MudButton>
+			}
+		</MudItem>
 	</MudGrid>
 </MudContainer>
 
 @code {
+	private bool _askDeleteConfirmation = false;
+	
 	// TODO: Handle an update of server data
 	private async Task UploadFiles(IBrowserFile? file)
 	{
@@ -51,5 +80,22 @@
 				throw new Exception("ContextService.CurrentServer is null !");
 			}
 		}
+	}
+
+	private void DeleteServer()
+	{
+		_askDeleteConfirmation = true;
+	}
+
+	private void CancelDeleteServer()
+	{
+		_askDeleteConfirmation = false;
+	}
+
+	private async void ConfirmDeleteServer()
+	{
+		_askDeleteConfirmation = false;
+		await ContextService.DeleteCurrentServer();
+		Navigation.NavigateTo("/");
 	}
 }

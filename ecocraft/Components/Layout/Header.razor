@@ -35,13 +35,6 @@
     @code {
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
-    public int valueDebug = 0;
-
-    public void Log()
-    {
-        valueDebug = ContextService.CurrentUserServer.UserSkills.Count;
-    }
-
     protected override void OnInitialized()
     {
         ContextService.OnContextChanged += StateHasChanged;

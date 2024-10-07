@@ -7,30 +7,46 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<title>Eco Price Calculator</title>
+
 <MudLayout>
     <MudAppBar Elevation="1">
-		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
-        <MudSpacer />
-        <Header></Header>
+        <MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start" />
+        <MudText Typo="Typo.h5" Class="ml-3">Eco Price Calculator</MudText>
+        <MudSpacer/>
+        @if (!_isLoading)
+        {
+            <Header></Header>
+        }
     </MudAppBar>
-    
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
+
+    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu/>
     </MudDrawer>
-    
-    <MudMainContent Class="mt-16 pa-4">
-        @Body
+
+    <MudMainContent Class="mt-16 pa-8">
+        @if (!_isLoading)
+        {
+            @Body
+        }
+        else
+        {
+            <MudItem sm="12" class="d-flex justify-center">
+                <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+            </MudItem>
+        }
     </MudMainContent>
+    
 </MudLayout>
 
 @code {
-    private bool _drawerOpen = true;
+    // private bool _drawerOpen = true;
+    private bool _isLoading = true;
 
-    private void DrawerToggle()
+    /*private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
-    }
+    }*/
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -40,7 +56,8 @@
         }
 
         await ContextService.InitializeContext();
-	
+
+        this._isLoading = false;
         StateHasChanged();
     }
 }

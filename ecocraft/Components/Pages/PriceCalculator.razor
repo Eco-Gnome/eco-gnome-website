@@ -4,104 +4,114 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
+@inject LocalStorageService LocalStorageService
 
 <PageTitle>Price Calculator</PageTitle>
 
-<MudContainer>
-	<MudGrid>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+	<MudGrid Style="height: auto">
 		<!-- Première Colonne -->
-		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudAutocomplete T="Skill"
-			                 Value="_emptySkill"
-			                 SearchFunc="SearchSkills"
-			                 ValueChanged="AddUserSkill"
-			                 Placeholder="Choose skills"
-			                 Dense="true"
-			                 MaxItems="null"
-			                 Variant="Variant.Outlined"
-			                 AnchorOrigin="Origin.BottomLeft"
-			                 TransformOrigin="Origin.TopLeft">
-				<ItemTemplate>
-					@if (!string.IsNullOrEmpty(context.Profession) && previousProfession != context.Profession)
-					{
-						<MudText Color="Color.Primary" Typo="Typo.caption">@context.Profession</MudText>
-					}
-					<MudText>@context.Name</MudText>
-					@{
-						previousProfession = context.Profession;
-					}
-				</ItemTemplate>
-			</MudAutocomplete>
-
-			<MudTable Items="UserServerDataService.UserSkills" Dense="true">
-				<HeaderContent>
-					<MudTh>Name</MudTh>
-					<MudTh>Level</MudTh>
-					<MudTh>Action</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd>
-						@context.Skill.Name
-					</MudTd>
-					<MudTd>
-						<MudNumericField HideSpinButtons="true" T="int" Value=@context.Level Variant="Variant.Text" Min="0" Max="7" Style="width: 24px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
-					</MudTd>
-					<MudTd>
-						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
-					</MudTd>
-				</RowTemplate>
-			</MudTable>
-
-			<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
-
-			<MudAutocomplete T="CraftingTable"
-			                 Value="_emptyCraftingTable"
-			                 SearchFunc="SearchCraftingTables"
-			                 ValueChanged="AddUserCraftingTable"
-			                 Placeholder="Choose a crafting table..." 
-			                 Dense="true"
-			                 MaxItems="null"
-			                 Variant="Variant.Outlined"
-			                 AnchorOrigin="Origin.BottomLeft"
-			                 TransformOrigin="Origin.TopLeft">
-			</MudAutocomplete>
-
-			<MudTable Items="UserServerDataService.UserCraftingTables" Dense="true">
-				<HeaderContent>
-					<MudTh>Name</MudTh>
-					<MudTh>Upgrade</MudTh>
-					<MudTh>Action</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd>
-						@context.CraftingTable.Name
-					</MudTd>
-					<MudTd>
-						<MudSelect T="PluginModule" Placeholder="Choose a module" Value=@context.PluginModule Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
-							@foreach (var pluginModule in context.CraftingTable.PluginModules)
+		<MudItem sm="4" Class="pa-2 d-flex flex-column">
+			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+				<MudAutocomplete T="Skill"
+				                 @ref="_autocompleteSkillRef"
+				                 Value="_emptySkill"
+				                 SearchFunc="SearchSkills"
+				                 ValueChanged="AddUserSkill"
+				                 Placeholder="Choose skills"
+				                 Dense="true"
+				                 MaxItems="null"
+				                 Variant="Variant.Outlined"
+				                 AnchorOrigin="Origin.BottomLeft"
+				                 TransformOrigin="Origin.TopLeft">
+					<ItemTemplate>
+						@if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
 						{
-							<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
+							<MudText Color="Color.Primary" Typo="Typo.caption">@context.Profession</MudText>
 						}
-						</MudSelect> 
-					</MudTd>
-					<MudTd>
-						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
-					</MudTd>
-				</RowTemplate>
-			</MudTable> 
+						<MudText>@context.Name</MudText>
+						@{
+							_previousProfession = context.Profession;
+						}
+					</ItemTemplate>
+				</MudAutocomplete>
+
+				<MudTable Items="UserServerDataService.UserSkills" Dense="true">
+					<HeaderContent>
+						<MudTh>Name</MudTh>
+						<MudTh>Level</MudTh>
+						<MudTh>Action</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							@context.Skill.Name
+						</MudTd>
+						<MudTd>
+							<MudNumericField HideSpinButtons="true" T="int" Value=@context.Level Variant="Variant.Text" Min="0" Max="7" Style="width: 24px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
+						</MudTd>
+						<MudTd>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+
+				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+				<MudAutocomplete T="CraftingTable"
+				                 @ref="_autocompleteCraftingTableRef"
+				                 Value="_emptyCraftingTable"
+				                 SearchFunc="SearchCraftingTables"
+				                 ValueChanged="AddUserCraftingTable"
+				                 Placeholder="Choose a crafting table..." 
+				                 Dense="true"
+				                 MaxItems="null"
+				                 Variant="Variant.Outlined"
+				                 AnchorOrigin="Origin.BottomLeft"
+				                 TransformOrigin="Origin.TopLeft">
+				</MudAutocomplete>
+
+				<MudTable Items="UserServerDataService.UserCraftingTables" Dense="true">
+					<HeaderContent>
+						<MudTh>Name</MudTh>
+						<MudTh>Upgrade</MudTh>
+						<MudTh>Action</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							@context.CraftingTable.Name
+						</MudTd>
+						<MudTd>
+							<MudSelect T="PluginModule" Placeholder="Choose a module" Value=@context.PluginModule Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+								@foreach (var pluginModule in context.CraftingTable.PluginModules)
+							{
+								<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
+							}
+							</MudSelect> 
+						</MudTd>
+						<MudTd>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable> 
+ 			</MudItem>
  		</MudItem>
 
 		<!-- Deuxième Colonne -->
-		<MudItem sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudStack>
+		<MudItem sm="4" Class="pa-2 d-flex flex-column">
+			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+				<MudStack>
+				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+					<MudText>Only level-accessible recipes</MudText>
+					<MudCheckBox T="bool" @bind-Value="onlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
+				</MudStack>
 				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 					<MudText>Price per 1000 calories</MudText>
 					@if (UserServerDataService.UserSetting is not null)
 					{
 						<div>
 							@* <MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" /> *@
-							<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" />
-						</div>					
+							<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined"/>
+						</div>
 					}
 
 				</MudStack>
@@ -112,50 +122,70 @@
 					</div>
 				</MudStack> *@
 			</MudStack>
+			</MudItem>
 		</MudItem>
 
 		<!-- Troisième Colonne -->
-		<MudItem xs="12" sm="4" Class="border-solid border-2 mud-border-primary pa-4">
-			<MudAutocomplete T="Recipe"
-			                 Value="_emptyRecipe"
-			                 SearchFunc="SearchRecipes"
-			                 ValueChanged="AddUserRecipe"
-			                 Placeholder="Ajouter une recette" 
-			                 Dense="true"
-			                 MaxItems="null"
-			                 Variant="Variant.Outlined" 
-			                 AnchorOrigin="Origin.BottomLeft" 
-			                 TransformOrigin="Origin.TopLeft">
-			</MudAutocomplete>
+		<MudItem sm="4" Class="pa-2 d-flex flex-column">
+			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+				<MudAutocomplete T="Recipe"
+				                 @ref="_autocompleteRecipeRef"
+				                 Value="_emptyRecipe"
+				                 SearchFunc="SearchRecipes"
+				                 ValueChanged="AddUserRecipe"
+				                 Placeholder="Ajouter une recette"
+				                 Dense="true"
+				                 MaxItems="null"
+				                 Variant="Variant.Outlined"
+				                 AnchorOrigin="Origin.BottomLeft"
+				                 TransformOrigin="Origin.TopLeft">
+				</MudAutocomplete>
 
-			<MudTable Items="UserServerDataService.UserRecipes" Dense="true">
-				<HeaderContent>
-					<MudTh>Name</MudTh>
-					<MudTh>Price</MudTh>
-					<MudTh>Action</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd>
-						@context.Recipe.Name
-					</MudTd>
-					<MudTd>
-						<MudTextField Disabled="true" Value="0"></MudTextField>
-					</MudTd>
-					<MudTd>
-						<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(context))"></MudIconButton>
-					</MudTd>
-				</RowTemplate>
-			</MudTable>
+				<MudTable Items="UserServerDataService.UserRecipes" Dense="true">
+					<HeaderContent>
+						<MudTh>Name</MudTh>
+						<MudTh>Price</MudTh>
+						<MudTh>Action</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							@context.Recipe.Name
+						</MudTd>
+						<MudTd>
+							<MudTextField Disabled="true" Value="0"></MudTextField>
+						</MudTd>
+						<MudTd>
+							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(context))"></MudIconButton>
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+			</MudItem>
 		</MudItem>
 
 	</MudGrid>
 </MudContainer>
 
 @code {
-	private Skill? _emptySkill = null;
-	private Recipe? _emptyRecipe = null;
-	private CraftingTable? _emptyCraftingTable = null;
-	private string previousProfession = null;
+	private MudAutocomplete<Skill>? _autocompleteSkillRef;
+	private MudAutocomplete<CraftingTable>? _autocompleteCraftingTableRef;
+	private MudAutocomplete<Recipe>? _autocompleteRecipeRef;
+
+	private Skill? _emptySkill;
+	private Recipe? _emptyRecipe;
+	private CraftingTable? _emptyCraftingTable;
+	private string? _previousProfession;
+	private bool _onlyLevelAccessibleRecipes = true;
+
+	public bool onlyLevelAccessibleRecipes
+	{
+		get => _onlyLevelAccessibleRecipes;
+		set
+		{
+			_onlyLevelAccessibleRecipes = value;
+			UpdateLocalSettings();
+			UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		}
+	}
 
 	protected override Task OnInitializedAsync()
 	{
@@ -163,10 +193,27 @@
 		
 		return Task.CompletedTask;
 	}
+    
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+		{
+			return;
+		}
+
+		onlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
+		
+		StateHasChanged();
+	}
 
 	public void Dispose()
 	{
 		ContextService.OnContextChanged -= StateHasChanged;
+	}
+
+	private async void UpdateLocalSettings()
+	{
+		await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", onlyLevelAccessibleRecipes.ToString());
 	}
 
 	private Task<IEnumerable<Skill>> SearchSkills(string value)
@@ -247,8 +294,9 @@
 		UserServerDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
 		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 
-
 		_emptySkill = null;
+
+		_autocompleteSkillRef?.Clear();
 	}
 
 	private void RemoveUserSkill(UserSkill skill)
@@ -276,6 +324,7 @@
 		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 
 		_emptyCraftingTable = null;
+		_autocompleteCraftingTableRef?.Clear();
 	}
 
 	private void RemoveUserCraftingTable(UserCraftingTable craftingTable)
@@ -299,7 +348,8 @@
 
 		UserServerDataService.AddUserRecipe(userRecipe);
 
-		_emptySkill = null;
+		_emptyRecipe = null;
+		_autocompleteRecipeRef?.Clear();
 	}
 
 	private void RemoveUserRecipe(UserRecipe recipe)
