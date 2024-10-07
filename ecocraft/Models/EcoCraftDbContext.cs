@@ -229,7 +229,8 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<UserServer>()
 			.HasOne(us => us.Server)
 			.WithMany(s => s.UserServers)
-			.HasForeignKey(us => us.ServerId);
+			.HasForeignKey(us => us.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
 		
 		// * Server Data
 		// Server

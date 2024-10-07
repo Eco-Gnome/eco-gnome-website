@@ -86,6 +86,20 @@ public class UserServerDataService(
         UserRecipes.Remove(userRecipe);
         userRecipeDbService.Delete(userRecipe);
     }
+    
+    /* Comportements d'ajouts automatiques:
+        * Modification du level
+            - Ajout de toutes les recettes nouvellement accessibles à ce skill et aux crafting tables sélectionnées
+            OU
+            - Suppression de toutes les recettes qui ne sont plus accessibles
+		* Ajout d'un UserSkill
+			- Ajout de toutes les tables correspondantes à ce skill
+			- Ajout de toutes les recettes correspondantes à ce skill
+		* Ajout d'une table
+			- Ajout de toutes les recettes liées aux skills actuels et à cette table
+		* Ajout d'une recette
+			- Ajout de la table correspondante
+    */
 
 	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer)
 	{

@@ -90,4 +90,14 @@ public class ContextService(
         // Don't know why, but the second one allows the MudSelect of servers to correctly display the selected server
         OnContextChanged?.Invoke();
     }
+
+    public async Task DeleteCurrentServer()
+    {
+        if (!CurrentUserServer.IsAdmin)
+        {
+            return;
+        }
+        
+        serverDbService.Delete(CurrentServer!);
+    }
 }
