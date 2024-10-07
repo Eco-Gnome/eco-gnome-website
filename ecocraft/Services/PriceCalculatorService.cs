@@ -4,11 +4,11 @@ namespace ecocraft.Services;
 
 public class PriceCalculatorService(
     ServerDataService serverDataService,
-    UserDataService userDataService)
+    UserServerDataService userServerDataService)
 {
     public List<ItemOrTag> ListItemOrTagsToBuy()
     {
-        var selectedElements = userDataService.UserRecipes
+        var selectedElements = userServerDataService.UserRecipes
             .Select(ur => ur.Recipe)
             .SelectMany(r => r.Elements)
             .ToList();
@@ -27,7 +27,7 @@ public class PriceCalculatorService(
     
     public List<ItemOrTag> ListItemOrTagsToSell()
     {
-        var selectedElements = userDataService.UserRecipes
+        var selectedElements = userServerDataService.UserRecipes
             .Select(ur => ur.Recipe)
             .SelectMany(r => r.Elements)
             .ToList();

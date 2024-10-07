@@ -162,9 +162,9 @@ namespace ecocraft.Models
     {
         [Key] public Guid Id { get; set; }
         [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-        public float CalorieCost { get; set; }
-        public float Margin { get; set; }
-        public float TimeFee { get; set; }
+        public float CalorieCost { get; set; } = 0;
+        public float Margin { get; set; } = 0;
+        public float TimeFee { get; set; } = 0;
 
         public UserServer UserServer { get; set; }
     }
@@ -178,7 +178,7 @@ namespace ecocraft.Models
         
         public UserServer UserServer { get; set; }
         public CraftingTable CraftingTable { get; set; }
-        public PluginModule PluginModule { get; set; }
+        public PluginModule? PluginModule { get; set; }
     }
 
     public class UserSkill

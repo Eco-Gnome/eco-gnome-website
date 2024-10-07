@@ -1,304 +1,267 @@
 ﻿using System.Text.Json;
 using ecocraft.Models;
-using ecocraft.Services.DbServices;
 
 namespace ecocraft.Services.ImportData
 {
-	public class ImportDataService(
-		EcoCraftDbContext dbContext,
-		ServerDataService serverDataService,
-		SkillDbService skillDbService, 
-		PluginModuleDbService pluginModuleDbService,
-		CraftingTableDbService craftingTableDbService,
-		ItemOrTagDbService itemOrTagDbService,
-		ElementDbService elementDbService,
-		RecipeDbService recipeDbService)
-	{
-		// TODO: Handle an update of server data
-		public async Task ImportServerData(string jsonContent, Server server)
-		{
-			try
-			{
-				var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
+    public class ImportDataService(
+        EcoCraftDbContext dbContext,
+        ServerDataService serverDataService)
+    {
+        public async Task ImportServerData(string jsonContent, Server server)
+        {
+            try
+            {
+                var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
 
-				if (importedData is not null)
-				{
-					// TODO: remove middle saves (requires to improve import functions)
-					ImportSkills(server, importedData.skills);
-					await dbContext.SaveChangesAsync();
+                if (importedData is not null)
+                {
+                    ImportSkills(server, importedData.skills);
+                    ImportPluginModules(server, importedData.pluginModules);
+                    ImportCraftingTables(server, importedData.craftingTables);
+                    ImportItemTag(server, importedData.itemTagAssoc);
+                    ImportRecipes(server, importedData.recipes);
 
-					ImportPluginModules(server, importedData.pluginModules);
-					await dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur durant l'import: {ex.Message} {ex.StackTrace}");
+            }
+        }
 
-					ImportCraftingTables(server, importedData.craftingTables);
-					await dbContext.SaveChangesAsync();
+        private void ImportSkills(Server server, List<SkillDto> newSkills)
+        {
+            foreach (var newSkill in newSkills)
+            {
+                var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newSkill.Name);
 
-					ImportRecipes(server, importedData.recipes, importedData.itemTagAssoc);
-					await dbContext.SaveChangesAsync();
+                if (dbSkill is null)
+                {
+                    serverDataService.ImportSkill(server, newSkill.Name);
+                }
+                // Else, do nothing because Skill does not have anything else to save
+            }
+        }
 
-					ImportItemTagAssoc(importedData.itemTagAssoc);
-					
-					await dbContext.SaveChangesAsync();
-				}
-			}
-			catch (JsonException ex)
-			{
-				Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Erreur durant l'import: {ex.Message} {ex.StackTrace}");
-			}
-		}
+        private void ImportPluginModules(Server server, List<PluginModuleDto> newPluginModules)
+        {
+            foreach (var newPluginModule in newPluginModules)
+            {
+                var dbPluginModule =
+                    serverDataService.PluginModules.FirstOrDefault(p => p.Name == newPluginModule.Name);
 
-		private void ImportSkills(Server server, List<SkillDto> skillDtos)
-		{
-			var namesToCheck = skillDtos.Select(dto => dto.Name).ToList();
+                if (dbPluginModule is null)
+                {
+                    serverDataService.ImportPluginModule(server, newPluginModule.Name, newPluginModule.Percent);
+                }
+                else
+                {
+                    serverDataService.RefreshPluginModule(dbPluginModule, newPluginModule.Percent);
+                }
+            }
+        }
 
-			// Récupère les noms qui existent déjà dans la base
-			var existingNames = serverDataService.Skills
-				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name)
-				.ToList();
+        private void ImportCraftingTables(Server server, List<CraftingTableDto> newCraftingTables)
+        {
+            foreach (var newCraftingTable in newCraftingTables)
+            {
+                var dbCraftingTable =
+                    serverDataService.CraftingTables.FirstOrDefault(p => p.Name == newCraftingTable.Name);
 
-			// Ajouter uniquement les objets qui n'existent pas
-			foreach (var dto in skillDtos)
-			{
-				if (!existingNames.Contains(dto.Name))
-				{
-					var newSkill = new Skill
-					{
-						Name = dto.Name,
-						Server = server,
-					};
+                var pluginModules = newCraftingTable.CraftingTablePluginModules
+                    .Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm))
+                    .ToList();
 
-					serverDataService.Skills.Add(newSkill);
-					skillDbService.Add(newSkill);
-				}
-			}
-		}
+                if (dbCraftingTable is null)
+                {
+                    serverDataService.ImportCraftingTable(
+                        server,
+                        newCraftingTable.Name,
+                        pluginModules
+                    );
+                }
+                else
+                {
+                    serverDataService.RefreshCraftingTable(
+                        dbCraftingTable,
+                        pluginModules
+                    );
+                }
+            }
+        }
 
-		private void ImportPluginModules(Server server, List<PluginModuleDto> pluginModuleDtos)
-		{
-			var namesToCheck = pluginModuleDtos.Select(dto => dto.Name).ToList();
+        private void ImportItemTag(Server server, List<ItemTagAssocDto> newItemOrTags)
+        {
+            foreach (var newItemOrTag in newItemOrTags)
+            {
+                var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag);
 
-			// Récupère les noms qui existent déjà dans la base
-			var existingNames = serverDataService.PluginModules
-				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name)
-				.ToList();
+                if (dbTag is null)
+                {
+                    dbTag = serverDataService.ImportItemOrTag(server, newItemOrTag.Tag, true);
+                }
+                else
+                {
+                    serverDataService.RefreshItemOrTag(dbTag, true);
+                }
 
-			// Ajouter uniquement les objets qui n'existent pas
-			foreach (var dto in pluginModuleDtos)
-			{
-				if (!existingNames.Contains(dto.Name))
-				{
-					var newPluginModule = new PluginModule
-					{
-						Name = dto.Name,
-						Percent = dto.Percent,
-						Server = server,
-					};
+                dbTag.AssociatedItemOrTags.Clear();
 
-					serverDataService.PluginModules.Add(newPluginModule);
-					pluginModuleDbService.Add(newPluginModule);
-				}
-			}
+                foreach (var item in newItemOrTag.Types)
+                {
+                    var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item);
 
-			var existingUserSkill =
-				serverDataService.PluginModules.FirstOrDefault(pm => pm.Name.Contains("NoUpgrade") && pm.Server.Id == server.Id);
-			if (existingUserSkill == null)
-				pluginModuleDbService.Add(new PluginModule
-					{ Name = "NoUpgrade", Percent = 0, Server = server });
+                    if (itemDb is null)
+                    {
+                        itemDb = serverDataService.ImportItemOrTag(server, dbTag.Name, false);
+                    }
+                    else
+                    {
+                        serverDataService.RefreshItemOrTag(itemDb, true);
+                    }
 
-		}
+                    dbTag.AssociatedItemOrTags.Add(itemDb);
+                }
+            }
+        }
 
-		private void ImportCraftingTables(Server server, List<CraftingTableDto> craftingTableDtos)
-		{
-			var namesToCheck = craftingTableDtos.Select(dto => dto.Name).ToList();
+        private void ImportRecipes(Server server, List<RecipeDto> newRecipes)
+        {
+            foreach (var newRecipe in newRecipes)
+            {
+                var dbRecipe = serverDataService.Recipes.FirstOrDefault(p => p.Name == newRecipe.Name);
+                var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newRecipe.RequiredSkill);
+                var dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == newRecipe.CraftingTable);
 
-			// Récupère les noms qui existent déjà dans la base
-			var existingNames = serverDataService.CraftingTables
-				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name)
-				.ToList();
+                if (dbRecipe is null)
+                {
+                    dbRecipe = serverDataService.ImportRecipe(
+                        server,
+                        newRecipe.Name,
+                        newRecipe.FamilyName,
+                        newRecipe.CraftMinutes,
+                        dbSkill,
+                        newRecipe.RequiredSkillLevel,
+                        newRecipe.IsBlueprint,
+                        newRecipe.IsDefault,
+                        newRecipe.Labor,
+                        dbCraftingTable
+                    );
+                }
+                else
+                {
+                    serverDataService.RefreshRecipe(
+                        dbRecipe,
+                        newRecipe.FamilyName,
+                        newRecipe.CraftMinutes,
+                        dbSkill,
+                        newRecipe.RequiredSkillLevel,
+                        newRecipe.IsBlueprint,
+                        newRecipe.IsDefault,
+                        newRecipe.Labor,
+                        dbCraftingTable
+                    );
+                }
 
-			// Ajouter uniquement les objets qui n'existent pas
-			foreach (var dto in craftingTableDtos)
-			{
-				if (!existingNames.Contains(dto.Name))
-				{
-					var newCraftingTable = new CraftingTable
-					{
-						Name = dto.Name,
-						Server = server,
-						PluginModules = dto.CraftingTablePluginModules
-							.Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm)).ToList()
-					};
+                foreach (var newRecipeIngredient in newRecipe.Ingredients)
+                {
+                    newRecipeIngredient.Quantity *= -1;
+                }
 
-					serverDataService.CraftingTables.Add(newCraftingTable);
-					craftingTableDbService.Add(newCraftingTable);
-				}
-			}
-		}
+                var dbElements = dbRecipe.Elements;
+                dbRecipe.Elements = [];
 
-		private void ImportRecipes(Server server, List<RecipeDto> recipeDtos, List<ItemTagAssocDto> itemTagAssoc)
-		{
-			var namesToCheck = recipeDtos.Select(dto => dto.Name).ToList();
+                foreach (var element in newRecipe.Ingredients.Concat(newRecipe.Products))
+                {
+                    var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
+                    var itemOrTag = serverDataService.ItemOrTags.FirstOrDefault(e => e.Name == element.ItemOrTag);
 
-			// Récupère les noms qui existent déjà dans la base
-			var existingRecipeNames = serverDataService.Recipes
-				.Where(ct => namesToCheck.Contains(ct.Name))
-				.Select(ct => ct.Name)
-				.ToList();
+                    if (itemOrTag is null)
+                    {
+                        // This can't be a tag otherwise it would already exist
+                        itemOrTag = serverDataService.ImportItemOrTag(server, element.ItemOrTag, false);
+                    }
 
-			// Récupère les itemsOrTag qui existent déjà dans la base
-			var existingItemOrTags = serverDataService.ItemOrTags
-				.Select(ct => ct.Name)
-				.ToList();
+                    // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
+                    // so we need to be sure dbElement is the correct-retrieved element) 
+                    var dbElement = dbElements.FirstOrDefault(e =>
+                        e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
 
-			// Ajouter uniquement les objets qui n'existent pas
-			foreach (var recipeDto in recipeDtos)
-			{
-				if (!existingRecipeNames.Contains(recipeDto.Name))
-				{
-					var newRecipe = new Recipe
-					{
-						Name = recipeDto.Name,
-						FamilyName = recipeDto.FamilyName,
-						CraftMinutes = recipeDto.CraftMinutes,
-						Skill = serverDataService.Skills.FirstOrDefault(s => s.Name == recipeDto.RequiredSkill),
-						SkillLevel = recipeDto.RequiredSkillLevel,
-						IsBlueprint = recipeDto.IsBlueprint,
-						IsDefault = recipeDto.IsDefault,
-						Labor = recipeDto.Labor,
-						CraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipeDto.CraftingTable),
-						Server = server,
-					};
+                    if (dbElement is null)
+                    {
+                        dbElement = serverDataService.ImportElement(dbRecipe, itemOrTag, element.Quantity,
+                            element.IsDynamic, skill, element.LavishTalent);
+                    }
+                    else
+                    {
+                        serverDataService.RefreshElement(dbElement, dbRecipe, itemOrTag, element.Quantity,
+                            element.IsDynamic, skill, element.LavishTalent);
+                    }
 
-					serverDataService.Recipes.Add(newRecipe);
-					recipeDbService.Add(newRecipe);
+                    dbRecipe.Elements.Add(dbElement);
+                }
+            }
+        }
 
-					// Si l'item or tag n'existe pas actuellement, on le crée, avant de créer l'element
-					foreach (var recipeItem in recipeDto.Ingredients.Concat(recipeDto.Products))
-					{
-						if (existingItemOrTags.Contains(recipeItem.ItemOrTag)) continue;
-						
-						var itemOrTag = new ItemOrTag
-						{
-							Name = recipeItem.ItemOrTag,
-							IsTag = itemTagAssoc.Select(t => t.Tag).Contains(recipeItem.ItemOrTag),
-							Server = server,
-						};
+        private class ImportDataDto
+        {
+            public List<RecipeDto> recipes { get; set; }
+            public List<ItemTagAssocDto> itemTagAssoc { get; set; }
+            public List<PluginModuleDto> pluginModules { get; set; }
+            public List<CraftingTableDto> craftingTables { get; set; }
+            public List<SkillDto> skills { get; set; }
+        }
 
-						serverDataService.ItemOrTags.Add(itemOrTag);
-						itemOrTagDbService.Add(itemOrTag);
-					}
+        private class RecipeDto
+        {
+            public string Name { get; set; }
+            public string FamilyName { get; set; }
+            public float CraftMinutes { get; set; }
+            public string RequiredSkill { get; set; }
+            public int RequiredSkillLevel { get; set; }
+            public bool IsBlueprint { get; set; }
+            public bool IsDefault { get; set; }
+            public float Labor { get; set; }
+            public string CraftingTable { get; set; }
+            public List<ElementDto> Ingredients { get; set; }
+            public List<ElementDto> Products { get; set; }
+        }
 
-					foreach (var recipeDtoIngredient in recipeDto.Ingredients)
-					{
-						recipeDtoIngredient.Quantity *= -1;
-					}
+        private class ElementDto
+        {
+            public string ItemOrTag { get; set; }
+            public float Quantity { get; set; }
+            public bool IsDynamic { get; set; }
+            public string Skill { get; set; }
+            public bool LavishTalent { get; set; }
+        }
 
-					foreach (var element in recipeDto.Ingredients.Concat(recipeDto.Products))
-					{
-						var itemOrTag = itemOrTagDbService.GetByName(element.ItemOrTag)!;
-						var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
+        private class CraftingTableDto
+        {
+            public string Name { get; set; }
+            public List<string> CraftingTablePluginModules { get; set; }
+        }
 
-						var ing = new Element
-						{
-							Recipe = newRecipe,
-							ItemOrTag = itemOrTag,
-							Quantity = element.Quantity,
-							IsDynamic = element.IsDynamic,
-							Skill = skill,
-							LavishTalent = element.LavishTalent,
-						};
+        private class ItemTagAssocDto
+        {
+            public string Tag { get; set; }
+            public List<string> Types { get; set; }
+        }
 
-						elementDbService.Add(ing);
-					}
-				}
-			}
-		}
+        private class PluginModuleDto
+        {
+            public string Name { get; set; }
+            public float Percent { get; set; }
+        }
 
-		private void ImportItemTagAssoc(List<ItemTagAssocDto> itemTagAssoc)
-		{
-			foreach (var itemTag in itemTagAssoc)
-			{
-				var tag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == itemTag.Tag);
-
-				if (tag is not null)
-				{
-					foreach (var type in itemTag.Types)
-					{
-						var item = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == type);
-
-						if (item is not null)
-						{
-							tag.AssociatedItemOrTags.Add(item);
-						}
-					}
-
-					itemOrTagDbService.Update(tag);
-				}
-			}
-		}
-		
-		private class ImportDataDto
-		{
-			public List<RecipeDto> recipes { get; set; }
-			public List<ItemTagAssocDto> itemTagAssoc { get; set; }
-			public List<PluginModuleDto> pluginModules { get; set; }
-			public List<CraftingTableDto> craftingTables { get; set; }
-			public List<SkillDto> skills { get; set; }
-		}
-
-		private class RecipeDto
-		{
-			public string Name { get; set; }
-			public string FamilyName { get; set; }
-			public float CraftMinutes { get; set; }
-			public string RequiredSkill { get; set; }
-			public long RequiredSkillLevel { get; set; }
-			public bool IsBlueprint { get; set; }
-			public bool IsDefault { get; set; }
-			public float Labor { get; set; }
-			public string CraftingTable { get; set; }
-			public List<ElementDto> Ingredients { get; set; }
-			public List<ElementDto> Products { get; set; }
-		}
-
-		private class ElementDto
-		{
-			public string ItemOrTag { get; set; }
-			public float Quantity { get; set; }
-			public bool IsDynamic { get; set; }
-			public string Skill { get; set; }
-			public bool LavishTalent { get; set; }
-		}
-
-		private class CraftingTableDto
-		{
-			public string Name { get; set; }
-			public List<string> CraftingTablePluginModules { get; set; }
-		}
-
-		private class ItemTagAssocDto
-		{
-			public string Tag { get; set; }
-			public List<string> Types { get; set; }
-		}
-
-		private class PluginModuleDto
-		{
-			public string Name { get; set; }
-			public float Percent { get; set; }
-		}
-
-		private class SkillDto
-		{
-			public string Name { get; set; }
-		}
-	}
-
+        private class SkillDto
+        {
+            public string Name { get; set; }
+        }
+    }
 }

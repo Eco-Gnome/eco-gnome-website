@@ -252,8 +252,7 @@ namespace ecocraft.Migrations
                         name: "FK_UserCraftingTable_PluginModule_PluginModuleId",
                         column: x => x.PluginModuleId,
                         principalTable: "PluginModule",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_UserCraftingTable_UserServer_UserServerId",
                         column: x => x.UserServerId,
@@ -268,7 +267,7 @@ namespace ecocraft.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Price = table.Column<float>(type: "REAL", nullable: false),
+                    Price = table.Column<float>(type: "REAL", nullable: true),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -368,6 +367,31 @@ namespace ecocraft.Migrations
                         column: x => x.SkillId,
                         principalTable: "Skill",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRecipe",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    RecipeId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRecipe", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserRecipe_Recipe_RecipeId",
+                        column: x => x.RecipeId,
+                        principalTable: "Recipe",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserRecipe_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -492,6 +516,16 @@ namespace ecocraft.Migrations
                 column: "UserServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserRecipe_RecipeId",
+                table: "UserRecipe",
+                column: "RecipeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRecipe_UserServerId",
+                table: "UserRecipe",
+                column: "UserServerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserServer_ServerId",
                 table: "UserServer",
                 column: "ServerId");
@@ -534,6 +568,9 @@ namespace ecocraft.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserPrice");
+
+            migrationBuilder.DropTable(
+                name: "UserRecipe");
 
             migrationBuilder.DropTable(
                 name: "UserSetting");

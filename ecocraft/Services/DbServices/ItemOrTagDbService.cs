@@ -30,12 +30,6 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
 		
-	public ItemOrTag? GetByName(string name)
-	{
-		return context.ItemOrTags
-			.FirstOrDefault(s => s.Name == name);
-	}
-
 	public ItemOrTag Add(ItemOrTag itemOrTag)
 	{
 		context.ItemOrTags.Add(itemOrTag);

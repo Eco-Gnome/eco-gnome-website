@@ -5,9 +5,9 @@ namespace ecocraft.Services;
 
 public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService<Recipe>
 {
-	public async Task<List<Recipe>> GetAllAsync()
+	public Task<List<Recipe>> GetAllAsync()
 	{
-		return await context.Recipes
+		return context.Recipes
 			.Include(r => r.Elements)
 			.ToListAsync();
 	}

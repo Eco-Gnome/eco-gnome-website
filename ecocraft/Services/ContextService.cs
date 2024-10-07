@@ -7,7 +7,7 @@ public class ContextService(
     LocalStorageService localStorageService,
     ServerDbService serverDbService,
     ServerDataService serverDataService,
-    UserDataService userDataService,
+    UserServerDataService userServerDataService,
     UserDbService userDbService)
 {
     public event Action? OnContextChanged;
@@ -32,22 +32,11 @@ public class ContextService(
         
         var userServer = CurrentUser?.UserServers.Find(us => us.ServerId == server.Id);
 
-        if (userServer is null)
-        {
-            userServer = new UserServer()
-            {
-                ServerId = server.Id,
-                UserId = CurrentUser.Id,
-            };
-            CurrentUser.UserServers.Add(userServer);
-            await userDbService.UpdateAndSave(CurrentUser);
-        }
-
         CurrentUserServer = userServer;
         CurrentServer = server;
 
         await serverDataService.RetrieveServerData(CurrentServer);
-        await userDataService.RetrieveUserData(CurrentUserServer);
+        await userServerDataService.RetrieveUserData(CurrentUserServer!);
 
         await localStorageService.AddItem("ServerId", CurrentServer.Id.ToString());
 
@@ -92,7 +81,7 @@ public class ContextService(
                     CurrentServer = searchedServer;
                     CurrentUserServer = foundUserServer;
 					await serverDataService.RetrieveServerData(CurrentServer);
-					await userDataService.RetrieveUserData(CurrentUserServer);
+					await userServerDataService.RetrieveUserData(CurrentUserServer);
 				}
             }
         }

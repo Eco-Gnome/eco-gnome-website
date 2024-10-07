@@ -38,7 +38,7 @@ builder.Services.AddScoped<ContextService>();
 builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
-builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<UserServerDataService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();

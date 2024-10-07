@@ -158,7 +158,8 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(s => s.PluginModule)
 			.WithMany()
-			.HasForeignKey(s => s.PluginModuleId);
+			.HasForeignKey(s => s.PluginModuleId)
+			.IsRequired(false);
 		
 		// UserSkill
 		modelBuilder.Entity<UserSkill>()
@@ -168,7 +169,7 @@ public class EcoCraftDbContext : DbContext
 			.HasOne(us => us.Skill)
 			.WithMany(s => s.UserSkills)
 			.HasForeignKey(us => us.SkillId);
-		
+
 		modelBuilder.Entity<UserSkill>()
 			.HasOne(us => us.UserServer)
 			.WithMany(use => use.UserSkills)

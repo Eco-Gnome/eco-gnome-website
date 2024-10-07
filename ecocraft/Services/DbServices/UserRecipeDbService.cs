@@ -18,9 +18,9 @@ namespace ecocraft.Services
                 .ToListAsync();
         }
 
-        public async Task<UserRecipe?> GetByIdAsync(Guid id)
+        public Task<UserRecipe?> GetByIdAsync(Guid id)
         {
-            return await context.UserRecipes
+            return context.UserRecipes
                 .Include(up => up.UserServer)
                 .FirstOrDefaultAsync(up => up.Id == id);
         }

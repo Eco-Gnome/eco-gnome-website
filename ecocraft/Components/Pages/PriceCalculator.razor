@@ -3,7 +3,7 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @inject ContextService ContextService
-@inject UserDataService UserDataService
+@inject UserServerDataService UserServerDataService
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -23,7 +23,7 @@
 			                 TransformOrigin="Origin.TopLeft">
 			</MudAutocomplete>
 
-			<MudTable Items="UserDataService.UserSkills" Dense="true">
+			<MudTable Items="UserServerDataService.UserSkills" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Level</MudTh>
@@ -56,7 +56,7 @@
 			                 TransformOrigin="Origin.TopLeft">
 			</MudAutocomplete>
 
-			<MudTable Items="UserDataService.UserCraftingTables" Dense="true">
+			<MudTable Items="UserServerDataService.UserCraftingTables" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Upgrade</MudTh>
@@ -86,10 +86,14 @@
 			<MudStack>
 				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 					<MudText>Price per 1000 calories</MudText>
-					<div>
-						@* <MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" /> *@
-							<MudNumericField T="float" @bind-Value=calorieCost OnBlur="UpdateCalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" />
-						</div>
+					@if (UserServerDataService.UserSetting is not null)
+					{
+						<div>
+							@* <MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" /> *@
+							<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" />
+						</div>					
+					}
+
 				</MudStack>
 				@* <MudStack Justify="Justify.SpaceBetween" Row="true" Spacing="3" AlignItems="AlignItems.Center">
 					<MudText>Profit percentage</MudText>
@@ -114,7 +118,7 @@
 			                 TransformOrigin="Origin.TopLeft">
 			</MudAutocomplete>
 
-			<MudTable Items="UserDataService.UserRecipes" Dense="true">
+			<MudTable Items="UserServerDataService.UserRecipes" Dense="true">
 				<HeaderContent>
 					<MudTh>Name</MudTh>
 					<MudTh>Price</MudTh>
@@ -141,11 +145,12 @@
 	private Skill? _emptySkill = null;
 	private Recipe? _emptyRecipe = null;
 	private CraftingTable? _emptyCraftingTable = null;
-	private float calorieCost = 0;
 
-	protected override async Task OnInitializedAsync()
+	protected override Task OnInitializedAsync()
 	{
 		ContextService.OnContextChanged += StateHasChanged;
+		
+		return Task.CompletedTask;
 	}
 
 	public void Dispose()
@@ -159,11 +164,11 @@
 
 		if (string.IsNullOrEmpty(value))
 		{
-			result = UserDataService.GetAvailableSkills();
+			result = UserServerDataService.GetAvailableSkills();
 		}
 		else
 		{
-			result = UserDataService.GetAvailableSkills()
+			result = UserServerDataService.GetAvailableSkills()
 				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
@@ -177,11 +182,11 @@
 
 		if (string.IsNullOrEmpty(value))
 		{
-			result = UserDataService.GetAvailableRecipes();
+			result = UserServerDataService.GetAvailableRecipes();
 		}
 		else
 		{
-			result = UserDataService.GetAvailableRecipes()
+			result = UserServerDataService.GetAvailableRecipes()
 				.Where(r => r.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
@@ -195,11 +200,11 @@
 
 		if (string.IsNullOrEmpty(value))
 		{
-			result = UserDataService.GetAvailableCraftingTables();
+			result = UserServerDataService.GetAvailableCraftingTables();
 		}
 		else
 		{
-			result = UserDataService.GetAvailableCraftingTables()
+			result = UserServerDataService.GetAvailableCraftingTables()
 				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
@@ -221,9 +226,9 @@
 			Level = 1,
 		};
 
-		UserDataService.AddUserSkill(userSkill);
-		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
-		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.AddUserSkill(userSkill);
+		UserServerDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
+		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 
 
 		_emptySkill = null;
@@ -231,9 +236,9 @@
 
 	private void RemoveUserSkill(UserSkill skill)
 	{
-		UserDataService.RemoveUserSkill(skill);
-		UserDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
-		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.RemoveUserSkill(skill);
+		UserServerDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
+		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserCraftingTable(CraftingTable? craftingTable)
@@ -243,25 +248,23 @@
 			return;
 		}
 
-
-		PluginModule defaultModule = ContextService.CurrentUserServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
 		var userCraftingTable = new UserCraftingTable
 		{
 			CraftingTable = craftingTable,
 			UserServer = ContextService.CurrentUserServer!,
-			PluginModule = defaultModule
+			PluginModule = null
 		};
 
-		UserDataService.AddUserCraftingTable(userCraftingTable);
-		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.AddUserCraftingTable(userCraftingTable);
+		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 
 		_emptyCraftingTable = null;
 	}
 
 	private void RemoveUserCraftingTable(UserCraftingTable craftingTable)
 	{
-		UserDataService.RemoveUserCraftingTable(craftingTable);
-		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.RemoveUserCraftingTable(craftingTable);
+		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserRecipe(Recipe? recipe)
@@ -277,14 +280,14 @@
 			UserServer = ContextService.CurrentUserServer!,
 		};
 
-		UserDataService.AddUserRecipe(userRecipe);
+		UserServerDataService.AddUserRecipe(userRecipe);
 
 		_emptySkill = null;
 	}
 
 	private void RemoveUserRecipe(UserRecipe recipe)
 	{
-		UserDataService.RemoveUserRecipe(recipe);
+		UserServerDataService.RemoveUserRecipe(recipe);
 	}
 
 	private void OnLevelChanged(UserSkill userSkill, int newLevel)
@@ -292,7 +295,7 @@
 		userSkill.Level = newLevel;
 		// Comment gère-t-on l'argument limitToSkillLevelRecipes ?
 
-		UserDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
@@ -300,10 +303,9 @@
 		userCraftingTable.PluginModule = newUpgrade;
 	}
 
-	private void UpdateCalorieCost()
+	private void UpdateCalorieCost(float calorieCost)
 	{
-		// TODO : le userSettings est vide, je n'arrive pas à trouver où le créer ? à la création du server ? du user ? du userserver ? Besoin de clarification :)
-		//var userSettings = UserDataService.UserSettings.First(us => us.UserServer == ContextService.CurrentUserServer);
-		//userSettings.CalorieCost = calorieCost;
+		UserServerDataService.UserSetting!.CalorieCost = calorieCost;
+		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
 	}
 }

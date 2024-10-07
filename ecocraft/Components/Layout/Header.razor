@@ -7,7 +7,7 @@
 @inject ContextService ContextService
 @inject IDialogService DialogService
 @inject ServerDbService ServerDbService
-@inject UserDataService UserDataService
+@inject UserServerDataService UserServerDataService
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
@@ -35,6 +35,13 @@
     @code {
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
+    public int valueDebug = 0;
+
+    public void Log()
+    {
+        valueDebug = ContextService.CurrentUserServer.UserSkills.Count;
+    }
+
     protected override void OnInitialized()
     {
         ContextService.OnContextChanged += StateHasChanged;
@@ -52,7 +59,7 @@
 
     private async Task Save()
     {
-        await UserDataService.SaveUserData(ContextService.CurrentUserServer!);
+        await EcoCraftDbContext.SaveChangesAsync();
     }
 
     private async Task CreateServer()
@@ -67,7 +74,19 @@
             Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false};
             await ServerDbService.AddAndSave(newServer);
 
-            UserServer userServer = new UserServer { UserId = ContextService.CurrentUser!.Id, ServerId = newServer.Id, IsAdmin = true, Pseudo = ContextService.CurrentUser.Pseudo };
+            UserServer userServer = new UserServer
+            {
+                UserId = ContextService.CurrentUser!.Id, 
+                ServerId = newServer.Id, 
+                IsAdmin = true, 
+                Pseudo = ContextService.CurrentUser.Pseudo,
+            };
+            
+            userServer.UserSettings.Add(new UserSetting
+            {
+                UserServer = userServer,
+            });
+            
             ContextService.CurrentUser.UserServers.Add(userServer);
             await EcoCraftDbContext.SaveChangesAsync();
             

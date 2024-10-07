@@ -5,19 +5,19 @@ namespace ecocraft.Services.DbServices;
 
 public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Server>
 {
-	public async Task<List<Server>> GetAllAsync()
+	public Task<List<Server>> GetAllAsync()
 	{
-		return await context.Servers.ToListAsync();
+		return context.Servers.ToListAsync();
 	}
 
-	public async Task<List<Server>> GetAllDefaultAsync()
+	public Task<List<Server>> GetAllDefaultAsync()
 	{
-		return await context.Servers.Where(s => s.IsDefault).ToListAsync();
+		return context.Servers.Where(s => s.IsDefault).ToListAsync();
 	}
 
-	public async Task<Server?> GetByIdAsync(Guid id)
+	public Task<Server?> GetByIdAsync(Guid id)
 	{
-		return await context.Servers.Include(s => s.UserServers)
+		return context.Servers.Include(s => s.UserServers)
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 

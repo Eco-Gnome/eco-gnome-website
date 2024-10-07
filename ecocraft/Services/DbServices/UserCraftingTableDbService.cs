@@ -21,9 +21,9 @@ namespace ecocraft.Services
                 .ToListAsync();
 		}
 
-		public async Task<UserCraftingTable?> GetByIdAsync(Guid id)
+		public Task<UserCraftingTable?> GetByIdAsync(Guid id)
 		{
-			return await context.UserCraftingTables
+			return context.UserCraftingTables
 				.FirstOrDefaultAsync(uct => uct.Id == id);
 		}
 

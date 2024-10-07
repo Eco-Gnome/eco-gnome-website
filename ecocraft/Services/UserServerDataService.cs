@@ -1,11 +1,9 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace ecocraft.Services;
 
-public class UserDataService(
+public class UserServerDataService(
 	UserSkillDbService userSkillDbService,
     UserCraftingTableDbService userCraftingTableDbService,
     UserSettingDbService userSettingDbService,
@@ -17,7 +15,7 @@ public class UserDataService(
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
-    public List<UserSetting> UserSettings { get; private set; } = [];
+    public UserSetting? UserSetting { get; private set; }
     public List<UserElement> UserElements { get; private set; } = [];
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
@@ -35,25 +33,16 @@ public class UserDataService(
 
         UserSkills = userSkillsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
-        UserSettings = userSettingsTask.Result;
+        UserSetting = userSettingsTask.Result;
         UserElements = userElementsTask.Result;
         UserPrices = userPricesTask.Result;
         UserRecipes = userRecipesTask.Result;
     }
 
-	public async Task SaveUserData(UserServer userServer)
+	public Task SaveUserData(UserServer userServer)
 	{
-		userServer.UserSkills = UserSkills;
-		userServer.UserCraftingTables = UserCraftingTables;
-		userServer.UserSettings = UserSettings;
-		userServer.UserElements = UserElements;
-		userServer.UserPrices = UserPrices;
-		userServer.UserRecipes = UserRecipes;
-
-		await userDbService.UpdateAndSave(userServer.User);
-
+		return userDbService.UpdateAndSave(userServer.User);
     }
-
 
 	public void AddUserSkill(UserSkill userSkill)
     {
@@ -63,6 +52,7 @@ public class UserDataService(
 
     public void RemoveUserSkill(UserSkill userSkill)
     {
+	    userSkill.UserServer.UserSkills.Remove(userSkill);
         UserSkills.Remove(userSkill);
         userSkillDbService.Delete(userSkill);
     }
@@ -75,19 +65,13 @@ public class UserDataService(
 
     public void RemoveUserCraftingTable(UserCraftingTable userCraftingTable)
     {
+	    userCraftingTable.UserServer.UserCraftingTables.Remove(userCraftingTable);
         UserCraftingTables.Remove(userCraftingTable);
         userCraftingTableDbService.Delete(userCraftingTable);
     }
-	public void AddUserSetting(UserSetting userSetting)
+	public void UpdateUserSetting(UserSetting userSetting)
 	{
-		UserSettings.Add(userSetting);
-		userSettingDbService.Add(userSetting);
-	}
-
-	public void RemoveUserSetting(UserSetting userSetting)
-	{
-		UserSettings.Remove(userSetting);
-		userSettingDbService.Delete(userSetting);
+		userSettingDbService.Update(userSetting);
 	}
 
 	public void AddUserRecipe(UserRecipe userRecipe)
@@ -98,6 +82,7 @@ public class UserDataService(
 
     public void RemoveUserRecipe(UserRecipe userRecipe)
     {
+	    userRecipe.UserServer.UserRecipes.Remove(userRecipe);
         UserRecipes.Remove(userRecipe);
         userRecipeDbService.Delete(userRecipe);
     }
@@ -129,12 +114,10 @@ public class UserDataService(
 
 		foreach (var existingTable in craftingTablesToRemove)
 		{
-			UserCraftingTables.Remove(existingTable);
+			RemoveUserCraftingTable(existingTable);
 		}
 
 		// 5. Ajouter les nouvelles CraftingTables qui ne sont pas déjà associées à l'utilisateur
-		PluginModule defaultModule = userServer.Server.PluginModules.FirstOrDefault(pm => pm.Name.Equals("NoUpgrade"));
-
 		foreach (var craftingTable in availableCraftingTables)
 		{
 			if (!existingUserCraftingTables.Any(uct => uct.CraftingTable.Id == craftingTable.Id))
@@ -143,9 +126,10 @@ public class UserDataService(
 				{
 					UserServer = userServer,
 					CraftingTable = craftingTable,
-					PluginModule = defaultModule // Associer un PluginModule par défaut
+					PluginModule = null
 				};
-				UserCraftingTables.Add(newUserCraftingTable);
+				
+				AddUserCraftingTable(newUserCraftingTable);
 			}
 		}
 
@@ -155,23 +139,19 @@ public class UserDataService(
 
 	public List<UserRecipe> UpdateUserRecipes(UserServer userServer)
 	{
-		// 1. Récupérer les compétences actuelles de l'utilisateur et leur niveau
-		var userSkills = UserSkills.Where(us => us.UserServer.Id == userServer.Id).ToList();
-
-		// 2. Récupérer les CraftingTables disponibles pour cet utilisateur
+		// 2. Récupérer les CraftingTables deja liées à cet utilisateur
 		var craftingTables = UserCraftingTables
-			.Where(uct => uct.UserServer.Id == userServer.Id)
 			.Select(uct => uct.CraftingTable)
 			.ToList();
 
 		// 3. Charger les UserRecipes existants pour cet utilisateur
-		var existingUserRecipes = UserRecipes.Where(ur => ur.UserServer.Id == userServer.Id).ToList();
+		var existingUserRecipes = UserRecipes.ToList();
 
 		// Liste pour les nouvelles recettes
 		var availableRecipes = new List<Recipe>();
 
 		// 4. Récupérer les recettes disponibles en fonction des compétences de l'utilisateur et des CraftingTables
-		foreach (var userSkill in userSkills)
+		foreach (var userSkill in UserSkills)
 		{
 			var skill = userSkill.Skill;
 			var skillLevel = userSkill.Level;
@@ -192,7 +172,7 @@ public class UserDataService(
 
 		foreach (var recipeToRemove in recipesToRemove)
 		{
-			UserRecipes.Remove(recipeToRemove);
+			RemoveUserRecipe(recipeToRemove);
 		}
 
 		// 6. Ajouter les nouvelles UserRecipes qui ne sont pas déjà associées à l'utilisateur
@@ -205,15 +185,14 @@ public class UserDataService(
 					UserServer = userServer,
 					Recipe = recipe
 				};
-				UserRecipes.Add(newUserRecipe);
+				
+				AddUserRecipe(newUserRecipe);
 			}
 		}
 
 		// Retourner la liste mise à jour des UserRecipes
 		return UserRecipes;
 	}
-
-
 
 	public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
 	{
@@ -228,12 +207,16 @@ public class UserDataService(
 			recipes.UnionWith(limitToSkillLevelRecipes ? foundRecipes.Where(r => r.SkillLevel <= userSkillLevel) : foundRecipes);
 		}
 		
+		// TODO: limit via crafting tables
+		
 		if (addNonSkilledRecipes)
 		{
-			recipes.UnionWith(UserRecipes.Select(ucr => ucr.Recipe).Where(r => r.Skill is null));
+			recipes.UnionWith(UserRecipes.Select(ucr => ucr.Recipe)
+				.Where(r => r.Skill is null));
 		}
 		
-		return recipes.ToList();
+		return recipes.Where(r => !UserRecipes.Select(ur => ur.Recipe).Contains(r))
+			.ToList();
 	}
 	
 	public List<Skill> GetAvailableSkills()

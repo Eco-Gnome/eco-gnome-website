@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
-	public class UserSettingDbService(EcoCraftDbContext context) : IGenericUserDbService<UserSetting>
+	public class UserSettingDbService(EcoCraftDbContext context) : IGenericDbService<UserSetting>
 	{
 		public Task<List<UserSetting>> GetAllAsync()
 		{
@@ -11,11 +11,10 @@ namespace ecocraft.Services
 				.ToListAsync();
 		}
 
-		public Task<List<UserSetting>> GetByUserServerAsync(UserServer userServer)
+		public Task<UserSetting?> GetByUserServerAsync(UserServer userServer)
 		{
 			return context.UserSettings
-				.Where(s => s.UserServerId == userServer.Id)
-				.ToListAsync();
+				.FirstOrDefaultAsync(us => us.UserServerId == userServer.Id);
 		}
 
 		public Task<UserSetting?> GetByIdAsync(Guid id)

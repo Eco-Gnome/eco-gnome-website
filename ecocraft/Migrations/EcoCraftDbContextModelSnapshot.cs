@@ -568,9 +568,7 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.PluginModule", "PluginModule")
                         .WithMany()
-                        .HasForeignKey("PluginModuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PluginModuleId");
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserCraftingTables")

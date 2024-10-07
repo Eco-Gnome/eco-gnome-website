@@ -11,8 +11,8 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20240928073033_test")]
-    partial class test
+    [Migration("20241006220537_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -321,7 +321,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
 
-                    b.Property<float>("Price")
+                    b.Property<float?>("Price")
                         .HasColumnType("REAL");
 
                     b.Property<Guid>("UserServerId")
@@ -334,6 +334,27 @@ namespace ecocraft.Migrations
                     b.HasIndex("UserServerId");
 
                     b.ToTable("UserPrice", (string)null);
+                });
+
+            modelBuilder.Entity("ecocraft.Models.UserRecipe", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserServerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserServerId");
+
+                    b.ToTable("UserRecipe", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>
@@ -550,9 +571,7 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.PluginModule", "PluginModule")
                         .WithMany()
-                        .HasForeignKey("PluginModuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PluginModuleId");
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserCraftingTables")
@@ -601,6 +620,25 @@ namespace ecocraft.Migrations
                         .IsRequired();
 
                     b.Navigation("ItemOrTag");
+
+                    b.Navigation("UserServer");
+                });
+
+            modelBuilder.Entity("ecocraft.Models.UserRecipe", b =>
+                {
+                    b.HasOne("ecocraft.Models.Recipe", "Recipe")
+                        .WithMany("UserRecipes")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.UserServer", "UserServer")
+                        .WithMany("UserRecipes")
+                        .HasForeignKey("UserServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
 
                     b.Navigation("UserServer");
                 });
@@ -676,6 +714,8 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
                 {
                     b.Navigation("Elements");
+
+                    b.Navigation("UserRecipes");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Server", b =>
@@ -712,6 +752,8 @@ namespace ecocraft.Migrations
                     b.Navigation("UserElements");
 
                     b.Navigation("UserPrices");
+
+                    b.Navigation("UserRecipes");
 
                     b.Navigation("UserSettings");
 

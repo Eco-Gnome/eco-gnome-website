@@ -21,7 +21,7 @@ public class ElementDbService(EcoCraftDbContext context) : IGenericDbService<Ele
 
 	public Element Add(Element element)
 	{
-		context.Elements.AddAsync(element);
+		context.Elements.Add(element);
 
 		return element;
 	}

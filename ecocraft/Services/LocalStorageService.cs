@@ -21,9 +21,9 @@ namespace ecocraft.Services
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
         }
 
-        public async Task<string?> GetItem(string key)
+        public Task<string> GetItem(string key)
         {
-            return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
+            return _jsRuntime.InvokeAsync<string>("localStorage.getItem", key).AsTask();
         }
     }
 }
