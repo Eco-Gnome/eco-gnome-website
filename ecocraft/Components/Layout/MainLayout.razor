@@ -2,7 +2,7 @@
 @inherits LayoutComponentBase
 @inject ContextService ContextService
 
-<MudThemingProvider />
+<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="myDarkTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -14,6 +14,8 @@
         <MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start" />
         <MudText Typo="Typo.h5" Class="ml-3">Eco Price Calculator</MudText>
         <MudSpacer/>
+        <MudIcon Icon="@Icons.Material.Filled.LightMode" />
+        <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" />
         @if (!_isLoading)
         {
             <Header></Header>
@@ -43,6 +45,31 @@
     // private bool _drawerOpen = true;
     private bool _isLoading = true;
 
+    //private MudTheme _theme = new();
+    private bool _isDarkMode = true;
+
+    private MudTheme myDarkTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                /*Black = "#212121",
+                Background = "#303030",
+                Surface = "#373740",
+                DrawerBackground = "#27272f",
+                AppbarBackground = "#212121",
+                TextPrimary = "#ffffff",
+                TextSecondary = "#d0d0d0",
+                ActionDefault = "#adadb1",
+                ActionDisabled = "rgba(255,255,255, 0.26)",
+                ActionDisabledBackground = "rgba(255,255,255, 0.12)"*/
+            },
+
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Blue.Lighten1
+            },
+        };
+
     /*private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -60,4 +87,6 @@
         this._isLoading = false;
         StateHasChanged();
     }
+
+
 }
