@@ -13,7 +13,8 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 
 	public Task<List<ItemOrTag>> GetByServerAsync(Server server)
 	{
-		return context.ItemOrTags
+		return context.ItemOrTags			
+			.Include(s => s.LocalizedName)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}

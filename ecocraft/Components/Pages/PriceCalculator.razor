@@ -3,6 +3,7 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @inject ContextService ContextService
+@inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject LocalStorageService LocalStorageService
 
@@ -27,9 +28,9 @@
 					<ItemTemplate>
 						@if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
 						{
-							<MudText Color="Color.Primary" Typo="Typo.caption">@context.Profession</MudText>
+							<MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
 						}
-						<MudText>@context.Name</MudText>
+						<MudText>@ContextService.GetTranslation(context)</MudText>
 						@{
 							_previousProfession = context.Profession;
 						}
@@ -44,7 +45,7 @@
 					</HeaderContent>
 					<RowTemplate>
 						<MudTd>
-							@context.Skill.Name
+							@ContextService.GetTranslation(context.Skill)
 						</MudTd>
 						<MudTd>
 							<MudNumericField HideSpinButtons="true" T="int" Value=@context.Level Variant="Variant.Text" Min="0" Max="7" Style="width: 24px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
@@ -68,6 +69,9 @@
 				                 Variant="Variant.Outlined"
 				                 AnchorOrigin="Origin.BottomLeft"
 				                 TransformOrigin="Origin.TopLeft">
+					<ItemTemplate>
+						<MudText>@ContextService.GetTranslation(context)</MudText>
+					</ItemTemplate>
 				</MudAutocomplete>
 
 				<MudTable Items="UserServerDataService.UserCraftingTables" Dense="true">
@@ -78,7 +82,7 @@
 					</HeaderContent>
 					<RowTemplate>
 						<MudTd>
-							@context.CraftingTable.Name
+							@ContextService.GetTranslation(context.CraftingTable)
 						</MudTd>
 						<MudTd>
 							<MudSelect T="PluginModule?" 
@@ -92,7 +96,7 @@
 								<MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
 								@foreach (var pluginModule in context.CraftingTable.PluginModules)
 							{
-								<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
+								<MudSelectItem T="PluginModule" Value="@pluginModule">@ContextService.GetTranslation(pluginModule)</MudSelectItem>
 							}
 							</MudSelect> 
 						</MudTd>
@@ -147,6 +151,9 @@
 				                 Variant="Variant.Outlined"
 				                 AnchorOrigin="Origin.BottomLeft"
 				                 TransformOrigin="Origin.TopLeft">
+					<ItemTemplate>
+						<MudText>@ContextService.GetTranslation(context)</MudText>
+					</ItemTemplate>
 				</MudAutocomplete>
 
 				<MudTable Items="UserServerDataService.UserRecipes" Dense="true">
@@ -157,7 +164,7 @@
 					</HeaderContent>
 					<RowTemplate>
 						<MudTd>
-							@context.Recipe.Name
+							@ContextService.GetTranslation(context.Recipe)
 						</MudTd>
 						<MudTd>
 							<MudTextField Disabled="true" Value="0"></MudTextField>

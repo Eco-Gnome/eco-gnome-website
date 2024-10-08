@@ -16,6 +16,7 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 	{
 		return context.Recipes
 			.Include(c => c.Elements)
+			.Include(s => s.LocalizedName)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}

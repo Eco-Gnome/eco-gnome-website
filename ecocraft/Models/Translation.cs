@@ -3,7 +3,6 @@
 public enum SupportedLanguage
 {
     English,
-    Gibberish,
     French,
     Spanish,
     German,

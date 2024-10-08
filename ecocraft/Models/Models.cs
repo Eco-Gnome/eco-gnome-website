@@ -293,7 +293,6 @@ public class LocalizedField
         new()
         {
             [SupportedLanguage.English] = LanguageCode.en_US,
-            [SupportedLanguage.Gibberish] = LanguageCode.en_US,
             [SupportedLanguage.French] = LanguageCode.fr,
             [SupportedLanguage.Spanish] = LanguageCode.es,
             [SupportedLanguage.German] = LanguageCode.de,

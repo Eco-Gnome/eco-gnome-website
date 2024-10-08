@@ -11,10 +11,9 @@
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-
      <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />
 
-     <MudSelect T="Server" Label="Select a server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+     <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)
         {
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
@@ -30,9 +29,16 @@
         <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
         <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
     </MudStack>
+
+    <MudSelect T="LanguageCode" Label="Language" Value="@ContextService.CurrentLanguageCode" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedLanguageChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+        @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
+        {
+        <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
+        }
+    </MudSelect>
 </MudStack>
 
-    @code {
+@code {
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
     protected override void OnInitialized()
@@ -43,6 +49,11 @@
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
+    }
+
+    private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
+    {
+        await ContextService.ChangeLanguage(languageCodes.First());
     }
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
@@ -120,5 +131,4 @@
             await UserDbService.UpdateAndSave(ContextService.CurrentUser);
         }
     }
-
 }
