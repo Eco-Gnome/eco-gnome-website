@@ -95,9 +95,9 @@
 							           TransformOrigin="Origin.TopLeft">
 								<MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
 								@foreach (var pluginModule in context.CraftingTable.PluginModules)
-							{
-								<MudSelectItem T="PluginModule" Value="@pluginModule">@ContextService.GetTranslation(pluginModule)</MudSelectItem>
-							}
+								{
+									<MudSelectItem T="PluginModule" Value="@pluginModule">@ContextService.GetTranslation(pluginModule)</MudSelectItem>
+								}
 							</MudSelect> 
 						</MudTd>
 						<MudTd>

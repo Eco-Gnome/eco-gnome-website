@@ -4,9 +4,7 @@ using ecocraft.Models;
 
 namespace ecocraft.Diagram;
 
-public class ItemNode: NodeModel
+public class ItemNode(ItemOrTag itemOrTag, Point? position = null) : EcoNode(position)
 {
-    public ItemNode(Point? position = null) : base(position) { }
-    
-    public ItemOrTag ItemOrTag { get; set; }
+    public ItemOrTag ItemOrTag { get; set; } = itemOrTag;
 }

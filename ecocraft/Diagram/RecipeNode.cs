@@ -4,9 +4,10 @@ using ecocraft.Models;
 
 namespace ecocraft.Diagram;
 
-public class RecipeNode: NodeModel
+public class RecipeNode(Recipe recipe, Point? position = null) : EcoNode(position)
 {
-    public RecipeNode(Point? position = null) : base(position) { }
-    
-    public Recipe Recipe { get; set; }
+    public Recipe Recipe { get; set; } = recipe;
+    public List<TagNode> InputsTags = [];
+    public List<ItemNode> Inputs = [];
+    public List<ItemNode> Outputs = [];
 }

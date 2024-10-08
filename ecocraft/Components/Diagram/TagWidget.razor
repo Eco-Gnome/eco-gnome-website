@@ -3,13 +3,14 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 
-<div>
-    <h5 class="eco-node tag-node-title">@ContextService.GetTranslation(Node.ItemOrTag)</h5>
-    
-    @foreach (var port in Node.Ports)
-    {
-        <PortRenderer @key="port" Port="port" />
-    }
+<div class="d-flex justify-center align-center">
+    <div style="position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 100px; background-color: black; margin-right: -5px; padding: 5px;">
+        <PortRenderer @key="Node.Ports[0]" Port="@Node.Ports[0]"/>
+    </div>
+    <h5 style="position: relative; z-index: 2; " class="eco-node tag-node-title">@ContextService.GetTranslation(Node.ItemOrTag)</h5>
+    <div style="position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 100px; background-color: black; margin-left: -5px; padding: 5px;">
+        <PortRenderer @key="Node.Ports[1]" Port="@Node.Ports[1]"/>
+    </div>
 </div>
 
 @code {

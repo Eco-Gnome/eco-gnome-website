@@ -18,12 +18,20 @@
 
 <MudContainer>
 	<MudGrid>
+		<MudItem sm="12" Class="pa-4">
+			<MudButton Variant="Variant.Filled"
+			           Color="Color.Primary"
+			           StartIcon="@Icons.Material.Filled.AutoGraph"
+			           OnClick="GenerateGraph">
+				Reset Graph
+			</MudButton>
+		</MudItem>
 		<MudItem sm="12" Class="pa-4 mud-elevation-2">
 			<div class="diagram-container">
 				<CascadingValue Value="Diagram" IsFixed="true">
 					<DiagramCanvas>
 						<Widgets>
-							<GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white" />
+							<GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="white"/>
 						</Widgets>
 					</DiagramCanvas>
 				</CascadingValue>
@@ -34,7 +42,7 @@
 
 @code {
 	private BlazorDiagram Diagram { get; set; } = null!;
-	
+
 	protected override void OnInitialized()
 	{
 		var options = new BlazorDiagramOptions
@@ -55,99 +63,421 @@
 		Diagram.RegisterComponent<TagNode, TagWidget>();
 		Diagram.RegisterComponent<ItemNode, ItemWidget>();
 		Diagram.RegisterComponent<RecipeNode, RecipeWidget>();
+
+		GenerateGraph();
+	}
+
+	private void GenerateGraph()
+	{
+		Diagram.Nodes.Clear();
 		
-		var itemOrTagNodes = new Dictionary<ItemOrTag, NodeModel>();
+		var itemNodes = new Dictionary<ItemOrTag, ItemNode>();
+		var tagNodes = new Dictionary<ItemOrTag, TagNode>();
+		var recipeNodes = new List<RecipeNode>();
 		
-		var x = 0;
-		var y = 0;
-		
+		// Create Tags and Items
 		foreach (var itemOrTag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct())
 		{
 			NodeModel node;
 			
 			if (itemOrTag.IsTag)
 			{
-				node = new TagNode
-				{
-					Position = new Point(x, y),
-					ItemOrTag = itemOrTag,
-				};
+				node = Diagram.Nodes.Add(new TagNode(itemOrTag));
+				tagNodes.Add(itemOrTag, (TagNode)node);
 			}
 			else
 			{
-				node = Diagram.Nodes.Add(new ItemNode
-				{
-					Position = new Point(x, y),
-					ItemOrTag = itemOrTag,
-				});
+				node = Diagram.Nodes.Add(new ItemNode(itemOrTag));
+				itemNodes.Add(itemOrTag, (ItemNode)node);
 			}
 			
-			itemOrTagNodes.Add(itemOrTag, node);
 			node.AddPort(PortAlignment.Left);
 			node.AddPort(PortAlignment.Right);
-			
-			x += 200;
-			
-			if (x > 10000)
-			{
-				y += 200;
-				x = 0;
-			}
 		}
 		
+		// Link Tags and Items
 		foreach (var tag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct().Where(i => i.IsTag))
 		{
 			foreach (var item in tag.AssociatedItemOrTags)
 			{
-				var itemNode = itemOrTagNodes.GetValueOrDefault(item);
-				var tagNode = itemOrTagNodes.GetValueOrDefault(tag);
+				var itemNode = itemNodes.GetValueOrDefault(item);
+				var tagNode = tagNodes.GetValueOrDefault(tag);
 				
 				if (itemNode is not null && tagNode is not null)
 				{
 					Diagram.Links.Add(new LinkModel(
-						new ShapeIntersectionAnchor(tagNode), 
-						new SinglePortAnchor(itemNode.Ports.First())
+						new SinglePortAnchor(tagNode.Ports[0]), 
+						new SinglePortAnchor(itemNode.Ports[1])
 					));
+					tagNode.RelatedItems.Add(itemNode);
 				}
 			}
 		}
 		
-		x = 0;
-		y = 0;
-		
+		// Create Recipes and Link them to Items and Tags
 		foreach (var recipe in UserServerDataService.UserRecipes.Select(ur => ur.Recipe))
 		{
-			var node = Diagram.Nodes.Add(new RecipeNode
-			{
-				Position = new Point(x, y),
-				Recipe = recipe,
-			});
+			var recipeNode = Diagram.Nodes.Add(new RecipeNode(recipe));
 			
-			// node.AddPort(PortAlignment.Left);
-			// node.AddPort(PortAlignment.Right);
+			recipeNodes.Add(recipeNode);
+			
+			recipeNode.AddPort(PortAlignment.Left);
+			recipeNode.AddPort(PortAlignment.Right);
 			
 			foreach (var element in recipe.Elements)
 			{
-				var itemOrTagNode = itemOrTagNodes.GetValueOrDefault(element.ItemOrTag);
+				var tagNode = tagNodes.GetValueOrDefault(element.ItemOrTag);
+				var itemNode = itemNodes.GetValueOrDefault(element.ItemOrTag);
 				
-				if (itemOrTagNode is null) continue;
+				LinkModel link;
 				
-				var link = new LinkModel(
-					new ShapeIntersectionAnchor(node),
-					new SinglePortAnchor(itemOrTagNode.Ports[element.IsIngredient() ? 1 : 0])
-				);
+				if (tagNode is not null)
+				{
+					link = new LinkModel(
+						new SinglePortAnchor(recipeNode.Ports.First()),
+						new SinglePortAnchor(tagNode.Ports[element.IsIngredient() ? 1 : 0])
+					);
+					
+					recipeNode.InputsTags.Add(tagNode);
+				} 
+				else if (itemNode is not null)
+				{
+					if (element.IsIngredient())
+					{
+						link = new LinkModel(
+							new SinglePortAnchor(recipeNode.Ports.First()),
+							new SinglePortAnchor(itemNode.Ports[1])
+						);
+						recipeNode.Inputs.Add(itemNode);
+					}
+					else
+					{
+						link = new LinkModel(
+							new SinglePortAnchor(recipeNode.Ports[1]),
+							new SinglePortAnchor(itemNode.Ports.First())
+						);
+						recipeNode.Outputs.Add(itemNode);
+					}
+				}
+				else
+				{
+					throw new Exception("Can't find related tag or item.");
+				}
+				
 				link.Labels.Add(new LinkLabelModel(link, element.Quantity.ToString()));
-				
 				Diagram.Links.Add(link);
 			}
-			
-			x += 200;
-			
-			if (x > 2000)
+		}
+		
+		// Algorithme de placement
+		
+		var allNodes = new List<EcoNode>();
+		allNodes.AddRange(itemNodes.Values);
+		allNodes.AddRange(tagNodes.Values);
+		allNodes.AddRange(recipeNodes);
+		
+		var allEdges = new List<EcoEdge>();
+
+		foreach (var recipeNode in recipeNodes)
+		{
+			allEdges.AddRange(recipeNode.Inputs.Select(inputItem => new EcoEdge(inputItem, recipeNode)));
+			allEdges.AddRange(recipeNode.InputsTags.Select(inputTag => new EcoEdge(inputTag, recipeNode)));
+			allEdges.AddRange(recipeNode.Outputs.Select(outputItem => new EcoEdge(recipeNode, outputItem)));
+		}
+
+		foreach (var tagNode in tagNodes.Values)
+		{
+			allEdges.AddRange(tagNode.RelatedItems.Select(relatedItem => new EcoEdge(relatedItem, tagNode)));
+		}
+
+		// RandomAlgo(allNodes);
+		// ForceDirectedLayoutAlgo(allNodes, allEdges, width: 2000, height: 2000, iterations: 100);
+		SugiyamaAlgo(allNodes, allEdges);
+	}
+
+	private static void RandomAlgo(List<EcoNode> nodes)
+	{
+		Random random = new Random();
+		foreach (var node in nodes)
+		{
+			if (node.Position == null || (node.Position.X == 0 && node.Position.Y == 0))
 			{
-				y += 200;
-				x = 0;
+				node.Position = new Point(random.NextDouble() * 1000, random.NextDouble() * 1000);
 			}
 		}
 	}
+
+	private static void ForceDirectedLayoutAlgo(List<EcoNode> nodes, List<EcoEdge> edges, double width, double height, int iterations = 100)
+	{
+	    int N = nodes.Count;
+	    double area = width * height;
+	    double k = 0.75 * Math.Sqrt(area / N); // Constante pour les forces
+
+	    double temperature = width / 10; // Température initiale pour le refroidissement
+	    double coolingFactor = 0.95;     // Facteur de refroidissement
+
+	    // Dictionnaire pour stocker les déplacements
+	    var displacements = new Dictionary<NodeModel, Point>();
+
+	    // Initialiser les positions si nécessaire
+	    Random random = new Random();
+	    foreach (var node in nodes)
+	    {
+	        if (node.Position == null || (node.Position.X == 0 && node.Position.Y == 0))
+	        {
+	            node.Position = new Point(random.NextDouble() * width, random.NextDouble() * height);
+	        }
+	    }
+
+	    for (int i = 0; i < iterations; i++)
+	    {
+	        // Initialiser les déplacements
+	        foreach (var node in nodes)
+	        {
+	            displacements[node] = new Point(0, 0);
+	        }
+
+	        // Calcul des forces de répulsion
+	        foreach (var v in nodes)
+	        {
+	            foreach (var u in nodes)
+	            {
+	                if (u != v)
+	                {
+	                    Point delta = v.Position.Subtract(u.Position);
+	                    double distance = delta.Length + 0.01; // Éviter la division par zéro
+	                    double force = (k * k) / distance;
+
+	                    Point displacement = delta.Normalize().Multiply(force);
+	                    displacements[v] += displacement;
+	                }
+	            }
+	        }
+
+	        // Calcul des forces d'attraction
+	        foreach (var edge in edges)
+	        {
+	            Point delta = edge.Target.Position.Subtract(edge.Source.Position);
+	            double distance = delta.Length + 0.01;
+	            double force = (distance * distance) / k;
+
+	            Point displacement = delta.Normalize().Multiply(force);
+
+	            displacements[edge.Target] = displacements[edge.Target].Subtract(displacement);
+	            displacements[edge.Source] += displacement;
+	        }
+
+	        // Mise à jour des positions
+	        foreach (var node in nodes)
+	        {
+	            Point displacement = displacements[node];
+	            double distance = displacement.Length;
+	            if (distance > 0)
+	            {
+	                // Limiter le déplacement à la température
+	                double limitedDistance = Math.Min(distance, temperature);
+	                Point limitedDisplacement = displacement.Normalize().Multiply(limitedDistance);
+
+	                node.Position = node.Position.Add(limitedDisplacement.X, limitedDisplacement.Y);
+	            }
+
+	            // Optionnel : Gérer les limites de la zone
+	            double x = Math.Min(width, Math.Max(0, node.Position.X));
+	            double y = Math.Min(height, Math.Max(0, node.Position.Y));
+	            node.Position = new Point(y, x);
+	        }
+
+	        // Refroidissement
+	        temperature *= coolingFactor;
+	    }
+	}
+
+	private static void SugiyamaAlgo(List<EcoNode> nodes, List<EcoEdge> edges)
+	{
+		double layerSpacing = 400;
+		double nodeSpacing = 100;
+		int iterations = 200;
+
+		RemoveCycles(nodes, edges);
+		AssignLayers(nodes, edges);
+		OrderNodesInLayers(nodes, edges, iterations);
+		AssignCoordinates(nodes, layerSpacing, nodeSpacing);
+	}
+
+	private static void RemoveCycles(List<EcoNode> allNodes, List<EcoEdge> edges)
+	{
+		var visited = new HashSet<EcoNode>();
+		var stack = new HashSet<EcoNode>();
+
+		foreach (var node in allNodes)
+		{
+			if (!visited.Contains(node))
+			{
+				DFS(node, edges, visited, stack);
+			}
+		}
+	}
+
+	private static void DFS(EcoNode node, List<EcoEdge> edges, HashSet<EcoNode> visited, HashSet<EcoNode> stack)
+	{
+		visited.Add(node);
+		stack.Add(node);
+
+		foreach (var edge in GetOutgoingEdges(node, edges))
+		{
+			var neighbor = edge.Target;
+			if (!visited.Contains(neighbor))
+			{
+				DFS(neighbor, edges, visited, stack);
+			}
+			else if (stack.Contains(neighbor))
+			{
+				// Cycle détecté, inverser l'arête
+				edge.IsReversed = true;
+				// Inverser l'arête dans la liste des arêtes
+				edge.Source = neighbor;
+				edge.Target = node;
+			}
+		}
+
+		stack.Remove(node);
+	}
+
+	private static List<EcoEdge> GetOutgoingEdges(EcoNode node, List<EcoEdge> edges)
+	{
+		return edges.Where(e => e.Source == node && !e.IsReversed).ToList();
+	}
+	
+	private static void AssignLayers(List<EcoNode> allNodes, List<EcoEdge> edges)
+	{
+		// Initialiser les couches
+		foreach (var node in allNodes)
+		{
+			node.Layer = -1; // Non assigné
+		}
+
+		// Trouver les nœuds sans prédécesseurs (sources)
+		var sources = allNodes.Where(n => GetIncomingEdges(n, edges).Count == 0).ToList();
+
+		var queue = new Queue<EcoNode>();
+		foreach (var source in sources)
+		{
+			source.Layer = 0;
+			queue.Enqueue(source);
+		}
+
+		while (queue.Count > 0)
+		{
+			var node = queue.Dequeue();
+			int layer = node.Layer;
+
+			foreach (var edge in GetOutgoingEdges(node, edges))
+			{
+				var neighbor = edge.Target;
+				int neighborLayer = layer + 1;
+				if (neighbor.Layer < neighborLayer)
+				{
+					neighbor.Layer = neighborLayer;
+					queue.Enqueue(neighbor);
+				}
+			}
+		}
+	}
+
+	private static List<EcoEdge> GetIncomingEdges(EcoNode node, List<EcoEdge> edges)
+	{
+		return edges.Where(e => e.Target == node && !e.IsReversed).ToList();
+	}
+	
+	private static void OrderNodesInLayers(List<EcoNode> allNodes, List<EcoEdge> edges, int iterations)
+	{
+	    // Regrouper les nœuds par couche
+	    var layers = allNodes.GroupBy(n => n.Layer).OrderBy(g => g.Key).ToDictionary(g => g.Key, g => g.ToList());
+
+	    // Initialiser l'ordre des nœuds dans chaque couche
+	    foreach (var layer in layers.Values)
+	    {
+	        int order = 0;
+	        foreach (var node in layer)
+	        {
+	            node.Order = order++;
+	        }
+	    }
+
+	    // Nombre d'itérations pour améliorer l'ordonnancement
+	    for (int i = 0; i < iterations; i++)
+	    {
+	        // Du haut vers le bas
+	        for (int l = 1; l < layers.Count; l++)
+	        {
+	            var layerNodes = layers[l].OrderBy(n => n.Order).ToList();
+	            foreach (var node in layerNodes)
+	            {
+	                var incomingNodes = GetIncomingEdges(node, edges).Select(e => e.Source).ToList();
+	                if (incomingNodes.Count > 0)
+	                {
+	                    double barycenter = incomingNodes.Average(n => n.Order);
+	                    node.Order = barycenter;
+	                }
+	            }
+	            // Réordonner les nœuds
+	            layers[l] = layers[l].OrderBy(n => n.Order).ToList();
+	            // Réattribuer les ordres entiers
+	            int order = 0;
+	            foreach (var node in layers[l])
+	            {
+	                node.Order = order++;
+	            }
+	        }
+
+	        // Du bas vers le haut
+	        for (int l = layers.Count - 2; l >= 0; l--)
+	        {
+	            var layerNodes = layers[l].OrderBy(n => n.Order).ToList();
+	            foreach (var node in layerNodes)
+	            {
+	                var outgoingNodes = GetOutgoingEdges(node, edges).Select(e => e.Target).ToList();
+	                if (outgoingNodes.Count > 0)
+	                {
+	                    double barycenter = outgoingNodes.Average(n => n.Order);
+	                    node.Order = barycenter;
+	                }
+	            }
+	            // Réordonner les nœuds
+	            layers[l] = layers[l].OrderBy(n => n.Order).ToList();
+	            // Réattribuer les ordres entiers
+	            int order = 0;
+	            foreach (var node in layers[l])
+	            {
+	                node.Order = order++;
+	            }
+	        }
+	    }
+	}
+	
+	private static void AssignCoordinates(List<EcoNode> allNodes, double layerSpacing, double nodeSpacing)
+	{
+		// Regrouper les nœuds par couche
+		var layers = allNodes.GroupBy(n => n.Layer).OrderBy(g => g.Key).ToList();
+
+		foreach (var layerGroup in layers)
+		{
+			int layer = layerGroup.Key;
+			var nodesInLayer = layerGroup.OrderBy(n => n.Order).ToList();
+
+			// Calculer la position Y pour cette couche
+			double y = layer * layerSpacing;
+
+			// Calculer la position X pour chaque nœud
+			for (int i = 0; i < nodesInLayer.Count; i++)
+			{
+				var node = nodesInLayer[i];
+				double x = i * nodeSpacing;
+
+				node.Position = new Point(y, x);
+			}
+		}
+	}
+
+
 }
