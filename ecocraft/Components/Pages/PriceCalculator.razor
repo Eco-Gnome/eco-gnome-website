@@ -81,7 +81,15 @@
 							@context.CraftingTable.Name
 						</MudTd>
 						<MudTd>
-							<MudSelect T="PluginModule" Placeholder="Choose a module" Value=@context.PluginModule Dense="true" Variant="Variant.Outlined" ValueChanged="(PluginModule newPluginModule) => OnSelectedPluginModuleChanged(context, newPluginModule)" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+							<MudSelect T="PluginModule?" 
+							           Placeholder="Choose a module" 
+							           @bind-Value="context.PluginModule"
+							           Dense="true" 
+							           Variant="Variant.Outlined"
+							           ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
+							           AnchorOrigin="Origin.BottomLeft"
+							           TransformOrigin="Origin.TopLeft">
+								<MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
 								@foreach (var pluginModule in context.CraftingTable.PluginModules)
 							{
 								<MudSelectItem T="PluginModule" Value="@pluginModule">@pluginModule.Name</MudSelectItem>
@@ -365,7 +373,7 @@
 		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
-	private void OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule newUpgrade)
+	private void OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule? newUpgrade)
 	{
 		userCraftingTable.PluginModule = newUpgrade;
 	}

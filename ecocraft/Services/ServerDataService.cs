@@ -1,6 +1,5 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using MudBlazor;
 
 namespace ecocraft.Services;
 
@@ -18,8 +17,19 @@ public class ServerDataService(
     public List<Recipe> Recipes { get; private set; } = [];
     public List<ItemOrTag> ItemOrTags { get; private set; } = [];
 
-    public async Task RetrieveServerData(Server server)
+    public async Task RetrieveServerData(Server? server)
     {
+        if (server is null)
+        {
+            Skills = [];
+            CraftingTables = [];
+            PluginModules = [];
+            Recipes = [];
+            ItemOrTags = [];
+
+            return;
+        }
+        
         var skillsTask = skillDbService.GetByServerAsync(server);
         var craftingTablesTask = craftingTableDbService.GetByServerAsync(server);
         var pluginModulesTask = pluginModuleDbService.GetByServerAsync(server);
@@ -35,13 +45,14 @@ public class ServerDataService(
         ItemOrTags = itemOrTagsTask.Result;
     }
 
-    public Skill ImportSkill(Server server, string name, string? profession)
+    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession)
     {
         var skill = new Skill
         {
             Name = name,
             Profession = profession,
             Server = server,
+            LocalizedName = localizedName,
         };
 
         Skills.Add(skill);
@@ -50,18 +61,21 @@ public class ServerDataService(
         return skill;
     }
 
-    public void RefreshSkill(Skill skill, string? profession)
+    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession)
     {
+        skill.LocalizedName = localizedName;
         skill.Profession = profession;
+
         skillDbService.Update(skill);
     }
 
-    public PluginModule ImportPluginModule(Server server, string name, float percent)
+    public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, float percent)
     {
         var pluginModule = new PluginModule
         {
             Name = name,
-            Percent = percent,
+            Percent = percent,            
+            LocalizedName = localizedName,
             Server = server,
         };
 
@@ -71,19 +85,22 @@ public class ServerDataService(
         return pluginModule;
     }
 
-    public void RefreshPluginModule(PluginModule pluginModule, float percent)
+    public void RefreshPluginModule(PluginModule pluginModule, LocalizedField localizedName, float percent)
     {
+        pluginModule.LocalizedName = localizedName;
         pluginModule.Percent = percent;
+        
         pluginModuleDbService.Update(pluginModule);
     }
 
-    public CraftingTable ImportCraftingTable(Server server, string name, List<PluginModule> pluginModules)
+    public CraftingTable ImportCraftingTable(Server server, string name, LocalizedField localizedName, List<PluginModule> pluginModules)
     {
         var craftingTable = new CraftingTable
         {
             Name = name,
             PluginModules = pluginModules,
             Server = server,
+            LocalizedName = localizedName,
         };
 
         CraftingTables.Add(craftingTable);
@@ -92,19 +109,22 @@ public class ServerDataService(
         return craftingTable;
     }
 
-    public void RefreshCraftingTable(CraftingTable craftingTable, List<PluginModule> pluginModules)
+    public void RefreshCraftingTable(CraftingTable craftingTable, LocalizedField localizedName, List<PluginModule> pluginModules)
     {
+        craftingTable.LocalizedName = localizedName;
         craftingTable.PluginModules = pluginModules;
+        
         craftingTableDbService.Update(craftingTable);
     }
 
-    public ItemOrTag ImportItemOrTag(Server server, string name, bool isTag)
+    public ItemOrTag ImportItemOrTag(Server server, string name, LocalizedField localizedName, bool isTag)
     {
         var itemOrTag = new ItemOrTag
         {
             Name = name,
             Server = server,
             IsTag = isTag,
+            LocalizedName = localizedName,
         };
 
         ItemOrTags.Add(itemOrTag);
@@ -113,19 +133,25 @@ public class ServerDataService(
         return itemOrTag;
     }
 
-    public void RefreshItemOrTag(ItemOrTag itemOrTag, bool isTag)
+    public void RefreshItemOrTag(ItemOrTag itemOrTag, LocalizedField localizedName, bool isTag)
     {
+        itemOrTag.LocalizedName = localizedName;
         itemOrTag.IsTag = isTag;
-        
-        itemOrTagDbService.Update(itemOrTag);
+
+        // Specific for ItemOrTag, they  can appear in multiple recipes, so we must not update them if they have not yet been created in the database
+        if (!ItemOrTags.Contains(itemOrTag))
+        {
+            itemOrTagDbService.Update(itemOrTag);
+        }
     }
 
-    public Recipe ImportRecipe(Server server, string name, string familyName, float craftMinutes, Skill? skill,
+    public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill,
         int requiredSkillLevel, bool isBlueprint, bool isDefault, float labor, CraftingTable craftingTable)
     {
         var recipe = new Recipe
         {
             Name = name,
+            LocalizedName = localizedName,
             FamilyName = familyName,
             CraftMinutes = craftMinutes,
             Skill = skill,
@@ -143,9 +169,10 @@ public class ServerDataService(
         return recipe;
     }
 
-    public void RefreshRecipe(Recipe recipe, string familyName, float craftMinutes, Skill? skill, int requiredSkillLevel,
+    public void RefreshRecipe(Recipe recipe, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill, int requiredSkillLevel,
         bool isBlueprint, bool isDefault, float labor, CraftingTable craftingTable)
     {
+        recipe.LocalizedName = localizedName;
         recipe.FamilyName = familyName;
         recipe.CraftMinutes = craftMinutes;
         recipe.Skill = skill;
@@ -154,7 +181,7 @@ public class ServerDataService(
         recipe.IsDefault = isDefault;
         recipe.Labor = labor;
         recipe.CraftingTable = craftingTable;
-
+        
         recipeDbService.Update(recipe);
     }
 

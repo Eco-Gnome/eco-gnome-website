@@ -1,7 +1,7 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDbService<CraftingTable>
 {

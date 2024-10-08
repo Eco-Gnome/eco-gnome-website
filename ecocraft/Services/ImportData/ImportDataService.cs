@@ -1,251 +1,454 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using ecocraft.Models;
 
-namespace ecocraft.Services.ImportData
+namespace ecocraft.Services.ImportData;
+
+public class ImportDataService(
+    EcoCraftDbContext dbContext,
+    ServerDataService serverDataService)
 {
-    public class ImportDataService(
-        EcoCraftDbContext dbContext,
-        ServerDataService serverDataService)
+    public async Task ImportServerData(string jsonContent, Server server)
     {
-        public async Task ImportServerData(string jsonContent, Server server)
+        try
         {
-            try
-            {
-                var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new LanguageCodeDictionaryConverter());
 
-                if (importedData is not null)
-                {
-                    ImportSkills(server, importedData.skills, importedData.itemTagAssoc);
-                    ImportPluginModules(server, importedData.pluginModules);
-                    ImportCraftingTables(server, importedData.craftingTables);
-                    ImportItemTag(server, importedData.itemTagAssoc);
-                    ImportRecipes(server, importedData.recipes);
-                    
-                    await dbContext.SaveChangesAsync();
-                }
-            }
-            catch (JsonException ex)
+            var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent, options);
+
+            if (importedData is not null)
             {
-                Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur durant l'import: {ex.Message} {ex.StackTrace}");
+                ImportSkills(server, importedData.skills);
+                ImportPluginModules(server, importedData.pluginModules);
+                ImportCraftingTables(server, importedData.craftingTables);
+                ImportRecipes(server, importedData.recipes);
+                ImportItemTagAssoc(importedData.itemTagAssoc);
+
+                await dbContext.SaveChangesAsync();
             }
         }
-
-        private void ImportSkills(Server server, List<SkillDto> newSkills, List<ItemTagAssocDto> newItemTagAssocs)
+        catch (JsonException ex)
         {
-            foreach (var newSkill in newSkills)
-            {
-                var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newSkill.Name);
+            Console.WriteLine($"Erreur lors de la désérialisation JSON: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur durant l'import: {ex.Message} {ex.StackTrace}");
+        }
+    }
 
-                if (dbSkill is null)
-                {
-                    serverDataService.ImportSkill(server, newSkill.Name, newSkill.Profession);
-                }
-                else
-                {
-                    serverDataService.RefreshSkill(dbSkill, newSkill.Profession);
-                }
+    private void ImportSkills(Server server, List<SkillDto> newSkills)
+    {
+        foreach (var newSkill in newSkills)
+        {
+            var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newSkill.Name);
+
+            if (dbSkill is null)
+            {
+                serverDataService.ImportSkill(server, newSkill.Name,
+                    TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession);
+            }
+            else
+            {
+                serverDataService.RefreshSkill(dbSkill, TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName),
+                    newSkill.Profession);
             }
         }
+    }
 
-        private void ImportPluginModules(Server server, List<PluginModuleDto> newPluginModules)
+    private void ImportPluginModules(Server server, List<PluginModuleDto> newPluginModules)
+    {
+        foreach (var newPluginModule in newPluginModules)
         {
-            foreach (var newPluginModule in newPluginModules)
-            {
-                var dbPluginModule =
-                    serverDataService.PluginModules.FirstOrDefault(p => p.Name == newPluginModule.Name);
+            var dbPluginModule =
+                serverDataService.PluginModules.FirstOrDefault(p => p.Name == newPluginModule.Name);
 
-                if (dbPluginModule is null)
-                {
-                    serverDataService.ImportPluginModule(server, newPluginModule.Name, newPluginModule.Percent);
-                }
-                else
-                {
-                    serverDataService.RefreshPluginModule(dbPluginModule, newPluginModule.Percent);
-                }
+            if (dbPluginModule is null)
+            {
+                serverDataService.ImportPluginModule(server, newPluginModule.Name,
+                    TranslationsToLocalizedField(server, newPluginModule.LocalizedName), newPluginModule.Percent);
+            }
+            else
+            {
+                serverDataService.RefreshPluginModule(dbPluginModule,
+                    TranslationsToLocalizedField(server, newPluginModule.LocalizedName, dbPluginModule.LocalizedName), newPluginModule.Percent);
             }
         }
+    }
 
-        private void ImportCraftingTables(Server server, List<CraftingTableDto> newCraftingTables)
+    private void ImportCraftingTables(Server server, List<CraftingTableDto> newCraftingTables)
+    {
+        foreach (var newCraftingTable in newCraftingTables)
         {
-            foreach (var newCraftingTable in newCraftingTables)
+            var dbCraftingTable =
+                serverDataService.CraftingTables.FirstOrDefault(p => p.Name == newCraftingTable.Name);
+
+            var pluginModules = newCraftingTable.CraftingTablePluginModules
+                .Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm))
+                .ToList();
+
+            if (dbCraftingTable is null)
             {
-                var dbCraftingTable =
-                    serverDataService.CraftingTables.FirstOrDefault(p => p.Name == newCraftingTable.Name);
+                serverDataService.ImportCraftingTable(
+                    server,
+                    newCraftingTable.Name,
+                    TranslationsToLocalizedField(server, newCraftingTable.LocalizedName),
+                    pluginModules
+                );
+            }
+            else
+            {
+                serverDataService.RefreshCraftingTable(
+                    dbCraftingTable,
+                    TranslationsToLocalizedField(server, newCraftingTable.LocalizedName, dbCraftingTable.LocalizedName),
+                    pluginModules
+                );
+            }
+        }
+    }
 
-                var pluginModules = newCraftingTable.CraftingTablePluginModules
-                    .Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm))
-                    .ToList();
+    private void ImportRecipes(Server server, List<RecipeDto> newRecipes)
+    {
+        foreach (var newRecipe in newRecipes)
+        {
+            var dbRecipe = serverDataService.Recipes.FirstOrDefault(p => p.Name == newRecipe.Name);
+            var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newRecipe.RequiredSkill);
+            var dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == newRecipe.CraftingTable);
 
-                if (dbCraftingTable is null)
+            if (dbRecipe is null)
+            {
+                dbRecipe = serverDataService.ImportRecipe(
+                    server,
+                    newRecipe.Name,
+                    TranslationsToLocalizedField(server, newRecipe.LocalizedName),
+                    newRecipe.FamilyName,
+                    newRecipe.CraftMinutes,
+                    dbSkill,
+                    newRecipe.RequiredSkillLevel,
+                    newRecipe.IsBlueprint,
+                    newRecipe.IsDefault,
+                    newRecipe.Labor,
+                    dbCraftingTable
+                );
+            }
+            else
+            {
+                serverDataService.RefreshRecipe(
+                    dbRecipe,
+                    TranslationsToLocalizedField(server, newRecipe.LocalizedName, dbRecipe.LocalizedName),
+                    newRecipe.FamilyName,
+                    newRecipe.CraftMinutes,
+                    dbSkill,
+                    newRecipe.RequiredSkillLevel,
+                    newRecipe.IsBlueprint,
+                    newRecipe.IsDefault,
+                    newRecipe.Labor,
+                    dbCraftingTable
+                );
+            }
+
+            foreach (var newRecipeIngredient in newRecipe.Ingredients)
+            {
+                newRecipeIngredient.Quantity *= -1;
+            }
+
+            var dbElements = dbRecipe.Elements;
+            dbRecipe.Elements = [];
+
+            foreach (var element in newRecipe.Ingredients.Concat(newRecipe.Products))
+            {
+                var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
+                var dbItemOrTag = serverDataService.ItemOrTags.FirstOrDefault(e => e.Name == element.ItemOrTag);
+
+                if (dbItemOrTag is null)
                 {
-                    serverDataService.ImportCraftingTable(
+                    dbItemOrTag = serverDataService.ImportItemOrTag(
                         server,
-                        newCraftingTable.Name,
-                        pluginModules
+                        element.ItemOrTag,
+                        TranslationsToLocalizedField(server, element.LocalizedItemOrTag),
+                        element.IsTag
                     );
                 }
                 else
                 {
-                    serverDataService.RefreshCraftingTable(
-                        dbCraftingTable,
-                        pluginModules
+                    serverDataService.RefreshItemOrTag(
+                        dbItemOrTag,
+                        TranslationsToLocalizedField(server, element.LocalizedItemOrTag, dbItemOrTag.LocalizedName),
+                        element.IsTag
                     );
                 }
-            }
-        }
 
-        private void ImportItemTag(Server server, List<ItemTagAssocDto> newItemOrTags)
-        {
-            foreach (var newItemOrTag in newItemOrTags)
-            {
-                var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag) ?? serverDataService.ImportItemOrTag(server, newItemOrTag.Tag, true);
-                dbTag.AssociatedItemOrTags.Clear();
+                // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
+                // so we need to be sure dbElement is the correct-retrieved element) 
+                var dbElement = dbElements.FirstOrDefault(e =>
+                    e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
 
-                foreach (var item in newItemOrTag.Types)
+                if (dbElement is null)
                 {
-                    var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item) ?? serverDataService.ImportItemOrTag(server, item, false);
-                    dbTag.AssociatedItemOrTags.Add(itemDb);
-                }
-            }
-        }
-
-        private void ImportRecipes(Server server, List<RecipeDto> newRecipes)
-        {
-            foreach (var newRecipe in newRecipes)
-            {
-                var dbRecipe = serverDataService.Recipes.FirstOrDefault(p => p.Name == newRecipe.Name);
-                var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newRecipe.RequiredSkill);
-                var dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == newRecipe.CraftingTable);
-
-                if (dbRecipe is null)
-                {
-                    dbRecipe = serverDataService.ImportRecipe(
-                        server,
-                        newRecipe.Name,
-                        newRecipe.FamilyName,
-                        newRecipe.CraftMinutes,
-                        dbSkill,
-                        newRecipe.RequiredSkillLevel,
-                        newRecipe.IsBlueprint,
-                        newRecipe.IsDefault,
-                        newRecipe.Labor,
-                        dbCraftingTable
-                    );
-                }
-                else
-                {
-                    serverDataService.RefreshRecipe(
+                    dbElement = serverDataService.ImportElement(
                         dbRecipe,
-                        newRecipe.FamilyName,
-                        newRecipe.CraftMinutes,
-                        dbSkill,
-                        newRecipe.RequiredSkillLevel,
-                        newRecipe.IsBlueprint,
-                        newRecipe.IsDefault,
-                        newRecipe.Labor,
-                        dbCraftingTable
+                        dbItemOrTag,
+                        element.Quantity,
+                        element.IsDynamic,
+                        skill,
+                        element.LavishTalent
+                    );
+                }
+                else
+                {
+                    serverDataService.RefreshElement(
+                        dbElement,
+                        dbRecipe,
+                        dbItemOrTag,
+                        element.Quantity,
+                        element.IsDynamic,
+                        skill,
+                        element.LavishTalent
                     );
                 }
 
-                foreach (var newRecipeIngredient in newRecipe.Ingredients)
-                {
-                    newRecipeIngredient.Quantity *= -1;
-                }
-
-                var dbElements = dbRecipe.Elements;
-                dbRecipe.Elements = [];
-
-                foreach (var element in newRecipe.Ingredients.Concat(newRecipe.Products))
-                {
-                    var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
-                    var itemOrTag = serverDataService.ItemOrTags.FirstOrDefault(e => e.Name == element.ItemOrTag);
-
-                    if (itemOrTag is null)
-                    {
-                        // This can't be a tag otherwise it would already exist
-                        itemOrTag = serverDataService.ImportItemOrTag(server, element.ItemOrTag, false);
-                    }
-
-                    // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
-                    // so we need to be sure dbElement is the correct-retrieved element) 
-                    var dbElement = dbElements.FirstOrDefault(e =>
-                        e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
-
-                    if (dbElement is null)
-                    {
-                        dbElement = serverDataService.ImportElement(dbRecipe, itemOrTag, element.Quantity,
-                            element.IsDynamic, skill, element.LavishTalent);
-                    }
-                    else
-                    {
-                        serverDataService.RefreshElement(dbElement, dbRecipe, itemOrTag, element.Quantity,
-                            element.IsDynamic, skill, element.LavishTalent);
-                    }
-
-                    dbRecipe.Elements.Add(dbElement);
-                }
+                dbRecipe.Elements.Add(dbElement);
             }
         }
+    }
 
-        private class ImportDataDto
+    private void ImportItemTagAssoc(List<ItemTagAssocDto> newItemOrTags)
+    {
+        foreach (var newItemOrTag in newItemOrTags)
         {
-            public List<RecipeDto> recipes { get; set; }
-            public List<ItemTagAssocDto> itemTagAssoc { get; set; }
-            public List<PluginModuleDto> pluginModules { get; set; }
-            public List<CraftingTableDto> craftingTables { get; set; }
-            public List<SkillDto> skills { get; set; }
+            var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag);
+
+            // We import itemTagAssociations only if the tag exists 
+            if (dbTag is null) continue;
+
+            dbTag.IsTag = true;
+            dbTag.AssociatedItemOrTags.Clear();
+
+            foreach (var item in newItemOrTag.Types)
+            {
+                var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item);
+
+                // We import itemTagAssociations only if the item exist
+                if (itemDb is null) continue;
+
+                dbTag.AssociatedItemOrTags.Add(itemDb);
+            }
+        }
+    }
+
+    public static LocalizedField TranslationsToLocalizedField(Server server, Dictionary<LanguageCode, string> translations, LocalizedField? localizedField = null)
+    {
+        if (localizedField is null)
+        {
+            localizedField = new LocalizedField
+            {
+                Server = server
+            };
         }
 
-        private class RecipeDto
+        foreach (var translation in translations)
         {
-            public string Name { get; set; }
-            public string FamilyName { get; set; }
-            public float CraftMinutes { get; set; }
-            public string RequiredSkill { get; set; }
-            public int RequiredSkillLevel { get; set; }
-            public bool IsBlueprint { get; set; }
-            public bool IsDefault { get; set; }
-            public float Labor { get; set; }
-            public string CraftingTable { get; set; }
-            public List<ElementDto> Ingredients { get; set; }
-            public List<ElementDto> Products { get; set; }
+            switch (translation.Key)
+            {
+                case LanguageCode.en_US:
+                    localizedField.en_US = translation.Value;
+                    break;
+                case LanguageCode.fr:
+                    localizedField.fr = translation.Value;
+                    break;
+                case LanguageCode.es:
+                    localizedField.es = translation.Value;
+                    break;
+                case LanguageCode.de:
+                    localizedField.de = translation.Value;
+                    break;
+                case LanguageCode.ko:
+                    localizedField.ko = translation.Value;
+                    break;
+                case LanguageCode.pt_BR:
+                    localizedField.pt_BR = translation.Value;
+                    break;
+                case LanguageCode.zh_Hans:
+                    localizedField.zh_Hans = translation.Value;
+                    break;
+                case LanguageCode.ru:
+                    localizedField.ru = translation.Value;
+                    break;
+                case LanguageCode.it:
+                    localizedField.it = translation.Value;
+                    break;
+                case LanguageCode.pt_PT:
+                    localizedField.pt_PT = translation.Value;
+                    break;
+                case LanguageCode.hu:
+                    localizedField.hu = translation.Value;
+                    break;
+                case LanguageCode.ja:
+                    localizedField.ja = translation.Value;
+                    break;
+                case LanguageCode.nn:
+                    localizedField.nn = translation.Value;
+                    break;
+                case LanguageCode.pl:
+                    localizedField.pl = translation.Value;
+                    break;
+                case LanguageCode.nl:
+                    localizedField.nl = translation.Value;
+                    break;
+                case LanguageCode.ro:
+                    localizedField.ro = translation.Value;
+                    break;
+                case LanguageCode.da:
+                    localizedField.da = translation.Value;
+                    break;
+                case LanguageCode.cs:
+                    localizedField.cs = translation.Value;
+                    break;
+                case LanguageCode.sv:
+                    localizedField.sv = translation.Value;
+                    break;
+                case LanguageCode.uk:
+                    localizedField.uk = translation.Value;
+                    break;
+                case LanguageCode.el:
+                    localizedField.el = translation.Value;
+                    break;
+                case LanguageCode.ar_sa:
+                    localizedField.ar_sa = translation.Value;
+                    break;
+                case LanguageCode.vi:
+                    localizedField.vi = translation.Value;
+                    break;
+                case LanguageCode.tr:
+                    localizedField.tr = translation.Value;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported LanguageCode: {translation.Key}");
+            }
+        }
+        
+        return localizedField;
+    }
+
+    private class ImportDataDto
+    {
+        public List<RecipeDto> recipes { get; set; }
+        public List<ItemTagAssocDto> itemTagAssoc { get; set; }
+        public List<PluginModuleDto> pluginModules { get; set; }
+        public List<CraftingTableDto> craftingTables { get; set; }
+        public List<SkillDto> skills { get; set; }
+    }
+
+    private class RecipeDto
+    {
+        public string Name { get; set; }
+        public Dictionary<LanguageCode, string> LocalizedName { get; set; }
+        public string FamilyName { get; set; }
+        public float CraftMinutes { get; set; }
+        public string RequiredSkill { get; set; }
+        public int RequiredSkillLevel { get; set; }
+        public bool IsBlueprint { get; set; }
+        public bool IsDefault { get; set; }
+        public float Labor { get; set; }
+        public string CraftingTable { get; set; }
+        public List<ElementDto> Ingredients { get; set; }
+        public List<ElementDto> Products { get; set; }
+    }
+
+    private class ElementDto
+    {
+        public string ItemOrTag { get; set; }
+        public Dictionary<LanguageCode, string> LocalizedItemOrTag { get; set; }
+        public bool IsTag { get; set; }
+        public float Quantity { get; set; }
+        public bool IsDynamic { get; set; }
+        public string Skill { get; set; }
+        public bool LavishTalent { get; set; }
+    }
+
+    private class CraftingTableDto
+    {
+        public string Name { get; set; }
+        public Dictionary<LanguageCode, string> LocalizedName { get; set; }
+        public List<string> CraftingTablePluginModules { get; set; }
+    }
+
+    private class ItemTagAssocDto
+    {
+        public string Tag { get; set; }
+        public List<string> Types { get; set; }
+    }
+
+    private class PluginModuleDto
+    {
+        public string Name { get; set; }
+        public Dictionary<LanguageCode, string> LocalizedName { get; set; }
+        public float Percent { get; set; }
+    }
+
+    private class SkillDto
+    {
+        public string Name { get; set; }
+        public Dictionary<LanguageCode, string> LocalizedName { get; set; }
+        public string? Profession { get; set; }
+    }
+}
+
+public class LanguageCodeDictionaryConverter : JsonConverter<Dictionary<LanguageCode, string>>
+{
+    public override Dictionary<LanguageCode, string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var dictionary = new Dictionary<LanguageCode, string>();
+
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("Le JSON n'est pas un objet.");
         }
 
-        private class ElementDto
+        while (reader.Read())
         {
-            public string ItemOrTag { get; set; }
-            public float Quantity { get; set; }
-            public bool IsDynamic { get; set; }
-            public string Skill { get; set; }
-            public bool LavishTalent { get; set; }
+            if (reader.TokenType == JsonTokenType.EndObject)
+                return dictionary;
+
+            if (reader.TokenType != JsonTokenType.PropertyName)
+            {
+                throw new JsonException("Propriété attendue.");
+            }
+
+            string propertyName = reader.GetString();
+
+            // Remplacer les tirets par des underscores
+            string enumKey = propertyName.Replace("-", "_");
+
+            if (!Enum.TryParse<LanguageCode>(enumKey, ignoreCase: true, out var languageCode))
+            {
+                throw new JsonException($"Clé de langue invalide : {propertyName}");
+            }
+
+            reader.Read();
+
+            string value = reader.GetString();
+
+            dictionary.Add(languageCode, value);
         }
 
-        private class CraftingTableDto
+        throw new JsonException("Fin de l'objet JSON attendue.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, Dictionary<LanguageCode, string> value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        foreach (var kvp in value)
         {
-            public string Name { get; set; }
-            public List<string> CraftingTablePluginModules { get; set; }
+            // Convertir la clé en chaîne avec des tirets
+            string key = kvp.Key.ToString().Replace("_", "-");
+
+            writer.WritePropertyName(key);
+            writer.WriteStringValue(kvp.Value);
         }
 
-        private class ItemTagAssocDto
-        {
-            public string Tag { get; set; }
-            public List<string> Types { get; set; }
-        }
-
-        private class PluginModuleDto
-        {
-            public string Name { get; set; }
-            public float Percent { get; set; }
-        }
-
-        private class SkillDto
-        {
-            public string Name { get; set; }
-            public string? Profession { get; set; }
-        }
+        writer.WriteEndObject();
     }
 }

@@ -15,7 +15,16 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 builder.Services.AddDbContext<EcoCraftDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options
+        .UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .EnableSensitiveDataLogging()
+        .UseLoggerFactory(LoggerFactory.Create(bd =>
+        {
+            bd
+                .AddConsole()
+                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+        }))
+    );
 
 // DB Services
 builder.Services.AddScoped<CraftingTableDbService>();
@@ -51,6 +60,15 @@ builder.Services.AddAuthorization(config =>
         policy.Requirements.Add(new IsServerAdminRequirement()));
 });
 
+// Authentication Configuration
+/*builder.Services.AddAuthentication(options =>
+    {
+        // Configure your authentication scheme here
+        // For example, using cookies or JWT tokens
+        options.DefaultAuthenticateScheme = "YourAuthenticationScheme"; // Remplace par ton schéma
+        options.DefaultChallengeScheme = "YourAuthenticationScheme"; // Remplace par ton schéma
+    })
+    .AddYourAuthenticationScheme(); // Remplace par ta méthode d'authentification (ex. .AddCookie(), .AddJwtBearer(), etc.)*/
 
 var app = builder.Build();
 
@@ -62,6 +80,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

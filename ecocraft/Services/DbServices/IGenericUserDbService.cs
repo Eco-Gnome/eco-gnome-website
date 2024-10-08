@@ -1,14 +1,8 @@
 ﻿using ecocraft.Models;
 
-namespace ecocraft.Services
+namespace ecocraft.Services.DbServices;
+
+public interface IGenericUserDbService<T> : IGenericDbService<T> where T : class
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading.Tasks;
-
-	public interface IGenericUserDbService<T> : IGenericDbService<T> where T : class
-	{
-		Task<List<T>> GetByUserServerAsync(UserServer userServer);
-	}
-
+	Task<List<T>> GetByUserServerAsync(UserServer userServer);
 }

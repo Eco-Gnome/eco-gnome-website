@@ -4,6 +4,7 @@ using ecocraft.Services.DbServices;
 namespace ecocraft.Services;
 
 public class ContextService(
+    EcoCraftDbContext dbContext,
     LocalStorageService localStorageService,
     ServerDbService serverDbService,
     ServerDataService serverDataService,
@@ -25,20 +26,15 @@ public class ContextService(
 
     public async Task ChangeServer(Server? server)
     {
-        if (server is null)
-        {
-            return;
-        }
-        
-        var userServer = CurrentUser?.UserServers.Find(us => us.ServerId == server.Id);
+        var userServer = CurrentUser?.UserServers.Find(us => us.ServerId == server?.Id);
 
         CurrentUserServer = userServer;
         CurrentServer = server;
 
         await serverDataService.RetrieveServerData(CurrentServer);
-        await userServerDataService.RetrieveUserData(CurrentUserServer!);
+        await userServerDataService.RetrieveUserData(CurrentUserServer);
 
-        await localStorageService.AddItem("ServerId", CurrentServer.Id.ToString());
+        await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
         OnContextChanged?.Invoke();
     }
@@ -93,11 +89,19 @@ public class ContextService(
 
     public async Task DeleteCurrentServer()
     {
-        if (!CurrentUserServer.IsAdmin)
+        if (!CurrentUserServer!.IsAdmin)
         {
             return;
         }
         
         serverDbService.Delete(CurrentServer!);
+        await dbContext.SaveChangesAsync();
+        await ChangeServer(null);
+    }
+
+    public async Task RenounceAdmin()
+    {
+        CurrentUserServer!.IsAdmin = false;
+        await dbContext.SaveChangesAsync();
     }
 }
