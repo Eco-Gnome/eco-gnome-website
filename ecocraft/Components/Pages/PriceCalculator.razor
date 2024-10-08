@@ -121,18 +121,19 @@
 					@if (UserServerDataService.UserSetting is not null)
 					{
 						<div>
-							@* <MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined" Style="width: 40px;" /> *@
 							<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined"/>
 						</div>
 					}
-
 				</MudStack>
-				@* <MudStack Justify="Justify.SpaceBetween" Row="true" Spacing="3" AlignItems="AlignItems.Center">
+				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 					<MudText>Profit percentage</MudText>
-					<div>
-						<MudNumericField OnBlur="UpdateUser" T="decimal" @bind-Value="user.ProfitMargin" HideSpinButtons="true" Variant="Variant.Text" Style="width: 40px;" />
-					</div>
-				</MudStack> *@
+						@if (UserServerDataService.UserSetting is not null)
+					{
+						<div>
+							<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
+						</div>
+					}
+				</MudStack>
 			</MudStack>
 			</MudItem>
 		</MudItem>
@@ -205,10 +206,10 @@
 	protected override Task OnInitializedAsync()
 	{
 		ContextService.OnContextChanged += StateHasChanged;
-		
+
 		return Task.CompletedTask;
 	}
-    
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -217,7 +218,7 @@
 		}
 
 		onlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
-		
+
 		StateHasChanged();
 	}
 
@@ -388,6 +389,12 @@
 	private void UpdateCalorieCost(float calorieCost)
 	{
 		UserServerDataService.UserSetting!.CalorieCost = calorieCost;
+		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+	}
+
+	private void UpdateMargin(float margin)
+	{
+		UserServerDataService.UserSetting!.Margin = margin;
 		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
 	}
 }
