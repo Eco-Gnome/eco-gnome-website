@@ -207,6 +207,11 @@ public class ContextService(
                 default:
                     throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}");
         }
+
+        if (String.IsNullOrEmpty(translation))
+        {
+            translation = hasLocalizedName.LocalizedName.en_US;
+        }
         
         return translation;
     }

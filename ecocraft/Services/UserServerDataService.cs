@@ -111,6 +111,7 @@ public class UserServerDataService(
 			- Ajout de toutes les recettes liées aux skills actuels et à cette table
 		* Ajout d'une recette
 			- Ajout de la table correspondante
+			- Creation des UserPrice et UserElement liés
     */
 
 	public List<UserCraftingTable> UpdateUserCraftingTables(UserServer userServer)
