@@ -22,7 +22,7 @@
 .diagram-container {
     width: 100%;
     height: 600px;
-    border: 1px solid black; /* Just visual */
+    border: none;
 }
 
 .item-node-title {
