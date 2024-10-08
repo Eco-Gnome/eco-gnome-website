@@ -22,6 +22,7 @@ public class PriceCalculatorService(
             .Where(e => e.IsIngredient())
             .Select(e => e.ItemOrTag)
             .Where(i => !listOfProducts.Contains(i))
+            .Distinct()
             .ToList();
     }
     

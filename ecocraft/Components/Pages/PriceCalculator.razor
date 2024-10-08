@@ -6,6 +6,7 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject LocalStorageService LocalStorageService
+@inject PriceCalculatorService PriceCalculatorService
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -112,29 +113,46 @@
 		<MudItem sm="4" Class="pa-2 d-flex flex-column">
 			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
 				<MudStack>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-					<MudText>Only level-accessible recipes</MudText>
-					<MudCheckBox T="bool" @bind-Value="onlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
-				</MudStack>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-					<MudText>Price per 1000 calories</MudText>
-					@if (UserServerDataService.UserSetting is not null)
-					{
-						<div>
-							<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined"/>
-						</div>
-					}
-				</MudStack>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-					<MudText>Profit percentage</MudText>
+					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+						<MudText>Only level-accessible recipes</MudText>
+						<MudCheckBox T="bool" @bind-Value="onlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
+					</MudStack>
+					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+						<MudText>Price per 1000 calories</MudText>
 						@if (UserServerDataService.UserSetting is not null)
-					{
-						<div>
-							<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
-						</div>
-					}
+						{
+							<div>
+								<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined"/>
+							</div>
+						}
+					</MudStack>
+					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+						<MudText>Profit percentage</MudText>
+							@if (UserServerDataService.UserSetting is not null)
+							{
+								<div>
+									<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
+								</div>
+							}
+					</MudStack>
 				</MudStack>
-			</MudStack>
+
+				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+				<MudTable Items="PriceCalculatorService.ListItemOrTagsToBuy()" Dense="true">
+					<HeaderContent>
+						<MudTh>Name</MudTh>
+						<MudTh>Price</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							@ContextService.GetTranslation(context)
+						</MudTd>
+						@* <MudTd>
+							<MudNumericField T="float" Disabled="true" Value="context.user"></MudNumericField>
+						</MudTd> *@
+					</RowTemplate>
+				</MudTable>
 			</MudItem>
 		</MudItem>
 
