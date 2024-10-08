@@ -53,6 +53,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("LocalizedNameId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -61,6 +64,8 @@ namespace ecocraft.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocalizedNameId");
 
                     b.HasIndex("ServerId");
 
@@ -111,6 +116,9 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsTag")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("LocalizedNameId")
+                        .HasColumnType("TEXT");
+
                     b.Property<float>("MaxPrice")
                         .HasColumnType("REAL");
 
@@ -126,15 +134,132 @@ namespace ecocraft.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocalizedNameId");
+
                     b.HasIndex("ServerId");
 
                     b.ToTable("ItemOrTag", (string)null);
+                });
+
+            modelBuilder.Entity("ecocraft.Models.LocalizedField", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ServerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ar_sa")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("cs")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("da")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("de")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("el")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("en_US")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("es")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("fr")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("hu")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("it")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ja")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ko")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("nl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("nn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("pl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("pt_BR")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("pt_PT")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ro")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ru")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("sv")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("tr")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("uk")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("vi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("zh_Hans")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("LocalizedField", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.PluginModule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -149,6 +274,8 @@ namespace ecocraft.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocalizedNameId");
+
                     b.HasIndex("ServerId");
 
                     b.ToTable("PluginModule", (string)null);
@@ -157,7 +284,6 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<float>("CraftMinutes")
@@ -178,6 +304,9 @@ namespace ecocraft.Migrations
 
                     b.Property<float>("Labor")
                         .HasColumnType("REAL");
+
+                    b.Property<Guid?>("LocalizedNameId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -227,6 +356,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("LocalizedNameId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -238,6 +370,8 @@ namespace ecocraft.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocalizedNameId");
 
                     b.HasIndex("ServerId");
 
@@ -271,7 +405,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("CraftingTableId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("PluginModuleId")
+                    b.Property<Guid?>("PluginModuleId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserServerId")
@@ -469,11 +603,18 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
                 {
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
+                        .WithMany("CraftingTables")
+                        .HasForeignKey("LocalizedNameId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("CraftingTables")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
                 });
@@ -494,7 +635,8 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.Skill", "Skill")
                         .WithMany()
-                        .HasForeignKey("SkillId");
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ItemOrTag");
 
@@ -505,8 +647,26 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.ItemOrTag", b =>
                 {
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
+                        .WithMany("ItemOrTags")
+                        .HasForeignKey("LocalizedNameId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("ItemOrTags")
+                        .HasForeignKey("ServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LocalizedName");
+
+                    b.Navigation("Server");
+                });
+
+            modelBuilder.Entity("ecocraft.Models.LocalizedField", b =>
+                {
+                    b.HasOne("ecocraft.Models.Server", "Server")
+                        .WithMany()
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -516,11 +676,18 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.PluginModule", b =>
                 {
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
+                        .WithMany("PluginModules")
+                        .HasForeignKey("LocalizedNameId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("PluginModules")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
                 });
@@ -533,6 +700,12 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
+                        .WithMany("Recipes")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("Recipes")
                         .HasForeignKey("ServerId")
@@ -541,9 +714,12 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.Skill", "Skill")
                         .WithMany("Recipes")
-                        .HasForeignKey("SkillId");
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("CraftingTable");
+
+                    b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
 
@@ -552,11 +728,18 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.Skill", b =>
                 {
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
+                        .WithMany("Skills")
+                        .HasForeignKey("LocalizedNameId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("Skills")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
                 });
@@ -571,7 +754,8 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.PluginModule", "PluginModule")
                         .WithMany()
-                        .HasForeignKey("PluginModuleId");
+                        .HasForeignKey("PluginModuleId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserCraftingTables")
@@ -709,6 +893,19 @@ namespace ecocraft.Migrations
                     b.Navigation("Elements");
 
                     b.Navigation("UserPrices");
+                });
+
+            modelBuilder.Entity("ecocraft.Models.LocalizedField", b =>
+                {
+                    b.Navigation("CraftingTables");
+
+                    b.Navigation("ItemOrTags");
+
+                    b.Navigation("PluginModules");
+
+                    b.Navigation("Recipes");
+
+                    b.Navigation("Skills");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>

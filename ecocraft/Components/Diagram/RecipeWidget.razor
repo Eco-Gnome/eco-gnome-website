@@ -1,8 +1,10 @@
 ﻿@using Blazor.Diagrams.Components.Renderers;
 @using ecocraft.Diagram;
+@using ecocraft.Services
+@inject ContextService ContextService
 
 <div>
-    <h5 class="eco-node recipe-node-title">@Node.Recipe.Name</h5>
+    <h5 class="eco-node recipe-node-title">@ContextService.GetTranslation(Node.Recipe)</h5>
     
     @foreach (var port in Node.Ports)
     {

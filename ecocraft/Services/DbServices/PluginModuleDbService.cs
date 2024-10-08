@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ecocraft.Models;
+﻿using ecocraft.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbService<PluginModule>
 {
@@ -15,6 +15,7 @@ public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbS
     {
         return context.PluginModules
             .Where(s => s.ServerId == server.Id)
+            .Include(s => s.LocalizedName)
             .ToListAsync();
     }
 

@@ -1,8 +1,7 @@
 ﻿@page "/server-management"
-@attribute [Authorize(Policy = "IsServerAdmin")]
+<!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
-@using Microsoft.AspNetCore.Authorization
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
@@ -11,7 +10,7 @@
 
 <MudContainer>
 	<MudGrid>
-		<MudItem sm="6" Class="pa-4">
+		<MudItem sm="4" Class="pa-4">
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
@@ -24,37 +23,50 @@
 				</ButtonTemplate>
 			</MudFileUpload>
 		</MudItem>
-		<MudItem sm="6" Class="pa-4">
+		<MudItem sm="4" Class="pa-4">
 			<MudButton HtmlTag="label"
 			           Variant="Variant.Filled"
-			           Color="Color.Warning"
+			           Color="Color.Error"
 			           StartIcon="@Icons.Material.Filled.DeleteForever"
 			           OnClick="DeleteServer">
 				Delete Server
 			</MudButton>
-			 @if (_askDeleteConfirmation)
+			@if (_askDeleteConfirmation)
 			{
-				<MudButton HtmlTag="label"
-				           Variant="Variant.Filled"
-				           Color="Color.Secondary"
+				<br />
+				<MudButton Variant="Variant.Filled"
+				           Color="Color.Success"
 				           StartIcon="@Icons.Material.Filled.Close"
 				           OnClick="CancelDeleteServer">
-					Delete Server
 				</MudButton>
-				<MudButton HtmlTag="label"
-				           Variant="Variant.Filled"
-				           Color="Color.Tertiary"
+				<MudButton Variant="Variant.Filled"
+				           Color="Color.Warning"
 				           StartIcon="@Icons.Material.Filled.Check"
 				           OnClick="ConfirmDeleteServer">
-					Delete Server
 				</MudButton>
 			}
+		</MudItem>
+		<MudItem sm="4" Class="pa-4">
+			<MudButton Variant="Variant.Filled"
+			           Color="Color.Warning"
+			           StartIcon="@Icons.Material.Filled.TimeToLeave"
+			           OnClick="RenounceAdmin">
+				Renounce Admin
+			</MudButton>
 		</MudItem>
 	</MudGrid>
 </MudContainer>
 
 @code {
 	private bool _askDeleteConfirmation = false;
+
+	protected override void OnInitialized()
+	{
+		if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentUserServer.IsAdmin)
+		{
+			Navigation.NavigateTo("/");
+		}
+	}
 	
 	// TODO: Handle an update of server data
 	private async Task UploadFiles(IBrowserFile? file)
@@ -63,7 +75,7 @@
 		if (file != null && file.ContentType == "application/json")
 		{
 			// On lit le fichier JSON en mémoire
-			using var stream = file.OpenReadStream(2000000);
+			using var stream = file.OpenReadStream(10_000_000);
 			using var memoryStream = new MemoryStream();
 			await stream.CopyToAsync(memoryStream);
 
@@ -98,4 +110,11 @@
 		await ContextService.DeleteCurrentServer();
 		Navigation.NavigateTo("/");
 	}
+
+	private async void RenounceAdmin()
+	{
+		await ContextService.RenounceAdmin();
+		Navigation.NavigateTo("/");
+	}
 }
+

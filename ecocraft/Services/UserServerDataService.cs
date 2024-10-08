@@ -20,8 +20,20 @@ public class UserServerDataService(
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
 
-    public async Task RetrieveUserData(UserServer userServer)
+    public async Task RetrieveUserData(UserServer? userServer)
     {
+	    if (userServer is null)
+	    {
+		    UserSkills = [];
+		    UserCraftingTables = [];
+		    UserSetting = null;
+		    UserElements = [];
+		    UserPrices = [];
+		    UserRecipes = [];
+
+		    return;
+	    }
+	    
         var userSkillsTask = userSkillDbService.GetByUserServerAsync(userServer);
         var userCraftingTablesTask = userCraftingTableDbService.GetByUserServerAsync(userServer);
         var userSettingsTask = userSettingDbService.GetByUserServerAsync(userServer);

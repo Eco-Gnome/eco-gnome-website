@@ -1,7 +1,7 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService<Recipe>
 {
@@ -16,6 +16,7 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 	{
 		return context.Recipes
 			.Include(c => c.Elements)
+			.Include(s => s.LocalizedName)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}

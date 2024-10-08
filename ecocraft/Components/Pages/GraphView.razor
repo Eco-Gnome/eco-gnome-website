@@ -12,13 +12,13 @@
 @using ecocraft.Services
 @using Blazor.Diagrams.Components.Widgets
 @using Blazor.Diagrams.Core.Geometry
-@inject ServerDataService ServerDataService
+@inject UserServerDataService UserServerDataService
 
 <PageTitle>Graph View</PageTitle>
 
 <MudContainer>
 	<MudGrid>
-		<MudItem sm="12" Class="border-solid border-2 mud-border-primary pa-4">
+		<MudItem sm="12" Class="pa-4 mud-elevation-2">
 			<div class="diagram-container">
 				<CascadingValue Value="Diagram" IsFixed="true">
 					<DiagramCanvas>
@@ -61,7 +61,7 @@
 		var x = 0;
 		var y = 0;
 		
-		foreach (var itemOrTag in ServerDataService.ItemOrTags)
+		foreach (var itemOrTag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct())
 		{
 			NodeModel node;
 			
@@ -95,7 +95,7 @@
 			}
 		}
 		
-		foreach (var tag in ServerDataService.ItemOrTags.Where(i => i.IsTag))
+		foreach (var tag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct().Where(i => i.IsTag))
 		{
 			foreach (var item in tag.AssociatedItemOrTags)
 			{
@@ -115,7 +115,7 @@
 		x = 0;
 		y = 0;
 		
-		foreach (var recipe in ServerDataService.Recipes)
+		foreach (var recipe in UserServerDataService.UserRecipes.Select(ur => ur.Recipe))
 		{
 			var node = Diagram.Nodes.Add(new RecipeNode
 			{
@@ -143,7 +143,7 @@
 			
 			x += 200;
 			
-			if (x > 10000)
+			if (x > 2000)
 			{
 				y += 200;
 				x = 0;

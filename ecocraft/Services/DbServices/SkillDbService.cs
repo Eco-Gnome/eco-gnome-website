@@ -21,6 +21,7 @@ public class SkillDbService : IGenericNamedDbService<Skill>
 	public Task<List<Skill>> GetByServerAsync(Server server)
 	{
 		return _context.Skills.Where(s => s.ServerId == server.Id)
+			.Include(s => s.LocalizedName)
 			.ToListAsync();
 	}
 

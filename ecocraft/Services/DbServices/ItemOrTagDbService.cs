@@ -1,7 +1,7 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbService<ItemOrTag>
 {
@@ -13,7 +13,8 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 
 	public Task<List<ItemOrTag>> GetByServerAsync(Server server)
 	{
-		return context.ItemOrTags
+		return context.ItemOrTags			
+			.Include(s => s.LocalizedName)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}

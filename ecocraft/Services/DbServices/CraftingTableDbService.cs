@@ -1,7 +1,7 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDbService<CraftingTable>
 {
@@ -16,6 +16,7 @@ public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDb
 		return context.CraftingTables
 			.Where(ct => ct.ServerId == server.Id)
 			.Include(ct => ct.PluginModules)
+			.Include(s => s.LocalizedName)
 			.ToListAsync();
 	}
 
