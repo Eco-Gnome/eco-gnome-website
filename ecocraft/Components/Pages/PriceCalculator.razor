@@ -2,9 +2,11 @@
 @implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Services.DbServices
 @inject ContextService ContextService
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
+@inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
 
@@ -139,18 +141,22 @@
 
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
-				<MudTable Items="PriceCalculatorService.ListItemOrTagsToBuy()" Dense="true">
+				<MudTable Items="PriceCalculatorService.GetUserPricesToBuy()" Dense="true">
 					<HeaderContent>
 						<MudTh>Name</MudTh>
 						<MudTh>Price</MudTh>
 					</HeaderContent>
 					<RowTemplate>
 						<MudTd>
-							@ContextService.GetTranslation(context)
+							@if (context.ItemOrTag.IsTag)
+							{
+								<MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Dark"/>
+							}
+							@ContextService.GetTranslation(context.ItemOrTag)
 						</MudTd>
-						@* <MudTd>
-							<MudNumericField T="float" Disabled="true" Value="context.user"></MudNumericField>
-						</MudTd> *@
+						<MudTd>
+							<MudNumericField T="float?" Value="context.Price" ValueChanged="@(value => UpdatePriceCalculation(@context, value))"></MudNumericField>
+						</MudTd>
 					</RowTemplate>
 				</MudTable>
 			</MudItem>
@@ -175,24 +181,46 @@
 					</ItemTemplate>
 				</MudAutocomplete>
 
-				<MudTable Items="UserServerDataService.UserRecipes" Dense="true">
-					<HeaderContent>
-						<MudTh>Name</MudTh>
-						<MudTh>Price</MudTh>
-						<MudTh>Action</MudTh>
-					</HeaderContent>
-					<RowTemplate>
-						<MudTd>
-							@ContextService.GetTranslation(context.Recipe)
-						</MudTd>
-						<MudTd>
-							<MudTextField Disabled="true" Value="0"></MudTextField>
-						</MudTd>
-						<MudTd>
-							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(context))"></MudIconButton>
-						</MudTd>
-					</RowTemplate>
-				</MudTable>
+				<MudGrid>
+					@foreach (var upe in PriceCalculatorService.GetUserPricesToSell())
+					{
+						<MudItem sm="12">
+							<MudGrid>
+								<MudItem sm="6">
+									@ContextService.GetTranslation(upe.Key.ItemOrTag)
+								</MudItem>
+								<MudItem sm="4">
+									<MudNumericField Style="height: 25px" Disabled="true" Value="@upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
+								</MudItem>
+								<MudItem sm="2">
+									@if (upe.Value.Count == 1)
+									{
+										<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(upe.Value.First().Element.Recipe.UserRecipes.First()))"></MudIconButton>
+									}
+								</MudItem>
+							</MudGrid>
+						</MudItem>
+						@if (upe.Value.Count > 1) 
+						{
+							@foreach (var userElement in upe.Value)
+							{
+								<MudItem sm="12" Class="pa-0">
+									<MudGrid>
+										<MudItem sm="6">
+											-> @ContextService.GetTranslation(userElement.Element.Recipe)
+										</MudItem>
+										<MudItem sm="4">
+											<MudNumericField Style="height: 25px" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
+										</MudItem>
+										<MudItem sm="2">
+											<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.UserRecipes.First()))"></MudIconButton>
+										</MudItem>
+									</MudGrid>
+								</MudItem>
+							}
+						}
+					}
+				</MudGrid>
 			</MudItem>
 		</MudItem>
 
@@ -217,7 +245,7 @@
 		{
 			_onlyLevelAccessibleRecipes = value;
 			UpdateLocalSettings();
-			UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+			UserServerDataService.RefreshAllUserSkillRecipes(ContextService.CurrentUserServer!, _onlyLevelAccessibleRecipes);
 		}
 	}
 
@@ -317,27 +345,15 @@
 			return;
 		}
 
-		var userSkill = new UserSkill
-		{
-			Skill = skill,
-			UserServer = ContextService.CurrentUserServer!,
-			Level = 1,
-		};
-
-		UserServerDataService.AddUserSkill(userSkill);
-		UserServerDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
-		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, onlyLevelAccessibleRecipes);
 
 		_emptySkill = null;
-
 		_autocompleteSkillRef?.Clear();
 	}
 
 	private void RemoveUserSkill(UserSkill skill)
 	{
 		UserServerDataService.RemoveUserSkill(skill);
-		UserServerDataService.UpdateUserCraftingTables(ContextService.CurrentUserServer!);
-		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserCraftingTable(CraftingTable? craftingTable)
@@ -347,15 +363,7 @@
 			return;
 		}
 
-		var userCraftingTable = new UserCraftingTable
-		{
-			CraftingTable = craftingTable,
-			UserServer = ContextService.CurrentUserServer!,
-			PluginModule = null
-		};
-
-		UserServerDataService.AddUserCraftingTable(userCraftingTable);
-		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
+		UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
 
 		_emptyCraftingTable = null;
 		_autocompleteCraftingTableRef?.Clear();
@@ -364,7 +372,6 @@
 	private void RemoveUserCraftingTable(UserCraftingTable craftingTable)
 	{
 		UserServerDataService.RemoveUserCraftingTable(craftingTable);
-		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
 	}
 
 	private void AddUserRecipe(Recipe? recipe)
@@ -374,13 +381,7 @@
 			return;
 		}
 
-		var userRecipe = new UserRecipe
-		{
-			Recipe = recipe,
-			UserServer = ContextService.CurrentUserServer!,
-		};
-
-		UserServerDataService.AddUserRecipe(userRecipe);
+		UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
 
 		_emptyRecipe = null;
 		_autocompleteRecipeRef?.Clear();
@@ -393,15 +394,15 @@
 
 	private void OnLevelChanged(UserSkill userSkill, int newLevel)
 	{
+		if (userSkill.Level == newLevel) return;
+		
+		var isIncrease = newLevel - userSkill.Level > 0;
 		userSkill.Level = newLevel;
-		// Comment gère-t-on l'argument limitToSkillLevelRecipes ?
 
-		UserServerDataService.UpdateUserRecipes(ContextService.CurrentUserServer!);
-	}
-
-	private void OnSelectedPluginModuleChanged(UserCraftingTable userCraftingTable, PluginModule? newUpgrade)
-	{
-		userCraftingTable.PluginModule = newUpgrade;
+		if (onlyLevelAccessibleRecipes)
+		{
+			UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
+		}
 	}
 
 	private void UpdateCalorieCost(float calorieCost)
@@ -414,5 +415,12 @@
 	{
 		UserServerDataService.UserSetting!.Margin = margin;
 		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+	}
+
+	private void UpdatePriceCalculation(UserPrice userPrice, float? value)
+	{
+		userPrice.Price = value;
+		UserPriceDbService.Update(userPrice);
+		PriceCalculatorService.Calculate();
 	}
 }

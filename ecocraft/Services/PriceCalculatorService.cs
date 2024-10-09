@@ -3,46 +3,75 @@
 namespace ecocraft.Services;
 
 public class PriceCalculatorService(
+    ContextService contextService,
     ServerDataService serverDataService,
     UserServerDataService userServerDataService)
 {
-    public List<ItemOrTag> ListItemOrTagsToBuy()
+    public List<UserPrice> GetUserPricesToBuy()
     {
-        var selectedElements = userServerDataService.UserRecipes
-            .Select(ur => ur.Recipe)
-            .SelectMany(r => r.Elements)
+        // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
+        return userServerDataService.UserPrices
+            .Where(up => !userServerDataService.UserElements
+                .Where(ue => ue.Element.IsProduct())
+                .Select(ue => ue.Element.ItemOrTag)
+                .Contains(up.ItemOrTag)
+            )
+            .OrderBy(o => contextService.GetTranslation(o.ItemOrTag))
             .ToList();
-        
-        var listOfProducts = selectedElements
-            .Where(e => e.IsProduct())
-            .Select(e => e.ItemOrTag)
-            .ToList();
-        
-        return selectedElements
-            .Where(e => e.IsIngredient())
-            .Select(e => e.ItemOrTag)
-            .Where(i => !listOfProducts.Contains(i))
+    }
+
+    public Dictionary<UserPrice, List<UserElement>> GetUserPricesToSell()
+    {
+        // Get all UserPrices where their ItemOrTag is produced by any existing UserElement
+        var userPricesToSell = userServerDataService.UserElements
+            .Where(ue => ue.Element.IsProduct())
+            .Select(ue => ue.Element.ItemOrTag.UserPrices.First())
             .Distinct()
             .ToList();
-    }
-    
-    public List<ItemOrTag> ListItemOrTagsToSell()
-    {
-        var selectedElements = userServerDataService.UserRecipes
-            .Select(ur => ur.Recipe)
-            .SelectMany(r => r.Elements)
-            .ToList();
+
+        var output = new Dictionary<UserPrice, List<UserElement>>();
         
-        return selectedElements
-            .Where(e => e.IsProduct())
-            .Select(e => e.ItemOrTag)
-            .ToList();
+        foreach (var userPriceToSell in userPricesToSell)
+        {
+            output.Add(userPriceToSell, userServerDataService.UserElements.Where(ue => ue.Element.ItemOrTag == userPriceToSell.ItemOrTag && ue.Element.IsProduct()).ToList());
+        }
+
+        output = output.OrderBy(o => contextService.GetTranslation(o.Key.ItemOrTag))
+            .ToDictionary();
+
+        return output;
     }
-    
-    public float CalculateItemOrTagPrice(ItemOrTag itemOrTag)
+
+    public void Calculate()
+    {
+        var userPriceAndElements = GetUserPricesToSell();
+
+        foreach (var upe in userPriceAndElements)
+        {
+            upe.Key.Price = null;
+            
+            foreach (var element in upe.Value)
+            {
+                element.Price = null;
+            };
+        }
+        
+        // Calculate all UserPrices to Sell
+        foreach (var upe in userPriceAndElements)
+        {
+            CalculateUserPrice(upe.Key, upe.Value);
+        }
+    }
+
+    private void CalculateUserPrice(UserPrice userPrice, List<UserElement> relatedUserElements)
+    {
+        
+    }
+
+    /*public float CalculateItemOrTagPrice(ItemOrTag itemOrTag)
     {
         var price = itemOrTag.UserPrices.FirstOrDefault()?.Price;
-        
+
         if (price is not null)
         {
             return price ?? 0;
@@ -50,7 +79,8 @@ public class PriceCalculatorService(
 
         if (itemOrTag.IsTag)
         {
-            var itemPrices = itemOrTag.AssociatedItemOrTags.Select(i => i.UserPrices.FirstOrDefault()?.Price).Where(i => i != null).ToList();
+            var itemPrices = itemOrTag.AssociatedItemOrTags.Select(i => i.UserPrices.FirstOrDefault()?.Price)
+                .Where(i => i != null).ToList();
 
             if (itemPrices.Count > 0)
             {
@@ -60,5 +90,5 @@ public class PriceCalculatorService(
         }
 
         return 0;
-    }
+    }*/
 }

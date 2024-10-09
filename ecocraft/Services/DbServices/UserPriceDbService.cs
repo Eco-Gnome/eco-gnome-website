@@ -33,7 +33,10 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 
 	public void Update(UserPrice userPrice)
 	{
-		context.UserPrices.Update(userPrice);
+		if (!context.UserPrices.Contains(userPrice))
+		{
+			context.UserPrices.Update(userPrice);
+		}
 	}
 
 	public void Delete(UserPrice userPrice)

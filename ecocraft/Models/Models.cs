@@ -209,7 +209,9 @@ public class UserElement
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Element")] public Guid ElementId { get; set; }
-    public float Share { get; set; }
+    public float? Price { get; set; }
+    public bool IsPrimary { get; set; } = false;
+    public float Share { get; set; } = 1;
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
     public Element Element { get; set; }
