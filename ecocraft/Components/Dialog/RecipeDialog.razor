@@ -5,7 +5,7 @@
 <MudDialogContent>
     <MudContainer MaxWidth="MaxWidth.Medium" Style="min-width: 600px; min-height: 300px;">
         <MudGrid>
-            <MudItem xs="12" Class="d-flex align-center">
+            <MudItem xs="12">
                 <MudText>CraftingTable: @ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
                 <MudText>Skill: @ContextService.GetTranslation(Recipe.Skill) @(Recipe.Skill is not null ? Recipe.SkillLevel : "")</MudText>
                 <MudText>Craft Time: @Recipe.CraftMinutes minutes</MudText>

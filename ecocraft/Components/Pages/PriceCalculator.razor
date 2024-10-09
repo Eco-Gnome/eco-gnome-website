@@ -194,6 +194,7 @@
 							<MudGrid>
 								<MudItem sm="6">
 									@ContextService.GetTranslation(upe.Key.ItemOrTag)
+									<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
 								</MudItem>
 								<MudItem sm="4">
 									<MudNumericField Style="height: 25px" Disabled="true" Value="@upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
