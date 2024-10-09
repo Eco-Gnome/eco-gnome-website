@@ -98,7 +98,7 @@
 		// Link Tags and Items
 		foreach (var tag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct().Where(i => i.IsTag))
 		{
-			foreach (var item in tag.AssociatedItemOrTags)
+			foreach (var item in tag.AssociatedItems)
 			{
 				var itemNode = itemNodes.GetValueOrDefault(item);
 				var tagNode = tagNodes.GetValueOrDefault(tag);

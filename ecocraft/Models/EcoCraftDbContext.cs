@@ -91,8 +91,8 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 		
 		modelBuilder.Entity<ItemOrTag>()
-			.HasMany(i => i.AssociatedItemOrTags)
-			.WithMany()
+			.HasMany(i => i.AssociatedTags)
+			.WithMany(i => i.AssociatedItems)
 			.UsingEntity(
 				"ItemTagAssoc",
 				r => r.HasOne(typeof(ItemOrTag))

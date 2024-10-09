@@ -77,7 +77,8 @@ public class ItemOrTag: IHasLocalizedName
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
     public List<UserPrice> UserPrices { get; set; } = [];
-    public List<ItemOrTag> AssociatedItemOrTags { get; set; } = [];
+    public List<ItemOrTag> AssociatedTags { get; set; } = [];
+    public List<ItemOrTag> AssociatedItems { get; set; } = [];
 
     public override string ToString()
     {
@@ -196,12 +197,12 @@ public class UserCraftingTable
 public class UserSkill
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("Skill")] public Guid SkillId { get; set; }		
+    [ForeignKey("Skill")] public Guid? SkillId { get; set; }		
     public int Level { get; set; }
     public bool HasLavishTalent { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-        
-    public Skill Skill { get; set; }
+    
+    public Skill? Skill { get; set; }
     public UserServer UserServer { get; set; }
 }
 

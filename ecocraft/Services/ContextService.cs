@@ -126,8 +126,10 @@ public class ContextService(
         await dbContext.SaveChangesAsync();
     }
     
-    public string GetTranslation(IHasLocalizedName hasLocalizedName)
+    public string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
+        if (hasLocalizedName is null) return "BUG_NO_NAME";
+        
         string translation;
         
         switch (CurrentLanguageCode)

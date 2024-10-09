@@ -115,9 +115,9 @@ public class UserServerDataService(
 	    if (onlyLevelAccessibleRecipes)
 	    {
 		    // If we activate the limitation of recipes, we remove all recipes that does not meet the requirements
-		    foreach (var userRecipe in UserRecipes)
+		    foreach (var userRecipe in UserRecipes.ToList())
 		    {
-			    if (userRecipe.Recipe.SkillLevel > UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
+			    if (userRecipe.Recipe.Skill is not null && userRecipe.Recipe.SkillLevel > UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
 			    {
 				    RemoveUserRecipe(userRecipe);
 			    }
@@ -126,12 +126,37 @@ public class UserServerDataService(
 	    else
 	    {
 		    // If we deactivate the limitation of recipes, we add all recipes of our skills
-		    foreach (var userSkill in UserSkills)
+		    foreach (var userSkill in UserSkills.Where(us => us.Skill is not null).ToList())
 		    {
-			    foreach (var recipe in userSkill.Skill.Recipes.Where(r => !UserRecipes.Select(ur => ur.Recipe).Contains(r)).ToList())
+			    foreach (var recipe in userSkill.Skill!.Recipes.Where(r => !UserRecipes.Select(ur => ur.Recipe).Contains(r)).ToList())
 			    {
 				    AddUserRecipe(recipe, userServer);
 			    }
+		    }
+	    }
+    }
+
+    public void ToggleEmptyUserSkill(UserServer userServer, bool displayNonSkilledRecipes)
+    {
+	    var nullUserSkill = UserSkills.FirstOrDefault(us => us.Skill is null);
+
+	    if (displayNonSkilledRecipes)
+	    {
+		    if (nullUserSkill is null)
+		    {
+			    // Add a fake UserSkill without skill, so we can retrieve recipes that doesn't require skill easily
+			    UserSkills.Add(new UserSkill
+			    {
+				    UserServer = userServer,
+				    Level = 7
+			    });
+		    }
+	    }
+	    else
+	    {
+		    if (nullUserSkill is not null)
+		    {
+			    RemoveUserSkill(nullUserSkill);
 		    }
 	    }
     }
@@ -160,14 +185,14 @@ public class UserServerDataService(
 	
     public void RemoveUserCraftingTable(UserCraftingTable userCraftingTable)
     {
-	    foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable).ToList())
-	    {
-		    RemoveUserRecipe(userRecipe);
-	    }
-	    
 	    userCraftingTable.UserServer.UserCraftingTables.Remove(userCraftingTable);
         UserCraftingTables.Remove(userCraftingTable);
         userCraftingTableDbService.Delete(userCraftingTable);
+        
+        foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable).ToList())
+        {
+	        RemoveUserRecipe(userRecipe, false);
+        }
     }
     
 	public void UpdateUserSetting(UserSetting userSetting)
@@ -197,7 +222,7 @@ public class UserServerDataService(
 		}
 	}
 
-    public void RemoveUserRecipe(UserRecipe userRecipe)
+    public void RemoveUserRecipe(UserRecipe userRecipe, bool removeCraftingTables = true)
     {
 	    foreach (var userElement in UserElements.Where(ue => ue.Element.Recipe == userRecipe.Recipe).ToList())
 	    {
@@ -208,7 +233,7 @@ public class UserServerDataService(
         UserRecipes.Remove(userRecipe);
         userRecipeDbService.Delete(userRecipe);
         
-        if (UserRecipes.All(ur => ur.Recipe.CraftingTable != userRecipe.Recipe.CraftingTable))
+        if (removeCraftingTables && UserRecipes.All(ur => ur.Recipe.CraftingTable != userRecipe.Recipe.CraftingTable))
         {
 	        RemoveUserCraftingTable(UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable));
         }
@@ -291,15 +316,13 @@ public class UserServerDataService(
 
 	public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
 	{
-		var skills = UserSkills.Select(us => us.Skill);
 		var recipes = new HashSet<Recipe>();
 		
-		foreach (var skill in skills)
+		foreach (var userSkill in UserSkills)
 		{
-			var userSkillLevel = skill.UserSkills.First().Level;
-			var foundRecipes = skill.Recipes.Where(r => r.Skill == skill).ToList();
+			var foundRecipes = serverDataService.Recipes.Where(r => r.Skill == userSkill.Skill);
 			
-			recipes.UnionWith(limitToSkillLevelRecipes ? foundRecipes.Where(r => r.SkillLevel <= userSkillLevel).ToList() : foundRecipes);
+			recipes.UnionWith(limitToSkillLevelRecipes ? foundRecipes.Where(r => r.SkillLevel <= userSkill.Level).ToList() : foundRecipes);
 		}
 		
 		if (addNonSkilledRecipes)
@@ -323,6 +346,7 @@ public class UserServerDataService(
 	{
 		var userCraftingTables = UserCraftingTables.Select(uct => uct.CraftingTable);
 		
-		return serverDataService.CraftingTables.Where(ct => !userCraftingTables.Contains(ct)).ToList();
+		// Retrieve crafting tables that are not already used, and only crafting table that have a recipe with a skill defined in UserSkill
+		return serverDataService.CraftingTables.Where(ct => !userCraftingTables.Contains(ct) && ct.Recipes.Select(r => r.Skill).Any(s => UserSkills.Select(us => us.Skill).Contains(s)) ).ToList();
 	}
 }

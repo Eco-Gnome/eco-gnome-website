@@ -1,8 +1,10 @@
 ﻿@page "/"
 @implements IDisposable
+@using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@inject IDialogService DialogService
 @inject ContextService ContextService
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
@@ -40,7 +42,7 @@
 					</ItemTemplate>
 				</MudAutocomplete>
 
-				<MudTable Items="UserServerDataService.UserSkills" Dense="true">
+				<MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)" Dense="true">
 					<HeaderContent>
 						<MudTh>Name</MudTh>
 						<MudTh>Level</MudTh>
@@ -116,8 +118,12 @@
 			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
 				<MudStack>
 					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+						<MudText>Display non-skilled recipes</MudText>
+						<MudCheckBox T="bool" @bind-Value="DisplayNonSkilledRecipes" Variant="Variant.Outlined"/>
+					</MudStack>
+					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 						<MudText>Only level-accessible recipes</MudText>
-						<MudCheckBox T="bool" @bind-Value="onlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
+						<MudCheckBox T="bool" @bind-Value="OnlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
 					</MudStack>
 					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 						<MudText>Price per 1000 calories</MudText>
@@ -150,7 +156,7 @@
 						<MudTd>
 							@if (context.ItemOrTag.IsTag)
 							{
-								<MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Dark"/>
+								<MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Default" OnClick="@(() => ShowTagDialog(context.ItemOrTag))"/>
 							}
 							@ContextService.GetTranslation(context.ItemOrTag)
 						</MudTd>
@@ -200,7 +206,7 @@
 								</MudItem>
 							</MudGrid>
 						</MudItem>
-						@if (upe.Value.Count > 1) 
+						@if (upe.Value.Count > 1)
 						{
 							@foreach (var userElement in upe.Value)
 							{
@@ -208,6 +214,7 @@
 									<MudGrid>
 										<MudItem sm="6">
 											-> @ContextService.GetTranslation(userElement.Element.Recipe)
+											<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))"></MudIconButton>
 										</MudItem>
 										<MudItem sm="4">
 											<MudNumericField Style="height: 25px" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
@@ -237,8 +244,9 @@
 	private CraftingTable? _emptyCraftingTable;
 	private string? _previousProfession;
 	private bool _onlyLevelAccessibleRecipes = true;
+	private bool _displayNonSkilledRecipes = true;
 
-	public bool onlyLevelAccessibleRecipes
+	public bool OnlyLevelAccessibleRecipes
 	{
 		get => _onlyLevelAccessibleRecipes;
 		set
@@ -246,6 +254,18 @@
 			_onlyLevelAccessibleRecipes = value;
 			UpdateLocalSettings();
 			UserServerDataService.RefreshAllUserSkillRecipes(ContextService.CurrentUserServer!, _onlyLevelAccessibleRecipes);
+		}
+	}
+
+	public bool DisplayNonSkilledRecipes
+	{
+		get => _displayNonSkilledRecipes;
+		set
+		{
+			_displayNonSkilledRecipes = value;
+			UpdateLocalSettings();
+			UserServerDataService.ToggleEmptyUserSkill(ContextService.CurrentUserServer!, _displayNonSkilledRecipes);
+			StateHasChanged();
 		}
 	}
 
@@ -263,7 +283,8 @@
 			return;
 		}
 
-		onlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
+		OnlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
+		DisplayNonSkilledRecipes = await LocalStorageService.GetItem("displayNonSkilledRecipes") == "True";
 
 		StateHasChanged();
 	}
@@ -275,7 +296,8 @@
 
 	private async void UpdateLocalSettings()
 	{
-		await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", onlyLevelAccessibleRecipes.ToString());
+		await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", OnlyLevelAccessibleRecipes.ToString());
+		await LocalStorageService.AddItem("displayNonSkilledRecipes", DisplayNonSkilledRecipes.ToString());
 	}
 
 	private Task<IEnumerable<Skill>> SearchSkills(string value)
@@ -345,7 +367,7 @@
 			return;
 		}
 
-		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, onlyLevelAccessibleRecipes);
+		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
 
 		_emptySkill = null;
 		_autocompleteSkillRef?.Clear();
@@ -399,7 +421,7 @@
 		var isIncrease = newLevel - userSkill.Level > 0;
 		userSkill.Level = newLevel;
 
-		if (onlyLevelAccessibleRecipes)
+		if (OnlyLevelAccessibleRecipes)
 		{
 			UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
 		}
@@ -422,5 +444,27 @@
 		userPrice.Price = value;
 		UserPriceDbService.Update(userPrice);
 		PriceCalculatorService.Calculate();
+	}
+
+	private async void ShowRecipeDialog(Recipe recipe)
+	{
+		var parameters = new DialogParameters
+		{
+			["Recipe"] = recipe,
+		};
+		var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters);
+
+		await dialog.Result;
+	}
+
+	private async void ShowTagDialog(ItemOrTag tag)
+	{
+		var parameters = new DialogParameters
+		{
+			["Tag"] = tag,
+		};
+		var dialog = DialogService.Show<TagDialog>(ContextService.GetTranslation(tag), parameters);
+
+		await dialog.Result;
 	}
 }

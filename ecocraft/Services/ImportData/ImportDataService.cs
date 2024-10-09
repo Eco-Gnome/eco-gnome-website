@@ -223,7 +223,7 @@ public class ImportDataService(
             if (dbTag is null) continue;
 
             dbTag.IsTag = true;
-            dbTag.AssociatedItemOrTags.Clear();
+            dbTag.AssociatedItems.Clear();
 
             foreach (var item in newItemOrTag.Types)
             {
@@ -232,7 +232,7 @@ public class ImportDataService(
                 // We import itemTagAssociations only if the item exist
                 if (itemDb is null) continue;
 
-                dbTag.AssociatedItemOrTags.Add(itemDb);
+                dbTag.AssociatedItems.Add(itemDb);
             }
         }
     }

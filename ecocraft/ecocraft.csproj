@@ -30,6 +30,8 @@
   <ItemGroup>
     <AdditionalFiles Include="Components\Dialog\ServerDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\UserDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\RecipeDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\TagDialog.razor" />
   </ItemGroup>
   
 </Project>
