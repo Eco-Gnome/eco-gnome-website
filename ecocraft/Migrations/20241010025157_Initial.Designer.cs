@@ -11,8 +11,8 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241009020156_allow-null-price")]
-    partial class allownullprice
+    [Migration("20241010025157_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Index")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDynamic")
                         .HasColumnType("INTEGER");
@@ -434,9 +437,6 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ElementId")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("INTEGER");
-
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");
 
@@ -467,12 +467,22 @@ namespace ecocraft.Migrations
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");
 
+                    b.Property<Guid?>("PrimaryUserElementId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("PrimaryUserPriceId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("UserServerId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ItemOrTagId");
+
+                    b.HasIndex("PrimaryUserElementId");
+
+                    b.HasIndex("PrimaryUserPriceId");
 
                     b.HasIndex("UserServerId");
 
@@ -565,7 +575,7 @@ namespace ecocraft.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("SkillId")
+                    b.Property<Guid?>("SkillId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserServerId")
@@ -806,6 +816,16 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecocraft.Models.UserElement", "PrimaryUserElement")
+                        .WithMany()
+                        .HasForeignKey("PrimaryUserElementId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("ecocraft.Models.UserPrice", "PrimaryUserPrice")
+                        .WithMany()
+                        .HasForeignKey("PrimaryUserPriceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserPrices")
                         .HasForeignKey("UserServerId")
@@ -813,6 +833,10 @@ namespace ecocraft.Migrations
                         .IsRequired();
 
                     b.Navigation("ItemOrTag");
+
+                    b.Navigation("PrimaryUserElement");
+
+                    b.Navigation("PrimaryUserPrice");
 
                     b.Navigation("UserServer");
                 });
@@ -871,8 +895,7 @@ namespace ecocraft.Migrations
                     b.HasOne("ecocraft.Models.Skill", "Skill")
                         .WithMany("UserSkills")
                         .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserSkills")

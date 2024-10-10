@@ -14,13 +14,13 @@
                 <MudText Typo="Typo.h6">Ingredients:</MudText>
                 @foreach (var element in Recipe.Elements.Where(e => e.IsIngredient()).ToList())
                 {
-                    <MudText> @(element.Quantity * -1) @ContextService.GetTranslation(element.ItemOrTag)</MudText>
+                    <MudText> @(element.Quantity * -1) @ContextService.GetTranslation(element.ItemOrTag) @(!element.IsDynamic ? "(static)" : "")</MudText>
                 }
 
                 <MudText Typo="Typo.h6">Products:</MudText>
                 @foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).ToList())
                 {
-                    <MudText> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag)</MudText>
+                    <MudText> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText> <MudText></MudText>
                 }
             </MudItem>
         </MudGrid>

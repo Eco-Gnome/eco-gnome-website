@@ -11,7 +11,7 @@
 @inject UserDbService UserDbService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-     <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />
+     <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
      <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)

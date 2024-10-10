@@ -185,12 +185,13 @@ public class ServerDataService(
         recipeDbService.Update(recipe);
     }
 
-    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
+    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
     {
         var element = new Element
         {
             Recipe = recipe,
             ItemOrTag = itemOrTag,
+            Index = index,
             Quantity = quantity,
             IsDynamic = isDynamic,
             Skill = skill,
@@ -202,10 +203,11 @@ public class ServerDataService(
         return element;
     }
 
-    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
+    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
     {
         element.Recipe = recipe;
         element.ItemOrTag = itemOrTag;
+        element.Index = index;
         element.Quantity = quantity;
         element.IsDynamic = isDynamic;
         element.Skill = skill;

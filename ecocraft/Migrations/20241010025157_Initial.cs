@@ -261,32 +261,6 @@ namespace ecocraft.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserPrice",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Price = table.Column<float>(type: "REAL", nullable: true),
-                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserPrice", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserPrice_ItemOrTag_ItemOrTagId",
-                        column: x => x.ItemOrTagId,
-                        principalTable: "ItemOrTag",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserPrice_UserServer_UserServerId",
-                        column: x => x.UserServerId,
-                        principalTable: "UserServer",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CraftingTablePluginModule",
                 columns: table => new
                 {
@@ -393,7 +367,7 @@ namespace ecocraft.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    SkillId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SkillId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Level = table.Column<int>(type: "INTEGER", nullable: false),
                     HasLavishTalent = table.Column<bool>(type: "INTEGER", nullable: false),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
@@ -422,6 +396,7 @@ namespace ecocraft.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     RecipeId = table.Column<Guid>(type: "TEXT", nullable: false),
                     ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Index = table.Column<int>(type: "INTEGER", nullable: false),
                     Quantity = table.Column<float>(type: "REAL", nullable: false),
                     IsDynamic = table.Column<bool>(type: "INTEGER", nullable: false),
                     SkillId = table.Column<Guid>(type: "TEXT", nullable: true),
@@ -481,6 +456,7 @@ namespace ecocraft.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ElementId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Price = table.Column<float>(type: "REAL", nullable: true),
                     Share = table.Column<float>(type: "REAL", nullable: false),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
@@ -495,6 +471,46 @@ namespace ecocraft.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserElement_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserPrice",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Price = table.Column<float>(type: "REAL", nullable: true),
+                    PrimaryUserElementId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    PrimaryUserPriceId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPrice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_ItemOrTag_ItemOrTagId",
+                        column: x => x.ItemOrTagId,
+                        principalTable: "ItemOrTag",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_UserElement_PrimaryUserElementId",
+                        column: x => x.PrimaryUserElementId,
+                        principalTable: "UserElement",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_UserPrice_PrimaryUserPriceId",
+                        column: x => x.PrimaryUserPriceId,
+                        principalTable: "UserPrice",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_UserServer_UserServerId",
                         column: x => x.UserServerId,
                         principalTable: "UserServer",
                         principalColumn: "Id",
@@ -617,6 +633,16 @@ namespace ecocraft.Migrations
                 column: "ItemOrTagId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserPrice_PrimaryUserElementId",
+                table: "UserPrice",
+                column: "PrimaryUserElementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPrice_PrimaryUserPriceId",
+                table: "UserPrice",
+                column: "PrimaryUserPriceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserPrice_UserServerId",
                 table: "UserPrice",
                 column: "UserServerId");
@@ -670,9 +696,6 @@ namespace ecocraft.Migrations
                 name: "UserCraftingTable");
 
             migrationBuilder.DropTable(
-                name: "UserElement");
-
-            migrationBuilder.DropTable(
                 name: "UserPrice");
 
             migrationBuilder.DropTable(
@@ -686,6 +709,9 @@ namespace ecocraft.Migrations
 
             migrationBuilder.DropTable(
                 name: "PluginModule");
+
+            migrationBuilder.DropTable(
+                name: "UserElement");
 
             migrationBuilder.DropTable(
                 name: "Element");

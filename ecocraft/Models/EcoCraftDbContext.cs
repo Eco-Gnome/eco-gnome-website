@@ -264,6 +264,18 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(up => up.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
 		
+		modelBuilder.Entity<UserPrice>()
+			.HasOne(up => up.PrimaryUserElement)
+			.WithMany()
+			.HasForeignKey(up => up.PrimaryUserElementId)
+			.OnDelete(DeleteBehavior.Cascade);
+		
+		modelBuilder.Entity<UserPrice>()
+			.HasOne(up => up.PrimaryUserPrice)
+			.WithMany()
+			.HasForeignKey(up => up.PrimaryUserPriceId)
+			.OnDelete(DeleteBehavior.Cascade);
+		
 		// UserRecipe
 		modelBuilder.Entity<UserRecipe>()
 			.ToTable("UserRecipe");

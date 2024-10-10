@@ -11,6 +11,7 @@
 @inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
+@inject EcoCraftDbContext dbContext
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -92,14 +93,15 @@
 						<MudTd>
 							<MudSelect T="PluginModule?" 
 							           Placeholder="Choose a module" 
-							           @bind-Value="context.PluginModule"
+							           Value="context.PluginModule"
+							           ValueChanged="@(value => ChangePluginModule(context, value))"
 							           Dense="true" 
 							           Variant="Variant.Outlined"
 							           ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
 							           AnchorOrigin="Origin.BottomLeft"
 							           TransformOrigin="Origin.TopLeft">
 								<MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
-								@foreach (var pluginModule in context.CraftingTable.PluginModules)
+								@foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm?.Percent ?? 1))
 								{
 									<MudSelectItem T="PluginModule" Value="@pluginModule">@ContextService.GetTranslation(pluginModule)</MudSelectItem>
 								}
@@ -136,13 +138,16 @@
 					</MudStack>
 					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
 						<MudText>Profit percentage</MudText>
-							@if (UserServerDataService.UserSetting is not null)
-							{
-								<div>
-									<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
-								</div>
-							}
+						@if (UserServerDataService.UserSetting is not null)
+						{
+							<div>
+								<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
+							</div>
+						}
 					</MudStack>
+					<!--<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+						<MudButton OnClick="PriceCalculatorService.Calculate" Style="width: 150px" Color="Color.Tertiary">Recalculate</MudButton>
+					</MudStack>-->
 				</MudStack>
 
 				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
@@ -194,16 +199,19 @@
 							<MudGrid>
 								<MudItem sm="6">
 									@ContextService.GetTranslation(upe.Key.ItemOrTag)
-									<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
+									@if (upe.Value.Count == 1)
+									{
+										<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
+									}
 								</MudItem>
 								<MudItem sm="4">
 									<MudNumericField Style="height: 25px" Disabled="true" Value="@upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
 								</MudItem>
 								<MudItem sm="2">
-									@if (upe.Value.Count == 1)
-									{
-										<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(upe.Value.First().Element.Recipe.UserRecipes.First()))"></MudIconButton>
-									}
+									<MudIconButton 
+										Icon="@(upe.Value.Count == 1 ? Icons.Material.Filled.Clear : Icons.Material.Filled.ClearAll)" 
+										Size="Size.Small" 
+										OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => upe.Value.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"></MudIconButton>
 								</MudItem>
 							</MudGrid>
 						</MudItem>
@@ -254,7 +262,11 @@
 		{
 			_onlyLevelAccessibleRecipes = value;
 			UpdateLocalSettings();
-			UserServerDataService.RefreshAllUserSkillRecipes(ContextService.CurrentUserServer!, _onlyLevelAccessibleRecipes);
+			if (_onlyLevelAccessibleRecipes)
+			{
+				UserServerDataService.RemoveNonAllowedUserRecipes();
+			}
+			StateHasChanged();
 		}
 	}
 
@@ -312,7 +324,7 @@
 		else
 		{
 			result = UserServerDataService.GetAvailableSkills()
-				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+				.Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
 
@@ -332,7 +344,7 @@
 		else
 		{
 			result = UserServerDataService.GetAvailableRecipes()
-				.Where(r => r.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+				.Where(r => ContextService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
 
@@ -352,7 +364,7 @@
 		else
 		{
 			result = UserServerDataService.GetAvailableCraftingTables()
-				.Where(s => s.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+				.Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
 				.ToList();
 		}
 
@@ -361,7 +373,7 @@
 		return Task.FromResult(result);
 	}
 
-	private void AddUserSkill(Skill? skill)
+	private async Task AddUserSkill(Skill? skill)
 	{
 		if (skill is null)
 		{
@@ -369,17 +381,22 @@
 		}
 
 		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
-
+		await dbContext.SaveChangesAsync();
+		
 		_emptySkill = null;
 		_autocompleteSkillRef?.Clear();
+		
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
 	}
 
-	private void RemoveUserSkill(UserSkill skill)
+	private async Task RemoveUserSkill(UserSkill skill)
 	{
 		UserServerDataService.RemoveUserSkill(skill);
+		await dbContext.SaveChangesAsync();
 	}
 
-	private void AddUserCraftingTable(CraftingTable? craftingTable)
+	private async Task AddUserCraftingTable(CraftingTable? craftingTable)
 	{
 		if (craftingTable is null)
 		{
@@ -387,17 +404,22 @@
 		}
 
 		UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
+		await dbContext.SaveChangesAsync();
 
 		_emptyCraftingTable = null;
 		_autocompleteCraftingTableRef?.Clear();
+		
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
 	}
 
-	private void RemoveUserCraftingTable(UserCraftingTable craftingTable)
+	private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
 	{
 		UserServerDataService.RemoveUserCraftingTable(craftingTable);
+		await dbContext.SaveChangesAsync();
 	}
 
-	private void AddUserRecipe(Recipe? recipe)
+	private async Task AddUserRecipe(Recipe? recipe)
 	{
 		if (recipe is null)
 		{
@@ -405,17 +427,32 @@
 		}
 
 		UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
-
+		await dbContext.SaveChangesAsync();
+		
 		_emptyRecipe = null;
 		_autocompleteRecipeRef?.Clear();
+		
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
 	}
 
-	private void RemoveUserRecipe(UserRecipe recipe)
+	private async Task RemoveUserRecipe(UserRecipe recipe)
 	{
 		UserServerDataService.RemoveUserRecipe(recipe);
+		await dbContext.SaveChangesAsync();
 	}
 
-	private void OnLevelChanged(UserSkill userSkill, int newLevel)
+	private async Task RemoveUserRecipes(List<UserRecipe> recipes)
+	{
+		foreach (var recipe in recipes)
+		{
+			UserServerDataService.RemoveUserRecipe(recipe);
+		}
+		
+		await dbContext.SaveChangesAsync();
+	}
+
+	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
 	{
 		if (userSkill.Level == newLevel) return;
 		
@@ -426,28 +463,46 @@
 		{
 			UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
 		}
+		await dbContext.SaveChangesAsync();
+
+		if (isIncrease)
+		{
+			PriceCalculatorService.Calculate();
+			StateHasChanged();
+		}
 	}
 
-	private void UpdateCalorieCost(float calorieCost)
+	private void ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
+	{
+		userCraftingTable.PluginModule = pluginModule;
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
+	}
+
+	private async Task UpdateCalorieCost(float calorieCost)
 	{
 		UserServerDataService.UserSetting!.CalorieCost = calorieCost;
 		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+		await dbContext.SaveChangesAsync();
 	}
 
-	private void UpdateMargin(float margin)
+	private async Task UpdateMargin(float margin)
 	{
 		UserServerDataService.UserSetting!.Margin = margin;
 		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+		await dbContext.SaveChangesAsync();
 	}
 
-	private void UpdatePriceCalculation(UserPrice userPrice, float? value)
+	private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
 	{
 		userPrice.Price = value;
 		UserPriceDbService.Update(userPrice);
+		await dbContext.SaveChangesAsync();
 		PriceCalculatorService.Calculate();
+		StateHasChanged();
 	}
 
-	private async void ShowRecipeDialog(Recipe recipe)
+	private async Task ShowRecipeDialog(Recipe recipe)
 	{
 		var parameters = new DialogParameters
 		{
@@ -456,9 +511,10 @@
 		var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters);
 
 		await dialog.Result;
+		await dbContext.SaveChangesAsync();
 	}
 
-	private async void ShowTagDialog(ItemOrTag tag)
+	private async Task ShowTagDialog(ItemOrTag tag)
 	{
 		var parameters = new DialogParameters
 		{
@@ -467,5 +523,6 @@
 		var dialog = DialogService.Show<TagDialog>(ContextService.GetTranslation(tag), parameters);
 
 		await dialog.Result;
+		await dbContext.SaveChangesAsync();
 	}
 }

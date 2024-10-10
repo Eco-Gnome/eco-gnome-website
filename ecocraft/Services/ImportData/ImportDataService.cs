@@ -148,9 +148,27 @@ public class ImportDataService(
                 );
             }
 
-            foreach (var newRecipeIngredient in newRecipe.Ingredients)
+            // Should we do that ??
+            /*foreach (var product in newRecipe.Products.ToList())
             {
-                newRecipeIngredient.Quantity *= -1;
+                var associatedIngredient = newRecipe.Ingredients.FirstOrDefault(i => i.ItemOrTag == product.ItemOrTag);
+                
+                if (associatedIngredient is not null)
+                {
+                    newRecipe.Products.Remove(product);
+                    associatedIngredient.Quantity += product.Quantity;
+                }
+            }*/
+
+            for (var i = 0; i < newRecipe.Ingredients.Count; i++)
+            {
+                newRecipe.Ingredients[i].Quantity *= -1;
+                newRecipe.Ingredients[i].Index = i;
+            }
+
+            for (var i = 0; i < newRecipe.Products.Count; i++)
+            {
+                newRecipe.Products[i].Index = i;
             }
 
             var dbElements = dbRecipe.Elements;
@@ -189,6 +207,7 @@ public class ImportDataService(
                     dbElement = serverDataService.ImportElement(
                         dbRecipe,
                         dbItemOrTag,
+                        element.Index,
                         element.Quantity,
                         element.IsDynamic,
                         skill,
@@ -201,6 +220,7 @@ public class ImportDataService(
                         dbElement,
                         dbRecipe,
                         dbItemOrTag,
+                        element.Index,
                         element.Quantity,
                         element.IsDynamic,
                         skill,
@@ -361,6 +381,7 @@ public class ImportDataService(
         public string ItemOrTag { get; set; }
         public Dictionary<LanguageCode, string> LocalizedItemOrTag { get; set; }
         public bool IsTag { get; set; }
+        public int Index { get; set; } // ! This is not in the json file, it's calculated after
         public float Quantity { get; set; }
         public bool IsDynamic { get; set; }
         public string Skill { get; set; }

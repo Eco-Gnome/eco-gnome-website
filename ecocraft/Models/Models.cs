@@ -37,6 +37,7 @@ public class Element
     [Key] public Guid Id { get; set; }
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+    public int Index { get; set; }
     public float Quantity { get; set; }
     public bool IsDynamic { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
@@ -211,8 +212,7 @@ public class UserElement
     [Key] public Guid Id { get; set; }
     [ForeignKey("Element")] public Guid ElementId { get; set; }
     public float? Price { get; set; }
-    public bool IsPrimary { get; set; } = false;
-    public float Share { get; set; } = 1;
+    public float Share { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
     public Element Element { get; set; }
@@ -224,10 +224,14 @@ public class UserPrice
     [Key] public Guid Id { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }		
     public float? Price { get; set; }         
+    [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
+    [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
     public ItemOrTag ItemOrTag { get; set; }
     public UserServer UserServer { get; set; }
+    public UserElement? PrimaryUserElement { get; set; }
+    public UserPrice? PrimaryUserPrice { get; set; }
 }
 
 public class UserRecipe
