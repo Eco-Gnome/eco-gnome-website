@@ -47,12 +47,14 @@ public class ImportDataService(
             if (dbSkill is null)
             {
                 serverDataService.ImportSkill(server, newSkill.Name,
-                    TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession);
+                    TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession,
+                    newSkill.LaborReducePercent);
             }
             else
             {
-                serverDataService.RefreshSkill(dbSkill, TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName),
-                    newSkill.Profession);
+                serverDataService.RefreshSkill(dbSkill,
+                    TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName),
+                    newSkill.Profession, newSkill.LaborReducePercent);
             }
         }
     }
@@ -72,7 +74,8 @@ public class ImportDataService(
             else
             {
                 serverDataService.RefreshPluginModule(dbPluginModule,
-                    TranslationsToLocalizedField(server, newPluginModule.LocalizedName, dbPluginModule.LocalizedName), newPluginModule.Percent);
+                    TranslationsToLocalizedField(server, newPluginModule.LocalizedName, dbPluginModule.LocalizedName),
+                    newPluginModule.Percent);
             }
         }
     }
@@ -152,7 +155,7 @@ public class ImportDataService(
             /*foreach (var product in newRecipe.Products.ToList())
             {
                 var associatedIngredient = newRecipe.Ingredients.FirstOrDefault(i => i.ItemOrTag == product.ItemOrTag);
-                
+
                 if (associatedIngredient is not null)
                 {
                     newRecipe.Products.Remove(product);
@@ -257,7 +260,8 @@ public class ImportDataService(
         }
     }
 
-    public static LocalizedField TranslationsToLocalizedField(Server server, Dictionary<LanguageCode, string> translations, LocalizedField? localizedField = null)
+    public static LocalizedField TranslationsToLocalizedField(Server server,
+        Dictionary<LanguageCode, string> translations, LocalizedField? localizedField = null)
     {
         if (localizedField is null)
         {
@@ -347,7 +351,7 @@ public class ImportDataService(
                     throw new ArgumentException($"Unsupported LanguageCode: {translation.Key}");
             }
         }
-        
+
         return localizedField;
     }
 
@@ -413,12 +417,14 @@ public class ImportDataService(
         public string Name { get; set; }
         public Dictionary<LanguageCode, string> LocalizedName { get; set; }
         public string? Profession { get; set; }
+        public float[] LaborReducePercent { get; set; }
     }
 }
 
 public class LanguageCodeDictionaryConverter : JsonConverter<Dictionary<LanguageCode, string>>
 {
-    public override Dictionary<LanguageCode, string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override Dictionary<LanguageCode, string> Read(ref Utf8JsonReader reader, Type typeToConvert,
+        JsonSerializerOptions options)
     {
         var dictionary = new Dictionary<LanguageCode, string>();
 
@@ -457,7 +463,8 @@ public class LanguageCodeDictionaryConverter : JsonConverter<Dictionary<Language
         throw new JsonException("Fin de l'objet JSON attendue.");
     }
 
-    public override void Write(Utf8JsonWriter writer, Dictionary<LanguageCode, string> value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Dictionary<LanguageCode, string> value,
+        JsonSerializerOptions options)
     {
         writer.WriteStartObject();
 

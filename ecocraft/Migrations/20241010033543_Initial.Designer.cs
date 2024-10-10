@@ -11,7 +11,7 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241010025157_Initial")]
+    [Migration("20241010033543_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -362,6 +362,10 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LaborReducePercent")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("TEXT");
 
@@ -437,6 +441,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ElementId")
                         .HasColumnType("TEXT");
 
+                    b.Property<float?>("MarginPrice")
+                        .HasColumnType("REAL");
+
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");
 
@@ -463,6 +470,9 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
+
+                    b.Property<float?>("MarginPrice")
+                        .HasColumnType("REAL");
 
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");

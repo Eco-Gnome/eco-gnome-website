@@ -73,7 +73,7 @@ public class ItemOrTag: IHasLocalizedName
     public float MinPrice { get; set; }
     public float MaxPrice { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
+
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
@@ -93,6 +93,7 @@ public class Skill: IHasLocalizedName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string? Profession { get; set; }
+    public float[] LaborReducePercent { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -112,7 +113,7 @@ public class CraftingTable: IHasLocalizedName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
+
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
@@ -133,7 +134,7 @@ public class PluginModule: IHasLocalizedName
 
     public float Percent { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
+
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<CraftingTable> CraftingTables { get; set; } = [];
@@ -153,7 +154,7 @@ public class User
 
     public List<UserServer> UserServers { get; set; } = [];
 }
-    
+
 public class UserServer
 {
     [Key] public Guid Id { get; set; }
@@ -212,6 +213,7 @@ public class UserElement
     [Key] public Guid Id { get; set; }
     [ForeignKey("Element")] public Guid ElementId { get; set; }
     public float? Price { get; set; }
+    public float? MarginPrice { get; set; }
     public float Share { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
         
@@ -223,7 +225,8 @@ public class UserPrice
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }		
-    public float? Price { get; set; }         
+    public float? Price { get; set; }  
+    public float? MarginPrice { get; set; }       
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }

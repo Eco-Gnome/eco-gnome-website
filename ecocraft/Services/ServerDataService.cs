@@ -45,12 +45,13 @@ public class ServerDataService(
         ItemOrTags = itemOrTagsTask.Result;
     }
 
-    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession)
+    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, float[] laborReducePercent)
     {
         var skill = new Skill
         {
             Name = name,
             Profession = profession,
+            LaborReducePercent = laborReducePercent,
             Server = server,
             LocalizedName = localizedName,
         };
@@ -61,10 +62,11 @@ public class ServerDataService(
         return skill;
     }
 
-    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession)
+    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, float[] laborReducePercent)
     {
         skill.LocalizedName = localizedName;
         skill.Profession = profession;
+        skill.LaborReducePercent = laborReducePercent;
 
         skillDbService.Update(skill);
     }

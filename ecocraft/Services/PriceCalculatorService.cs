@@ -3,6 +3,7 @@
 namespace ecocraft.Services;
 
 public class PriceCalculatorService(
+    EcoCraftDbContext dbContext,
     ContextService contextService,
     ServerDataService serverDataService,
     UserServerDataService userServerDataService)
@@ -60,7 +61,7 @@ public class PriceCalculatorService(
                 element.Price = null;
             }
         }
-        
+
         foreach (var upb in userPriceToBuy)
         {
             upb.Price ??= 0;
@@ -77,8 +78,9 @@ public class PriceCalculatorService(
             Console.WriteLine($"Calculate userPrice of Item {upe.Key.ItemOrTag.Name}");
             CalculateUserPrice(upe.Key, upe.Key, 1);
             Console.WriteLine($"Final calculation Item {upe.Key.ItemOrTag.Name} is {upe.Key.Price}");
-
         }
+
+        dbContext.SaveChanges();
     }
 
     private void CalculateUserPrice(UserPrice userPrice, UserPrice masterUserPrice, int depth)
@@ -206,26 +208,31 @@ public class PriceCalculatorService(
         // Don't calculate any recipe with null price
         if (ingredients.Any(i => i.Price is null)) return;
 
-        var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userElement.Element.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
-        
-        var ingredientCostSum = -1 * ingredients.Sum(ing => ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? pluginModulePercent : 1));
+        var pluginModulePercent = userServerDataService.UserCraftingTables
+            .First(uct => uct.CraftingTable == userElement.Element.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
+
+        var ingredientCostSum = -1 * ingredients.Sum(ing =>
+            ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? pluginModulePercent : 1));
 
         // Remove ingredientCostSum from items that are bought
         foreach (var product in products.ToList())
         {
-            var associatedUserPrice =
-                userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
+            var associatedUserPrice = userServerDataService.UserPrices
+                .First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
-            if (GetUserPricesToBuy().Contains(associatedUserPrice))
-            {
-                Console.WriteLine(
-                    $"{new string('\t', depth)}Product {product.Element.ItemOrTag.Name} is a bought output, so we remove from ingredientCost: {associatedUserPrice.Price * product.Element.Quantity}");
+            if (!GetUserPricesToBuy().Contains(associatedUserPrice)) continue;
+            
+            Console.WriteLine(
+                $"{new string('\t', depth)}Product {product.Element.ItemOrTag.Name} is a bought output, so we remove from ingredientCost: {associatedUserPrice.Price * product.Element.Quantity}");
 
-                ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity * (product.Element.IsDynamic ? pluginModulePercent : 1);
-                product.Price = -1 * associatedUserPrice.Price * (product.Element.IsDynamic ? pluginModulePercent : 1);
-                products.Remove(product);
-            }
+            ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity *
+                                 (product.Element.IsDynamic ? pluginModulePercent : 1);
+            product.Price = -1 * associatedUserPrice.Price * (product.Element.IsDynamic ? pluginModulePercent : 1);
+            products.Remove(product);
         }
+
+        var skillReducePercent = userElement.Element.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userElement.Element.Recipe.Skill).Level];
+        ingredientCostSum += userElement.Element.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
 
         Console.WriteLine(
             $"{new string('\t', depth)}Calculate userElement {userElement.Element.ItemOrTag.Name} of {userElement.Element.Recipe.Name} => ingredientCostSum {ingredientCostSum}");

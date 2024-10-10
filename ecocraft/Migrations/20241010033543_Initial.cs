@@ -196,6 +196,7 @@ namespace ecocraft.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     LocalizedNameId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Profession = table.Column<string>(type: "TEXT", nullable: true),
+                    LaborReducePercent = table.Column<string>(type: "TEXT", nullable: false),
                     ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -457,6 +458,7 @@ namespace ecocraft.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ElementId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Price = table.Column<float>(type: "REAL", nullable: true),
+                    MarginPrice = table.Column<float>(type: "REAL", nullable: true),
                     Share = table.Column<float>(type: "REAL", nullable: false),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
@@ -484,6 +486,7 @@ namespace ecocraft.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ItemOrTagId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Price = table.Column<float>(type: "REAL", nullable: true),
+                    MarginPrice = table.Column<float>(type: "REAL", nullable: true),
                     PrimaryUserElementId = table.Column<Guid>(type: "TEXT", nullable: true),
                     PrimaryUserPriceId = table.Column<Guid>(type: "TEXT", nullable: true),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)

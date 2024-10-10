@@ -8,6 +8,7 @@
 @inject ContextService ContextService
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
+@inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
@@ -54,7 +55,7 @@
 							@ContextService.GetTranslation(context.Skill)
 						</MudTd>
 						<MudTd>
-							<MudNumericField HideSpinButtons="true" T="int" Value=@context.Level Variant="Variant.Text" Min="0" Max="7" Style="width: 24px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
+							<MudNumericField T="int" Value=@context.Level Min="0" Max="7" Style="width: 50px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
 						</MudTd>
 						<MudTd>
 							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
@@ -132,7 +133,7 @@
 						@if (UserServerDataService.UserSetting is not null)
 						{
 							<div>
-								<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" HideSpinButtons="true" Variant="Variant.Outlined"/>
+								<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" Variant="Variant.Outlined"/>
 							</div>
 						}
 					</MudStack>
@@ -141,7 +142,7 @@
 						@if (UserServerDataService.UserSetting is not null)
 						{
 							<div>
-								<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" HideSpinButtons="true" Variant="Variant.Outlined" />
+								<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" Variant="Variant.Outlined" />
 							</div>
 						}
 					</MudStack>
@@ -193,6 +194,19 @@
 				</MudAutocomplete>
 
 				<MudGrid>
+					<MudItem sm="12">
+						<MudGrid>
+							<MudItem sm="6">
+								Item Name
+							</MudItem>
+							<MudItem sm="4">
+								Prices Without / With margin  
+							</MudItem>
+							<MudItem sm="2">
+								Action
+							</MudItem>
+						</MudGrid>
+					</MudItem>
 					@foreach (var upe in PriceCalculatorService.GetUserPricesToSell())
 					{
 						<MudItem sm="12">
@@ -204,13 +218,14 @@
 										<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
 									}
 								</MudItem>
-								<MudItem sm="4">
-									<MudNumericField Style="height: 25px" Disabled="true" Value="@upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
+								<MudItem sm="4" Class="d-flex">
+									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
+									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
 								</MudItem>
 								<MudItem sm="2">
-									<MudIconButton 
-										Icon="@(upe.Value.Count == 1 ? Icons.Material.Filled.Clear : Icons.Material.Filled.ClearAll)" 
-										Size="Size.Small" 
+									<MudIconButton
+										Icon="@(upe.Value.Count == 1 ? Icons.Material.Filled.Clear : Icons.Material.Filled.ClearAll)"
+										Size="Size.Small"
 										OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => upe.Value.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"></MudIconButton>
 								</MudItem>
 							</MudGrid>
@@ -387,6 +402,7 @@
 		_autocompleteSkillRef?.Clear();
 		
 		PriceCalculatorService.Calculate();
+
 		StateHasChanged();
 	}
 
@@ -410,6 +426,7 @@
 		_autocompleteCraftingTableRef?.Clear();
 		
 		PriceCalculatorService.Calculate();
+
 		StateHasChanged();
 	}
 
@@ -433,6 +450,7 @@
 		_autocompleteRecipeRef?.Clear();
 		
 		PriceCalculatorService.Calculate();
+
 		StateHasChanged();
 	}
 
@@ -465,16 +483,14 @@
 		}
 		await dbContext.SaveChangesAsync();
 
-		if (isIncrease)
-		{
-			PriceCalculatorService.Calculate();
-			StateHasChanged();
-		}
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
 	}
 
-	private void ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
+	private async Task ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
 	{
 		userCraftingTable.PluginModule = pluginModule;
+		await dbContext.SaveChangesAsync();
 		PriceCalculatorService.Calculate();
 		StateHasChanged();
 	}
@@ -484,6 +500,8 @@
 		UserServerDataService.UserSetting!.CalorieCost = calorieCost;
 		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
 		await dbContext.SaveChangesAsync();
+		PriceCalculatorService.Calculate();		
+		StateHasChanged();
 	}
 
 	private async Task UpdateMargin(float margin)
@@ -498,7 +516,7 @@
 		userPrice.Price = value;
 		UserPriceDbService.Update(userPrice);
 		await dbContext.SaveChangesAsync();
-		PriceCalculatorService.Calculate();
+		PriceCalculatorService.Calculate();		
 		StateHasChanged();
 	}
 
