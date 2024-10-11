@@ -10,19 +10,21 @@
 <title>Eco Price Calculator</title>
 
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start" />
-        <MudText Typo="Typo.h5" Class="ml-3">Eco Price Calculator</MudText>
+    <MudAppBar Elevation="2">
+        <MudImage Src="/assets/avatar.png" Width="52" />
+        
+        <!--<MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start"/>-->
+        <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
         <MudSpacer/>
-        <MudIcon Icon="@Icons.Material.Filled.LightMode" />
-        <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" />
+        <MudIcon Icon="@Icons.Material.Filled.LightMode"/>
+        <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool"/>
         @if (!_isLoading)
         {
             <Header></Header>
         }
     </MudAppBar>
 
-    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <MudDrawer @bind-Open="@_open" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true" ClipMode="DrawerClipMode.Docked" Elevation="4">
         <NavMenu/>
     </MudDrawer>
 
@@ -44,7 +46,8 @@
 @code {
     // private bool _drawerOpen = true;
     private bool _isLoading = true;
-
+    private bool _open = false;
+    
     //private MudTheme _theme = new();
     private bool _isDarkMode = true;
 
@@ -52,29 +55,28 @@
         {
             Palette = new PaletteLight()
             {
-                /*Black = "#212121",
-                Background = "#303030",
-                Surface = "#373740",
-                DrawerBackground = "#27272f",
-                AppbarBackground = "#212121",
+                Black = "#212121",
+                Background = "#5a9046",
+                Primary = "#f4ffa1",
+                Surface = "#304e24",
+                DrawerBackground = "#298684",
+                DrawerIcon = "#ffffff",
+                DrawerText = "#ffffff",
+                AppbarBackground = "#298684",
+                TableLines = "#ffffff",
                 TextPrimary = "#ffffff",
                 TextSecondary = "#d0d0d0",
                 ActionDefault = "#adadb1",
                 ActionDisabled = "rgba(255,255,255, 0.26)",
-                ActionDisabledBackground = "rgba(255,255,255, 0.12)"*/
+                ActionDisabledBackground = "rgba(255,255,255, 0.12)"
             },
 
             PaletteDark = new PaletteDark()
             {
-                Primary = Colors.Blue.Lighten1
+                Primary = Colors.Blue.Lighten1,
             },
         };
 
-    /*private void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }*/
-    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
