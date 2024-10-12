@@ -1,11 +1,15 @@
 ﻿@page "/server-management"
 <!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
 @using ecocraft.Models
+@using ecocraft.Extensions
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
+@using ecocraft.Services.DbServices
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
+@inject ServerDbService ServerDbService
+
 
 <PageTitle>Server Management</PageTitle>
 
@@ -75,10 +79,14 @@
 		</HeaderContent>
 		<RowTemplate>
 			<MudTd>
-				<MudText>@context.Server.Name</MudText>
+				<MudTextField Value="@context.Server.Name" ReadOnly="@(!context.IsAdmin)" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(context,newServerName)"> </MudTextField>
 			</MudTd>
-			<MudTd>
+			<MudTd Style="display: flex; align-items: center; gap: 8px;">
 				<MudText>@context.Server.JoinCode</MudText>
+				@if (@context?.IsAdmin ?? false)
+				{
+					<MudIconButton Icon="@Icons.Material.Filled.Refresh" aria-label="regenerate" Size="Size.Small" OnClick="@(() => UpdateJoinCode(context))"></MudIconButton>
+				}
 			</MudTd>
 			<MudTd>
 				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
@@ -123,13 +131,25 @@
 			}
 		}
 	}
+	
+	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
+	{
+		if (newServerName == "") return;
+		userServer.Server.Name = newServerName;
+		await ServerDbService.UpdateAndSave(userServer.Server);
+	}
 
 	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
 	{
 		if (newPseudo == "") return;
 		userServer.Pseudo = newPseudo;
 		await ContextService.updateCurrentUser();
+	}
 
+	private async Task UpdateJoinCode(UserServer userServer)
+	{
+		userServer.Server.GenerateJoinCode();
+		await ServerDbService.UpdateAndSave(userServer.Server);
 	}
 
 	private void DeleteServer()

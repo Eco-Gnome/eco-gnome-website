@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
 @using ecocraft.Components.Dialog
+@using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
@@ -23,11 +24,6 @@
                 <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
             }
         </MudSelect>
-
-        @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
-        {
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit Server" OnClick="EditServer" />
-        }
         <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
      </MudPaper>
 
@@ -83,7 +79,8 @@
 
         if (!result.Canceled)
         {
-            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false, JoinCode = ServerDataService.GenerateJoinCode()};
+            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false};
+            newServer.GenerateJoinCode();
             await ServerDbService.AddAndSave(newServer);
 
             UserServer userServer = new UserServer
@@ -105,7 +102,7 @@
             await ContextService.ChangeServer(newServer);
         }
     }
-
+    /*
     private async Task EditServer()
     {
         var parameters = new DialogParameters
@@ -121,7 +118,7 @@
             ContextService.CurrentServer!.Name = result.Data.ToString()!;
             await ServerDbService.UpdateAndSave(ContextService.CurrentServer);
         }
-    }
+    }*/
 
     private async Task EditUserDialog()
     {

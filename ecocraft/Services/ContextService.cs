@@ -30,7 +30,7 @@ public class ContextService(
         await userDbService.UpdateAndSave(CurrentUser);
     }
 
-    public async Task ChangeLanguage(LanguageCode languageCode)
+	public async Task ChangeLanguage(LanguageCode languageCode)
     {
         CurrentLanguageCode = languageCode;
         await localStorageService.AddItem("LanguageCode", CurrentLanguageCode.ToString());

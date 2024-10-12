@@ -222,20 +222,4 @@ public class ServerDataService(
         
         elementDbService.Update(element);
     }
-
-    public string GenerateJoinCode(int length = 8)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            var byteBuffer = new byte[length];
-
-            // Remplir le buffer avec des octets aléatoires
-            rng.GetBytes(byteBuffer);
-
-            // Convertir les octets en caractères alphanumériques
-            JoinCode = new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
-            return JoinCode;
-        }
-    }
 }
