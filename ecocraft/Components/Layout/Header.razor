@@ -14,19 +14,24 @@
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
-     <MudText>@ServerDataService.JoinCode</MudText>
+     <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <MudText>@ServerDataService.JoinCode</MudText>
 
-     <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
-        @foreach (var server in ContextService.AvailableServers)
+        <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+            @foreach (var server in ContextService.AvailableServers)
+            {
+                <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+            }
+        </MudSelect>
+
+        @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
         {
-            <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit Server" OnClick="EditServer" />
         }
-    </MudSelect>
-    @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
-    {
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit Server" OnClick="EditServer"/>
-    }
-    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
+     </MudPaper>
+
+     
 
     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
         <MudText>@ContextService.CurrentUser?.Pseudo</MudText>

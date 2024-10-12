@@ -25,6 +25,11 @@ public class ContextService(
         get { return DefaultServers.Concat(CurrentUser?.UserServers?.Select(cus => cus.Server) ?? []).ToList(); }
     }
 
+    public async Task updateCurrentUser()
+    {
+        await userDbService.UpdateAndSave(CurrentUser);
+    }
+
     public async Task ChangeLanguage(LanguageCode languageCode)
     {
         CurrentLanguageCode = languageCode;

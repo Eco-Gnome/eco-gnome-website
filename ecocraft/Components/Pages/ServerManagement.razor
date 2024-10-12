@@ -1,5 +1,6 @@
 ﻿@page "/server-management"
 <!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
+@using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
 @inject ImportDataService ImportDataService
@@ -9,6 +10,9 @@
 <PageTitle>Server Management</PageTitle>
 
 <MudContainer>
+	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
+		<MudText Typo="Typo.h5" Style="text-align: center;">Server administration</MudText>
+	</MudPaper>
 	<MudGrid>
 		<MudItem sm="4" Class="pa-4">
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
@@ -57,7 +61,33 @@
 	</MudGrid>
 </MudContainer>
 
-@code {
+<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+<MudContainer>
+	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
+		<MudText Typo="Typo.h5" Style="text-align: center;">User Server administration</MudText>
+	</MudPaper>
+	<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
+		<HeaderContent>
+			<MudTh>Server name</MudTh>
+			<MudTh>Server join code</MudTh>
+			<MudTh>Server username</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd>
+				<MudText>@context.Server.Name</MudText>
+			</MudTd>
+			<MudTd>
+				<MudText>@context.Server.JoinCode</MudText>
+			</MudTd>
+			<MudTd>
+				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+			</MudTd>
+		</RowTemplate>
+	</MudTable>
+</MudContainer>
+
+	@code {
 	private bool _askDeleteConfirmation = false;
 
 	protected override void OnInitialized()
@@ -67,7 +97,7 @@
 			Navigation.NavigateTo("/");
 		}
 	}
-	
+
 	// TODO: Handle an update of server data
 	private async Task UploadFiles(IBrowserFile? file)
 	{
@@ -92,6 +122,14 @@
 				throw new Exception("ContextService.CurrentServer is null !");
 			}
 		}
+	}
+
+	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
+	{
+		if (newPseudo == "") return;
+		userServer.Pseudo = newPseudo;
+		await ContextService.updateCurrentUser();
+
 	}
 
 	private void DeleteServer()
