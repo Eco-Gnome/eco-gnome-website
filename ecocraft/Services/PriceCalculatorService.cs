@@ -1,4 +1,5 @@
 ﻿using ecocraft.Models;
+using System.Net.NetworkInformation;
 
 namespace ecocraft.Services;
 
@@ -211,8 +212,11 @@ public class PriceCalculatorService(
         var pluginModulePercent = userServerDataService.UserCraftingTables
             .First(uct => uct.CraftingTable == userElement.Element.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
 
+        // Lavish Talent : should it be stored in DB from server export ?
+        float lavishTalentValue = (float) 0.95;
+
         var ingredientCostSum = -1 * ingredients.Sum(ing =>
-            ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? pluginModulePercent : 1));
+            ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));
 
         // Remove ingredientCostSum from items that are bought
         foreach (var product in products.ToList())
@@ -226,8 +230,8 @@ public class PriceCalculatorService(
                 $"{new string('\t', depth)}Product {product.Element.ItemOrTag.Name} is a bought output, so we remove from ingredientCost: {associatedUserPrice.Price * product.Element.Quantity}");
 
             ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity *
-                                 (product.Element.IsDynamic ? pluginModulePercent : 1);
-            product.Price = -1 * associatedUserPrice.Price * (product.Element.IsDynamic ? pluginModulePercent : 1);
+                                 (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1);
+            product.Price = (-1 * associatedUserPrice.Price * (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue: pluginModulePercent) : 1));
             products.Remove(product);
         }
 

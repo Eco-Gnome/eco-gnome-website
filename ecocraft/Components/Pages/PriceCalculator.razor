@@ -51,8 +51,14 @@
 						<MudTh>Action</MudTh>
 					</HeaderContent>
 					<RowTemplate>
+						@* <MudStack Justify="Justify.SpaceBetween"> *@
+							@* <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"> *@
 						<MudTd>
-							@ContextService.GetTranslation(context.Skill)
+							<MudText>@ContextService.GetTranslation(context.Skill)</MudText>
+							@if (context.Level >= 7)
+							{
+								<MudCheckBox Value="context.HasLavishTalent" Label="Lavish talent" Color="Color.Primary" ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)"></MudCheckBox>
+							}
 						</MudTd>
 						<MudTd>
 							<MudNumericField T="int" Value=@context.Level Min="0" Max="7" Style="width: 50px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
@@ -60,6 +66,8 @@
 						<MudTd>
 							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
 						</MudTd>
+							@* </MudStack> *@								
+						@* </MudStack> *@
 					</RowTemplate>
 				</MudTable>
 
@@ -397,10 +405,10 @@
 
 		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
 		await dbContext.SaveChangesAsync();
-		
+
 		_emptySkill = null;
 		_autocompleteSkillRef?.Clear();
-		
+
 		PriceCalculatorService.Calculate();
 
 		StateHasChanged();
@@ -424,7 +432,7 @@
 
 		_emptyCraftingTable = null;
 		_autocompleteCraftingTableRef?.Clear();
-		
+
 		PriceCalculatorService.Calculate();
 
 		StateHasChanged();
@@ -445,10 +453,10 @@
 
 		UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
 		await dbContext.SaveChangesAsync();
-		
+
 		_emptyRecipe = null;
 		_autocompleteRecipeRef?.Clear();
-		
+
 		PriceCalculatorService.Calculate();
 
 		StateHasChanged();
@@ -466,21 +474,33 @@
 		{
 			UserServerDataService.RemoveUserRecipe(recipe);
 		}
-		
+
 		await dbContext.SaveChangesAsync();
 	}
 
 	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
 	{
 		if (userSkill.Level == newLevel) return;
-		
+
 		var isIncrease = newLevel - userSkill.Level > 0;
 		userSkill.Level = newLevel;
+
+		if (userSkill.Level < 7)
+			userSkill.HasLavishTalent = false;
 
 		if (OnlyLevelAccessibleRecipes)
 		{
 			UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
 		}
+		await dbContext.SaveChangesAsync();
+
+		PriceCalculatorService.Calculate();
+		StateHasChanged();
+	}
+
+	private async Task OnLavishTalentChanged(UserSkill userSkill, bool newLavishTalent)
+	{
+		userSkill.HasLavishTalent = newLavishTalent;
 		await dbContext.SaveChangesAsync();
 
 		PriceCalculatorService.Calculate();
