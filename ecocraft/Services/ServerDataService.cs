@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using System.Security.Cryptography;
 
 namespace ecocraft.Services;
 
@@ -17,6 +18,8 @@ public class ServerDataService(
     public List<Recipe> Recipes { get; private set; } = [];
     public List<ItemOrTag> ItemOrTags { get; private set; } = [];
 
+    public string JoinCode { get; private set; } = "";
+
     public async Task RetrieveServerData(Server? server)
     {
         if (server is null)
@@ -26,6 +29,7 @@ public class ServerDataService(
             PluginModules = [];
             Recipes = [];
             ItemOrTags = [];
+            JoinCode = "";
 
             return;
         }
@@ -43,6 +47,7 @@ public class ServerDataService(
         PluginModules = pluginModulesTask.Result;
         Recipes = recipesTask.Result;
         ItemOrTags = itemOrTagsTask.Result;
+        JoinCode = server.JoinCode;
     }
 
     public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, float[] laborReducePercent)
@@ -216,5 +221,21 @@ public class ServerDataService(
         element.LavishTalent = lavishTalent;
         
         elementDbService.Update(element);
+    }
+
+    public string GenerateJoinCode(int length = 8)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            var byteBuffer = new byte[length];
+
+            // Remplir le buffer avec des octets aléatoires
+            rng.GetBytes(byteBuffer);
+
+            // Convertir les octets en caractères alphanumériques
+            JoinCode = new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
+            return JoinCode;
+        }
     }
 }

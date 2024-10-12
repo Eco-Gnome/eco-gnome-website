@@ -9,9 +9,12 @@
 @inject ServerDbService ServerDbService
 @inject UserServerDataService UserServerDataService
 @inject UserDbService UserDbService
+@inject ServerDataService ServerDataService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
+
+     <MudText>@ServerDataService.JoinCode</MudText>
 
      <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)
@@ -75,7 +78,7 @@
 
         if (!result.Canceled)
         {
-            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false};
+            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false, JoinCode = ServerDataService.GenerateJoinCode()};
             await ServerDbService.AddAndSave(newServer);
 
             UserServer userServer = new UserServer
