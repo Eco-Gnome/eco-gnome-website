@@ -227,8 +227,8 @@
 									}
 								</MudItem>
 								<MudItem sm="4" Class="d-flex">
-									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
-									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
+									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
 								</MudItem>
 								<MudItem sm="2">
 									<MudIconButton
@@ -249,7 +249,7 @@
 											<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))"></MudIconButton>
 										</MudItem>
 										<MudItem sm="4">
-											<MudNumericField Style="height: 25px" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
+											<MudNumericField Style="height: 25px" ReadOnly="true" HideSpinButtons="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
 										</MudItem>
 										<MudItem sm="2">
 											<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.UserRecipes.First()))"></MudIconButton>
