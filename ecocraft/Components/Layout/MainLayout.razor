@@ -16,11 +16,9 @@
         <!--<MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start"/>-->
         <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
         <MudSpacer/>
-        <MudIcon Icon="@Icons.Material.Filled.LightMode"/>
-        <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool"/>
         @if (!_isLoading)
         {
-            <Header></Header>
+            <Header @bind-isDarkMode="_isDarkMode"></Header>
         }
     </MudAppBar>
 

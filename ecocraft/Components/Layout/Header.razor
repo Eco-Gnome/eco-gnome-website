@@ -15,6 +15,9 @@
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
+     <MudIcon Icon="@Icons.Material.Filled.LightMode" />
+     <MudSwitch Value="isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="OnDarkModeChanged"/>
+
      <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
         <MudText>@ServerDataService.JoinCode</MudText>
 
@@ -43,6 +46,12 @@
 </MudStack>
 
 @code {
+    [Parameter]
+    public bool isDarkMode { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> isDarkModeChanged { get; set; }
+
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
     protected override void OnInitialized()
@@ -53,6 +62,12 @@
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
+    }
+
+    private async Task OnDarkModeChanged(bool newValue)
+    {
+        isDarkMode = newValue;
+        await isDarkModeChanged.InvokeAsync(newValue); // Notifie le parent
     }
 
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
