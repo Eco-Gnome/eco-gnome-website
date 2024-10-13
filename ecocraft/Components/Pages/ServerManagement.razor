@@ -1,5 +1,6 @@
 ﻿@page "/server-management"
 <!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
+@implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Extensions
 @using ecocraft.Services
@@ -91,12 +92,36 @@
 			<MudTd>
 				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
 			</MudTd>
+			<MudTd>
+				<MudButton HtmlTag="label"
+						   Variant="Variant.Filled"
+						   Color="Color.Error"
+						   StartIcon="@Icons.Material.Filled.ExitToApp"
+						   OnClick="@(() => LeaveServer(context))">
+					Leave Server
+				</MudButton>
+				@if (_askLeaveConfirmations.ContainsKey(context))
+				{
+					<br />
+					<MudButton Variant="Variant.Filled"
+							   Color="Color.Success"
+							   StartIcon="@Icons.Material.Filled.Close"
+							   OnClick="@(() => CancelLeaveServer(context))">
+					</MudButton>
+					<MudButton Variant="Variant.Filled"
+							   Color="Color.Warning"
+							   StartIcon="@Icons.Material.Filled.Check"
+							   OnClick="@(() => ConfirmLeaveServer(context))">
+					</MudButton>
+				}
+			</MudTd>
 		</RowTemplate>
 	</MudTable>
 </MudContainer>
 
-	@code {
+@code {
 	private bool _askDeleteConfirmation = false;
+	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
 
 	protected override void OnInitialized()
 	{
@@ -104,6 +129,18 @@
 		{
 			Navigation.NavigateTo("/");
 		}
+	}
+
+	protected override Task OnInitializedAsync()
+	{
+		ContextService.OnContextChanged += StateHasChanged;
+
+		return Task.CompletedTask;
+	}
+
+	public void Dispose()
+	{
+		ContextService.OnContextChanged -= StateHasChanged;
 	}
 
 	// TODO: Handle an update of server data
@@ -131,7 +168,7 @@
 			}
 		}
 	}
-	
+
 	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
 	{
 		if (newServerName == "") return;
@@ -150,6 +187,31 @@
 	{
 		userServer.Server.GenerateJoinCode();
 		await ServerDbService.UpdateAndSave(userServer.Server);
+	}
+
+	private void LeaveServer(UserServer userServer)
+	{
+		if (!_askLeaveConfirmations.ContainsKey(userServer))
+		{
+			_askLeaveConfirmations.Add(userServer, true);
+		}		
+	}
+
+	private void CancelLeaveServer(UserServer userServer)
+	{
+		if (_askLeaveConfirmations.ContainsKey(userServer))
+		{
+			_askLeaveConfirmations.Remove(userServer);
+		}		
+	}
+
+	private async void ConfirmLeaveServer(UserServer userServerToLeave)
+	{
+		if (_askLeaveConfirmations.ContainsKey(userServerToLeave))
+		{
+			_askLeaveConfirmations.Remove(userServerToLeave);
+			await ContextService.LeaveServer(userServerToLeave);
+		}
 	}
 
 	private void DeleteServer()

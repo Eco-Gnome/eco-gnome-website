@@ -113,7 +113,14 @@ public class ContextService(
         OnContextChanged?.Invoke();
     }
 
-    public async Task DeleteCurrentServer()
+	public async Task LeaveServer(UserServer userServerToLeave)
+	{
+		CurrentUser?.UserServers.Remove(userServerToLeave);
+		await dbContext.SaveChangesAsync();
+		await ChangeServer(null);
+	}
+
+	public async Task DeleteCurrentServer()
     {
         if (!CurrentUserServer!.IsAdmin)
         {

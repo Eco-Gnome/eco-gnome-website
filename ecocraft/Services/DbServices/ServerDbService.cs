@@ -21,7 +21,12 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public Server Add(Server server)
+    public Task<Server?> GetByJoinCodeAsync(string joinCode)
+    {
+        return context.Servers.FirstOrDefaultAsync(s => s.JoinCode == joinCode);
+    }
+
+    public Server Add(Server server)
 	{
 		context.Servers.Add(server);
 

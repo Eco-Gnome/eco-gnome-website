@@ -11,10 +11,19 @@
 @inject UserServerDataService UserServerDataService
 @inject UserDbService UserDbService
 @inject ServerDataService ServerDataService
+@inject ISnackbar Snackbar
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
+     <MudTextField @bind-Value="joinCode" Variant="Variant.Outlined"> </MudTextField>
+     <MudButton HtmlTag="label"
+                Variant="Variant.Filled"
+                Color="Color.Primary"
+                OnClick="onJoinServer">
+         Join
+     </MudButton>
+     
      <MudIcon Icon="@Icons.Material.Filled.LightMode" />
      <MudSwitch Value="isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="OnDarkModeChanged"/>
 
@@ -51,6 +60,8 @@
 
     [Parameter]
     public EventCallback<bool> isDarkModeChanged { get; set; }
+
+    public string joinCode { get; set; } = "";
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
@@ -98,41 +109,43 @@
             newServer.GenerateJoinCode();
             await ServerDbService.AddAndSave(newServer);
 
-            UserServer userServer = new UserServer
+            await JoinServer(newServer, true);
+
+            /*UserServer userServer = new UserServer
             {
-                UserId = ContextService.CurrentUser!.Id, 
-                ServerId = newServer.Id, 
-                IsAdmin = true, 
-                Pseudo = ContextService.CurrentUser.Pseudo,
-            };
-            
-            userServer.UserSettings.Add(new UserSetting
+            UserId = ContextService.CurrentUser!.Id, 
+            ServerId = newServer.Id, 
+            IsAdmin = true, 
+            Pseudo = ContextService.CurrentUser.Pseudo,
+        };
+
+        userServer.UserSettings.Add(new UserSetting
             {
-                UserServer = userServer,
-            });
-            
-            ContextService.CurrentUser.UserServers.Add(userServer);
-            await EcoCraftDbContext.SaveChangesAsync();
-            
-            await ContextService.ChangeServer(newServer);
+            UserServer = userServer,
+        });
+
+        ContextService.CurrentUser.UserServers.Add(userServer);
+        await EcoCraftDbContext.SaveChangesAsync();
+
+        await ContextService.ChangeServer(newServer);*/
         }
     }
     /*
     private async Task EditServer()
     {
-        var parameters = new DialogParameters
-        {
-            ["ServerName"] = ContextService.CurrentServer?.Name,
-        };
-        var dialog = DialogService.Show<ServerDialog>("Edit server", parameters);
+    var parameters = new DialogParameters
+    {
+    ["ServerName"] = ContextService.CurrentServer?.Name,
+    };
+    var dialog = DialogService.Show<ServerDialog>("Edit server", parameters);
 
-        var result = await dialog.Result;
+    var result = await dialog.Result;
 
-        if (!result.Canceled)
-        {
-            ContextService.CurrentServer!.Name = result.Data.ToString()!;
-            await ServerDbService.UpdateAndSave(ContextService.CurrentServer);
-        }
+    if (!result.Canceled)
+    {
+    ContextService.CurrentServer!.Name = result.Data.ToString()!;
+    await ServerDbService.UpdateAndSave(ContextService.CurrentServer);
+    }
     }*/
 
     private async Task EditUserDialog()
@@ -150,5 +163,48 @@
             ContextService.CurrentUser.Pseudo = result.Data.ToString()!;
             await UserDbService.UpdateAndSave(ContextService.CurrentUser);
         }
+    }
+
+    private async Task onJoinServer()
+    {
+        var server = ServerDbService.GetByJoinCodeAsync(joinCode).Result;
+        if(server is not null)
+            await JoinServer(server);
+        else
+        {
+            this.Snackbar.Clear();
+            this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            this.Snackbar.Add("Server not found", Severity.Error);
+        }        
+    }
+
+    private async Task JoinServer(Server server, bool isAdmin = false)
+    {
+        if (ContextService.AvailableServers.Contains(server))
+        {
+            this.Snackbar.Clear();
+            this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            this.Snackbar.Add("You are already in this server", Severity.Warning);
+            return;
+        }
+
+
+        UserServer userServer = new UserServer
+            {
+                UserId = ContextService.CurrentUser!.Id,
+                ServerId = server.Id,
+                IsAdmin = isAdmin,
+                Pseudo = ContextService.CurrentUser.Pseudo,
+            };
+
+        userServer.UserSettings.Add(new UserSetting
+            {
+                UserServer = userServer,
+            });
+
+        ContextService.CurrentUser.UserServers.Add(userServer);
+        await EcoCraftDbContext.SaveChangesAsync();
+
+        await ContextService.ChangeServer(server);
     }
 }
