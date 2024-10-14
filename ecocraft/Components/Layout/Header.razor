@@ -110,43 +110,8 @@
             await ServerDbService.AddAndSave(newServer);
 
             await JoinServer(newServer, true);
-
-            /*UserServer userServer = new UserServer
-            {
-            UserId = ContextService.CurrentUser!.Id, 
-            ServerId = newServer.Id, 
-            IsAdmin = true, 
-            Pseudo = ContextService.CurrentUser.Pseudo,
-        };
-
-        userServer.UserSettings.Add(new UserSetting
-            {
-            UserServer = userServer,
-        });
-
-        ContextService.CurrentUser.UserServers.Add(userServer);
-        await EcoCraftDbContext.SaveChangesAsync();
-
-        await ContextService.ChangeServer(newServer);*/
         }
     }
-    /*
-    private async Task EditServer()
-    {
-    var parameters = new DialogParameters
-    {
-    ["ServerName"] = ContextService.CurrentServer?.Name,
-    };
-    var dialog = DialogService.Show<ServerDialog>("Edit server", parameters);
-
-    var result = await dialog.Result;
-
-    if (!result.Canceled)
-    {
-    ContextService.CurrentServer!.Name = result.Data.ToString()!;
-    await ServerDbService.UpdateAndSave(ContextService.CurrentServer);
-    }
-    }*/
 
     private async Task EditUserDialog()
     {

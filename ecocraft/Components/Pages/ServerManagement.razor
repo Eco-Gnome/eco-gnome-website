@@ -10,6 +10,8 @@
 @inject ContextService ContextService
 @inject NavigationManager Navigation
 @inject ServerDbService ServerDbService
+@inject EcoCraftDbContext EcoCraftDbContext
+@inject UserDbService UserDbService
 
 
 <PageTitle>Server Management</PageTitle>
@@ -64,6 +66,27 @@
 			</MudButton>
 		</MudItem>
 	</MudGrid>
+</MudContainer>
+
+<MudContainer>
+	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
+		<MudText Typo="Typo.h5" Style="text-align: center;">User Server administration</MudText>
+	</MudPaper>
+	<MudTable Items="ContextService.CurrentServer!.UserServers" Dense="true">
+		<HeaderContent>
+			<MudTh>User pseudo</MudTh>
+			<MudTh>Admin</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd>
+				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+			</MudTd>
+			<MudTd>
+				<MudSwitch Value="@context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
+			</MudTd>
+		</RowTemplate>
+
+	</MudTable>
 </MudContainer>
 
 <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
@@ -235,6 +258,12 @@
 	{
 		await ContextService.RenounceAdmin();
 		Navigation.NavigateTo("/");
+	}
+
+	private async void OnIsAdmin(UserServer userServer)
+	{
+		userServer.IsAdmin = !userServer.IsAdmin;
+		//await UserDbService.UpdateAndSave(userServer.User); // Pourquoi le user est-il null dans ce contexte ?
 	}
 }
 
