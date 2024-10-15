@@ -16,20 +16,29 @@
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
-     <MudTextField @bind-Value="JoinCode" Variant="Variant.Outlined"> </MudTextField>
-     <MudButton HtmlTag="label"
-                Variant="Variant.Filled"
-                Color="Color.Primary"
-                OnClick="OnJoinServer">
-         Join
-     </MudButton>
+    <MudPaper Elevation="3" Class="pa-2" Style="display: flex; align-items: center; justify-content: space-between;">
+        <MudIcon Icon="@Icons.Material.Filled.LightMode" />
+        <MudSwitch Style="left: 14px;" Value="IsDarkMode" Color="Color.Dark" T="bool" ValueChanged="OnDarkModeChanged" />
+        <MudIcon Icon="@Icons.Material.Filled.DarkMode" />
+    </MudPaper>
 
-     <MudIcon Icon="@Icons.Material.Filled.LightMode" />
-     <MudSwitch Value="IsDarkMode" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="OnDarkModeChanged"/>
+     <MudPaper Elevation="3" Class="pa-2" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+         <MudTextField @bind-Value="JoinCode"
+                       Class="mt-0"
+                       Immediate="true"
+                       Style="height: 35px"
+                       Variant="Variant.Outlined" />
+         <MudButton HtmlTag="label"
+                    Variant="Variant.Filled"
+                    Color="Color.Dark"
+                    Disabled="@(String.IsNullOrEmpty(JoinCode))"
+                    OnClick="OnJoinServer">
+             Join Server
+         </MudButton>
+     </MudPaper>
 
      <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
         <MudText>@ServerDataService.JoinCode</MudText>
-
         <MudSelect T="Server"
                    Class="select-dense"
                    Label="Server"
@@ -151,8 +160,14 @@
 
     private async Task OnJoinServer()
     {
+        if (String.IsNullOrEmpty(JoinCode))
+        {
+            this.Snackbar.Add("You need to add a server code", Severity.Error);
+            return;
+        }
+
         var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
-        if(server is not null)
+        if (server is not null)
             await JoinServer(server);
         else
         {

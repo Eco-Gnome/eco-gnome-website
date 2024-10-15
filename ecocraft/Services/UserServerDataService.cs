@@ -263,7 +263,12 @@ public class UserServerDataService(
 
         if (!otherUserElementsOfSameItemOrTag.Any())
         {
-            RemoveUserPrice(UserPrices.First(up => up.ItemOrTag == userElement.Element.ItemOrTag));
+            var removedUserPrice = UserPrices.FirstOrDefault(up => up.ItemOrTag == userElement.Element.ItemOrTag);
+
+            if (removedUserPrice is not null)
+            {
+                RemoveUserPrice(removedUserPrice);
+            }
         }
     }
 
