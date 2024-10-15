@@ -20,8 +20,19 @@
 	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
 		<MudText Typo="Typo.h5" Style="text-align: center;">Current server administration</MudText>
 	</MudPaper>
+
 	<MudGrid>
-		<MudItem sm="4" Class="pa-4">
+		<MudItem sm="3" Class="pa-4">
+			<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" ReadOnly="@(ContextService.CurrentUserServer!.IsAdmin)" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!,newServerName)"> </MudTextField>
+		</MudItem>
+		<MudItem Class="d-flex align-center flex-grow-1 gap-4" sm="3">
+			<MudTextField Value="@ContextService.CurrentServer!.JoinCode" Label="Join code" ReadOnly="@(ContextService.CurrentUserServer!.IsAdmin)" Variant="Variant.Outlined"></MudTextField>
+			<MudIconButton Icon="@Icons.Material.Filled.Refresh" aria-label="regenerate" Size="Size.Small" OnClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"></MudIconButton>
+		</MudItem>
+	</MudGrid>
+
+	<MudGrid>
+		<MudItem sm="3" Class="pa-4">
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
@@ -34,7 +45,7 @@
 				</ButtonTemplate>
 			</MudFileUpload>
 		</MudItem>
-		<MudItem sm="4" Class="pa-4">
+		<MudItem sm="3" Class="pa-4">
 			<MudButton HtmlTag="label"
 			           Variant="Variant.Filled"
 			           Color="Color.Error"
@@ -57,7 +68,7 @@
 				</MudButton>
 			}
 		</MudItem>
-		<MudItem sm="4" Class="pa-4">
+		<MudItem sm="3" Class="pa-4">
 			<MudButton Variant="Variant.Filled"
 			           Color="Color.Warning"
 			           StartIcon="@Icons.Material.Filled.TimeToLeave"
@@ -69,9 +80,6 @@
 </MudContainer>
 
 <MudContainer>
-	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
-		<MudText Typo="Typo.h5" Style="text-align: center;">User Server administration</MudText>
-	</MudPaper>
 	<MudTable Items="ContextService.CurrentServer!.UserServers" Dense="true">
 		<HeaderContent>
 			<MudTh>User pseudo</MudTh>
@@ -263,7 +271,7 @@
 	private async void OnIsAdmin(UserServer userServer)
 	{
 		userServer.IsAdmin = !userServer.IsAdmin;
-		//await UserDbService.UpdateAndSave(userServer.User); // Pourquoi le user est-il null dans ce contexte ?
+		await EcoCraftDbContext.SaveChangesAsync();
 	}
 }
 
