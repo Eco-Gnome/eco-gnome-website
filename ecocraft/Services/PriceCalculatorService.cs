@@ -48,7 +48,7 @@ public class PriceCalculatorService(
         return output;
     }
 
-    public void Calculate()
+    public async Task Calculate()
     {
         var userPriceAndElements = GetUserPricesToSell();
         var userPriceToBuy = GetUserPricesToBuy();
@@ -81,7 +81,7 @@ public class PriceCalculatorService(
             Console.WriteLine($"Final calculation Item {upe.Key.ItemOrTag.Name} is {upe.Key.Price}");
         }
 
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
     private void CalculateUserPrice(UserPrice userPrice, UserPrice masterUserPrice, int depth)

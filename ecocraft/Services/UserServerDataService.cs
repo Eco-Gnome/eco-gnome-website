@@ -10,8 +10,7 @@ public class UserServerDataService(
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
-    ServerDataService serverDataService,
-    UserDbService userDbService)
+    ServerDataService serverDataService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];

@@ -1,9 +1,10 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
 @inject ContextService ContextService
+@inject UserServerDataService UserServerDataService
 
 <MudDialogContent>
-    <MudContainer MaxWidth="MaxWidth.Medium" Style="min-width: 600px; min-height: 300px;">
+    <MudContainer MaxWidth="MaxWidth.Medium" Style="width: 600px; min-height: 400px;">
         <MudGrid>
             <MudItem xs="12">
                 <MudText>CraftingTable: @ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
@@ -18,9 +19,29 @@
                 }
 
                 <MudText Typo="Typo.h6">Products:</MudText>
-                @foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).ToList())
+                @foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).ToList())
                 {
-                    <MudText> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText> <MudText></MudText>
+                   <MudGrid Class="d-flex justify-top">
+                        <MudItem xs="6" Class="pt-0">
+                            <MudText Class="pt-2"> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText> <MudText></MudText>
+                        </MudItem>
+                        <MudItem xs="6" Class="pt-0">
+                            <MudNumericField T="decimal" 
+                                             Label="Share percent"
+                                             Value="(decimal)UserServerDataService.UserElements.First(ue => ue.Element == element).Share"
+                                             Style="height: 30px"
+                                             Min="0"
+                                             Max="1"
+                                             Step="0.01m"
+                                             Variant="Variant.Outlined"
+                                             Immediate="true"
+                                             ValueChanged="@((v) => ChangeShare(UserServerDataService.UserElements.First(ue => ue.Element == element), v))"/>
+                        </MudItem>
+                    </MudGrid>
+                }
+                @if (_shareError)
+                {
+                    <MudText Style="color: red;">Error! Make sure the sum of all Products Share equals 1</MudText>
                 }
             </MudItem>
         </MudGrid>
@@ -32,9 +53,35 @@
 
     [Parameter]
     public Recipe Recipe { get; set; }
+    
+    private bool _shareError = false;
 
     private void Ok()
     {
         MudDialog.Cancel();
+    }
+
+    protected override void OnInitialized()
+    {
+        IsShareError();
+    }
+
+    private void ChangeShare(UserElement element, decimal value)
+    {
+        Console.WriteLine(value);
+        element.Share = (float)value;
+        IsShareError();
+    }
+
+    private void IsShareError()
+    {
+        var sum = 0f;
+        
+        foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).ToList())
+        {
+            sum += UserServerDataService.UserElements.First(ue => ue.Element == element).Share;
+        }
+
+        _shareError = !sum.Equals(1f);
     }
 }

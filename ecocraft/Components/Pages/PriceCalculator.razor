@@ -8,7 +8,6 @@
 @inject ContextService ContextService
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
-@inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
@@ -17,550 +16,594 @@
 <PageTitle>Price Calculator</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-	<MudGrid Style="height: auto">
-		<!-- Première Colonne -->
-		<MudItem sm="4" Class="pa-2 d-flex flex-column">
-			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
-				<MudAutocomplete T="Skill"
-				                 @ref="_autocompleteSkillRef"
-				                 Value="_emptySkill"
-				                 SearchFunc="SearchSkills"
-				                 ValueChanged="AddUserSkill"
-				                 Placeholder="Choose skills"
-				                 Dense="true"
-				                 MaxItems="null"
-				                 Variant="Variant.Outlined"
-				                 AnchorOrigin="Origin.BottomLeft"
-				                 TransformOrigin="Origin.TopLeft">
-					<ItemTemplate>
-						@if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
-						{
-							<MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
-						}
-						<MudText>@ContextService.GetTranslation(context)</MudText>
-						@{
-							_previousProfession = context.Profession;
-						}
-					</ItemTemplate>
-				</MudAutocomplete>
+<MudGrid Style="height: auto">
+<!-- Première Colonne -->
+<MudItem sm="4" Class="pa-2 d-flex flex-column">
+    <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+        <MudAutocomplete T="Skill"
+                         @ref="_autocompleteSkillRef"
+                         Value="_emptySkill"
+                         SearchFunc="SearchSkills"
+                         ValueChanged="AddUserSkill"
+                         Placeholder="Choose skills"
+                         Dense="true"
+                         MaxItems="null"
+                         Variant="Variant.Outlined"
+                         AnchorOrigin="Origin.BottomLeft"
+                         TransformOrigin="Origin.TopLeft">
+            <ItemTemplate>
+                @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
+                {
+                    <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
+                }
+                <MudText>@ContextService.GetTranslation(context)</MudText>
+                @{
+                    _previousProfession = context.Profession;
+                }
+            </ItemTemplate>
+        </MudAutocomplete>
 
-				<MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)" Dense="true">
-					<HeaderContent>
-						<MudTh>Name</MudTh>
-						<MudTh>Level</MudTh>
-						<MudTh>Action</MudTh>
-					</HeaderContent>
-					<RowTemplate>
-						@* <MudStack Justify="Justify.SpaceBetween"> *@
-							@* <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"> *@
-						<MudTd>
-							<MudText>@ContextService.GetTranslation(context.Skill)</MudText>
-							@if (context.Level >= 7)
-							{
-								<MudCheckBox Value="context.HasLavishTalent" Label="Lavish talent" Color="Color.Primary" ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)"></MudCheckBox>
-							}
-						</MudTd>
-						<MudTd>
-							<MudNumericField T="int" Value=@context.Level Min="0" Max="7" Style="width: 50px;" Immediate="true" ValueChanged="(int newValue) => OnLevelChanged(context,newValue)" />
-						</MudTd>
-						<MudTd>
-							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
-						</MudTd>
-							@* </MudStack> *@								
-						@* </MudStack> *@
-					</RowTemplate>
-				</MudTable>
+        <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)" Dense="true" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Level</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                @* <MudStack Justify="Justify.SpaceBetween"> *@
+                @* <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"> *@
+                <MudTd>
+                    <MudText>@ContextService.GetTranslation(context.Skill)</MudText>
+                    @if (context.Level >= 7)
+                    {
+                        <MudCheckBox Value="context.HasLavishTalent" Label="Lavish talent" Color="Color.Primary" ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)"></MudCheckBox>
+                    }
+                </MudTd>
+                <MudTd>
+                    <MudNumericField T="int"
+                                     Value=@context.Level
+                                     Min="1"
+                                     Max="7"
+                                     Variant="Variant.Outlined"
+                                     Style="height: 35px; width: 50px;"
+                                     Immediate="true"
+                                     ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
+                </MudTd>
+                @* </MudStack> *@
+                @* </MudStack> *@
+            </RowTemplate>
+        </MudTable>
 
-				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+        <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
 
-				<MudAutocomplete T="CraftingTable"
-				                 @ref="_autocompleteCraftingTableRef"
-				                 Value="_emptyCraftingTable"
-				                 SearchFunc="SearchCraftingTables"
-				                 ValueChanged="AddUserCraftingTable"
-				                 Placeholder="Choose a crafting table..." 
-				                 Dense="true"
-				                 MaxItems="null"
-				                 Variant="Variant.Outlined"
-				                 AnchorOrigin="Origin.BottomLeft"
-				                 TransformOrigin="Origin.TopLeft">
-					<ItemTemplate>
-						<MudText>@ContextService.GetTranslation(context)</MudText>
-					</ItemTemplate>
-				</MudAutocomplete>
+        <MudAutocomplete T="CraftingTable"
+                         @ref="_autocompleteCraftingTableRef"
+                         Value="_emptyCraftingTable"
+                         SearchFunc="SearchCraftingTables"
+                         ValueChanged="AddUserCraftingTable"
+                         Placeholder="Choose a crafting table..."
+                         Dense="true"
+                         MaxItems="null"
+                         Variant="Variant.Outlined"
+                         AnchorOrigin="Origin.BottomLeft"
+                         TransformOrigin="Origin.TopLeft">
+            <ItemTemplate>
+                <MudText>@ContextService.GetTranslation(context)</MudText>
+            </ItemTemplate>
+        </MudAutocomplete>
 
-				<MudTable Items="UserServerDataService.UserCraftingTables" Dense="true">
-					<HeaderContent>
-						<MudTh>Name</MudTh>
-						<MudTh>Upgrade</MudTh>
-						<MudTh>Action</MudTh>
-					</HeaderContent>
-					<RowTemplate>
-						<MudTd>
-							@ContextService.GetTranslation(context.CraftingTable)
-						</MudTd>
-						<MudTd>
-							<MudSelect T="PluginModule?" 
-							           Placeholder="Choose a module" 
-							           Value="context.PluginModule"
-							           ValueChanged="@(value => ChangePluginModule(context, value))"
-							           Dense="true" 
-							           Variant="Variant.Outlined"
-							           ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
-							           AnchorOrigin="Origin.BottomLeft"
-							           TransformOrigin="Origin.TopLeft">
-								<MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
-								@foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm?.Percent ?? 1))
-								{
-									<MudSelectItem T="PluginModule" Value="@pluginModule">@ContextService.GetTranslation(pluginModule)</MudSelectItem>
-								}
-							</MudSelect> 
-						</MudTd>
-						<MudTd>
-							<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
-						</MudTd>
-					</RowTemplate>
-				</MudTable> 
- 			</MudItem>
- 		</MudItem>
+        <MudTable Items="UserServerDataService.UserCraftingTables" Class="mt-4" Dense="true">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Upgrade</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    @ContextService.GetTranslation(context.CraftingTable)
+                </MudTd>
+                <MudTd>
+                    <MudSelect T="PluginModule?"
+                               Class="select-dense"
+                               Placeholder="Choose a module"
+                               Value="context.PluginModule"
+                               ValueChanged="@(value => ChangePluginModule(context, value))"
+                               Dense="true"
+                               Variant="Variant.Outlined"
+                               ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
+                               AnchorOrigin="Origin.BottomLeft"
+                               TransformOrigin="Origin.TopLeft">
+                        <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
+                        @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
+                        {
+                            <MudSelectItem T="PluginModule"
+                                           Value="@pluginModule">
+                                @ContextService.GetTranslation(pluginModule)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+</MudItem>
 
-		<!-- Deuxième Colonne -->
-		<MudItem sm="4" Class="pa-2 d-flex flex-column">
-			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
-				<MudStack>
-					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-						<MudText>Display non-skilled recipes</MudText>
-						<MudCheckBox T="bool" @bind-Value="DisplayNonSkilledRecipes" Variant="Variant.Outlined"/>
-					</MudStack>
-					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-						<MudText>Only level-accessible recipes</MudText>
-						<MudCheckBox T="bool" @bind-Value="OnlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
-					</MudStack>
-					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-						<MudText>Price per 1000 calories</MudText>
-						@if (UserServerDataService.UserSetting is not null)
-						{
-							<div>
-								<MudNumericField T="float" ValueChanged="UpdateCalorieCost" Value="UserServerDataService.UserSetting.CalorieCost" Variant="Variant.Outlined"/>
-							</div>
-						}
-					</MudStack>
-					<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-						<MudText>Profit percentage</MudText>
-						@if (UserServerDataService.UserSetting is not null)
-						{
-							<div>
-								<MudNumericField T="float" ValueChanged="UpdateMargin" Value="UserServerDataService.UserSetting.Margin" Variant="Variant.Outlined" />
-							</div>
-						}
-					</MudStack>
-					<!--<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-						<MudButton OnClick="PriceCalculatorService.Calculate" Style="width: 150px" Color="Color.Tertiary">Recalculate</MudButton>
-					</MudStack>-->
-				</MudStack>
+<!-- Deuxième Colonne -->
+<MudItem sm="4" Class="pa-2 d-flex flex-column">
+    <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+        <MudStack Spacing="0">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText>Display non-skilled recipes</MudText>
+                <MudCheckBox T="bool" @bind-Value="DisplayNonSkilledRecipes" Variant="Variant.Outlined"/>
+            </MudStack>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText>Only level-accessible recipes</MudText>
+                <MudCheckBox T="bool" @bind-Value="OnlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
+            </MudStack>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText>Price per 1000 calories</MudText>
+                @if (UserServerDataService.UserSetting is not null)
+                {
+                    <div>
+                        <MudNumericField T="float"
+                                         ValueChanged="UpdateCalorieCost"
+                                         Style="height: 35px; width: 100px"
+                                         Value="UserServerDataService.UserSetting.CalorieCost"
+                                         Variant="Variant.Outlined"/>
+                    </div>
+                }
+            </MudStack>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText>Profit percentage</MudText>
+                @if (UserServerDataService.UserSetting is not null)
+                {
+                    <div>
+                        <MudNumericField T="float"
+                                         ValueChanged="UpdateMargin"
+                                         Style="height: 35px; width: 100px"
+                                         Value="UserServerDataService.UserSetting.Margin"
+                                         Variant="Variant.Outlined"/>
+                    </div>
+                }
+            </MudStack>
+        </MudStack>
 
-				<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+        <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
 
-				<MudTable Items="PriceCalculatorService.GetUserPricesToBuy()" Dense="true">
-					<HeaderContent>
-						<MudTh>Name</MudTh>
-						<MudTh>Price</MudTh>
-					</HeaderContent>
-					<RowTemplate>
-						<MudTd>
-							@if (context.ItemOrTag.IsTag)
-							{
-								<MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Default" OnClick="@(() => ShowTagDialog(context.ItemOrTag))"/>
-							}
-							@ContextService.GetTranslation(context.ItemOrTag)
-						</MudTd>
-						<MudTd>
-							<MudNumericField T="float?" Value="context.Price" ValueChanged="@(value => UpdatePriceCalculation(@context, value))"></MudNumericField>
-						</MudTd>
-					</RowTemplate>
-				</MudTable>
-			</MudItem>
-		</MudItem>
+        <MudTable Items="PriceCalculatorService.GetUserPricesToBuy()" Dense="true">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Price</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    @if (context.ItemOrTag.IsTag)
+                    {
+                        <MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Default" OnClick="@(() => ShowTagDialog(context.ItemOrTag))"/>
+                    }
+                    @ContextService.GetTranslation(context.ItemOrTag)
+                </MudTd>
+                <MudTd>
+                    <MudNumericField T="float?"
+                                     Value="context.Price"
+                                     Variant="Variant.Outlined"
+                                     Style="height: 35px; width: 100px"
+                                     ValueChanged="@(value => UpdatePriceCalculation(@context, value))"/>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+</MudItem>
 
-		<!-- Troisième Colonne -->
-		<MudItem sm="4" Class="pa-2 d-flex flex-column">
-			<MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
-				<MudAutocomplete T="Recipe"
-				                 @ref="_autocompleteRecipeRef"
-				                 Value="_emptyRecipe"
-				                 SearchFunc="SearchRecipes"
-				                 ValueChanged="AddUserRecipe"
-				                 Placeholder="Ajouter une recette"
-				                 Dense="true"
-				                 MaxItems="null"
-				                 Variant="Variant.Outlined"
-				                 AnchorOrigin="Origin.BottomLeft"
-				                 TransformOrigin="Origin.TopLeft">
-					<ItemTemplate>
-						<MudText>@ContextService.GetTranslation(context)</MudText>
-					</ItemTemplate>
-				</MudAutocomplete>
+<!-- Troisième Colonne -->
+<MudItem sm="4" Class="pa-2 d-flex flex-column">
+    <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
+        <MudAutocomplete T="Recipe"
+                         @ref="_autocompleteRecipeRef"
+                         Value="_emptyRecipe"
+                         SearchFunc="SearchRecipes"
+                         ValueChanged="AddUserRecipe"
+                         Placeholder="Ajouter une recette"
+                         Dense="true"
+                         MaxItems="null"
+                         Variant="Variant.Outlined"
+                         AnchorOrigin="Origin.BottomLeft"
+                         TransformOrigin="Origin.TopLeft">
+            <ItemTemplate>
+                <MudText>@ContextService.GetTranslation(context)</MudText>
+            </ItemTemplate>
+        </MudAutocomplete>
 
-				<MudGrid>
-					<MudItem sm="12">
-						<MudGrid>
-							<MudItem sm="6">
-								Item Name
-							</MudItem>
-							<MudItem sm="4">
-								Prices Without / With margin  
-							</MudItem>
-							<MudItem sm="2">
-								Action
-							</MudItem>
-						</MudGrid>
-					</MudItem>
-					@foreach (var upe in PriceCalculatorService.GetUserPricesToSell())
-					{
-						<MudItem sm="12">
-							<MudGrid>
-								<MudItem sm="6">
-									@ContextService.GetTranslation(upe.Key.ItemOrTag)
-									@if (upe.Value.Count == 1)
-									{
-										<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
-									}
-								</MudItem>
-								<MudItem sm="4" Class="d-flex">
-									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="upe.Key.Price" Variant="Variant.Outlined"></MudNumericField>
-									<MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
-								</MudItem>
-								<MudItem sm="2">
-									<MudIconButton
-										Icon="@(upe.Value.Count == 1 ? Icons.Material.Filled.Clear : Icons.Material.Filled.ClearAll)"
-										Size="Size.Small"
-										OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => upe.Value.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"></MudIconButton>
-								</MudItem>
-							</MudGrid>
-						</MudItem>
-						@if (upe.Value.Count > 1)
-						{
-							@foreach (var userElement in upe.Value)
-							{
-								<MudItem sm="12" Class="pa-0">
-									<MudGrid>
-										<MudItem sm="6">
-											-> @ContextService.GetTranslation(userElement.Element.Recipe)
-											<MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))"></MudIconButton>
-										</MudItem>
-										<MudItem sm="4">
-											<MudNumericField Style="height: 25px" ReadOnly="true" HideSpinButtons="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
-										</MudItem>
-										<MudItem sm="2">
-											<MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.UserRecipes.First()))"></MudIconButton>
-										</MudItem>
-									</MudGrid>
-								</MudItem>
-							}
-						}
-					}
-				</MudGrid>
-			</MudItem>
-		</MudItem>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-3 mud-elevation-1 mt-4 mud-table">
+            <MudGrid>
+                <MudItem sm="12">
+                    <MudGrid>
+                        <MudItem sm="6">
+                            Item Name
+                        </MudItem>
+                        <MudItem sm="4">
+                            Prices w/wo margin
+                        </MudItem>
+                        <MudItem sm="2">
+                            Action
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+                @foreach (var upe in PriceCalculatorService.GetUserPricesToSell())
+                {
+                    <MudItem sm="12" Class="@(upe.Value.Count == 1 ? "" : "pb-0")" Style="border-top: 1px solid var(--mud-palette-table-lines)">
+                        <MudGrid Class="pb-0">
+                            <MudItem sm="6">
+                                @ContextService.GetTranslation(upe.Key.ItemOrTag)
+                                @if (upe.Value.Count == 1)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(upe.Value.First().Element.Recipe))"></MudIconButton>
+                                }
+                            </MudItem>
+                            <MudItem sm="4" Class="d-flex">
+                                <MudNumericField T="float?"
+                                                 Class="mt-0"
+                                                 Style="height: 25px; width: 75px"
+                                                 HideSpinButtons="true"
+                                                 Format="N2"
+                                                 Disabled="true"
+                                                 Value="upe.Key.Price"
+                                                 Variant="Variant.Outlined" />
+                                <MudNumericField T="float?"
+                                                 Class="mt-0"
+                                                 Style="height: 25px; width: 75px"
+                                                 HideSpinButtons="true"
+                                                 Format="N2"
+                                                 Disabled="true"
+                                                 Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))"
+                                                 Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem sm="2">
+                                <MudIconButton
+                                    Icon="@(upe.Value.Count == 1 ? Icons.Material.Filled.Clear : Icons.Material.Filled.PlaylistRemove)"
+                                    Size="Size.Small"
+                                    OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => upe.Value.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))">
+                                </MudIconButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    @if (upe.Value.Count > 1)
+                    {
+                        @foreach (var userElement in upe.Value)
+                        {
+                            <MudItem sm="12" Class="@(upe.Value.Last() == userElement ? "pb-2 pt-0" : "pb-0 pt-0")">
+                                <MudGrid>
+                                    <MudItem sm="6">
+                                        <MudIconButton Icon="@(upe.Key.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => SetPrimaryElement(upe.Key, userElement))"/>
+                                        @ContextService.GetTranslation(userElement.Element.Recipe)
+                                        <MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))"/>
+                                    </MudItem>
+                                    <MudItem sm="4" Class="d-flex">
+                                        <MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
+                                        <MudNumericField T="float?" Style="height: 25px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                    </MudItem>
+                                    <MudItem sm="2">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))"></MudIconButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudItem>
+                        }
+                    }
+                }
+            </MudGrid>
+        </MudContainer>
+    </MudItem>
+</MudItem>
 
-	</MudGrid>
+</MudGrid>
 </MudContainer>
 
 @code {
-	private MudAutocomplete<Skill>? _autocompleteSkillRef;
-	private MudAutocomplete<CraftingTable>? _autocompleteCraftingTableRef;
-	private MudAutocomplete<Recipe>? _autocompleteRecipeRef;
+    private MudAutocomplete<Skill>? _autocompleteSkillRef;
+    private MudAutocomplete<CraftingTable>? _autocompleteCraftingTableRef;
+    private MudAutocomplete<Recipe>? _autocompleteRecipeRef;
 
-	private Skill? _emptySkill;
-	private Recipe? _emptyRecipe;
-	private CraftingTable? _emptyCraftingTable;
-	private string? _previousProfession;
-	private bool _onlyLevelAccessibleRecipes = true;
-	private bool _displayNonSkilledRecipes = true;
+    private Skill? _emptySkill;
+    private Recipe? _emptyRecipe;
+    private CraftingTable? _emptyCraftingTable;
+    private string? _previousProfession;
+    private bool _onlyLevelAccessibleRecipes = true;
+    private bool _displayNonSkilledRecipes = true;
 
-	public bool OnlyLevelAccessibleRecipes
-	{
-		get => _onlyLevelAccessibleRecipes;
-		set
-		{
-			_onlyLevelAccessibleRecipes = value;
-			UpdateLocalSettings();
-			if (_onlyLevelAccessibleRecipes)
-			{
-				UserServerDataService.RemoveNonAllowedUserRecipes();
-			}
-			StateHasChanged();
-		}
-	}
+    public bool OnlyLevelAccessibleRecipes
+    {
+        get => _onlyLevelAccessibleRecipes;
+        set
+        {
+            _onlyLevelAccessibleRecipes = value;
+            UpdateLocalSettings();
+            if (_onlyLevelAccessibleRecipes)
+            {
+                UserServerDataService.RemoveNonAllowedUserRecipes();
+            }
 
-	public bool DisplayNonSkilledRecipes
-	{
-		get => _displayNonSkilledRecipes;
-		set
-		{
-			_displayNonSkilledRecipes = value;
-			UpdateLocalSettings();
-			UserServerDataService.ToggleEmptyUserSkill(ContextService.CurrentUserServer!, _displayNonSkilledRecipes);
-			StateHasChanged();
-		}
-	}
+            StateHasChanged();
+        }
+    }
 
-	protected override Task OnInitializedAsync()
-	{
-		ContextService.OnContextChanged += StateHasChanged;
+    public bool DisplayNonSkilledRecipes
+    {
+        get => _displayNonSkilledRecipes;
+        set
+        {
+            _displayNonSkilledRecipes = value;
+            UpdateLocalSettings();
+            UserServerDataService.ToggleEmptyUserSkill(ContextService.CurrentUserServer!, _displayNonSkilledRecipes);
+            StateHasChanged();
+        }
+    }
 
-		return Task.CompletedTask;
-	}
+    protected override Task OnInitializedAsync()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (!firstRender)
-		{
-			return;
-		}
+        return Task.CompletedTask;
+    }
 
-		OnlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
-		DisplayNonSkilledRecipes = await LocalStorageService.GetItem("displayNonSkilledRecipes") == "True";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
 
-		StateHasChanged();
-	}
+        OnlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
+        DisplayNonSkilledRecipes = await LocalStorageService.GetItem("displayNonSkilledRecipes") == "True";
 
-	public void Dispose()
-	{
-		ContextService.OnContextChanged -= StateHasChanged;
-	}
+        StateHasChanged();
+    }
 
-	private async void UpdateLocalSettings()
-	{
-		await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", OnlyLevelAccessibleRecipes.ToString());
-		await LocalStorageService.AddItem("displayNonSkilledRecipes", DisplayNonSkilledRecipes.ToString());
-	}
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
 
-	private Task<IEnumerable<Skill>> SearchSkills(string value)
-	{
-		IEnumerable<Skill> result;
+    private async void UpdateLocalSettings()
+    {
+        await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", OnlyLevelAccessibleRecipes.ToString());
+        await LocalStorageService.AddItem("displayNonSkilledRecipes", DisplayNonSkilledRecipes.ToString());
+    }
 
-		if (string.IsNullOrEmpty(value))
-		{
-			result = UserServerDataService.GetAvailableSkills();
-		}
-		else
-		{
-			result = UserServerDataService.GetAvailableSkills()
-				.Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
-				.ToList();
-		}
+    private Task<IEnumerable<Skill>> SearchSkills(string value)
+    {
+        IEnumerable<Skill> result;
 
-		result = result.Where(s => s.Profession is not null).OrderBy(s => s.Profession);
+        if (string.IsNullOrEmpty(value))
+        {
+            result = UserServerDataService.GetAvailableSkills();
+        }
+        else
+        {
+            result = UserServerDataService.GetAvailableSkills()
+                .Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+        }
 
-		return Task.FromResult(result);
-	}
+        result = result.Where(s => s.Profession is not null).OrderBy(s => s.Profession);
 
-	private Task<IEnumerable<Recipe>> SearchRecipes(string value)
-	{
-		IEnumerable<Recipe> result;
+        return Task.FromResult(result);
+    }
 
-		if (string.IsNullOrEmpty(value))
-		{
-			result = UserServerDataService.GetAvailableRecipes();
-		}
-		else
-		{
-			result = UserServerDataService.GetAvailableRecipes()
-				.Where(r => ContextService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
-				.ToList();
-		}
+    private Task<IEnumerable<Recipe>> SearchRecipes(string value)
+    {
+        IEnumerable<Recipe> result;
 
-		result = result.OrderBy(r => r.Name);
+        if (string.IsNullOrEmpty(value))
+        {
+            result = UserServerDataService.GetAvailableRecipes();
+        }
+        else
+        {
+            result = UserServerDataService.GetAvailableRecipes()
+                .Where(r => ContextService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+        }
 
-		return Task.FromResult(result);
-	}
+        result = result.OrderBy(r => r.Name);
 
-	private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value)
-	{
-		IEnumerable<CraftingTable> result;
+        return Task.FromResult(result);
+    }
 
-		if (string.IsNullOrEmpty(value))
-		{
-			result = UserServerDataService.GetAvailableCraftingTables();
-		}
-		else
-		{
-			result = UserServerDataService.GetAvailableCraftingTables()
-				.Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
-				.ToList();
-		}
+    private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value)
+    {
+        IEnumerable<CraftingTable> result;
 
-		result = result.OrderBy(c => c.Name);
+        if (string.IsNullOrEmpty(value))
+        {
+            result = UserServerDataService.GetAvailableCraftingTables();
+        }
+        else
+        {
+            result = UserServerDataService.GetAvailableCraftingTables()
+                .Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+        }
 
-		return Task.FromResult(result);
-	}
+        result = result.OrderBy(c => c.Name);
 
-	private async Task AddUserSkill(Skill? skill)
-	{
-		if (skill is null)
-		{
-			return;
-		}
+        return Task.FromResult(result);
+    }
 
-		UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
-		await dbContext.SaveChangesAsync();
+    private async Task AddUserSkill(Skill? skill)
+    {
+        if (skill is null)
+        {
+            return;
+        }
 
-		_emptySkill = null;
-		_autocompleteSkillRef?.Clear();
+        UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
 
-		PriceCalculatorService.Calculate();
+        _emptySkill = null;
+        _autocompleteSkillRef?.Clear();
 
-		StateHasChanged();
-	}
+        await PriceCalculatorService.Calculate();
 
-	private async Task RemoveUserSkill(UserSkill skill)
-	{
-		UserServerDataService.RemoveUserSkill(skill);
-		await dbContext.SaveChangesAsync();
-	}
+        StateHasChanged();
+    }
 
-	private async Task AddUserCraftingTable(CraftingTable? craftingTable)
-	{
-		if (craftingTable is null)
-		{
-			return;
-		}
+    private async Task RemoveUserSkill(UserSkill skill)
+    {
+        UserServerDataService.RemoveUserSkill(skill);
+        await PriceCalculatorService.Calculate();
+    }
 
-		UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
-		await dbContext.SaveChangesAsync();
+    private async Task AddUserCraftingTable(CraftingTable? craftingTable)
+    {
+        if (craftingTable is null)
+        {
+            return;
+        }
 
-		_emptyCraftingTable = null;
-		_autocompleteCraftingTableRef?.Clear();
+        UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
 
-		PriceCalculatorService.Calculate();
+        _emptyCraftingTable = null;
+        _autocompleteCraftingTableRef?.Clear();
 
-		StateHasChanged();
-	}
+        await PriceCalculatorService.Calculate();
 
-	private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
-	{
-		UserServerDataService.RemoveUserCraftingTable(craftingTable);
-		await dbContext.SaveChangesAsync();
-	}
+        StateHasChanged();
+    }
 
-	private async Task AddUserRecipe(Recipe? recipe)
-	{
-		if (recipe is null)
-		{
-			return;
-		}
+    private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
+    {
+        UserServerDataService.RemoveUserCraftingTable(craftingTable);
+        await PriceCalculatorService.Calculate();
+    }
 
-		UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
-		await dbContext.SaveChangesAsync();
+    private async Task AddUserRecipe(Recipe? recipe)
+    {
+        if (recipe is null)
+        {
+            return;
+        }
 
-		_emptyRecipe = null;
-		_autocompleteRecipeRef?.Clear();
+        UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
 
-		PriceCalculatorService.Calculate();
+        _emptyRecipe = null;
+        _autocompleteRecipeRef?.Clear();
 
-		StateHasChanged();
-	}
+        await PriceCalculatorService.Calculate();
 
-	private async Task RemoveUserRecipe(UserRecipe recipe)
-	{
-		UserServerDataService.RemoveUserRecipe(recipe);
-		await dbContext.SaveChangesAsync();
-	}
+        StateHasChanged();
+    }
 
-	private async Task RemoveUserRecipes(List<UserRecipe> recipes)
-	{
-		foreach (var recipe in recipes)
-		{
-			UserServerDataService.RemoveUserRecipe(recipe);
-		}
+    private async Task RemoveUserRecipe(UserRecipe recipe)
+    {
+        UserServerDataService.RemoveUserRecipe(recipe);
+        await dbContext.SaveChangesAsync();
+    }
 
-		await dbContext.SaveChangesAsync();
-	}
+    private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
+    {
+        userPrice.PrimaryUserElement = userElement;
+        await PriceCalculatorService.Calculate();
+    }
 
-	private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
-	{
-		if (userSkill.Level == newLevel) return;
+    private async Task RemoveUserRecipes(List<UserRecipe> recipes)
+    {
+        foreach (var recipe in recipes)
+        {
+            UserServerDataService.RemoveUserRecipe(recipe);
+        }
 
-		var isIncrease = newLevel - userSkill.Level > 0;
-		userSkill.Level = newLevel;
+        await dbContext.SaveChangesAsync();
+    }
 
-		if (userSkill.Level < 7)
-			userSkill.HasLavishTalent = false;
+    private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
+    {
+        if (userSkill.Level == newLevel) return;
 
-		if (OnlyLevelAccessibleRecipes)
-		{
-			UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
-		}
-		await dbContext.SaveChangesAsync();
+        var isIncrease = newLevel - userSkill.Level > 0;
+        userSkill.Level = newLevel;
 
-		PriceCalculatorService.Calculate();
-		StateHasChanged();
-	}
+        if (userSkill.Level < 7)
+            userSkill.HasLavishTalent = false;
 
-	private async Task OnLavishTalentChanged(UserSkill userSkill, bool newLavishTalent)
-	{
-		userSkill.HasLavishTalent = newLavishTalent;
-		await dbContext.SaveChangesAsync();
+        if (OnlyLevelAccessibleRecipes)
+        {
+            UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
+        }
 
-		PriceCalculatorService.Calculate();
-		StateHasChanged();
-	}
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-	private async Task ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
-	{
-		userCraftingTable.PluginModule = pluginModule;
-		await dbContext.SaveChangesAsync();
-		PriceCalculatorService.Calculate();
-		StateHasChanged();
-	}
+    private async Task OnLavishTalentChanged(UserSkill userSkill, bool newLavishTalent)
+    {
+        userSkill.HasLavishTalent = newLavishTalent;
 
-	private async Task UpdateCalorieCost(float calorieCost)
-	{
-		UserServerDataService.UserSetting!.CalorieCost = calorieCost;
-		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
-		await dbContext.SaveChangesAsync();
-		PriceCalculatorService.Calculate();		
-		StateHasChanged();
-	}
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-	private async Task UpdateMargin(float margin)
-	{
-		UserServerDataService.UserSetting!.Margin = margin;
-		UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
-		await dbContext.SaveChangesAsync();
-	}
+    private async Task ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
+    {
+        userCraftingTable.PluginModule = pluginModule;
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-	private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
-	{
-		userPrice.Price = value;
-		UserPriceDbService.Update(userPrice);
-		await dbContext.SaveChangesAsync();
-		PriceCalculatorService.Calculate();		
-		StateHasChanged();
-	}
+    private async Task UpdateCalorieCost(float calorieCost)
+    {
+        UserServerDataService.UserSetting!.CalorieCost = calorieCost;
+        UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-	private async Task ShowRecipeDialog(Recipe recipe)
-	{
-		var parameters = new DialogParameters
-		{
-			["Recipe"] = recipe,
-		};
-		var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters);
+    private async Task UpdateMargin(float margin)
+    {
+        UserServerDataService.UserSetting!.Margin = margin;
+        UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-		await dialog.Result;
-		await dbContext.SaveChangesAsync();
-	}
+    private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
+    {
+        userPrice.Price = value;
+        UserPriceDbService.Update(userPrice);
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
 
-	private async Task ShowTagDialog(ItemOrTag tag)
-	{
-		var parameters = new DialogParameters
-		{
-			["Tag"] = tag,
-		};
-		var dialog = DialogService.Show<TagDialog>(ContextService.GetTranslation(tag), parameters);
+    private async Task ShowRecipeDialog(Recipe recipe)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Recipe"] = recipe,
+        };
+        var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters);
 
-		await dialog.Result;
-		await dbContext.SaveChangesAsync();
-	}
+        await dialog.Result;
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task ShowTagDialog(ItemOrTag tag)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Tag"] = tag,
+        };
+        var dialog = DialogService.Show<TagDialog>(ContextService.GetTranslation(tag), parameters);
+
+        await dialog.Result;
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
 }

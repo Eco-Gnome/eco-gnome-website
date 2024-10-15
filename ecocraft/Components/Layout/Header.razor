@@ -16,21 +16,29 @@
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
      <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
 
-     <MudTextField @bind-Value="joinCode" Variant="Variant.Outlined"> </MudTextField>
+     <MudTextField @bind-Value="JoinCode" Variant="Variant.Outlined"> </MudTextField>
      <MudButton HtmlTag="label"
                 Variant="Variant.Filled"
                 Color="Color.Primary"
-                OnClick="onJoinServer">
+                OnClick="OnJoinServer">
          Join
      </MudButton>
-     
+
      <MudIcon Icon="@Icons.Material.Filled.LightMode" />
-     <MudSwitch Value="isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="OnDarkModeChanged"/>
+     <MudSwitch Value="IsDarkMode" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="OnDarkModeChanged"/>
 
      <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
         <MudText>@ServerDataService.JoinCode</MudText>
 
-        <MudSelect T="Server" Label="Server" Value="@ContextService.CurrentServer" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedServerChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+        <MudSelect T="Server"
+                   Class="select-dense"
+                   Label="Server"
+                   Value="@ContextService.CurrentServer"
+                   Dense="false"
+                   Variant="Variant.Outlined"
+                   SelectedValuesChanged="OnSelectedServerChanged"
+                   AnchorOrigin="Origin.BottomLeft"
+                   TransformOrigin="Origin.TopLeft">
             @foreach (var server in ContextService.AvailableServers)
             {
                 <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
@@ -39,29 +47,40 @@
         <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
      </MudPaper>
 
-     
 
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
-    </MudStack>
+    <MudPaper Class="pl-3" Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
+        </MudStack>
+    </MudPaper>
 
-    <MudSelect T="LanguageCode" Label="Language" Value="@ContextService.CurrentLanguageCode" Dense="false" Variant="Variant.Outlined" SelectedValuesChanged="OnSelectedLanguageChanged" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
-        @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
-        {
-        <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
-        }
-    </MudSelect>
+    <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <MudSelect T="LanguageCode"
+                   Class="select-dense"
+                   Label="Language"
+                   Value="@ContextService.CurrentLanguageCode"
+                   Dense="false"
+                   Variant="Variant.Outlined"
+                   SelectedValuesChanged="OnSelectedLanguageChanged"
+                   AnchorOrigin="Origin.BottomLeft"
+                   TransformOrigin="Origin.TopLeft">
+            @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
+            {
+                <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
 </MudStack>
 
 @code {
     [Parameter]
-    public bool isDarkMode { get; set; }
+    public bool IsDarkMode { get; set; }
 
     [Parameter]
-    public EventCallback<bool> isDarkModeChanged { get; set; }
+    public EventCallback<bool> IsDarkModeChanged { get; set; }
 
-    public string joinCode { get; set; } = "";
+    private string JoinCode { get; set; } = "";
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
@@ -77,8 +96,8 @@
 
     private async Task OnDarkModeChanged(bool newValue)
     {
-        isDarkMode = newValue;
-        await isDarkModeChanged.InvokeAsync(newValue); // Notifie le parent
+        IsDarkMode = newValue;
+        await IsDarkModeChanged.InvokeAsync(newValue); // Notifie le parent
     }
 
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
@@ -130,9 +149,9 @@
         }
     }
 
-    private async Task onJoinServer()
+    private async Task OnJoinServer()
     {
-        var server = ServerDbService.GetByJoinCodeAsync(joinCode).Result;
+        var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
         if(server is not null)
             await JoinServer(server);
         else
@@ -140,7 +159,7 @@
             this.Snackbar.Clear();
             this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
             this.Snackbar.Add("Server not found", Severity.Error);
-        }        
+        }
     }
 
     private async Task JoinServer(Server server, bool isAdmin = false)
