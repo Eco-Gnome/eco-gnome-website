@@ -23,7 +23,7 @@ public class ImportDataService(
                 ImportPluginModules(server, importedData.pluginModules);
                 ImportCraftingTables(server, importedData.craftingTables);
                 ImportRecipes(server, importedData.recipes);
-                ImportItemTagAssoc(importedData.itemTagAssoc);
+                ImportItemTagAssoc(server, importedData.itemTagAssoc);
 
                 await dbContext.SaveChangesAsync();
             }
@@ -201,7 +201,7 @@ public class ImportDataService(
                 }
 
                 // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
-                // so we need to be sure dbElement is the correct-retrieved element) 
+                // so we need to be sure dbElement is the correct-retrieved element)
                 var dbElement = dbElements.FirstOrDefault(e =>
                     e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
 
@@ -236,13 +236,13 @@ public class ImportDataService(
         }
     }
 
-    private void ImportItemTagAssoc(List<ItemTagAssocDto> newItemOrTags)
+    private void ImportItemTagAssoc(Server server, List<ItemTagAssocDto> newItemOrTags)
     {
         foreach (var newItemOrTag in newItemOrTags)
         {
             var dbTag = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == newItemOrTag.Tag);
 
-            // We import itemTagAssociations only if the tag exists 
+            // We import itemTagAssociations only if the tag exists
             if (dbTag is null) continue;
 
             dbTag.IsTag = true;
@@ -250,17 +250,20 @@ public class ImportDataService(
 
             foreach (var item in newItemOrTag.Types)
             {
-                var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item);
-
-                // We import itemTagAssociations only if the item exist
-                if (itemDb is null) continue;
+                // We still import itemTagAssociations if the item doesn't exist because it might be harvested in-game instead of crafted
+                var itemDb = serverDataService.ItemOrTags.FirstOrDefault(i => i.Name == item) ?? serverDataService.ImportItemOrTag(
+                    server,
+                    item,
+                    TranslationsToLocalizedField(server, new Dictionary<LanguageCode, string>()),
+                    false
+                );
 
                 dbTag.AssociatedItems.Add(itemDb);
             }
         }
     }
 
-    public static LocalizedField TranslationsToLocalizedField(Server server,
+    private static LocalizedField TranslationsToLocalizedField(Server server,
         Dictionary<LanguageCode, string> translations, LocalizedField? localizedField = null)
     {
         if (localizedField is null)

@@ -49,3 +49,25 @@
 .select-dense input, .select-dense .mud-input-slot {
     padding: 12px !important;
 }
+
+.tag-mud-table .mud-table-cell {
+    border: none;
+}
+
+.buy-items-price-cell {
+    vertical-align: top !important;
+}
+
+.small-text {
+    font-size: 0.875rem !important;
+}
+
+.rectangle-input .mud-input {
+    height: 25px;
+    width: 100px;
+}
+
+.rectangle-input .mud-input-slot {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}

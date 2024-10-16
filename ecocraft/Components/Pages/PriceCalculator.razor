@@ -103,7 +103,7 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd>
-                    @ContextService.GetTranslation(context.CraftingTable)
+                    <MudText>@ContextService.GetTranslation(context.CraftingTable)</MudText>
                 </MudTd>
                 <MudTd>
                     <MudSelect T="PluginModule?"
@@ -182,19 +182,80 @@
                 <MudTh>Price</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd>
+                <MudTd >
+                    <div style="height: 41px; display: table-cell; vertical-align: middle">
+                        <MudText Class="small-text">@ContextService.GetTranslation(context.ItemOrTag)</MudText>
+                    </div>
                     @if (context.ItemOrTag.IsTag)
                     {
-                        <MudIconButton Class="pa-1" Style="margin-left: -5px" Icon="@Icons.Material.Filled.Bookmark" Color="Color.Default" OnClick="@(() => ShowTagDialog(context.ItemOrTag))"/>
+                        var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context.ItemOrTag);
+
+                        <MudTable Items="context.ItemOrTag.AssociatedItems" Elevation="0" Class="pa-0 tag-mud-table" Dense="true">
+                            <RowTemplate Context="item">
+                                @{
+                                    var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
+
+                                    <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
+                                        @if (userPriceItem is not null)
+                                        {
+                                            <MudIconButton Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
+                                        }
+                                        else
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Block"
+                                                           Size="Size.Small"/>
+                                        }
+                                        <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
+                                    </MudTd>
+                                }
+                            </RowTemplate>
+                        </MudTable>
                     }
-                    @ContextService.GetTranslation(context.ItemOrTag)
                 </MudTd>
-                <MudTd>
-                    <MudNumericField T="float?"
-                                     Value="context.Price"
-                                     Variant="Variant.Outlined"
-                                     Style="height: 35px; width: 100px"
-                                     ValueChanged="@(value => UpdatePriceCalculation(@context, value))"/>
+                <MudTd Class="buy-items-price-cell">
+                    <div style="height: 41px; display: table-cell; vertical-align: middle">
+                        <MudNumericField T="float?"
+                                         Class="rectangle-input"
+                                         Disabled="@(context.ItemOrTag.IsTag)"
+                                         HideSpinButtons="@(context.ItemOrTag.IsTag)"
+                                         Value="context.Price"
+                                         Format="N2"
+                                         Variant="Variant.Outlined"
+                                         ValueChanged="@(value => UpdatePriceCalculation(context, value))"/>
+                    </div>
+                    @if (context.ItemOrTag.IsTag)
+                    {
+                        <MudTable Items="context.ItemOrTag.AssociatedItems" Elevation="0" Class="pa-0 tag-mud-table" Dense="true">
+                            <RowTemplate Context="item">
+                                @{
+                                    var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
+
+                                    <MudTd Class="pa-0">
+                                        @if (userPriceItem is not null)
+                                        {
+                                            <MudNumericField T="float?"
+                                                             Class="rectangle-input"
+                                                             HideSpinButtons="true"
+                                                             Format="N2"
+                                                             Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
+                                                             Value="@userPriceItem.Price"
+                                                             Variant="Variant.Outlined"/>
+                                        }
+                                        else
+                                        {
+                                            <MudNumericField T="float?"
+                                                             Class="rectangle-input"
+                                                             HideSpinButtons="true"
+                                                             Format="N2"
+                                                             Variant="Variant.Outlined"/>
+                                        }
+                                    </MudTd>
+                                }
+                            </RowTemplate>
+                        </MudTable>
+                    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -254,7 +315,7 @@
                                                  Format="N2"
                                                  Disabled="true"
                                                  Value="upe.Key.Price"
-                                                 Variant="Variant.Outlined" />
+                                                 Variant="Variant.Outlined"/>
                                 <MudNumericField T="float?"
                                                  Class="mt-0"
                                                  Style="height: 25px; width: 75px"
@@ -262,7 +323,7 @@
                                                  Format="N2"
                                                  Disabled="true"
                                                  Value="@(upe.Key.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))"
-                                                 Variant="Variant.Outlined" />
+                                                 Variant="Variant.Outlined"/>
                             </MudItem>
                             <MudItem sm="2">
                                 <MudIconButton
@@ -593,17 +654,18 @@
         StateHasChanged();
     }
 
-    private async Task ShowTagDialog(ItemOrTag tag)
+    private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)
     {
-        var parameters = new DialogParameters
+        if (userPrice.PrimaryUserPrice == target)
         {
-            ["Tag"] = tag,
-        };
-        var dialog = DialogService.Show<TagDialog>(ContextService.GetTranslation(tag), parameters);
+            userPrice.PrimaryUserPrice = null;
+        }
+        else
+        {
+            userPrice.PrimaryUserPrice = target;
+        }
 
-        await dialog.Result;
         await PriceCalculatorService.Calculate();
-        StateHasChanged();
     }
 
 }

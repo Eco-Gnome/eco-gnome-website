@@ -33,7 +33,7 @@ public class ServerDataService(
 
             return;
         }
-        
+
         var skillsTask = skillDbService.GetByServerAsync(server);
         var craftingTablesTask = craftingTableDbService.GetByServerAsync(server);
         var pluginModulesTask = pluginModuleDbService.GetByServerAsync(server);
@@ -81,7 +81,7 @@ public class ServerDataService(
         var pluginModule = new PluginModule
         {
             Name = name,
-            Percent = percent,            
+            Percent = percent,
             LocalizedName = localizedName,
             Server = server,
         };
@@ -96,7 +96,7 @@ public class ServerDataService(
     {
         pluginModule.LocalizedName = localizedName;
         pluginModule.Percent = percent;
-        
+
         pluginModuleDbService.Update(pluginModule);
     }
 
@@ -120,7 +120,7 @@ public class ServerDataService(
     {
         craftingTable.LocalizedName = localizedName;
         craftingTable.PluginModules = pluginModules;
-        
+
         craftingTableDbService.Update(craftingTable);
     }
 
@@ -188,7 +188,7 @@ public class ServerDataService(
         recipe.IsDefault = isDefault;
         recipe.Labor = labor;
         recipe.CraftingTable = craftingTable;
-        
+
         recipeDbService.Update(recipe);
     }
 
@@ -204,7 +204,7 @@ public class ServerDataService(
             Skill = skill,
             LavishTalent = lavishTalent,
         };
-        
+
         elementDbService.Add(element);
 
         return element;
@@ -219,7 +219,7 @@ public class ServerDataService(
         element.IsDynamic = isDynamic;
         element.Skill = skill;
         element.LavishTalent = lavishTalent;
-        
+
         elementDbService.Update(element);
     }
 }

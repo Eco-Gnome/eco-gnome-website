@@ -65,7 +65,31 @@ public class PriceCalculatorService(
 
         foreach (var upb in userPriceToBuy)
         {
-            upb.Price ??= 0;
+            if (upb.ItemOrTag.IsTag)
+            {
+                upb.Price = null;
+
+                foreach (var item in upb.ItemOrTag.AssociatedItems)
+                {
+                    var itemPrice = userServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
+
+                    if (itemPrice is not null)
+                    {
+                        if (GetUserPricesToSell().Any(up => up.Key == itemPrice))
+                        {
+                            itemPrice.Price = null;
+                        }
+                        else
+                        {
+                            itemPrice.Price ??= 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                upb.Price ??= 0;
+            }
         }
 
         foreach (var userElement in userServerDataService.UserElements)
@@ -124,8 +148,8 @@ public class PriceCalculatorService(
                 }
             }
 
-            // By default, we choose the minimum price.
-            userPrice.Price = userPrices.Min(up => up.Price);
+            // By default, we choose the maximum price.
+            userPrice.Price = userPrices.Min(up => up.Price) ?? 0;
 
             Console.WriteLine(
                 $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => Tag Min: {userPrice.Price}");
@@ -176,9 +200,6 @@ public class PriceCalculatorService(
 
         foreach (var ingredient in ingredients)
         {
-            Console.WriteLine(
-                $"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} is price: {ingredient.Price}");
-
             if (ingredient.Price is not null) continue;
 
             var ingredientUserPrice =
@@ -191,7 +212,7 @@ public class PriceCalculatorService(
                     CalculateUserPrice(ingredientUserPrice, masterUserPrice, depth + 1);
                     ingredient.Price = ingredientUserPrice.Price;
                     Console.WriteLine(
-                        $"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} is finally price {ingredient.Price}");
+                        $"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} has calculated price {ingredient.Price}");
                 }
                 else
                 {
@@ -203,6 +224,7 @@ public class PriceCalculatorService(
             else
             {
                 ingredient.Price = ingredientUserPrice.Price;
+                Console.WriteLine($"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} price from user price: {ingredientUserPrice.Price}");
             }
         }
 
@@ -225,7 +247,7 @@ public class PriceCalculatorService(
                 .First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
             if (!GetUserPricesToBuy().Contains(associatedUserPrice)) continue;
-            
+
             Console.WriteLine(
                 $"{new string('\t', depth)}Product {product.Element.ItemOrTag.Name} is a bought output, so we remove from ingredientCost: {associatedUserPrice.Price * product.Element.Quantity}");
 
