@@ -176,7 +176,7 @@
 
         <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
 
-        <MudTable Items="PriceCalculatorService.GetUserPricesToBuy()" Dense="true">
+        <MudTable Items="@(PriceCalculatorService.GetUserPricesToBuy(true))" Dense="true">
             <HeaderContent>
                 <MudTh>Name</MudTh>
                 <MudTh>Price</MudTh>

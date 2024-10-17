@@ -1,26 +1,36 @@
 ﻿using ecocraft.Models;
-using System.Net.NetworkInformation;
 
 namespace ecocraft.Services;
 
 public class PriceCalculatorService(
     EcoCraftDbContext dbContext,
     ContextService contextService,
-    ServerDataService serverDataService,
     UserServerDataService userServerDataService)
 {
-    public List<UserPrice> GetUserPricesToBuy()
+    public List<UserPrice> GetUserPricesToBuy(bool withoutItemsAssociatedToTags = false)
     {
         // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
-        return userServerDataService.UserPrices
+        var list = userServerDataService.UserPrices
             .Where(up => !userServerDataService.UserElements
                 .Where(ue =>
                     ue.Element.IsProduct() &&
-                    ue.Element.Index ==
-                    0) //&& ue.Element.Recipe.Elements.Where(e => e.ItemOrTag == ue.Element.ItemOrTag).Select(x => x.Quantity).Sum() > 0)
+                    ue.Element.Index == 0)
+                //&& ue.Element.Recipe.Elements.Where(e => e.ItemOrTag == ue.Element.ItemOrTag).Select(x => x.Quantity).Sum() > 0)
                 .Select(ue => ue.Element.ItemOrTag)
                 .Contains(up.ItemOrTag)
-            )
+            ).ToList();
+
+        if (withoutItemsAssociatedToTags)
+        {
+            // Remove all UserPrices which ItemOrTag is associated to a Tag in the first list
+            list = list.Where(up => !list.Where(i => i.ItemOrTag.IsTag)
+                .SelectMany(i => i.ItemOrTag.AssociatedItems)
+                .ToList()
+                .Contains(up.ItemOrTag)
+            ).ToList();
+        }
+
+        return list
             .OrderBy(o => contextService.GetTranslation(o.ItemOrTag))
             .ToList();
     }
@@ -144,8 +154,8 @@ public class PriceCalculatorService(
                 userPrices.Add(itemUserPrice);
             }
 
-            // By default, we choose the maximum price.
-            userPrice.Price = userPrices.Max(up => up.Price);
+            // By default, we choose the minimum price.
+            userPrice.Price = userPrices.Min(up => up.Price);
 
             Console.WriteLine(
                 $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => Tag Min: {userPrice.Price}");
@@ -248,7 +258,7 @@ public class PriceCalculatorService(
 
             ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity *
                                  (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1);
-            product.Price = (-1 * associatedUserPrice.Price * (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue: pluginModulePercent) : 1));
+            product.Price = (-1 * associatedUserPrice.Price * (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));
             products.Remove(product);
         }
 

@@ -268,9 +268,9 @@ public class UserServerDataService(
         UserElements.Remove(userElement);
         userElementDbService.Delete(userElement);
 
-        // Remove the UserPrice if no other UserElement target it.
+        // Remove the UserPrice if no other UserElement target it or no other tag.
         var otherUserElementsOfSameItemOrTag =
-            UserElements.Where(u => u.Element.ItemOrTag == userElement.Element.ItemOrTag).ToList();
+            UserElements.Where(u => u.Element.ItemOrTag == userElement.Element.ItemOrTag || u.Element.ItemOrTag.AssociatedItems.Contains(userElement.Element.ItemOrTag)).ToList();
 
         if (!otherUserElementsOfSameItemOrTag.Any())
         {
@@ -279,6 +279,25 @@ public class UserServerDataService(
             if (removedUserPrice is not null)
             {
                 RemoveUserPrice(removedUserPrice);
+
+                if (removedUserPrice.ItemOrTag.IsTag)
+                {
+                    foreach (var item in removedUserPrice.ItemOrTag.AssociatedItems)
+                    {
+                        var otherUserElementsOfSameItem =
+                            UserElements.Where(u => u.Element.ItemOrTag == item || u.Element.ItemOrTag.AssociatedItems.Contains(item)).ToList();
+
+                        if (!otherUserElementsOfSameItem.Any())
+                        {
+                            var itemUserPrice = UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
+
+                            if (itemUserPrice is not null)
+                            {
+                                RemoveUserPrice(itemUserPrice);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
