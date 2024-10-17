@@ -136,20 +136,16 @@ public class PriceCalculatorService(
             {
                 var itemUserPrice = userServerDataService.UserPrices.FirstOrDefault(u => u.ItemOrTag == item);
 
-                // J'anticipe le cas où j'ai trop d'éléments dans mon AssociatedItems (que certains ne figurent pas dans les UserPrice)
-                if (itemUserPrice is not null)
+                if (itemUserPrice.Price is null)
                 {
-                    if (itemUserPrice.Price is null)
-                    {
-                        CalculateUserPrice(itemUserPrice, masterUserPrice, depth + 1);
-                    }
-
-                    userPrices.Add(itemUserPrice);
+                    CalculateUserPrice(itemUserPrice, masterUserPrice, depth + 1);
                 }
+
+                userPrices.Add(itemUserPrice);
             }
 
             // By default, we choose the maximum price.
-            userPrice.Price = userPrices.Min(up => up.Price) ?? 0;
+            userPrice.Price = userPrices.Max(up => up.Price);
 
             Console.WriteLine(
                 $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => Tag Min: {userPrice.Price}");
@@ -234,8 +230,7 @@ public class PriceCalculatorService(
         var pluginModulePercent = userServerDataService.UserCraftingTables
             .First(uct => uct.CraftingTable == userElement.Element.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
 
-        // Lavish Talent : should it be stored in DB from server export ?
-        float lavishTalentValue = (float) 0.95;
+        float lavishTalentValue = userElement.Element.Recipe.Skill?.LavishTalentValue ?? 1;
 
         var ingredientCostSum = -1 * ingredients.Sum(ing =>
             ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));

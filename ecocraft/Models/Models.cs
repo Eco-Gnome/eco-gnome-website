@@ -18,7 +18,7 @@ public class Recipe: IHasLocalizedName
     public float Labor { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
+
     public LocalizedField LocalizedName { get; set; }
     public Skill? Skill { get; set; }
     public CraftingTable CraftingTable { get; set; }
@@ -42,7 +42,7 @@ public class Element
     public bool IsDynamic { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public bool LavishTalent { get; set; }
-        
+
     public Recipe Recipe { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
     public Skill? Skill { get; set; }
@@ -52,7 +52,7 @@ public class Element
     {
         return Quantity < 0;
     }
-        
+
     public bool IsProduct()
     {
         return Quantity > 0;
@@ -94,6 +94,7 @@ public class Skill: IHasLocalizedName
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string? Profession { get; set; }
     public float[] LaborReducePercent { get; set; }
+    public float? LavishTalentValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -129,7 +130,7 @@ public class CraftingTable: IHasLocalizedName
 public class PluginModule: IHasLocalizedName
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }        
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
     public float Percent { get; set; }
@@ -159,10 +160,10 @@ public class UserServer
 {
     [Key] public Guid Id { get; set; }
     public string Pseudo { get; set; }
-    public bool IsAdmin { get; set; }         
+    public bool IsAdmin { get; set; }
     [ForeignKey("User")] public Guid UserId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
-        
+
     public User User { get; set; }
     public Server Server { get; set; }
     public List<UserSkill> UserSkills { get; set; } = [];
@@ -190,7 +191,7 @@ public class UserCraftingTable
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
-        
+
     public UserServer UserServer { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public PluginModule? PluginModule { get; set; }
@@ -199,11 +200,11 @@ public class UserCraftingTable
 public class UserSkill
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("Skill")] public Guid? SkillId { get; set; }		
+    [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public int Level { get; set; }
     public bool HasLavishTalent { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-    
+
     public Skill? Skill { get; set; }
     public UserServer UserServer { get; set; }
 }
@@ -216,7 +217,7 @@ public class UserElement
     public float? MarginPrice { get; set; }
     public float Share { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-        
+
     public Element Element { get; set; }
     public UserServer UserServer { get; set; }
 }
@@ -224,13 +225,13 @@ public class UserElement
 public class UserPrice
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }		
-    public float? Price { get; set; }  
-    public float? MarginPrice { get; set; }       
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+    public float? Price { get; set; }
+    public float? MarginPrice { get; set; }
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-        
+
     public ItemOrTag ItemOrTag { get; set; }
     public UserServer UserServer { get; set; }
     public UserElement? PrimaryUserElement { get; set; }
@@ -240,13 +241,13 @@ public class UserPrice
 public class UserRecipe
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("Recipe")] public Guid RecipeId { get; set; }		
+    [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-        
+
     public Recipe Recipe { get; set; }
     public UserServer UserServer { get; set; }
 }
-    
+
 // Server Data
 public class Server
 {

@@ -11,8 +11,9 @@
 @inject NavigationManager Navigation
 @inject ServerDbService ServerDbService
 @inject EcoCraftDbContext EcoCraftDbContext
-@inject UserDbService UserDbService
-
+@inject ServerDataService ServerDataService
+@inject UserServerDataService UserServerDataService
+@inject ISnackbar Snackbar
 
 <PageTitle>Server Management</PageTitle>
 
@@ -36,22 +37,32 @@
 			<MudFileUpload T="IBrowserFile" Context="fileInput" FilesChanged="UploadFiles">
 				<ButtonTemplate>
 					<MudButton HtmlTag="label"
+					           Disabled="_showUploadServerDataLoader"
 					           Variant="Variant.Filled"
 					           Color="Color.Primary"
 					           StartIcon="@Icons.Material.Filled.CloudUpload"
 					           for="@fileInput">
 						Upload Server Data
+						@if (_showUploadServerDataLoader)
+						{
+							<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2" />
+						}
 					</MudButton>
 				</ButtonTemplate>
 			</MudFileUpload>
 		</MudItem>
 		<MudItem sm="3" Class="pa-4">
 			<MudButton HtmlTag="label"
+			           Disabled="_showDeleteServerLoader"
 			           Variant="Variant.Filled"
 			           Color="Color.Error"
 			           StartIcon="@Icons.Material.Filled.DeleteForever"
 			           OnClick="DeleteServer">
 				Delete Server
+				@if (_showDeleteServerLoader)
+				{
+					<MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2" />
+				}
 			</MudButton>
 			@if (_askDeleteConfirmation)
 			{
@@ -153,6 +164,8 @@
 @code {
 	private bool _askDeleteConfirmation = false;
 	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
+	private bool _showUploadServerDataLoader = false;
+	private bool _showDeleteServerLoader = false;
 
 	protected override void OnInitialized()
 	{
@@ -174,7 +187,6 @@
 		ContextService.OnContextChanged -= StateHasChanged;
 	}
 
-	// TODO: Handle an update of server data
 	private async Task UploadFiles(IBrowserFile? file)
 	{
 		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
@@ -189,14 +201,18 @@
 			using var reader = new StreamReader(memoryStream);
 			string jsonContent = await reader.ReadToEndAsync();
 
-			if (ContextService.CurrentServer is not null)
-			{
-				await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer);
-			}
-			else
-			{
-				throw new Exception("ContextService.CurrentServer is null !");
-			}
+			_showUploadServerDataLoader = true;
+			StateHasChanged();
+			await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
+			_showUploadServerDataLoader = false;
+			StateHasChanged();
+
+			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
+			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
+
+			Snackbar.Clear();
+			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+			Snackbar.Add("Upload Successful", Severity.Success);
 		}
 	}
 
@@ -225,7 +241,7 @@
 		if (!_askLeaveConfirmations.ContainsKey(userServer))
 		{
 			_askLeaveConfirmations.Add(userServer, true);
-		}		
+		}
 	}
 
 	private void CancelLeaveServer(UserServer userServer)
@@ -233,7 +249,7 @@
 		if (_askLeaveConfirmations.ContainsKey(userServer))
 		{
 			_askLeaveConfirmations.Remove(userServer);
-		}		
+		}
 	}
 
 	private async void ConfirmLeaveServer(UserServer userServerToLeave)
@@ -258,7 +274,10 @@
 	private async void ConfirmDeleteServer()
 	{
 		_askDeleteConfirmation = false;
+		_showDeleteServerLoader = true;
+		StateHasChanged();
 		await ContextService.DeleteCurrentServer();
+		_showDeleteServerLoader = false;
 		Navigation.NavigateTo("/");
 	}
 

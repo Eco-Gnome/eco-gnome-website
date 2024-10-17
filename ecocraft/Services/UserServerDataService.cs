@@ -248,6 +248,17 @@ public class UserServerDataService(
         if (UserPrices.FirstOrDefault(up => up.ItemOrTag == userElement.Element.ItemOrTag) is null)
         {
             AddUserPrice(element.ItemOrTag, userServer);
+
+            if (element.ItemOrTag.IsTag)
+            {
+                foreach (var item in element.ItemOrTag.AssociatedItems)
+                {
+                    if (UserPrices.FirstOrDefault(up => up.ItemOrTag == item) is null)
+                    {
+                        AddUserPrice(item, userServer);
+                    }
+                }
+            }
         }
     }
 

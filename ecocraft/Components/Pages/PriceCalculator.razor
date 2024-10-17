@@ -188,7 +188,7 @@
                     </div>
                     @if (context.ItemOrTag.IsTag)
                     {
-                        var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context.ItemOrTag);
+                        var userPriceTag = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == context.ItemOrTag);
 
                         <MudTable Items="context.ItemOrTag.AssociatedItems" Elevation="0" Class="pa-0 tag-mud-table" Dense="true">
                             <RowTemplate Context="item">
@@ -196,17 +196,9 @@
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
                                     <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
-                                        @if (userPriceItem is not null)
-                                        {
-                                            <MudIconButton Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                           Size="Size.Small"
-                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
-                                        }
-                                        else
-                                        {
-                                            <MudIconButton Icon="@Icons.Material.Filled.Block"
-                                                           Size="Size.Small"/>
-                                        }
+                                        <MudIconButton Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
                                         <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
                                     </MudTd>
                                 }
@@ -233,24 +225,15 @@
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
                                     <MudTd Class="pa-0">
-                                        @if (userPriceItem is not null)
-                                        {
-                                            <MudNumericField T="float?"
-                                                             Class="rectangle-input"
-                                                             HideSpinButtons="true"
-                                                             Format="N2"
-                                                             Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
-                                                             Value="@userPriceItem.Price"
-                                                             Variant="Variant.Outlined"/>
-                                        }
-                                        else
-                                        {
-                                            <MudNumericField T="float?"
-                                                             Class="rectangle-input"
-                                                             HideSpinButtons="true"
-                                                             Format="N2"
-                                                             Variant="Variant.Outlined"/>
-                                        }
+                                        <MudNumericField T="float?"
+                                                         Class="rectangle-input"
+                                                         HideSpinButtons="true"
+                                                         Format="N2"
+                                                         Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item) ||
+                                        PriceCalculatorService.GetUserPricesToBuy().Any(up => up.ItemOrTag == item))"
+                                                         Value="userPriceItem.Price"
+                                                         ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
+                                                         Variant="Variant.Outlined"/>
                                     </MudTd>
                                 }
                             </RowTemplate>

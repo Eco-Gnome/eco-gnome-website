@@ -50,7 +50,7 @@ public class ServerDataService(
         JoinCode = server.JoinCode;
     }
 
-    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, float[] laborReducePercent)
+    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, float[] laborReducePercent, float? lavishTalentValue)
     {
         var skill = new Skill
         {
@@ -59,6 +59,7 @@ public class ServerDataService(
             LaborReducePercent = laborReducePercent,
             Server = server,
             LocalizedName = localizedName,
+            LavishTalentValue = lavishTalentValue
         };
 
         Skills.Add(skill);
@@ -67,11 +68,12 @@ public class ServerDataService(
         return skill;
     }
 
-    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, float[] laborReducePercent)
+    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, float[] laborReducePercent, float? lavishTalentValue)
     {
         skill.LocalizedName = localizedName;
         skill.Profession = profession;
         skill.LaborReducePercent = laborReducePercent;
+        skill.LavishTalentValue = lavishTalentValue;
 
         skillDbService.Update(skill);
     }
@@ -145,11 +147,7 @@ public class ServerDataService(
         itemOrTag.LocalizedName = localizedName;
         itemOrTag.IsTag = isTag;
 
-        // Specific for ItemOrTag, they  can appear in multiple recipes, so we must not update them if they have not yet been created in the database
-        if (!ItemOrTags.Contains(itemOrTag))
-        {
-            itemOrTagDbService.Update(itemOrTag);
-        }
+        itemOrTagDbService.Update(itemOrTag);
     }
 
     public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill,
