@@ -552,7 +552,7 @@
     private async Task RemoveUserRecipe(UserRecipe recipe)
     {
         UserServerDataService.RemoveUserRecipe(recipe);
-        await dbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
