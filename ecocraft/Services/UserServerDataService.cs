@@ -271,7 +271,7 @@ public class UserServerDataService(
         // Remove any existing PrimaryUserPrice
         foreach (var userPrice in UserPrices.Where(up => up.PrimaryUserElement == userElement))
         {
-            userPrice.PrimaryUserPrice = null;
+            userPrice.PrimaryUserElement = null;
         }
 
         // Remove the UserPrice if no other UserElement target it or no other tag.
