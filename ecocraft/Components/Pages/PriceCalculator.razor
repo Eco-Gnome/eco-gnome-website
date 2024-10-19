@@ -53,7 +53,7 @@
                 @* <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"> *@
                 <MudTd>
                     <MudText>@ContextService.GetTranslation(context.Skill)</MudText>
-                    @if (context.Level >= 7)
+                    @if (context.Level >= 7 && context.Skill.LavishTalentValue is not null)
                     {
                         <MudCheckBox Value="context.HasLavishTalent" Label="Lavish talent" Color="Color.Primary" ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)"></MudCheckBox>
                     }
