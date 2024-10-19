@@ -26,7 +26,7 @@
                             <MudText Class="pt-2"> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText> <MudText></MudText>
                         </MudItem>
                         <MudItem xs="6" Class="pt-0">
-                            <MudNumericField T="decimal" 
+                            <MudNumericField T="decimal"
                                              Label="Share percent"
                                              Value="(decimal)UserServerDataService.UserElements.First(ue => ue.Element == element).Share"
                                              Style="height: 30px"
@@ -53,7 +53,7 @@
 
     [Parameter]
     public Recipe Recipe { get; set; }
-    
+
     private bool _shareError = false;
 
     private void Ok()
@@ -68,7 +68,6 @@
 
     private void ChangeShare(UserElement element, decimal value)
     {
-        Console.WriteLine(value);
         element.Share = (float)value;
         IsShareError();
     }
@@ -76,12 +75,12 @@
     private void IsShareError()
     {
         var sum = 0f;
-        
+
         foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).ToList())
         {
             sum += UserServerDataService.UserElements.First(ue => ue.Element == element).Share;
         }
 
-        _shareError = !sum.Equals(1f);
+        _shareError = Math.Abs(sum - 1f) > 0.0001f;
     }
 }

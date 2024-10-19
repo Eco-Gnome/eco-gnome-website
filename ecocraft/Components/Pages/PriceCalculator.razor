@@ -195,12 +195,15 @@
                                 @{
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
-                                    <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
-                                        <MudIconButton Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                       Size="Size.Small"
-                                                       OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
-                                        <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
-                                    </MudTd>
+                                    @if (userPriceItem is not null)
+                                    {
+                                        <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
+                                            <MudIconButton Icon="@(userPriceTag?.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
+                                            <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
+                                        </MudTd>
+                                    }
                                 }
                             </RowTemplate>
                         </MudTable>
@@ -224,17 +227,19 @@
                                 @{
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
-                                    <MudTd Class="pa-0">
-                                        <MudNumericField T="float?"
-                                                         Class="rectangle-input"
-                                                         HideSpinButtons="true"
-                                                         Format="N2"
-                                                         Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item) ||
-                                        PriceCalculatorService.GetUserPricesToBuy().Any(up => up.ItemOrTag == item))"
-                                                         Value="userPriceItem.Price"
-                                                         ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
-                                                         Variant="Variant.Outlined"/>
-                                    </MudTd>
+                                    @if (userPriceItem is not null)
+                                    {
+                                        <MudTd Class="pa-0">
+                                            <MudNumericField T="float?"
+                                                             Class="rectangle-input"
+                                                             HideSpinButtons="true"
+                                                             Format="N2"
+                                                             Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
+                                                             Value="userPriceItem.Price"
+                                                             ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
+                                                             Variant="Variant.Outlined"/>
+                                        </MudTd>
+                                    }
                                 }
                             </RowTemplate>
                         </MudTable>
@@ -552,7 +557,7 @@
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
     {
-        userPrice.PrimaryUserElement = userElement;
+        userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
         await PriceCalculatorService.Calculate();
     }
 

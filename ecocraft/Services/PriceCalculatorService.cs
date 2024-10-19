@@ -110,9 +110,7 @@ public class PriceCalculatorService(
         // Calculate all UserPrices to Sell
         foreach (var upe in userPriceAndElements)
         {
-            Console.WriteLine($"Calculate userPrice of Item {upe.Key.ItemOrTag.Name}");
             CalculateUserPrice(upe.Key, upe.Key, 1);
-            Console.WriteLine($"Final calculation Item {upe.Key.ItemOrTag.Name} is {upe.Key.Price}");
         }
 
         await dbContext.SaveChangesAsync();
@@ -121,8 +119,6 @@ public class PriceCalculatorService(
     private void CalculateUserPrice(UserPrice userPrice, UserPrice masterUserPrice, int depth)
     {
         if (userPrice.Price is not null) return;
-
-        Console.WriteLine($"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name}");
 
         if (userPrice.ItemOrTag.IsTag)
         {
@@ -134,8 +130,6 @@ public class PriceCalculatorService(
                 }
 
                 userPrice.Price = userPrice.PrimaryUserPrice.Price;
-                Console.WriteLine(
-                    $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => Tag Primary: {userPrice.Price}");
 
                 return;
             }
@@ -144,7 +138,7 @@ public class PriceCalculatorService(
 
             foreach (var item in userPrice.ItemOrTag.AssociatedItems)
             {
-                var itemUserPrice = userServerDataService.UserPrices.FirstOrDefault(u => u.ItemOrTag == item);
+                var itemUserPrice = userServerDataService.UserPrices.First(u => u.ItemOrTag == item);
 
                 if (itemUserPrice.Price is null)
                 {
@@ -156,9 +150,6 @@ public class PriceCalculatorService(
 
             // By default, we choose the minimum price.
             userPrice.Price = userPrices.Min(up => up.Price);
-
-            Console.WriteLine(
-                $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => Tag Min: {userPrice.Price}");
 
             return;
         }
@@ -175,16 +166,10 @@ public class PriceCalculatorService(
         if (userPrice.PrimaryUserElement is not null)
         {
             userPrice.Price = userPrice.PrimaryUserElement.Price;
-
-            Console.WriteLine(
-                $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => UserElements Primary {userPrice.Price}");
         }
         else
         {
             userPrice.Price = relatedUserElements.Max(r => r.Price);
-
-            Console.WriteLine(
-                $"{new string('\t', depth)}Calculate userPrice {userPrice.ItemOrTag.Name} => UserElements Max {userPrice.Price}");
         }
     }
 
@@ -194,9 +179,6 @@ public class PriceCalculatorService(
         {
             return;
         }
-
-        Console.WriteLine(
-            $"{new string('\t', depth)}Calculate userElement {userElement.Element.ItemOrTag.Name} of {userElement.Element.Recipe.Name}");
 
         var otherUserElements = userServerDataService.UserElements
             .Where(ue => ue.Element.Recipe == userElement.Element.Recipe)
@@ -217,20 +199,16 @@ public class PriceCalculatorService(
                 {
                     CalculateUserPrice(ingredientUserPrice, masterUserPrice, depth + 1);
                     ingredient.Price = ingredientUserPrice.Price;
-                    Console.WriteLine(
-                        $"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} has calculated price {ingredient.Price}");
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"{new string('\t', depth)}Circular recipes detected when trying to find {ingredientUserPrice.ItemOrTag.Name}");
+                    // Circular detected, don't calculate
                     return;
                 }
             }
             else
             {
                 ingredient.Price = ingredientUserPrice.Price;
-                Console.WriteLine($"{new string('\t', depth)}Ingredient {ingredient.Element.ItemOrTag.Name} price from user price: {ingredientUserPrice.Price}");
             }
         }
 
@@ -253,9 +231,6 @@ public class PriceCalculatorService(
 
             if (!GetUserPricesToBuy().Contains(associatedUserPrice)) continue;
 
-            Console.WriteLine(
-                $"{new string('\t', depth)}Product {product.Element.ItemOrTag.Name} is a bought output, so we remove from ingredientCost: {associatedUserPrice.Price * product.Element.Quantity}");
-
             ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity *
                                  (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1);
             product.Price = (-1 * associatedUserPrice.Price * (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));
@@ -265,15 +240,9 @@ public class PriceCalculatorService(
         var skillReducePercent = userElement.Element.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userElement.Element.Recipe.Skill).Level];
         ingredientCostSum += userElement.Element.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
 
-        Console.WriteLine(
-            $"{new string('\t', depth)}Calculate userElement {userElement.Element.ItemOrTag.Name} of {userElement.Element.Recipe.Name} => ingredientCostSum {ingredientCostSum}");
-
         foreach (var product in products)
         {
             product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
-
-            Console.WriteLine(
-                $"{new string('\t', depth)}Calculate userElement {product.Element.ItemOrTag.Name} of {product.Element.Recipe.Name} => {product.Price}");
         }
     }
 }

@@ -17,12 +17,11 @@ builder.Services.AddMudServices();
 builder.Services.AddDbContext<EcoCraftDbContext>(options =>
     options
         .UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-        .EnableSensitiveDataLogging()
         .UseLoggerFactory(LoggerFactory.Create(bd =>
         {
             bd
                 .AddConsole()
-                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Error);
         }))
     );
 

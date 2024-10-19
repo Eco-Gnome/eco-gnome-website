@@ -268,6 +268,12 @@ public class UserServerDataService(
         UserElements.Remove(userElement);
         userElementDbService.Delete(userElement);
 
+        // Remove any existing PrimaryUserPrice
+        foreach (var userPrice in UserPrices.Where(up => up.PrimaryUserElement == userElement))
+        {
+            userPrice.PrimaryUserPrice = null;
+        }
+
         // Remove the UserPrice if no other UserElement target it or no other tag.
         var otherUserElementsOfSameItemOrTag =
             UserElements.Where(u => u.Element.ItemOrTag == userElement.Element.ItemOrTag || u.Element.ItemOrTag.AssociatedItems.Contains(userElement.Element.ItemOrTag)).ToList();
@@ -320,29 +326,6 @@ public class UserServerDataService(
         UserPrices.Remove(userPrice);
         userPriceDbService.Delete(userPrice);
     }
-
-    /* Comportements d'ajouts automatiques:
-        * Ajout d'un UserSkill
-            - Ajout de toutes les recettes correspondantes à ce skill (+ conséquences)
-        * Suppression d'un UserSkill
-            - Suppression de toutes les recettes liées à ce skill (+ conséquences)
-            - Suppression de toutes les tables qui n'ont plus de UserRecipe liées
-        * Modification du level d'un UserSkill
-            * En cas d'augmentation:
-                - Ajout de toutes les recettes nouvellement accessibles de ce skill (+ conséquences)
-            * En cas de diminution:
-                - Suppression de toutes les recettes qui ne sont plus accessibles de ce skill (+ conséquences)
-        * Ajout d'une table
-            - Ajout de toutes les recettes liées aux skills actuels et à cette table, seulement si le user est l'initiateur
-        * Suppression d'une table
-            - Suppression de toutes les recettes liées à cette table de tous les skills
-        * Ajout d'une recette
-            - Ajout de la table correspondante
-            - Creation des UserPrice et UserElement liés
-        * Suppression d'une recette
-            - Suppression des UserPrice et UserElement liés
-            - Si une table n'a plus de recette, retirer la table
-    */
 
     public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
     {
