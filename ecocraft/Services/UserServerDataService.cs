@@ -264,15 +264,15 @@ public class UserServerDataService(
 
     private void RemoveUserElement(UserElement userElement)
     {
-        userElement.UserServer.UserElements.Remove(userElement);
-        UserElements.Remove(userElement);
-        userElementDbService.Delete(userElement);
-
         // Remove any existing PrimaryUserPrice
         foreach (var userPrice in UserPrices.Where(up => up.PrimaryUserElement == userElement))
         {
             userPrice.PrimaryUserElement = null;
         }
+
+        userElement.UserServer.UserElements.Remove(userElement);
+        UserElements.Remove(userElement);
+        userElementDbService.Delete(userElement);
 
         // Remove the UserPrice if no other UserElement target it or no other tag.
         var otherUserElementsOfSameItemOrTag =

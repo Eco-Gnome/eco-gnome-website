@@ -11,8 +11,8 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241010033543_Initial")]
-    partial class Initial
+    [Migration("20241019133058_remove-cascade-on-primary")]
+    partial class removecascadeonprimary
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -347,6 +347,10 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("JoinCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -365,6 +369,9 @@ namespace ecocraft.Migrations
                     b.Property<string>("LaborReducePercent")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<float?>("LavishTalentValue")
+                        .HasColumnType("REAL");
 
                     b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("TEXT");
@@ -828,11 +835,13 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.UserElement", "PrimaryUserElement")
                         .WithMany()
-                        .HasForeignKey("PrimaryUserElementId");
+                        .HasForeignKey("PrimaryUserElementId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.UserPrice", "PrimaryUserPrice")
                         .WithMany()
-                        .HasForeignKey("PrimaryUserPriceId");
+                        .HasForeignKey("PrimaryUserPriceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserPrices")

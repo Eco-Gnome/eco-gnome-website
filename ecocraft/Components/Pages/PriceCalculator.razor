@@ -11,7 +11,6 @@
 @inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
-@inject EcoCraftDbContext dbContext
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -182,7 +181,7 @@
                 <MudTh>Price</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd >
+                <MudTd>
                     <div style="height: 41px; display: table-cell; vertical-align: middle">
                         <MudText Class="small-text">@ContextService.GetTranslation(context.ItemOrTag)</MudText>
                     </div>
@@ -195,15 +194,12 @@
                                 @{
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
-                                    @if (userPriceItem is not null)
-                                    {
-                                        <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
-                                            <MudIconButton Icon="@(userPriceTag?.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                           Size="Size.Small"
-                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
-                                            <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
-                                        </MudTd>
-                                    }
+                                    <MudTd Style="height: 31px; display: flex;" Class="pt-0 pb-0">
+                                        <MudIconButton Icon="@(userPriceTag?.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
+                                        <p Class="pt-2 pl-1">@ContextService.GetTranslation(item)</p>
+                                    </MudTd>
                                 }
                             </RowTemplate>
                         </MudTable>
@@ -227,19 +223,16 @@
                                 @{
                                     var userPriceItem = UserServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
 
-                                    @if (userPriceItem is not null)
-                                    {
-                                        <MudTd Class="pa-0">
-                                            <MudNumericField T="float?"
-                                                             Class="rectangle-input"
-                                                             HideSpinButtons="true"
-                                                             Format="N2"
-                                                             Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
-                                                             Value="userPriceItem.Price"
-                                                             ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
-                                                             Variant="Variant.Outlined"/>
-                                        </MudTd>
-                                    }
+                                    <MudTd Class="pa-0">
+                                        <MudNumericField T="float?"
+                                                         Class="rectangle-input"
+                                                         HideSpinButtons="true"
+                                                         Format="N2"
+                                                         Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
+                                                         Value="userPriceItem.Price"
+                                                         ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
+                                                         Variant="Variant.Outlined"/>
+                                    </MudTd>
                                 }
                             </RowTemplate>
                         </MudTable>
@@ -549,14 +542,12 @@
         StateHasChanged();
     }
 
-    private async Task RemoveUserRecipe(UserRecipe recipe, bool calculate = true)
+    private async Task RemoveUserRecipe(UserRecipe recipe)
     {
         UserServerDataService.RemoveUserRecipe(recipe);
-        if (calculate)
-        {
-            await PriceCalculatorService.Calculate();
-            StateHasChanged();
-        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
@@ -569,7 +560,7 @@
     {
         foreach (var recipe in recipes)
         {
-            UserServerDataService.RemoveUserRecipe(recipe, false);
+            UserServerDataService.RemoveUserRecipe(recipe);
         }
 
         await PriceCalculatorService.Calculate();
