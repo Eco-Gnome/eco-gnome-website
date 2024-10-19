@@ -549,10 +549,14 @@
         StateHasChanged();
     }
 
-    private async Task RemoveUserRecipe(UserRecipe recipe)
+    private async Task RemoveUserRecipe(UserRecipe recipe, bool calculate = true)
     {
         UserServerDataService.RemoveUserRecipe(recipe);
-        await PriceCalculatorService.Calculate();
+        if (calculate)
+        {
+            await PriceCalculatorService.Calculate();
+            StateHasChanged();
+        }
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
@@ -565,10 +569,11 @@
     {
         foreach (var recipe in recipes)
         {
-            UserServerDataService.RemoveUserRecipe(recipe);
+            UserServerDataService.RemoveUserRecipe(recipe, false);
         }
 
-        await dbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
