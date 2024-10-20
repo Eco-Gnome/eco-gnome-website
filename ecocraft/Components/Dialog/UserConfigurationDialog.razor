@@ -1,0 +1,89 @@
+﻿@using ecocraft.Models
+@using ecocraft.Services
+@inject ContextService ContextService
+
+<MudDialogContent>
+	<MudContainer>
+		<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
+			<MudText Typo="Typo.h5" Style="text-align: center;">User administration</MudText>
+		</MudPaper>
+		<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
+			<HeaderContent>
+				<MudTh>Server name</MudTh>
+				<MudTh>Server join code</MudTh>
+				<MudTh>Server username</MudTh>
+			</HeaderContent>
+			<RowTemplate>
+				<MudTd>
+					<MudTextField Value="@context.Server.Name" ReadOnly=true Variant="Variant.Outlined"> </MudTextField>
+				</MudTd>
+				<MudTd>
+					<MudTextField Value="@context.Server.JoinCode" ReadOnly=true Variant="Variant.Outlined"></MudTextField>
+				</MudTd>
+				<MudTd>
+					<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+				</MudTd>
+				<MudTd>
+					<MudButton HtmlTag="label"
+							   Variant="Variant.Filled"
+							   Color="Color.Error"
+							   StartIcon="@Icons.Material.Filled.ExitToApp"
+							   OnClick="@(() => LeaveServer(context))">
+						Leave Server
+					</MudButton>
+					@if (_askLeaveConfirmations.ContainsKey(context))
+					{
+						@* <br /> *@
+						<MudButton Variant="Variant.Filled"
+								   Color="Color.Success"
+								   StartIcon="@Icons.Material.Filled.Close"
+								   OnClick="@(() => CancelLeaveServer(context))">
+						</MudButton>
+						<MudButton Variant="Variant.Filled"
+								   Color="Color.Warning"
+								   StartIcon="@Icons.Material.Filled.Check"
+								   OnClick="@(() => ConfirmLeaveServer(context))">
+						</MudButton>
+					}
+				</MudTd>
+			</RowTemplate>
+		</MudTable>
+	</MudContainer>
+</MudDialogContent>
+
+@code {
+	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
+
+
+	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
+	{
+		if (newPseudo == "") return;
+		userServer.Pseudo = newPseudo;
+		await ContextService.updateCurrentUser();
+	}
+
+	private void LeaveServer(UserServer userServer)
+	{
+		if (!_askLeaveConfirmations.ContainsKey(userServer))
+		{
+			_askLeaveConfirmations.Add(userServer, true);
+		}
+	}
+
+	private void CancelLeaveServer(UserServer userServer)
+	{
+		if (_askLeaveConfirmations.ContainsKey(userServer))
+		{
+			_askLeaveConfirmations.Remove(userServer);
+		}
+	}
+
+	private async void ConfirmLeaveServer(UserServer userServerToLeave)
+	{
+		if (_askLeaveConfirmations.ContainsKey(userServerToLeave))
+		{
+			_askLeaveConfirmations.Remove(userServerToLeave);
+			await ContextService.LeaveServer(userServerToLeave);
+		}
+	}
+}

@@ -117,7 +117,7 @@ public class ContextService(
 	{
 		CurrentUser?.UserServers.Remove(userServerToLeave);
 		await dbContext.SaveChangesAsync();
-		await ChangeServer(null);
+		await ChangeServer(CurrentUser?.UserServers.FirstOrDefault().Server);
 	}
 
 	public async Task DeleteCurrentServer()
