@@ -105,7 +105,7 @@
                     <MudText>@ContextService.GetTranslation(context.CraftingTable)</MudText>
                 </MudTd>
                 <MudTd>
-                    <MudSelect T="PluginModule?"
+                    <MudSelect T="PluginModule"
                                Class="select-dense"
                                Placeholder="Choose a module"
                                Value="context.PluginModule"
@@ -279,7 +279,7 @@
                 </MudItem>
                 @foreach (var upe in PriceCalculatorService.GetUserPricesToSell())
                 {
-                    <MudItem sm="12" Class="@(upe.Value.Count == 1 ? "" : "pb-0")" Style="border-top: 1px solid var(--mud-palette-table-lines)">
+                    <MudItem sm="12" Class="@(upe.Value.Count == 1 ? "" : "pb-0")" Style="border-top: 1px solid var(--mud-palette-table-lines) ">
                         <MudGrid Class="pb-0">
                             <MudItem sm="6">
                                 @ContextService.GetTranslation(upe.Key.ItemOrTag)
@@ -419,7 +419,7 @@
         await LocalStorageService.AddItem("displayNonSkilledRecipes", DisplayNonSkilledRecipes.ToString());
     }
 
-    private Task<IEnumerable<Skill>> SearchSkills(string value)
+    private Task<IEnumerable<Skill>> SearchSkills(string value, CancellationToken token)
     {
         IEnumerable<Skill> result;
 
@@ -439,7 +439,7 @@
         return Task.FromResult(result);
     }
 
-    private Task<IEnumerable<Recipe>> SearchRecipes(string value)
+    private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
     {
         IEnumerable<Recipe> result;
 
@@ -459,7 +459,7 @@
         return Task.FromResult(result);
     }
 
-    private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value)
+    private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value, CancellationToken token)
     {
         IEnumerable<CraftingTable> result;
 
@@ -489,7 +489,7 @@
         UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
 
         _emptySkill = null;
-        _autocompleteSkillRef?.Clear();
+        _autocompleteSkillRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 
@@ -512,7 +512,7 @@
         UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
 
         _emptyCraftingTable = null;
-        _autocompleteCraftingTableRef?.Clear();
+        _autocompleteCraftingTableRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 
@@ -535,7 +535,7 @@
         UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
 
         _emptyRecipe = null;
-        _autocompleteRecipeRef?.Clear();
+        _autocompleteRecipeRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 

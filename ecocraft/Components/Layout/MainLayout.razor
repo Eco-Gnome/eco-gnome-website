@@ -2,7 +2,7 @@
 @inherits LayoutComponentBase
 @inject ContextService ContextService
 
-<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="myDarkTheme" />
+<MudThemeProvider Theme="myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -51,7 +51,7 @@
 
     private MudTheme myDarkTheme = new MudTheme()
         {
-            Palette = new PaletteLight()
+            PaletteLight = new PaletteLight()
             {
                 Black = "#212121",
                 Background = "#5a9046",
