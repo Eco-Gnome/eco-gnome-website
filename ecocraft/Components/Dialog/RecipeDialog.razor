@@ -3,8 +3,8 @@
 @inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
 
-<MudDialogContent>
-    <MudContainer MaxWidth="MaxWidth.Medium" Style="width: 600px; min-height: 400px;">
+<MudDialog MaxWidth="MaxWidth.Medium" Style="width: 600px; min-height: 400px;">
+    <DialogContent>
         <MudGrid>
             <MudItem xs="12">
                 <MudText>CraftingTable: @ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
@@ -21,7 +21,7 @@
                 <MudText Typo="Typo.h6">Products:</MudText>
                 @foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).ToList())
                 {
-                   <MudGrid Class="d-flex justify-top">
+                    <MudGrid Class="d-flex justify-top">
                         <MudItem xs="6" Class="pt-0">
                             <MudText Class="pt-2"> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText> <MudText></MudText>
                         </MudItem>
@@ -48,8 +48,8 @@
                 }
             </MudItem>
         </MudGrid>
-    </MudContainer>
-</MudDialogContent>
+    </DialogContent>
+</MudDialog>
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;

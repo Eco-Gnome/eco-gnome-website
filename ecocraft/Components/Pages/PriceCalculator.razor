@@ -631,7 +631,8 @@
         {
             ["Recipe"] = recipe,
         };
-        var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters);
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;
         await PriceCalculatorService.Calculate();
