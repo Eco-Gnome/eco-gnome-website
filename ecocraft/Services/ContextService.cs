@@ -120,6 +120,12 @@ public class ContextService(
 		await ChangeServer(CurrentUser?.UserServers.FirstOrDefault().Server);
 	}
 
+	public async Task KickFromServer(UserServer userServerToKick)
+	{
+		userServerToKick.Server.UserServers.Remove(userServerToKick);
+		await dbContext.SaveChangesAsync();
+	}
+
 	public async Task DeleteCurrentServer()
     {
         if (!CurrentUserServer!.IsAdmin)

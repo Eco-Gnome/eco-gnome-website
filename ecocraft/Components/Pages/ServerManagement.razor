@@ -103,6 +103,29 @@
 			<MudTd>
 				<MudSwitch Value="@context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
 			</MudTd>
+			<MudTd>
+				<MudButton HtmlTag="label"
+						   Variant="Variant.Filled"
+						   Color="Color.Error"
+						   StartIcon="@Icons.Material.Filled.ExitToApp"
+						   OnClick="@(() => KickUser(context))">
+					Kick User
+				</MudButton>
+				@if (_askKickConfirmations.ContainsKey(context))
+				{
+					<br />
+					<MudButton Variant="Variant.Filled"
+							   Color="Color.Success"
+							   StartIcon="@Icons.Material.Filled.Close"
+							   OnClick="@(() => CancelKick(context))">
+					</MudButton>
+					<MudButton Variant="Variant.Filled"
+							   Color="Color.Warning"
+							   StartIcon="@Icons.Material.Filled.Check"
+							   OnClick="@(() => ConfirmKick(context))">
+					</MudButton>
+				}
+			</MudTd>
 		</RowTemplate>
 
 	</MudTable>
@@ -112,6 +135,7 @@
 	private bool _askDeleteConfirmation = false;
 	private bool _showUploadServerDataLoader = false;
 	private bool _showDeleteServerLoader = false;
+	private Dictionary<UserServer, bool> _askKickConfirmations = new Dictionary<UserServer, bool>();
 
 	protected override void OnInitialized()
 	{
@@ -212,6 +236,31 @@
 	{
 		userServer.IsAdmin = !userServer.IsAdmin;
 		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private void KickUser(UserServer userServer)
+	{
+		if (!_askKickConfirmations.ContainsKey(userServer))
+		{
+			_askKickConfirmations.Add(userServer, true);
+		}
+	}
+
+	private void CancelKick(UserServer userServer)
+	{
+		if (_askKickConfirmations.ContainsKey(userServer))
+		{
+			_askKickConfirmations.Remove(userServer);
+		}
+	}
+
+	private async void ConfirmKick(UserServer userServerToKick)
+	{
+		if (_askKickConfirmations.ContainsKey(userServerToKick))
+		{
+			_askKickConfirmations.Remove(userServerToKick);
+			await ContextService.KickFromServer(userServerToKick);
+		}
 	}
 }
 
