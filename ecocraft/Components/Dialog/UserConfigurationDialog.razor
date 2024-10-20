@@ -2,58 +2,76 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 
-<MudDialogContent>
-	<MudContainer>
-		<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
-			<MudText Typo="Typo.h5" Style="text-align: center;">User administration</MudText>
-		</MudPaper>
-		<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
-			<HeaderContent>
-				<MudTh>Server name</MudTh>
-				<MudTh>Server join code</MudTh>
-				<MudTh>Server username</MudTh>
-			</HeaderContent>
-			<RowTemplate>
-				<MudTd>
-					<MudTextField Value="@context.Server.Name" ReadOnly=true Variant="Variant.Outlined"> </MudTextField>
-				</MudTd>
-				<MudTd>
-					<MudTextField Value="@context.Server.JoinCode" ReadOnly=true Variant="Variant.Outlined"></MudTextField>
-				</MudTd>
-				<MudTd>
-					<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
-				</MudTd>
-				<MudTd>
-					<MudButton HtmlTag="label"
-							   Variant="Variant.Filled"
-							   Color="Color.Error"
-							   StartIcon="@Icons.Material.Filled.ExitToApp"
-							   OnClick="@(() => LeaveServer(context))">
-						Leave Server
-					</MudButton>
-					@if (_askLeaveConfirmations.ContainsKey(context))
-					{
-						@* <br /> *@
-						<MudButton Variant="Variant.Filled"
-								   Color="Color.Success"
-								   StartIcon="@Icons.Material.Filled.Close"
-								   OnClick="@(() => CancelLeaveServer(context))">
-						</MudButton>
-						<MudButton Variant="Variant.Filled"
-								   Color="Color.Warning"
-								   StartIcon="@Icons.Material.Filled.Check"
-								   OnClick="@(() => ConfirmLeaveServer(context))">
-						</MudButton>
-					}
-				</MudTd>
-			</RowTemplate>
-		</MudTable>
-	</MudContainer>
-</MudDialogContent>
+<MudDialog>
+	<TitleContent>
+		User management
+	</TitleContent>
+	<DialogContent>
+		<MudTabs Outlined="true" Position="@Position.Top" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
+			<MudTabPanel Text="My servers">
+				<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
+					<MudText Typo="Typo.h5" Style="text-align: center;">User administration</MudText>
+				</MudPaper>
+				<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
+					<HeaderContent>
+						<MudTh>Server name</MudTh>
+						<MudTh>Server join code</MudTh>
+						<MudTh>Server username</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							<MudTextField Value="@context.Server.Name" ReadOnly=true Variant="Variant.Outlined"> </MudTextField>
+						</MudTd>
+						<MudTd>
+							<MudTextField Value="@context.Server.JoinCode" ReadOnly=true Variant="Variant.Outlined"></MudTextField>
+						</MudTd>
+						<MudTd>
+							<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+						</MudTd>
+						<MudTd>
+							<MudButton HtmlTag="label"
+									   Variant="Variant.Filled"
+									   Color="Color.Error"
+									   StartIcon="@Icons.Material.Filled.ExitToApp"
+									   OnClick="@(() => LeaveServer(context))">
+								Leave Server
+							</MudButton>
+							@if (_askLeaveConfirmations.ContainsKey(context))
+							{
+								@* <br /> *@
+								<MudButton Variant="Variant.Filled"
+										   Color="Color.Success"
+										   StartIcon="@Icons.Material.Filled.Close"
+										   OnClick="@(() => CancelLeaveServer(context))">
+								</MudButton>
+								<MudButton Variant="Variant.Filled"
+										   Color="Color.Warning"
+										   StartIcon="@Icons.Material.Filled.Check"
+										   OnClick="@(() => ConfirmLeaveServer(context))">
+								</MudButton>
+							}
+						</MudTd>
+					</RowTemplate>
+				</MudTable>
+			</MudTabPanel>
+			<MudTabPanel Text="Options">
+				<MudText>UserSettings</MudText>
+			</MudTabPanel>
+		</MudTabs>
+	</DialogContent>
+	@* <DialogActions>
+		<MudButton OnClick="Cancel">Cancel</MudButton>
+		<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+	</DialogActions> *@
+</MudDialog>
+
+
 
 @code {
 	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
 
+	[CascadingParameter]
+	private MudDialogInstance MudDialog { get; set; }
 
 	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
 	{

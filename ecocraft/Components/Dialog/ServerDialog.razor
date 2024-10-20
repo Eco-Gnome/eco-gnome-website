@@ -1,12 +1,19 @@
-﻿<MudDialogContent>
-    <MudText Typo="Typo.h6">Nom du serveur</MudText>
-    <MudTextField @bind-Value="ServerName" Label="Nom du serveur" />
-</MudDialogContent>
+﻿
+<MudDialog OnKeyDown="OnKeyDownAsync">
+    @* <TitleContent>
+        
+    </TitleContent> *@
+    <DialogContent>
+        <MudItem>
+            <MudTextField @bind-Value="ServerName" Immediate="true" Variant="Variant.Outlined" Label="Server name" />
+        </MudItem>
+    </DialogContent>
 
-<MudDialogActions>
-    <MudButton OnClick="Submit" Color="Color.Primary">Valider</MudButton>
-    <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
-</MudDialogActions>
+    <DialogActions>
+        <MudButton OnClick="Submit" Color="Color.Primary">Valider</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
@@ -22,5 +29,16 @@
     private void Cancel()
     {
         MudDialog.Cancel();
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        switch (args.Key)
+        {
+            case "Enter":
+            case "NumpadEnter":
+                Submit();
+                break;
+        }
     }
 }

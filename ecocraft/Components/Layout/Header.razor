@@ -60,7 +60,7 @@
     <MudPaper Class="pl-3" Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
             <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Tertiary" aria-label="Config User" OnClick="ConfigureUser" />
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Tertiary" aria-label="Config User" @onclick="ConfigureUser" />
             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
         </MudStack>
     </MudPaper>
@@ -129,7 +129,8 @@
     private async Task CreateServer()
     {
         var parameters = new DialogParameters();
-        var dialog = DialogService.Show<ServerDialog>("Create server", parameters);
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ServerDialog>("Create server", parameters, options);
 
         var result = await dialog.Result;
 
@@ -149,7 +150,10 @@
         {
             ["Pseudo"] = ContextService.CurrentUser!.Pseudo,
         };
-        var dialog = DialogService.Show<UserDialog>("Create user", parameters);
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var dialog = await DialogService.ShowAsync<UserDialog>("Create user", parameters, options);
 
         var result = await dialog.Result;
 
@@ -209,8 +213,10 @@
         await ContextService.ChangeServer(server);
     }
 
-    private async Task ConfigureUser()
+    private Task ConfigureUser()
     {
-        var dialog = DialogService.Show<UserConfigurationDialog>();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
+        return dialog;
     }
 }
