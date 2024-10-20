@@ -77,14 +77,6 @@
 				</MudButton>
 			}
 		</MudItem>
-		<MudItem sm="3" Class="d-flex align-center flex-grow-1 gap-4">
-			<MudButton Variant="Variant.Filled"
-			           Color="Color.Warning"
-			           StartIcon="@Icons.Material.Filled.TimeToLeave"
-			           OnClick="RenounceAdmin">
-				Renounce Admin
-			</MudButton>
-		</MudItem>
 	</MudGrid>
 </MudContainer>
 
@@ -99,12 +91,13 @@
 				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
 			</MudTd>
 			<MudTd>
-				<MudSwitch Value="@context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
+				<MudSwitch Value="@context.IsAdmin" Disabled="ContextService.CurrentUser!.UserServers.Contains(context) && context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
 			</MudTd>
 			<MudTd>
 				<MudButton HtmlTag="label"
 						   Variant="Variant.Filled"
 						   Color="Color.Error"
+						   Disabled="context.User == ContextService.CurrentUser"
 						   StartIcon="@Icons.Material.Filled.ExitToApp"
 						   OnClick="@(() => KickUser(context))">
 					Kick User
@@ -221,12 +214,6 @@
 		StateHasChanged();
 		await ContextService.DeleteCurrentServer();
 		_showDeleteServerLoader = false;
-		Navigation.NavigateTo("/");
-	}
-
-	private async void RenounceAdmin()
-	{
-		await ContextService.RenounceAdmin();
 		Navigation.NavigateTo("/");
 	}
 
