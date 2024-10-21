@@ -80,53 +80,150 @@
 	</MudGrid>
 </MudContainer>
 
-<MudContainer>
-	<MudTable Items="ContextService.CurrentServer!.UserServers" Dense="true">
+<MudTable Items="ContextService.CurrentServer!.UserServers" Dense="true">
+	<HeaderContent>
+		<MudTh>User pseudo</MudTh>
+		<MudTh>Admin</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		<MudTd>
+			<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+		</MudTd>
+		<MudTd>
+			<MudSwitch Value="@context.IsAdmin" Disabled="ContextService.CurrentUser!.UserServers.Contains(context) && context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
+		</MudTd>
+		<MudTd>
+			<MudButton HtmlTag="label"
+						Variant="Variant.Filled"
+						Color="Color.Error"
+						Disabled="context.User == ContextService.CurrentUser"
+						StartIcon="@Icons.Material.Filled.ExitToApp"
+						OnClick="@(() => KickUser(context))">
+				Kick User
+			</MudButton>
+			@if (_askKickConfirmations.ContainsKey(context))
+			{
+				<br />
+				<MudButton Variant="Variant.Filled"
+							Color="Color.Success"
+							StartIcon="@Icons.Material.Filled.Close"
+							OnClick="@(() => CancelKick(context))">
+				</MudButton>
+				<MudButton Variant="Variant.Filled"
+							Color="Color.Warning"
+							StartIcon="@Icons.Material.Filled.Check"
+							OnClick="@(() => ConfirmKick(context))">
+				</MudButton>
+			}
+		</MudTd>
+	</RowTemplate>
+
+</MudTable>
+
+<MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+@* ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements).Where(e => e.IsIngredient()) *@
+<MudStack Row Justify="Justify.SpaceEvenly" AlignItems="AlignItems.Start">
+	<MudTable Items="GetItemOrTagFromRecipe(true)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
 		<HeaderContent>
-			<MudTh>User pseudo</MudTh>
-			<MudTh>Admin</MudTh>
+			<MudTh>Name</MudTh>
+			<MudTh>Min price</MudTh>
+			<MudTh>Max price</MudTh>
 		</HeaderContent>
+		<ToolBarContent>
+			<MudText Typo="Typo.h6">ItemOrTags from server recipes</MudText>
+			<MudSpacer />
+			<MudTextField @bind-Value="searchItemOrTag" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+		</ToolBarContent>
 		<RowTemplate>
 			<MudTd>
-				<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+				<div>
+					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
+				</div>
 			</MudTd>
 			<MudTd>
-				<MudSwitch Value="@context.IsAdmin" Disabled="ContextService.CurrentUser!.UserServers.Contains(context) && context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />
+				<div>
+					<MudNumericField T="float?"
+									 Class="rectangle-input"
+									 Disabled="@(context.IsTag)"
+									 HideSpinButtons="@(context.IsTag)"
+									 Value="context.MinPrice"
+									 Format="N2"
+									 Variant="Variant.Outlined" />
+				</div>
 			</MudTd>
 			<MudTd>
-				<MudButton HtmlTag="label"
-						   Variant="Variant.Filled"
-						   Color="Color.Error"
-						   Disabled="context.User == ContextService.CurrentUser"
-						   StartIcon="@Icons.Material.Filled.ExitToApp"
-						   OnClick="@(() => KickUser(context))">
-					Kick User
-				</MudButton>
-				@if (_askKickConfirmations.ContainsKey(context))
-				{
-					<br />
-					<MudButton Variant="Variant.Filled"
-							   Color="Color.Success"
-							   StartIcon="@Icons.Material.Filled.Close"
-							   OnClick="@(() => CancelKick(context))">
-					</MudButton>
-					<MudButton Variant="Variant.Filled"
-							   Color="Color.Warning"
-							   StartIcon="@Icons.Material.Filled.Check"
-							   OnClick="@(() => ConfirmKick(context))">
-					</MudButton>
-				}
+				<div>
+					<MudNumericField T="float?"
+									 Class="rectangle-input"
+									 Disabled="@(context.IsTag)"
+									 HideSpinButtons="@(context.IsTag)"
+									 Value="context.MaxPrice"
+									 Format="N2"
+									 Variant="Variant.Outlined" />
+				</div>
 			</MudTd>
 		</RowTemplate>
-
+		<PagerContent>
+			<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
+		</PagerContent>
 	</MudTable>
-</MudContainer>
+
+	<MudTable Items="GetItemOrTagFromServer(true)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+		<HeaderContent>
+			<MudTh>Name</MudTh>
+			<MudTh>Min price</MudTh>
+			<MudTh>Max price</MudTh>
+		</HeaderContent>
+		<ToolBarContent>
+			<MudText Typo="Typo.h6">ItemOrTags from server</MudText>
+			<MudSpacer />
+			<MudTextField @bind-Value="searchItemOrTag" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+		</ToolBarContent>
+		<RowTemplate>
+			<MudTd>
+				<div>
+					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
+				</div>
+			</MudTd>
+			<MudTd>
+				<div>
+					<MudNumericField T="float?"
+									 Class="rectangle-input"
+									 Disabled="@(context.IsTag)"
+									 HideSpinButtons="@(context.IsTag)"
+									 Value="context.MinPrice"
+									 Format="N2"
+									 Variant="Variant.Outlined" />
+				</div>
+			</MudTd>
+			<MudTd>
+				<div>
+					<MudNumericField T="float?"
+									 Class="rectangle-input"
+									 Disabled="@(context.IsTag)"
+									 HideSpinButtons="@(context.IsTag)"
+									 Value="context.MaxPrice"
+									 Format="N2"
+									 Variant="Variant.Outlined" />
+				</div>
+			</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
+		</PagerContent>
+	</MudTable>
+</MudStack>
+
 
 @code {
 	private bool _askDeleteConfirmation = false;
 	private bool _showUploadServerDataLoader = false;
 	private bool _showDeleteServerLoader = false;
 	private Dictionary<UserServer, bool> _askKickConfirmations = new Dictionary<UserServer, bool>();
+	//private string searchElement = "";
+	private string searchItemOrTag = "";
+	//private IEnumerable<Element> Elements = new List<Element>();
 
 	protected override void OnInitialized()
 	{
@@ -139,6 +236,8 @@
 	protected override Task OnInitializedAsync()
 	{
 		ContextService.OnContextChanged += StateHasChanged;
+
+		//Elements = ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements).Where(e => e.IsIngredient());
 
 		return Task.CompletedTask;
 	}
@@ -246,6 +345,107 @@
 			_askKickConfirmations.Remove(userServerToKick);
 			await ContextService.KickFromServer(userServerToKick);
 		}
+	}
+
+	/*private bool FilterFunc1(Element element) => FilterFunc(element, searchElement);
+
+	private bool FilterFunc(Element element, string searchString)
+		{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+		if (element.ItemOrTag.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (ContextService.GetTranslation(element.ItemOrTag).Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		return false;
+	}*/
+
+	private bool FilterFunc2(ItemOrTag itemOrTag) => FilterFuncItemOrTag(itemOrTag, searchItemOrTag);
+
+	private bool FilterFuncItemOrTag(ItemOrTag itemOrTag, string searchString)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+		if (itemOrTag.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (ContextService.GetTranslation(itemOrTag).Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		return false;
+	}
+
+	public List<ItemOrTag> GetItemOrTagFromServer(bool withoutItemsAssociatedToTags = false)
+	{
+		// Get all ItemOrTag where they are not produced by any Recipe
+		var list = ContextService.CurrentServer!.ItemOrTags
+			//.Where(iot => !iot.IsTag)
+			.Where(iot => !ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements)
+				.Where(e =>
+					e.IsProduct() &&
+					e.Index == 0)
+				.Select(e => e.ItemOrTag)
+				.Contains(iot)
+			);
+
+
+		/*list = userServerDataService.UserPrices
+			.Where(up => !userServerDataService.UserElements
+					.Where(ue =>
+					ue.Element.IsProduct() &&
+					ue.Element.Index == 0)
+				.Select(ue => ue.Element.ItemOrTag)
+				.Contains(up.ItemOrTag)
+			).ToList();
+		*/
+		/*
+		if (withoutItemsAssociatedToTags)
+			{
+			// Remove all ItemOrTag which is a Tag in the first list
+			list = list.Where(up => !list.Where(i => i.ItemOrTag.IsTag)
+				.SelectMany(i => i.ItemOrTag.AssociatedItems)
+				.ToList()
+				.Contains(up.ItemOrTag)
+			).ToList();
+		}*/
+
+		return list
+			.OrderBy(iot => ContextService.GetTranslation(iot))
+			.ToList();
+	}
+
+	public List<ItemOrTag> GetItemOrTagFromRecipe(bool withoutItemsAssociatedToTags = false)
+	{
+		//ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements).Where(e => e.IsIngredient());
+
+		// Get all ItemOrTag where they are not produced by any Recipe
+		IEnumerable<ItemOrTag> list = ContextService.CurrentServer!.ItemOrTags
+			.Where(iot => !iot.IsTag)
+			.Where(iot => !ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements)
+				.Where(e =>
+					e.IsProduct() &&
+					e.Index == 0)
+				.Select(e => e.ItemOrTag)
+				.Contains(iot)
+			);
+
+
+
+		// get all ItemOrTag which are needed in ingredients recipe
+		var list2 = ContextService.CurrentServer!.Recipes
+			.SelectMany(r => r.Elements
+				.Where(e => e.IsIngredient())
+				.Select(e => e.ItemOrTag))
+			.Distinct();
+
+		// get all ItemOrTag which are needed in ingredients recipe and not in any recipe product
+		var list3 = ContextService.CurrentServer!.Recipes
+			.SelectMany(r => r.Elements
+				.Where(e => !e.IsProduct())
+				.Select(e => e.ItemOrTag))
+			.Distinct();
+
+		return list3
+		.OrderBy(iot => ContextService.GetTranslation(iot))
+		.ToList();
 	}
 }
 
