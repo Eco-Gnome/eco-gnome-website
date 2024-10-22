@@ -127,11 +127,21 @@
 	<MudTable Items="@listOfIngredients.Where(iot => !iot.IsTag)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
-			<MudTh>Min price</MudTh>
-			<MudTh>Max price</MudTh>
+			<MudTh>Min price
+				<MudIconButton Icon="@Icons.Material.Filled.Clear"
+							   OnClick="@(() => OnClearMinPrices(listOfIngredients.Where(iot => !iot.IsTag).ToList()))"
+							   Color="Color.Primary"
+							   Size="Size.Small" />
+			</MudTh>
+			<MudTh>Max price
+				<MudIconButton Icon="@Icons.Material.Filled.Clear"
+							   OnClick="@(() => OnClearMaxPrices(listOfIngredients.Where(iot => !iot.IsTag).ToList()))"
+							   Color="Color.Primary"
+							   Size="Size.Small" />
+			</MudTh>
 		</HeaderContent>
 		<ToolBarContent>
-			<MudText Typo="Typo.h6">Item (no tags) ingredients from server recipes</MudText>
+			<MudText Typo="Typo.h6">Item ingredients from server recipes</MudText>
 			<MudSpacer />
 			<MudTextField @bind-Value="searchItemOrTag" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 		</ToolBarContent>
@@ -171,7 +181,7 @@
 		</PagerContent>
 	</MudTable>
 
-	<MudTable Items="@listOfIngredients" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+	@* <MudTable Items="@listOfIngredients" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
 			<MudTh>Min price</MudTh>
@@ -214,7 +224,7 @@
 		<PagerContent>
 			<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
 		</PagerContent>
-	</MudTable>
+	</MudTable> *@
 
 	<MudTable Items="@listOfMiddle" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
 		<HeaderContent>
@@ -403,6 +413,22 @@
 		if (newPseudo == "") return;
 		userServer.Pseudo = newPseudo;
 		await ContextService.updateCurrentUser();
+	}
+
+	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
+	{
+		foreach (var _itemOrTag in itemOrTags)
+		{
+			_itemOrTag.MinPrice = null;
+		}
+	}
+
+	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
+	{
+		foreach (var _itemOrTag in itemOrTags)
+		{
+			_itemOrTag.MaxPrice = null;
+		}
 	}
 
 	private async Task UpdateJoinCode(UserServer userServer)
