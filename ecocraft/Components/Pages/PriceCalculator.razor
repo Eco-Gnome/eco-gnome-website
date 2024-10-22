@@ -138,14 +138,17 @@
 <MudItem sm="4" Class="pa-2 d-flex flex-column">
     <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
         <MudStack Spacing="0">
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText>Display non-skilled recipes</MudText>
-                <MudCheckBox T="bool" @bind-Value="DisplayNonSkilledRecipes" Variant="Variant.Outlined"/>
-            </MudStack>
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText>Only level-accessible recipes</MudText>
-                <MudCheckBox T="bool" @bind-Value="OnlyLevelAccessibleRecipes" Variant="Variant.Outlined"/>
-            </MudStack>
+            @if (UserServerDataService.UserSetting is not null)
+            {
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText>Display non-skilled recipes</MudText>
+                    <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
+                </MudStack>
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText>Only level-accessible recipes</MudText>
+                    <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged" />
+                </MudStack>
+            }
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                 <MudText>Price per 1000 calories</MudText>
                 @if (UserServerDataService.UserSetting is not null)
@@ -633,6 +636,18 @@
         userCraftingTable.PluginModule = pluginModule;
         await PriceCalculatorService.Calculate();
         StateHasChanged();
+    }
+
+    private async Task OnOptionDisplayChanged()
+    {
+        UserServerDataService.UserSetting!.DisplayNonSkilledRecipes = !UserServerDataService.UserSetting.DisplayNonSkilledRecipes;
+        await EcoCraftDbContext.SaveChangesAsync();
+    }
+
+    private async Task OnOptionOnlyLevelChanged()
+    {
+        UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
+        await EcoCraftDbContext.SaveChangesAsync();
     }
 
     private async Task UpdateCalorieCost(float calorieCost)

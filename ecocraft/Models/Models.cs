@@ -182,8 +182,11 @@ public class UserSetting
     public float Margin { get; set; } = 0;
     public List<string> MarginNames { get; set; } = [];
     public List<float> MarginValues { get; set; } = [];
+    public bool DisplayNonSkilledRecipes { get; set; } = false;
+    public bool OnlyLevelAccessibleRecipes { get; set; } = false;  
 
-	public float TimeFee { get; set; } = 0;
+
+    public float TimeFee { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
 }
