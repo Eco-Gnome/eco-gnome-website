@@ -401,6 +401,24 @@
 		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
+	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
+	{
+		foreach (var _itemOrTag in itemOrTags)
+		{
+			_itemOrTag.MinPrice = null;
+		}
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
+	{
+		foreach (var _itemOrTag in itemOrTags)
+		{
+			_itemOrTag.MaxPrice = null;
+		}
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
 	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
 	{
 		if (newServerName == "") return;
@@ -415,21 +433,7 @@
 		await ContextService.updateCurrentUser();
 	}
 
-	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
-	{
-		foreach (var _itemOrTag in itemOrTags)
-		{
-			_itemOrTag.MinPrice = null;
-		}
-	}
-
-	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
-	{
-		foreach (var _itemOrTag in itemOrTags)
-		{
-			_itemOrTag.MaxPrice = null;
-		}
-	}
+	
 
 	private async Task UpdateJoinCode(UserServer userServer)
 	{
