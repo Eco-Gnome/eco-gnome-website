@@ -70,8 +70,8 @@ public class ItemOrTag: IHasLocalizedName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public bool IsTag { get; set; }
-    public float MinPrice { get; set; }
-    public float MaxPrice { get; set; }
+    public float? MinPrice { get; set; }
+    public float? MaxPrice { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }

@@ -214,6 +214,8 @@
                                          Value="context.Price"
                                          Format="N2"
                                          Variant="Variant.Outlined"
+                                         Min="context.ItemOrTag.MinPrice"
+                                         Max="context.ItemOrTag.MaxPrice"
                                          ValueChanged="@(value => UpdatePriceCalculation(context, value))"/>
                     </div>
                     @if (context.ItemOrTag.IsTag)
@@ -230,6 +232,8 @@
                                                          Format="N2"
                                                          Disabled="@(PriceCalculatorService.GetUserPricesToSell().Any(up => up.Key.ItemOrTag == item))"
                                                          Value="userPriceItem.Price"
+                                                         Min="context.ItemOrTag.MinPrice"
+                                                         Max="context.ItemOrTag.MaxPrice"
                                                          ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
                                                          Variant="Variant.Outlined"/>
                                     </MudTd>

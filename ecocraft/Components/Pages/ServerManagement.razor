@@ -14,6 +14,7 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject ISnackbar Snackbar
+@using System.Globalization
 
 <PageTitle>Server Management</PageTitle>
 
@@ -147,8 +148,9 @@
 									 Disabled="@(context.IsTag)"
 									 HideSpinButtons="@(context.IsTag)"
 									 Value="context.MinPrice"
-									 Format="N2"
-									 Variant="Variant.Outlined" />
+									 Format="F2"
+									 Variant="Variant.Outlined"
+									 ValueChanged="@(value => OnMinValueChange(context,value))" />
 				</div>
 			</MudTd>
 			<MudTd>
@@ -158,8 +160,9 @@
 									 Disabled="@(context.IsTag)"
 									 HideSpinButtons="@(context.IsTag)"
 									 Value="context.MaxPrice"
-									 Format="N2"
-									 Variant="Variant.Outlined" />
+									 Format="F2"
+									 Variant="Variant.Outlined"
+									 ValueChanged="@(value => OnMaxValueChange(context,value))" />
 				</div>
 			</MudTd>
 		</RowTemplate>
@@ -372,6 +375,20 @@
 			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
 			Snackbar.Add("Upload Successful", Severity.Success);
 		}
+	}
+
+	private async Task OnMinValueChange(ItemOrTag context, float? minPrice)
+	{
+		//if (minPrice is null) return;
+		context.MinPrice = minPrice;
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task OnMaxValueChange(ItemOrTag context, float? maxPrice)
+	{
+		//if (maxPrice is null) return;
+		context.MaxPrice = maxPrice;
+		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
 	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
