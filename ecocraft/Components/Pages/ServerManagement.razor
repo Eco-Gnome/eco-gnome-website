@@ -124,20 +124,24 @@
 <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
 <MudStack Row Justify="Justify.SpaceEvenly" AlignItems="AlignItems.Start">
-	<MudTable Items="@listOfIngredients.Where(iot => !iot.IsTag)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+	<MudTable Items="@listOfIngredients.Where(iot => !iot.IsTag)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="false" FixedHeader="true" Height="800px" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
 			<MudTh>Min price
+				<MudTooltip Text="Clear min prices">
 				<MudIconButton Icon="@Icons.Material.Filled.Clear"
 							   OnClick="@(() => OnClearMinPrices(listOfIngredients.Where(iot => !iot.IsTag).ToList()))"
 							   Color="Color.Primary"
 							   Size="Size.Small" />
+				</MudTooltip>
 			</MudTh>
 			<MudTh>Max price
+				<MudTooltip Text="Clear max prices">
 				<MudIconButton Icon="@Icons.Material.Filled.Clear"
 							   OnClick="@(() => OnClearMaxPrices(listOfIngredients.Where(iot => !iot.IsTag).ToList()))"
 							   Color="Color.Primary"
 							   Size="Size.Small" />
+				</MudTooltip>
 			</MudTh>
 		</HeaderContent>
 		<ToolBarContent>
@@ -181,52 +185,28 @@
 		</PagerContent>
 	</MudTable>
 
-	@* <MudTable Items="@listOfIngredients" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+	<MudTable Items="@ContextService.CurrentServer!.Recipes.SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct().OrderBy(iot => ContextService.GetTranslation(iot)).Where(iot => iot.IsTag)" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="false" FixedHeader="true" Height="800px" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
-			<MudTh>Min price</MudTh>
-			<MudTh>Max price</MudTh>
 		</HeaderContent>
 		<ToolBarContent>
-			<MudText Typo="Typo.h6">ItemOrTags ingredients from server recipes</MudText>
+			<MudText Typo="Typo.h6">Tag from server recipes</MudText>
 			<MudSpacer />
 			<MudTextField @bind-Value="searchItemOrTag" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 		</ToolBarContent>
 		<RowTemplate>
 			<MudTd>
 				<div>
-					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
-				</div>
-			</MudTd>
-			<MudTd>
-				<div>
-					<MudNumericField T="float?"
-									 Class="rectangle-input"
-									 Disabled="@(context.IsTag)"
-									 HideSpinButtons="@(context.IsTag)"
-									 Value="context.MinPrice"
-									 Format="N2"
-									 Variant="Variant.Outlined" />
-				</div>
-			</MudTd>
-			<MudTd>
-				<div>
-					<MudNumericField T="float?"
-									 Class="rectangle-input"
-									 Disabled="@(context.IsTag)"
-									 HideSpinButtons="@(context.IsTag)"
-									 Value="context.MaxPrice"
-									 Format="N2"
-									 Variant="Variant.Outlined" />
+					<MudText Class="small-text">@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)</MudText>
 				</div>
 			</MudTd>
 		</RowTemplate>
 		<PagerContent>
 			<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
 		</PagerContent>
-	</MudTable> *@
+	</MudTable>
 
-	<MudTable Items="@listOfMiddle" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+	<MudTable Items="@listOfMiddle" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="false" FixedHeader="true" Height="800px" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
 			<MudTh>Min price</MudTh>
@@ -271,7 +251,7 @@
 		</PagerContent>
 	</MudTable>
 
-	<MudTable Items="@listOfProducts" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="true" FixedHeader="true" Dense="true" Hover="true">
+	<MudTable Items="@listOfProducts" Filter="new Func<ItemOrTag,bool>(FilterFunc2)" Virtualize="false" FixedHeader="true" Height="800px" Dense="true" Hover="true">
 		<HeaderContent>
 			<MudTh>Name</MudTh>
 			<MudTh>Min price</MudTh>

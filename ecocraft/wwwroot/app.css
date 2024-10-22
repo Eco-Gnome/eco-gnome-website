@@ -42,10 +42,6 @@
     color: white;
 }
 
-.mud-table-container {
-    overflow: hidden !important;  /* Ou `overflow: visible` */
-}
-
 .select-dense input, .select-dense .mud-input-slot {
     padding: 12px !important;
 }
