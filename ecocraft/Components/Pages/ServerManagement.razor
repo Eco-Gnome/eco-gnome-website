@@ -152,7 +152,7 @@
 		<RowTemplate>
 			<MudTd>
 				<div>
-					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
+					<MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
 				</div>
 			</MudTd>
 			<MudTd>
@@ -197,7 +197,7 @@
 		<RowTemplate>
 			<MudTd>
 				<div>
-					<MudText Class="small-text">@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)</MudText>
+					<MudText Typo="Typo.body2">@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)</MudText>
 				</div>
 			</MudTd>
 		</RowTemplate>
@@ -220,7 +220,7 @@
 		<RowTemplate>
 			<MudTd>
 				<div>
-					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
+					<MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
 				</div>
 			</MudTd>
 			<MudTd>
@@ -265,7 +265,7 @@
 		<RowTemplate>
 			<MudTd>
 				<div>
-					<MudText Class="small-text">@ContextService.GetTranslation(context)</MudText>
+					<MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
 				</div>
 			</MudTd>
 			<MudTd>
@@ -361,6 +361,8 @@
 			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
 			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
 
+			StateHasChanged();
+
 			Snackbar.Clear();
 			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
 			Snackbar.Add("Upload Successful", Severity.Success);
@@ -413,7 +415,7 @@
 		await ContextService.updateCurrentUser();
 	}
 
-	
+
 
 	private async Task UpdateJoinCode(UserServer userServer)
 	{

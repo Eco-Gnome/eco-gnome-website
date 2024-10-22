@@ -42,6 +42,8 @@ public class Element
     public bool IsDynamic { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public bool LavishTalent { get; set; }
+    public bool DefaultIsReintegrated { get; set; }
+    public float DefaultShare { get; set; }
 
     public Recipe Recipe { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
@@ -183,7 +185,7 @@ public class UserSetting
     public List<string> MarginNames { get; set; } = [];
     public List<float> MarginValues { get; set; } = [];
     public bool DisplayNonSkilledRecipes { get; set; } = false;
-    public bool OnlyLevelAccessibleRecipes { get; set; } = false;  
+    public bool OnlyLevelAccessibleRecipes { get; set; } = false;
 
 
     public float TimeFee { get; set; } = 0;
@@ -215,20 +217,26 @@ public class UserSkill
     public UserServer UserServer { get; set; }
 }
 
-public class UserElement
+internal interface IHasPrice
+{
+    public float? Price { get; set; }
+}
+
+public class UserElement: IHasPrice
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Element")] public Guid ElementId { get; set; }
     public float? Price { get; set; }
     public float? MarginPrice { get; set; }
     public float Share { get; set; }
+    public bool IsReintegrated { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
 
     public Element Element { get; set; }
     public UserServer UserServer { get; set; }
 }
 
-public class UserPrice
+public class UserPrice: IHasPrice
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
@@ -237,6 +245,7 @@ public class UserPrice
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public bool OverrideIsBought { get; set; }
 
     public ItemOrTag ItemOrTag { get; set; }
     public UserServer UserServer { get; set; }

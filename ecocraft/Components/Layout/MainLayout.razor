@@ -1,5 +1,6 @@
-﻿@using ecocraft.Services
+﻿@implements IDisposable
 @inherits LayoutComponentBase
+@using ecocraft.Services
 @inject ContextService ContextService
 
 <MudThemeProvider Theme="myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
@@ -29,7 +30,14 @@
     <MudMainContent Class="mt-16 pa-8">
         @if (!_isLoading)
         {
-            @Body
+            if (ContextService.CurrentUserServer is not null)
+            {
+                @Body
+            }
+            else
+            {
+                <MudText>Please join a server !</MudText>
+            }
         }
         else
         {
@@ -74,6 +82,18 @@
                 Primary = Colors.Blue.Lighten1,
             },
         };
+
+    protected override Task OnInitializedAsync()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
+
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

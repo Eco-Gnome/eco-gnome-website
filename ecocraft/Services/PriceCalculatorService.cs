@@ -7,242 +7,186 @@ public class PriceCalculatorService(
     ContextService contextService,
     UserServerDataService userServerDataService)
 {
-    public List<UserPrice> GetUserPricesToBuy(bool withoutItemsAssociatedToTags = false)
+    public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags()
     {
         // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
-        var list = userServerDataService.UserPrices
-            .Where(up => !userServerDataService.UserElements
-                .Where(ue =>
-                    ue.Element.IsProduct() &&
-                    ue.Element.Index == 0)
-                //&& ue.Element.Recipe.Elements.Where(e => e.ItemOrTag == ue.Element.ItemOrTag).Select(x => x.Quantity).Sum() > 0)
-                .Select(ue => ue.Element.ItemOrTag)
-                .Contains(up.ItemOrTag)
-            ).ToList();
-
-        if (withoutItemsAssociatedToTags)
-        {
-            // Remove all UserPrices which ItemOrTag is associated to a Tag in the first list
-            list = list.Where(up => !list.Where(i => i.ItemOrTag.IsTag)
-                .SelectMany(i => i.ItemOrTag.AssociatedItems)
-                .ToList()
-                .Contains(up.ItemOrTag)
-            ).ToList();
-        }
-
-        return list
-            .OrderBy(o => contextService.GetTranslation(o.ItemOrTag))
+        var listOfProducts = userServerDataService.UserElements
+            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated)
+            .Select(ue => ue.Element.ItemOrTag)
+            .Distinct()
             .ToList();
+
+        var listOfIngredients = userServerDataService.UserElements
+            .Where(ue => !listOfProducts.Contains(ue.Element.ItemOrTag))
+            .Select(ue => ue.Element.ItemOrTag)
+            .Concat(
+                userServerDataService.UserPrices
+                    .Where(up => up.OverrideIsBought)
+                    .Select(up => up.ItemOrTag)
+            )
+            .Distinct()
+            .ToList();
+
+        return (listOfIngredients, listOfProducts);
     }
 
-    public Dictionary<UserPrice, List<UserElement>> GetUserPricesToSell()
+    public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTagsForDisplay()
     {
-        // Get all UserPrices where their ItemOrTag is produced by any existing UserElement
-        var userPricesToSell = userServerDataService.UserPrices
-            .Where(up => userServerDataService.UserElements.Any(ue =>
-                ue.Element.ItemOrTag == up.ItemOrTag && ue.Element.IsProduct() && ue.Element.Index == 0))
+        var (listOfIngredients, listOfProducts) = GetCategorizedItemOrTags();
+
+        listOfIngredients = listOfIngredients.Where(i => !i.AssociatedTags.Intersect(listOfIngredients).Any())
+            .OrderBy(n => contextService.GetTranslation(n))
             .ToList();
 
-        var output = new Dictionary<UserPrice, List<UserElement>>();
+        listOfProducts = listOfProducts
+            .OrderBy(n => contextService.GetTranslation(n))
+            .ToList();
 
-        foreach (var userPriceToSell in userPricesToSell)
-        {
-            output.Add(userPriceToSell,
-                userServerDataService.UserElements.Where(ue =>
-                    ue.Element.ItemOrTag == userPriceToSell.ItemOrTag && ue.Element.IsProduct()).ToList());
-        }
-
-        output = output.OrderBy(o => contextService.GetTranslation(o.Key.ItemOrTag))
-            .ToDictionary();
-
-        return output;
+        return (listOfIngredients, listOfProducts);
     }
 
     public async Task Calculate()
     {
-        var userPriceAndElements = GetUserPricesToSell();
-        var userPriceToBuy = GetUserPricesToBuy();
+        // Reset Prices
+        var (itemOrTagsToBuy, itemOrTagsToSell) = GetCategorizedItemOrTags();
 
-        foreach (var upe in userPriceAndElements)
+        userServerDataService.UserElements.ForEach(ue => ue.Price = null);
+        userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag))
+            .ToList().ForEach(ue => ue.Price =
+            null);
+
+        List<UserRecipe> remainingUserRecipes = userServerDataService.UserRecipes.ToList();
+        int nbHandled;
+
+        do
         {
-            upe.Key.Price = null;
+            nbHandled = 0;
+            int iterator = 0;
 
-            foreach (var element in upe.Value)
+            while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
             {
-                element.Price = null;
-            }
-        }
+                var userRecipe = remainingUserRecipes[iterator];
+                Console.WriteLine($"Check Recipe: {userRecipe.Recipe.Name}");
 
-        foreach (var upb in userPriceToBuy)
-        {
-            if (upb.ItemOrTag.IsTag)
-            {
-                upb.Price = null;
+                var userElementIngredients = userServerDataService.UserElements.Where(ue => ue.Element.IsIngredient() && ue.Element.Recipe == userRecipe.Recipe).ToList();
 
-                foreach (var item in upb.ItemOrTag.AssociatedItems)
+                // Try to find ingredient price, based on it's associated UserPrice, or if it's a tag, based on it's related Items
+                foreach (var ingredient in userElementIngredients.Where(ue => ue.Price is null).ToList())
                 {
-                    var itemPrice = userServerDataService.UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
+                    var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == ingredient.Element.ItemOrTag);
 
-                    if (itemPrice is not null)
+                    if (associatedUserPrice.Price is not null)
                     {
-                        if (GetUserPricesToSell().Any(up => up.Key == itemPrice))
+                        ingredient.Price = associatedUserPrice.Price;
+                        Console.WriteLine($"=> Ingredient {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+
+                        continue;
+                    }
+
+                    if (!associatedUserPrice.ItemOrTag.IsTag) continue;
+
+                    if (associatedUserPrice.PrimaryUserPrice?.Price is not null)
+                    {
+                        associatedUserPrice.Price = associatedUserPrice.PrimaryUserPrice.Price;
+                        ingredient.Price = associatedUserPrice.Price;
+                        Console.WriteLine($"=> Ingredient Tag (from primary) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+
+                        continue;
+                    }
+
+                    var associatedItemsUserPrices = associatedUserPrice.ItemOrTag.AssociatedItems.Select(iot => userServerDataService.UserPrices.First(up => up
+                        .ItemOrTag == iot)).ToList();
+
+                    if (!associatedItemsUserPrices.All(up => up.Price is not null)) continue;
+
+                    associatedUserPrice.Price = associatedItemsUserPrices.Select(up => up.Price).Min();
+                    ingredient.Price = associatedUserPrice.Price;
+                    Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+                }
+
+                if (userElementIngredients.Any(ue => ue.Price is null))
+                {
+                    iterator++;
+                    userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
+                    Console.WriteLine($"=> Stop");
+                    continue;
+                }
+
+                var userElementProducts = userServerDataService.UserElements.Where(ue => ue.Element.IsProduct() && ue.Element.Recipe == userRecipe.Recipe).ToList();
+                var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
+
+                if (reintegratedProducts.Any(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null))
+                {
+                    iterator++;
+                    reintegratedProducts.Where(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Reintegrated Product {ue.Element.ItemOrTag.Name} is null"));
+                    Console.WriteLine($"=> Stop");
+                    continue;
+                }
+
+                Console.WriteLine($"=> Calc");
+
+                remainingUserRecipes.RemoveAt(iterator);
+
+                var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
+                var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
+
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ing => ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic
+                    ? userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent
+                        ? pluginModulePercent * lavishTalentValue
+                        : pluginModulePercent
+                    : 1));
+
+                // We remove from ingredientCostSum, the price of reintegrated products
+                foreach (var reintegratedProduct in reintegratedProducts)
+                {
+                    var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == reintegratedProduct.Element.ItemOrTag);
+
+                    reintegratedProduct.Price = -1 * associatedUserPrice.Price * (reintegratedProduct.Element.IsDynamic
+                        ? userServerDataService.UserSkills.First(us => us.Skill == reintegratedProduct.Element.Skill).HasLavishTalent
+                            ? pluginModulePercent * lavishTalentValue
+                            : pluginModulePercent
+                        : 1);
+                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.Element.Quantity;
+                }
+
+                var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userRecipe
+                    .Recipe.Skill).Level] ?? 1;
+                ingredientCostSum += userRecipe.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
+
+                foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
+                {
+                    product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
+                    Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
+
+                    // Calculate the associated User price if needed
+                    var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
+
+                    if (associatedUserPrice.Price is null)
+                    {
+                        // We choose the PrimaryUserElement.Price
+                        if (associatedUserPrice.PrimaryUserElement == product)
                         {
-                            itemPrice.Price = null;
+                            associatedUserPrice.Price = product.Price;
                         }
-                        else
+                        else if (associatedUserPrice.PrimaryUserElement is null)
                         {
-                            itemPrice.Price ??= 0;
+                            // Or we choose the min price of all related user element
+                            var relatedUserElements = userServerDataService.UserElements.Where(ue => ue.Element.ItemOrTag == associatedUserPrice.ItemOrTag
+                                                                                                     && ue.Element.IsProduct()
+                                                                                                     && !ue.IsReintegrated).ToList();
+
+                            if (relatedUserElements.All(ue => ue.Price is not null))
+                            {
+                                associatedUserPrice.Price = relatedUserElements.Min(ue => ue.Price);
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                upb.Price ??= 0;
-            }
-        }
 
-        foreach (var userElement in userServerDataService.UserElements)
-        {
-            userElement.Price = null;
-        }
-
-        // Calculate all UserPrices to Sell
-        foreach (var upe in userPriceAndElements)
-        {
-            CalculateUserPrice(upe.Key, upe.Key, 1);
-        }
+                nbHandled++;
+            }
+        } while (nbHandled > 0);
 
         await dbContext.SaveChangesAsync();
-    }
-
-    private void CalculateUserPrice(UserPrice userPrice, UserPrice masterUserPrice, int depth)
-    {
-        if (userPrice.Price is not null) return;
-
-        if (userPrice.ItemOrTag.IsTag)
-        {
-            if (userPrice.PrimaryUserPrice is not null)
-            {
-                if (userPrice.PrimaryUserPrice.Price is null)
-                {
-                    CalculateUserPrice(userPrice.PrimaryUserPrice, masterUserPrice, depth + 1);
-                }
-
-                userPrice.Price = userPrice.PrimaryUserPrice.Price;
-
-                return;
-            }
-
-            List<UserPrice> userPrices = [];
-
-            foreach (var item in userPrice.ItemOrTag.AssociatedItems)
-            {
-                var itemUserPrice = userServerDataService.UserPrices.First(u => u.ItemOrTag == item);
-
-                if (itemUserPrice.Price is null)
-                {
-                    CalculateUserPrice(itemUserPrice, masterUserPrice, depth + 1);
-                }
-
-                userPrices.Add(itemUserPrice);
-            }
-
-            // By default, we choose the minimum price.
-            userPrice.Price = userPrices.Min(up => up.Price);
-
-            return;
-        }
-
-        var relatedUserElements = userServerDataService.UserElements
-            .Where(ue => ue.Element.IsProduct() && ue.Element.Index == 0 && ue.Element.ItemOrTag == userPrice.ItemOrTag)
-            .ToList();
-
-        foreach (var userElement in relatedUserElements)
-        {
-            CalculateUserElement(userElement, masterUserPrice, depth + 1);
-        }
-
-        if (userPrice.PrimaryUserElement is not null)
-        {
-            userPrice.Price = userPrice.PrimaryUserElement.Price;
-        }
-        else
-        {
-            userPrice.Price = relatedUserElements.Max(r => r.Price);
-        }
-    }
-
-    private void CalculateUserElement(UserElement userElement, UserPrice masterUserPrice, int depth)
-    {
-        if (userElement.Price is not null)
-        {
-            return;
-        }
-
-        var otherUserElements = userServerDataService.UserElements
-            .Where(ue => ue.Element.Recipe == userElement.Element.Recipe)
-            .ToList();
-        var products = otherUserElements.Where(ue => ue.Element.IsProduct()).ToList();
-        var ingredients = otherUserElements.Where(ue => ue.Element.IsIngredient()).ToList();
-
-        foreach (var ingredient in ingredients)
-        {
-            if (ingredient.Price is not null) continue;
-
-            var ingredientUserPrice =
-                userServerDataService.UserPrices.First(up => up.ItemOrTag == ingredient.Element.ItemOrTag);
-
-            if (ingredientUserPrice.Price is null)
-            {
-                if (ingredientUserPrice != masterUserPrice)
-                {
-                    CalculateUserPrice(ingredientUserPrice, masterUserPrice, depth + 1);
-                    ingredient.Price = ingredientUserPrice.Price;
-                }
-                else
-                {
-                    // Circular detected, don't calculate
-                    return;
-                }
-            }
-            else
-            {
-                ingredient.Price = ingredientUserPrice.Price;
-            }
-        }
-
-        // Don't calculate any recipe with null price
-        if (ingredients.Any(i => i.Price is null)) return;
-
-        var pluginModulePercent = userServerDataService.UserCraftingTables
-            .First(uct => uct.CraftingTable == userElement.Element.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
-
-        float lavishTalentValue = userElement.Element.Recipe.Skill?.LavishTalentValue ?? 1;
-
-        var ingredientCostSum = -1 * ingredients.Sum(ing =>
-            ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));
-
-        // Remove ingredientCostSum from items that are bought
-        foreach (var product in products.ToList())
-        {
-            var associatedUserPrice = userServerDataService.UserPrices
-                .First(up => up.ItemOrTag == product.Element.ItemOrTag);
-
-            if (!GetUserPricesToBuy().Contains(associatedUserPrice)) continue;
-
-            ingredientCostSum -= associatedUserPrice.Price * product.Element.Quantity *
-                                 (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1);
-            product.Price = (-1 * associatedUserPrice.Price * (product.Element.IsDynamic ? (userServerDataService.UserSkills.First(us => us.Skill == product.Element.Skill).HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent) : 1));
-            products.Remove(product);
-        }
-
-        var skillReducePercent = userElement.Element.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userElement.Element.Recipe.Skill).Level];
-        ingredientCostSum += userElement.Element.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
-
-        foreach (var product in products)
-        {
-            product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
-        }
     }
 }

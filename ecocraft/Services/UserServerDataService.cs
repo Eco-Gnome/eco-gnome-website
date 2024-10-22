@@ -238,7 +238,8 @@ public class UserServerDataService(
         {
             Element = element,
             UserServer = userServer,
-            Share = element.IsIngredient() ? -1 : element.Index == 0 ? 1 : 0,
+            Share = element.DefaultShare,
+            IsReintegrated = element.DefaultIsReintegrated
         };
 
         UserElements.Add(userElement);
@@ -314,6 +315,7 @@ public class UserServerDataService(
         {
             ItemOrTag = itemOrTag,
             UserServer = userServer,
+            OverrideIsBought = false
         };
 
         UserPrices.Add(userPrice);

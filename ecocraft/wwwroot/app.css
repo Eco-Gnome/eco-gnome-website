@@ -42,20 +42,12 @@
     color: white;
 }
 
-.select-dense input, .select-dense .mud-input-slot {
-    padding: 12px !important;
+.skill-table .mud-table-container {
+    max-height: 250px;
 }
 
-.tag-mud-table .mud-table-cell {
-    border: none;
-}
-
-.buy-items-price-cell {
-    vertical-align: top !important;
-}
-
-.small-text {
-    font-size: 0.875rem !important;
+.craftingtable-table .mud-table-container {
+    max-height: 350px;
 }
 
 .rectangle-input .mud-input {
@@ -63,7 +55,17 @@
     width: 100px;
 }
 
-.rectangle-input .mud-input-slot {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+.square-input .mud-input {
+    height: 35px;
+    width: 55px;
+}
+
+.rectangle-input input.mud-input-root-outlined, .square-input input.mud-input-root-outlined {
+    padding-top: 6px !important;
+    padding-bottom: 7px !important;
+}
+
+.select-dense .mud-input-slot {
+    padding-top: 12px !important;
+    padding-bottom: 14px !important;
 }

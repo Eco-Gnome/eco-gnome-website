@@ -2,51 +2,120 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
+@inject PriceCalculatorService PriceCalculatorService
 
 <MudDialog MaxWidth="MaxWidth.Medium" Style="width: 600px; min-height: 500px;">
     <DialogContent>
         <MudStack Spacing="2">
             <MudText>CraftingTable: @ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
-            <MudText>Skill: @ContextService.GetTranslation(Recipe.Skill) @(Recipe.Skill is not null ? Recipe.SkillLevel : "")</MudText>
+            @if (Recipe.Skill is not null)
+            {
+                <MudText>Skill: @ContextService.GetTranslation(Recipe.Skill) @(Recipe.SkillLevel)</MudText>
+            }
             <MudText>Craft Time: @Recipe.CraftMinutes minutes</MudText>
-            <MudText>Labor: @Recipe.Labor</MudText>
-
-            <MudText Typo="Typo.h6">Ingredients:</MudText>
-            <MudStack Spacing="1">
-                @foreach (var element in Recipe.Elements.Where(e => e.IsIngredient()).ToList())
-                {
-                    <MudText> @(element.Quantity * -1) @ContextService.GetTranslation(element.ItemOrTag) @(!element.IsDynamic ? "(static)" : "")</MudText>
-                }
+            <MudStack Row>
+                <MudText>Labor: @Recipe.Labor</MudText>
+                <MudText Color="Color.Primary">
+                    @(Math.Round(GetLaborPrice(), 3)) $
+                </MudText>
             </MudStack>
 
-            <MudText Typo="Typo.h6">Products:</MudText>
-            @foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).ToList())
-            {
-                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudItem>
-                        <MudText> @(element.Quantity) @ContextService.GetTranslation(element.ItemOrTag) @(element.IsDynamic ? "(dynamic)" : "")</MudText>
-                    </MudItem>
-                    @if (Recipe.Elements.Where(e => e.IsProduct()).Count() > 1)
-                    {
-                        <MudItem>
-                            <MudNumericField T="decimal"
-                                             Label="Share percent"
-                                             Value="(decimal)UserServerDataService.UserElements.First(ue => ue.Element == element).Share"
-                                             Style="height: 30px; max-width: 150px;"
-                                             Min="0"
-                                             Max="1"
-                                             Step="0.01m"
-                                             Variant="Variant.Outlined"
-                                             Immediate="true"
-                                             ValueChanged="@((v) => ChangeShare(UserServerDataService.UserElements.First(ue => ue.Element == element), v))" />
-                        </MudItem>
-                    }
-                </MudStack>
-            }
+            <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true">
+                <GroupHeaderTemplate>
+                    <MudTh colspan="2" Class="mud-background">
+                        <MudText>@context.Key</MudText>
+                    </MudTh>
+                    <MudTh colspan="3" Class="mud-background">
+                        <MudStack Row Reverse="true">
+                            @if (context.Key!.ToString() == "Ingredients")
+                            {
+                                <MudText Style="min-width: 60px" Typo="Typo.body2" Color="Color.Primary">
+                                    @(Math.Round(-1 * (ElementSum(context.Items.ToList()) - ElementSum(GetReintegratedElements())) + GetLaborPrice(), 2)) $
+                                </MudText>
+                                <MudText Typo="Typo.body2">Total Cost:</MudText>
+                            }
+                            else
+                            {
+                                <MudText Style="min-width: 60px"  Typo="Typo.body2" Color="Color.Primary">
+                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2)) $
+                                </MudText>
+                                <MudText Typo="Typo.body2">Total Price:</MudText>
+                            }
+                        </MudStack>
+                    </MudTh>
+                </GroupHeaderTemplate>
+                <RowTemplate>
+                    <MudTd Style="width: 30px">@(Math.Abs(context.Element.Quantity))</MudTd>
+                    <MudTd>@ContextService.GetTranslation(context.Element.ItemOrTag)</MudTd>
+                    <MudTd>@context.Element.IsDynamic</MudTd>
+                    <MudTd>
+                        @if (context.Element.Index > 0 && context.Element.IsProduct())
+                        {
+                        <MudSwitch T="bool"
+                                   Color="Color.Primary"
+                                   Value="context.IsReintegrated"
+                                   ValueChanged="@(v => ChangeReintegrate(context, v))">
+                            <MudText Typo="Typo.body2">Recovered Item</MudText>
+                        </MudSwitch>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Primary">
+                            @(context.Price is not null ? Math.Round((float)context.Price!, 2) + " $" : "")
+                        </MudText>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
 
-            @if (_shareError)
+            @if (ShouldDisplayShare())
             {
-                <MudText Style="color: red;">Error! Make sure the sum of all Products Share equals 1</MudText>
+                var list = GetProductsWithoutReintegratedElements();
+
+                <MudStack>
+                    <MudText Class="mt-2" Typo="Typo.body2">Price Sharing between outputs:</MudText>
+                    <MudChart ChartType="ChartType.Donut"
+                              LegendPosition="Position.Right"
+                              Width="150px"
+                              Height="150px"
+                              InputData="@(list.Select(ue => (double)ue.Share).ToArray())"
+                              InputLabels="@(list.Select(ue => ContextService.GetTranslation(ue.Element.ItemOrTag) + " (" + Math.Round(ue.Share * 100) + "%)").ToArray())"/>
+                    <MudStack>
+                        @for (var i = 0; i < list.Count; i++)
+                        {
+                            var product = list[i];
+                            int index = i;
+
+                            <MudStack Row>
+                                <MudText Style="min-width: 100px">
+                                    @(ContextService.GetTranslation(product.Element.ItemOrTag)):
+                                </MudText>
+                                <MudSlider T="float"
+                                           @ref="SliderRef"
+                                           Style="max-width: 350px"
+                                           Color="@_sliderColors[index % 3]"
+                                           Immediate="false"
+                                           Value="product.Share"
+                                           ValueChanged="@(v => ChangeShare(product, v))"
+                                           Max="1"
+                                           Min="0"
+                                           Disabled="_lockedSliders.Contains(product)"
+                                           Step="0.01f"/>
+                                <MudIconButton
+                                    Size="Size.Small"
+                                    OnClick="@(() => ChangeLockSliders(product))"
+                                    Icon="@(_lockedSliders.Contains(product) ? Icons.Material.Filled.Lock : Icons.Material.Outlined.Lock)"/>
+                            </MudStack>
+                        }
+                    </MudStack>
+                    <MudStack Row>
+                        <MudButton OnClick="FirstOnly">Only First Product</MudButton>
+                        <MudButton OnClick="Equality">Fair Distribution</MudButton>
+                        @if (list.Any(e => (int)e.Element.Quantity != (int)list.Max(i => i.Element.Quantity)))
+                        {
+                            <MudButton OnClick="Equilibrate">Distribute by Quantity</MudButton>
+                        }
+                    </MudStack>
+                </MudStack>
             }
         </MudStack>
     </DialogContent>
@@ -61,31 +130,149 @@
 
     private bool _shareError = false;
 
+    private bool _showCustomize = false;
+    private Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
+    private List<UserElement> _lockedSliders = [];
+    private List<MudSlider<float>> _sliderRefs = [];
+    public MudSlider<float> SliderRef { set => _sliderRefs.Add(value); }
+
     private void Ok()
     {
         MudDialog.Cancel();
     }
 
-    protected override void OnInitialized()
+    private readonly TableGroupDefinition<UserElement> _userElementsDefinition = new()
     {
-        IsShareError();
+        Indentation = false,
+        Expandable = false,
+        IsInitiallyExpanded = true,
+        Selector = (e) => e.Element.IsProduct() ? "Products" : "Ingredients"
+    };
+
+    private bool ShouldDisplayShare()
+    {
+        return Recipe.Elements.Count(e => e.IsProduct() && !UserServerDataService.UserElements.First(ue => ue.Element == e).IsReintegrated) > 1;
     }
 
-    private void ChangeShare(UserElement element, decimal value)
+    private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
-        element.Share = (float)value;
-        IsShareError();
+        userElement.IsReintegrated = value;
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
-    private void IsShareError()
+    private void ChangeLockSliders(UserElement userElement)
     {
-        var sum = 0f;
-
-        foreach (var element in Recipe.Elements.Where(e => e.IsProduct()).ToList())
+        if (_lockedSliders.Contains(userElement))
         {
-            sum += UserServerDataService.UserElements.First(ue => ue.Element == element).Share;
+            _lockedSliders.Remove(userElement);
+        }
+        else
+        {
+            _lockedSliders.Add(userElement);
+        }
+    }
+
+    private float ElementSum(List<UserElement> userElements)
+    {
+        return userElements.Sum(ue => ue.Price * ue.Element.Quantity) ?? 0f;
+    }
+
+    private List<UserElement> GetReintegratedElements()
+    {
+        return GetUserElements().Where(e => e.Element.IsProduct() && e.IsReintegrated).ToList();
+    }
+
+    private List<UserElement> GetProductsWithoutReintegratedElements()
+    {
+        return GetUserElements().Where(e => e.Element.IsProduct() && !e.IsReintegrated).ToList();
+    }
+
+    private float GetLaborPrice()
+    {
+        return Recipe.Labor
+            * UserServerDataService.UserSetting!.CalorieCost / 1000
+            * (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
+    }
+
+    private List<UserElement> GetUserElements()
+    {
+        return Recipe.Elements.OrderBy(e => e.IsProduct()).ThenBy(e => e.Index).Select(e => UserServerDataService.UserElements.First(ue => ue.Element == e))
+            .ToList();
+    }
+
+    private async Task ChangeShare(UserElement userElement, float value)
+    {
+        var others = GetProductsWithoutReintegratedElements().Where(ue => ue != userElement).ToList();
+        var lockedOthers = others.Where(ue => _lockedSliders.Contains(ue)).ToList();
+        var unlockedOthers = others.Where(ue => !_lockedSliders.Contains(ue)).ToList();
+
+        if (unlockedOthers.Count == 0)
+        {
+            return;
         }
 
-        _shareError = Math.Abs(sum - 1f) > 0.0001f;
+        var result = (1 - lockedOthers.Sum(l => l.Share) - value) / unlockedOthers.Count;
+
+        if (result < 0)
+        {
+            return;
+        }
+
+        userElement.Share = value;
+
+        foreach (var other in unlockedOthers)
+        {
+            other.Share = (1 - lockedOthers.Sum(l => l.Share) - userElement.Share) / unlockedOthers.Count;
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task Equality()
+    {
+        var products = Recipe.Elements.Where(e => e.IsProduct()).ToList();
+
+        foreach (var product in products)
+        {
+            var associatedUserElement = UserServerDataService.UserElements.First(ue => ue.Element == product);
+
+            associatedUserElement.Share = 1f / products.Count;
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task Equilibrate()
+    {
+        var products = Recipe.Elements.Where(e => e.IsProduct()).ToList();
+        var totalQuantity = products.Sum(p => p.Quantity);
+
+        foreach (var product in products)
+        {
+            var associatedUserElement = UserServerDataService.UserElements.First(ue => ue.Element == product);
+
+            associatedUserElement.Share = product.Quantity / totalQuantity;
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task FirstOnly()
+    {
+        var products = Recipe.Elements.Where(e => e.IsProduct()).ToList();
+
+        foreach (var product in products)
+        {
+            var associatedUserElement = UserServerDataService.UserElements.First(ue => ue.Element == product);
+
+            associatedUserElement.Share = product.Index == 0 ? 1f : 0f;
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 }

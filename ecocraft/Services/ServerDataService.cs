@@ -201,6 +201,8 @@ public class ServerDataService(
             IsDynamic = isDynamic,
             Skill = skill,
             LavishTalent = lavishTalent,
+            DefaultShare = index == 0 ? 1 : 0,
+            DefaultIsReintegrated = false
         };
 
         elementDbService.Add(element);
@@ -217,6 +219,8 @@ public class ServerDataService(
         element.IsDynamic = isDynamic;
         element.Skill = skill;
         element.LavishTalent = lavishTalent;
+        element.DefaultShare = index == 0 ? 1 : 0;
+        element.DefaultIsReintegrated = false;
 
         elementDbService.Update(element);
     }

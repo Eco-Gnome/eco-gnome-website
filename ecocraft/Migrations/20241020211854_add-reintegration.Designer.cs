@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241020211854_add-reintegration")]
+    partial class addreintegration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -78,12 +81,6 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("DefaultIsReintegrated")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<float>("DefaultShare")
-                        .HasColumnType("REAL");
-
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
@@ -128,10 +125,10 @@ namespace ecocraft.Migrations
                     b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("TEXT");
 
-                    b.Property<float?>("MaxPrice")
+                    b.Property<float>("MaxPrice")
                         .HasColumnType("REAL");
 
-                    b.Property<float?>("MinPrice")
+                    b.Property<float>("MinPrice")
                         .HasColumnType("REAL");
 
                     b.Property<string>("Name")
@@ -451,9 +448,6 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ElementId")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsReintegrated")
-                        .HasColumnType("INTEGER");
-
                     b.Property<float?>("MarginPrice")
                         .HasColumnType("REAL");
 
@@ -481,14 +475,14 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool?>("IsReintegrated")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
 
                     b.Property<float?>("MarginPrice")
                         .HasColumnType("REAL");
-
-                    b.Property<bool>("OverrideIsBought")
-                        .HasColumnType("INTEGER");
 
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");
@@ -573,22 +567,8 @@ namespace ecocraft.Migrations
                     b.Property<float>("CalorieCost")
                         .HasColumnType("REAL");
 
-                    b.Property<bool>("DisplayNonSkilledRecipes")
-                        .HasColumnType("INTEGER");
-
                     b.Property<float>("Margin")
                         .HasColumnType("REAL");
-
-                    b.Property<string>("MarginNames")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MarginValues")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("OnlyLevelAccessibleRecipes")
-                        .HasColumnType("INTEGER");
 
                     b.Property<float>("TimeFee")
                         .HasColumnType("REAL");
