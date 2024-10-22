@@ -180,7 +180,10 @@ public class UserSetting
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public float CalorieCost { get; set; } = 0;
     public float Margin { get; set; } = 0;
-    public float TimeFee { get; set; } = 0;
+    public List<string> MarginNames { get; set; } = [];
+    public List<float> MarginValues { get; set; } = [];
+
+	public float TimeFee { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
 }

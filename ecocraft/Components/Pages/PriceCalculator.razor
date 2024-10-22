@@ -11,6 +11,7 @@
 @inject UserPriceDbService UserPriceDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
+@inject EcoCraftDbContext EcoCraftDbContext
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -171,6 +172,35 @@
                     </div>
                 }
             </MudStack>
+            
+            
+            @if (UserServerDataService.UserSetting is not null)
+            {
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    @for (int m = 0 ; m < UserServerDataService.UserSetting.MarginNames.Count ; m++)
+                    {
+                        var index = m;
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudTextField Value="UserServerDataService.UserSetting.MarginNames[index]"></MudTextField>
+                            <MudNumericField T="float"
+                                                Style="height: 35px; width: 100px"
+                                                Value="UserServerDataService.UserSetting.MarginValues[index]"
+                                                Adornment="Adornment.End" 
+                                                AdornmentText="%"
+                                                Min="0"
+                                                Variant="Variant.Outlined" />
+                            <MudTooltip Text="Remove margin">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => OnRemoveMargin(index))" />
+                            </MudTooltip>
+                        </MudStack>
+                    }                    
+                    <MudTooltip Text="Add margin">
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddMargin"/>
+                    </MudTooltip>
+                </MudStack>
+            }
+            
+            
         </MudStack>
 
         <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
@@ -619,6 +649,22 @@
         UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
         await PriceCalculatorService.Calculate();
         StateHasChanged();
+    }
+
+    private async Task OnAddMargin()
+    {
+        UserServerDataService.UserSetting!.MarginNames.Add("New margin");
+        UserServerDataService.UserSetting!.MarginValues.Add(0.0f);
+        await EcoCraftDbContext.SaveChangesAsync();
+    }
+
+    private async Task OnRemoveMargin(int index)
+    {
+        UserServerDataService.UserSetting!.MarginNames.RemoveAt(index);
+        UserServerDataService.UserSetting!.MarginValues.RemoveAt(index);
+        await EcoCraftDbContext.SaveChangesAsync();
+        StateHasChanged();
+        //TODO : update calcul ?
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
