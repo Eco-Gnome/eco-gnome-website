@@ -38,6 +38,7 @@ builder.Services.AddScoped<UserDbService>();
 builder.Services.AddScoped<UserElementDbService>();
 builder.Services.AddScoped<UserPriceDbService>();
 builder.Services.AddScoped<UserRecipeDbService>();
+builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
 

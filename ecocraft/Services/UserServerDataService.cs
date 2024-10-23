@@ -10,6 +10,7 @@ public class UserServerDataService(
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
+    UserMarginDbService userMarginDbService,
     ServerDataService serverDataService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
@@ -18,6 +19,7 @@ public class UserServerDataService(
     public List<UserElement> UserElements { get; private set; } = [];
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
+    public List<UserMargin> UserMargins { get; private set; } = [];
 
     public async Task RetrieveUserData(UserServer? userServer)
     {
@@ -29,6 +31,7 @@ public class UserServerDataService(
             UserElements = [];
             UserPrices = [];
             UserRecipes = [];
+            UserMargins = [];
 
             return;
         }
@@ -39,9 +42,10 @@ public class UserServerDataService(
         var userElementsTask = userElementDbService.GetByUserServerAsync(userServer);
         var userPricesTask = userPriceDbService.GetByUserServerAsync(userServer);
         var userRecipesTask = userRecipeDbService.GetByUserServerAsync(userServer);
+        var userMarginsTask = userMarginDbService.GetByUserServerAsync(userServer);
 
         await Task.WhenAll(userSkillsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
-            userRecipesTask);
+            userRecipesTask, userMarginsTask);
 
         UserSkills = userSkillsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
@@ -49,6 +53,7 @@ public class UserServerDataService(
         UserElements = userElementsTask.Result;
         UserPrices = userPricesTask.Result;
         UserRecipes = userRecipesTask.Result;
+        UserMargins = userMarginsTask.Result;
     }
 
     public void AddUserSkill(Skill? skill, UserServer userServer, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
@@ -90,6 +95,25 @@ public class UserServerDataService(
         userSkill.UserServer.UserSkills.Remove(userSkill);
         UserSkills.Remove(userSkill);
         userSkillDbService.Delete(userSkill);
+    }
+
+    public void CreateUserMargin(UserServer userServer)
+    {
+        var userMargin = new UserMargin
+        {
+            Name = "New margin",
+            UserServer = userServer,
+            Margin = 0,
+        };
+
+        UserMargins.Add(userMargin);
+        userMarginDbService.Add(userMargin);
+    }
+
+    public void RemoveUserMargin(UserMargin userMargin)
+    {
+        UserMargins.Remove(userMargin);
+        userMarginDbService.Delete(userMargin);
     }
 
     public void UserSkillLevelChange(UserSkill userSkill, UserServer userServer, bool isIncrease)

@@ -174,6 +174,7 @@ public class UserServer
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<UserSetting> UserSettings { get; set; } = [];
     public List<UserRecipe> UserRecipes { get; set; } = [];
+    public List<UserMargin> UserMargins { get; set; } = [];
 }
 
 public class UserSetting
@@ -182,13 +183,20 @@ public class UserSetting
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public float CalorieCost { get; set; } = 0;
     public float Margin { get; set; } = 0;
-    public List<string> MarginNames { get; set; } = [];
-    public List<float> MarginValues { get; set; } = [];
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
 
-
     public float TimeFee { get; set; } = 0;
+
+    public UserServer UserServer { get; set; }
+}
+
+public class UserMargin
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public string Name { get; set; } = "";
+    public float Margin { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
 }

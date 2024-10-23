@@ -207,6 +207,13 @@
                 UserServer = userServer,
             });
 
+        userServer.UserMargins.Add(new UserMargin
+        {
+                UserServer = userServer,
+                Name = "Default margin",
+                Margin = 20,
+        });
+
         ContextService.CurrentUser.UserServers.Add(userServer);
         await EcoCraftDbContext.SaveChangesAsync();
 

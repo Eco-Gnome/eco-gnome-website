@@ -9,9 +9,11 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject UserPriceDbService UserPriceDbService
+@inject UserMarginDbService UserMarginDbService
 @inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
 @inject EcoCraftDbContext EcoCraftDbContext
+@inject ISnackbar Snackbar
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -166,6 +168,7 @@
                     </div>
                 }
             </MudStack>
+
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                 <MudText>Profit percentage</MudText>
                 @if (UserServerDataService.UserSetting is not null)
@@ -180,31 +183,41 @@
                 }
             </MudStack>
 
-
             @if (UserServerDataService.UserSetting is not null)
             {
-                <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    @for (int m = 0; m < UserServerDataService.UserSetting.MarginNames.Count; m++)
-                    {
-                        var index = m;
                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudTextField Value="UserServerDataService.UserSetting.MarginNames[index]"></MudTextField>
-                            <MudNumericField T="float"
-                                             Style="height: 35px; width: 100px"
-                                             Value="UserServerDataService.UserSetting.MarginValues[index]"
-                                             Adornment="Adornment.End"
-                                             AdornmentText="%"
-                                             Min="0"
-                                             Variant="Variant.Outlined"/>
-                            <MudTooltip Text="Remove margin">
-                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => OnRemoveMargin(index))"/>
+                            <MudText Typo="Typo.body1">Margin : </MudText>
+                            <MudTooltip Text="Add margin">
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddMargin" />
                             </MudTooltip>
                         </MudStack>
-                    }
-                    <MudTooltip Text="Add margin">
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddMargin"/>
-                    </MudTooltip>
-                </MudStack>
+                <MudTable Items="UserServerDataService.UserMargins"
+                        FixedHeader="true"
+                        Hover="true"
+                        Class="mt-4 craftingtable-table"
+                        Dense="true">
+                    <RowTemplate>
+                        <MudTd>
+                            <MudTextField Value="context.Name" ValueChanged="@((string value) => UpdateMarginName(context, value))"></MudTextField>
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="float"
+                                                Style="height: 35px; width: 100px"
+                                                Value="context.Margin"
+                                                Adornment="Adornment.End"
+                                                AdornmentText="%"
+                                                Min="0"
+                                                ValueChanged="@((float value) => UpdateMargin(context, value))"
+                                                Variant="Variant.Outlined" />
+                        </MudTd>
+                        <MudTd>
+                            <MudTooltip Text="Remove margin">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => OnRemoveMargin(context))" />
+                            </MudTooltip>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                
             }
 
 
@@ -706,20 +719,37 @@
         StateHasChanged();
     }
 
+    private async Task UpdateMargin(UserMargin userMargin, float margin)
+    {
+        userMargin.Margin = margin;
+        //await PriceCalculatorService.Calculate();
+        await EcoCraftDbContext.SaveChangesAsync();
+        //StateHasChanged();
+    }
+
+    private async Task UpdateMarginName(UserMargin userMargin, string name)
+    {
+        userMargin.Name = name;
+        await EcoCraftDbContext.SaveChangesAsync();
+        //StateHasChanged();
+    }
+
     private async Task OnAddMargin()
     {
-        UserServerDataService.UserSetting!.MarginNames.Add("New margin");
-        UserServerDataService.UserSetting!.MarginValues.Add(0.0f);
+        UserServerDataService.CreateUserMargin(ContextService.CurrentUserServer!);
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
-    private async Task OnRemoveMargin(int index)
+    private async Task OnRemoveMargin(UserMargin userMargin)
     {
-        UserServerDataService.UserSetting!.MarginNames.RemoveAt(index);
-        UserServerDataService.UserSetting!.MarginValues.RemoveAt(index);
+        if(UserServerDataService.UserMargins.Count == 1)
+        {
+            this.Snackbar.Add("You can't remove your last margin", Severity.Error);
+            return;
+        }
+        UserServerDataService.RemoveUserMargin(userMargin);
         await EcoCraftDbContext.SaveChangesAsync();
-        StateHasChanged();
-        //TODO : update calcul ?
+        //StateHasChanged();
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)

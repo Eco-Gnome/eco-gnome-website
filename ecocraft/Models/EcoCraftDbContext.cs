@@ -23,8 +23,9 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserPrice> UserPrices { get; set; }
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
+    public DbSet<UserMargin> UserMargins { get; set; }
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
 		
@@ -192,9 +193,19 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(us => us.UserSettings)
 			.HasForeignKey(us => us.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
-		// UserCraftingTable
-		modelBuilder.Entity<UserCraftingTable>()
+
+        // UserMargin
+        modelBuilder.Entity<UserMargin>()
+            .ToTable("UserMargin");
+
+        modelBuilder.Entity<UserMargin>()
+            .HasOne(us => us.UserServer)
+            .WithMany(us => us.UserMargins)
+            .HasForeignKey(us => us.UserServerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UserCraftingTable
+        modelBuilder.Entity<UserCraftingTable>()
 			.ToTable("UserCraftingTable");
 
 		modelBuilder.Entity<UserCraftingTable>()
