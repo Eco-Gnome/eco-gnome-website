@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241023191740_marginRemoveFromSetting")]
+    partial class marginRemoveFromSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -897,7 +900,7 @@ namespace ecocraft.Migrations
                     b.HasOne("ecocraft.Models.UserMargin", "UserMargin")
                         .WithMany("UserPrices")
                         .HasForeignKey("UserMarginId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")

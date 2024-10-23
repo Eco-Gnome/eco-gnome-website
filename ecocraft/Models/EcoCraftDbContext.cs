@@ -262,8 +262,14 @@ public class EcoCraftDbContext : DbContext
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
 			.ToTable("UserPrice");
-
+		
 		modelBuilder.Entity<UserPrice>()
+			.HasOne(up => up.UserMargin)
+			.WithMany(um => um.UserPrices)
+			.HasForeignKey(up => up.UserMarginId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.ItemOrTag)
 			.WithMany(iot => iot.UserPrices)
 			.HasForeignKey(up => up.ItemOrTagId)

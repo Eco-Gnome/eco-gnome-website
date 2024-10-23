@@ -113,6 +113,10 @@ public class UserServerDataService(
     public void RemoveUserMargin(UserMargin userMargin)
     {
         UserMargins.Remove(userMargin);
+        foreach (UserPrice userPrice in UserPrices.Where(up => up.UserMargin == userMargin))
+        {
+            userPrice.UserMargin = UserMargins.First();
+        }        
         userMarginDbService.Delete(userMargin);
     }
 
@@ -339,6 +343,7 @@ public class UserServerDataService(
         {
             ItemOrTag = itemOrTag,
             UserServer = userServer,
+            UserMargin = UserMargins.First(),
             OverrideIsBought = false
         };
 

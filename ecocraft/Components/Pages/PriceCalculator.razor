@@ -169,20 +169,6 @@
                 }
             </MudStack>
 
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText>Profit percentage</MudText>
-                @if (UserServerDataService.UserSetting is not null)
-                {
-                    <div>
-                        <MudNumericField T="float"
-                                         ValueChanged="UpdateMargin"
-                                         Style="height: 35px; width: 100px"
-                                         Value="UserServerDataService.UserSetting.Margin"
-                                         Variant="Variant.Outlined"/>
-                    </div>
-                }
-            </MudStack>
-
             @if (UserServerDataService.UserSetting is not null)
             {
                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
@@ -342,6 +328,7 @@
                                    OnClick="@(() => _showMultiRecipes = !_showMultiRecipes)"/>
                 </MudTh>
                 <MudTh>Prices w/wo margin</MudTh>
+                <MudTh>Margin</MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -358,23 +345,45 @@
                             @ContextService.GetTranslation(context)
                         </MudLink>
                     </MudTd>
-                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0 d-flex" : "d-flex")">
-                        <MudNumericField T="float?"
-                                         Class="mt-0"
-                                         Style="height: 26px; width: 75px"
-                                         HideSpinButtons="true"
-                                         Format="N2"
-                                         Disabled="true"
-                                         Value="userPrice.Price"
-                                         Variant="Variant.Outlined"/>
-                        <MudNumericField T="float?"
-                                         Class="mt-0"
-                                         Style="height: 26px; width: 75px"
-                                         HideSpinButtons="true"
-                                         Format="N2"
-                                         Disabled="true"
-                                         Value="@(userPrice.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))"
-                                         Variant="Variant.Outlined"/>
+                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                        <MudStack Row>
+                            <MudNumericField T="float?"
+                                                Class="mt-0"
+                                                Style="height: 26px; width: 75px"
+                                                HideSpinButtons="true"
+                                                Format="N2"
+                                                Disabled="true"
+                                                Value="userPrice.Price"
+                                                Variant="Variant.Outlined" />
+                            <MudNumericField T="float?"
+                                                Class="mt-0"
+                                                Style="height: 26px; width: 75px"
+                                                HideSpinButtons="true"
+                                                Format="N2"
+                                                Disabled="true"
+                                                Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
+                                                Variant="Variant.Outlined" />
+                        </MudStack>                        
+                    </MudTd>
+                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                        <MudSelect 
+                            T="UserMargin" 
+                            Value="userPrice.UserMargin"
+                            ValueChanged="@(value => ChangeUserPriceMargin(userPrice, value))"
+                            ToStringFunc="@(um => um.Margin + " %")"
+                            Class="select-dense"
+                            Dense="true"
+                            Variant="Variant.Outlined"
+                            AnchorOrigin="Origin.BottomLeft"
+                            TransformOrigin="Origin.TopLeft">
+                            @foreach (var userMargin in UserServerDataService.UserMargins)
+                            {
+                                <MudSelectItem  T="UserMargin"
+                                                Value="userMargin">
+                                    @userMargin.Margin %
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
                     </MudTd>
                     <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
                         <MudIconButton
@@ -409,10 +418,13 @@
                                         @ContextService.GetTranslation(userElement.Element.Recipe)
                                     </MudLink>
                                 </MudTd>
-                                <MudTd Class="@(relatedElements.Last() == userElement ? "d-flex pt-0 pb-1" : "border-0 d-flex pt-0 pb-1")">
-                                    <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
-                                    <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + UserServerDataService.UserSetting!.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                <MudTd Class="@(relatedElements.Last() == userElement ? "pt-0 pb-1" : "border-0 pt-0 pb-1")">
+                                    <MudStack Row>
+                                        <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
+                                        <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                    </MudStack>                                    
                                 </MudTd>
+                                <MudTd Class="@(relatedElements.Last() == userElement ? "pt-0 pb-1" : "border-0 pt-0 pb-1")"></MudTd>
                                 <MudTd Class="@(relatedElements.Last() == userElement ? "pt-0 pb-1" : "border-0 pt-0 pb-1")">
                                     <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))"></MudIconButton>
                                 </MudTd>
@@ -579,7 +591,6 @@
         UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
 
         _emptySkill = null;
-        _autocompleteSkillRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 
@@ -602,7 +613,6 @@
         UserServerDataService.AddUserCraftingTable(craftingTable, ContextService.CurrentUserServer!, true);
 
         _emptyCraftingTable = null;
-        _autocompleteCraftingTableRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 
@@ -625,7 +635,6 @@
         UserServerDataService.AddUserRecipe(recipe, ContextService.CurrentUserServer!);
 
         _emptyRecipe = null;
-        _autocompleteRecipeRef?.ClearAsync();
 
         await PriceCalculatorService.Calculate();
 
@@ -710,14 +719,14 @@
         await PriceCalculatorService.Calculate();
         StateHasChanged();
     }
-
+    /*
     private async Task UpdateMargin(float margin)
-    {
+        {
         UserServerDataService.UserSetting!.Margin = margin;
         UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
         await PriceCalculatorService.Calculate();
         StateHasChanged();
-    }
+    }*/
 
     private async Task UpdateMargin(UserMargin userMargin, float margin)
     {
@@ -749,6 +758,15 @@
         }
         UserServerDataService.RemoveUserMargin(userMargin);
         await EcoCraftDbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+
+    private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin userMargin)
+    {
+        userPrice.UserMargin = userMargin;
+        UserPriceDbService.Update(userPrice);
+        await EcoCraftDbContext.SaveChangesAsync();
+        //await PriceCalculatorService.Calculate();
         //StateHasChanged();
     }
 

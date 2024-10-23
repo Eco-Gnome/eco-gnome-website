@@ -182,7 +182,6 @@ public class UserSetting
     [Key] public Guid Id { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public float CalorieCost { get; set; } = 0;
-    public float Margin { get; set; } = 0;
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
 
@@ -199,6 +198,7 @@ public class UserMargin
     public float Margin { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
+    public List<UserPrice> UserPrices { get; set; } = [];
 }
 
 public class UserCraftingTable
@@ -254,7 +254,9 @@ public class UserPrice: IHasPrice
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public bool OverrideIsBought { get; set; }
-
+    
+    [ForeignKey("UserMargin")] public Guid UserMarginId { get; set; }
+    public UserMargin UserMargin { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
     public UserServer UserServer { get; set; }
     public UserElement? PrimaryUserElement { get; set; }
