@@ -39,6 +39,7 @@ jobs:
         password: ${{ env.SFTP_PASSWORD }}
         source: "./publish/*"
         target: "/home/ecocraft/www"
+        strip_components: 1
       env:
         DEBUG: 'true'
 
@@ -51,5 +52,5 @@ jobs:
         script: |
           cd /home/ecocraft/www
           systemctl stop ecocraft.service
-          dotnet ef database update
+          dotnet ef database update --no-build
           systemctl start ecocraft.service
