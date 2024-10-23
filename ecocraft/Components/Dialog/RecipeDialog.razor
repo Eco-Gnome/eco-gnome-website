@@ -90,7 +90,6 @@
                                     @(ContextService.GetTranslation(product.Element.ItemOrTag)):
                                 </MudText>
                                 <MudSlider T="float"
-                                           @ref="SliderRef"
                                            Style="max-width: 350px"
                                            Color="@_sliderColors[index % 3]"
                                            Immediate="false"
@@ -128,13 +127,8 @@
     [Parameter]
     public Recipe Recipe { get; set; }
 
-    private bool _shareError = false;
-
-    private bool _showCustomize = false;
-    private Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
-    private List<UserElement> _lockedSliders = [];
-    private List<MudSlider<float>> _sliderRefs = [];
-    public MudSlider<float> SliderRef { set => _sliderRefs.Add(value); }
+    private readonly Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
+    private readonly List<UserElement> _lockedSliders = [];
 
     private void Ok()
     {

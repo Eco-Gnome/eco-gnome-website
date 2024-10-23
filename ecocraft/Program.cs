@@ -71,6 +71,13 @@ builder.Services.AddAuthorization(config =>
 
 var app = builder.Build();
 
+// Appliquer automatiquement les migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EcoCraftDbContext>();
+    dbContext.Database.Migrate(); // Applique toutes les migrations en attente
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

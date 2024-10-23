@@ -52,5 +52,4 @@ jobs:
         script: |
           cd /home/ecocraft/www
           systemctl stop ecocraft.service
-          dotnet ef database update --no-build
           systemctl start ecocraft.service
