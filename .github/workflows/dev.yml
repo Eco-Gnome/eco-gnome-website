@@ -1,0 +1,55 @@
+name: Deploy ecocraft dev
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
+      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.x'
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore
+
+    - name: Build the project
+      run: |
+        dotnet publish -c Release -o ./publish
+
+    - name: Upload files via SFTP
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ env.SFTP_SERVER }}
+        username: ${{ env.SFTP_USERNAME }}
+        password: ${{ env.SFTP_PASSWORD }}
+        source: "./publish/*"
+        target: "/home/ecocraft/www-dev"
+        strip_components: 1
+      env:
+        DEBUG: 'true'
+
+    - name: Restart application via SSH
+      uses: appleboy/ssh-action@v0.1.4
+      with:
+        host: ${{ env.SFTP_SERVER }}
+        username: ${{ env.SFTP_USERNAME }}
+        password: ${{ env.SFTP_PASSWORD }}
+        script: |
+          cd /home/ecocraft/www-dev
+          systemctl stop ecocraft-dev.service
+          systemctl start ecocraft-dev.service
