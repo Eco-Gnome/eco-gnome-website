@@ -51,9 +51,7 @@ public class PriceCalculatorService(
         var (itemOrTagsToBuy, itemOrTagsToSell) = GetCategorizedItemOrTags();
 
         userServerDataService.UserElements.ForEach(ue => ue.Price = null);
-        userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag))
-            .ToList().ForEach(ue => ue.Price =
-            null);
+        userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag).ToList().ForEach(ue => ue.Price = null);
 
         List<UserRecipe> remainingUserRecipes = userServerDataService.UserRecipes.ToList();
         int nbHandled;

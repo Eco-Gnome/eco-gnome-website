@@ -746,14 +746,7 @@
 
     private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)
     {
-        if (userPrice.PrimaryUserPrice == target)
-        {
-            userPrice.PrimaryUserPrice = null;
-        }
-        else
-        {
-            userPrice.PrimaryUserPrice = target;
-        }
+        userPrice.PrimaryUserPrice = userPrice.PrimaryUserPrice == target ? null : target;
 
         await PriceCalculatorService.Calculate();
     }
