@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace ecocraft.Services;
 
@@ -79,24 +80,40 @@ public class ContextService(
         DefaultServers.AddRange(await serverDbService.GetAllDefaultAsync());
 
         var lastServerId = await localStorageService.GetItem("ServerId");
+        Server? searchedServer = null;
 
         if (!string.IsNullOrEmpty(lastServerId))
         {
-            var searchedServer = await serverDbService.GetByIdAsync(new Guid(lastServerId));
-
+            searchedServer = await serverDbService.GetByIdAsync(new Guid(lastServerId));
             if (searchedServer is not null)
             {
-                var foundUserServer = CurrentUser.UserServers.Find(ue => ue.ServerId == searchedServer.Id);
-
-                if (foundUserServer is not null)
+                if (!CurrentUser.UserServers.Any(ue => ue.ServerId == searchedServer.Id))
                 {
-                    CurrentServer = searchedServer;
-                    CurrentUserServer = foundUserServer;
-					await serverDataService.RetrieveServerData(CurrentServer);
-					await userServerDataService.RetrieveUserData(CurrentUserServer);
-				}
+                    searchedServer = null;
+                }
             }
         }
+
+        if(searchedServer is null)
+        {
+            if (CurrentUser.UserServers.Count != 0)
+            {
+                searchedServer = CurrentUser.UserServers.First().Server;
+            }
+            else if (DefaultServers.Count != 0)
+            {
+                await JoinServer(DefaultServers.First());
+            }
+        }
+
+        if (searchedServer is not null)
+        {
+            CurrentServer = searchedServer;
+            CurrentUserServer = CurrentUser.UserServers.First(us => us.Server == searchedServer);
+			await serverDataService.RetrieveServerData(CurrentServer);
+			await userServerDataService.RetrieveUserData(CurrentUserServer);
+		}
+  
 
         var languageCode = await localStorageService.GetItem("LanguageCode");
 
