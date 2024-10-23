@@ -22,7 +22,7 @@ public class ContextService(
 
     public List<Server> AvailableServers
     {
-        get { return DefaultServers.Concat(CurrentUser?.UserServers?.Select(cus => cus.Server) ?? []).ToList(); }
+        get { return DefaultServers.Concat(CurrentUser?.UserServers?.Select(cus => cus.Server) ?? []).Distinct().ToList(); }
     }
 
     public async Task updateCurrentUser()
