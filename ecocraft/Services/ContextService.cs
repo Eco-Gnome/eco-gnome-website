@@ -103,6 +103,7 @@ public class ContextService(
             else if (DefaultServers.Count != 0)
             {
                 await JoinServer(DefaultServers.First());
+                searchedServer = DefaultServers.First();
             }
         }
 
