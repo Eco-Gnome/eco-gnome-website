@@ -102,6 +102,7 @@
 		{
 			_askLeaveConfirmations.Remove(userServerToLeave);
 			await ContextService.LeaveServer(userServerToLeave);
+			await ContextService.ChangeServer(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.Server);
 		}
 	}
 }

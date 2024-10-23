@@ -140,7 +140,9 @@
             newServer.GenerateJoinCode();
             await ServerDbService.AddAndSave(newServer);
 
-            await JoinServer(newServer, true);
+            await ContextService.JoinServer(newServer, true);
+
+            await ContextService.ChangeServer(newServer);
         }
     }
 
@@ -152,9 +154,7 @@
         };
 
         var options = new DialogOptions { CloseOnEscapeKey = true };
-
         var dialog = await DialogService.ShowAsync<UserDialog>("Create user", parameters, options);
-
         var result = await dialog.Result;
 
         if (!result.Canceled)
@@ -168,55 +168,28 @@
     {
         if (String.IsNullOrEmpty(JoinCode))
         {
-            this.Snackbar.Add("You need to add a server code", Severity.Error);
+            Snackbar.Add("You need to add a server code", Severity.Error);
             return;
         }
 
         var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
-        if (server is not null)
-            await JoinServer(server);
-        else
-        {
-            this.Snackbar.Clear();
-            this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            this.Snackbar.Add("Server not found", Severity.Error);
-        }
-    }
 
-    private async Task JoinServer(Server server, bool isAdmin = false)
-    {
-        if (ContextService.AvailableServers.Contains(server))
-        {
-            this.Snackbar.Clear();
-            this.Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            this.Snackbar.Add("You are already in this server", Severity.Warning);
+        if (server is null) {
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            Snackbar.Add("Server not found", Severity.Error);
             return;
         }
 
-
-        UserServer userServer = new UserServer
-            {
-                UserId = ContextService.CurrentUser!.Id,
-                ServerId = server.Id,
-                IsAdmin = isAdmin,
-                Pseudo = ContextService.CurrentUser.Pseudo,
-            };
-
-        userServer.UserSettings.Add(new UserSetting
-            {
-                UserServer = userServer,
-            });
-
-        userServer.UserMargins.Add(new UserMargin
+        if (ContextService.AvailableServers.Contains(server))
         {
-                UserServer = userServer,
-                Name = "Default margin",
-                Margin = 20,
-        });
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            Snackbar.Add("You are already in this server", Severity.Warning);
+            return;
+        }
 
-        ContextService.CurrentUser.UserServers.Add(userServer);
-        await EcoCraftDbContext.SaveChangesAsync();
-
+        await ContextService.JoinServer(server);
         await ContextService.ChangeServer(server);
     }
 

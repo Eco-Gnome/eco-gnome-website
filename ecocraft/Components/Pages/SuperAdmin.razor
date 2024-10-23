@@ -14,204 +14,285 @@
 <PageTitle>Super Admin</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
-	<MudGrid>
-		<MudItem lg="6" md="12">
-			<MudTable Items="_users"
-			          Filter="new Func<User, bool>(SearchUser)"
-			          Virtualize="false"
-			          FixedHeader="true"
-			          Height="400px"
-			          Dense="true"
-			          Hover="true">
-				<HeaderContent>
-					<MudTh>Id</MudTh>
-					<MudTh>Pseudo</MudTh>
-					<MudTh>Creation Date</MudTh>
-					<MudTh>Servers</MudTh>
-					<MudTh>Action</MudTh>
-				</HeaderContent>
-				<ToolBarContent>
-					<MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-						<MudText Typo="Typo.h5">Users</MudText>
-						<MudStack Style="width: 200px">
-							<MudTextField @bind-Value="searchUser"
-							              Immediate
-							              Placeholder="Search"
-							              Adornment="Adornment.Start"
-							              AdornmentIcon="@Icons.Material.Filled.Search"
-							              IconSize="Size.Small"
-							              Class="mt-0"/>
-						</MudStack>
-					</MudStack>
-				</ToolBarContent>
-				<RowTemplate>
-					<MudTd>@context.Id</MudTd>
-					<MudTd>@context.Pseudo</MudTd>
-					<MudTd>@context.CreationDateTime</MudTd>
-					<MudTd>
-						<MudStack Row Spacing="0" Justify="Justify.Center" Class="gap-0">
-							@context.UserServers.Count
-							<MudTooltip Text="Joined Servers">
-								<MudIcon Icon="@Icons.Material.Outlined.Dataset" Size="Size.Small"/>
-							</MudTooltip>
-							<MudSpacer />
-							@context.UserServers.Count(us => us.IsAdmin)
-							<MudTooltip Text="Number of servers the user is admin on">
-								<MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" Size="Size.Small"/>
-							</MudTooltip>
-						</MudStack>
-					</MudTd>
-					<MudTh>
-						@if (context != ContextService.CurrentUser)
-						{
-							<MudStack Row AlignItems="AlignItems.Center">
-								<MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
-								               Size="Size.Small"
-								               OnClick="@(() => DeleteUser(context))"/>
-								<MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
-								               Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
-								               Size="Size.Small"
-								               OnClick="@(() => ToggleSuperAdmin(context))"/>
-							</MudStack>
-						}
-					</MudTh>
-				</RowTemplate>
-				<PagerContent>
-					<MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
-				</PagerContent>
-			</MudTable>
-		</MudItem>
-		<MudItem lg="6" md="12">
-			<MudTable Items="_servers"
-			          Filter="new Func<Server, bool>(SearchServer)"
-			          Virtualize="false"
-			          FixedHeader="true"
-			          Height="400px"
-			          Dense="true"
-			          Hover="true">
-				<HeaderContent>
-					<MudTh>Id</MudTh>
-					<MudTh>Name</MudTh>
-					<MudTh>Creation Date</MudTh>
-					<MudTh>Players</MudTh>
-					<MudTh>Admins</MudTh>
-				</HeaderContent>
-				<ToolBarContent>
-					<MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-						<MudText Typo="Typo.h5">Servers</MudText>
-						<MudStack Style="width: 200px">
-							<MudTextField @bind-Value="searchServer"
-							              Immediate
-							              Placeholder="Search"
-							              Adornment="Adornment.Start"
-							              AdornmentIcon="@Icons.Material.Filled.Search"
-							              IconSize="Size.Small"
-							              Class="mt-0"/>
-						</MudStack>
-					</MudStack>
-				</ToolBarContent>
-				<RowTemplate>
-					<MudTd>@context.Id</MudTd>
-					<MudTd>@context.Name</MudTd>
-					<MudTd>@context.CreationDateTime</MudTd>
-					<MudTd>
-						@context.UserServers.Count
-					</MudTd>
-					<MudTd>
-						@(String.Join(' ', context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
-					</MudTd>
-				</RowTemplate>
-				<PagerContent>
-					<MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
-				</PagerContent>
-			</MudTable>
-		</MudItem>
-	</MudGrid>
+    <MudGrid>
+        <MudItem lg="6" md="12">
+            <MudTable Items="_users"
+                      Filter="new Func<User, bool>(SearchUser)"
+                      Virtualize="false"
+                      FixedHeader="true"
+                      Height="400px"
+                      Dense="true"
+                      Hover="true">
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Pseudo</MudTh>
+                    <MudTh>Creation Date</MudTh>
+                    <MudTh>Servers</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <ToolBarContent>
+                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                        <MudText Typo="Typo.h5">Users</MudText>
+                        <MudStack Style="width: 200px">
+                            <MudTextField @bind-Value="searchUser"
+                                          Immediate
+                                          Placeholder="Search"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Class="mt-0"/>
+                        </MudStack>
+                    </MudStack>
+                </ToolBarContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudTooltip Text="@context.Id.ToString()">
+                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>@context.Pseudo</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@context.CreationDateTime.ToString()">
+                            <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Row Spacing="0" Justify="Justify.Center" Class="gap-0">
+                            @context.UserServers.Count
+                            <MudTooltip Class="mr-4" Text="Joined Servers">
+                                <MudIcon Icon="@Icons.Material.Outlined.Dataset" Size="Size.Small"/>
+                            </MudTooltip>
+                            @context.UserServers.Count(us => us.IsAdmin)
+                            <MudTooltip Text="Number of servers the user is admin on">
+                                <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" Size="Size.Small"/>
+                            </MudTooltip>
+                        </MudStack>
+                    </MudTd>
+                    <MudTd>
+                        @if (context != ContextService.CurrentUser)
+                        {
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                               Size="Size.Small"
+                                               OnClick="@(() => DeleteUser(context))"/>
+                                <MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
+                                               Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+                                               Size="Size.Small"
+                                               OnClick="@(() => ToggleSuperAdmin(context))"/>
+                            </MudStack>
+                        }
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
+                </PagerContent>
+            </MudTable>
+        </MudItem>
+        <MudItem lg="6" md="12">
+            <MudTable Items="_servers"
+                      Filter="new Func<Server, bool>(SearchServer)"
+                      Virtualize="false"
+                      FixedHeader="true"
+                      Height="400px"
+                      Dense="true"
+                      Hover="true">
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Creation Date</MudTh>
+                    <MudTh>JoinCode</MudTh>
+                    <MudTh>Players</MudTh>
+                    <MudTh>Admins</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <ToolBarContent>
+                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                        <MudText Typo="Typo.h5">Servers</MudText>
+                        <MudStack Style="width: 200px">
+                            <MudTextField @bind-Value="searchServer"
+                                          Immediate
+                                          Placeholder="Search"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Class="mt-0"/>
+                        </MudStack>
+                    </MudStack>
+                </ToolBarContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudTooltip Text="@context.Id.ToString()">
+                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>@(context.IsDefault ? "[Default]" : "") @context.Name</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@context.CreationDateTime.ToString()">
+                            <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>
+                        @context.JoinCode
+                    </MudTd>
+                    <MudTd>
+                        @context.UserServers.Count
+                    </MudTd>
+                    <MudTd>
+                        @(String.Join(' ', context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteServer(context))"/>
+
+                            <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.DisabledByDefault : Icons.Material.Outlined.AllInbox )"
+                                           Color="@(context.IsDefault ? Color.Warning : Color.Error )"
+                                           Size="Size.Small"
+                                           OnClick="@(() => ToggleDefault(context))"/>
+
+                            <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.IsAdmin ?? false ? Icons.Material.Filled.ArrowDownward :
+                                    Icons.Material.Filled.ArrowUpward)"
+                                           Size="Size.Small"
+                                           Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
+                                           OnClick="@(() => ToggleSelfAdmin(context))"/>
+                        </MudStack>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
+                </PagerContent>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
 </MudContainer>
 
 @code {
-	private protected List<User> _users = [];
-	private protected List<Server> _servers = [];
-	private string searchUser = "";
-	private string searchServer= "";
+    private protected List<User> _users = [];
+    private protected List<Server> _servers = [];
+    private string searchUser = "";
+    private string searchServer = "";
 
-	protected override void OnInitialized()
-	{
-		if (ContextService.CurrentUser == null || !ContextService.CurrentUser.SuperAdmin)
-		{
-			Navigation.NavigateTo("/");
-		}
-	}
+    protected override void OnInitialized()
+    {
+        if (ContextService.CurrentUser == null || !ContextService.CurrentUser.SuperAdmin)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
 
-	protected override async Task OnInitializedAsync()
-	{
-		ContextService.OnContextChanged += StateHasChanged;
+    protected override async Task OnInitializedAsync()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
 
-		_users = await UserDbService.GetAllAsync();
-		_servers = await ServerDbService.GetAllAsync();
-	}
+        _users = await UserDbService.GetAllAsync();
+        _servers = await ServerDbService.GetAllAsync();
+    }
 
-	public void Dispose()
-	{
-		ContextService.OnContextChanged -= StateHasChanged;
-	}
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
 
-	private async Task ToggleSuperAdmin(User user)
-	{
-		if (user == ContextService.CurrentUser)
-		{
-			this.Snackbar.Add("You can't edit yourself from this page.", Severity.Error);
-			return;
-		}
+    private async Task CopyToClipboard(string text)
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        Snackbar.Add("Id copied to clipboard", Severity.Info);
+    }
 
-		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to {(user.SuperAdmin ? "demote" : "promote")} this user {(user.SuperAdmin ? "from" : "to")} Super Admin ?");
+    private async Task ToggleSuperAdmin(User user)
+    {
+        if (user == ContextService.CurrentUser)
+        {
+            this.Snackbar.Add("You can't edit yourself from this page.", Severity.Error);
+            return;
+        }
 
-		if (confirmed)
-		{
-			bool confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", "This change has a lot of impact and could corrupt the entire website! Please confirm again.");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to {(user.SuperAdmin ? "demote" : "promote")} this user {(user.SuperAdmin ? "from" : "to")} Super Admin ?");
 
-			if (confirmedTwice)
-			{
-				user.SuperAdmin = !user.SuperAdmin;
-				await DbContext.SaveChangesAsync();
-				StateHasChanged();
-			}
-		}
-	}
+        if (confirmed)
+        {
+            bool confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", "This change has a lot of impact and could corrupt the entire website! Please confirm again.");
 
-	private bool SearchUser(User user)
-	{
-		if (string.IsNullOrWhiteSpace(searchUser))
-			return true;
-		if (user.Pseudo.Contains(searchUser, StringComparison.OrdinalIgnoreCase))
-			return true;
-		if (user.Id.ToString().Contains(searchUser, StringComparison.OrdinalIgnoreCase))
-			return true;
-		return false;
-	}
+            if (confirmedTwice)
+            {
+                user.SuperAdmin = !user.SuperAdmin;
+                await DbContext.SaveChangesAsync();
+                StateHasChanged();
+            }
+        }
+    }
 
-	private bool SearchServer(Server server)
-	{
-		if (string.IsNullOrWhiteSpace(searchServer))
-			return true;
-		if (server.Name.Contains(searchServer, StringComparison.OrdinalIgnoreCase))
-			return true;
-		if (server.Id.ToString().Contains(searchServer, StringComparison.OrdinalIgnoreCase))
-			return true;
-		return false;
-	}
+    private async Task ToggleDefault(Server server)
+    {
+        server.IsDefault = !server.IsDefault;
+        await DbContext.SaveChangesAsync();
+    }
 
-	private async Task DeleteUser(User user)
-	{
-		if (user == ContextService.CurrentUser)
-		{
-			this.Snackbar.Add("You can't delete yourself from this page.", Severity.Error);
-			return;
-		}
+    private bool SearchUser(User user)
+    {
+        if (string.IsNullOrWhiteSpace(searchUser))
+            return true;
+        if (user.Pseudo.Contains(searchUser, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (user.Id.ToString().Contains(searchUser, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
 
-		UserDbService.Delete(user);
-		await DbContext.SaveChangesAsync();
-		_users = await UserDbService.GetAllAsync();
-	}
+    private bool SearchServer(Server server)
+    {
+        if (string.IsNullOrWhiteSpace(searchServer))
+            return true;
+        if (server.Name.Contains(searchServer, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (server.Id.ToString().Contains(searchServer, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task DeleteUser(User user)
+    {
+        if (user == ContextService.CurrentUser)
+        {
+            this.Snackbar.Add("You can't delete yourself from this page.", Severity.Error);
+            return;
+        }
+
+        UserDbService.Delete(user);
+        await DbContext.SaveChangesAsync();
+        _users = await UserDbService.GetAllAsync();
+    }
+
+    private async Task ToggleSelfAdmin(Server server)
+    {
+        var currentUserServer = ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == server);
+
+        if (currentUserServer is not null)
+        {
+            if (currentUserServer.IsAdmin)
+            {
+                await ContextService.LeaveServer(currentUserServer);
+            }
+            else
+            {
+                currentUserServer.IsAdmin = true;
+            }
+            await DbContext.SaveChangesAsync();
+        }
+        else
+        {
+            await ContextService.JoinServer(server, true);
+        }
+
+        _servers = await ServerDbService.GetAllAsync();
+    }
+
+    private async Task DeleteServer(Server server)
+    {
+        ServerDbService.Delete(server);
+        await DbContext.SaveChangesAsync();
+        _servers = await ServerDbService.GetAllAsync();
+    }
+
 }
-

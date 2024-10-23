@@ -14,22 +14,21 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject ISnackbar Snackbar
-@using System.Globalization
 
 <PageTitle>Server Management</PageTitle>
 
-<MudContainer>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
 	<MudPaper Style="display: flex; justify-content: center; align-items: center;  border: 2px solid #ccc; padding: 8px;">
 		<MudText Typo="Typo.h5" Style="text-align: center;">Current server administration</MudText>
 	</MudPaper>
 
 	<MudGrid>
 		<MudItem sm="3" Class="d-flex align-center flex-grow-1 gap-4">
-			<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" ReadOnly="@(ContextService.CurrentUserServer!.IsAdmin)" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!,newServerName)"> </MudTextField>
+			<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!, newServerName)"/>
 		</MudItem>
 		<MudItem Class="d-flex align-center flex-grow-1 gap-4" sm="3">
-			<MudTextField Value="@ContextService.CurrentServer!.JoinCode" Label="Join code" ReadOnly="@(ContextService.CurrentUserServer!.IsAdmin)" Variant="Variant.Outlined"></MudTextField>
-			<MudIconButton Icon="@Icons.Material.Filled.Refresh" aria-label="regenerate" Size="Size.Small" OnClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"></MudIconButton>
+			<MudTextField Value="@ContextService.CurrentServer!.JoinCode" Label="Join code" Variant="Variant.Outlined"></MudTextField>
+			<MudIconButton Icon="@Icons.Material.Filled.Refresh" aria-label="regenerate" Size="Size.Small" OnClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"/>
 		</MudItem>
 	</MudGrid>
 
@@ -44,7 +43,7 @@
 						Upload Server Data
 						@if (_showUploadServerDataLoader)
 						{
-							<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2" />
+							<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
 						}
 					</MudButton>
 				</ActivatorContent>
@@ -60,12 +59,12 @@
 				Delete Server
 				@if (_showDeleteServerLoader)
 				{
-					<MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2" />
+					<MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
 				}
 			</MudButton>
 			@if (_askDeleteConfirmation)
 			{
-				<br />
+				<br/>
 				<MudButton Variant="Variant.Filled"
 				           Color="Color.Success"
 				           StartIcon="@Icons.Material.Filled.Close"
@@ -88,7 +87,7 @@
 	</HeaderContent>
 	<RowTemplate>
 		<MudTd>
-			<MudTextField Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)"> </MudTextField>
+			@context.Pseudo
 		</MudTd>
 		<MudTd>
 			<MudSwitch Value="@context.IsAdmin" Disabled="ContextService.CurrentUser!.UserServers.Contains(context) && context.IsAdmin" Color="Color.Primary" Class="ma-4" T="bool" ValueChanged="() => OnIsAdmin(context)" />

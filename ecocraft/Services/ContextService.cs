@@ -115,11 +115,36 @@ public class ContextService(
         OnContextChanged?.Invoke();
     }
 
+    public async Task JoinServer(Server server, bool isAdmin = false)
+    {
+        UserServer userServer = new UserServer
+        {
+            UserId = CurrentUser!.Id,
+            ServerId = server.Id,
+            IsAdmin = isAdmin,
+            Pseudo = CurrentUser.Pseudo,
+        };
+
+        userServer.UserSettings.Add(new UserSetting
+        {
+            UserServer = userServer,
+        });
+
+        userServer.UserMargins.Add(new UserMargin
+        {
+            UserServer = userServer,
+            Name = "Default margin",
+            Margin = 20,
+        });
+
+        CurrentUser.UserServers.Add(userServer);
+        await dbContext.SaveChangesAsync();
+    }
+
 	public async Task LeaveServer(UserServer userServerToLeave)
 	{
 		CurrentUser?.UserServers.Remove(userServerToLeave);
 		await dbContext.SaveChangesAsync();
-		await ChangeServer(CurrentUser?.UserServers.FirstOrDefault().Server);
 	}
 
 	public async Task KickFromServer(UserServer userServerToKick)
