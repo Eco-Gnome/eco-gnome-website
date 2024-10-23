@@ -136,7 +136,7 @@
 
         if (!result.Canceled)
         {
-            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false};
+            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false, CreationDateTime = DateTime.UtcNow };
             newServer.GenerateJoinCode();
             await ServerDbService.AddAndSave(newServer);
 

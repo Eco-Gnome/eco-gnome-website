@@ -153,7 +153,9 @@ public class User
 {
     [Key] public Guid Id { get; set; }
     public string Pseudo { get; set; }
+    public DateTime CreationDateTime { get; set; }
     public Guid SecretId { get; set; }
+    public bool SuperAdmin { get; set; }
 
     public List<UserServer> UserServers { get; set; } = [];
 }
@@ -279,6 +281,7 @@ public class Server
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
     public bool IsDefault { get; set; }
+    public DateTime CreationDateTime { get; set; }
 	public string JoinCode { get; set; }
 
 	public List<UserServer> UserServers { get; set; } = [];

@@ -203,7 +203,7 @@
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
-                
+
             }
 
 
@@ -363,11 +363,11 @@
                                                 Disabled="true"
                                                 Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
                                                 Variant="Variant.Outlined" />
-                        </MudStack>                        
+                        </MudStack>
                     </MudTd>
                     <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
-                        <MudSelect 
-                            T="UserMargin" 
+                        <MudSelect
+                            T="UserMargin"
                             Value="userPrice.UserMargin"
                             ValueChanged="@(value => ChangeUserPriceMargin(userPrice, value))"
                             ToStringFunc="@(um => um.Margin + " %")"
@@ -422,7 +422,7 @@
                                     <MudStack Row>
                                         <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
                                         <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
-                                    </MudStack>                                    
+                                    </MudStack>
                                 </MudTd>
                                 <MudTd Class="@(relatedElements.Last() == userElement ? "pt-0 pb-1" : "border-0 pt-0 pb-1")"></MudTd>
                                 <MudTd Class="@(relatedElements.Last() == userElement ? "pt-0 pb-1" : "border-0 pt-0 pb-1")">

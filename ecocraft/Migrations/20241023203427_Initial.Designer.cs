@@ -11,8 +11,8 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241022200812_Add options to userSettings")]
-    partial class AddoptionstouserSettings
+    [Migration("20241023203427_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,12 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("DefaultIsReintegrated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("DefaultShare")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
@@ -344,6 +350,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
@@ -401,12 +410,18 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Pseudo")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("SecretId")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SuperAdmin")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -448,6 +463,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ElementId")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsReintegrated")
+                        .HasColumnType("INTEGER");
+
                     b.Property<float?>("MarginPrice")
                         .HasColumnType("REAL");
 
@@ -469,6 +487,29 @@ namespace ecocraft.Migrations
                     b.ToTable("UserElement", (string)null);
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Margin")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserServerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserServerId");
+
+                    b.ToTable("UserMargin", (string)null);
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserPrice", b =>
                 {
                     b.Property<Guid>("Id")
@@ -481,6 +522,9 @@ namespace ecocraft.Migrations
                     b.Property<float?>("MarginPrice")
                         .HasColumnType("REAL");
 
+                    b.Property<bool>("OverrideIsBought")
+                        .HasColumnType("INTEGER");
+
                     b.Property<float?>("Price")
                         .HasColumnType("REAL");
 
@@ -488,6 +532,9 @@ namespace ecocraft.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("PrimaryUserPriceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserMarginId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserServerId")
@@ -500,6 +547,8 @@ namespace ecocraft.Migrations
                     b.HasIndex("PrimaryUserElementId");
 
                     b.HasIndex("PrimaryUserPriceId");
+
+                    b.HasIndex("UserMarginId");
 
                     b.HasIndex("UserServerId");
 
@@ -566,17 +615,6 @@ namespace ecocraft.Migrations
 
                     b.Property<bool>("DisplayNonSkilledRecipes")
                         .HasColumnType("INTEGER");
-
-                    b.Property<float>("Margin")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("MarginNames")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MarginValues")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<bool>("OnlyLevelAccessibleRecipes")
                         .HasColumnType("INTEGER");
@@ -839,6 +877,17 @@ namespace ecocraft.Migrations
                     b.Navigation("UserServer");
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
+                {
+                    b.HasOne("ecocraft.Models.UserServer", "UserServer")
+                        .WithMany("UserMargins")
+                        .HasForeignKey("UserServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserServer");
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserPrice", b =>
                 {
                     b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
@@ -857,6 +906,12 @@ namespace ecocraft.Migrations
                         .HasForeignKey("PrimaryUserPriceId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("ecocraft.Models.UserMargin", "UserMargin")
+                        .WithMany("UserPrices")
+                        .HasForeignKey("UserMarginId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserPrices")
                         .HasForeignKey("UserServerId")
@@ -868,6 +923,8 @@ namespace ecocraft.Migrations
                     b.Navigation("PrimaryUserElement");
 
                     b.Navigation("PrimaryUserPrice");
+
+                    b.Navigation("UserMargin");
 
                     b.Navigation("UserServer");
                 });
@@ -1005,11 +1062,18 @@ namespace ecocraft.Migrations
                     b.Navigation("UserServers");
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
+                {
+                    b.Navigation("UserPrices");
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>
                 {
                     b.Navigation("UserCraftingTables");
 
                     b.Navigation("UserElements");
+
+                    b.Navigation("UserMargins");
 
                     b.Navigation("UserPrices");
 

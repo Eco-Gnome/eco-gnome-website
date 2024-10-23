@@ -40,10 +40,15 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 		return user;
 	}
 
+	public Task<int> CountUsers()
+	{
+		return context.Users.CountAsync();
+	}
+
 	public Task UpdateAndSave(User user)
 	{
 		context.Users.Update(user);
-		
+
 		return context.SaveChangesAsync();
 	}
 

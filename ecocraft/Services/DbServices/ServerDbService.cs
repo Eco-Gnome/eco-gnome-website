@@ -7,7 +7,10 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 {
 	public Task<List<Server>> GetAllAsync()
 	{
-		return context.Servers.ToListAsync();
+		return context.Servers
+			.Include(u => u.UserServers)
+			.ThenInclude(us => us.User)
+			.ToListAsync();
 	}
 
 	public Task<List<Server>> GetAllDefaultAsync()
@@ -50,7 +53,7 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 	public Task UpdateAndSave(Server server)
 	{
 		context.Servers.Update(server);
-		
+
 		return context.SaveChangesAsync();
 	}
 

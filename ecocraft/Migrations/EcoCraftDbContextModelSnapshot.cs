@@ -347,6 +347,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
@@ -404,12 +407,18 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Pseudo")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("SecretId")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SuperAdmin")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

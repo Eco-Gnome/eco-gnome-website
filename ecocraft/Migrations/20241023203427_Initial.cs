@@ -17,7 +17,9 @@ namespace ecocraft.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreationDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    JoinCode = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +32,9 @@ namespace ecocraft.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Pseudo = table.Column<string>(type: "TEXT", nullable: false),
-                    SecretId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    CreationDateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SecretId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SuperAdmin = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,8 +144,8 @@ namespace ecocraft.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     LocalizedNameId = table.Column<Guid>(type: "TEXT", nullable: true),
                     IsTag = table.Column<bool>(type: "INTEGER", nullable: false),
-                    MinPrice = table.Column<float>(type: "REAL", nullable: false),
-                    MaxPrice = table.Column<float>(type: "REAL", nullable: false),
+                    MinPrice = table.Column<float>(type: "REAL", nullable: true),
+                    MaxPrice = table.Column<float>(type: "REAL", nullable: true),
                     ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -197,6 +201,7 @@ namespace ecocraft.Migrations
                     LocalizedNameId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Profession = table.Column<string>(type: "TEXT", nullable: true),
                     LaborReducePercent = table.Column<string>(type: "TEXT", nullable: false),
+                    LavishTalentValue = table.Column<float>(type: "REAL", nullable: true),
                     ServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -217,13 +222,34 @@ namespace ecocraft.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserMargin",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Margin = table.Column<float>(type: "REAL", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserMargin", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserMargin_UserServer_UserServerId",
+                        column: x => x.UserServerId,
+                        principalTable: "UserServer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserSetting",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CalorieCost = table.Column<float>(type: "REAL", nullable: false),
-                    Margin = table.Column<float>(type: "REAL", nullable: false),
+                    DisplayNonSkilledRecipes = table.Column<bool>(type: "INTEGER", nullable: false),
+                    OnlyLevelAccessibleRecipes = table.Column<bool>(type: "INTEGER", nullable: false),
                     TimeFee = table.Column<float>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
@@ -401,7 +427,9 @@ namespace ecocraft.Migrations
                     Quantity = table.Column<float>(type: "REAL", nullable: false),
                     IsDynamic = table.Column<bool>(type: "INTEGER", nullable: false),
                     SkillId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    LavishTalent = table.Column<bool>(type: "INTEGER", nullable: false)
+                    LavishTalent = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DefaultIsReintegrated = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DefaultShare = table.Column<float>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -460,6 +488,7 @@ namespace ecocraft.Migrations
                     Price = table.Column<float>(type: "REAL", nullable: true),
                     MarginPrice = table.Column<float>(type: "REAL", nullable: true),
                     Share = table.Column<float>(type: "REAL", nullable: false),
+                    IsReintegrated = table.Column<bool>(type: "INTEGER", nullable: false),
                     UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -489,7 +518,9 @@ namespace ecocraft.Migrations
                     MarginPrice = table.Column<float>(type: "REAL", nullable: true),
                     PrimaryUserElementId = table.Column<Guid>(type: "TEXT", nullable: true),
                     PrimaryUserPriceId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    UserServerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OverrideIsBought = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UserMarginId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -506,6 +537,12 @@ namespace ecocraft.Migrations
                         principalTable: "UserElement",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPrice_UserMargin_UserMarginId",
+                        column: x => x.UserMarginId,
+                        principalTable: "UserMargin",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UserPrice_UserPrice_PrimaryUserPriceId",
                         column: x => x.PrimaryUserPriceId,
@@ -631,6 +668,11 @@ namespace ecocraft.Migrations
                 column: "UserServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserMargin_UserServerId",
+                table: "UserMargin",
+                column: "UserServerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserPrice_ItemOrTagId",
                 table: "UserPrice",
                 column: "ItemOrTagId");
@@ -644,6 +686,11 @@ namespace ecocraft.Migrations
                 name: "IX_UserPrice_PrimaryUserPriceId",
                 table: "UserPrice",
                 column: "PrimaryUserPriceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPrice_UserMarginId",
+                table: "UserPrice",
+                column: "UserMarginId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserPrice_UserServerId",
@@ -715,6 +762,9 @@ namespace ecocraft.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserElement");
+
+            migrationBuilder.DropTable(
+                name: "UserMargin");
 
             migrationBuilder.DropTable(
                 name: "Element");

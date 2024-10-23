@@ -34,7 +34,7 @@ public class ContextService(
     {
         CurrentLanguageCode = languageCode;
         await localStorageService.AddItem("LanguageCode", CurrentLanguageCode.ToString());
-        
+
         OnContextChanged?.Invoke();
     }
 
@@ -69,8 +69,10 @@ public class ContextService(
 
         CurrentUser ??= await userDbService.AddAndSave(new User
         {
-            Pseudo = "John Doe",
+            Pseudo = "My Pseudo",
             SecretId = new Guid(),
+            CreationDateTime = DateTime.UtcNow,
+            SuperAdmin = await userDbService.CountUsers() == 0,
         });
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
@@ -95,7 +97,7 @@ public class ContextService(
 				}
             }
         }
-        
+
         var languageCode = await localStorageService.GetItem("LanguageCode");
 
         if (!string.IsNullOrEmpty(languageCode))
@@ -132,7 +134,7 @@ public class ContextService(
         {
             return;
         }
-        
+
         serverDbService.Delete(CurrentServer!);
         await dbContext.SaveChangesAsync();
         await ChangeServer(null);
@@ -143,13 +145,13 @@ public class ContextService(
         CurrentUserServer!.IsAdmin = false;
         await dbContext.SaveChangesAsync();
     }
-    
+
     public string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
         if (hasLocalizedName is null) return "BUG_NO_NAME";
-        
+
         string translation;
-        
+
         switch (CurrentLanguageCode)
         {
             case LanguageCode.en_US:
@@ -232,7 +234,7 @@ public class ContextService(
         {
             translation = hasLocalizedName.LocalizedName.en_US;
         }
-        
+
         return translation;
     }
 }

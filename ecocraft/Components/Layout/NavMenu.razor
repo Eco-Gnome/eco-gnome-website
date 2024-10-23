@@ -9,6 +9,10 @@
     {
         <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">Server Management</MudNavLink>
     }
+    @if (ContextService.CurrentUser?.SuperAdmin ?? false)
+    {
+        <MudNavLink Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">Super Admin</MudNavLink>
+    }
 </MudNavMenu>
 
 @code {
@@ -16,7 +20,7 @@
     {
         ContextService.OnContextChanged += StateHasChanged;
     }
-    
+
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;

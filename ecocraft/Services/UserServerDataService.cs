@@ -116,7 +116,7 @@ public class UserServerDataService(
         foreach (UserPrice userPrice in UserPrices.Where(up => up.UserMargin == userMargin))
         {
             userPrice.UserMargin = UserMargins.First();
-        }        
+        }
         userMarginDbService.Delete(userMargin);
     }
 
@@ -344,7 +344,8 @@ public class UserServerDataService(
             ItemOrTag = itemOrTag,
             UserServer = userServer,
             UserMargin = UserMargins.First(),
-            OverrideIsBought = false
+            OverrideIsBought = false,
+            Price = itemOrTag.MinPrice,
         };
 
         UserPrices.Add(userPrice);
