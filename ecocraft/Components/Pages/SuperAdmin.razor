@@ -146,15 +146,17 @@
                                            Size="Size.Small"
                                            OnClick="@(() => DeleteServer(context))"/>
 
-                            <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.DisabledByDefault : Icons.Material.Outlined.AllInbox )"
+                            <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.CreditCardOff : Icons.Material.Outlined.CreditCard )"
                                            Color="@(context.IsDefault ? Color.Warning : Color.Error )"
                                            Size="Size.Small"
                                            OnClick="@(() => ToggleDefault(context))"/>
 
-                            <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.IsAdmin ?? false ? Icons.Material.Filled.ArrowDownward :
+                            <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Icons
+                                    .Material.Filled
+                                    .ArrowDownward :
                                     Icons.Material.Filled.ArrowUpward)"
                                            Size="Size.Small"
-                                           Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
+                                           Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
                                            OnClick="@(() => ToggleSelfAdmin(context))"/>
                         </MudStack>
                     </MudTd>
@@ -278,6 +280,7 @@
             {
                 currentUserServer.IsAdmin = true;
             }
+
             await DbContext.SaveChangesAsync();
         }
         else
