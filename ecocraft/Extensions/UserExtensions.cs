@@ -3,11 +3,11 @@ using System.Security.Cryptography;
 
 namespace ecocraft.Extensions
 {
-	public static class ServerExtensions
+	public static class UserExtensions
 	{
-		public static void GenerateJoinCode(this Server server, int length = 8)
+		public static void GeneratePseudo(this User user, int length = 8)
 		{
-			const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+			const string chars = "0123456789";
 			using (var rng = RandomNumberGenerator.Create())
 			{
 				var byteBuffer = new byte[length];
@@ -16,7 +16,7 @@ namespace ecocraft.Extensions
 				rng.GetBytes(byteBuffer);
 
 				// Convertir les octets en caractères alphanumériques
-				server.JoinCode = "user" + new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
+				user.Pseudo = new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
 			}
 		}
 	}

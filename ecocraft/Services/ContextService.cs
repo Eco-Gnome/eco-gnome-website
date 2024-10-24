@@ -1,6 +1,6 @@
-﻿using ecocraft.Models;
+﻿using ecocraft.Extensions;
+using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using Microsoft.AspNetCore.Hosting.Server;
 
 namespace ecocraft.Services;
 
@@ -75,13 +75,15 @@ public class ContextService(
             }
         }
 
-        CurrentUser ??= await userDbService.AddAndSave(new User
+        var newUser = new User
         {
-            Pseudo = "My Pseudo",
             SecretId = new Guid(),
             CreationDateTime = DateTime.UtcNow,
             SuperAdmin = await userDbService.CountUsers() == 0,
-        });
+        };
+        newUser.GeneratePseudo();
+
+        CurrentUser ??= await userDbService.AddAndSave(newUser);
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         DefaultServers.AddRange(await serverDbService.GetAllDefaultAsync());
@@ -121,7 +123,7 @@ public class ContextService(
 			await serverDataService.RetrieveServerData(CurrentServer);
 			await userServerDataService.RetrieveUserData(CurrentUserServer);
 		}
-  
+
 
         var languageCode = await localStorageService.GetItem("LanguageCode");
 

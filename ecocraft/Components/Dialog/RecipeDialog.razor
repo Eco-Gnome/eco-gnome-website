@@ -47,7 +47,7 @@
                 <RowTemplate>
                     <MudTd Style="width: 30px">@(Math.Abs(context.Element.Quantity))</MudTd>
                     <MudTd>@ContextService.GetTranslation(context.Element.ItemOrTag)</MudTd>
-                    <MudTd>@context.Element.IsDynamic</MudTd>
+                    <MudTd>@(context.Element.IsDynamic ? "dynamic" : "static")</MudTd>
                     <MudTd>
                         @if (context.Element.Index > 0 && context.Element.IsProduct())
                         {
