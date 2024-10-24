@@ -151,6 +151,7 @@
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
+        await FirstOnly();
         await PriceCalculatorService.Calculate();
         StateHasChanged();
     }

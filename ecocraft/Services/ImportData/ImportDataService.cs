@@ -208,8 +208,7 @@ public class ImportDataService(
 
                 // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
                 // so we need to be sure dbElement is the correct-retrieved element)
-                var dbElement = dbElements.FirstOrDefault(e =>
-                    e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
+                var dbElement = dbElements.FirstOrDefault(e => e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
 
                 if (dbElement is null)
                 {
