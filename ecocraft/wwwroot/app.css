@@ -78,3 +78,8 @@
 .dense-checkbox .mud-button-root {
     padding: 4px;
 }
+
+.hack-validation .mud-input-control-helper-container {
+    position: absolute;
+    bottom: -25px;
+}

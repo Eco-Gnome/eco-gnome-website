@@ -16,7 +16,7 @@ namespace ecocraft.Extensions
 				rng.GetBytes(byteBuffer);
 
 				// Convertir les octets en caractères alphanumériques
-				server.JoinCode = "user" + new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
+				server.JoinCode = new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
 			}
 		}
 	}

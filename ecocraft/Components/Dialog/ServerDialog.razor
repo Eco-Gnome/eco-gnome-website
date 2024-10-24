@@ -1,59 +1,63 @@
 ﻿
 <MudDialog>
     <TitleContent>
-        Create or join a server
     </TitleContent>
     <DialogContent>
         <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
             <MudText Typo="Typo.subtitle1">Do you already have an invitation?</MudText>
-            <MudTextField @bind-Value="JoinCode"
-                          Class="mt-0"
-                          Immediate="true"
-                          Label="Join code"
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.Done"
-                          AdornmentAriaLabel="join server"
-                          AdornmentColor="Color.Tertiary"
-                          OnAdornmentClick="OnJoinServer"
-                          OnKeyDown="OnKeyDownJoinAsync" />
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
+                <MudTextField @bind-Value="JoinCode"
+                              Class="mt-0"
+                              Immediate="true"
+                              Label="Join code"
+                              Variant="Variant.Outlined"
+                              OnKeyDown="OnKeyDownJoinAsync" />
+                <MudIconButton
+                    Disabled="@(JoinCode.Length < 8)"
+                    Icon="@Icons.Material.Filled.AddBox"
+                    Color="Color.Tertiary"
+                    OnClick="OnJoinServer" />
+            </MudStack>
         </MudPaper>
 
         <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
-        <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
-            <MudText Typo="Typo.subtitle1">Create your server</MudText>        
-            <MudTextField @bind-Value="ServerName" 
-                          Immediate="true" 
-                          Variant="Variant.Outlined"
-                          Label="Your server name" 
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.Done"
-                          AdornmentAriaLabel="join server"
-                          AdornmentColor="Color.Tertiary" 
-                          OnAdornmentClick="OnCreateServer"
-                          OnKeyDown="OnKeyDownCreateAsync"/>
-        </MudPaper>        
+        <MudPaper Elevation="0" Class="pa-2 mb-6" Style="align-items: center; justify-content: space-between; gap: 16px;">
+            <MudText Typo="Typo.subtitle1">Create your server</MudText>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
+                <MudTextField @bind-Value="ServerName"
+                              Class="hack-validation"
+                              Immediate="true"
+                              Validation="@(new Func<string, IEnumerable<string>>(MinAndMaxCharacters))"
+                              Variant="Variant.Outlined"
+                              Label="Your server name"
+                              OnKeyDown="OnKeyDownCreateAsync" />
+                <MudIconButton
+                    Disabled="@(ServerName.Length < 3)"
+                    Icon="@Icons.Material.Filled.AddBox"
+                    Color="Color.Tertiary"
+                    OnClick="OnCreateServer" />
+            </MudStack>
+        </MudPaper>
     </DialogContent>
-
-    <DialogActions>
-        <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
 
-    public string ServerName { get; set; }
+    private string ServerName { get; set; } = "";
+    private string JoinCode { get; set; } = "";
 
-    public string JoinCode { get; set; }
-
-    private void Cancel()
+    private IEnumerable<string> MinAndMaxCharacters(string ch)
     {
-        MudDialog.Cancel();
+        if (!string.IsNullOrEmpty(ch) && 25 < ch?.Length)
+            yield return "Max 25 characters";
+        if (!string.IsNullOrEmpty(ch) && 3 > ch?.Length)
+            yield return "Min 3 characters";
     }
 
-    private async Task OnKeyDownCreateAsync(KeyboardEventArgs args)
+
+    private void OnKeyDownCreateAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
@@ -64,7 +68,7 @@
         }
     }
 
-    private async Task OnKeyDownJoinAsync(KeyboardEventArgs args)
+    private void OnKeyDownJoinAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
@@ -77,6 +81,11 @@
 
     private void OnCreateServer()
     {
+        if (ServerName.Length < 3)
+        {
+            return;
+        }
+
         MudDialog.Close(DialogResult.Ok(new[] { "Create", ServerName }));
     }
 

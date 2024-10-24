@@ -12,7 +12,7 @@
 	</TitleContent>
 	<DialogContent>
 
-		<MudTextField Value="ContextService.CurrentUser!.Pseudo" Variant="Variant.Outlined" Label="My global pseudo" ValueChanged="@((string pseudo) => OnUpdateUserName(pseudo))"/>
+		<MudTextField Value="ContextService.CurrentUser!.Pseudo" Variant="Variant.Outlined" Label="Pseudo" ValueChanged="@((string pseudo) => OnUpdateUserName(pseudo))"/>
 
 		<MudTabs Outlined="true" Position="@Position.Top" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
 			<MudTabPanel Text="My servers">
@@ -26,7 +26,7 @@
 					<HeaderContent>
 						<MudTh><MudText>Name</MudText></MudTh>
 						<MudTh><MudText>Join code</MudText></MudTh>
-						<MudTh><MudText>My user server pseudo</MudText></MudTh>
+						<MudTh><MudText>In-Game pseudo</MudText></MudTh>
 						<MudTh></MudTh>
 					</HeaderContent>
 					<RowTemplate>
@@ -47,7 +47,7 @@
 												Color="Color.Success"
 												Icon="@Icons.Material.Filled.Close"
 												OnClick="@(() => CancelLeaveServer(context))">
-									</MudIconButton>									
+									</MudIconButton>
 								}
 								<MudIconButton Color="Color.Error"
 												Icon="@Icons.Material.Filled.ExitToApp"
@@ -55,7 +55,7 @@
 								</MudIconButton>
 								@if (_askLeaveConfirmations.ContainsKey(context))
 								{
-									
+
 									<MudIconButton
 												Color="Color.Warning"
 												Icon="@Icons.Material.Filled.Check"

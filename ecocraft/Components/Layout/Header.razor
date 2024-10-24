@@ -102,7 +102,7 @@
 
     private async Task CreateServer()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = true, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+        var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
         var dialog = DialogService.Show<ServerDialog>("Create or join server", options);
 
         var result = await dialog.Result;
@@ -112,7 +112,7 @@
             if (result.Data is string[] resultArray)
             {
                 var returnType = resultArray[0];
-                var returnData = resultArray[1];    
+                var returnData = resultArray[1];
                 if (returnType == "Create")
                 {
                     Server newServer = new Server { Name = returnData!, IsDefault = false, CreationDateTime = DateTime.UtcNow };
