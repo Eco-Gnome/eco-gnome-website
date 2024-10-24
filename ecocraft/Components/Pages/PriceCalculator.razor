@@ -9,8 +9,6 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject UserPriceDbService UserPriceDbService
-@inject UserMarginDbService UserMarginDbService
-@inject LocalStorageService LocalStorageService
 @inject PriceCalculatorService PriceCalculatorService
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject ISnackbar Snackbar
@@ -23,7 +21,6 @@
 <MudItem sm="4" Class="pa-2 d-flex flex-column">
     <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
         <MudAutocomplete T="Skill"
-                         @ref="_autocompleteSkillRef"
                          Value="_emptySkill"
                          SearchFunc="SearchSkills"
                          ValueChanged="AddUserSkill"
@@ -81,7 +78,6 @@
         </MudTable>
 
         <MudAutocomplete T="CraftingTable"
-                         @ref="_autocompleteCraftingTableRef"
                          Value="_emptyCraftingTable"
                          SearchFunc="SearchCraftingTables"
                          ValueChanged="AddUserCraftingTable"
@@ -300,7 +296,6 @@
 <MudItem sm="4" Class="pa-2 d-flex flex-column">
     <MudItem sm="12" Class="flex-grow-1 mud-elevation-2 pa-4">
         <MudAutocomplete T="Recipe"
-                         @ref="_autocompleteRecipeRef"
                          Value="_emptyRecipe"
                          SearchFunc="SearchRecipes"
                          ValueChanged="AddUserRecipe"
@@ -443,54 +438,13 @@
 </MudContainer>
 
 @code {
-    private MudAutocomplete<Skill>? _autocompleteSkillRef;
-    private MudAutocomplete<CraftingTable>? _autocompleteCraftingTableRef;
-    private MudAutocomplete<Recipe>? _autocompleteRecipeRef;
     private bool _showMultiRecipes = true;
     private bool _showTagItems = true;
-
-    private TableGroupDefinition<UserPrice> _groupIngredientsDefinition = new()
-    {
-        GroupName = "Associated Items",
-        Indentation = true,
-        Expandable = false,
-        Selector = (e) => e.ItemOrTag.AssociatedItems.Select(iot => iot.UserPrices.First()) // TODO: find a way to not do iot.UserPrices.First
-    };
 
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
     private string? _previousProfession;
-    private bool _onlyLevelAccessibleRecipes = true;
-    private bool _displayNonSkilledRecipes = true;
-
-    public bool OnlyLevelAccessibleRecipes
-    {
-        get => _onlyLevelAccessibleRecipes;
-        set
-        {
-            _onlyLevelAccessibleRecipes = value;
-            UpdateLocalSettings();
-            if (_onlyLevelAccessibleRecipes)
-            {
-                UserServerDataService.RemoveNonAllowedUserRecipes();
-            }
-
-            StateHasChanged();
-        }
-    }
-
-    public bool DisplayNonSkilledRecipes
-    {
-        get => _displayNonSkilledRecipes;
-        set
-        {
-            _displayNonSkilledRecipes = value;
-            UpdateLocalSettings();
-            UserServerDataService.ToggleEmptyUserSkill(ContextService.CurrentUserServer!, _displayNonSkilledRecipes);
-            StateHasChanged();
-        }
-    }
 
     protected override Task OnInitializedAsync()
     {
@@ -499,28 +453,9 @@
         return Task.CompletedTask;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        OnlyLevelAccessibleRecipes = await LocalStorageService.GetItem("onlyLevelAccessibleRecipes") == "True";
-        DisplayNonSkilledRecipes = await LocalStorageService.GetItem("displayNonSkilledRecipes") == "True";
-
-        StateHasChanged();
-    }
-
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
-    }
-
-    private async void UpdateLocalSettings()
-    {
-        await LocalStorageService.AddItem("onlyLevelAccessibleRecipes", OnlyLevelAccessibleRecipes.ToString());
-        await LocalStorageService.AddItem("displayNonSkilledRecipes", DisplayNonSkilledRecipes.ToString());
     }
 
     private Task<IEnumerable<Skill>> SearchSkills(string value, CancellationToken token)
@@ -590,7 +525,7 @@
             return;
         }
 
-        UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, OnlyLevelAccessibleRecipes);
+        UserServerDataService.AddUserSkill(skill, ContextService.CurrentUserServer!, UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes);
 
         _emptySkill = null;
 
@@ -678,7 +613,7 @@
         if (userSkill.Level < 7)
             userSkill.HasLavishTalent = false;
 
-        if (OnlyLevelAccessibleRecipes)
+        if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
         {
             UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
         }
@@ -705,12 +640,19 @@
     private async Task OnOptionDisplayChanged()
     {
         UserServerDataService.UserSetting!.DisplayNonSkilledRecipes = !UserServerDataService.UserSetting.DisplayNonSkilledRecipes;
+        UserServerDataService.ToggleEmptyUserSkill(ContextService.CurrentUserServer!, UserServerDataService.UserSetting!.DisplayNonSkilledRecipes);
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
     private async Task OnOptionOnlyLevelChanged()
     {
         UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
+
+        if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
+        {
+            UserServerDataService.RemoveNonAllowedUserRecipes();
+        }
+
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
@@ -721,14 +663,6 @@
         await PriceCalculatorService.Calculate();
         StateHasChanged();
     }
-    /*
-    private async Task UpdateMargin(float margin)
-        {
-        UserServerDataService.UserSetting!.Margin = margin;
-        UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
-    }*/
 
     private async Task UpdateMargin(UserMargin userMargin, float margin)
     {
