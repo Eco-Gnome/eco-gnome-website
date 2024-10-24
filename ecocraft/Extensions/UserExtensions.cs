@@ -16,7 +16,7 @@ namespace ecocraft.Extensions
 				rng.GetBytes(byteBuffer);
 
 				// Convertir les octets en caractères alphanumériques
-				user.Pseudo = new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
+				user.Pseudo = "user" + new string(byteBuffer.Select(b => chars[b % chars.Length]).ToArray());
 			}
 		}
 	}
