@@ -42,17 +42,13 @@
     color: white;
 }
 
-.skill-table .mud-table-container {
-    max-height: 250px;
-}
-
-.craftingtable-table .mud-table-container {
-    max-height: 350px;
-}
-
 .rectangle-input .mud-input {
     height: 25px;
     width: 100px;
+}
+
+.flex-no-grow {
+    flex: 0 1 auto !important;
 }
 
 .square-input .mud-input {
@@ -68,4 +64,17 @@
 .select-dense .mud-input-slot {
     padding-top: 12px !important;
     padding-bottom: 14px !important;
+}
+
+.select-dense.very-dense .mud-input-slot {
+    padding-top: 6px !important;
+    padding-bottom: 7px !important;
+}
+
+.mud-table-head .mud-table-row .mud-table-cell {
+    background-color: #303038 !important;
+}
+
+.dense-checkbox .mud-button-root {
+    padding: 4px;
 }

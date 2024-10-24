@@ -45,10 +45,10 @@ public class PriceCalculatorService(
         return (listOfIngredients, listOfProducts);
     }
 
-    public async Task Calculate()
+    public async Task Calculate(bool debug = false)
     {
         // Reset Prices
-        var (itemOrTagsToBuy, itemOrTagsToSell) = GetCategorizedItemOrTags();
+        var (_, itemOrTagsToSell) = GetCategorizedItemOrTags();
 
         userServerDataService.UserElements.ForEach(ue => ue.Price = null);
         userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag).ToList().ForEach(ue => ue.Price = null);
@@ -64,7 +64,7 @@ public class PriceCalculatorService(
             while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
             {
                 var userRecipe = remainingUserRecipes[iterator];
-                Console.WriteLine($"Check Recipe: {userRecipe.Recipe.Name}");
+                if (debug) Console.WriteLine($"Check Recipe: {userRecipe.Recipe.Name}");
 
                 var userElementIngredients = userServerDataService.UserElements.Where(ue => ue.Element.IsIngredient() && ue.Element.Recipe == userRecipe.Recipe).ToList();
 
@@ -76,7 +76,7 @@ public class PriceCalculatorService(
                     if (associatedUserPrice.Price is not null)
                     {
                         ingredient.Price = associatedUserPrice.Price;
-                        Console.WriteLine($"=> Ingredient {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+                        if (debug) Console.WriteLine($"=> Ingredient {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
 
                         continue;
                     }
@@ -87,7 +87,7 @@ public class PriceCalculatorService(
                     {
                         associatedUserPrice.Price = associatedUserPrice.PrimaryUserPrice.Price;
                         ingredient.Price = associatedUserPrice.Price;
-                        Console.WriteLine($"=> Ingredient Tag (from primary) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+                        if (debug) Console.WriteLine($"=> Ingredient Tag (from primary) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
 
                         continue;
                     }
@@ -99,14 +99,14 @@ public class PriceCalculatorService(
 
                     associatedUserPrice.Price = associatedItemsUserPrices.Select(up => up.Price).Min();
                     ingredient.Price = associatedUserPrice.Price;
-                    Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
+                    if (debug) Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
                 }
 
                 if (userElementIngredients.Any(ue => ue.Price is null))
                 {
                     iterator++;
-                    userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
-                    Console.WriteLine($"=> Stop");
+                    if (debug) userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
+                    if (debug) Console.WriteLine($"=> Stop");
                     continue;
                 }
 
@@ -117,11 +117,11 @@ public class PriceCalculatorService(
                 {
                     iterator++;
                     reintegratedProducts.Where(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Reintegrated Product {ue.Element.ItemOrTag.Name} is null"));
-                    Console.WriteLine($"=> Stop");
+                    if (debug) Console.WriteLine($"=> Stop");
                     continue;
                 }
 
-                Console.WriteLine($"=> Calc");
+                if (debug) Console.WriteLine($"=> Calc");
 
                 remainingUserRecipes.RemoveAt(iterator);
 
@@ -151,10 +151,14 @@ public class PriceCalculatorService(
                     .Recipe.Skill).Level] ?? 1;
                 ingredientCostSum += userRecipe.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
 
+                var craftMinuteFee = userServerDataService.UserCraftingTables.First(u => u.CraftingTable == userRecipe.Recipe.CraftingTable).CraftMinuteFee;
+
+                ingredientCostSum += craftMinuteFee * userRecipe.Recipe.CraftMinutes;
+
                 foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                 {
                     product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
-                    Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
+                    if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
 
                     // Calculate the associated User price if needed
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);

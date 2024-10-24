@@ -12,7 +12,10 @@
             {
                 <MudText>Skill: @ContextService.GetTranslation(Recipe.Skill) @(Recipe.SkillLevel)</MudText>
             }
-            <MudText>Craft Time: @Recipe.CraftMinutes minutes</MudText>
+            <MudStack Row>
+                <MudText>Craft Time: </MudText>
+                <MudText Color="Color.Primary">@GetCraftMinutePrice() $</MudText>
+            </MudStack>
             <MudStack Row>
                 <MudText>Labor: @Recipe.Labor</MudText>
                 <MudText Color="Color.Primary">
@@ -30,7 +33,8 @@
                             @if (context.Key!.ToString() == "Ingredients")
                             {
                                 <MudText Style="min-width: 60px" Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(-1 * (ElementSum(context.Items.ToList()) - ElementSum(GetReintegratedElements())) + GetLaborPrice(), 2)) $
+                                    @(Math.Round(-1 * (ElementSum(context.Items.ToList())) + GetLaborPrice(), 2)) $
+                                    @(GetReintegratedElements().Count > 0 ? $"( {ElementSum(GetReintegratedElements())} $)" : "")
                                 </MudText>
                                 <MudText Typo="Typo.body2">Total Cost:</MudText>
                             }
@@ -188,6 +192,12 @@
         return Recipe.Labor
             * UserServerDataService.UserSetting!.CalorieCost / 1000
             * (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
+    }
+
+    private float GetCraftMinutePrice()
+    {
+        return Recipe.CraftMinutes
+            * UserServerDataService.UserCraftingTables.First(u => u.CraftingTable == Recipe.CraftingTable).CraftMinuteFee;
     }
 
     private List<UserElement> GetUserElements()

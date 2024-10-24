@@ -156,6 +156,7 @@ public class User
     public DateTime CreationDateTime { get; set; }
     public Guid SecretId { get; set; }
     public bool SuperAdmin { get; set; }
+    public bool ShowHelp { get; set; }
 
     public List<UserServer> UserServers { get; set; } = [];
 }
@@ -209,6 +210,7 @@ public class UserCraftingTable
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
+    public float CraftMinuteFee { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
     public CraftingTable CraftingTable { get; set; }
@@ -256,7 +258,7 @@ public class UserPrice: IHasPrice
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public bool OverrideIsBought { get; set; }
-    
+
     [ForeignKey("UserMargin")] public Guid UserMarginId { get; set; }
     public UserMargin UserMargin { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
