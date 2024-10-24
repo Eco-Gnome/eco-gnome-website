@@ -43,6 +43,12 @@ public class ContextService(
     {
         var userServer = CurrentUser?.UserServers.Find(us => us.ServerId == server?.Id);
 
+        if (userServer == null)
+        {
+            await JoinServer(server!);
+            userServer = CurrentUser?.UserServers.Find(us => us.ServerId == server?.Id);
+        }
+
         CurrentUserServer = userServer;
         CurrentServer = server;
 
@@ -52,6 +58,7 @@ public class ContextService(
         await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
         OnContextChanged?.Invoke();
+        
     }
 
     public async Task InitializeContext()
