@@ -135,10 +135,16 @@ public class ContextService(
             CurrentLanguageCode = LanguageCode.en_US;
         }
 
-        OnContextChanged?.Invoke();
+        InvokeContextChanged();
         // Don't know why, but the second one allows the MudSelect of servers to correctly display the selected server
-        OnContextChanged?.Invoke();
-    }
+        InvokeContextChanged();
+
+	}
+
+    public void InvokeContextChanged()
+    {
+		OnContextChanged?.Invoke();
+	}
 
     public async Task JoinServer(Server server, bool isAdmin = false)
     {

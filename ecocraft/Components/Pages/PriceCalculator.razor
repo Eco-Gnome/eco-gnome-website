@@ -171,12 +171,12 @@
 
             @if (UserServerDataService.UserSetting is not null)
             {
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText Typo="Typo.body1">Margin : </MudText>
-                            <MudTooltip Text="Add margin">
-                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddMargin" />
-                            </MudTooltip>
-                        </MudStack>
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.body1">Margin : </MudText>
+                    <MudTooltip Text="Add margin">
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" OnClick="OnAddMargin" />
+                    </MudTooltip>
+                </MudStack>
                 <MudTable Items="UserServerDataService.UserMargins"
                         FixedHeader="true"
                         Hover="true"
@@ -251,6 +251,7 @@
                                          Disabled="@(context.IsTag)"
                                          HideSpinButtons="@(context.IsTag)"
                                          Value="userPriceTag.Price"
+                                                 Immediate="true"
                                          Format="N2"
                                          Variant="Variant.Outlined"
                                          Min="context.MinPrice"
@@ -281,6 +282,7 @@
                                                  Format="N2"
                                                  Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
                                                  Value="userPriceItem.Price"
+                                                 Immediate="true"
                                                  Min="item.MinPrice"
                                                  Max="item.MaxPrice"
                                                  ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"

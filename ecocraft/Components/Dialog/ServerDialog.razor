@@ -1,16 +1,42 @@
 ﻿
-<MudDialog OnKeyDown="OnKeyDownAsync">
-    @* <TitleContent>
-        
-    </TitleContent> *@
+<MudDialog>
+    <TitleContent>
+        Create or join a server
+    </TitleContent>
     <DialogContent>
-        <MudItem>
-            <MudTextField @bind-Value="ServerName" Immediate="true" Variant="Variant.Outlined" Label="Server name" />
-        </MudItem>
+        <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
+            <MudText Typo="Typo.subtitle1">Do you already have an invitation?</MudText>
+            <MudTextField @bind-Value="JoinCode"
+                          Class="mt-0"
+                          Immediate="true"
+                          Label="Join code"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Done"
+                          AdornmentAriaLabel="join server"
+                          AdornmentColor="Color.Tertiary"
+                          OnAdornmentClick="OnJoinServer"
+                          OnKeyDown="OnKeyDownJoinAsync" />
+        </MudPaper>
+
+        <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+
+        <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
+            <MudText Typo="Typo.subtitle1">Create your server</MudText>        
+            <MudTextField @bind-Value="ServerName" 
+                          Immediate="true" 
+                          Variant="Variant.Outlined"
+                          Label="Your server name" 
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Done"
+                          AdornmentAriaLabel="join server"
+                          AdornmentColor="Color.Tertiary" 
+                          OnAdornmentClick="OnCreateServer"
+                          OnKeyDown="OnKeyDownCreateAsync"/>
+        </MudPaper>        
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="Submit" Color="Color.Primary">Valider</MudButton>
         <MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
     </DialogActions>
 </MudDialog>
@@ -18,27 +44,44 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter]
     public string ServerName { get; set; }
 
-    private void Submit()
-    {
-        MudDialog.Close(DialogResult.Ok(ServerName));
-    }
+    public string JoinCode { get; set; }
 
     private void Cancel()
     {
         MudDialog.Cancel();
     }
 
-    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    private async Task OnKeyDownCreateAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
             case "Enter":
             case "NumpadEnter":
-                Submit();
+                OnCreateServer();
                 break;
         }
+    }
+
+    private async Task OnKeyDownJoinAsync(KeyboardEventArgs args)
+    {
+        switch (args.Key)
+        {
+            case "Enter":
+            case "NumpadEnter":
+                OnJoinServer();
+                break;
+        }
+    }
+
+    private void OnCreateServer()
+    {
+        MudDialog.Close(DialogResult.Ok(new[] { "Create", ServerName }));
+    }
+
+    private void OnJoinServer()
+    {
+        MudDialog.Close(DialogResult.Ok(new[] { "Join", JoinCode }));
     }
 }

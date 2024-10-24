@@ -14,73 +14,49 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
-<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-     <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
+<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+    <!--<MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Tertiary" aria-label="Save data" OnClick="Save" />-->
+    <MudImage Src="/assets/avatar.png" Width="52" />
+    <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
 
-    <MudPaper Elevation="3" Class="pa-2" Style="display: flex; align-items: center; justify-content: space-between;">
-        <MudIcon Icon="@Icons.Material.Filled.LightMode" />
-        <MudSwitch Style="left: 14px;" Value="IsDarkMode" Color="Color.Dark" T="bool" ValueChanged="OnDarkModeChanged" />
-        <MudIcon Icon="@Icons.Material.Filled.DarkMode" />
-    </MudPaper>
-
-     <MudPaper Elevation="3" Class="pa-2" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-         <MudTextField @bind-Value="JoinCode"
-                       Class="mt-0"
-                       Immediate="true"
-                       Style="height: 35px"
-                       Variant="Variant.Outlined" />
-         <MudButton HtmlTag="label"
-                    Variant="Variant.Filled"
-                    Color="Color.Dark"
-                    Disabled="@(String.IsNullOrEmpty(JoinCode))"
-                    OnClick="OnJoinServer">
-             Join Server
-         </MudButton>
-     </MudPaper>
-
-     <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <MudSelect T="Server"
-                   Class="select-dense"
-                   Label="Server"
-                   Value="@ContextService.CurrentServer"
-                   Dense="false"
-                   Variant="Variant.Outlined"
-                   SelectedValuesChanged="OnSelectedServerChanged"
-                   AnchorOrigin="Origin.BottomLeft"
-                   TransformOrigin="Origin.TopLeft">
-            @foreach (var server in ContextService.AvailableServers)
-            {
-                <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
-            }
-        </MudSelect>
-        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
-     </MudPaper>
+    <MudSelect  T="Server"
+                Class="select-dense"
+                Value="@ContextService.CurrentServer"
+                Style="min-width:200px;padding-left:10px"
+                Dense="false"
+                Underline="false"
+                Variant="Variant.Outlined"
+                SelectedValuesChanged="OnSelectedServerChanged"
+                AnchorOrigin="Origin.BottomLeft"
+                TransformOrigin="Origin.TopLeft">
+        @foreach (var server in ContextService.AvailableServers)
+        {
+            <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
+</MudStack>
 
 
-    <MudPaper Class="pl-3" Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudText>@ContextService.CurrentUser?.Pseudo</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Tertiary" aria-label="Config User" @onclick="ConfigureUser" />
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Tertiary" aria-label="Edit User" OnClick="EditUserDialog"/>
-        </MudStack>
-    </MudPaper>
+<MudSpacer />
 
-    <MudPaper Elevation="3" Style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <MudSelect T="LanguageCode"
-                   Class="select-dense"
-                   Label="Language"
-                   Value="@ContextService.CurrentLanguageCode"
-                   Dense="false"
-                   Variant="Variant.Outlined"
-                   SelectedValuesChanged="OnSelectedLanguageChanged"
-                   AnchorOrigin="Origin.BottomLeft"
-                   TransformOrigin="Origin.TopLeft">
-            @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
-            {
-                <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
-            }
-        </MudSelect>
-    </MudPaper>
+
+<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
+    <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary" Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+
+    <MudSelect T="LanguageCode"
+                Class="select-dense"
+                Value="@ContextService.CurrentLanguageCode"
+                Dense="false"
+                Variant="Variant.Outlined"
+                SelectedValuesChanged="OnSelectedLanguageChanged"
+                AnchorOrigin="Origin.BottomLeft"
+                TransformOrigin="Origin.TopLeft">
+        @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
+        {
+            <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
+        }
+    </MudSelect>
 </MudStack>
 
 @code {
@@ -89,8 +65,6 @@
 
     [Parameter]
     public EventCallback<bool> IsDarkModeChanged { get; set; }
-
-    private string JoinCode { get; set; } = "";
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
 
@@ -128,43 +102,36 @@
 
     private async Task CreateServer()
     {
-        var parameters = new DialogParameters();
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = DialogService.Show<ServerDialog>("Create server", parameters, options);
+        var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = true, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = DialogService.Show<ServerDialog>("Create or join server", options);
 
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            Server newServer = new Server { Name = result.Data.ToString()!, IsDefault = false, CreationDateTime = DateTime.UtcNow };
-            newServer.GenerateJoinCode();
-            await ServerDbService.AddAndSave(newServer);
+            if (result.Data is string[] resultArray)
+            {
+                var returnType = resultArray[0];
+                var returnData = resultArray[1];    
+                if (returnType == "Create")
+                {
+                    Server newServer = new Server { Name = returnData!, IsDefault = false, CreationDateTime = DateTime.UtcNow };
+                    newServer.GenerateJoinCode();
+                    await ServerDbService.AddAndSave(newServer);
 
-            await ContextService.JoinServer(newServer, true);
+                    await ContextService.JoinServer(newServer, true);
 
-            await ContextService.ChangeServer(newServer);
+                    await ContextService.ChangeServer(newServer);
+                    Navigation.NavigateTo("/server-management");
+                }else if(returnType == "Join")
+                {
+                    await OnJoinServer(returnData);
+                }
+            }
         }
     }
 
-    private async Task EditUserDialog()
-    {
-        var parameters = new DialogParameters
-        {
-            ["Pseudo"] = ContextService.CurrentUser!.Pseudo,
-        };
-
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<UserDialog>("Create user", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            ContextService.CurrentUser.Pseudo = result.Data.ToString()!;
-            await UserDbService.UpdateAndSave(ContextService.CurrentUser);
-        }
-    }
-
-    private async Task OnJoinServer()
+    private async Task OnJoinServer(string? JoinCode)
     {
         if (String.IsNullOrEmpty(JoinCode))
         {
@@ -193,10 +160,10 @@
         await ContextService.ChangeServer(server);
     }
 
-    private Task ConfigureUser()
+    private async Task ConfigureUser()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
-        return dialog;
+        var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
+
     }
 }

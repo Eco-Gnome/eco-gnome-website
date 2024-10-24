@@ -12,11 +12,10 @@
 
 <MudLayout>
     <MudAppBar Elevation="2">
-        <MudImage Src="/assets/avatar.png" Width="52" />
+        @* <MudImage Src="/assets/avatar.png" Width="52" /> *@
 
-        <!--<MudIconButton Icon="@Icons.Material.Filled.Calculate" Color="Color.Inherit" Edge="Edge.Start"/>-->
-        <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
-        <MudSpacer/>
+        @* <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText> *@
+        @* <MudSpacer/> *@
         @if (!_isLoading)
         {
             <Header @bind-isDarkMode="_isDarkMode"></Header>
