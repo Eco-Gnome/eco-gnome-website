@@ -78,6 +78,11 @@ public class ServerDataService(
         skillDbService.Update(skill);
     }
 
+    public void DeleteSkill(Skill skill)
+    {
+        skillDbService.Delete(skill);
+    }
+
     public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, float percent)
     {
         var pluginModule = new PluginModule
@@ -100,6 +105,11 @@ public class ServerDataService(
         pluginModule.Percent = percent;
 
         pluginModuleDbService.Update(pluginModule);
+    }
+
+    public void DeletePluginModule(PluginModule pluginModule)
+    {
+        pluginModuleDbService.Delete(pluginModule);
     }
 
     public CraftingTable ImportCraftingTable(Server server, string name, LocalizedField localizedName, List<PluginModule> pluginModules)
@@ -126,6 +136,11 @@ public class ServerDataService(
         craftingTableDbService.Update(craftingTable);
     }
 
+    public void DeleteCraftingTable(CraftingTable craftingTable)
+    {
+        craftingTableDbService.Delete(craftingTable);
+    }
+
     public ItemOrTag ImportItemOrTag(Server server, string name, LocalizedField localizedName, bool isTag)
     {
         var itemOrTag = new ItemOrTag
@@ -148,6 +163,11 @@ public class ServerDataService(
         itemOrTag.IsTag = isTag;
 
         itemOrTagDbService.Update(itemOrTag);
+    }
+
+    public void DeleteItemOrTag(ItemOrTag itemOrTag)
+    {
+        itemOrTagDbService.Delete(itemOrTag);
     }
 
     public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill,
@@ -188,6 +208,11 @@ public class ServerDataService(
         recipe.CraftingTable = craftingTable;
 
         recipeDbService.Update(recipe);
+    }
+
+    public void DeleteRecipe(Recipe recipe)
+    {
+        recipeDbService.Delete(recipe);
     }
 
     public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)

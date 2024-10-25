@@ -44,9 +44,9 @@
 					</MudStack>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
 						<MudStack Spacing="0">
-							<MudText>Recipes: @ServerDataService.Recipes.Count</MudText>
+							<MudText>Recipes: @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
 							<MudText>Items: @ServerDataService.ItemOrTags.Where(i => !i.IsTag).Count() / Tags: @ServerDataService.ItemOrTags.Where(i => i.IsTag).Count()</MudText>
-							<MudText>Skills: @ServerDataService.Skills.Count</MudText>
+							<MudText>Skills: @ServerDataService.Skills.Count(s => s.Profession is not null)</MudText>
 							<MudText>Crafting Tables: @ServerDataService.CraftingTables.Count</MudText>
 							<MudText>Modules: @ServerDataService.PluginModules.Count</MudText>
 						</MudStack>

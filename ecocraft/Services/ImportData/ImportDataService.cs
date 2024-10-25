@@ -39,8 +39,12 @@ public class ImportDataService(
 
     private void ImportSkills(Server server, List<SkillDto> newSkills)
     {
+        var nameOccurence = new Dictionary<string, int>();
+
         foreach (var newSkill in newSkills)
         {
+            nameOccurence.Add(newSkill.Name, 1);
+
             var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == newSkill.Name);
 
             if (dbSkill is null)
@@ -56,23 +60,74 @@ public class ImportDataService(
                     newSkill.Profession, newSkill.LaborReducePercent, newSkill.LavishTalentValue);
             }
         }
+
+        foreach (var dbSkill in serverDataService.Skills)
+        {
+            if (!nameOccurence.TryGetValue(dbSkill.Name, out _))
+            {
+                serverDataService.DeleteSkill(dbSkill);
+            }
+        }
     }
 
     private void ImportItems(Server server, List<ItemDto> items)
     {
-        foreach (var item in items.Where(i => i.IsPluginModule is not null))
         {
-            ImportPluginModule(server, item);
+            var nameOccurence = new Dictionary<string, int>();
+
+            foreach (var item in items.Where(i => i.IsPluginModule is not null))
+            {
+                nameOccurence.Add(item.Name, 1);
+
+                ImportPluginModule(server, item);
+            }
+
+            foreach (var dbPluginModule in serverDataService.PluginModules)
+            {
+                if (!nameOccurence.TryGetValue(dbPluginModule.Name, out _))
+                {
+                    serverDataService.DeletePluginModule(dbPluginModule);
+                }
+            }
         }
 
-        foreach (var item in items.Where(i => i.IsCraftingTable is not null))
         {
-            ImportCraftingTable(server, item);
+            var nameOccurence = new Dictionary<string, int>();
+
+            foreach (var item in items.Where(i => i.IsCraftingTable is not null))
+            {
+                nameOccurence.Add(item.Name, 1);
+
+                ImportCraftingTable(server, item);
+            }
+
+            foreach (var dbCraftingTable in serverDataService.CraftingTables)
+            {
+                if (!nameOccurence.TryGetValue(dbCraftingTable.Name, out _))
+                {
+                    serverDataService.DeleteCraftingTable(dbCraftingTable);
+                }
+            }
         }
 
-        foreach (var item in items)
         {
-            ImportItem(server, item);
+            var nameOccurence = new Dictionary<string, int>();
+
+            foreach (var item in items)
+            {
+                nameOccurence.Add(item.Name, 1);
+
+
+                ImportItem(server, item);
+            }
+
+            foreach (var dbItem in serverDataService.ItemOrTags.Where(iot => !iot.IsTag))
+            {
+                if (!nameOccurence.TryGetValue(dbItem.Name, out _))
+                {
+                    serverDataService.DeleteItemOrTag(dbItem);
+                }
+            }
         }
     }
 
@@ -136,8 +191,12 @@ public class ImportDataService(
 
     private void ImportTags(Server server, List<TagDto> tags)
     {
+        var nameOccurence = new Dictionary<string, int>();
+
         foreach (var tag in tags)
         {
+            nameOccurence.Add(tag.Name, 1);
+
             var dbTag = ImportItem(server, tag, true);
 
             dbTag.AssociatedItems = tag.AssociatedItems
@@ -145,12 +204,32 @@ public class ImportDataService(
                 .Where(e => e is not null)
                 .ToList()!;
         }
+
+        foreach (var dbTag in serverDataService.ItemOrTags.Where(iot => iot.IsTag))
+        {
+            if (!nameOccurence.TryGetValue(dbTag.Name, out _))
+            {
+                serverDataService.DeleteItemOrTag(dbTag);
+            }
+        }
     }
 
     private void ImportRecipes(Server server, List<RecipeDto> recipes)
     {
+        var nameOccurence = new Dictionary<string, int>();
+
         foreach (var recipe in recipes)
         {
+            if (nameOccurence.TryGetValue(recipe.Name, out var index))
+            {
+                recipe.Name += $"__{index}";
+                nameOccurence[recipe.Name] += 1;
+            }
+            else
+            {
+                nameOccurence[recipe.Name] = 1;
+            }
+
             var dbRecipe = serverDataService.Recipes.FirstOrDefault(p => p.Name == recipe.Name);
             var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == recipe.RequiredSkill);
             var dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipe.CraftingTable);
@@ -234,7 +313,17 @@ public class ImportDataService(
                         skill,
                         element.LavishTalent
                     );
+
+                    dbRecipe.Elements.Add(dbElement);
                 }
+            }
+        }
+
+        foreach (var dbRecipe in serverDataService.Recipes)
+        {
+            if (!nameOccurence.TryGetValue(dbRecipe.Name, out _))
+            {
+                serverDataService.DeleteRecipe(dbRecipe);
             }
         }
     }
