@@ -14,6 +14,7 @@
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Server Management</PageTitle>
 
@@ -41,7 +42,14 @@
 						              OnAdornmentClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"
 						              Variant="Variant.Outlined" />
 					</MudStack>
-					<MudStack Row Class="flex-no-grow">
+					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
+						<MudStack Spacing="0">
+							<MudText>Recipes: @ServerDataService.Recipes.Count</MudText>
+							<MudText>Items: @ServerDataService.ItemOrTags.Where(i => !i.IsTag).Count() / Tags: @ServerDataService.ItemOrTags.Where(i => i.IsTag).Count()</MudText>
+							<MudText>Skills: @ServerDataService.Skills.Count</MudText>
+							<MudText>Crafting Tables: @ServerDataService.CraftingTables.Count</MudText>
+							<MudText>Modules: @ServerDataService.PluginModules.Count</MudText>
+						</MudStack>
 						<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
 							<ActivatorContent>
 								<MudButton Disabled="_showUploadServerDataLoader"
@@ -98,7 +106,7 @@
 							<MudTextField @bind-Value="_searchPseudo" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 						</MudStack>
 					</MudTh>
-					<MudTh>Action</MudTh>
+					<MudTh></MudTh>
 				</HeaderContent>
 				<RowTemplate>
 					<MudTd>
@@ -110,44 +118,46 @@
 						</MudStack>
 					</MudTd>
 					<MudTd>
-						@if (context != ContextService.CurrentUserServer)
-						{
-							<MudButton Variant="Variant.Filled"
-							           Color="@(context.IsAdmin ? Color.Warning : Color.Error)"
-							           StartIcon="@(context.IsAdmin ? Icons.Material.Filled.KeyboardDoubleArrowUp : Icons.Material.Filled.KeyboardDoubleArrowDown)"
-							           OnClick="@(() => ToggleAdmin(context))">
-								@(context.IsAdmin ? "Demote Admin" : "Promote Admin")
-							</MudButton>
-						}
-
-						@if (context != ContextService.CurrentUserServer)
-						{
-							<MudButton HtmlTag="label"
-							           Variant="Variant.Filled"
-							           Color="Color.Error"
-							           StartIcon="@Icons.Material.Filled.ExitToApp"
-							           OnClick="@(() => KickUser(context))">
-								Kick User
-							</MudButton>
-							@if (_askKickConfirmations.ContainsKey(context))
+						<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Spacing="3">
+							@if (context != ContextService.CurrentUserServer)
 							{
-								<br/>
 								<MudButton Variant="Variant.Filled"
-								           Color="Color.Success"
-								           StartIcon="@Icons.Material.Filled.Close"
-								           OnClick="@(() => CancelKick(context))">
-								</MudButton>
-								<MudButton Variant="Variant.Filled"
-								           Color="Color.Warning"
-								           StartIcon="@Icons.Material.Filled.Check"
-								           OnClick="@(() => ConfirmKick(context))">
+								           Color="@(context.IsAdmin ? Color.Warning : Color.Error)"
+								           StartIcon="@(context.IsAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+								           OnClick="@(() => ToggleAdmin(context))">
+									@(context.IsAdmin ? "Demote Admin" : "Promote Admin")
 								</MudButton>
 							}
-						}
+
+							@if (context != ContextService.CurrentUserServer)
+							{
+								<MudButton HtmlTag="label"
+								           Variant="Variant.Filled"
+								           Color="Color.Primary"
+								           StartIcon="@Icons.Material.Filled.ExitToApp"
+								           OnClick="@(() => KickUser(context))">
+									Kick User
+								</MudButton>
+								@if (_askKickConfirmations.ContainsKey(context))
+								{
+									<br/>
+									<MudButton Variant="Variant.Filled"
+									           Color="Color.Success"
+									           StartIcon="@Icons.Material.Filled.Close"
+									           OnClick="@(() => CancelKick(context))">
+									</MudButton>
+									<MudButton Variant="Variant.Filled"
+									           Color="Color.Warning"
+									           StartIcon="@Icons.Material.Filled.Check"
+									           OnClick="@(() => ConfirmKick(context))">
+									</MudButton>
+								}
+							}
+						</MudStack>
 					</MudTd>
 				</RowTemplate>
 				<PagerContent>
-					<MudTablePager PageSizeOptions="new int[]{10, 25, 50}" />
+					<MudTablePager PageSizeOptions="new []{10, 25, 50}" />
 				</PagerContent>
 			</MudTable>
 		</MudItem>
@@ -156,7 +166,7 @@
 			          Filter="new Func<ItemOrTag,bool>(FilterTag)"
 			          Virtualize="false"
 			          FixedHeader="true"
-			          Height="800px"
+			          Height="700px"
 			          Dense="true"
 			          Hover="true">
 				<HeaderContent>
@@ -169,16 +179,30 @@
 				</HeaderContent>
 				<RowTemplate>
 					<MudTd>
-						<MudText Typo="Typo.body2">@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)</MudText>
+						<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+							<MudLink OnClick="@(() => ToggleTag(context))">
+								<MudText Typo="Typo.body2">
+									@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)
+								</MudText>
+							</MudLink>
+							@if (_selectedTag == context)
+							{
+								<MudIconButton Class="pa-0"
+								               Color="Color.Primary"
+								               Icon="@Icons.Material.Filled.Clear"
+								               Size="Size.Small"
+								               OnClick="@(() => ToggleTag(context))" />
+							}
+						</MudStack>
 					</MudTd>
 				</RowTemplate>
 				<PagerContent>
-					<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
+					<MudTablePager PageSizeOptions="new []{25, 50, 100, 200}" />
 				</PagerContent>
 			</MudTable>
 		</MudItem>
 		<MudItem sm="8">
-			<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag,bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="800px" Dense="true" Hover="true">
+			<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag,bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
 				<HeaderContent>
 					<MudTh>
 						<MudStack Row AlignItems="AlignItems.Center">
@@ -232,7 +256,7 @@
 					</MudTd>
 				</RowTemplate>
 				<PagerContent>
-					<MudTablePager PageSizeOptions="new int[]{25, 50, 100}" />
+					<MudTablePager PageSizeOptions="new []{25, 50, 100, 200}" />
 				</PagerContent>
 			</MudTable>
 		</MudItem>
@@ -240,13 +264,14 @@
 </MudContainer>
 
 @code {
-	private bool _askDeleteConfirmation = false;
-	private bool _showUploadServerDataLoader = false;
-	private bool _showDeleteServerLoader = false;
-	private readonly Dictionary<UserServer, bool> _askKickConfirmations = new Dictionary<UserServer, bool>();
+	private bool _askDeleteConfirmation;
+	private bool _showUploadServerDataLoader;
+	private bool _showDeleteServerLoader;
+	private readonly Dictionary<UserServer, bool> _askKickConfirmations = new ();
 	private string _searchPseudo = "";
 	private string _searchTag = "";
 	private string _searchItem = "";
+	private ItemOrTag? _selectedTag;
 
 	protected override void OnInitialized()
 	{
@@ -270,19 +295,18 @@
 
 	private List<ItemOrTag> GetItems()
 	{
-		return ContextService.CurrentServer!.Recipes
-			.SelectMany(r => r.Elements)
-			.Select(e => e.ItemOrTag)
-			.SelectMany(e => e.IsTag ? e.AssociatedItems : [])
-			.Where(e => !e.IsTag)
-			.Distinct()
-			.OrderBy(iot => ContextService.GetTranslation(iot))
-			.ToList();
+		return ServerDataService.ItemOrTags.Where(e => !e.IsTag)
+			.OrderBy(iot => ContextService.GetTranslation(iot)).ToList();
+	}
+
+	private void ToggleTag(ItemOrTag tag)
+	{
+		_selectedTag = tag == _selectedTag ? null : tag;
 	}
 
 	private List<ItemOrTag> GetTags()
 	{
-		return ContextService.CurrentServer!.ItemOrTags
+		return ServerDataService.ItemOrTags
 			.Where(e => e.IsTag)
 			.OrderBy(iot => ContextService.GetTranslation(iot))
 			.ToList();
@@ -290,15 +314,13 @@
 
 	private async Task UploadFiles(IBrowserFile file)
 	{
-		// On vérifie le type MIME pour s'assurer qu'il s'agit bien d'un fichier JSON
 		if (file != null && file.ContentType == "application/json")
 		{
-			// On lit le fichier JSON en mémoire
 			using var stream = file.OpenReadStream(10_000_000);
 			using var memoryStream = new MemoryStream();
 			await stream.CopyToAsync(memoryStream);
 
-			memoryStream.Position = 0; // Repositionner au début pour la lecture
+			memoryStream.Position = 0;
 			using var reader = new StreamReader(memoryStream);
 			string jsonContent = await reader.ReadToEndAsync();
 
@@ -328,6 +350,7 @@
 		}
 
 		userServer.IsAdmin = !userServer.IsAdmin;
+		EcoCraftDbContext.SaveChanges();
 	}
 
 	private async Task OnMinValueChange(ItemOrTag context, float? minPrice)
@@ -344,6 +367,9 @@
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
 	{
+		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to clear all min prices ?");
+		if (!confirmed) return;
+
 		foreach (var itemOrTag in itemOrTags)
 		{
 			itemOrTag.MinPrice = null;
@@ -353,6 +379,9 @@
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
 	{
+		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to clear all max prices ?");
+		if (!confirmed) return;
+
 		foreach (var itemOrTag in itemOrTags)
 		{
 			itemOrTag.MaxPrice = null;
@@ -399,12 +428,6 @@
 		await ContextService.DeleteCurrentServer();
 		_showDeleteServerLoader = false;
 		Navigation.NavigateTo("/");
-	}
-
-	private async void OnIsAdmin(UserServer userServer)
-	{
-		userServer.IsAdmin = !userServer.IsAdmin;
-		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
 	private void KickUser(UserServer userServer)
@@ -454,10 +477,12 @@
 
 	private bool FilterItem(ItemOrTag itemOrTag)
 	{
-		return FilterItemOrTag(itemOrTag, _searchItem);
+		return FilterItemOrTag(itemOrTag, _searchItem, _selectedTag);
 	}
 
-	private bool FilterItemOrTag(ItemOrTag itemOrTag, string search) {
+	private bool FilterItemOrTag(ItemOrTag itemOrTag, string search, ItemOrTag? specificTag = null) {
+		if (specificTag is not null && !itemOrTag.AssociatedTags.Contains(specificTag))
+			return false;
 		if (string.IsNullOrWhiteSpace(search))
 			return true;
 		if (itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
