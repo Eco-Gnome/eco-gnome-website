@@ -57,9 +57,9 @@
 				DefaultPathGenerator = new SmoothPathGenerator()
 			},
 		};
-		
+
 		Diagram = new BlazorDiagram(options);
-		
+
 		Diagram.RegisterComponent<TagNode, TagWidget>();
 		Diagram.RegisterComponent<ItemNode, ItemWidget>();
 		Diagram.RegisterComponent<RecipeNode, RecipeWidget>();
@@ -70,16 +70,16 @@
 	private void GenerateGraph()
 	{
 		Diagram.Nodes.Clear();
-		
+
 		var itemNodes = new Dictionary<ItemOrTag, ItemNode>();
 		var tagNodes = new Dictionary<ItemOrTag, TagNode>();
 		var recipeNodes = new List<RecipeNode>();
-		
+
 		// Create Tags and Items
 		foreach (var itemOrTag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct())
 		{
 			NodeModel node;
-			
+
 			if (itemOrTag.IsTag)
 			{
 				node = Diagram.Nodes.Add(new TagNode(itemOrTag));
@@ -90,11 +90,11 @@
 				node = Diagram.Nodes.Add(new ItemNode(itemOrTag));
 				itemNodes.Add(itemOrTag, (ItemNode)node);
 			}
-			
+
 			node.AddPort(PortAlignment.Left);
 			node.AddPort(PortAlignment.Right);
 		}
-		
+
 		// Link Tags and Items
 		foreach (var tag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct().Where(i => i.IsTag))
 		{
@@ -102,44 +102,44 @@
 			{
 				var itemNode = itemNodes.GetValueOrDefault(item);
 				var tagNode = tagNodes.GetValueOrDefault(tag);
-				
+
 				if (itemNode is not null && tagNode is not null)
 				{
 					Diagram.Links.Add(new LinkModel(
-						new SinglePortAnchor(tagNode.Ports[0]), 
+						new SinglePortAnchor(tagNode.Ports[0]),
 						new SinglePortAnchor(itemNode.Ports[1])
 					));
 					tagNode.RelatedItems.Add(itemNode);
 				}
 			}
 		}
-		
+
 		// Create Recipes and Link them to Items and Tags
 		foreach (var recipe in UserServerDataService.UserRecipes.Select(ur => ur.Recipe))
 		{
 			var recipeNode = Diagram.Nodes.Add(new RecipeNode(recipe));
-			
+
 			recipeNodes.Add(recipeNode);
-			
+
 			recipeNode.AddPort(PortAlignment.Left);
 			recipeNode.AddPort(PortAlignment.Right);
-			
+
 			foreach (var element in recipe.Elements)
 			{
 				var tagNode = tagNodes.GetValueOrDefault(element.ItemOrTag);
 				var itemNode = itemNodes.GetValueOrDefault(element.ItemOrTag);
-				
+
 				LinkModel link;
-				
+
 				if (tagNode is not null)
 				{
 					link = new LinkModel(
 						new SinglePortAnchor(recipeNode.Ports.First()),
 						new SinglePortAnchor(tagNode.Ports[element.IsIngredient() ? 1 : 0])
 					);
-					
+
 					recipeNode.InputsTags.Add(tagNode);
-				} 
+				}
 				else if (itemNode is not null)
 				{
 					if (element.IsIngredient())
@@ -163,19 +163,19 @@
 				{
 					throw new Exception("Can't find related tag or item.");
 				}
-				
+
 				link.Labels.Add(new LinkLabelModel(link, element.Quantity.ToString()));
 				Diagram.Links.Add(link);
 			}
 		}
-		
+
 		// Algorithme de placement
-		
+
 		var allNodes = new List<EcoNode>();
 		allNodes.AddRange(itemNodes.Values);
 		allNodes.AddRange(tagNodes.Values);
 		allNodes.AddRange(recipeNodes);
-		
+
 		var allEdges = new List<EcoEdge>();
 
 		foreach (var recipeNode in recipeNodes)
@@ -347,7 +347,7 @@
 	{
 		return edges.Where(e => e.Source == node && !e.IsReversed).ToList();
 	}
-	
+
 	private static void AssignLayers(List<EcoNode> allNodes, List<EcoEdge> edges)
 	{
 		// Initialiser les couches
@@ -388,7 +388,7 @@
 	{
 		return edges.Where(e => e.Target == node && !e.IsReversed).ToList();
 	}
-	
+
 	private static void OrderNodesInLayers(List<EcoNode> allNodes, List<EcoEdge> edges, int iterations)
 	{
 	    // Regrouper les nœuds par couche
@@ -454,7 +454,7 @@
 	        }
 	    }
 	}
-	
+
 	private static void AssignCoordinates(List<EcoNode> allNodes, double layerSpacing, double nodeSpacing)
 	{
 		// Regrouper les nœuds par couche

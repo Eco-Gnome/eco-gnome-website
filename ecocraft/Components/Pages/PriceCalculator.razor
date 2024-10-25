@@ -1,6 +1,7 @@
 ﻿@page "/"
 @implements IDisposable
 @using ecocraft.Components.Dialog
+@using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
@@ -16,469 +17,490 @@
 <PageTitle>Price Calculator</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-<MudGrid Style="height: auto">
-<!-- Première Colonne -->
-<MudItem md="12" lg="4" Class="pa-2 d-flex flex-column">
-    <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
-        <MudAutocomplete T="Skill"
-                         Value="_emptySkill"
-                         Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
-                         SearchFunc="SearchSkills"
-                         ValueChanged="AddUserSkill"
-                         Placeholder="Add skill"
-                         Dense="true"
-                         MaxItems="null"
-                         Variant="Variant.Outlined"
-                         AnchorOrigin="Origin.BottomLeft"
-                         TransformOrigin="Origin.TopLeft">
-            <ItemTemplate>
-                @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
-                {
-                    <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
-                }
-                <MudText>@ContextService.GetTranslation(context)</MudText>
-                @{
-                    _previousProfession = context.Profession;
-                }
-            </ItemTemplate>
-        </MudAutocomplete>
-
-        <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
-                  Hover="true"
-                  Dense="true"
-                  Class="mt-4">
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Level</MudTh>
-                <MudTh></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Class="py-3">
-                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
-                </MudTd>
-                <MudTd>
-                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
-                        <MudNumericField T="int"
-                                         Value="@context.Level"
-                                         Class="square-input flex-no-grow"
-                                         Min="1"
-                                         Max="7"
-                                         Variant="Variant.Outlined"
-                                         Immediate="true"
-                                         ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
-                        @if (context.Level >= 7 && context.Skill.LavishTalentValue is not null)
+    <MudGrid Style="height: auto">
+        <MudItem md="12" lg="4" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+                <MudAutocomplete T="Skill"
+                                 Value="_emptySkill"
+                                 Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
+                                 SearchFunc="SearchSkills"
+                                 ValueChanged="AddUserSkill"
+                                 Placeholder="Add skill"
+                                 Dense="true"
+                                 MaxItems="null"
+                                 Variant="Variant.Outlined"
+                                 AnchorOrigin="Origin.BottomLeft"
+                                 TransformOrigin="Origin.TopLeft">
+                    <ItemTemplate>
+                        @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
                         {
-                            <MudCheckBox Value="context.HasLavishTalent"
-                                         Class="dense-checkbox"
-                                         Label="Lavish talent"
-                                         Color="Color.Primary"
-                                         ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)" />
+                            <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
                         }
-                    </MudStack>
-                </MudTd>
-                <MudTd Style="text-align: right">
-                    <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
+                        <MudText>@ContextService.GetTranslation(context)</MudText>
+                        @{
+                            _previousProfession = context.Profession;
+                        }
+                    </ItemTemplate>
+                </MudAutocomplete>
 
-        <MudAutocomplete T="CraftingTable"
-                         Value="_emptyCraftingTable"
-                         Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
-                         SearchFunc="SearchCraftingTables"
-                         ValueChanged="AddUserCraftingTable"
-                         Placeholder="Add crafting table"
-                         Dense="true"
-                         Class="mt-4"
-                         MaxItems="null"
-                         Variant="Variant.Outlined"
-                         AnchorOrigin="Origin.BottomLeft"
-                         TransformOrigin="Origin.TopLeft">
-            <ItemTemplate>
-                <MudText>@ContextService.GetTranslation(context)</MudText>
-            </ItemTemplate>
-        </MudAutocomplete>
+                <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
+                          Hover="true"
+                          Dense="true"
+                          Class="mt-4">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Level</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd Class="py-3">
+                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
+                                <MudNumericField T="int"
+                                                 Value="@context.Level"
+                                                 Class="square-input flex-no-grow"
+                                                 Min="1"
+                                                 Max="7"
+                                                 Variant="Variant.Outlined"
+                                                 Immediate="true"
+                                                 ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
+                                <MudCheckBox Value="context.HasLavishTalent"
+                                             Class="dense-checkbox"
+                                             Style="@($"visibility: {(context.Level >= 7 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
+                                             Label="Lavish talent"
+                                             Color="Color.Primary"
+                                             ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)" />
+                            </MudStack>
+                        </MudTd>
+                        <MudTd Style="text-align: right">
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
 
-        <MudTable Items="UserServerDataService.UserCraftingTables"
-                  FixedHeader="true"
-                  Hover="true"
-                  Class="mt-4"
-                  Dense="true">
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Upgrade</MudTh>
-                <MudTh Class="px-1">Cost per min</MudTh>
-                <MudTh Class="px-1"></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Class="py-3">
-                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
-                </MudTd>
-                <MudTd>
-                    @if (context.CraftingTable.PluginModules.Count > 0)
-                    {
-                        <MudSelect T="PluginModule"
-                                   Class="select-dense very-dense"
-                                   Placeholder="Choose a module"
-                                   Value="context.PluginModule"
-                                   ValueChanged="@(value => ChangePluginModule(context, value))"
-                                   Dense="true"
-                                   Typo="Typo.body2"
-                                   Variant="Variant.Outlined"
-                                   ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
-                                   AnchorOrigin="Origin.BottomLeft"
-                                   TransformOrigin="Origin.TopLeft">
-                            <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
-                            @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
-                            {
-                                <MudSelectItem T="PluginModule"
-                                               Value="@pluginModule">
-                                    <MudText Typo="Typo.body2">
-                                        @ContextService.GetTranslation(pluginModule)
-                                    </MudText>
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    }
-                </MudTd>
-                <MudTd Class="px-1">
-                    <MudNumericField T="float"
-                                     Style="max-width: 85px;"
-                                     Class="rectangle-input"
-                                     Format="N2"
-                                     ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
-                                     Value="@context.CraftMinuteFee"
-                                     Variant="Variant.Outlined"/>
-                </MudTd>
-                <MudTd Class="px-1">
-                    <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-    </MudPaper>
-</MudItem>
+                <MudAutocomplete T="CraftingTable"
+                                 Value="_emptyCraftingTable"
+                                 Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
+                                 SearchFunc="SearchCraftingTables"
+                                 ValueChanged="AddUserCraftingTable"
+                                 Placeholder="Add crafting table"
+                                 Dense="true"
+                                 Class="mt-4"
+                                 MaxItems="null"
+                                 Variant="Variant.Outlined"
+                                 AnchorOrigin="Origin.BottomLeft"
+                                 TransformOrigin="Origin.TopLeft">
+                    <ItemTemplate>
+                        <MudText>@ContextService.GetTranslation(context)</MudText>
+                    </ItemTemplate>
+                </MudAutocomplete>
 
-<!-- Deuxième Colonne -->
-<MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
-    <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
-        <MudStack Spacing="0">
-            @if (UserServerDataService.UserSetting is not null)
-            {
-                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudText>Display non-skilled recipes</MudText>
-                    <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
-                </MudStack>
-                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudText>Only level-accessible recipes</MudText>
-                    <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
-                </MudStack>
-            }
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText>Cost per 1000 calories</MudText>
-                @if (UserServerDataService.UserSetting is not null)
-                {
-                    <div>
-                        <MudNumericField T="float"
-                                         ValueChanged="UpdateCalorieCost"
-                                         Style="height: 35px; width: 100px"
-                                         Value="UserServerDataService.UserSetting.CalorieCost"
-                                         Variant="Variant.Outlined"/>
-                    </div>
-                }
-            </MudStack>
-
-            @if (UserServerDataService.UserSetting is not null)
-            {
-                <MudTable Items="UserServerDataService.UserMargins"
+                <MudTable Items="UserServerDataService.UserCraftingTables"
                           FixedHeader="true"
                           Hover="true"
                           Class="mt-4"
                           Dense="true">
                     <HeaderContent>
-                        <MudTh>
-                            <MudStack Row>
-                                <MudText Typo="Typo.body1">Margin</MudText>
-                                <MudIconButton Size="Size.Small"
-                                               Class="pa-0 pl-2"
-                                               Icon="@(_showMargins ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
-                                               OnClick="@(() => _showMargins = !_showMargins)"/>
-                            </MudStack>
-                        </MudTh>
-                        <MudTh></MudTh>
-                        <MudTh Style="text-align: right">
-                            @if (!_showMargins)
-                            {
-                                <MudText Typo="Typo.body2">@(UserServerDataService.UserMargins.Count) margins</MudText>
-                            }
-                        </MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Upgrade</MudTh>
+                        <MudTh Class="px-1">Cost per min</MudTh>
+                        <MudTh Class="px-1"></MudTh>
                     </HeaderContent>
-                    <FooterContent>
-                        @if (_showMargins)
-                        {
-                            <MudTd colspan="3">
-                                <MudStack Row Justify="Justify.Center">
-                                    <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="OnAddMargin">Add margin</MudButton>
-                                </MudStack>
-                            </MudTd>
-                        }
-                    </FooterContent>
                     <RowTemplate>
+                        <MudTd Class="py-3">
+                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                        </MudTd>
+                        <MudTd>
+                            @if (context.CraftingTable.PluginModules.Count > 0)
+                            {
+                                <MudSelect T="PluginModule"
+                                           Class="select-dense very-dense"
+                                           Placeholder="Choose a module"
+                                           Value="context.PluginModule"
+                                           ValueChanged="@(value => ChangePluginModule(context, value))"
+                                           Dense="true"
+                                           Typo="Typo.body2"
+                                           Variant="Variant.Outlined"
+                                           ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
+                                           AnchorOrigin="Origin.BottomLeft"
+                                           TransformOrigin="Origin.TopLeft">
+                                    <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
+                                    @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
+                                    {
+                                        <MudSelectItem T="PluginModule"
+                                                       Value="@pluginModule">
+                                            <MudText Typo="Typo.body2">
+                                                @ContextService.GetTranslation(pluginModule)
+                                            </MudText>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                        </MudTd>
+                        <MudTd Class="px-1">
+                            <MudNumericField T="float"
+                                             Style="max-width: 85px;"
+                                             Class="rectangle-input"
+                                             Format="N2"
+                                             ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
+                                             Value="@context.CraftMinuteFee"
+                                             Variant="Variant.Outlined"/>
+                        </MudTd>
+                        <MudTd Class="px-1">
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+                <MudStack Spacing="0">
+                    @if (UserServerDataService.UserSetting is not null)
+                    {
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText>Display non-skilled recipes</MudText>
+                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
+                        </MudStack>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText>Only level-accessible recipes</MudText>
+                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
+                        </MudStack>
+                    }
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText>Cost per 1000 calories</MudText>
+                        @if (UserServerDataService.UserSetting is not null)
+                        {
+                            <div>
+                                <MudNumericField T="float"
+                                                 ValueChanged="UpdateCalorieCost"
+                                                 Style="height: 35px; width: 100px"
+                                                 Value="UserServerDataService.UserSetting.CalorieCost"
+                                                 Variant="Variant.Outlined"/>
+                            </div>
+                        }
+                    </MudStack>
+
+                    @if (UserServerDataService.UserSetting is not null)
+                    {
+                        <MudTable Items="UserServerDataService.UserMargins"
+                                  FixedHeader="true"
+                                  Hover="true"
+                                  Class="mt-4"
+                                  Dense="true">
+                            <HeaderContent>
+                                <MudTh>
+                                    <MudStack Row>
+                                        <MudText Typo="Typo.body1">Margin</MudText>
+                                        <MudIconButton Size="Size.Small"
+                                                       Class="pa-0 pl-2"
+                                                       Icon="@(_showMargins ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
+                                                       OnClick="@(() => _showMargins = !_showMargins)"/>
+                                    </MudStack>
+                                </MudTh>
+                                <MudTh></MudTh>
+                                <MudTh Style="text-align: right">
+                                    @if (!_showMargins)
+                                    {
+                                        <MudText Typo="Typo.body2">@(UserServerDataService.UserMargins.Count) margins</MudText>
+                                    }
+                                </MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                @if (_showMargins)
+                                {
+                                    <MudTd Class="py-1">
+                                        <MudTextField Value="context.Name"
+                                                      Typo="Typo.body2"
+                                                      Style="border-bottom-color: gray"
+                                                      ValueChanged="@((string v) => UpdateMarginName(context, v))" />
+                                    </MudTd>
+                                    <MudTd Class="py-1">
+                                        <MudNumericField T="float"
+                                                         Class="rectangle-input"
+                                                         Style="height: 35px; width: 110px"
+                                                         Value="context.Margin"
+                                                         Min="0"
+                                                         Adornment="Adornment.End"
+                                                         AdornmentText="% "
+                                                         Converter="@CultureInvariantConverter.DotOrComma"
+                                                         ValueChanged="@(v => UpdateMargin(context, v))"
+                                                         Variant="Variant.Outlined"/>
+                                    </MudTd>
+                                    <MudTd Class="py-1" Style="text-align: right;">
+                                        <MudTooltip Text="Remove margin">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => OnRemoveMargin(context))"/>
+                                        </MudTooltip>
+                                    </MudTd>
+                                }
+                            </RowTemplate>
+                        </MudTable>
                         @if (_showMargins)
                         {
-                            <MudTd>
-                                <MudTextField Value="context.Name" ValueChanged="@((string value) => UpdateMarginName(context, value))"></MudTextField>
+                            <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudButton Class="py-1" StartIcon="@Icons.Material.Filled.Add" OnClick="OnAddMargin">Add margin</MudButton>
+                            </MudStack>
+                        }
+                    }
+                </MudStack>
+
+                <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
+
+                <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
+                          Dense="true"
+                          Hover="true">
+                    <HeaderContent>
+                        <MudTh>
+                            Name
+                            <MudIconButton Size="Size.Small"
+                                           Class="pa-0 pl-2"
+                                           Icon="@(_showTagItems ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
+                                           OnClick="@(() => _showTagItems = !_showTagItems)"/>
+                        </MudTh>
+                        <MudTh>Price</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @{
+                            var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
+
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
+                                <MudText Typo="Typo.body2">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        @if (context.IsTag)
+                                        {
+                                            <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
+                                        }
+                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+                                    </MudStack>
+
+                                    @if (!_showTagItems && userPriceTag.PrimaryUserPrice is not null)
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center" Class="pl-8 d-flex" Spacing="1">
+                                            <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowRightBottom"/>
+                                            <MudText Typo="Typo.body2">
+                                                @ContextService.GetTranslation(userPriceTag.PrimaryUserPrice.ItemOrTag)
+                                            </MudText>
+                                        </MudStack>
+                                    }
+                                </MudText>
                             </MudTd>
-                            <MudTd>
-                                <MudNumericField T="float"
-                                                 Style="height: 35px; width: 100px"
-                                                 Value="context.Margin"
-                                                 Adornment="Adornment.End"
-                                                 AdornmentText="%"
-                                                 Min="0"
-                                                 ValueChanged="@((float value) => UpdateMargin(context, value))"
-                                                 Variant="Variant.Outlined"/>
-                            </MudTd>
-                            <MudTd>
-                                <MudTooltip Text="Remove margin">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Error" OnClick="@(() => OnRemoveMargin(context))"/>
-                                </MudTooltip>
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")" Style="position: relative;">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudNumericField T="float?"
+                                                     Class="rectangle-input"
+                                                     Disabled="@(context.IsTag)"
+                                                     HideSpinButtons="@(context.IsTag)"
+                                                     Value="userPriceTag.Price"
+                                                     Immediate="true"
+                                                     Format="N2"
+                                                     Variant="Variant.Outlined"
+                                                     Min="context.MinPrice"
+                                                     Max="context.MaxPrice"
+                                                     ValueChanged="@(value => UpdatePriceCalculation(userPriceTag, value))"/>
+                                    @if (context.IsTag && userPriceTag.Price is null)
+                                    {
+                                        <MudTooltip Text="This value will be the minimum price of it's related items, unless you choose a specific one by clicking a star.">
+                                            <MudIcon Style="position: absolute; left: 99px; top: 7px"
+                                                     Icon="@MDIIcons.Outline.Information"
+                                                     Class="ml-n2"/>
+                                        </MudTooltip>
+                                    }
+                                </MudStack>
                             </MudTd>
                         }
                     </RowTemplate>
-                </MudTable>
-            }
-        </MudStack>
-
-        <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
-
-        <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
-                  Dense="true"
-                  Hover="true">
-            <HeaderContent>
-                <MudTh>
-                    Name
-                    <MudIconButton Size="Size.Small"
-                                   Class="pa-0 pl-2"
-                                   Icon="@(_showTagItems ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
-                                   OnClick="@(() => _showTagItems = !_showTagItems)"/>
-                </MudTh>
-                <MudTh>Price</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                @{
-                    var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
-
-                    <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
-                        <MudText Typo="Typo.body2">
-                            @ContextService.GetTranslation(context)
-
-                            @if (!_showTagItems && userPriceTag.PrimaryUserPrice is not null)
+                    <ChildRowContent>
+                        @if (_showTagItems)
+                        {
+                            @foreach (var item in context.AssociatedItems)
                             {
-                                <p Class="pl-2 d-flex">
-                                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Star"/>
-                                    <MudText Class="pl-1" Style="padding-top: 1px" Typo="Typo.body2">
-                                        @ContextService.GetTranslation(userPriceTag.PrimaryUserPrice.ItemOrTag)
-                                    </MudText>
-                                </p>
-                            }
-                        </MudText>
-                    </MudTd>
-                    <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
-                        <MudNumericField T="float?"
-                                         Class="rectangle-input"
-                                         Disabled="@(context.IsTag)"
-                                         HideSpinButtons="@(context.IsTag)"
-                                         Value="userPriceTag.Price"
-                                                 Immediate="true"
-                                         Format="N2"
-                                         Variant="Variant.Outlined"
-                                         Min="context.MinPrice"
-                                         Max="context.MaxPrice"
-                                         ValueChanged="@(value => UpdatePriceCalculation(userPriceTag, value))"/>
-                    </MudTd>
-                }
-            </RowTemplate>
-            <ChildRowContent>
-                @if (_showTagItems)
-                {
-                    @foreach (var item in context.AssociatedItems)
-                    {
-                        var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
-                        var userPriceItem = UserServerDataService.UserPrices.First(up => up.ItemOrTag == item);
+                                var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
+                                var userPriceItem = UserServerDataService.UserPrices.First(up => up.ItemOrTag == item);
 
-                        <MudTr>
-                            <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
+                                <MudTr>
+                                    <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
+                                        <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                            <MudIconButton tabindex="-1"
+                                                           Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
+                                            <MudText Typo="Typo.body2" Class="pt-1">@ContextService.GetTranslation(item)</MudText>
+                                        </MudStack>
+                                    </MudTd>
+                                    <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
+                                        <MudStack Row Style="position: relative;">
+                                            <MudNumericField T="float?"
+                                                             Class="rectangle-input"
+                                                             HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
+                                                             Format="N2"
+                                                             Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
+                                                             Value="userPriceItem.Price"
+                                                             Immediate="true"
+                                                             Min="item.MinPrice"
+                                                             Max="item.MaxPrice"
+                                                             ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
+                                                             Variant="Variant.Outlined"/>
+                                            @if (PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))
+                                            {
+                                                <MudTooltip Text="This value is automatically calculated by the system.">
+                                                    <MudIcon Style="position: absolute; top: 1px; left: 78px;"
+                                                             Icon="@MDIIcons.Filled.Calculator"></MudIcon>
+                                                </MudTooltip>
+                                            }
+                                        </MudStack>
+                                    </MudTd>
+                                </MudTr>
+                            }
+                        }
+                    </ChildRowContent>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+                <MudAutocomplete T="Recipe"
+                                 Value="_emptyRecipe"
+                                 Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
+                                 SearchFunc="SearchRecipes"
+                                 ValueChanged="AddUserRecipe"
+                                 Placeholder="Add recipe"
+                                 Dense="true"
+                                 MaxItems="null"
+                                 Variant="Variant.Outlined"
+                                 AnchorOrigin="Origin.BottomLeft"
+                                 TransformOrigin="Origin.TopLeft">
+                    <ItemTemplate>
+                        <MudText>@ContextService.GetTranslation(context)</MudText>
+                    </ItemTemplate>
+                </MudAutocomplete>
+
+                <MudTable Items="PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToSell"
+                          Class="mt-4"
+                          Dense="true"
+                          Hover="true">
+                    <HeaderContent>
+                        <MudTh>
+                            Item Name
+                            <MudIconButton Icon="@(_showMultiRecipes ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
+                                           Size="Size.Small"
+                                           Class="pa-0 pl-2"
+                                           OnClick="@(() => _showMultiRecipes = !_showMultiRecipes)"/>
+                        </MudTh>
+                        <MudTh>Prices w/wo margin</MudTh>
+                        <MudTh Class="px-1">Margin</MudTh>
+                        <MudTh Class="px-1"></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        @{
+                            var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
+                            var relatedUserElements = UserServerDataService.UserElements
+                                .Where(ue => ue.Element.IsProduct()
+                                             && ue.Element.ItemOrTag == context
+                                             && !ue.IsReintegrated)
+                                .ToList();
+
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                                <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
+                                    @ContextService.GetTranslation(context)
+                                </MudLink>
+                            </MudTd>
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
                                 <MudStack Row>
-                                    <MudIconButton tabindex="-1"
-                                                   Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                   Size="Size.Small"
-                                                   OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
-                                    <p Class="pt-1 pl-1">@ContextService.GetTranslation(item)</p>
+                                    <MudNumericField T="float?"
+                                                        Class="mt-0"
+                                                        Style="height: 26px; width: 75px"
+                                                        HideSpinButtons="true"
+                                                        Format="N2"
+                                                        Disabled="true"
+                                                        Value="userPrice.Price"
+                                                        Variant="Variant.Outlined" />
+                                    <MudNumericField T="float?"
+                                                        Class="mt-0"
+                                                        Style="height: 26px; width: 75px"
+                                                        HideSpinButtons="true"
+                                                        Format="N2"
+                                                        Disabled="true"
+                                                        Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
+                                                        Variant="Variant.Outlined" />
                                 </MudStack>
                             </MudTd>
-                            <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
-                                <MudNumericField T="float?"
-                                                 Class="rectangle-input"
-                                                 HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
-                                                 Format="N2"
-                                                 Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
-                                                 Value="userPriceItem.Price"
-                                                 Immediate="true"
-                                                 Min="item.MinPrice"
-                                                 Max="item.MaxPrice"
-                                                 ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
-                                                 Variant="Variant.Outlined"/>
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                                <MudSelect
+                                    T="UserMargin"
+                                    Value="userPrice.UserMargin"
+                                    ValueChanged="@(value => ChangeUserPriceMargin(userPrice, value))"
+                                    ToStringFunc="@(um => um.Margin + " %")"
+                                    Class="select-dense very-dense"
+                                    Dense="true"
+                                    Variant="Variant.Outlined"
+                                    AnchorOrigin="Origin.BottomLeft"
+                                    TransformOrigin="Origin.TopLeft">
+                                    @foreach (var userMargin in UserServerDataService.UserMargins)
+                                    {
+                                        <MudSelectItem T="UserMargin"
+                                                       Value="userMargin">
+                                            @userMargin.Margin %
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
                             </MudTd>
-                        </MudTr>
-                    }
-                }
-            </ChildRowContent>
-        </MudTable>
-    </MudPaper>
-</MudItem>
-
-<!-- Troisième Colonne -->
-<MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
-    <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
-        <MudAutocomplete T="Recipe"
-                         Value="_emptyRecipe"
-                         Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
-                         SearchFunc="SearchRecipes"
-                         ValueChanged="AddUserRecipe"
-                         Placeholder="Add recipe"
-                         Dense="true"
-                         MaxItems="null"
-                         Variant="Variant.Outlined"
-                         AnchorOrigin="Origin.BottomLeft"
-                         TransformOrigin="Origin.TopLeft">
-            <ItemTemplate>
-                <MudText>@ContextService.GetTranslation(context)</MudText>
-            </ItemTemplate>
-        </MudAutocomplete>
-
-        <MudTable Items="PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToSell"
-                  Class="mt-4"
-                  Dense="true"
-                  Hover="true">
-            <HeaderContent>
-                <MudTh>
-                    Item Name
-                    <MudIconButton Icon="@(_showMultiRecipes ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
-                                   Size="Size.Small"
-                                   Class="pa-0 pl-2"
-                                   OnClick="@(() => _showMultiRecipes = !_showMultiRecipes)"/>
-                </MudTh>
-                <MudTh>Prices w/wo margin</MudTh>
-                <MudTh Class="px-1">Margin</MudTh>
-                <MudTh Class="px-1"></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                @{
-                    var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
-                    var relatedUserElements = UserServerDataService.UserElements
-                        .Where(ue => ue.Element.IsProduct()
-                                     && ue.Element.ItemOrTag == context
-                                     && !ue.IsReintegrated)
-                        .ToList();
-
-                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
-                        <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
-                            @ContextService.GetTranslation(context)
-                        </MudLink>
-                    </MudTd>
-                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
-                        <MudStack Row>
-                            <MudNumericField T="float?"
-                                                Class="mt-0"
-                                                Style="height: 26px; width: 75px"
-                                                HideSpinButtons="true"
-                                                Format="N2"
-                                                Disabled="true"
-                                                Value="userPrice.Price"
-                                                Variant="Variant.Outlined" />
-                            <MudNumericField T="float?"
-                                                Class="mt-0"
-                                                Style="height: 26px; width: 75px"
-                                                HideSpinButtons="true"
-                                                Format="N2"
-                                                Disabled="true"
-                                                Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
-                                                Variant="Variant.Outlined" />
-                        </MudStack>
-                    </MudTd>
-                    <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
-                        <MudSelect
-                            T="UserMargin"
-                            Value="userPrice.UserMargin"
-                            ValueChanged="@(value => ChangeUserPriceMargin(userPrice, value))"
-                            ToStringFunc="@(um => um.Margin + " %")"
-                            Class="select-dense very-dense"
-                            Dense="true"
-                            Variant="Variant.Outlined"
-                            AnchorOrigin="Origin.BottomLeft"
-                            TransformOrigin="Origin.TopLeft">
-                            @foreach (var userMargin in UserServerDataService.UserMargins)
-                            {
-                                <MudSelectItem T="UserMargin"
-                                               Value="userMargin">
-                                    @userMargin.Margin %
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudTd>
-                    <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")} px-1")">
-                        <MudIconButton
-                            Icon="@(relatedUserElements.Count > 1 && _showMultiRecipes ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
-                            Size="Size.Small"
-                            OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))">
-                        </MudIconButton>
-                    </MudTd>
-                }
-            </RowTemplate>
-            <ChildRowContent>
-                @if (_showMultiRecipes)
-                {
-                    var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
-                    var relatedElements = UserServerDataService.UserElements
-                        .Where(ue => ue.Element.IsProduct()
-                                     && ue.Element.ItemOrTag == context
-                                     && !ue.IsReintegrated)
-                        .ToList();
-
-                    @if (relatedElements.Count > 1)
-                    {
-                        @foreach (var userElement in relatedElements)
-                        {
-                            <MudTr>
-                                <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")"
-                                       Style="white-space: nowrap;overflow: hidden; max-width: 280px">
-                                    <MudIconButton Icon="@(userPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                   Size="Size.Small"
-                                                   OnClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
-                                    <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
-                                        @ContextService.GetTranslation(userElement.Element.Recipe)
-                                    </MudLink>
-                                </MudTd>
-                                <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
-                                    <MudStack Row>
-                                        <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
-                                        <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
-                                    </MudStack>
-                                </MudTd>
-                                <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")"></MudTd>
-                                <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))"></MudIconButton>
-                                </MudTd>
-                            </MudTr>
+                            <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")} px-1")">
+                                <MudIconButton
+                                    Icon="@(relatedUserElements.Count > 1 && _showMultiRecipes ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
+                                    Size="Size.Small"
+                                    OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))">
+                                </MudIconButton>
+                            </MudTd>
                         }
-                    }
-                }
-            </ChildRowContent>
-        </MudTable>
-    </MudPaper>
-</MudItem>
+                    </RowTemplate>
+                    <ChildRowContent>
+                        @if (_showMultiRecipes)
+                        {
+                            var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
+                            var relatedElements = UserServerDataService.UserElements
+                                .Where(ue => ue.Element.IsProduct()
+                                             && ue.Element.ItemOrTag == context
+                                             && !ue.IsReintegrated)
+                                .ToList();
 
-</MudGrid>
+                            @if (relatedElements.Count > 1)
+                            {
+                                @foreach (var userElement in relatedElements)
+                                {
+                                    <MudTr>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")"
+                                               Style="white-space: nowrap;overflow: hidden; max-width: 280px">
+                                            <MudIconButton Icon="@(userPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
+                                            <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
+                                                @ContextService.GetTranslation(userElement.Element.Recipe)
+                                            </MudLink>
+                                        </MudTd>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
+                                            <MudStack Row>
+                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
+                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                            </MudStack>
+                                        </MudTd>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")"></MudTd>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))"></MudIconButton>
+                                        </MudTd>
+                                    </MudTr>
+                                }
+                            }
+                        }
+                    </ChildRowContent>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
 </MudContainer>
 
 @code {
@@ -656,7 +678,9 @@
         userSkill.Level = newLevel;
 
         if (userSkill.Level < 7)
+        {
             userSkill.HasLavishTalent = false;
+        }
 
         if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
         {
@@ -711,6 +735,7 @@
 
     private async Task UpdateMargin(UserMargin userMargin, float margin)
     {
+
         userMargin.Margin = margin;
         //await PriceCalculatorService.Calculate();
         await EcoCraftDbContext.SaveChangesAsync();

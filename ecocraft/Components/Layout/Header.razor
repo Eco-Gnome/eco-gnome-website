@@ -34,7 +34,11 @@
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
         }
     </MudSelect>
-    <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Outlined" Color="Color.Tertiary" aria-label="Create Server" OnClick="CreateServer" />
+    <MudIconButton Icon="@MDIIcons.Filled.ServerPlus"
+                   Size="Size.Small"
+                   aria-label="Create server"
+                   Color="Color.Tertiary"
+                   OnClick="CreateServer" />
 </MudStack>
 
 
