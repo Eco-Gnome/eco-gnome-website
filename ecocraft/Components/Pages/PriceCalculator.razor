@@ -16,10 +16,10 @@
 
 <PageTitle>Price Calculator</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
     <MudGrid Style="height: auto">
-        <MudItem md="12" lg="4" Class="pa-2 d-flex flex-column">
-            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+        <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                 <MudAutocomplete T="Skill"
                                  Value="_emptySkill"
                                  Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
@@ -157,7 +157,7 @@
         </MudItem>
 
         <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
-            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                 <MudStack Spacing="0">
                     @if (UserServerDataService.UserSetting is not null)
                     {
@@ -360,8 +360,8 @@
             </MudPaper>
         </MudItem>
 
-        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
-            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-4">
+        <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                 <MudAutocomplete T="Recipe"
                                  Value="_emptyRecipe"
                                  Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
@@ -390,6 +390,7 @@
                                            Class="pa-0 pl-2"
                                            OnClick="@(() => _showMultiRecipes = !_showMultiRecipes)"/>
                         </MudTh>
+                        <MudTh>Override price</MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
                         <MudTh Class="px-1">Margin</MudTh>
                         <MudTh Class="px-1"></MudTh>
@@ -408,6 +409,10 @@
                                     @ContextService.GetTranslation(context)
                                 </MudLink>
                             </MudTd>
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                                <MudSwitch Value=userPrice.OverrideIsBought Color="Color.Primary" ValueChanged="@((bool val) => OnOverridePrice(val, userPrice))"></MudSwitch>
+                            </MudTd>
+                            
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
                                 <MudStack Row>
                                     <MudNumericField T="float?"
@@ -772,8 +777,6 @@
         userPrice.UserMargin = userMargin;
         UserPriceDbService.Update(userPrice);
         await EcoCraftDbContext.SaveChangesAsync();
-        //await PriceCalculatorService.Calculate();
-        //StateHasChanged();
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
@@ -809,6 +812,13 @@
     {
         userCraftingTable.CraftMinuteFee = value;
         await PriceCalculatorService.Calculate();
+    }
+
+    private async Task OnOverridePrice(bool value, UserPrice userPrice)
+    {
+        userPrice.OverrideIsBought = value;
+        UserPriceDbService.Update(userPrice);
+        await EcoCraftDbContext.SaveChangesAsync();
     }
 
 }
