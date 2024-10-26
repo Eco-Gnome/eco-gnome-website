@@ -45,13 +45,13 @@ public class PriceCalculatorService(
         return (listOfIngredients, listOfProducts);
     }
 
-    public async Task Calculate(bool debug = false)
+    public async Task Calculate(bool debug = true)
     {
         // Reset Prices
         var (_, itemOrTagsToSell) = GetCategorizedItemOrTags();
 
-        userServerDataService.UserElements.ForEach(ue => ue.Price = null);
-        userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag).ToList().ForEach(ue => ue.Price = null);
+        userServerDataService.UserElements.ForEach(ue => ue.Price = userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).OverrideIsBought ? userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price : null);
+        userServerDataService.UserPrices.Where(up => itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag).ToList().ForEach(up => up.Price = up.OverrideIsBought ? up.Price : null);
 
         List<UserRecipe> remainingUserRecipes = userServerDataService.UserRecipes.ToList();
         int nbHandled;
@@ -73,6 +73,9 @@ public class PriceCalculatorService(
                 {
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == ingredient.Element.ItemOrTag);
 
+                    if (associatedUserPrice.OverrideIsBought)
+                        continue;
+
                     if (associatedUserPrice.Price is not null)
                     {
                         ingredient.Price = associatedUserPrice.Price;
@@ -85,7 +88,7 @@ public class PriceCalculatorService(
 
                     if (associatedUserPrice.PrimaryUserPrice?.Price is not null)
                     {
-                        associatedUserPrice.Price = associatedUserPrice.PrimaryUserPrice.Price;
+                        associatedUserPrice.Price = associatedUserPrice.PrimaryUserPrice.Price;                        
                         ingredient.Price = associatedUserPrice.Price;
                         if (debug) Console.WriteLine($"=> Ingredient Tag (from primary) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
 
@@ -157,32 +160,37 @@ public class PriceCalculatorService(
 
                 foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                 {
-                    product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
-                    if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
-
                     // Calculate the associated User price if needed
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
-                    if (associatedUserPrice.Price is null)
+                    //if (!associatedUserPrice.OverrideIsBought)
                     {
-                        // We choose the PrimaryUserElement.Price
-                        if (associatedUserPrice.PrimaryUserElement == product)
-                        {
-                            associatedUserPrice.Price = product.Price;
-                        }
-                        else if (associatedUserPrice.PrimaryUserElement is null)
-                        {
-                            // Or we choose the min price of all related user element
-                            var relatedUserElements = userServerDataService.UserElements.Where(ue => ue.Element.ItemOrTag == associatedUserPrice.ItemOrTag
-                                                                                                     && ue.Element.IsProduct()
-                                                                                                     && !ue.IsReintegrated).ToList();
+                        product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
+                        if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
 
-                            if (relatedUserElements.All(ue => ue.Price is not null))
+                        if (associatedUserPrice.Price is null)
+                        {
+                            // We choose the PrimaryUserElement.Price
+                            if (associatedUserPrice.PrimaryUserElement == product)
                             {
-                                associatedUserPrice.Price = relatedUserElements.Min(ue => ue.Price);
+                                associatedUserPrice.Price = product.Price;
+                            }
+                            else if (associatedUserPrice.PrimaryUserElement is null)
+                            {
+                                // Or we choose the min price of all related user element
+                                var relatedUserElements = userServerDataService.UserElements.Where(ue => ue.Element.ItemOrTag == associatedUserPrice.ItemOrTag
+                                                                                                         && ue.Element.IsProduct()
+                                                                                                         && !ue.IsReintegrated).ToList();
+
+                                if (relatedUserElements.All(ue => ue.Price is not null))
+                                {
+                                    associatedUserPrice.Price = relatedUserElements.Min(ue => ue.Price);
+                                }
                             }
                         }
                     }
+
+                    
                 }
 
                 nbHandled++;
