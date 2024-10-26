@@ -382,6 +382,13 @@
                           Class="mt-4"
                           Dense="true"
                           Hover="true">
+                    <ColGroup>
+                        <col />
+                        <col style="width: 40px;" />
+                        <col />
+                        <col />
+                        <col />
+                    </ColGroup>
                     <HeaderContent>
                         <MudTh>
                             Item Name
@@ -410,7 +417,9 @@
                                 </MudLink>
                             </MudTd>
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
-                                <MudSwitch Value=userPrice.OverrideIsBought Color="Color.Primary" ValueChanged="@((bool val) => OnOverridePrice(val, userPrice))"></MudSwitch>
+                                <MudSwitch  Value=userPrice.OverrideIsBought Color="Color.Primary" 
+                                            ValueChanged="@((bool val) => OnOverridePrice(val, userPrice))"
+                                            Size="Size.Small"></MudSwitch>
                             </MudTd>
                             
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
@@ -486,6 +495,7 @@
                                                 @ContextService.GetTranslation(userElement.Element.Recipe)
                                             </MudLink>
                                         </MudTd>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")"></MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
                                             <MudStack Row>
                                                 <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
