@@ -75,6 +75,10 @@
     background-color: #303038 !important;
 }
 
+.mud-table-container {
+    overflow-y: hidden !important;
+}
+
 .dense-checkbox .mud-button-root {
     padding: 4px;
 }
