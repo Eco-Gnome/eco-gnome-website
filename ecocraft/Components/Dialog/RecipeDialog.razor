@@ -18,9 +18,14 @@
             </MudStack>
             <MudStack Row>
                 <MudText>Labor: @Recipe.Labor</MudText>
-                <MudText Color="Color.Primary">
-                    @(Math.Round(GetLaborPrice(), 3)) $
-                </MudText>
+                <MudStack Row>
+                    <MudText Color="Color.Primary">
+                        @(Math.Round(GetLaborPrice(), 3)) $
+                    </MudText>
+                    <MudText>
+                        (-@(Math.Round((1 - GetLaborReducePercent()), 1) * 100) %)
+                    </MudText>
+                </MudStack>
             </MudStack>
 
             <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true">
@@ -191,7 +196,12 @@
     {
         return Recipe.Labor
             * UserServerDataService.UserSetting!.CalorieCost / 1000
-            * (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
+            * GetLaborReducePercent();
+    }
+
+    private float GetLaborReducePercent()
+    {
+        return (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
     }
 
     private float GetCraftMinutePrice()
