@@ -45,7 +45,7 @@ public class PriceCalculatorService(
         return (listOfIngredients, listOfProducts);
     }
 
-    public async Task Calculate(bool debug = false)
+    public async Task Calculate(bool debug = true)
     {
         // Reset Prices
         var (_, itemOrTagsToSell) = GetCategorizedItemOrTags();
@@ -164,10 +164,8 @@ public class PriceCalculatorService(
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
                     //if (!associatedUserPrice.OverrideIsBought)
-                    {                    
-                        product.Price = ingredientCostSum * 
-                                        product.Share 
-                                        / product.Element.Quantity;
+                    {
+                        product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
                         if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
 
                         if (associatedUserPrice.Price is null)
