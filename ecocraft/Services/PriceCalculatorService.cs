@@ -45,7 +45,7 @@ public class PriceCalculatorService(
         return (listOfIngredients, listOfProducts);
     }
 
-    public async Task Calculate(bool debug = true)
+    public async Task Calculate(bool debug = false)
     {
         // Reset Prices
         var (_, itemOrTagsToSell) = GetCategorizedItemOrTags();
@@ -131,8 +131,8 @@ public class PriceCalculatorService(
                 var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
                 var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
 
-                var ingredientCostSum = -1 * userElementIngredients.Sum(ing => ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic
-                    ? userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.Element.Quantity * (ue.Element.IsDynamic
+                    ? userServerDataService.UserSkills.First(us => us.Skill == ue.Element.Skill).HasLavishTalent
                         ? pluginModulePercent * lavishTalentValue
                         : pluginModulePercent
                     : 1));
@@ -164,8 +164,10 @@ public class PriceCalculatorService(
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
                     //if (!associatedUserPrice.OverrideIsBought)
-                    {
-                        product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
+                    {                    
+                        product.Price = ingredientCostSum * 
+                                        product.Share 
+                                        / product.Element.Quantity;
                         if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
 
                         if (associatedUserPrice.Price is null)

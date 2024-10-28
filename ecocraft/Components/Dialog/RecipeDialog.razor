@@ -4,7 +4,7 @@
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 
-<MudDialog MaxWidth="MaxWidth.Medium" Style="width: 600px; min-height: 500px;">
+<MudDialog Style="min-height: 500px;">
     <DialogContent>
         <MudStack Spacing="2">
             <MudText>CraftingTable: @ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
@@ -13,7 +13,7 @@
                 <MudText>Skill: @ContextService.GetTranslation(Recipe.Skill) @(Recipe.SkillLevel)</MudText>
             }
             <MudStack Row>
-                <MudText>Craft Time: </MudText>
+                <MudText>Craft Time: @GetFormatedCraftTime(@Recipe.CraftMinutes)</MudText>
                 <MudText Color="Color.Primary">@GetCraftMinutePrice() $</MudText>
             </MudStack>
             <MudStack Row>
@@ -33,20 +33,23 @@
                     <MudTh colspan="2" Class="mud-background">
                         <MudText>@context.Key</MudText>
                     </MudTh>
+                    <MudTh colspan="1" Class="mud-background">
+                        <MudText>$ / u</MudText>
+                    </MudTh>
                     <MudTh colspan="3" Class="mud-background">
                         <MudStack Row Reverse="true">
                             @if (context.Key!.ToString() == "Ingredients")
                             {
                                 <MudText Style="min-width: 60px" Typo="Typo.body2" Color="Color.Primary">
                                     @(Math.Round(-1 * (ElementSum(context.Items.ToList())) + GetLaborPrice(), 2)) $
-                                    @(GetReintegratedElements().Count > 0 ? $"( {ElementSum(GetReintegratedElements())} $)" : "")
+                                    @(GetReintegratedElements().Count > 0 ? $"( {ElementSum(GetReintegratedElements(), false)} $)" : "")
                                 </MudText>
                                 <MudText Typo="Typo.body2">Total Cost:</MudText>
                             }
                             else
                             {
                                 <MudText Style="min-width: 60px"  Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2)) $
+                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements(), false), 2)) $
                                 </MudText>
                                 <MudText Typo="Typo.body2">Total Price:</MudText>
                             }
@@ -56,7 +59,19 @@
                 <RowTemplate>
                     <MudTd Style="width: 30px">@(Math.Abs(context.Element.Quantity))</MudTd>
                     <MudTd>@ContextService.GetTranslation(context.Element.ItemOrTag)</MudTd>
-                    <MudTd>@(context.Element.IsDynamic ? "dynamic" : "static")</MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.body2" Color="Color.Primary">
+                            @if (context.Element.IsIngredient())
+                            {
+                                @(context.Price is not null ? Math.Round((float)context.Price!, 2) + " $" : "")
+                            }
+                            else
+                            {
+                                @(context.Price is not null ? Math.Round((float)context.Price!, 2) + " $" : "")                                
+                            }                            
+                        </MudText>
+                    </MudTd>
+                    <MudTd>@(context.Element.IsDynamic ? $"dynamic (-{Math.Round((1-GetModuleAndLavishReducePercent()),3) * 100} %)" : "static")</MudTd>
                     <MudTd>
                         @if (context.Element.Index > 0 && context.Element.IsProduct())
                         {
@@ -70,7 +85,18 @@
                     </MudTd>
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Primary">
-                            @(context.Price is not null ? Math.Round((float)context.Price!, 2) + " $" : "")
+                            @if (context.Element.IsIngredient())
+                            {
+                                @(context.Price is not null ? Math.Round(
+                                    context.Element.IsDynamic ?
+                                    (float)context.Price! * -context.Element.Quantity * GetModuleAndLavishReducePercent() :
+                                    (float)context.Price! * -context.Element.Quantity
+                                , 2 ) + " $" : "")
+                            }
+                            else
+                            {
+                                @(context.Price is not null ? Math.Round((float)context.Price! * context.Element.Quantity, 2) + " $" : "")
+                            }
                         </MudText>
                     </MudTd>
                 </RowTemplate>
@@ -177,9 +203,10 @@
         }
     }
 
-    private float ElementSum(List<UserElement> userElements)
+    private float ElementSum(List<UserElement> userElements, bool? withReduction = true)
     {
-        return userElements.Sum(ue => ue.Price * ue.Element.Quantity) ?? 0f;
+        var ingredientCostSum = userElements.Sum(ue => ue.Price * ue.Element.Quantity * ((ue.Element.IsDynamic & (bool)withReduction!) ? GetModuleAndLavishReducePercent() : 1));
+        return ingredientCostSum ?? 0f;
     }
 
     private List<UserElement> GetReintegratedElements()
@@ -204,10 +231,27 @@
         return (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
     }
 
+    private float GetModuleAndLavishReducePercent()
+    {
+        var pluginModulePercent = UserServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == Recipe.CraftingTable).PluginModule?.Percent ?? 1;
+        var userRecipe = UserServerDataService.UserRecipes.First(ur => ur.Recipe == Recipe);
+        var userSkill = UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill);
+        var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
+        return userSkill.HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
+    }
+
     private float GetCraftMinutePrice()
     {
         return Recipe.CraftMinutes
             * UserServerDataService.UserCraftingTables.First(u => u.CraftingTable == Recipe.CraftingTable).CraftMinuteFee;
+    }
+
+    public string GetFormatedCraftTime(float craftMinutes)
+    {
+        int totalSeconds = (int)(craftMinutes * 60);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return $"{minutes} min {seconds} s";
     }
 
     private List<UserElement> GetUserElements()
