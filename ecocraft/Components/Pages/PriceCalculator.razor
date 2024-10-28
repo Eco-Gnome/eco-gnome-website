@@ -807,7 +807,6 @@
         var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;
-        await PriceCalculatorService.Calculate();
         StateHasChanged();
     }
 
