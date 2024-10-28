@@ -131,8 +131,8 @@ public class PriceCalculatorService(
                 var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
                 var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
 
-                var ingredientCostSum = -1 * userElementIngredients.Sum(ing => ing.Price * ing.Element.Quantity * (ing.Element.IsDynamic
-                    ? userServerDataService.UserSkills.First(us => us.Skill == ing.Element.Skill).HasLavishTalent
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.Element.Quantity * (ue.Element.IsDynamic
+                    ? userServerDataService.UserSkills.First(us => us.Skill == ue.Element.Skill).HasLavishTalent
                         ? pluginModulePercent * lavishTalentValue
                         : pluginModulePercent
                     : 1));

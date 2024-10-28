@@ -803,11 +803,10 @@
         {
             ["Recipe"] = recipe,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;
-        await PriceCalculatorService.Calculate();
         StateHasChanged();
     }
 
@@ -827,8 +826,10 @@
     private async Task OnOverridePrice(bool value, UserPrice userPrice)
     {
         userPrice.OverrideIsBought = value;
-        UserPriceDbService.Update(userPrice);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
+        /*UserPriceDbService.Update(userPrice);
+        await EcoCraftDbContext.SaveChangesAsync();*/
+
     }
 
 }
