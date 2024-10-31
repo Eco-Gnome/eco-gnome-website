@@ -75,7 +75,7 @@
     background-color: #303038 !important;
 }
 
-.mud-table-container {
+.mud-table-container-no-overflow-y > .mud-table-container {
     overflow-y: hidden !important;
 }
 
