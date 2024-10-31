@@ -13,6 +13,7 @@
 @inject PriceCalculatorService PriceCalculatorService
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Price Calculator</PageTitle>
 
@@ -291,7 +292,7 @@
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudNumericField T="float?"
                                                      Class="rectangle-input"
-                                                     Disabled="@(context.IsTag)"
+                                                     ReadOnly="@(context.IsTag)"
                                                      HideSpinButtons="@(context.IsTag)"
                                                      Value="userPriceTag.Price"
                                                      Immediate="true"
@@ -308,6 +309,9 @@
                                                      Class="ml-n2"/>
                                         </MudTooltip>
                                     }
+                                    <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                   OnClick="() => CopyToClipboard(userPriceTag.Price)"
+                                                   Size="Size.Small" />
                                 </MudStack>
                             </MudTd>
                         }
@@ -350,6 +354,9 @@
                                                              Icon="@MDIIcons.Filled.Calculator"></MudIcon>
                                                 </MudTooltip>
                                             }
+                                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                           OnClick="() => CopyToClipboard(userPriceItem.Price)"
+                                                           Size="Size.Small" />
                                         </MudStack>
                                     </MudTd>
                                 </MudTr>
@@ -437,9 +444,14 @@
                                                         Style="height: 26px; width: 75px"
                                                         HideSpinButtons="true"
                                                         Format="N2"
-                                                        Disabled="true"
+                                                        ReadOnly="true"
                                                         Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
-                                                        Variant="Variant.Outlined" />
+                                                        Variant="Variant.Outlined"
+                                                        />
+                                    <MudIconButton  Icon="@Icons.Material.Outlined.ContentCopy" 
+                                                    OnClick="() => CopyToClipboard(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
+                                                    Size="Size.Small"/>
+
                                 </MudStack>
                             </MudTd>
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
@@ -499,7 +511,10 @@
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
                                             <MudStack Row>
                                                 <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
-                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                                <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                           OnClick="() => CopyToClipboard(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))"
+                                                               Size="Size.Small" />
                                             </MudStack>
                                         </MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")"></MudTd>
@@ -830,6 +845,19 @@
         /*UserPriceDbService.Update(userPrice);
         await EcoCraftDbContext.SaveChangesAsync();*/
 
+    }
+
+    private async Task CopyToClipboard(float? price)
+    {
+        if (price is null)
+        {
+            Snackbar.Add("This price isn't well configured", Severity.Warning);
+            return;
+        }
+
+        var text = Math.Round((double) price,2).ToString();
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        Snackbar.Add("Price copied to clipboard", Severity.Info);
     }
 
 }

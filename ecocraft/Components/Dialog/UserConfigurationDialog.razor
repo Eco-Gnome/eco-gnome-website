@@ -131,7 +131,7 @@
 	private async Task CopyToClipboard(string text)
 	{
 		await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-		Snackbar.Add("Id copied to clipboard", Severity.Info);
+		Snackbar.Add("Join code copied to clipboard", Severity.Info);
 	}
 
 	private async Task OnUpdateUserName(string newPseudo)
