@@ -261,7 +261,8 @@
                                            Icon="@(_showTagItems ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
                                            OnClick="@(() => _showTagItems = !_showTagItems)"/>
                         </MudTh>
-                        <MudTh>Buy price</MudTh>
+                        <MudTh colspan="2">Buy price</MudTh>
+                        @* <MudTh></MudTh> *@
                     </HeaderContent>
                     <RowTemplate>
                         @{
@@ -288,6 +289,7 @@
                                     }
                                 </MudText>
                             </MudTd>
+                            
                             <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")" Style="position: relative;">
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudNumericField T="float?"
@@ -309,10 +311,13 @@
                                                      Class="ml-n2"/>
                                         </MudTooltip>
                                     }
-                                    <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
-                                                   OnClick="() => CopyToClipboard(userPriceTag.Price)"
-                                                   Size="Size.Small" />
+                                    
                                 </MudStack>
+                            </MudTd>
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                               OnClick="() => CopyToClipboard(userPriceTag.Price)"
+                                               Size="Size.Small" />
                             </MudTd>
                         }
                     </RowTemplate>
@@ -334,6 +339,7 @@
                                             <MudText Typo="Typo.body2" Class="pt-1">@ContextService.GetTranslation(item)</MudText>
                                         </MudStack>
                                     </MudTd>
+                                    
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
                                         <MudStack Row Style="position: relative;">
                                             <MudNumericField T="float?"
@@ -354,10 +360,12 @@
                                                              Icon="@MDIIcons.Filled.Calculator"></MudIcon>
                                                 </MudTooltip>
                                             }
-                                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
-                                                           OnClick="() => CopyToClipboard(userPriceItem.Price)"
-                                                           Size="Size.Small" />
                                         </MudStack>
+                                    </MudTd>
+                                    <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-0")}")">
+                                        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                       OnClick="() => CopyToClipboard(userPriceItem.Price)"
+                                                       Size="Size.Small" />
                                     </MudTd>
                                 </MudTr>
                             }
