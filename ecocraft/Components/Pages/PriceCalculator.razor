@@ -261,7 +261,7 @@
                                            Icon="@(_showTagItems ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
                                            OnClick="@(() => _showTagItems = !_showTagItems)"/>
                         </MudTh>
-                        <MudTh>Price</MudTh>
+                        <MudTh>Buy price</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         @{
@@ -854,7 +854,7 @@
             return;
         }
 
-        var text = Math.Round((double) price,2).ToString();
+        var text = Math.Round((double) price,2).ToString("0.00");
         await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
         Snackbar.Add("Price copied to clipboard", Severity.Info);
     }
