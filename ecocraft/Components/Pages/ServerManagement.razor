@@ -16,7 +16,7 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Server Management - Eco Gnome</PageTitle>
+<PageTitle>Server Management - Eco Gnome (alpha)</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
 	<MudGrid Style="height: auto">
@@ -32,7 +32,7 @@
 					<MudStack Row>
 						<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!, newServerName)"/>
 						<MudTextField Class="flex-no-grow"
-						              ReadOnly						             
+						              ReadOnly
 						              Value="@ContextService.CurrentServer!.JoinCode"
 						              Label="Join code"
 						              Adornment="Adornment.End"
