@@ -1,3 +1,4 @@
+using System.Globalization;
 using ecocraft.Components;
 using ecocraft.Models;
 using MudBlazor.Services;
@@ -5,10 +6,20 @@ using Microsoft.EntityFrameworkCore;
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
 using ecocraft.Services.ImportData;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization();
+
+var supportedCultures = new[] { "en-US", "fr", "fr-FR", "es-ES", "es", "de", "de-DE" }; // Ajoutez les cultures que vous supportez
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("en-US");
+    options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+    options.SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -74,9 +85,8 @@ builder.Services.AddAuthorization(config =>
 
 var app = builder.Build();
 
-app.UseRequestLocalization(new RequestLocalizationOptions()
-    .AddSupportedCultures(new[] { "en-US", "fr-FR" })
-    .AddSupportedUICultures(new[] { "en-US", "fr-FR" }));
+var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
+app.UseRequestLocalization(locOptions.Value);
 
 // Appliquer automatiquement les migrations
 using (var scope = app.Services.CreateScope())
