@@ -8,6 +8,8 @@ using ecocraft.Services.ImportData;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLocalization();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -71,6 +73,10 @@ builder.Services.AddAuthorization(config =>
     .AddYourAuthenticationScheme(); // Remplace par ta méthode d'authentification (ex. .AddCookie(), .AddJwtBearer(), etc.)*/
 
 var app = builder.Build();
+
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .AddSupportedCultures(new[] { "en-US", "fr-FR" })
+    .AddSupportedUICultures(new[] { "en-US", "fr-FR" }));
 
 // Appliquer automatiquement les migrations
 using (var scope = app.Services.CreateScope())

@@ -1,6 +1,7 @@
 ﻿@page "/server-management"
 <!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
 @implements IDisposable
+@using System.Globalization
 @using ecocraft.Models
 @using ecocraft.Extensions
 @using ecocraft.Services
@@ -278,6 +279,11 @@
 		{
 			Navigation.NavigateTo("/");
 		}
+
+		Console.WriteLine("Invariant Name: " + CultureInfo.InvariantCulture.Name);
+		Console.WriteLine("CurrentCulture Name: " + CultureInfo.CurrentCulture.Name);
+		Console.WriteLine("CurrentUICulture Name: " + CultureInfo.CurrentUICulture.Name);
+		Console.WriteLine("InstalledUICulture Name: " + CultureInfo.InstalledUICulture.Name);
 	}
 
 	protected override Task OnInitializedAsync()
