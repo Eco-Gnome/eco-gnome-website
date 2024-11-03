@@ -5,6 +5,7 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using System.Globalization;
 @inject IDialogService DialogService
 @inject ContextService ContextService
 @inject ServerDataService ServerDataService
@@ -69,7 +70,7 @@
                                                  ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
                                 <MudCheckBox Value="context.HasLavishTalent"
                                              Class="dense-checkbox"
-                                             Style="@($"visibility: {(context.Level >= 7 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
+                                             Style="@($"visibility: {(context.Level >= 6 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
                                              Label="Lavish talent"
                                              Color="Color.Primary"
                                              ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)" />
@@ -146,6 +147,7 @@
                                              Class="rectangle-input"
                                              Format="N2"
                                              ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
+                                             Converter="@CultureInvariantConverter.DotOrCommaFloat"
                                              Value="@context.CraftMinuteFee"
                                              Variant="Variant.Outlined"/>
                         </MudTd>
@@ -180,6 +182,7 @@
                                                  ValueChanged="UpdateCalorieCost"
                                                  Style="height: 35px; width: 100px"
                                                  Value="UserServerDataService.UserSetting.CalorieCost"
+                                                 Converter="@CultureInvariantConverter.DotOrCommaFloat"
                                                  Variant="Variant.Outlined"/>
                             </div>
                         }
@@ -227,7 +230,7 @@
                                                          Min="0"
                                                          Adornment="Adornment.End"
                                                          AdornmentText="% "
-                                                         Converter="@CultureInvariantConverter.DotOrComma"
+                                                         Converter="@CultureInvariantConverter.DotOrCommaFloat"
                                                          ValueChanged="@(v => UpdateMargin(context, v))"
                                                          Variant="Variant.Outlined"/>
                                     </MudTd>
@@ -262,7 +265,6 @@
                                            OnClick="@(() => _showTagItems = !_showTagItems)"/>
                         </MudTh>
                         <MudTh colspan="2">Buy price</MudTh>
-                        @* <MudTh></MudTh> *@
                     </HeaderContent>
                     <RowTemplate>
                         @{
@@ -300,6 +302,7 @@
                                                      Immediate="true"
                                                      Format="N2"
                                                      Variant="Variant.Outlined"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaFloatNull"
                                                      Min="context.MinPrice"
                                                      Max="context.MaxPrice"
                                                      ValueChanged="@(value => UpdatePriceCalculation(userPriceTag, value))"/>
@@ -344,16 +347,17 @@
                                         <MudStack Row Style="position: relative;">
                                             <MudNumericField T="float?"
                                                              Class="rectangle-input"
-                                                             HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
+                                                             HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
                                                              Format="N2"
-                                                             Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))"
+                                                             Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
                                                              Value="userPriceItem.Price"
                                                              Immediate="true"
                                                              Min="item.MinPrice"
                                                              Max="item.MaxPrice"
+                                                             Converter="@CultureInvariantConverter.DotOrCommaFloatNull"
                                                              ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
                                                              Variant="Variant.Outlined"/>
-                                            @if (PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item))
+                                            @if (PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)
                                             {
                                                 <MudTooltip Text="This value is automatically calculated by the system.">
                                                     <MudIcon Style="position: absolute; top: 1px; left: 78px;"
@@ -446,6 +450,7 @@
                                                         Format="N2"
                                                         Disabled="true"
                                                         Value="userPrice.Price"
+                                                        Culture="CultureInfo.CurrentUICulture"
                                                         Variant="Variant.Outlined" />
                                     <MudNumericField T="float?"
                                                         Class="mt-0"
@@ -453,6 +458,7 @@
                                                         HideSpinButtons="true"
                                                         Format="N2"
                                                         ReadOnly="true"
+                                                        Culture="CultureInfo.CurrentUICulture"
                                                         Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
                                                         Variant="Variant.Outlined"
                                                         />
@@ -518,8 +524,8 @@
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")"></MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
                                             <MudStack Row>
-                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined"></MudNumericField>
-                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined"></MudNumericField>
+                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" Disabled="true" Value="@userElement.Price" Variant="Variant.Outlined" Culture="CultureInfo.CurrentUICulture"></MudNumericField>
+                                                <MudNumericField T="float?" Style="height: 26px; width: 75px" HideSpinButtons="true" Format="N2" ReadOnly="true" Value="@(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))" Variant="Variant.Outlined" Culture="CultureInfo.CurrentUICulture"></MudNumericField>
                                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                            OnClick="() => CopyToClipboard(userElement.Price * (1 + userPrice.UserMargin.Margin / 100))"
                                                                Size="Size.Small" />
