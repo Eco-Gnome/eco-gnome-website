@@ -13,12 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization();
 
-var supportedCultures = new[] { "en-US", "fr", "fr-FR", "es-ES", "es", "de", "de-DE" }; // Ajoutez les cultures que vous supportez
+// var supportedCultures = new[] { "en", "en-US", "en-GB", "fr", "fr-FR", "es-ES", "es", "de", "de-DE" }; // Ajoutez les cultures que vous supportez
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new RequestCulture("en-US");
-    options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
-    options.SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+    options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+    options.SupportedUICultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
 });
 
 // Add services to the container.
