@@ -301,7 +301,8 @@
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-0" : "")" Style="position: relative;">
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudTooltip Disabled="@(!context.IsTag || userPriceItemOrTag.Price is not null)"
-                                                Text="This value will be the minimum price of it's related items, unless you choose a specific one by clicking a star.">
+                                                Text="This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific
+                                                one by clicking a star.">
                                         <MudNumericField T="float?"
                                                          Class="rectangle-input small-adornment"
                                                          Style="width: 111px"
@@ -433,8 +434,8 @@
                           GroupBy="_groupDefinitionToSell"
                           Hover="true">
                     <HeaderContent>
-                        <MudTh Style="max-width: 10px; padding: 0"></MudTh>
-                        <MudTh>
+                        <MudTh Style="width: 0; padding: 0"></MudTh>
+                        <MudTh Class="pl-0">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                 <MudIconButton Icon="@(_showDetailedRecipes ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                Size="Size.Small"
@@ -459,7 +460,7 @@
                                              && !ue.IsReintegrated)
                                 .ToList();
 
-                            <MudTd Style="max-width: 10px; padding: 0">
+                            <MudTd Style="width: 0; padding: 0">
                                 <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
                                     <MudIconButton Size="Size.Small"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
@@ -467,13 +468,7 @@
                                 </MudTooltip>
                             </MudTd>
 
-
-                            @*Adornment="Adornment.End"
-                                                     AdornmentIcon="@(MDIIcons.Filled.PencilBox)"
-                                                     AdornmentColor="@Color.Primary"
-                                                     AdornmentAriaLabel="Override price"
-                                                     OnAdornmentClick="@(() => OverridePrice(true, userPrice))"*@
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0 pl-0" : " pl-0")">
                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                     @if (relatedUserElements.First().Element.Recipe.Elements.Count(e => e.IsProduct()) == 1)
                                     {
@@ -676,7 +671,14 @@
     private CraftingTable? _emptyCraftingTable;
     private string? _previousProfession;
 
-    private TableGroupDefinition<ItemOrTag>? _groupDefinitionToSell;
+    private TableGroupDefinition<ItemOrTag>? _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
+    {
+        GroupName = "Temporary",
+        Indentation = true,
+        Expandable = true,
+        IsInitiallyExpanded = true,
+        Selector = e => "All Skills"
+    };
 
     protected override async Task OnInitializedAsync()
     {
