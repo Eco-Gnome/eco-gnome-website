@@ -11,7 +11,7 @@ public class PriceCalculatorService(
     {
         // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
         var listOfProducts = userServerDataService.UserElements
-            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated)
+            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated && !userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).OverrideIsBought)
             .Select(ue => ue.Element.ItemOrTag)
             .Distinct()
             .ToList();

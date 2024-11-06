@@ -36,7 +36,7 @@
     <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
                    Size="Size.Small"
                    aria-label="Create server"
-                   Color="Color.Tertiary"
+                   Color="Color.Primary"
                    OnClick="CreateServer" />
 </MudStack>
 
@@ -45,7 +45,8 @@
 
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
-    <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary" Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+    <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Primary"
+               Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
 
     <MudSelect T="LanguageCode"
                 Class="select-dense"
