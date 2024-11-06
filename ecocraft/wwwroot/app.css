@@ -99,3 +99,11 @@
 .no-wrap-select .mud-input-slot {
     white-space: wrap !important;
 }
+
+.recipe-table .mud-table-row > :first-child {
+    max-width: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    position: relative;
+    left: 12px;
+}
