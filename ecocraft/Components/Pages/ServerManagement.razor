@@ -279,11 +279,6 @@
 		{
 			Navigation.NavigateTo("/");
 		}
-
-		Console.WriteLine("Invariant Name: " + CultureInfo.InvariantCulture.Name);
-		Console.WriteLine("CurrentCulture Name: " + CultureInfo.CurrentCulture.Name);
-		Console.WriteLine("CurrentUICulture Name: " + CultureInfo.CurrentUICulture.Name);
-		Console.WriteLine("InstalledUICulture Name: " + CultureInfo.InstalledUICulture.Name);
 	}
 
 	protected override Task OnInitializedAsync()
@@ -317,17 +312,17 @@
 			.ToList();
 	}
 
-	private async Task UploadFiles(IBrowserFile file)
+	private async Task UploadFiles(IBrowserFile? file)
 	{
-		if (file != null && file.ContentType == "application/json")
+		if (file is { ContentType: "application/json" })
 		{
-			using var stream = file.OpenReadStream(10_000_000);
+			await using var stream = file.OpenReadStream(10_000_000);
 			using var memoryStream = new MemoryStream();
 			await stream.CopyToAsync(memoryStream);
 
 			memoryStream.Position = 0;
 			using var reader = new StreamReader(memoryStream);
-			string jsonContent = await reader.ReadToEndAsync();
+			var jsonContent = await reader.ReadToEndAsync();
 
 			_showUploadServerDataLoader = true;
 			StateHasChanged();

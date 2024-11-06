@@ -19,6 +19,11 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 			.FirstOrDefaultAsync(u => u.Id == id);
 	}
 
+	public Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId)
+	{
+		return context.Users.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
+	}
+
 	public User Add(User user)
 	{
 		context.Users.Add(user);

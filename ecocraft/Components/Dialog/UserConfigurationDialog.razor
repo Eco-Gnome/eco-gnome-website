@@ -1,10 +1,13 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Services.DbServices
 @inject ContextService ContextService
 @inject IJSRuntime JSRuntime
 @inject ISnackbar Snackbar
 @inject EcoCraftDbContext EcoCraftDbContext
-
+@inject UserDbService UserDbService
+@inject LocalStorageService LocalStorageService
+@inject NavigationManager Navigation
 
 <MudDialog>
 	<TitleContent>
@@ -69,7 +72,32 @@
 				</MudTable>
 			</MudTabPanel>
 			<MudTabPanel Text="Options">
-				<MudText>UserSettings : we are working on !</MudText>
+				<MudStack>
+					<MudStack Row>
+						<MudTextField Variant="Variant.Outlined"
+						              Label="Public UserId"
+						              ReadOnly="true"
+						              Value="ContextService.CurrentUser.Id" />
+						<MudTextField Variant="Variant.Outlined"
+						              Label="Secret UserId"
+						              ReadOnly="true"
+						              Value="ContextService.CurrentUser.SecretId" />
+					</MudStack>
+
+					<MudStack Row Spacing="5">
+						<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => ExportUser())">Export User</MudButton>
+
+						<MudFileUpload T="IBrowserFile" FilesChanged="ImportUser">
+							<ActivatorContent>
+								<MudButton Variant="Variant.Filled"
+								           Color="Color.Warning"
+								           StartIcon="@Icons.Material.Filled.CloudUpload">
+									Import User
+								</MudButton>
+							</ActivatorContent>
+						</MudFileUpload>
+					</MudStack>
+				</MudStack>
 			</MudTabPanel>
 		</MudTabs>
 	</DialogContent>
@@ -141,5 +169,61 @@
 		await EcoCraftDbContext.SaveChangesAsync();
 		ContextService.InvokeContextChanged();
 		//StateHasChanged();
+	}
+
+	private async Task ExportUser()
+	{
+		var content = $"{ContextService.CurrentUser.Id}:{ContextService.CurrentUser.SecretId}";
+		var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+
+		// Conversion en base64 pour le passer à JavaScript
+		var base64 = Convert.ToBase64String(bytes);
+		var fileName = "eco_gnome_user_backup.txt";
+
+		// Appel de JavaScript pour déclencher le téléchargement
+		await JSRuntime.InvokeVoidAsync("triggerFileDownload", fileName, base64);
+	}
+
+	private async Task ImportUser(IBrowserFile? file)
+	{
+		if (file is { ContentType: "text/plain" })
+		{
+			await using var stream = file.OpenReadStream(1_000);
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+
+			memoryStream.Position = 0;
+			using var reader = new StreamReader(memoryStream);
+			var content = await reader.ReadToEndAsync();
+
+			try
+			{
+				var publicUserId = content.Split(':')[0];
+				var secretUserId = content.Split(':')[1];
+
+				var foundUser = await UserDbService.GetByIdAndSecretAsync(new Guid(publicUserId), new Guid(secretUserId));
+
+				if (foundUser is not null)
+				{
+					bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to import the user with pseudo {foundUser.Pseudo} ? This will erase your current saved user. Make sure to export the current user if you want to use it later !");
+
+					if (confirmed)
+					{
+						await LocalStorageService.AddItem("UserId", publicUserId);
+						await LocalStorageService.AddItem("SecretUserId", secretUserId);
+
+						Navigation.NavigateTo("/", forceLoad: true);
+					}
+				}
+				else
+				{
+					Snackbar.Add("Import User Error - Can't find the imported user", Severity.Error);
+				}
+			}
+			catch (Exception e)
+			{
+				Snackbar.Add("Import User Error - Choose a correct file.", Severity.Error);
+			}
+		}
 	}
 }

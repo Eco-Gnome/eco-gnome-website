@@ -134,15 +134,15 @@
         }
     }
 
-    private async Task OnJoinServer(string? JoinCode)
+    private async Task OnJoinServer(string? joinCode)
     {
-        if (String.IsNullOrEmpty(JoinCode))
+        if (string.IsNullOrEmpty(joinCode))
         {
             Snackbar.Add("You need to add a server code", Severity.Error);
             return;
         }
 
-        var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
+        var server = ServerDbService.GetByJoinCodeAsync(joinCode).Result;
 
         if (server is null) {
             Snackbar.Clear();

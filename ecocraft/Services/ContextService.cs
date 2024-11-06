@@ -58,26 +58,38 @@ public class ContextService(
         await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
         OnContextChanged?.Invoke();
-        
+
     }
 
     public async Task InitializeContext()
     {
-        string? localUserId = await localStorageService.GetItem("UserId");
+        var localUserId = await localStorageService.GetItem("UserId");
+        var secretUserId = await localStorageService.GetItem("SecretUserId");
 
-        if (!String.IsNullOrEmpty(localUserId))
+        if (!string.IsNullOrEmpty(localUserId))
         {
             var searchedUser = await userDbService.GetByIdAsync(new Guid(localUserId));
 
             if (searchedUser is not null)
             {
-                CurrentUser = searchedUser;
+                // For Migration Purpose
+                if (searchedUser.SecretId.ToString() == new Guid().ToString())
+                {
+                    searchedUser.SecretId = Guid.NewGuid();
+                    secretUserId = searchedUser.SecretId.ToString();
+                    await dbContext.SaveChangesAsync();
+                }
+
+                if (searchedUser.SecretId.ToString().Equals(secretUserId))
+                {
+                    CurrentUser = searchedUser;
+                }
             }
         }
 
         var newUser = new User
         {
-            SecretId = new Guid(),
+            SecretId = Guid.NewGuid(),
             CreationDateTime = DateTime.UtcNow,
             SuperAdmin = await userDbService.CountUsers() == 0,
         };
@@ -86,6 +98,7 @@ public class ContextService(
         CurrentUser ??= await userDbService.AddAndSave(newUser);
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
+        await localStorageService.AddItem("SecretUserId", CurrentUser.SecretId.ToString());
         DefaultServers.AddRange(await serverDbService.GetAllDefaultAsync());
 
         var lastServerId = await localStorageService.GetItem("ServerId");
@@ -124,7 +137,6 @@ public class ContextService(
 			await userServerDataService.RetrieveUserData(CurrentUserServer);
 		}
 
-
         var languageCode = await localStorageService.GetItem("LanguageCode");
 
         if (!string.IsNullOrEmpty(languageCode))
@@ -140,7 +152,6 @@ public class ContextService(
         InvokeContextChanged();
         // Don't know why, but the second one allows the MudSelect of servers to correctly display the selected server
         InvokeContextChanged();
-
 	}
 
     public void InvokeContextChanged()
@@ -288,7 +299,7 @@ public class ContextService(
                     throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}");
         }
 
-        if (String.IsNullOrEmpty(translation))
+        if (string.IsNullOrEmpty(translation))
         {
             translation = hasLocalizedName.LocalizedName.en_US;
         }
