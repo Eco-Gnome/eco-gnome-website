@@ -449,7 +449,7 @@
                         <MudTh Class="px-1"></MudTh>
                     </HeaderContent>
                     <GroupHeaderTemplate>
-                        <MudTh Class="mud-table-cell-custom-group mud-background-gray pl-8" colspan="5">@context.Key [@context.Items.Count()]</MudTh>
+                        <MudTh Class="mud-background-gray pl-8" colspan="5">@context.Key [@context.Items.Count()]</MudTh>
                     </GroupHeaderTemplate>
                     <RowTemplate>
                         @{
@@ -460,7 +460,7 @@
                                              && !ue.IsReintegrated)
                                 .ToList();
 
-                            <MudTd Style="width: 0; padding: 0">
+                            <MudTd Style="width: 0; padding: 0" Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
                                     <MudIconButton Size="Size.Small"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
@@ -592,6 +592,7 @@
                                     <MudTr>
                                         <!-- This empty MudTd must stay due to the collapse of the GroupBy -->
                                         <MudTd></MudTd>
+                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pa-0")"></MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")"
                                                Style="white-space: nowrap;overflow: hidden; max-width: 280px">
                                             <MudStack Row Spacing="1">

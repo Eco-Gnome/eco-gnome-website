@@ -20,12 +20,6 @@
 		<MudTabs Outlined="true" Position="@Position.Top" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
 			<MudTabPanel Text="My servers">
 				<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
-					<ColGroup>
-						<col />
-						<col style="width: 160px;" />
-						<col />
-						<col style="width: 160px;" />
-					</ColGroup>
 					<HeaderContent>
 						<MudTh><MudText>Name</MudText></MudTh>
 						<MudTh><MudText>Join code</MudText></MudTh>
@@ -37,8 +31,15 @@
 							<MudText>@context.Server.Name</MudText>
 						</MudTd>
 						<MudTd>
-							<MudTextField Value="context.Server.JoinCode" Underline="false" Variant="Variant.Text" Disabled="true" Adornment="Adornment.Start"
-										  AdornmentIcon="@Icons.Material.Outlined.ContentCopy" OnAdornmentClick="@(() => CopyToClipboard(context.Server.JoinCode))" AdornmentAriaLabel="Copy to clipboard"></MudTextField>
+							<MudTextField Value="context.Server.JoinCode"
+							              Underline="false"
+							              Variant="Variant.Text"
+							              Class="small-adornment"
+							              ReadOnly="true"
+							              Adornment="Adornment.Start"
+							              AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
+							              OnAdornmentClick="@(() => CopyToClipboard(context.Server.JoinCode))"
+							              AdornmentAriaLabel="Copy to clipboard" />
 						</MudTd>
 						<MudTd>
 							<MudTextField Margin="Margin.Dense" Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)" > </MudTextField>
@@ -47,19 +48,17 @@
 							<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="0">
 								@if (_askLeaveConfirmations.ContainsKey(context))
 								{
-									<MudIconButton
-												Color="Color.Success"
-												Icon="@Icons.Material.Filled.Close"
-												OnClick="@(() => CancelLeaveServer(context))">
+									<MudIconButton Color="Color.Success"
+												   Icon="@Icons.Material.Filled.Close"
+												   OnClick="@(() => CancelLeaveServer(context))">
 									</MudIconButton>
 								}
 								<MudIconButton Color="Color.Error"
-												Icon="@Icons.Material.Filled.ExitToApp"
-												OnClick="@(() => LeaveServer(context))">
+								               Icon="@Icons.Material.Filled.ExitToApp"
+										       OnClick="@(() => LeaveServer(context))">
 								</MudIconButton>
 								@if (_askLeaveConfirmations.ContainsKey(context))
 								{
-
 									<MudIconButton
 												Color="Color.Warning"
 												Icon="@Icons.Material.Filled.Check"
