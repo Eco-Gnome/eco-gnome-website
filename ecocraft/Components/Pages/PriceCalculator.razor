@@ -281,21 +281,20 @@
                                         <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
                                     }
                                     <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
-
-                                    @if (!_showDetailedTags && userPriceItemOrTag.PrimaryUserPrice is not null)
+                                    @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
                                     {
-                                        <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowLeft"/>
-                                        <MudText Typo="Typo.body2">
-                                            @ContextService.GetTranslation(userPriceItemOrTag.PrimaryUserPrice.ItemOrTag)
-                                        </MudText>
-                                    }
-                                    else if (!_showDetailedTags && context.AssociatedItems.Count > 0)
-                                    {
-                                        <MudText Typo="Typo.body2">
-                                            [@context.AssociatedItems.Count]
-                                        </MudText>
+                                        <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
                                     }
                                 </MudStack>
+                                @if (!_showDetailedTags && userPriceItemOrTag.PrimaryUserPrice is not null)
+                                {
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
+                                        <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
+                                        <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
+                                            @ContextService.GetTranslation(userPriceItemOrTag.PrimaryUserPrice.ItemOrTag)
+                                        </MudText>
+                                    </MudStack>
+                                }
                             </MudTd>
 
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-0" : "")" Style="position: relative;">
@@ -461,11 +460,13 @@
                                 .ToList();
 
                             <MudTd Style="width: 0; padding: 0" Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
-                                <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
-                                    <MudIconButton Size="Size.Small"
-                                                   Icon="@MDIIcons.Filled.ChevronDoubleLeft"
-                                                   OnClick="@(() => OverridePrice(true, userPrice))"/>
-                                </MudTooltip>
+                                <MudStack Justify="Justify.FlexStart" Style="height: 100%">
+                                    <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
+                                        <MudIconButton Size="Size.Small"
+                                                       Icon="@MDIIcons.Filled.ChevronDoubleLeft"
+                                                       OnClick="@(() => OverridePrice(true, userPrice))"/>
+                                    </MudTooltip>
+                                </MudStack>
                             </MudTd>
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0 pl-0" : " pl-0")">
@@ -490,40 +491,41 @@
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <MudIconButton Size="Size.Small"
-                                                               Icon="@MDIIcons.Outline.ApplicationCog"
-                                                               OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"/>
+                                                                   Icon="@MDIIcons.Outline.ApplicationCog"
+                                                                   OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"/>
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @ContextService.GetTranslation(context)
                                                     </MudText>
+                                                    @if (!_showDetailedRecipes && relatedUserElements.Count > 1)
+                                                    {
+                                                        <MudText Typo="Typo.body2" Class="pt-1">
+                                                            [@relatedUserElements.Count]
+                                                        </MudText>
+                                                    }
                                                 </MudStack>
                                             </MudLink>
                                         </MudTooltip>
                                     }
-
-                                    @if (!_showDetailedRecipes && userPrice.PrimaryUserElement is not null)
-                                    {
-                                        <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowLeft"/>
+                                </MudStack>
+                                @if (!_showDetailedRecipes && userPrice.PrimaryUserElement is not null)
+                                {
+                                    <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="pl-6">
+                                        <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                         <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userPrice.PrimaryUserElement.Element.Recipe))">
                                             <MudText Class="pt-1" Typo="Typo.body2">
                                                 @ContextService.GetTranslation(userPrice.PrimaryUserElement.Element.Recipe) Recipe
                                             </MudText>
                                         </MudLink>
-                                    }
-                                    else if (!_showDetailedRecipes && relatedUserElements.Count > 1)
-                                    {
-                                        <MudText Typo="Typo.body2">
-                                            [@relatedUserElements.Count]
-                                        </MudText>
-                                    }
-                                </MudStack>
-                            </MudTd>
+                                    </MudStack>
+                                }
+                                </MudTd>
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudStack Row>
                                     <MudNumericField T="float?"
                                                      FullWidth="false"
                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
-                                                     Style="width: 95px;"
+                                                     Style="width: 101px;"
                                                      HideSpinButtons="true"
                                                      Format="N2"
                                                      ReadOnly="true"
@@ -605,19 +607,22 @@
                                         </MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1")">
                                             <MudStack Row>
+                                                <MudIconButton tabindex="-1"
+                                                               Style="margin-right: -12px"
+                                                               Color="Color.Primary"
+                                                               Icon="@(userPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                               Size="Size.Small"
+                                                               OnClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
+
                                                 <MudNumericField T="float?"
-                                                                 Style="width: 95px"
+                                                                 Style="width: 75px"
                                                                  Class="flex-no-grow small-adornment rectangle-input"
                                                                  HideSpinButtons="true"
                                                                  Format="N2"
                                                                  ReadOnly="true"
                                                                  Value="@userElement.Price"
                                                                  Variant="Variant.Outlined"
-                                                                 Culture="CultureInfo.CurrentUICulture"
-                                                                 Adornment="Adornment.End"
-                                                                 AdornmentColor="Color.Primary"
-                                                                 AdornmentIcon="@(userPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                                 OnAdornmentClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
+                                                                 Culture="CultureInfo.CurrentUICulture"/>
                                             </MudStack>
                                         </MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-0")} pt-0 pb-1 px-1")"></MudTd>
