@@ -33,7 +33,7 @@
 					<MudStack Row>
 						<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!, newServerName)"/>
 						<MudTextField Class="flex-no-grow"
-						              ReadOnly
+						              Disabled
 						              Value="@ContextService.CurrentServer!.JoinCode"
 						              Label="Join code"
 						              Adornment="Adornment.End"

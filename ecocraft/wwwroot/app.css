@@ -87,3 +87,15 @@
     position: absolute;
     bottom: -25px;
 }
+
+.small-adornment .mud-input-adorned-end {
+    padding-right: 1px !important;
+}
+
+.small-adornment .mud-icon-root {
+    font-size: 1.25rem !important;
+}
+
+.no-wrap-select .mud-input-slot {
+    white-space: wrap !important;
+}

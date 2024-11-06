@@ -58,6 +58,14 @@
 
     private MudTheme myDarkTheme = new MudTheme()
         {
+            // Dark theme, celui utilisé actuellement
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.Blue.Lighten1,
+                TextDisabled = "rgba(255,255,255,0.6980392156862745)",
+            },
+
+            // Theme troll vert
             PaletteLight = new PaletteLight()
             {
                 Black = "#212121",
@@ -74,11 +82,6 @@
                 ActionDefault = "#adadb1",
                 ActionDisabled = "rgba(255,255,255, 0.26)",
                 ActionDisabledBackground = "rgba(255,255,255, 0.12)",
-            },
-
-            PaletteDark = new PaletteDark()
-            {
-                Primary = Colors.Blue.Lighten1,
             },
         };
 

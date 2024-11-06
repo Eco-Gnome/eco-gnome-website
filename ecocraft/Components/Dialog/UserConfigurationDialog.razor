@@ -34,7 +34,8 @@
 							<MudText>@context.Server.Name</MudText>
 						</MudTd>
 						<MudTd>
-							<MudTextField Value="context.Server.JoinCode" Underline="false" Variant="Variant.Text" ReadOnly="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Outlined.ContentCopy" OnAdornmentClick="@(() => CopyToClipboard(context.Server.JoinCode))" AdornmentAriaLabel="Copy to clipboard"></MudTextField>
+							<MudTextField Value="context.Server.JoinCode" Underline="false" Variant="Variant.Text" Disabled="true" Adornment="Adornment.Start"
+										  AdornmentIcon="@Icons.Material.Outlined.ContentCopy" OnAdornmentClick="@(() => CopyToClipboard(context.Server.JoinCode))" AdornmentAriaLabel="Copy to clipboard"></MudTextField>
 						</MudTd>
 						<MudTd>
 							<MudTextField Margin="Margin.Dense" Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)" > </MudTextField>
