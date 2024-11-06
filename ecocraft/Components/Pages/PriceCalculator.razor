@@ -8,6 +8,7 @@
 @using System.Globalization;
 @inject IDialogService DialogService
 @inject ContextService ContextService
+@inject LocalStorageService LocalStorageService
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
 @inject UserPriceDbService UserPriceDbService
@@ -196,13 +197,13 @@
                                   Class="mt-4"
                                   Dense="true">
                             <HeaderContent>
-                                <MudTh>
-                                    <MudStack Row>
-                                        <MudText Typo="Typo.body1">Margin</MudText>
+                                <MudTh Class="pl-1">
+                                    <MudStack Row Spacing="1">
                                         <MudIconButton Size="Size.Small"
                                                        Class="pa-0 pl-2"
-                                                       Icon="@(_showMargins ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
-                                                       OnClick="@(() => _showMargins = !_showMargins)"/>
+                                                       Icon="@(_showMargins ? @MDIIcons.Filled.ChevronDown : @MDIIcons.Filled.ChevronRight)"
+                                                       OnClick="@(() => ShowMargins = !_showMargins)"/>
+                                        <MudText Typo="Typo.body1">Margins Configuration</MudText>
                                     </MudStack>
                                 </MudTh>
                                 <MudTh></MudTh>
@@ -261,8 +262,8 @@
                             Name
                             <MudIconButton Size="Size.Small"
                                            Class="pa-0 pl-2"
-                                           Icon="@(_showTagItems ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
-                                           OnClick="@(() => _showTagItems = !_showTagItems)"/>
+                                           Icon="@(_showDetailedTags ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
+                                           OnClick="@(() => ShowDetailedTags = !_showDetailedTags)"/>
                         </MudTh>
                         <MudTh colspan="2">Buy price</MudTh>
                     </HeaderContent>
@@ -270,7 +271,7 @@
                         @{
                             var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
 
-                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-0" : "")">
                                 <MudText Typo="Typo.body2">
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                         @if (context.IsTag)
@@ -280,7 +281,7 @@
                                         <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
                                     </MudStack>
 
-                                    @if (!_showTagItems && userPriceTag.PrimaryUserPrice is not null)
+                                    @if (!_showDetailedTags && userPriceTag.PrimaryUserPrice is not null)
                                     {
                                         <MudStack Row AlignItems="AlignItems.Center" Class="pl-8 d-flex" Spacing="1">
                                             <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowRightBottom"/>
@@ -292,7 +293,7 @@
                                 </MudText>
                             </MudTd>
 
-                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")" Style="position: relative;">
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-0" : "")" Style="position: relative;">
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudTooltip Disabled="@(!context.IsTag || userPriceTag.Price is not null)"
                                                 Text="This value will be the minimum price of it's related items, unless you choose a specific one by clicking a star.">
@@ -314,7 +315,7 @@
                                     </MudTooltip>
                                 </MudStack>
                             </MudTd>
-                            <MudTd Class="@(context.AssociatedItems.Any() && _showTagItems ? "border-0" : "")">
+                            <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-0" : "")">
                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                OnClick="() => CopyToClipboard(userPriceTag.Price)"
                                                Size="Size.Small" />
@@ -322,7 +323,7 @@
                         }
                     </RowTemplate>
                     <ChildRowContent>
-                        @if (_showTagItems)
+                        @if (_showDetailedTags)
                         {
                             @foreach (var item in context.AssociatedItems)
                             {
@@ -408,10 +409,10 @@
                     <HeaderContent>
                         <MudTh>
                             Item Name
-                            <MudIconButton Icon="@(_showMultiRecipes ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
+                            <MudIconButton Icon="@(_showDetailedRecipes ? @Icons.Material.Outlined.Visibility : @Icons.Material.Outlined.VisibilityOff)"
                                            Size="Size.Small"
                                            Class="pa-0 pl-2"
-                                           OnClick="@(() => _showMultiRecipes = !_showMultiRecipes)"/>
+                                           OnClick="@(() => ShowDetailedRecipes = !_showDetailedRecipes)"/>
                         </MudTh>
                         <MudTh>Override price</MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
@@ -427,18 +428,18 @@
                                              && !ue.IsReintegrated)
                                 .ToList();
 
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                     @ContextService.GetTranslation(context)
                                 </MudLink>
                             </MudTd>
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudSwitch  Value=userPrice.OverrideIsBought Color="Color.Primary"
                                             ValueChanged="@((bool val) => OnOverridePrice(val, userPrice))"
                                             Size="Size.Small"></MudSwitch>
                             </MudTd>
 
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudStack Row>
                                     <MudNumericField T="float?"
                                                      Class="mt-0"
@@ -467,7 +468,7 @@
                                                      Variant="Variant.Outlined"/>
                                 </MudStack>
                             </MudTd>
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")">
+                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")">
                                 <MudSelect
                                     T="UserMargin"
                                     Value="userPrice.UserMargin"
@@ -487,9 +488,9 @@
                                     }
                                 </MudSelect>
                             </MudTd>
-                            <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showMultiRecipes ? "border-0" : "")} px-1")">
+                            <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-0" : "")} px-1")">
                                 <MudIconButton
-                                    Icon="@(relatedUserElements.Count > 1 && _showMultiRecipes ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
+                                    Icon="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
                                     Size="Size.Small"
                                     OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))">
                                 </MudIconButton>
@@ -497,7 +498,7 @@
                         }
                     </RowTemplate>
                     <ChildRowContent>
-                        @if (_showMultiRecipes)
+                        @if (_showDetailedRecipes)
                         {
                             var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
                             var relatedElements = UserServerDataService.UserElements
@@ -566,20 +567,48 @@
 </MudContainer>
 
 @code {
-    private bool _showMultiRecipes = true;
-    private bool _showTagItems = true;
-    private bool _showMargins = true;
+    private bool _showMargins;
+    private bool ShowMargins
+    {
+        set
+        {
+            _showMargins = value;
+            _ = LocalStorageService.AddItem("ShowMargins", value.ToString());
+        }
+    }
+
+    private bool _showDetailedTags;
+    private bool ShowDetailedTags
+    {
+        set
+        {
+            _showDetailedTags = value;
+            _ = LocalStorageService.AddItem("ShowDetailedTags", value.ToString());
+        }
+    }
+
+    private bool _showDetailedRecipes;
+    private bool ShowDetailedRecipes
+    {
+        set
+        {
+            _showDetailedRecipes = value;
+            _ = LocalStorageService.AddItem("ShowDetailedRecipes", value.ToString());
+        }
+    }
 
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
     private string? _previousProfession;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         ContextService.OnContextChanged += StateHasChanged;
 
-        return Task.CompletedTask;
+        _showMargins = await LocalStorageService.GetItem("ShowMargins") != "False";
+        _showDetailedTags = await LocalStorageService.GetItem("ShowDetailedTags") != "False";
+        _showDetailedRecipes = await LocalStorageService.GetItem("ShowDetailedRecipes") != "False";
     }
 
     public void Dispose()
