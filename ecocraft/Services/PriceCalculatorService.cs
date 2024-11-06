@@ -112,8 +112,13 @@ public class PriceCalculatorService(
                 if (userElementIngredients.Any(ue => ue.Price is null))
                 {
                     iterator++;
-                    if (debug) userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
-                    if (debug) Console.WriteLine($"=> Stop");
+
+                    if (debug)
+                    {
+                        userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
+                        Console.WriteLine($"=> Stop");
+                    }
+
                     continue;
                 }
 
@@ -123,8 +128,13 @@ public class PriceCalculatorService(
                 if (reintegratedProducts.Any(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null))
                 {
                     iterator++;
-                    reintegratedProducts.Where(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Reintegrated Product {ue.Element.ItemOrTag.Name} is null"));
-                    if (debug) Console.WriteLine($"=> Stop");
+
+                    if (debug)
+                    {
+                        reintegratedProducts.Where(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Reintegrated Product {ue.Element.ItemOrTag.Name} is null"));
+                        Console.WriteLine($"=> Stop");
+                    }
+
                     continue;
                 }
 

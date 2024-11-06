@@ -61,6 +61,10 @@
     padding-bottom: 7px !important;
 }
 
+.rectangle-input input.mud-input-root {
+    padding-inline-start: 10px !important;
+}
+
 .select-dense .mud-input-slot {
     padding-top: 12px !important;
     padding-bottom: 14px !important;
@@ -92,6 +96,11 @@
     padding-right: 1px !important;
 }
 
+.small-adornment .mud-input-root-adorned-end {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .small-adornment .mud-icon-root {
     font-size: 1.25rem !important;
 }
@@ -107,3 +116,4 @@
     position: relative;
     left: 12px;
 }
+
