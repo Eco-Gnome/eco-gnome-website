@@ -1,0 +1,8 @@
+﻿# Bloquer l'accès aux répertoires et fichiers sensibles
+User-agent: *
+
+# Autoriser toutes les autres pages
+Allow: /
+
+# Sitemap pour aider les moteurs de recherche à mieux explorer le site
+Sitemap: https://eco-gnome.com/sitemap.xml
