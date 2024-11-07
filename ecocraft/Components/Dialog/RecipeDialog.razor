@@ -167,7 +167,7 @@
                     <MudTd>
                         @if (context.Element.Index > 0 && context.Element.IsProduct())
                         {
-                            <MudTooltip Text="@(context.IsReintegrated ? "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products." : "Stop deducting this item from the cost price. This will mathematically increase the price of other products.")">
+                            <MudTooltip Text="@(!context.IsReintegrated ? "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products." : "Stop deducting this item from the cost price. This will mathematically increase the price of other products.")">
                                 <MudIconButton Icon="@(context.IsReintegrated ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
                                                Size="Size.Small"
                                                Color="Color.Primary"
