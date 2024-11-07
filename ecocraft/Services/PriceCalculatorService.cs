@@ -50,11 +50,7 @@ public class PriceCalculatorService(
         // Reset Prices
         var (_, itemOrTagsToSell) = GetCategorizedItemOrTags();
 
-        userServerDataService.UserElements
-            .Where(ue => !userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).OverrideIsBought)
-            .ToList()
-            .ForEach(ue => ue.Price = null);
-
+        userServerDataService.UserElements.ForEach(ue => ue.Price = null);
         userServerDataService.UserPrices
             .Where(up => (itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag) && !up.OverrideIsBought)
             .ToList()
@@ -143,25 +139,23 @@ public class PriceCalculatorService(
                 remainingUserRecipes.RemoveAt(iterator);
 
                 var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
-                var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
+                var lavishTalentValue = userServerDataService.UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).HasLavishTalent
+                    ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f
+                    : 1f;
 
-                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.Element.Quantity * (ue.Element.IsDynamic
-                    ? userServerDataService.UserSkills.First(us => us.Skill == ue.Element.Skill).HasLavishTalent
-                        ? pluginModulePercent * lavishTalentValue
-                        : pluginModulePercent
-                    : 1));
+                var dynamicReduction = pluginModulePercent * lavishTalentValue;
+
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price
+                                                                              * ue.Element.Quantity
+                                                                              * (ue.Element.IsDynamic ? dynamicReduction : 1));
 
                 // We remove from ingredientCostSum, the price of reintegrated products
                 foreach (var reintegratedProduct in reintegratedProducts)
                 {
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == reintegratedProduct.Element.ItemOrTag);
 
-                    reintegratedProduct.Price = -1 * associatedUserPrice.Price * (reintegratedProduct.Element.IsDynamic
-                        ? userServerDataService.UserSkills.First(us => us.Skill == reintegratedProduct.Element.Skill).HasLavishTalent
-                            ? pluginModulePercent * lavishTalentValue
-                            : pluginModulePercent
-                        : 1);
-                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.Element.Quantity;
+                    reintegratedProduct.Price = -1 * associatedUserPrice.Price;
+                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.Element.Quantity * (reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
                 }
 
                 var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userRecipe
@@ -170,21 +164,23 @@ public class PriceCalculatorService(
 
                 var craftMinuteFee = userServerDataService.UserCraftingTables.First(u => u.CraftingTable == userRecipe.Recipe.CraftingTable).CraftMinuteFee;
 
-                ingredientCostSum += craftMinuteFee * userRecipe.Recipe.CraftMinutes;
+                ingredientCostSum += craftMinuteFee * userRecipe.Recipe.CraftMinutes * pluginModulePercent;
+                // TODO: add talent related to craft time
 
                 foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                 {
                     // Calculate the associated User price if needed
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
+                    var finalQuantity = product.Element.Quantity * (product.Element.IsDynamic ? dynamicReduction : 1f);
+                    product.Price = ingredientCostSum * product.Share / finalQuantity;
+
+                    if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
+
                     if (associatedUserPrice.OverrideIsBought)
                     {
                         continue;
                     }
-
-                    product.Price = ingredientCostSum * product.Share / product.Element.Quantity;
-
-                    if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
 
                     if (associatedUserPrice.Price is null)
                     {

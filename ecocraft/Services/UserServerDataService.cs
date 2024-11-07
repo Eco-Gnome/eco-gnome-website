@@ -359,20 +359,21 @@ public class UserServerDataService(
         userPriceDbService.Delete(userPrice);
     }
 
-    public List<Recipe> GetAvailableRecipes(bool limitToSkillLevelRecipes = false, bool addNonSkilledRecipes = false)
+    public List<Recipe> GetAvailableRecipes()
     {
         var recipes = new HashSet<Recipe>();
+
 
         foreach (var userSkill in UserSkills)
         {
             var foundRecipes = serverDataService.Recipes.Where(r => r.Skill == userSkill.Skill);
 
-            recipes.UnionWith(limitToSkillLevelRecipes
+            recipes.UnionWith(UserSetting!.OnlyLevelAccessibleRecipes
                 ? foundRecipes.Where(r => r.SkillLevel <= userSkill.Level).ToList()
                 : foundRecipes);
         }
 
-        if (addNonSkilledRecipes)
+        if (UserSetting!.DisplayNonSkilledRecipes)
         {
             recipes.UnionWith(UserRecipes.Select(ucr => ucr.Recipe)
                 .Where(r => r.Skill is null).ToList());

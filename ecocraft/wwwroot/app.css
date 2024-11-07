@@ -96,6 +96,11 @@
     padding-right: 1px !important;
 }
 
+.small-adornment .mud-input-adornment-icon-button {
+    padding: 7px !important;
+    margin-right: -6px !important;
+}
+
 .small-adornment .mud-input-root-adorned-end {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
@@ -117,3 +122,10 @@
     left: 12px;
 }
 
+.border-l-1 {
+    border-left: 1px solid var(--mud-palette-table-lines) !important;
+}
+
+.border-r-1 {
+    border-right: 1px solid var(--mud-palette-table-lines) !important;
+}
