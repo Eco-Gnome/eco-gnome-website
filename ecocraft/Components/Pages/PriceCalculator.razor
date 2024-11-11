@@ -255,6 +255,7 @@
                 <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
 
                 <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
+                          Filter="new Func<ItemOrTag,bool>(FilterTagToBuy)"
                           Dense="true"
                           Hover="true">
                     <HeaderContent>
@@ -265,6 +266,7 @@
                                                Icon="@(_showDetailedTags ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                OnClick="@(() => ShowDetailedTags = !_showDetailedTags)"/>
                                 <MudText Typo="Typo.body2" Class="pt-1">Name</MudText>
+                                <MudTextField @bind-Value="_searchTagToBuy" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                             </MudStack>
                         </MudTh>
                         <MudTh>Buy price</MudTh>
@@ -429,6 +431,7 @@
                 </MudAutocomplete>
 
                 <MudTable Items="PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToSell"
+                          Filter="new Func<ItemOrTag,bool>(FilterItemToSell)"
                           Class="mt-4 mud-table-container-no-overflow-y recipe-table"
                           Dense="true"
                           GroupBy="_groupDefinitionToSell"
@@ -442,6 +445,7 @@
                                                Color="Color.Primary"
                                                OnClick="@(() => ShowDetailedRecipes = !_showDetailedRecipes)"/>
                                 <MudText Typo="Typo.body2" Class="pt-1">Item Name</MudText>
+                                <MudTextField @bind-Value="_searchItemToSell" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                             </MudStack>
                         </MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
@@ -677,6 +681,12 @@
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
     private string? _previousProfession;
+
+    private ItemOrTag? _selectedTagToBuy;
+    private string _searchTagToBuy = "";
+
+    private ItemOrTag? _selectedItemToSell;
+    private string _searchItemToSell = "";
 
     private TableGroupDefinition<ItemOrTag>? _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
     {
@@ -1018,5 +1028,34 @@
         await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
         Snackbar.Add("Price copied to clipboard", Severity.Success);
     }
+
+    private void OnGlobalSearchChanged(KeyboardEventArgs args)
+    {
+        StateHasChanged(); // Redessiner la page pour que les filtres s'appliquent
+    }
+
+    private bool FilterTagToBuy(ItemOrTag itemOrTag)
+    {
+        return FilterItemOrTag(itemOrTag, _searchTagToBuy, _selectedTagToBuy);
+    }
+
+    private bool FilterItemToSell(ItemOrTag itemOrTag)
+    {
+        return FilterItemOrTag(itemOrTag, _searchItemToSell, _selectedItemToSell);
+    }
+
+    private bool FilterItemOrTag(ItemOrTag itemOrTag, string search, ItemOrTag? specificTag = null)
+    {
+        if (specificTag is not null && !itemOrTag.AssociatedTags.Contains(specificTag))
+            return false;
+        if (string.IsNullOrWhiteSpace(search))
+            return true;
+        if (itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (ContextService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
 
 }
