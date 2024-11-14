@@ -113,7 +113,7 @@ public class UserServerDataService(
     public void RemoveUserMargin(UserMargin userMargin)
     {
         UserMargins.Remove(userMargin);
-        foreach (UserPrice userPrice in UserPrices.Where(up => up.UserMargin == userMargin))
+        foreach (var userPrice in UserPrices.Where(up => up.UserMargin == userMargin))
         {
             userPrice.UserMargin = UserMargins.First();
         }
@@ -144,15 +144,26 @@ public class UserServerDataService(
         }
     }
 
-    public void RemoveNonAllowedUserRecipes()
+    public void RecalculateUserRecipes(UserServer userServer)
     {
-        // If we activate the limitation of recipes, we remove all recipes that does not meet the requirements
+        // We remove all recipes that does not meet the requirements
         foreach (var userRecipe in UserRecipes.ToList())
         {
             if (userRecipe.Recipe.Skill is not null && userRecipe.Recipe.SkillLevel >
                 UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
             {
                 RemoveUserRecipe(userRecipe);
+            }
+        }
+
+        // We add all recipes that does meet the requirements
+        foreach (var userSkill in UserSkills.ToList())
+        {
+            var recipesToAdd = userSkill.Skill?.Recipes.Where(r => r.SkillLevel <= userSkill.Level).ToList() ?? [];
+
+            foreach (var recipe in recipesToAdd)
+            {
+                AddUserRecipe(recipe, userServer);
             }
         }
     }

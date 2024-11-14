@@ -78,7 +78,11 @@
                             </MudStack>
                         </MudTd>
                         <MudTd Style="text-align: right">
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserSkill(context))"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                           aria-label="delete"
+                                           tabindex="-1"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveUserSkill(context))" />
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -153,7 +157,11 @@
                                              Variant="Variant.Outlined"/>
                         </MudTd>
                         <MudTd Class="px-1">
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserCraftingTable(context))"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                           aria-label="delete"
+                                           tabindex="-1"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveUserCraftingTable(context))" />
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -200,6 +208,7 @@
                                 <MudTh Class="pl-1">
                                     <MudStack Row Spacing="1">
                                         <MudIconButton Size="Size.Small"
+                                                       tabindex="-1"
                                                        Class="pa-0 pl-2"
                                                        Icon="@(_showMargins ? @MDIIcons.Filled.ChevronDown : @MDIIcons.Filled.ChevronRight)"
                                                        OnClick="@(() => ShowMargins = !_showMargins)"/>
@@ -237,7 +246,10 @@
                                     </MudTd>
                                     <MudTd Class="py-1" Style="text-align: right;">
                                         <MudTooltip Text="Remove margin">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Size="Size.Small" OnClick="@(() => OnRemoveMargin(context))"/>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                                           tabindex="-1"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => OnRemoveMargin(context))"/>
                                         </MudTooltip>
                                     </MudTd>
                                 }
@@ -246,7 +258,10 @@
                         @if (_showMargins)
                         {
                             <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                <MudButton Class="py-1" StartIcon="@Icons.Material.Filled.Add" OnClick="OnAddMargin">Add margin</MudButton>
+                                <MudButton Class="py-1"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           tabindex="-1"
+                                           OnClick="OnAddMargin">Add margin</MudButton>
                             </MudStack>
                         }
                     }
@@ -262,6 +277,7 @@
                         <MudTh Class="pl-1">
                             <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                 <MudIconButton Size="Size.Small"
+                                               tabindex="-1"
                                                Color="Color.Primary"
                                                Icon="@(_showDetailedTags ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                OnClick="@(() => ShowDetailedTags = !_showDetailedTags)"/>
@@ -324,6 +340,7 @@
                                     @if (!context.IsTag && userPriceItemOrTag.Price is not null)
                                     {
                                         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                       tabindex="-1"
                                                        OnClick="() => CopyToClipboard(userPriceItemOrTag.Price)"
                                                        Size="Size.Small"/>
                                     }
@@ -336,6 +353,7 @@
                                 {
                                     <MudTooltip Text="Don't override this product price anymore.">
                                         <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
+                                                       tabindex="-1"
                                                        OnClick="() => OverridePrice(false, userPriceItemOrTag)"
                                                        Size="Size.Small" />
                                     </MudTooltip>
@@ -389,6 +407,7 @@
                                             @if (!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)
                                             {
                                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                               tabindex="-1"
                                                                OnClick="() => CopyToClipboard(userPriceItem.Price)"
                                                                Size="Size.Small"/>
                                             }
@@ -399,6 +418,7 @@
                                         {
                                             <MudTooltip Text="Don't override this product price anymore.">
                                                 <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
+                                                               tabindex="-1"
                                                                OnClick="() => OverridePrice(false, userPriceItem)"
                                                                Size="Size.Small" />
                                             </MudTooltip>
@@ -442,6 +462,7 @@
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                 <MudIconButton Icon="@(_showDetailedRecipes ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                Size="Size.Small"
+                                               tabindex="-1"
                                                Color="Color.Primary"
                                                OnClick="@(() => ShowDetailedRecipes = !_showDetailedRecipes)"/>
                                 <MudText Typo="Typo.body2" Class="pt-1">Item Name</MudText>
@@ -468,6 +489,7 @@
                                    Class="@($"{(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")} border-r-1")">
                                 <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
                                     <MudIconButton Size="Size.Small"
+                                                   tabindex="-1"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
                                                    OnClick="@(() => OverridePrice(true, userPrice))"/>
                                 </MudTooltip>
@@ -481,6 +503,7 @@
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <MudIconButton Size="Size.Small"
+                                                                   tabindex="-1"
                                                                    OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"
                                                                    Icon="@MDIIcons.Outline.Application"/>
                                                     <MudText Typo="Typo.body2" Class="pt-1">
@@ -496,6 +519,7 @@
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <MudIconButton Size="Size.Small"
+                                                                   tabindex="-1"
                                                                    Icon="@MDIIcons.Outline.ApplicationCog"
                                                                    OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"/>
                                                     <MudText Typo="Typo.body2" Class="pt-1">
@@ -574,10 +598,10 @@
                             </MudTd>
                             <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")} px-1")">
                                 <MudStack Row Spacing="2">
-                                    <MudIconButton
-                                        Icon="@(relatedUserElements.Count > 1 ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
-                                        Size="Size.Small"
-                                        OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"/>
+                                    <MudIconButton Icon="@(relatedUserElements.Count > 1 ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
+                                                   tabindex="-1"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"/>
                                 </MudStack>
                             </MudTd>
                         }
@@ -632,7 +656,11 @@
                                         </MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1 px-1")"></MudTd>
                                         <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1 px-1")">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Clear" aria-label="delete" Size="Size.Small" OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))"></MudIconButton>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                                           aria-label="delete"
+                                                           tabindex="-1"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))" />
                                         </MudTd>
                                     </MudTr>
                                 }
@@ -921,11 +949,7 @@
     private async Task OnOptionOnlyLevelChanged()
     {
         UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
-
-        if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
-        {
-            UserServerDataService.RemoveNonAllowedUserRecipes();
-        }
+        UserServerDataService.RecalculateUserRecipes(ContextService.CurrentUserServer!);
 
         await EcoCraftDbContext.SaveChangesAsync();
     }
