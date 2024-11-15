@@ -1,0 +1,194 @@
+[
+  {
+    "nameID": "SelfImprovementSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 3,
+    "yPos": 2
+  },
+  {
+    "nameID": "AdvancedBakingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 2,
+    "yPos": 0
+  },
+  {
+    "nameID": "AdvancedCookingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 3,
+    "yPos": 0
+  },
+  {
+    "nameID": "AdvancedMasonrySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 1,
+    "yPos": 2
+  },
+  {
+    "nameID": "AdvancedSmeltingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 2,
+    "yPos": 2
+  },
+  {
+    "nameID": "BakingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 6,
+    "yPos": 2
+  },
+  {
+    "nameID": "BasicEngineeringSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 6,
+    "yPos": 0
+  },
+  {
+    "nameID": "BlacksmithSkill",
+    "imageFile": "UI_Icons_06.png",
+    "xPos": 4,
+    "yPos": 11
+  },
+  {
+    "nameID": "ButcherySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 7,
+    "yPos": 2
+  },
+  {
+    "nameID": "CampfireCookingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 4,
+    "yPos": 0
+  },
+  {
+    "nameID": "CarpentrySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 0,
+    "yPos": 4
+  },
+  {
+    "nameID": "CompositesSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 0,
+    "yPos": 0
+  },
+  {
+    "nameID": "CookingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 0,
+    "yPos": 3
+  },
+  {
+    "nameID": "CuttingEdgeCookingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 5,
+    "yPos": 0
+  },
+  {
+    "nameID": "ElectronicsSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 1,
+    "yPos": 3
+  },
+  {
+    "nameID": "FarmingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 2,
+    "yPos": 3
+  },
+  {
+    "nameID": "FertilizersSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 5,
+    "yPos": 1
+  },
+  {
+    "nameID": "GatheringSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 3,
+    "yPos": 1
+  },
+  {
+    "nameID": "GlassworkingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 6,
+    "yPos": 1
+  },
+  {
+    "nameID": "HuntingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 3,
+    "yPos": 3
+  },
+  {
+    "nameID": "IndustrySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 7,
+    "yPos": 0
+  },
+  {
+    "nameID": "LoggingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 4,
+    "yPos": 3
+  },
+  {
+    "nameID": "MasonrySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 0,
+    "yPos": 2
+  },
+  {
+    "nameID": "MechanicsSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 0,
+    "yPos": 1
+  },
+  {
+    "nameID": "MillingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 4,
+    "yPos": 1
+  },
+  {
+    "nameID": "MiningSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 5,
+    "yPos": 3
+  },
+  {
+    "nameID": "OilDrillingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 1,
+    "yPos": 1
+  },
+  {
+    "nameID": "PaintingSkill",
+    "imageFile": "UI_Icons_06.png",
+    "xPos": 11,
+    "yPos": 15
+  },
+  {
+    "nameID": "PaperMillingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 1,
+    "yPos": 0
+  },
+  {
+    "nameID": "PotterySkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 7,
+    "yPos": 1
+  },
+  {
+    "nameID": "SmeltingSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 6,
+    "yPos": 3
+  },
+  {
+    "nameID": "ShipwrightSkill",
+    "imageFile": "skill-icons-sprite.png",
+    "xPos": 1,
+    "yPos": 4
+  }
+]

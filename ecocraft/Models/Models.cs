@@ -99,6 +99,10 @@ public class Skill: IHasLocalizedName
     public float? LavishTalentValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
+  /*  public string? imageFile;
+    public int? posX { get; set; }
+    public int? posY { get; set; }*/
+
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<Recipe> Recipes { get; set; } = [];

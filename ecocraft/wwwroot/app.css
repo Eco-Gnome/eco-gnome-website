@@ -4,6 +4,20 @@
 	but it is exclusively employed in the 'App.razor' component when authentication is enabled.
 */
 
+.icon-sprite-wrapper {
+    width: 32px;
+    height: 32px;
+    overflow: hidden; /* Cache les parties en dehors des 32x32 pixels */
+    display: inline-block;
+}
+
+.icon-sprite {
+    width: auto; /* Permet à l'image de garder sa taille naturelle pour que le positionnement fonctionne */
+    height: auto;
+    max-width: none;
+}
+
+
 .btn-primary {
     text-transform: uppercase;
     --bs-btn-bg: var(--mud-palette-primary) !important;
