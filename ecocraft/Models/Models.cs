@@ -66,7 +66,7 @@ public class Element
     }
 }
 
-public class ItemOrTag: IHasLocalizedName
+public class ItemOrTag: IHasLocalizedName, IHasIcon
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -82,6 +82,9 @@ public class ItemOrTag: IHasLocalizedName
     public List<UserPrice> UserPrices { get; set; } = [];
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
+    public string? imageFile { get; set; }
+    public int? posX { get; set; }
+    public int? posY { get; set; }
 
     public override string ToString()
     {
@@ -89,7 +92,7 @@ public class ItemOrTag: IHasLocalizedName
     }
 }
 
-public class Skill: IHasLocalizedName
+public class Skill: IHasLocalizedName, IHasIcon
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -99,14 +102,13 @@ public class Skill: IHasLocalizedName
     public float? LavishTalentValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
-  /*  public string? imageFile;
-    public int? posX { get; set; }
-    public int? posY { get; set; }*/
-
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<Recipe> Recipes { get; set; } = [];
     public List<UserSkill> UserSkills { get; set; } = [];
+    public string? imageFile { get; set; }
+    public int? posX { get; set; }
+    public int? posY { get; set; }
 
     public override string ToString()
     {
@@ -114,7 +116,7 @@ public class Skill: IHasLocalizedName
     }
 }
 
-public class CraftingTable: IHasLocalizedName
+public class CraftingTable: IHasLocalizedName, IHasIcon
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -126,6 +128,9 @@ public class CraftingTable: IHasLocalizedName
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
+    public string? imageFile { get; set; }
+    public int? posX { get; set; }
+    public int? posY { get; set; }
 
     public override string ToString()
     {
@@ -298,6 +303,13 @@ public class Server
     public List<Recipe> Recipes { get; set; } = [];
 }
 
+public interface IHasIcon
+{
+    public string? imageFile { get; set; }
+    public int? posX { get; set; }
+    public int? posY { get; set; }
+}
+
 // Utils
 public class LocalizedField
 {
@@ -363,4 +375,6 @@ public class LocalizedField
             [SupportedLanguage.Vietnamese] = LanguageCode.vi,
             [SupportedLanguage.Turkish] = LanguageCode.tr
         };
+
+    
 }

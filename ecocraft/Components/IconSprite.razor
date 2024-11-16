@@ -1,7 +1,6 @@
 ﻿@using MudBlazor
 
-@* <MudImage Style="@StyleString" /> *@
-<div style=@StyleString></div>
+<div style="@StyleString"></div>
 
 @code {
     [Parameter] public string ImageUrl { get; set; }
@@ -13,16 +12,17 @@
     private int PixelXPos => XPos * IconSize;
     private int PixelYPos => YPos * IconSize;
 
+    private string BackgroundSize => ImageUrl == "UI_Icons_Large_01.png" ? "800%" : "1600%";
+
+
     // Construction de la chaîne de style
     private string StyleString => $@"
         width: {IconSize}px;
-        height: {IconSize}px;
+        height: {IconSize}px;        
         background-position: -{PixelXPos}px -{PixelYPos}px;
-        background-size: 800%;
+        background-size: {BackgroundSize};
         overflow: hidden;
-        background-image:url('{ImageUrl}');
+        background-image:url('/assets/icons/{ImageUrl}');
+        flex:0 0 {IconSize}px;
     ";
 }
-
-@* <div style="background-image: url('@ImageUrl'); background-position: -@PixelXPos px -@PixelYPos px; width: @IconSize px; height: @IconSize px; background-size: auto; overflow: hidden;"></div> *@
-

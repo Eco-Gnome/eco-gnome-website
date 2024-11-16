@@ -333,6 +333,9 @@
 			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
 			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
 
+			// Map icons data
+			await ImportDataService.ImportIconsConfig(ContextService.CurrentServer!);
+
 			StateHasChanged();
 
 			Snackbar.Clear();

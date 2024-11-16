@@ -55,10 +55,12 @@
                         <MudTh>Level</MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
-                    <RowTemplate>
-                        <IconSprite ImageUrl="/assets/icons/UI_Icons_Large_01.png" XPos="3" YPos="0" IconSize="32" />
+                    <RowTemplate>                        
                         <MudTd Class="py-3">
-                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                <IconSprite ImageUrl="UI_Icons_Large_01.png" XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
+                                <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                            </MudStack>
                         </MudTd>
                         <MudTd>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
@@ -118,7 +120,10 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd Class="py-3">
-                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32" />
+                                <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                            </MudStack>
                         </MudTd>
                         <MudTd>
                             @if (context.CraftingTable.PluginModules.Count > 0)

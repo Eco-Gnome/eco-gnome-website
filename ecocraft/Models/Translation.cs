@@ -60,3 +60,4 @@ public interface IHasLocalizedName
 {
     public LocalizedField LocalizedName { get; set; }
 }
+
