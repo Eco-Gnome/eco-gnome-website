@@ -30,7 +30,7 @@
                         <MudStack Row Spacing="1">
                             <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes)</MudText>
 
-                            @if ((int)GetModuleAndLavishReducePercent(false) != 1)
+                            @if (HasUserRecipe() && (int)GetModuleAndLavishReducePercent(false) != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
@@ -42,7 +42,10 @@
 
                             <MudSpacer/>
 
-                            <MudText Color="Color.Primary" Class="pl-2">@GetCraftMinutePrice() $</MudText>
+                            @if (HasUserRecipe())
+                            {
+                                <MudText Color="Color.Primary" Class="pl-2">@GetCraftMinutePrice() $</MudText>
+                            }
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -52,14 +55,14 @@
                         <MudText Style="color: #888">Skill</MudText>
                         @if (Recipe.Skill is not null)
                         {
-                        <MudStack Row Spacing="1">
-                            <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
-                            <MudText>@(Recipe.SkillLevel)</MudText>
-                        </MudStack>
+                            <MudStack Row Spacing="1">
+                                <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
+                                <MudText>@(Recipe.SkillLevel)</MudText>
+                            </MudStack>
                         }
                         else
                         {
-                        <MudText>None</MudText>
+                            <MudText>None</MudText>
                         }
                     </MudStack>
                 </MudItem>
@@ -68,9 +71,8 @@
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
                             <MudText Style="color: #888">Labor</MudText>
-                            @if ((int)GetLaborReducePercent() != 1)
+                            @if (HasUserRecipe() && (int)GetLaborReducePercent() != 1)
                             {
-
                                 <MudText Color="Color.Secondary">
                                     @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
                                 </MudText>
@@ -79,7 +81,7 @@
                         <MudStack Row Spacing="1">
                             <MudText>@Recipe.Labor</MudText>
 
-                            @if ((int)GetLaborReducePercent() != 1)
+                            @if (HasUserRecipe() && (int)GetLaborReducePercent() != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
@@ -90,9 +92,12 @@
 
                             <MudSpacer/>
 
-                            <MudText Class="pl-2" Color="Color.Primary">
-                                @(Math.Round(GetLaborPrice(), 3)) $
-                            </MudText>
+                            @if (HasUserRecipe())
+                            {
+                                <MudText Class="pl-2" Color="Color.Primary">
+                                    @(Math.Round(GetLaborPrice(), 3)) $
+                                </MudText>
+                            }
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -249,18 +254,18 @@
     private readonly Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
     private readonly List<UserElement> _lockedSliders = [];
 
-    private void Ok()
-    {
-        MudDialog.Cancel();
-    }
-
     private readonly TableGroupDefinition<UserElement> _userElementsDefinition = new()
     {
         Indentation = false,
         Expandable = false,
         IsInitiallyExpanded = true,
-        Selector = (e) => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
+        Selector = e => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
     };
+
+    private bool HasUserRecipe()
+    {
+        return UserServerDataService.UserRecipes.FirstOrDefault(ur => ur.Recipe == Recipe) is not null;
+    }
 
     private bool ShouldDisplayShare()
     {

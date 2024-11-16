@@ -50,21 +50,23 @@
                             </ItemTemplate>
                         </MudAutocomplete>
 
-                        <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
-                                  Hover="true"
-                                  Dense="true"
-                                  Class="mt-4">
-                            <HeaderContent>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Level</MudTh>
-                                <MudTh></MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
-                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                        <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
-                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
-                                    </MudStack>
+                <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
+                          Hover="true"
+                          Dense="true"
+                          Class="mt-4">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Level</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd Class="py-3"Style="padding: 4px 4px 4px 4px;">
+                                    <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
+                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                    <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32"/>
+                                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                                </MudStack>
+                            </MudLink>
                                 </MudTd>
                                 <MudTd>
                                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
@@ -126,10 +128,12 @@
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
-                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                        <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32" />
-                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
-                                    </MudStack>
+                                    <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
+                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                    <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32"/>
+                                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                                </MudStack>
+                            </MudLink>
                                 </MudTd>
                                 <MudTd>
                                     @if (context.CraftingTable.PluginModules.Count > 0)
@@ -297,18 +301,19 @@
                             var userPriceItemOrTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
 
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />                                    
-                                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
-                                    @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
-                                    {
-                                        <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
-                                    }
+                                <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
+                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+                                        @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
+                                        {
+                                            <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>}
                                     @if (context.IsTag)
                                     {
                                         <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
-                                    }
-                                </MudStack>
+                                        }
+                                    </MudStack>
+                                </MudLink>
                                 @if (!_showDetailedTags && userPriceItemOrTag.PrimaryUserPrice is not null)
                                 {
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
@@ -319,7 +324,6 @@
                                     </MudStack>
                                 }
                             </MudTd>
-
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudTooltip Disabled="@(!context.IsTag || userPriceItemOrTag.Price is not null)"
@@ -379,7 +383,9 @@
                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                      Size="Size.Small"/>
-                                            <MudText Typo="Typo.body2" Class="pt-1">@ContextService.GetTranslation(item)</MudText>
+                                            <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(item))">
+                                                <MudText Typo="Typo.body2" Class="pt-1">@ContextService.GetTranslation(item)</MudText>
+                                            </MudLink>
                                         </MudStack>
                                     </MudTd>
 
@@ -480,7 +486,7 @@
                             </MudStack>
                         </MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
-                        <MudTh colspan="2">                            
+                        <MudTh colspan="2">
                         </MudTh>
                     </HeaderContent>
                     <GroupHeaderTemplate>
@@ -1013,9 +1019,10 @@
     private async Task OnOptionOnlyLevelChanged()
     {
         UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
-        UserServerDataService.RecalculateUserRecipes(ContextService.CurrentUserServer!);
+        UserServerDataService.RecalculateUserRecipes(ContextService.CurrentUserServer);
 
-        await EcoCraftDbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task UpdateCalorieCost(float calorieCost)
@@ -1080,6 +1087,44 @@
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters, options);
+
+        await dialog.Result;
+        StateHasChanged();
+    }
+
+    private async Task ShowCraftingTableDialog(CraftingTable craftingTable)
+    {
+        var parameters = new DialogParameters
+        {
+            ["CraftingTable"] = craftingTable,
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var dialog = DialogService.Show<CraftingTableDialog>(ContextService.GetTranslation(craftingTable), parameters, options);
+
+        await dialog.Result;
+    }
+
+    private async Task ShowSkillDialog(Skill skill)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Skill"] = skill,
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var dialog = DialogService.Show<SkillDialog>(ContextService.GetTranslation(skill), parameters, options);
+
+        await dialog.Result;
+        StateHasChanged();
+    }
+
+    private async Task ShowItemOrTagDialog(ItemOrTag itemOrTag)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ItemOrTag"] = itemOrTag,
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var dialog = DialogService.Show<ItemOrTagDialog>(ContextService.GetTranslation(itemOrTag), parameters, options);
 
         await dialog.Result;
         StateHasChanged();

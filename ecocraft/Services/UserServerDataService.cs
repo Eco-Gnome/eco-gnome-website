@@ -384,7 +384,6 @@ public class UserServerDataService(
     {
         var recipes = new HashSet<Recipe>();
 
-
         foreach (var userSkill in UserSkills)
         {
             var foundRecipes = serverDataService.Recipes.Where(r => r.Skill == userSkill.Skill);

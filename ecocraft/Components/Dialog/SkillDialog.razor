@@ -1,0 +1,17 @@
+﻿@using ecocraft.Models
+
+<MudDialog Style="min-height: 500px;">
+    <DialogContent>
+        <MudStack>
+            <MudText>Related recipes</MudText>
+            <RecipeList Recipes="@Skill.Recipes"/>
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Skill Skill { get; set; }
+}
