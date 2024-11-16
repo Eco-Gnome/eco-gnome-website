@@ -156,10 +156,20 @@ public class UserServerDataService(
             }
         }
 
+        var selectedRecipes = UserRecipes.Select(ur => ur.Recipe);
+        var onlyLevelAccessible = UserSetting!.OnlyLevelAccessibleRecipes;
+
         // We add all recipes that does meet the requirements
         foreach (var userSkill in UserSkills.ToList())
         {
-            var recipesToAdd = userSkill.Skill?.Recipes.Where(r => r.SkillLevel <= userSkill.Level).ToList() ?? [];
+            var recipesToAdd = userSkill.Skill?.Recipes ?? [];
+
+            if (onlyLevelAccessible)
+            {
+                recipesToAdd = recipesToAdd.Where(r => r.SkillLevel <= userSkill.Level).ToList();
+            }
+
+            recipesToAdd = recipesToAdd.Where(r => !selectedRecipes.Contains(r)).ToList();
 
             foreach (var recipe in recipesToAdd)
             {
