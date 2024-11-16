@@ -20,20 +20,23 @@
                         <MudStack Row Spacing="3">
                             <MudText Style="color: #888">Craft Time</MudText>
 
-                            <MudText Color="Color.Secondary">
-                                @(Math.Round(1 - GetModuleAndLavishReducePercent(), 1) * 100) %
-                            </MudText>
+                            @if ((int)GetModuleAndLavishReducePercent(false) != 1)
+                            {
+                                <MudText Color="Color.Secondary">
+                                    @(Math.Round(1 - GetModuleAndLavishReducePercent(false), 1) * 100) %
+                                </MudText>
+                            }
                         </MudStack>
                         <MudStack Row Spacing="1">
                             <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes)</MudText>
 
-                            @if ((int)GetModuleAndLavishReducePercent() != 1)
+                            @if ((int)GetModuleAndLavishReducePercent(false) != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
                                 <MudText Color="Color.Secondary">
 
-                                    @(GetFormatedCraftTime(Recipe.CraftMinutes * GetModuleAndLavishReducePercent()))
+                                    @(GetFormatedCraftTime(Recipe.CraftMinutes * GetModuleAndLavishReducePercent(false)))
                                 </MudText>
                             }
 
@@ -65,9 +68,13 @@
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
                             <MudText Style="color: #888">Labor</MudText>
-                            <MudText Color="Color.Secondary">
-                                @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
-                            </MudText>
+                            @if ((int)GetLaborReducePercent() != 1)
+                            {
+
+                                <MudText Color="Color.Secondary">
+                                    @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
+                                </MudText>
+                            }
                         </MudStack>
                         <MudStack Row Spacing="1">
                             <MudText>@Recipe.Labor</MudText>
@@ -310,12 +317,14 @@
         return (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
     }
 
-    private float GetModuleAndLavishReducePercent()
+    private float GetModuleAndLavishReducePercent(bool withLavish = true)
     {
         var pluginModulePercent = UserServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == Recipe.CraftingTable).PluginModule?.Percent ?? 1;
         var userRecipe = UserServerDataService.UserRecipes.First(ur => ur.Recipe == Recipe);
         var userSkill = UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill);
-        var lavishTalentValue = userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f;
+
+        var lavishTalentValue = withLavish ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f : 1f;
+
         return userSkill.HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
     }
 
