@@ -287,8 +287,8 @@
                                                Color="Color.Primary"
                                                Icon="@(_showDetailedTags ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                OnClick="@(() => ShowDetailedTags = !_showDetailedTags)"/>
-                                <MudText Typo="Typo.body2" Class="pt-1">Name</MudText>
-                                <MudTextField @bind-Value="_searchTagToBuy" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                <MudTextField @bind-Value="_searchTagToBuy" Immediate Placeholder="Ingredient Items Or Tags" Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                             </MudStack>
                         </MudTh>
                         <MudTh>Buy price</MudTh>
@@ -463,16 +463,17 @@
                           GroupBy="_groupDefinitionToSell"
                           Hover="true">
                     <HeaderContent>
-                        <MudTh Style="width: 26px; padding: 0"></MudTh>
-                        <MudTh Class="pl-0">
+                        <MudTh Style="width: 26px; padding: 0 0 0 4px;">
+                            <MudIconButton Icon="@(_showDetailedRecipes ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
+                                           Size="Size.Small"
+                                           tabindex="-1"
+                                           Color="Color.Primary"
+                                           OnClick="@(() => ShowDetailedRecipes = !_showDetailedRecipes)"/>
+                        </MudTh>
+                        <MudTh Class="pl-4">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIconButton Icon="@(_showDetailedRecipes ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
-                                               Size="Size.Small"
-                                               tabindex="-1"
-                                               Color="Color.Primary"
-                                               OnClick="@(() => ShowDetailedRecipes = !_showDetailedRecipes)"/>
-                                <MudText Typo="Typo.body2" Class="pt-1">Item Name</MudText>
-                                <MudTextField @bind-Value="_searchItemToSell" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                <MudTextField @bind-Value="_searchItemToSell" Immediate Placeholder="Product Items" Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                             </MudStack>
                         </MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
