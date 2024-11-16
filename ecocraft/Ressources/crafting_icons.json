@@ -389,6 +389,12 @@
     "xPos": 14,
     "yPos": 9
   },
+    {
+        "nameID": "WorkbenchItem",
+        "imageFile": "UI_Icons_00.png",
+        "xPos": 12,
+        "yPos": 12
+    },
   {
     "nameID": "WainwrightTableItem",
     "imageFile": "UI_Icons_00.png",

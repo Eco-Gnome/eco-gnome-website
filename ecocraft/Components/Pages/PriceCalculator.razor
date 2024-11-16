@@ -58,7 +58,7 @@
                     <RowTemplate>                        
                         <MudTd Class="py-3">
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                <IconSprite ImageUrl="UI_Icons_Large_01.png" XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
+                                <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
                                 <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
                             </MudStack>
                         </MudTd>
@@ -300,14 +300,15 @@
 
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                    @if (context.IsTag)
-                                    {
-                                        <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
-                                    }
+                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />                                    
                                     <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
                                     @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
                                     {
                                         <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
+                                    }
+                                    @if (context.IsTag)
+                                    {
+                                        <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
                                     }
                                 </MudStack>
                                 @if (!_showDetailedTags && userPriceItemOrTag.PrimaryUserPrice is not null)
@@ -509,10 +510,7 @@
                                         <MudTooltip Text="Open recipe popup, it displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <MudIconButton Size="Size.Small"
-                                                                   tabindex="-1"
-                                                                   OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"
-                                                                   Icon="@MDIIcons.Outline.Application"/>
+                                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @ContextService.GetTranslation(context)
                                                     </MudText>
@@ -525,10 +523,7 @@
                                         <MudTooltip Text="Open recipe popup, it gives ability to control the product price repartition and displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <MudIconButton Size="Size.Small"
-                                                                   tabindex="-1"
-                                                                   Icon="@MDIIcons.Outline.ApplicationCog"
-                                                                   OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))"/>
+                                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @ContextService.GetTranslation(context)
                                                     </MudText>
