@@ -50,23 +50,23 @@
                             </ItemTemplate>
                         </MudAutocomplete>
 
-                <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
-                          Hover="true"
-                          Dense="true"
-                          Class="mt-4">
-                    <HeaderContent>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Level</MudTh>
-                        <MudTh></MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd Class="py-3"Style="padding: 4px 4px 4px 4px;">
+                        <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
+                                  Hover="true"
+                                  Dense="true"
+                                  Class="mt-4">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Level</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Class="py-3"Style="padding: 4px 4px 4px 4px;">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
-                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                    <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32"/>
-                                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
-                                </MudStack>
-                            </MudLink>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                            <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32"/>
+                                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                                        </MudStack>
+                                    </MudLink>
                                 </MudTd>
                                 <MudTd>
                                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
@@ -129,11 +129,11 @@
                             <RowTemplate>
                                 <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
-                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                    <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32"/>
-                                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
-                                </MudStack>
-                            </MudLink>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                            <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32"/>
+                                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                                        </MudStack>
+                                    </MudLink>
                                 </MudTd>
                                 <MudTd>
                                     @if (context.CraftingTable.PluginModules.Count > 0)
@@ -264,13 +264,9 @@
                             }
                         </MudStack>
                     </MudExpansionPanel>
-
                 </MudExpansionPanels>
-
             </MudPaper>
         </MudItem>
-
-
 
         <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">

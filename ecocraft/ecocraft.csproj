@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="wwwroot\assets\eco-icons\" />
   </ItemGroup>
 
 
