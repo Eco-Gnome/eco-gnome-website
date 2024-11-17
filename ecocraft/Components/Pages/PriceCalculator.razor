@@ -63,7 +63,7 @@
                                 <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                            <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32"/>
+                                            <IconEco Obj="@context.Skill" />
                                             <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
                                         </MudStack>
                                     </MudLink>
@@ -130,7 +130,7 @@
                                 <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                            <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32"/>
+                                            <IconEco Obj="@context.CraftingTable" />
                                             <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
                                         </MudStack>
                                     </MudLink>
@@ -273,7 +273,8 @@
                 <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
                           Filter="new Func<ItemOrTag,bool>(FilterTagToBuy)"
                           Dense="true"
-                          Hover="true">
+                          Hover="true"
+                          Virtualize="false">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Items to buy</MudText>
                     </ToolBarContent>
@@ -299,7 +300,7 @@
                             <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
                                 <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
+                                        <IconEco Obj="@context"/>
                                         <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
 
                                         @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
@@ -449,7 +450,8 @@
                           Class="mud-table-container-no-overflow-y recipe-table"
                           Dense="true"
                           GroupBy="_groupDefinitionToSell"
-                          Hover="true">
+                          Hover="true"
+                          Virtualize="false">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Items to sell</MudText>
                         <MudSpacer/>
@@ -517,7 +519,7 @@
                                         <MudTooltip Text="Open recipe popup, it displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
+                                                    <IconEco Obj="@context" />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @ContextService.GetTranslation(context)
                                                     </MudText>
@@ -530,7 +532,7 @@
                                         <MudTooltip Text="Open recipe popup, it gives ability to control the product price repartition and displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
+                                                    <IconEco Obj=@context />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @ContextService.GetTranslation(context)
                                                     </MudText>

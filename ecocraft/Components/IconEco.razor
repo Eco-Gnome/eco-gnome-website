@@ -1,0 +1,28 @@
+﻿@using MudBlazor
+@using ecocraft.Models
+
+<MudImage Src=@($"/assets/eco-icons/{fileName}.png") Width=@IconSize Height=@IconSize Elevation="25" Class="rounded-lg" />
+
+@code {
+    [Parameter] public IHasIcon Obj { get; set; }
+    [Parameter] public int IconSize { get; set; } = 32;
+    [Parameter] public bool Foreground { get; set; } = false;
+
+    private string fileName
+    {
+        get
+        {
+            switch (Obj)
+            {
+                case ItemOrTag iot:
+                    return iot.Name;
+                case Skill skill:
+                    return skill.Name;
+                case CraftingTable ct:
+                    return ct.Name;
+                default:
+                    return "";
+            }          
+        }
+    }
+}
