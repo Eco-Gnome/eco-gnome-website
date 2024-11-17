@@ -30,7 +30,7 @@
                         <MudStack Row Spacing="1">
                             <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes)</MudText>
 
-                            @if (HasUserRecipe() && (int)GetModuleAndLavishReducePercent(false) != 1)
+                            @if ((int)GetModuleAndLavishReducePercent(false) != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
@@ -42,10 +42,7 @@
 
                             <MudSpacer/>
 
-                            @if (HasUserRecipe())
-                            {
-                                <MudText Color="Color.Primary" Class="pl-2">@GetCraftMinutePrice() $</MudText>
-                            }
+                            <MudText Color="Color.Primary" Class="pl-2">@GetCraftMinutePrice() $</MudText>
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -71,7 +68,7 @@
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
                             <MudText Style="color: #888">Labor</MudText>
-                            @if (HasUserRecipe() && (int)GetLaborReducePercent() != 1)
+                            @if ((int)GetLaborReducePercent() != 1)
                             {
                                 <MudText Color="Color.Secondary">
                                     @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
@@ -81,7 +78,7 @@
                         <MudStack Row Spacing="1">
                             <MudText>@Recipe.Labor</MudText>
 
-                            @if (HasUserRecipe() && (int)GetLaborReducePercent() != 1)
+                            @if ((int)GetLaborReducePercent() != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
@@ -92,12 +89,9 @@
 
                             <MudSpacer/>
 
-                            @if (HasUserRecipe())
-                            {
-                                <MudText Class="pl-2" Color="Color.Primary">
-                                    @(Math.Round(GetLaborPrice(), 3)) $
-                                </MudText>
-                            }
+                            <MudText Class="pl-2" Color="Color.Primary">
+                                @(Math.Round(GetLaborPrice(), 3)) $
+                            </MudText>
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -261,11 +255,6 @@
         IsInitiallyExpanded = true,
         Selector = e => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
     };
-
-    private bool HasUserRecipe()
-    {
-        return UserServerDataService.UserRecipes.FirstOrDefault(ur => ur.Recipe == Recipe) is not null;
-    }
 
     private bool ShouldDisplayShare()
     {
