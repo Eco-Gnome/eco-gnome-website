@@ -52,14 +52,14 @@
                         <MudText Style="color: #888">Skill</MudText>
                         @if (Recipe.Skill is not null)
                         {
-                        <MudStack Row Spacing="1">
-                            <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
-                            <MudText>@(Recipe.SkillLevel)</MudText>
-                        </MudStack>
+                            <MudStack Row Spacing="1">
+                                <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
+                                <MudText>@(Recipe.SkillLevel)</MudText>
+                            </MudStack>
                         }
                         else
                         {
-                        <MudText>None</MudText>
+                            <MudText>None</MudText>
                         }
                     </MudStack>
                 </MudItem>
@@ -70,7 +70,6 @@
                             <MudText Style="color: #888">Labor</MudText>
                             @if ((int)GetLaborReducePercent() != 1)
                             {
-
                                 <MudText Color="Color.Secondary">
                                     @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
                                 </MudText>
@@ -249,17 +248,12 @@
     private readonly Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
     private readonly List<UserElement> _lockedSliders = [];
 
-    private void Ok()
-    {
-        MudDialog.Cancel();
-    }
-
     private readonly TableGroupDefinition<UserElement> _userElementsDefinition = new()
     {
         Indentation = false,
         Expandable = false,
         IsInitiallyExpanded = true,
-        Selector = (e) => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
+        Selector = e => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
     };
 
     private bool ShouldDisplayShare()

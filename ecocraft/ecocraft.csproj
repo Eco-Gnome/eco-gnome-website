@@ -29,6 +29,9 @@
   <ItemGroup>
     <AdditionalFiles Include="Components\Dialog\ServerDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\RecipeDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\CraftingTableDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\SkillDialog.razor" />
+    <AdditionalFiles Include="Components\Dialog\ItemOrTagDialog.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,115 @@
+﻿@using ecocraft.Models
+@using ecocraft.Services
+@inject ContextService ContextService
+@inject IDialogService DialogService
+@inject UserServerDataService UserServerDataService
+
+<MudTable Items="@Recipes.OrderBy(r => r.FamilyName).ThenBy(r => r.Name)"
+          Dense="true"
+          Hover="true">
+    <HeaderContent>
+        <MudTh>Recipe name</MudTh>
+        <MudTh>Skill</MudTh>
+        <MudTh>Crafting Table</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>
+            <MudLink Color="Color.Default" Underline="Underline.None" OnClick="@(() => ToggleDetails(context))">
+                <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
+                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+                </MudStack>
+            </MudLink>
+        </MudTh>
+        <MudTh>
+            <MudText Typo="Typo.body2">@(context.Skill is not null ? ContextService.GetTranslation(context.Skill) : "")</MudText>
+        </MudTh>
+        <MudTh>
+            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+        </MudTh>
+        <MudTh>
+            @{
+                var userRecipe = GetUserRecipe(context);
+
+                @if (userRecipe is not null)
+                {
+                    <MudIconButton Color="Color.Default"
+                                   Icon="@Icons.Material.Filled.Clear"
+                                   Size="Size.Small"
+                                   OnClick="@(() => UserServerDataService.RemoveUserRecipe(userRecipe))"/>
+                }
+                else if (UserServerDataService.GetAvailableRecipes().Contains(context))
+                {
+                    <MudIconButton Color="Color.Primary"
+                                   Icon="@Icons.Material.Filled.Add"
+                                   Size="Size.Small"
+                                   OnClick="@(() => UserServerDataService.AddUserRecipe(context, ContextService.CurrentUserServer!))"/>
+                }
+            }
+        </MudTh>
+    </RowTemplate>
+    <ChildRowContent>
+        @if (_openedDetails.Contains(context))
+        {
+            <MudTr>
+                <MudTd colspan="4">
+                    <MudTable Items="@GetSpecificDisplayForElements(context)" Dense="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh Style="width: 35px; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pa-0 pl-2"></MudTh>
+                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">Ingredients</MudTh>
+                            <MudTh Style="width: 35px; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 border-l-1 pa-0 pl-2"></MudTh>
+                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">Products</MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context="ctx">
+                            <MudTd Class="pa-0 pl-2 border-0">@(ctx.Item1 is not null ? ctx.Item1.Quantity * -1 : "")</MudTd>
+                            <MudTd Class="border-0 pl-2">@(ctx.Item1 is not null ? ContextService.GetTranslation(ctx.Item1.ItemOrTag) : "")</MudTd>
+                            <MudTd Class="pa-0 pl-2 border-b-0 border-l-1">@(ctx.Item2 is not null ? ctx.Item2.Quantity : "")</MudTd>
+                            <MudTd Class="border-0 pl-2">@(ctx.Item2 is not null ? ContextService.GetTranslation(ctx.Item2.ItemOrTag) : "")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudTd>
+            </MudTr>
+        }
+    </ChildRowContent>
+</MudTable>
+
+@code {
+    [Parameter] public List<Recipe> Recipes { get; set; } = [];
+    private List<Recipe> _openedDetails = [];
+
+    private UserRecipe? GetUserRecipe(Recipe recipe)
+    {
+        return UserServerDataService.UserRecipes.FirstOrDefault(ur => ur.Recipe == recipe);
+    }
+
+    private void ToggleDetails(Recipe recipe)
+    {
+        if (_openedDetails.Contains(recipe))
+        {
+            _openedDetails.Remove(recipe);
+        }
+        else
+        {
+            _openedDetails.Add(recipe);
+        }
+    }
+
+    private List<(Element?, Element?)> GetSpecificDisplayForElements(Recipe recipe)
+    {
+        List<(Element?, Element?)> elements = [];
+
+        var products = recipe.Elements.Where(e => e.IsProduct()).ToList();
+        var ingredients = recipe.Elements.Where(e => e.IsIngredient()).ToList();
+
+        for (var i = 0; i < products.Count || i < ingredients.Count; i++)
+        {
+            var product = i < products.Count ? products[i] : null;
+            var ingredient = i < ingredients.Count ? ingredients[i] : null;
+
+            elements.Add((ingredient, product));
+        }
+
+        return elements;
+    }
+}

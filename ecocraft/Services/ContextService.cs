@@ -209,12 +209,6 @@ public class ContextService(
         await ChangeServer(null);
     }
 
-    public async Task RenounceAdmin()
-    {
-        CurrentUserServer!.IsAdmin = false;
-        await dbContext.SaveChangesAsync();
-    }
-
     public string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
         if (hasLocalizedName is null) return "BUG_NO_NAME";

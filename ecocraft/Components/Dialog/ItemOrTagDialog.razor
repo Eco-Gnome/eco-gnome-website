@@ -1,0 +1,29 @@
+﻿@using ecocraft.Models
+@using ecocraft.Services
+@inject ServerDataService ServerDataService
+
+<MudDialog Style="min-height: 500px;">
+    <DialogContent>
+        <MudStack Spacing="12">
+            @if (!ItemOrTag.IsTag)
+            {
+            <MudStack>
+                <MudText>Produced by</MudText>
+                <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsProduct()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
+            </MudStack>
+            }
+
+            <MudStack>
+                <MudText>Used in</MudText>
+                <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsIngredient()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public ItemOrTag ItemOrTag { get; set; }
+}
