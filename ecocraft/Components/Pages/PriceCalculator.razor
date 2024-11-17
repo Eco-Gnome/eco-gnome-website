@@ -23,262 +23,260 @@
     <MudGrid Style="height: auto">
         <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                <MudAutocomplete T="Skill"
-                                 Value="_emptySkill"
-                                 Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
-                                 SearchFunc="SearchSkills"
-                                 ValueChanged="AddUserSkill"
-                                 Placeholder="Add skill"
-                                 Dense="true"
-                                 MaxItems="null"
-                                 Variant="Variant.Outlined"
-                                 AnchorOrigin="Origin.BottomLeft"
-                                 TransformOrigin="Origin.TopLeft">
-                    <ItemTemplate>
-                        @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
-                        {
-                            <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
-                        }
-                        <MudText>@ContextService.GetTranslation(context)</MudText>
-                        @{
-                            _previousProfession = context.Profession;
-                        }
-                    </ItemTemplate>
-                </MudAutocomplete>
 
-                <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
-                          Hover="true"
-                          Dense="true"
-                          Class="mt-4">
-                    <HeaderContent>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Level</MudTh>
-                        <MudTh></MudTh>
-                    </HeaderContent>
-                    <RowTemplate>                        
-                        <MudTd Class="py-3">
-                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
-                                <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
-                            </MudStack>
-                        </MudTd>
-                        <MudTd>
-                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
-                                <MudNumericField T="int"
-                                                 Value="@context.Level"
-                                                 Class="square-input flex-no-grow"
-                                                 Min="1"
-                                                 Max="7"
-                                                 Variant="Variant.Outlined"
-                                                 Immediate="true"
-                                                 ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
-                                <MudCheckBox Value="context.HasLavishTalent"
-                                             Class="dense-checkbox"
-                                             Style="@($"visibility: {(context.Level >= 6 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
-                                             Label="Lavish talent"
-                                             Color="Color.Primary"
-                                             ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)" />
-                            </MudStack>
-                        </MudTd>
-                        <MudTd Style="text-align: right">
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
-                                           aria-label="delete"
-                                           tabindex="-1"
-                                           Size="Size.Small"
-                                           OnClick="@(() => RemoveUserSkill(context))" />
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text="@($"Skills ({UserServerDataService.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
+                        <MudAutocomplete T="Skill"
+                                         Value="_emptySkill"
+                                         Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
+                                         SearchFunc="SearchSkills"
+                                         ValueChanged="AddUserSkill"
+                                         Placeholder="Add skill"
+                                         Dense="true"
+                                         Class="auto-complete-input"
+                                         MaxItems="null"
+                                         Variant="Variant.Outlined"
+                                         AnchorOrigin="Origin.BottomLeft"
+                                         TransformOrigin="Origin.TopLeft">
+                            <ItemTemplate>
+                                @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
+                                {
+                                    <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
+                                }
+                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                                @{
+                                    _previousProfession = context.Profession;
+                                }
+                            </ItemTemplate>
+                        </MudAutocomplete>
 
-                <MudAutocomplete T="CraftingTable"
-                                 Value="_emptyCraftingTable"
-                                 Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
-                                 SearchFunc="SearchCraftingTables"
-                                 ValueChanged="AddUserCraftingTable"
-                                 Placeholder="Add crafting table"
-                                 Dense="true"
-                                 Class="mt-4"
-                                 MaxItems="null"
-                                 Variant="Variant.Outlined"
-                                 AnchorOrigin="Origin.BottomLeft"
-                                 TransformOrigin="Origin.TopLeft">
-                    <ItemTemplate>
-                        <MudText>@ContextService.GetTranslation(context)</MudText>
-                    </ItemTemplate>
-                </MudAutocomplete>
+                        <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
+                                  Hover="true"
+                                  Dense="true"
+                                  Class="mt-4">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Level</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                        <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32" />
+                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                                    </MudStack>
+                                </MudTd>
+                                <MudTd>
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
+                                        <MudNumericField T="int"
+                                                         Value="@context.Level"
+                                                         Class="square-input flex-no-grow"
+                                                         Min="1"
+                                                         Max="7"
+                                                         Variant="Variant.Outlined"
+                                                         Immediate="true"
+                                                         ValueChanged="(int newValue) => OnLevelChanged(context, newValue)" />
+                                        <MudCheckBox Value="context.HasLavishTalent"
+                                                     Class="dense-checkbox"
+                                                     Style="@($"visibility: {(context.Level >= 6 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
+                                                     Label="Lavish talent"
+                                                     Color="Color.Primary"
+                                                     ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)" />
+                                    </MudStack>
+                                </MudTd>
+                                <MudTd Style="text-align: right">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                                   aria-label="delete"
+                                                   tabindex="-1"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => RemoveUserSkill(context))" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudExpansionPanel>
 
-                <MudTable Items="UserServerDataService.UserCraftingTables"
-                          FixedHeader="true"
-                          Hover="true"
-                          Class="mt-4"
-                          Dense="true">
-                    <HeaderContent>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Upgrade</MudTh>
-                        <MudTh Class="px-1">Cost per min</MudTh>
-                        <MudTh Class="px-1"></MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd Class="py-3">
-                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32" />
-                                <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
-                            </MudStack>
-                        </MudTd>
-                        <MudTd>
-                            @if (context.CraftingTable.PluginModules.Count > 0)
-                            {
-                                <MudSelect T="PluginModule"
-                                           Class="select-dense very-dense no-wrap-select"
-                                           Placeholder="Choose a module"
-                                           Value="context.PluginModule"
-                                           ValueChanged="@(value => ChangePluginModule(context, value))"
-                                           Dense="true"
-                                           Typo="Typo.body2"
-                                           Variant="Variant.Outlined"
-                                           ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
-                                           AnchorOrigin="Origin.BottomLeft"
-                                           TransformOrigin="Origin.TopLeft">
-                                    <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
-                                    @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
-                                    {
-                                        <MudSelectItem T="PluginModule"
-                                                       Value="@pluginModule">
-                                            <MudText Typo="Typo.body2">
-                                                @ContextService.GetTranslation(pluginModule)
-                                            </MudText>
-                                        </MudSelectItem>
-                                    }
-                                </MudSelect>
-                            }
-                        </MudTd>
-                        <MudTd Class="px-1">
-                            <MudNumericField T="float"
-                                             Style="max-width: 85px;"
-                                             Class="rectangle-input"
-                                             Format="N2"
-                                             ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
-                                             Converter="@CultureInvariantConverter.DotOrCommaFloat"
-                                             Value="@context.CraftMinuteFee"
-                                             Variant="Variant.Outlined"/>
-                        </MudTd>
-                        <MudTd Class="px-1">
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
-                                           aria-label="delete"
-                                           tabindex="-1"
-                                           Size="Size.Small"
-                                           OnClick="@(() => RemoveUserCraftingTable(context))" />
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+                    <MudExpansionPanel Text="@($"Crafting tables ({UserServerDataService.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
+                        <MudAutocomplete T="CraftingTable"
+                                         Value="_emptyCraftingTable"
+                                         Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
+                                         SearchFunc="SearchCraftingTables"
+                                         ValueChanged="AddUserCraftingTable"
+                                         Placeholder="Add crafting table"
+                                         Dense="true"
+                                         Class="mt-4 auto-complete-input"
+                                         MaxItems="null"
+                                         Variant="Variant.Outlined"
+                                         AnchorOrigin="Origin.BottomLeft"
+                                         TransformOrigin="Origin.TopLeft">
+                            <ItemTemplate>
+                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                            </ItemTemplate>
+                        </MudAutocomplete>
 
-        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
-            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                <MudStack Spacing="0">
-                    @if (UserServerDataService.UserSetting is not null)
-                    {
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText>Display non-skilled recipes</MudText>
-                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
-                        </MudStack>
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText>Only level-accessible recipes</MudText>
-                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
-                        </MudStack>
-                    }
-                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                        <MudText>Cost per 1000 calories</MudText>
-                        @if (UserServerDataService.UserSetting is not null)
-                        {
-                            <div>
-                                <MudNumericField T="float"
-                                                 ValueChanged="UpdateCalorieCost"
-                                                 Style="height: 35px; width: 100px"
-                                                 Value="UserServerDataService.UserSetting.CalorieCost"
-                                                 Converter="@CultureInvariantConverter.DotOrCommaFloat"
-                                                 Variant="Variant.Outlined"/>
-                            </div>
-                        }
-                    </MudStack>
-
-                    @if (UserServerDataService.UserSetting is not null)
-                    {
-                        <MudTable Items="UserServerDataService.UserMargins"
+                        <MudTable Items="UserServerDataService.UserCraftingTables"
                                   FixedHeader="true"
                                   Hover="true"
                                   Class="mt-4"
                                   Dense="true">
                             <HeaderContent>
-                                <MudTh Class="pl-1">
-                                    <MudStack Row Spacing="1">
-                                        <MudIconButton Size="Size.Small"
-                                                       tabindex="-1"
-                                                       Class="pa-0 pl-2"
-                                                       Icon="@(_showMargins ? @MDIIcons.Filled.ChevronDown : @MDIIcons.Filled.ChevronRight)"
-                                                       OnClick="@(() => ShowMargins = !_showMargins)"/>
-                                        <MudText Typo="Typo.body1">Margins Configuration</MudText>
-                                    </MudStack>
-                                </MudTh>
-                                <MudTh></MudTh>
-                                <MudTh Style="text-align: right">
-                                    @if (!_showMargins)
-                                    {
-                                        <MudText Typo="Typo.body2">@(UserServerDataService.UserMargins.Count) margins</MudText>
-                                    }
-                                </MudTh>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Upgrade</MudTh>
+                                <MudTh Class="px-1">Cost per min</MudTh>
+                                <MudTh Class="px-1"></MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                @if (_showMargins)
-                                {
+                                <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                        <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32" />
+                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                                    </MudStack>
+                                </MudTd>
+                                <MudTd>
+                                    @if (context.CraftingTable.PluginModules.Count > 0)
+                                    {
+                                        <MudSelect T="PluginModule"
+                                                   Class="select-dense very-dense no-wrap-select"
+                                                   Placeholder="Choose a module"
+                                                   Value="context.PluginModule"
+                                                   ValueChanged="@(value => ChangePluginModule(context, value))"
+                                                   Dense="true"
+                                                   Typo="Typo.body2"
+                                                   Variant="Variant.Outlined"
+                                                   ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
+                                                   AnchorOrigin="Origin.BottomLeft"
+                                                   TransformOrigin="Origin.TopLeft">
+                                            <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
+                                            @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
+                                            {
+                                                <MudSelectItem T="PluginModule"
+                                                               Value="@pluginModule">
+                                                    <MudText Typo="Typo.body2">
+                                                        @ContextService.GetTranslation(pluginModule)
+                                                    </MudText>
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    }
+                                </MudTd>
+                                <MudTd Class="px-1">
+                                    <MudNumericField T="float"
+                                                     Style="max-width: 85px;height: 35px;"
+                                                     Class="rectangle-input"
+                                                     Format="N2"
+                                                     ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                     Value="@context.CraftMinuteFee"
+                                                     Variant="Variant.Outlined" />
+                                </MudTd>
+                                <MudTd Class="px-1">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                                   aria-label="delete"
+                                                   tabindex="-1"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => RemoveUserCraftingTable(context))" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudExpansionPanel>
+
+                    <MudExpansionPanel Text="@($"Margins ({UserServerDataService.UserMargins.Count})")" @bind-Expanded="ExpandedMargins">
+                        @if (UserServerDataService.UserSetting is not null)
+                        {
+                            <MudTable Items="UserServerDataService.UserMargins"
+                                      FixedHeader="true"
+                                      Hover="true"
+                                      Class="mt-4"
+                                      Dense="true">
+                                <HeaderContent>
+                                    <MudTh>Name</MudTh>
+                                    <MudTh>Value</MudTh>
+                                    <MudTh></MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
                                     <MudTd Class="py-1">
                                         <MudTextField Value="context.Name"
-                                                      Typo="Typo.body2"
-                                                      Style="border-bottom-color: gray"
-                                                      ValueChanged="@((string v) => UpdateMarginName(context, v))" />
+                                                        Typo="Typo.body2"
+                                                        Style="border-bottom-color: gray"
+                                                        ValueChanged="@((string v) => UpdateMarginName(context, v))" />
                                     </MudTd>
                                     <MudTd Class="py-1">
                                         <MudNumericField T="float"
-                                                         Class="rectangle-input"
-                                                         Style="height: 35px; width: 110px"
-                                                         Value="context.Margin"
-                                                         Min="0"
-                                                         Adornment="Adornment.End"
-                                                         AdornmentText="% "
-                                                         Converter="@CultureInvariantConverter.DotOrCommaFloat"
-                                                         ValueChanged="@(v => UpdateMargin(context, v))"
-                                                         Variant="Variant.Outlined"/>
+                                                            Class="rectangle-input"
+                                                            Style="height: 35px; width: 110px"
+                                                            Value="context.Margin"
+                                                            Min="0"
+                                                            Adornment="Adornment.End"
+                                                            AdornmentText="% "
+                                                            Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                            ValueChanged="@(v => UpdateMargin(context, v))"
+                                                            Variant="Variant.Outlined" />
                                     </MudTd>
                                     <MudTd Class="py-1" Style="text-align: right;">
                                         <MudTooltip Text="Remove margin">
                                             <MudIconButton Icon="@Icons.Material.Filled.Clear"
-                                                           tabindex="-1"
-                                                           Size="Size.Small"
-                                                           OnClick="@(() => OnRemoveMargin(context))"/>
+                                                            tabindex="-1"
+                                                            Size="Size.Small"
+                                                            OnClick="@(() => OnRemoveMargin(context))" />
                                         </MudTooltip>
                                     </MudTd>
-                                }
-                            </RowTemplate>
-                        </MudTable>
-                        @if (_showMargins)
+                                </RowTemplate>
+                            </MudTable>
+                            @if (_showMargins)
+                            {
+                                <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                    <MudButton Class="py-1"
+                                               StartIcon="@Icons.Material.Filled.Add"
+                                               tabindex="-1"
+                                               OnClick="OnAddMargin">Add margin</MudButton>
+                                </MudStack>
+                            }
+                        }
+                    </MudExpansionPanel>
+
+                    <MudExpansionPanel Text="Options" @bind-Expanded="ExpandedOptions">
+                        @if (UserServerDataService.UserSetting is not null)
                         {
-                            <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                <MudButton Class="py-1"
-                                           StartIcon="@Icons.Material.Filled.Add"
-                                           tabindex="-1"
-                                           OnClick="OnAddMargin">Add margin</MudButton>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText>Display non-skilled recipes</MudText>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged" />
+                            </MudStack>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudText>Only level-accessible recipes</MudText>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged" />
                             </MudStack>
                         }
-                    }
-                </MudStack>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText>Cost per 1000 calories</MudText>
+                            @if (UserServerDataService.UserSetting is not null)
+                            {
+                                <div>
+                                    <MudNumericField T="float"
+                                                     ValueChanged="UpdateCalorieCost"
+                                                     Style="height: 35px; width: 100px"
+                                                     Value="UserServerDataService.UserSetting.CalorieCost"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                     Variant="Variant.Outlined" />
+                                </div>
+                            }
+                        </MudStack>
+                    </MudExpansionPanel>
 
-                <MudDivider DividerType="DividerType.FullWidth" Class="my-6"/>
+                </MudExpansionPanels>
 
+            </MudPaper>
+        </MudItem>
+
+
+
+        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
+            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                 <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
                           Filter="new Func<ItemOrTag,bool>(FilterTagToBuy)"
                           Dense="true"
                           Hover="true">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Items to buy</MudText>
+                    </ToolBarContent>
                     <HeaderContent>
                         <MudTh Class="pl-1">
                             <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
@@ -441,28 +439,32 @@
 
         <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                <MudAutocomplete T="Recipe"
-                                 Value="_emptyRecipe"
-                                 Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
-                                 SearchFunc="SearchRecipes"
-                                 ValueChanged="AddUserRecipe"
-                                 Placeholder="Add recipe"
-                                 Dense="true"
-                                 MaxItems="null"
-                                 Variant="Variant.Outlined"
-                                 AnchorOrigin="Origin.BottomLeft"
-                                 TransformOrigin="Origin.TopLeft">
-                    <ItemTemplate>
-                        <MudText>@ContextService.GetTranslation(context)</MudText>
-                    </ItemTemplate>
-                </MudAutocomplete>
-
                 <MudTable Items="PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToSell"
                           Filter="new Func<ItemOrTag,bool>(FilterItemToSell)"
-                          Class="mt-4 mud-table-container-no-overflow-y recipe-table"
+                          Class="mud-table-container-no-overflow-y recipe-table"
                           Dense="true"
                           GroupBy="_groupDefinitionToSell"
                           Hover="true">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Items to sell</MudText>
+                        <MudSpacer/>
+                        <MudAutocomplete T="Recipe"
+                                         Value="_emptyRecipe"
+                                         Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
+                                         SearchFunc="SearchRecipes"
+                                         ValueChanged="AddUserRecipe"
+                                         Placeholder="Add recipe"
+                                         Class="auto-complete-input"
+                                         Dense="true"
+                                         MaxItems="null"
+                                         Variant="Variant.Outlined"
+                                         AnchorOrigin="Origin.BottomLeft"
+                                         TransformOrigin="Origin.TopLeft">
+                            <ItemTemplate>
+                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </ToolBarContent>
                     <HeaderContent>
                         <MudTh Style="width: 26px; padding: 0 0 0 4px;">
                             <MudIconButton Icon="@(_showDetailedRecipes ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
@@ -478,8 +480,8 @@
                             </MudStack>
                         </MudTh>
                         <MudTh>Prices wo/w margin</MudTh>
-                        <MudTh Class="px-1">Margin</MudTh>
-                        <MudTh Class="px-1"></MudTh>
+                        <MudTh colspan="2">                            
+                        </MudTh>
                     </HeaderContent>
                     <GroupHeaderTemplate>
                         <MudTh Class="mud-background-gray pl-8" colspan="5">@context.Key [@context.Items.Count()]</MudTh>
@@ -707,6 +709,62 @@
         }
     }
 
+    private bool _expandedSkills;
+    private bool ExpandedSkills
+    {
+        get
+        {
+            return _expandedSkills;
+        }
+        set
+        {
+            _expandedSkills = value;
+            _ = LocalStorageService.AddItem("ExpandedSkills", value.ToString());
+        }
+    }
+
+    private bool _expandedCraftingTables;
+    private bool ExpandedCraftingTables
+    {
+        get
+        {
+            return _expandedCraftingTables;
+        }
+        set
+        {
+            _expandedCraftingTables = value;
+            _ = LocalStorageService.AddItem("ExpandedCraftingTables", value.ToString());
+        }
+    }
+
+    private bool _expandedMargins;
+    private bool ExpandedMargins
+    {
+        get
+        {
+            return _expandedMargins;
+        }
+        set
+        {
+            _expandedMargins = value;
+            _ = LocalStorageService.AddItem("ExpandedMargins", value.ToString());
+        }
+    }
+
+    private bool _expandedOptions;
+    private bool ExpandedOptions
+    {
+        get
+        {
+            return _expandedOptions;
+        }
+        set
+        {
+            _expandedOptions = value;
+            _ = LocalStorageService.AddItem("ExpandedOptions", value.ToString());
+        }
+    }
+
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
@@ -734,6 +792,10 @@
         _showMargins = await LocalStorageService.GetItem("ShowMargins") != "False";
         _showDetailedTags = await LocalStorageService.GetItem("ShowDetailedTags") != "False";
         _showDetailedRecipes = await LocalStorageService.GetItem("ShowDetailedRecipes") != "False";
+        _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
+        _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
+        _expandedMargins = await LocalStorageService.GetItem("ExpandedMargins") != "False";
+        _expandedOptions = await LocalStorageService.GetItem("ExpandedOptions") != "False";
 
         _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
         {

@@ -4,6 +4,17 @@
 	but it is exclusively employed in the 'App.razor' component when authentication is enabled.
 */
 
+.mud-expand-panel .mud-expand-panel-content.mud-expand-panel-gutters {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}
+
+.mud-expand-panel .mud-expand-panel-content {
+    padding-bottom: 6px !important;
+    flex: 1 1 auto !important;
+    max-width: 100% !important;
+}
+
 .icon-sprite-wrapper {
     width: 32px;
     height: 32px;
@@ -77,6 +88,11 @@
 
 .rectangle-input input.mud-input-root {
     padding-inline-start: 10px !important;
+}
+
+.auto-complete-input input.mud-input-root {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
 }
 
 .select-dense .mud-input-slot {
