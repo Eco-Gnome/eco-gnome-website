@@ -60,7 +60,7 @@
                                 <MudTh></MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd Class="py-3"Style="padding: 4px 4px 4px 4px;">
+                                <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                             <IconSprite ImageUrl=@context.Skill.imageFile XPos="@(context.Skill.posX ?? 0)" YPos="@(context.Skill.posY ?? 0)" IconSize="32"/>
@@ -127,7 +127,7 @@
                                 <MudTh Class="px-1"></MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd Class="py-3" Style="padding: 4px 4px 4px 4px;">
+                                <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                             <IconSprite ImageUrl=@context.CraftingTable.imageFile XPos="@(context.CraftingTable.posX ?? 0)" YPos="@(context.CraftingTable.posY ?? 0)" IconSize="32"/>
@@ -301,12 +301,15 @@
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                         <IconSprite ImageUrl=@context.imageFile XPos="@(context.posX ?? 0)" YPos="@(context.posY ?? 0)" IconSize="32" />
                                         <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+
                                         @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
                                         {
-                                            <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>}
-                                    @if (context.IsTag)
-                                    {
-                                        <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
+                                            <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
+                                        }
+
+                                        @if (context.IsTag)
+                                        {
+                                            <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
                                         }
                                     </MudStack>
                                 </MudLink>
