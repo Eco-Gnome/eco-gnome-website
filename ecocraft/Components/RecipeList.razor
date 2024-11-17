@@ -4,31 +4,38 @@
 @inject IDialogService DialogService
 @inject UserServerDataService UserServerDataService
 
-<MudTable Items="@Recipes.OrderBy(r => r.FamilyName).ThenBy(r => r.Name)"
+<MudTable Items="@Recipes"
           Dense="true"
           Hover="true">
     <HeaderContent>
-        <MudTh>Recipe name</MudTh>
-        <MudTh>Skill</MudTh>
-        <MudTh>Crafting Table</MudTh>
-        <MudTh></MudTh>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => ContextService.GetTranslation(r))">Recipe name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => ContextService.GetTranslation(r.Skill))">Skill</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => ContextService.GetTranslation(r.CraftingTable))">Crafting Table</MudTableSortLabel></MudTh>
+        @* <MudTh></MudTh> *@
     </HeaderContent>
     <RowTemplate>
         <MudTh>
             <MudLink Color="Color.Default" Underline="Underline.None" OnClick="@(() => ToggleDetails(context))">
                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
-                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+                    <IconEco Obj="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
+                    <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>                    
                 </MudStack>
             </MudLink>
         </MudTh>
         <MudTh>
-            <MudText Typo="Typo.body2">@(context.Skill is not null ? ContextService.GetTranslation(context.Skill) : "")</MudText>
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                <IconEco Obj="@context.Skill" Size="32" />
+                <MudText Typo="Typo.body2">@(context.Skill is not null ? ContextService.GetTranslation(context.Skill) : "")</MudText>
+            </MudStack>            
         </MudTh>
         <MudTh>
-            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                <IconEco Obj="@context.CraftingTable" Size="32" />
+                <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+            </MudStack>
         </MudTh>
-        <MudTh>
+        @* <MudTh>
             @{
                 var userRecipe = GetUserRecipe(context);
 
@@ -47,7 +54,7 @@
                                    OnClick="@(() => UserServerDataService.AddUserRecipe(context, ContextService.CurrentUserServer!))"/>
                 }
             }
-        </MudTh>
+        </MudTh> *@
     </RowTemplate>
     <ChildRowContent>
         @if (_openedDetails.Contains(context))
@@ -63,9 +70,25 @@
                         </HeaderContent>
                         <RowTemplate Context="ctx">
                             <MudTd Class="pa-0 pl-2 border-0">@(ctx.Item1 is not null ? ctx.Item1.Quantity * -1 : "")</MudTd>
-                            <MudTd Class="border-0 pl-2">@(ctx.Item1 is not null ? ContextService.GetTranslation(ctx.Item1.ItemOrTag) : "")</MudTd>
+                            <MudTd Class="border-0 pl-2">
+                                @if (ctx.Item1 is not null)
+                                {
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <IconEco Obj="@ctx.Item1.ItemOrTag" Size="32"/>
+                                        @(ContextService.GetTranslation(ctx.Item1.ItemOrTag))
+                                    </MudStack>                                    
+                                }                                
+                            </MudTd>
                             <MudTd Class="pa-0 pl-2 border-b-0 border-l-1">@(ctx.Item2 is not null ? ctx.Item2.Quantity : "")</MudTd>
-                            <MudTd Class="border-0 pl-2">@(ctx.Item2 is not null ? ContextService.GetTranslation(ctx.Item2.ItemOrTag) : "")</MudTd>
+                            <MudTd Class="border-0 pl-2">
+                                @if (ctx.Item2 is not null)
+                                {
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <IconEco Obj="@ctx.Item2.ItemOrTag" Size="32" />
+                                        @(ContextService.GetTranslation(ctx.Item2.ItemOrTag))
+                                    </MudStack>
+                                }
+                            </MudTd>
                         </RowTemplate>
                     </MudTable>
                 </MudTd>

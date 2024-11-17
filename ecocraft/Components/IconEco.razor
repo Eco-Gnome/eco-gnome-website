@@ -1,11 +1,15 @@
 ﻿@using MudBlazor
 @using ecocraft.Models
 
-<MudImage Src=@($"/assets/eco-icons/{fileName}.png") Width=@IconSize Height=@IconSize Elevation="25" Class="rounded-lg" />
+@if (Obj is not null)
+{
+    <MudImage Src=@($"/assets/eco-icons/{fileName}.png") Width=@Size Height=@Size Elevation="25" Class="rounded-lg" />
+}
+
 
 @code {
     [Parameter] public IHasIcon Obj { get; set; }
-    [Parameter] public int IconSize { get; set; } = 32;
+    [Parameter] public int Size { get; set; } = 32;
     [Parameter] public bool Foreground { get; set; } = false;
 
     private string fileName

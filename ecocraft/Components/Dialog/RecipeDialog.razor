@@ -5,13 +5,22 @@
 @inject PriceCalculatorService PriceCalculatorService
 
 <MudDialog Style="min-height: 500px;">
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <IconEco Obj="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
+            <MudText Typo="Typo.h6">@ContextService.GetTranslation(Recipe)</MudText>
+        </MudStack>
+    </TitleContent>
     <DialogContent>
         <MudStack Spacing="12">
             <MudGrid>
                 <MudItem sm="6">
-                    <MudStack Spacing="1">
+                    <MudStack Spacing="1">                        
                         <MudText Style="color: #888">CraftingTable</MudText>
-                        <MudText>@ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <IconEco Obj="@Recipe.CraftingTable" />
+                            <MudText>@ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
+                        </MudStack>
                     </MudStack>
                 </MudItem>
 
@@ -52,7 +61,8 @@
                         <MudText Style="color: #888">Skill</MudText>
                         @if (Recipe.Skill is not null)
                         {
-                            <MudStack Row Spacing="1">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                <IconEco Obj="@Recipe.Skill" />
                                 <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
                             </MudStack>
@@ -139,7 +149,12 @@
                             }
                         </MudStack>
                     </MudTd>
-                    <MudTd>@ContextService.GetTranslation(context.Element.ItemOrTag)</MudTd>
+                    <MudTd>
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <IconEco Obj="@context.Element.ItemOrTag" />
+                            @ContextService.GetTranslation(context.Element.ItemOrTag)
+                        </MudStack>
+                    </MudTd>
                     <!-- unit price -->
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Primary">
