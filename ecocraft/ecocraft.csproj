@@ -35,4 +35,10 @@
     <AdditionalFiles Include="Components\Utils\RecipeList.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Ressources\crafting_icons.json" />
+    <_ContentIncludedByDefault Remove="Ressources\items_icons.json" />
+    <_ContentIncludedByDefault Remove="Ressources\skills_icons.json" />
+  </ItemGroup>
+
 </Project>

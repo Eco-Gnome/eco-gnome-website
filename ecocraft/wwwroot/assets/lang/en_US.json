@@ -1,13 +1,7 @@
-/*
-    Already traduced :
-    Components/Diagram : all
-    Components/Dialog : CraftingTable, ItemOrTag, Recipe
-
-    Components : RecipeList
-
-
-*/
 {
+    "__AlreadyTraduced_Components/Diagram": "all",
+    "__AlreadyTraduced_Components/Dialog": "CraftingTable, ItemOrTag, Recipe",
+    "__AlreadyTraduced_Components": "RecipeList",
     "Language": "Language",
     "RecipeList.RecipeName": "Recipe name",
     "Skill": "Skill",
@@ -31,11 +25,4 @@
     "RecipeDialog.Share.Honest": "80% First Product",
     "RecipeDialog.Share.Equality": "Fair Distribution",
     "RecipeDialog.Share.Equilibrate": "Distribute by Quantity"
-
-
-
-
-
-
-
 }
