@@ -14,6 +14,7 @@
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject ServerDataService ServerDataService
 @inject UserServerDataService UserServerDataService
+@inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
@@ -182,7 +183,7 @@
 						<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
 							<MudLink OnClick="@(() => ToggleTag(context))">
 								<MudText Typo="Typo.body2">
-									@ContextService.GetTranslation(context) (@context.AssociatedItems.Count)
+									@LocalizationService.GetTranslation(context) (@context.AssociatedItems.Count)
 								</MudText>
 							</MudLink>
 							@if (_selectedTag == context)
@@ -232,7 +233,7 @@
 				</HeaderContent>
 				<RowTemplate>
 					<MudTd>
-						<MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+						<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
 					</MudTd>
 					<MudTd>
 						<MudNumericField T="decimal?"
@@ -296,7 +297,7 @@
 	private List<ItemOrTag> GetItems()
 	{
 		return ServerDataService.ItemOrTags.Where(e => !e.IsTag)
-			.OrderBy(iot => ContextService.GetTranslation(iot)).ToList();
+			.OrderBy(iot => LocalizationService.GetTranslation(iot)).ToList();
 	}
 
 	private void ToggleTag(ItemOrTag tag)
@@ -308,7 +309,7 @@
 	{
 		return ServerDataService.ItemOrTags
 			.Where(e => e.IsTag)
-			.OrderBy(iot => ContextService.GetTranslation(iot))
+			.OrderBy(iot => LocalizationService.GetTranslation(iot))
 			.ToList();
 	}
 
@@ -487,7 +488,7 @@
 			return true;
 		if (itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
 			return true;
-		if (ContextService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
+		if (LocalizationService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
 			return true;
 		return false;
 	}

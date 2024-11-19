@@ -64,6 +64,7 @@ builder.Services.AddScoped<UserServerDataService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<LocalizationService>();
 
 // Authorization
 builder.Services.AddScoped<Authorization>();

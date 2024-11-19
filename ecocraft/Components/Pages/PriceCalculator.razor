@@ -14,6 +14,7 @@
 @inject UserPriceDbService UserPriceDbService
 @inject PriceCalculatorService PriceCalculatorService
 @inject EcoCraftDbContext EcoCraftDbContext
+@inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
@@ -41,9 +42,9 @@
                             <ItemTemplate>
                                 @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
                                 {
-                                    <MudText Color="Color.Primary" Typo="Typo.caption">@ContextService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
+                                    <MudText Color="Color.Primary" Typo="Typo.caption">@LocalizationService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
                                 }
-                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                                <MudText>@LocalizationService.GetTranslation(context)</MudText>
                                 @{
                                     _previousProfession = context.Profession;
                                 }
@@ -64,7 +65,7 @@
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                             <IconEco Obj="@context.Skill" />
-                                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.Skill)</MudText>
+                                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
                                         </MudStack>
                                     </MudLink>
                                 </MudTd>
@@ -111,7 +112,7 @@
                                          AnchorOrigin="Origin.BottomLeft"
                                          TransformOrigin="Origin.TopLeft">
                             <ItemTemplate>
-                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                                <MudText>@LocalizationService.GetTranslation(context)</MudText>
                             </ItemTemplate>
                         </MudAutocomplete>
 
@@ -131,7 +132,7 @@
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                             <IconEco Obj="@context.CraftingTable" />
-                                            <MudText Typo="Typo.body2">@ContextService.GetTranslation(context.CraftingTable)</MudText>
+                                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
                                         </MudStack>
                                     </MudLink>
                                 </MudTd>
@@ -155,7 +156,7 @@
                                                 <MudSelectItem T="PluginModule" Value="@pluginModule">
                                                     @* <IconEco ObjName="@pluginModule.Name" /> *@
                                                     <MudText Typo="Typo.body2">
-                                                        @ContextService.GetTranslation(pluginModule)
+                                                        @LocalizationService.GetTranslation(pluginModule)
                                                     </MudText>
                                                 </MudSelectItem>
                                             }
@@ -301,7 +302,7 @@
                                 <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                         <IconEco Obj="@context"/>
-                                        <MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
+                                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
 
                                         @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
                                         {
@@ -319,7 +320,7 @@
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
                                         <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                         <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
-                                            @ContextService.GetTranslation(userPriceItemOrTag.PrimaryUserPrice.ItemOrTag)
+                                            @LocalizationService.GetTranslation(userPriceItemOrTag.PrimaryUserPrice.ItemOrTag)
                                         </MudText>
                                     </MudStack>
                                 }
@@ -385,7 +386,7 @@
                                                      Size="Size.Small"/>
                                             <IconEco Obj="item" Size="24"/>
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(item))">
-                                                <MudText Typo="Typo.body2" Class="pt-1">@ContextService.GetTranslation(item)</MudText>
+                                                <MudText Typo="Typo.body2" Class="pt-1">@LocalizationService.GetTranslation(item)</MudText>
                                             </MudLink>
                                         </MudStack>
                                     </MudTd>
@@ -469,7 +470,7 @@
                                          AnchorOrigin="Origin.BottomLeft"
                                          TransformOrigin="Origin.TopLeft">
                             <ItemTemplate>
-                                <MudText>@ContextService.GetTranslation(context)</MudText>
+                                <MudText>@LocalizationService.GetTranslation(context)</MudText>
                             </ItemTemplate>
                         </MudAutocomplete>
                     </ToolBarContent>
@@ -522,7 +523,7 @@
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <IconEco Obj="@context" />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
-                                                        @ContextService.GetTranslation(context)
+                                                        @LocalizationService.GetTranslation(context)
                                                     </MudText>
                                                 </MudStack>
                                             </MudLink>
@@ -535,7 +536,7 @@
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <IconEco Obj=@context />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
-                                                        @ContextService.GetTranslation(context)
+                                                        @LocalizationService.GetTranslation(context)
                                                     </MudText>
                                                     @if (!_showDetailedRecipes && relatedUserElements.Count > 1)
                                                     {
@@ -554,7 +555,7 @@
                                         <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                         <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userPrice.PrimaryUserElement.Element.Recipe))">
                                             <MudText Class="pt-1" Typo="Typo.body2">
-                                                @ContextService.GetTranslation(userPrice.PrimaryUserElement.Element.Recipe) Recipe
+                                                @LocalizationService.GetTranslation(userPrice.PrimaryUserElement.Element.Recipe) Recipe
                                             </MudText>
                                         </MudLink>
                                     </MudStack>
@@ -642,7 +643,7 @@
                                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                          Size="Size.Small"/>
                                                 <MudLink Color="Color.Default" Class="pt-1" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
-                                                    @ContextService.GetTranslation(userElement.Element.Recipe) Recipe
+                                                    @LocalizationService.GetTranslation(userElement.Element.Recipe) Recipe
                                                 </MudLink>
                                             </MudStack>
                                         </MudTd>
@@ -819,7 +820,7 @@
                                  && !ue.IsReintegrated);
 
                 return firstRelatedUserElements?.Element.Recipe.Skill is not null
-                    ? ContextService.GetTranslation(firstRelatedUserElements.Element.Recipe.Skill)
+                    ? LocalizationService.GetTranslation(firstRelatedUserElements.Element.Recipe.Skill)
                     : "No Skill";
             },
         };
@@ -841,7 +842,7 @@
         else
         {
             result = UserServerDataService.GetAvailableSkills()
-                .Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Where(s => LocalizationService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
 
@@ -861,7 +862,7 @@
         else
         {
             result = UserServerDataService.GetAvailableRecipes()
-                .Where(r => ContextService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
 
@@ -881,7 +882,7 @@
         else
         {
             result = UserServerDataService.GetAvailableCraftingTables()
-                .Where(s => ContextService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Where(s => LocalizationService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
 
@@ -1088,7 +1089,7 @@
             ["Recipe"] = recipe,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<RecipeDialog>(ContextService.GetTranslation(recipe), parameters, options);
+        var dialog = DialogService.Show<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;
         StateHasChanged();
@@ -1101,7 +1102,7 @@
             ["CraftingTable"] = craftingTable,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<CraftingTableDialog>(ContextService.GetTranslation(craftingTable), parameters, options);
+        var dialog = DialogService.Show<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
 
         await dialog.Result;
     }
@@ -1113,7 +1114,7 @@
             ["Skill"] = skill,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<SkillDialog>(ContextService.GetTranslation(skill), parameters, options);
+        var dialog = DialogService.Show<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
 
         await dialog.Result;
         StateHasChanged();
@@ -1126,7 +1127,7 @@
             ["ItemOrTag"] = itemOrTag,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<ItemOrTagDialog>(ContextService.GetTranslation(itemOrTag), parameters, options);
+        var dialog = DialogService.Show<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
 
         await dialog.Result;
         StateHasChanged();
@@ -1187,7 +1188,7 @@
             return true;
         if (itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (ContextService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
+        if (LocalizationService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }

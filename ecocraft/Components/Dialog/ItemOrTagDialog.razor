@@ -1,13 +1,13 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
 @inject ServerDataService ServerDataService
-@inject ContextService ContextService
+@inject LocalizationService LocalizationService
 
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             <IconEco Obj="@ItemOrTag" Size="64" />
-            <MudText Typo="Typo.h6">@ContextService.GetTranslation(ItemOrTag)</MudText>
+            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(ItemOrTag)</MudText>
         </MudStack>
     </TitleContent>
     <DialogContent>

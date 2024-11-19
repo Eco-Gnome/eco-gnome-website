@@ -3,12 +3,13 @@
 @inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
+@inject LocalizationService LocalizationService
 
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             <IconEco Obj="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
-            <MudText Typo="Typo.h6">@ContextService.GetTranslation(Recipe)</MudText>
+            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(Recipe)</MudText>
         </MudStack>
     </TitleContent>
     <DialogContent>
@@ -19,7 +20,7 @@
                         <MudText Style="color: #888">CraftingTable</MudText>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <IconEco Obj="@Recipe.CraftingTable" />
-                            <MudText>@ContextService.GetTranslation(Recipe.CraftingTable)</MudText>
+                            <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -63,7 +64,7 @@
                         {
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                 <IconEco Obj="@Recipe.Skill" />
-                                <MudText>@ContextService.GetTranslation(Recipe.Skill)</MudText>
+                                <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
                             </MudStack>
                         }
@@ -152,7 +153,7 @@
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <IconEco Obj="@context.Element.ItemOrTag" />
-                            @ContextService.GetTranslation(context.Element.ItemOrTag)
+                            @LocalizationService.GetTranslation(context.Element.ItemOrTag)
                         </MudStack>
                     </MudTd>
                     <!-- unit price -->
@@ -210,7 +211,7 @@
                               Width="150px"
                               Height="150px"
                               InputData="@(list.Select(ue => (double)ue.Share).ToArray())"
-                              InputLabels="@(list.Select(ue => ContextService.GetTranslation(ue.Element.ItemOrTag) + " (" + Math.Round(ue.Share * 100) + "%)").ToArray())"/>
+                              InputLabels="@(list.Select(ue => LocalizationService.GetTranslation(ue.Element.ItemOrTag) + " (" + Math.Round(ue.Share * 100) + "%)").ToArray())"/>
                     <MudStack>
                         @for (var i = 0; i < list.Count; i++)
                         {
@@ -219,7 +220,7 @@
 
                             <MudStack Row>
                                 <MudText Style="min-width: 100px">
-                                    @(ContextService.GetTranslation(product.Element.ItemOrTag)):
+                                    @(LocalizationService.GetTranslation(product.Element.ItemOrTag)):
                                 </MudText>
                                 <MudSlider T="decimal"
                                            Style="max-width: 350px"

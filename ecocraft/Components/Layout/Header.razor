@@ -13,6 +13,7 @@
 @inject ServerDataService ServerDataService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject LocalizationService LocalizationService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
     <MudImage Src="/assets/avatar.png" Width="52" />
@@ -39,7 +40,8 @@
                    Color="Color.Tertiary"
                    OnClick="CreateServer" />
 </MudStack>
-
+<MudText>@LocalizationService.GetTranslation("Welcome")</MudText>
+<MudText>@LocalizationService.GetTranslation("Settings")</MudText>
 
 <MudSpacer />
 
@@ -50,7 +52,7 @@
 
     <MudSelect T="LanguageCode"
                 Class="select-dense"
-                Value="@ContextService.CurrentLanguageCode"
+               Value="@LocalizationService.CurrentLanguageCode"
                 Dense="false"
                 Variant="Variant.Outlined"
                 SelectedValuesChanged="OnSelectedLanguageChanged"
@@ -90,7 +92,9 @@
 
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
     {
-        await ContextService.ChangeLanguage(languageCodes.First());
+        await LocalizationService.SetLanguageAsync(languageCodes.First());
+        ContextService.InvokeContextChanged();
+
     }
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
