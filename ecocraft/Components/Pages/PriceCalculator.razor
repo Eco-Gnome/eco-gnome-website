@@ -152,8 +152,8 @@
                                             <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
                                             @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
                                             {
-                                                <MudSelectItem T="PluginModule"
-                                                               Value="@pluginModule">
+                                                <MudSelectItem T="PluginModule" Value="@pluginModule">
+                                                    @* <IconEco ObjName="@pluginModule.Name" /> *@
                                                     <MudText Typo="Typo.body2">
                                                         @ContextService.GetTranslation(pluginModule)
                                                     </MudText>

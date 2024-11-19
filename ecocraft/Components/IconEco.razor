@@ -1,7 +1,7 @@
 ﻿@using MudBlazor
 @using ecocraft.Models
 
-@if (Obj is not null)
+@if (Obj is not null || ObjName is not null)
 {
     <MudImage Src=@($"/assets/eco-icons/{fileName}.png") Width=@Size Height=@Size Elevation="25" Class="rounded-lg" />
 }
@@ -9,6 +9,7 @@
 
 @code {
     [Parameter] public IHasIcon Obj { get; set; }
+    [Parameter] public string ObjName { get; set; }
     [Parameter] public int Size { get; set; } = 32;
     [Parameter] public bool Foreground { get; set; } = false;
 
@@ -16,17 +17,25 @@
     {
         get
         {
-            switch (Obj)
+            if(ObjName is not null)
             {
-                case ItemOrTag iot:
-                    return iot.Name;
-                case Skill skill:
-                    return skill.Name;
-                case CraftingTable ct:
-                    return ct.Name;
-                default:
-                    return "";
-            }          
+                return ObjName;
+            }
+            else
+            {
+                switch (Obj)
+                {
+                    case ItemOrTag iot:
+                        return iot.Name;
+                    case Skill skill:
+                        return skill.Name;
+                    case CraftingTable ct:
+                        return ct.Name;
+                    default:
+                        return "";
+                }
+            }
+                   
         }
     }
 }
