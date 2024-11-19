@@ -10,12 +10,14 @@ public class Recipe: IHasLocalizedName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string FamilyName { get; set; }
-    public float CraftMinutes { get; set; }
+
+    public decimal CraftMinutes { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public long SkillLevel { get; set; }
     public bool IsBlueprint { get; set; }
     public bool IsDefault { get; set; }
-    public float Labor { get; set; }
+
+    public decimal Labor { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
@@ -38,12 +40,14 @@ public class Element
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
     public int Index { get; set; }
-    public float Quantity { get; set; }
+
+    public decimal Quantity { get; set; }
     public bool IsDynamic { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public bool LavishTalent { get; set; }
     public bool DefaultIsReintegrated { get; set; }
-    public float DefaultShare { get; set; }
+
+    public decimal DefaultShare { get; set; }
 
     public Recipe Recipe { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
@@ -72,8 +76,10 @@ public class ItemOrTag: IHasLocalizedName, IHasIcon
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public bool IsTag { get; set; }
-    public float? MinPrice { get; set; }
-    public float? MaxPrice { get; set; }
+
+    public decimal? MinPrice { get; set; }
+
+    public decimal? MaxPrice { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -98,8 +104,9 @@ public class Skill: IHasLocalizedName, IHasIcon
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string? Profession { get; set; }
-    public float[] LaborReducePercent { get; set; }
-    public float? LavishTalentValue { get; set; }
+    public decimal[] LaborReducePercent { get; set; }
+
+    public decimal? LavishTalentValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -144,7 +151,8 @@ public class PluginModule: IHasLocalizedName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
-    public float Percent { get; set; }
+
+    public decimal Percent { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -193,11 +201,12 @@ public class UserSetting
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
-    public float CalorieCost { get; set; } = 0;
+
+    public decimal CalorieCost { get; set; } = 0;
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
 
-    public float TimeFee { get; set; } = 0;
+    public decimal TimeFee { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
 }
@@ -207,7 +216,8 @@ public class UserMargin
     [Key] public Guid Id { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public string Name { get; set; } = "";
-    public float Margin { get; set; } = 0;
+
+    public decimal Margin { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
     public List<UserPrice> UserPrices { get; set; } = [];
@@ -219,7 +229,8 @@ public class UserCraftingTable
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
-    public float CraftMinuteFee { get; set; } = 0;
+
+    public decimal CraftMinuteFee { get; set; } = 0;
 
     public UserServer UserServer { get; set; }
     public CraftingTable CraftingTable { get; set; }
@@ -240,16 +251,20 @@ public class UserSkill
 
 internal interface IHasPrice
 {
-    public float? Price { get; set; }
+
+    public decimal? Price { get; set; }
 }
 
 public class UserElement: IHasPrice
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Element")] public Guid ElementId { get; set; }
-    public float? Price { get; set; }
-    public float? MarginPrice { get; set; }
-    public float Share { get; set; }
+
+    public decimal? Price { get; set; }
+
+    public decimal? MarginPrice { get; set; }
+
+    public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
 
@@ -261,8 +276,10 @@ public class UserPrice: IHasPrice
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
-    public float? Price { get; set; }
-    public float? MarginPrice { get; set; }
+
+    public decimal? Price { get; set; }
+
+    public decimal? MarginPrice { get; set; }
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
@@ -376,5 +393,5 @@ public class LocalizedField
             [SupportedLanguage.Turkish] = LanguageCode.tr
         };
 
-    
+
 }

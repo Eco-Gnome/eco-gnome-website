@@ -5,7 +5,7 @@ namespace ecocraft.Extensions;
 
 public static class CultureInvariantConverter
 {
-    public static readonly Converter<float> DotOrCommaFloat = new Converter<float>
+    public static readonly Converter<decimal> DotOrCommaDecimal = new Converter<decimal>
     {
         SetFunc = value => $"{value}",
         GetFunc = number =>
@@ -14,7 +14,7 @@ public static class CultureInvariantConverter
 
             number = number.Replace(',', '.');
 
-            if (float.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out float result))
+            if (decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
             {
                 return result;
             }
@@ -23,16 +23,16 @@ public static class CultureInvariantConverter
         },
     };
 
-    public static readonly Converter<float?> DotOrCommaFloatNull = new Converter<float?>
+    public static readonly Converter<decimal?> DotOrCommaDecimalNull = new Converter<decimal?>
     {
-        SetFunc = value => value is null ? null : $"{Math.Round((float)value, 2)}",
+        SetFunc = value => value is null ? null : $"{Math.Round((decimal)value, 2)}",
         GetFunc = number =>
         {
             if (String.IsNullOrWhiteSpace(number)) return null;
 
             number = number.Replace(',', '.');
 
-            if (float.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out float result))
+            if (decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
             {
                 return result;
             }

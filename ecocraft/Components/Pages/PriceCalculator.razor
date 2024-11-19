@@ -163,12 +163,12 @@
                                     }
                                 </MudTd>
                                 <MudTd Class="px-1">
-                                    <MudNumericField T="float"
+                                    <MudNumericField T="decimal"
                                                      Style="max-width: 85px;height: 35px;"
                                                      Class="rectangle-input"
                                                      Format="N2"
                                                      ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
-                                                     Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                      Value="@context.CraftMinuteFee"
                                                      Variant="Variant.Outlined" />
                                 </MudTd>
@@ -204,14 +204,14 @@
                                                         ValueChanged="@((string v) => UpdateMarginName(context, v))" />
                                     </MudTd>
                                     <MudTd Class="py-1">
-                                        <MudNumericField T="float"
+                                        <MudNumericField T="decimal"
                                                             Class="rectangle-input"
                                                             Style="height: 35px; width: 110px"
                                                             Value="context.Margin"
                                                             Min="0"
                                                             Adornment="Adornment.End"
                                                             AdornmentText="% "
-                                                            Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                            Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                             ValueChanged="@(v => UpdateMargin(context, v))"
                                                             Variant="Variant.Outlined" />
                                     </MudTd>
@@ -254,11 +254,11 @@
                             @if (UserServerDataService.UserSetting is not null)
                             {
                                 <div>
-                                    <MudNumericField T="float"
+                                    <MudNumericField T="decimal"
                                                      ValueChanged="UpdateCalorieCost"
                                                      Style="height: 35px; width: 100px"
                                                      Value="UserServerDataService.UserSetting.CalorieCost"
-                                                     Converter="@CultureInvariantConverter.DotOrCommaFloat"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                      Variant="Variant.Outlined" />
                                 </div>
                             }
@@ -329,7 +329,7 @@
                                     <MudTooltip Disabled="@(!context.IsTag || userPriceItemOrTag.Price is not null)"
                                                 Text="This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific
                                                 one by clicking a star.">
-                                        <MudNumericField T="float?"
+                                        <MudNumericField T="decimal?"
                                                          Class="rectangle-input small-adornment"
                                                          Style="width: 111px"
                                                          ReadOnly="@(context.IsTag)"
@@ -338,7 +338,7 @@
                                                          Immediate="true"
                                                          Format="N2"
                                                          Variant="Variant.Outlined"
-                                                         Converter="@CultureInvariantConverter.DotOrCommaFloatNull"
+                                                         Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                          Min="context.MinPrice"
                                                          Max="context.MaxPrice"
                                                          Adornment="@(context.IsTag && userPriceItemOrTag.Price is null ? Adornment.End : Adornment.None)"
@@ -400,7 +400,7 @@
                                                            OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
                                             <MudTooltip Disabled="@(!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)"
                                                         Text="This value is automatically calculated by the system.">
-                                                <MudNumericField T="float?"
+                                                <MudNumericField T="decimal?"
                                                                  Class="rectangle-input small-adornment"
                                                                  Style="width: 85px"
                                                                  HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
@@ -410,7 +410,7 @@
                                                                  Immediate="true"
                                                                  Min="item.MinPrice"
                                                                  Max="item.MaxPrice"
-                                                                 Converter="@CultureInvariantConverter.DotOrCommaFloatNull"
+                                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                                  ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
                                                                  Adornment="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought ? Adornment.End : Adornment.None)"
                                                                  AdornmentIcon="@MDIIcons.Filled.Calculator"
@@ -563,7 +563,7 @@
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                 <MudStack Row>
-                                    <MudNumericField T="float?"
+                                    <MudNumericField T="decimal?"
                                                      FullWidth="false"
                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
                                                      Style="width: 101px;"
@@ -573,7 +573,7 @@
                                                      Value="userPrice.Price"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Variant="Variant.Outlined"/>
-                                    <MudNumericField T="float?"
+                                    <MudNumericField T="decimal?"
                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
                                                      Style="width: 95px"
                                                      HideSpinButtons="true"
@@ -655,7 +655,7 @@
                                                                Size="Size.Small"
                                                                OnClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
 
-                                                <MudNumericField T="float?"
+                                                <MudNumericField T="decimal?"
                                                                  Style="width: 75px"
                                                                  Class="flex-no-grow small-adornment rectangle-input"
                                                                  HideSpinButtons="true"
@@ -1027,7 +1027,7 @@
         StateHasChanged();
     }
 
-    private async Task UpdateCalorieCost(float calorieCost)
+    private async Task UpdateCalorieCost(decimal calorieCost)
     {
         UserServerDataService.UserSetting!.CalorieCost = calorieCost;
         UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
@@ -1035,7 +1035,7 @@
         StateHasChanged();
     }
 
-    private async Task UpdateMargin(UserMargin userMargin, float margin)
+    private async Task UpdateMargin(UserMargin userMargin, decimal margin)
     {
 
         userMargin.Margin = margin;
@@ -1073,7 +1073,7 @@
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
-    private async Task UpdatePriceCalculation(UserPrice userPrice, float? value)
+    private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)
     {
         userPrice.Price = value;
         UserPriceDbService.Update(userPrice);
@@ -1139,7 +1139,7 @@
         await PriceCalculatorService.Calculate();
     }
 
-    private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, float value)
+    private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, decimal value)
     {
         userCraftingTable.CraftMinuteFee = value;
         await PriceCalculatorService.Calculate();
@@ -1151,7 +1151,7 @@
         await PriceCalculatorService.Calculate();
     }
 
-    private async Task CopyToClipboard(float? price)
+    private async Task CopyToClipboard(decimal? price)
     {
         if (price is null)
         {

@@ -138,11 +138,11 @@ public class ImportDataService(
 
         if (dbPluginModule is null)
         {
-            serverDataService.ImportPluginModule(server, pluginModule.Name, TranslationsToLocalizedField(server, pluginModule.LocalizedName), (float)pluginModule.PluginModulePercent!);
+            serverDataService.ImportPluginModule(server, pluginModule.Name, TranslationsToLocalizedField(server, pluginModule.LocalizedName), (decimal)pluginModule.PluginModulePercent!);
         }
         else
         {
-            serverDataService.RefreshPluginModule(dbPluginModule, TranslationsToLocalizedField(server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), (float)pluginModule.PluginModulePercent!);
+            serverDataService.RefreshPluginModule(dbPluginModule, TranslationsToLocalizedField(server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), (decimal)pluginModule.PluginModulePercent!);
         }
     }
 
@@ -448,14 +448,14 @@ public class ImportDataService(
     private class SkillDto : EcoItemDto
     {
         public string? Profession { get; set; }
-        public float[] LaborReducePercent { get; set; }
-        public float? LavishTalentValue { get; set; }
+        public decimal[] LaborReducePercent { get; set; }
+        public decimal? LavishTalentValue { get; set; }
     }
 
     private class ItemDto : EcoItemDto
     {
         public bool? IsPluginModule { get; set; }
-        public float? PluginModulePercent { get; set; }
+        public decimal? PluginModulePercent { get; set; }
         public bool? IsCraftingTable { get; set; }
         public List<string>? CraftingTablePluginModules { get; set; }
     }
@@ -468,12 +468,12 @@ public class ImportDataService(
     private class RecipeDto : EcoItemDto
     {
         public string FamilyName { get; set; }
-        public float CraftMinutes { get; set; }
+        public decimal CraftMinutes { get; set; }
         public string RequiredSkill { get; set; }
         public int RequiredSkillLevel { get; set; }
         public bool IsBlueprint { get; set; }
         public bool IsDefault { get; set; }
-        public float Labor { get; set; }
+        public decimal Labor { get; set; }
         public string CraftingTable { get; set; }
         public List<ElementDto> Ingredients { get; set; }
         public List<ElementDto> Products { get; set; }
@@ -482,7 +482,7 @@ public class ImportDataService(
     private class ElementDto
     {
         public string ItemOrTag { get; set; }
-        public float Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public bool IsDynamic { get; set; }
         public string Skill { get; set; }
         public bool LavishTalent { get; set; }

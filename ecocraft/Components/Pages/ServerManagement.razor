@@ -235,7 +235,7 @@
 						<MudText Typo="Typo.body2">@ContextService.GetTranslation(context)</MudText>
 					</MudTd>
 					<MudTd>
-						<MudNumericField T="float?"
+						<MudNumericField T="decimal?"
 						                 Class="rectangle-input"
 						                 Disabled="@(context.IsTag)"
 						                 HideSpinButtons="@(context.IsTag)"
@@ -245,7 +245,7 @@
 						                 ValueChanged="@(value => OnMinValueChange(context,value))" />
 					</MudTd>
 					<MudTd>
-						<MudNumericField T="float?"
+						<MudNumericField T="decimal?"
 						                 Class="rectangle-input"
 						                 Disabled="@(context.IsTag)"
 						                 HideSpinButtons="@(context.IsTag)"
@@ -353,13 +353,13 @@
 		EcoCraftDbContext.SaveChanges();
 	}
 
-	private async Task OnMinValueChange(ItemOrTag context, float? minPrice)
+	private async Task OnMinValueChange(ItemOrTag context, decimal? minPrice)
 	{
 		context.MinPrice = minPrice;
 		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
-	private async Task OnMaxValueChange(ItemOrTag context, float? maxPrice)
+	private async Task OnMaxValueChange(ItemOrTag context, decimal? maxPrice)
 	{
 		context.MaxPrice = maxPrice;
 		await EcoCraftDbContext.SaveChangesAsync();

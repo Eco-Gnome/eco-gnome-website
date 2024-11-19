@@ -50,7 +50,7 @@ public class ServerDataService(
         JoinCode = server.JoinCode;
     }
 
-    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, float[] laborReducePercent, float? lavishTalentValue)
+    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)
     {
         var skill = new Skill
         {
@@ -68,7 +68,7 @@ public class ServerDataService(
         return skill;
     }
 
-    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, float[] laborReducePercent, float? lavishTalentValue)
+    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)
     {
         skill.LocalizedName = localizedName;
         skill.Profession = profession;
@@ -83,7 +83,7 @@ public class ServerDataService(
         skillDbService.Delete(skill);
     }
 
-    public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, float percent)
+    public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, decimal percent)
     {
         var pluginModule = new PluginModule
         {
@@ -99,7 +99,7 @@ public class ServerDataService(
         return pluginModule;
     }
 
-    public void RefreshPluginModule(PluginModule pluginModule, LocalizedField localizedName, float percent)
+    public void RefreshPluginModule(PluginModule pluginModule, LocalizedField localizedName, decimal percent)
     {
         pluginModule.LocalizedName = localizedName;
         pluginModule.Percent = percent;
@@ -170,8 +170,8 @@ public class ServerDataService(
         itemOrTagDbService.Delete(itemOrTag);
     }
 
-    public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill,
-        int requiredSkillLevel, bool isBlueprint, bool isDefault, float labor, CraftingTable craftingTable)
+    public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, decimal craftMinutes, Skill? skill,
+        int requiredSkillLevel, bool isBlueprint, bool isDefault, decimal labor, CraftingTable craftingTable)
     {
         var recipe = new Recipe
         {
@@ -194,8 +194,8 @@ public class ServerDataService(
         return recipe;
     }
 
-    public void RefreshRecipe(Recipe recipe, LocalizedField localizedName, string familyName, float craftMinutes, Skill? skill, int requiredSkillLevel,
-        bool isBlueprint, bool isDefault, float labor, CraftingTable craftingTable)
+    public void RefreshRecipe(Recipe recipe, LocalizedField localizedName, string familyName, decimal craftMinutes, Skill? skill, int requiredSkillLevel,
+        bool isBlueprint, bool isDefault, decimal labor, CraftingTable craftingTable)
     {
         recipe.LocalizedName = localizedName;
         recipe.FamilyName = familyName;
@@ -215,7 +215,7 @@ public class ServerDataService(
         recipeDbService.Delete(recipe);
     }
 
-    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
+    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent)
     {
         var element = new Element
         {
@@ -235,7 +235,7 @@ public class ServerDataService(
         return element;
     }
 
-    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, float quantity, bool isDynamic, Skill? skill, bool lavishTalent)
+    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent)
     {
         element.Recipe = recipe;
         element.ItemOrTag = itemOrTag;

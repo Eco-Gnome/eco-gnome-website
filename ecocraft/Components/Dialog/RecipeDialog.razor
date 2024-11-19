@@ -158,7 +158,7 @@
                     <!-- unit price -->
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Primary">
-                            @(context.Price is not null ? Math.Round((float)context.Price!, 2) + " $" : "")
+                            @(context.Price is not null ? Math.Round((decimal)context.Price!, 2) + " $" : "")
                         </MudText>
                     </MudTd>
                     <!-- dynamic info -->
@@ -177,7 +177,7 @@
                         <MudStack Row Justify="Justify.FlexEnd">
                             <MudText Typo="Typo.body2" Color="Color.Primary">
                                 @(context.Price is not null
-                                    ? Math.Round((float)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
+                                    ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
                                         ? context.Element.Quantity * GetModuleAndLavishReducePercent()
                                         : context.Element.Quantity), 2) + " $"
                                     : "")
@@ -221,7 +221,7 @@
                                 <MudText Style="min-width: 100px">
                                     @(ContextService.GetTranslation(product.Element.ItemOrTag)):
                                 </MudText>
-                                <MudSlider T="float"
+                                <MudSlider T="decimal"
                                            Style="max-width: 350px"
                                            Color="@_sliderColors[index % 3]"
                                            Immediate="false"
@@ -230,7 +230,7 @@
                                            Max="1"
                                            Min="0"
                                            Disabled="_lockedSliders.Contains(product)"
-                                           Step="0.01f"/>
+                                           Step="0.01m"/>
                                 <MudIconButton
                                     Size="Size.Small"
                                     OnClick="@(() => ChangeLockSliders(product))"
@@ -301,12 +301,12 @@
         }
     }
 
-    private float ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
+    private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
     {
         var ingredientCostSum = userElements.Sum(ue => ue.Price * ue.Element.Quantity
                                                                 * (ue.Element.IsDynamic & withReduction! ? GetModuleAndLavishReducePercent() : 1)
                                                                 * (ue.IsReintegrated && reverseDeduction ? -1 : 1));
-        return ingredientCostSum ?? 0f;
+        return ingredientCostSum ?? 0;
     }
 
     private List<UserElement> GetProductsWithoutReintegratedElements()
@@ -314,36 +314,36 @@
         return GetUserElements().Where(e => e.Element.IsProduct() && !e.IsReintegrated).ToList();
     }
 
-    private float GetLaborPrice()
+    private decimal GetLaborPrice()
     {
         return Recipe.Labor
             * UserServerDataService.UserSetting!.CalorieCost / 1000
             * GetLaborReducePercent();
     }
 
-    private float GetLaborReducePercent()
+    private decimal GetLaborReducePercent()
     {
-        return (Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1);
+        return Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1;
     }
 
-    private float GetModuleAndLavishReducePercent(bool withLavish = true)
+    private decimal GetModuleAndLavishReducePercent(bool withLavish = true)
     {
         var pluginModulePercent = UserServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == Recipe.CraftingTable).PluginModule?.Percent ?? 1;
         var userRecipe = UserServerDataService.UserRecipes.First(ur => ur.Recipe == Recipe);
         var userSkill = UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill);
 
-        var lavishTalentValue = withLavish ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f : 1f;
+        var lavishTalentValue = withLavish ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1 : 1;
 
         return userSkill.HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
     }
 
-    private float GetCraftMinutePrice()
+    private decimal GetCraftMinutePrice()
     {
         return Recipe.CraftMinutes
             * UserServerDataService.UserCraftingTables.First(u => u.CraftingTable == Recipe.CraftingTable).CraftMinuteFee;
     }
 
-    public string GetFormatedCraftTime(float craftMinutes)
+    public string GetFormatedCraftTime(decimal craftMinutes)
     {
         int totalSeconds = (int)(craftMinutes * 60);
         int minutes = totalSeconds / 60;
@@ -357,7 +357,7 @@
             .ToList();
     }
 
-    private async Task ChangeShare(UserElement userElement, float value)
+    private async Task ChangeShare(UserElement userElement, decimal value)
     {
         var others = GetProductsWithoutReintegratedElements().Where(ue => ue != userElement).ToList();
         var lockedOthers = others.Where(ue => _lockedSliders.Contains(ue)).ToList();
@@ -392,7 +392,7 @@
 
         foreach (var userElement in userElements)
         {
-            userElement.Share = 1f / userElements.Count;
+            userElement.Share = 1 / userElements.Count;
         }
 
         await PriceCalculatorService.Calculate();
@@ -419,7 +419,7 @@
 
         foreach (var userElement in userElements)
         {
-            userElement.Share = userElement.Element.Index == 0 ? 1f : 0f;
+            userElement.Share = userElement.Element.Index == 0 ? 1 : 0;
         }
 
         await PriceCalculatorService.Calculate();
@@ -432,7 +432,7 @@
 
         foreach (var userElement in userElements)
         {
-            userElement.Share = userElement.Element.Index == 0 ? 0.8f : 0.2f / (userElements.Count - 1);
+            userElement.Share = userElement.Element.Index == 0 ? 0.8m : 0.2m / (userElements.Count - 1);
         }
 
         await PriceCalculatorService.Calculate();

@@ -112,7 +112,7 @@ public class PriceCalculatorService(
                     if (debug)
                     {
                         userElementIngredients.Where(ue => ue.Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Ingredient {ue.Element.ItemOrTag.Name} is null"));
-                        Console.WriteLine($"=> Stop");
+                        Console.WriteLine("=> Stop");
                     }
 
                     continue;
@@ -128,20 +128,20 @@ public class PriceCalculatorService(
                     if (debug)
                     {
                         reintegratedProducts.Where(ue => userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).Price is null).ToList().ForEach(ue => Console.WriteLine($"=> Reintegrated Product {ue.Element.ItemOrTag.Name} is null"));
-                        Console.WriteLine($"=> Stop");
+                        Console.WriteLine("=> Stop");
                     }
 
                     continue;
                 }
 
-                if (debug) Console.WriteLine($"=> Calc");
+                if (debug) Console.WriteLine("=> Calc");
 
                 remainingUserRecipes.RemoveAt(iterator);
 
                 var pluginModulePercent = userServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable).PluginModule?.Percent ?? 1;
                 var lavishTalentValue = userServerDataService.UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).HasLavishTalent
-                    ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1f
-                    : 1f;
+                    ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1
+                    : 1;
 
                 var dynamicReduction = pluginModulePercent * lavishTalentValue;
 
@@ -158,9 +158,8 @@ public class PriceCalculatorService(
                     ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.Element.Quantity * (reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
                 }
 
-                var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userRecipe
-                    .Recipe.Skill).Level] ?? 1;
-                ingredientCostSum += userRecipe.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
+                var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userServerDataService.UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level] ?? 1;
+                ingredientCostSum += (userRecipe.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent);
 
                 var craftMinuteFee = userServerDataService.UserCraftingTables.First(u => u.CraftingTable == userRecipe.Recipe.CraftingTable).CraftMinuteFee;
 
@@ -172,7 +171,7 @@ public class PriceCalculatorService(
                     // Calculate the associated User price if needed
                     var associatedUserPrice = userServerDataService.UserPrices.First(up => up.ItemOrTag == product.Element.ItemOrTag);
 
-                    var finalQuantity = product.Element.Quantity * (product.Element.IsDynamic ? dynamicReduction : 1f);
+                    var finalQuantity = product.Element.Quantity * (product.Element.IsDynamic ? dynamicReduction : 1);
                     product.Price = ingredientCostSum * product.Share / finalQuantity;
 
                     if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");
