@@ -1,0 +1,22 @@
+﻿@using ecocraft.Components.Utils
+@using ecocraft.Services
+
+<MudDialog Style="min-height: 500px;">
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <MudText Typo="Typo.h6">Eco Gnome Versions</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack>
+            @foreach (var releaseVersion in ReleaseVersionService.ReleaseVersions)
+            {
+                <ReleaseCard ReleaseVersion="@releaseVersion" />
+            }
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+}

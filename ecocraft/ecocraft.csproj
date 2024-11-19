@@ -14,17 +14,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MudBlazor" Version="7.13.0" />
+    <PackageReference Include="MudBlazor" Version="7.15.0" />
+    <PackageReference Include="MudBlazor.Markdown" Version="7.14.0" />
     <PackageReference Include="Z.Blazor.Diagrams" Version="3.0.2" />
     <PackageReference Include="Z.Blazor.Diagrams.Algorithms" Version="3.0.2" />
     <PackageReference Include="Z.Blazor.Diagrams.Core" Version="3.0.2" />
   </ItemGroup>
 
-
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
-
 
   <ItemGroup>
     <AdditionalFiles Include="Components\Dialog\ServerDialog.razor" />
@@ -32,6 +31,8 @@
     <AdditionalFiles Include="Components\Dialog\CraftingTableDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\SkillDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\ItemOrTagDialog.razor" />
+    <AdditionalFiles Include="Components\Utils\IconEco.razor" />
+    <AdditionalFiles Include="Components\Utils\RecipeList.razor" />
   </ItemGroup>
 
 </Project>

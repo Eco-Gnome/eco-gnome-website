@@ -1,17 +1,15 @@
-﻿@using MudBlazor
-@using ecocraft.Models
+﻿@using ecocraft.Models
 
 @if (Obj is not null || ObjName is not null)
 {
     <MudImage Src=@($"/assets/eco-icons/{fileName}.png") Width=@Size Height=@Size Elevation="25" Class="rounded-lg" />
 }
 
-
 @code {
     [Parameter] public IHasIcon Obj { get; set; }
     [Parameter] public string ObjName { get; set; }
     [Parameter] public int Size { get; set; } = 32;
-    [Parameter] public bool Foreground { get; set; } = false;
+    [Parameter] public bool Foreground { get; set; }
 
     private string fileName
     {
@@ -35,7 +33,7 @@
                         return "";
                 }
             }
-                   
+
         }
     }
 }

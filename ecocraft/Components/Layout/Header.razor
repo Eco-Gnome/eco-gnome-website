@@ -13,12 +13,20 @@
 @inject ServerDataService ServerDataService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject LocalStorageService LocalStorageService
 @inject LocalizationService LocalizationService
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
     <MudImage Src="/assets/avatar.png" Width="52" />
     <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
-
+    <MudLink Style="position: relative;" Color="Color.Primary" OnClick="() => OpenReleaseDialog()">
+        <MudText Color="Color.Primary" Class="mt-2 ml-n2">@ReleaseVersionService.ReleaseVersions.First().Title</MudText>
+        @if (_lastAcknowledgeVersion is null || _lastAcknowledgeVersion != ReleaseVersionService.ReleaseVersions.First().Date)
+        {
+            <MudText Color="Color.Warning"
+                     Style="position: absolute; top: -10px; left: 5px; transform: rotate(-15deg)">New!</MudText>
+        }
+    </MudLink>
     <MudSelect  T="Server"
                 Class="select-dense"
                 Value="@ContextService.CurrentServer"
@@ -41,9 +49,7 @@
                    OnClick="CreateServer" />
 </MudStack>
 
-
 <MudSpacer />
-
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
     <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
@@ -72,9 +78,12 @@
     public EventCallback<bool> IsDarkModeChanged { get; set; }
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private string? _lastAcknowledgeVersion;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        _lastAcknowledgeVersion = await LocalStorageService.GetItem("LastAcknowledgedVersion");
+
         ContextService.OnContextChanged += StateHasChanged;
     }
 
@@ -130,7 +139,8 @@
 
                     await ContextService.ChangeServer(newServer);
                     Navigation.NavigateTo("/server-management");
-                }else if(returnType == "Join")
+                }
+                else if(returnType == "Join")
                 {
                     await OnJoinServer(returnData);
                 }
@@ -148,7 +158,8 @@
 
         var server = ServerDbService.GetByJoinCodeAsync(joinCode).Result;
 
-        if (server is null) {
+        if (server is null)
+        {
             Snackbar.Clear();
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
             Snackbar.Add("Server not found", Severity.Error);
@@ -170,7 +181,15 @@
     private async Task ConfigureUser()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
-        var dialog = await DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
+        await DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
+    }
 
+    private async Task OpenReleaseDialog()
+    {
+        _lastAcknowledgeVersion = ReleaseVersionService.ReleaseVersions.First().Date;
+        await LocalStorageService.AddItem("LastAcknowledgedVersion", _lastAcknowledgeVersion);
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        await DialogService.ShowAsync<ReleaseDialog>("Releases", options);
     }
 }

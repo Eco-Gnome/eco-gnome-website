@@ -1,0 +1,22 @@
+﻿@using ecocraft.Services
+
+<MudCard Style="background-color: var(--mud-palette-background)">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudStack Row AlignItems="AlignItems.End">
+                <MudText Typo="Typo.h6" Color="Color.Primary">Version @ReleaseVersion.Title</MudText>
+                <MudText>@ReleaseVersion.Date</MudText>
+            </MudStack>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent Class="release">
+        <MudText>
+            @ReleaseVersion.Description
+        </MudText>
+        <MudMarkdown Value="@ReleaseVersion.Changes" />
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter] public required ReleaseVersion ReleaseVersion { get; set; }
+}

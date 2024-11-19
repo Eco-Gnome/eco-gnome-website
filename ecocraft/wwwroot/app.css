@@ -23,7 +23,7 @@
 }
 
 .icon-sprite {
-    width: auto; /* Permet à l'image de garder sa taille naturelle pour que le positionnement fonctionne */
+    width: auto; /* Permet Ã  l'image de garder sa taille naturelle pour que le positionnement fonctionne */
     height: auto;
     max-width: none;
 }
@@ -158,4 +158,9 @@
 
 .border-r-1 {
     border-right: 1px solid var(--mud-palette-table-lines) !important;
+}
+
+.release ul {
+    padding-left: 16px !important;
+    list-style: disc !important;
 }

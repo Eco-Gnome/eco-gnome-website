@@ -1,5 +1,6 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
@@ -16,7 +17,7 @@
         <MudStack Spacing="12">
             <MudGrid>
                 <MudItem sm="6">
-                    <MudStack Spacing="1">                        
+                    <MudStack Spacing="1">
                         <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTable")</MudText>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <IconEco Obj="@Recipe.CraftingTable" />
