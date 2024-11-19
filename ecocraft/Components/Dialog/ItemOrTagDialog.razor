@@ -15,13 +15,13 @@
             @if (!ItemOrTag.IsTag)
             {
             <MudStack>
-                <MudText>Produced by</MudText>
+                    <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.ProducedBy")</MudText>
                 <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsProduct()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
             </MudStack>
             }
 
             <MudStack>
-                <MudText>Used in</MudText>
+                <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.UsedIn")</MudText>
                 <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsIngredient()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
             </MudStack>
         </MudStack>

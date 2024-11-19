@@ -17,7 +17,7 @@
             <MudGrid>
                 <MudItem sm="6">
                     <MudStack Spacing="1">                        
-                        <MudText Style="color: #888">CraftingTable</MudText>
+                        <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTable")</MudText>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <IconEco Obj="@Recipe.CraftingTable" />
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
@@ -28,7 +28,7 @@
                 <MudItem sm="6">
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
-                            <MudText Style="color: #888">Craft Time</MudText>
+                            <MudText Style="color: #888">@LocalizationService.GetTranslation("RecipeDialog.CraftTime")</MudText>
 
                             @if ((int)GetModuleAndLavishReducePercent(false) != 1)
                             {
@@ -59,7 +59,7 @@
 
                 <MudItem sm="6">
                     <MudStack Spacing="1">
-                        <MudText Style="color: #888">Skill</MudText>
+                        <MudText Style="color: #888">@LocalizationService.GetTranslation("Skill")</MudText>
                         @if (Recipe.Skill is not null)
                         {
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -70,7 +70,7 @@
                         }
                         else
                         {
-                            <MudText>None</MudText>
+                            <MudText>@LocalizationService.GetTranslation("None")</MudText>
                         }
                     </MudStack>
                 </MudItem>
@@ -78,7 +78,7 @@
                 <MudItem sm="6">
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
-                            <MudText Style="color: #888">Labor</MudText>
+                            <MudText Style="color: #888">@LocalizationService.GetTranslation("RecipeDialog.Labor")</MudText>
                             @if ((int)GetLaborReducePercent() != 1)
                             {
                                 <MudText Color="Color.Secondary">
@@ -111,7 +111,7 @@
             <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true">
                 <GroupHeaderTemplate>
                     <MudTh colspan="2" Class="mud-background">
-                        <MudText>@context.Key</MudText>
+                        <MudText>@LocalizationService.GetTranslation(context.Key.ToString())</MudText>
                     </MudTh>
                     <MudTh colspan="1" Class="mud-background">
                         <MudText>$ / u</MudText>
@@ -120,14 +120,14 @@
                         <MudStack Row Justify="Justify.FlexEnd">
                             @if (context.Key!.ToString() == "Ingredients")
                             {
-                                <MudText Typo="Typo.body2">Total Cost:</MudText>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalCost")</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
                                     @(Math.Round(-1 * ElementSum(context.Items.ToList(), true) + GetLaborPrice(), 2)) $
                                 </MudText>
                             }
                             else
                             {
-                                <MudText Typo="Typo.body2">Total Price:</MudText>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalPrice")</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
                                     @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2)) $
                                 </MudText>
@@ -170,7 +170,7 @@
                         }
                         else
                         {
-                            <MudText Typo="Typo.body2">@(context.Element.IsDynamic ? "dynamic" : "static")</MudText>
+                            <MudText Typo="Typo.body2">@(context.Element.IsDynamic ? LocalizationService.GetTranslation("RecipeDialog.Dynamic") : LocalizationService.GetTranslation("RecipeDialog.Static"))</MudText>
                         }
                     </MudTd>
                     <!-- price -->
@@ -189,7 +189,7 @@
                     <MudTd>
                         @if (context.Element.Index > 0 && context.Element.IsProduct())
                         {
-                            <MudTooltip Text="@(!context.IsReintegrated ? "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products." : "Stop deducting this item from the cost price. This will mathematically increase the price of other products.")">
+                            <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
                                 <MudIconButton Icon="@(context.IsReintegrated ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
                                                Size="Size.Small"
                                                Color="Color.Primary"
@@ -205,7 +205,7 @@
                 var list = GetProductsWithoutReintegratedElements();
 
                 <MudStack>
-                    <MudText Class="mt-2" Typo="Typo.body2">Price Sharing between outputs:</MudText>
+                    <MudText Class="mt-2" Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.Share.Title")</MudText>
                     <MudChart ChartType="ChartType.Donut"
                               LegendPosition="Position.Right"
                               Width="150px"
@@ -240,12 +240,12 @@
                         }
                     </MudStack>
                     <MudStack Row>
-                        <MudButton OnClick="FirstOnly">Only First Product</MudButton>
-                        <MudButton OnClick="Honest">80% First Product</MudButton>
-                        <MudButton OnClick="Equality">Fair Distribution</MudButton>
+                        <MudButton OnClick="FirstOnly">@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnly")</MudButton>
+                        <MudButton OnClick="Honest">@LocalizationService.GetTranslation("RecipeDialog.Share.Honest")</MudButton>
+                        <MudButton OnClick="Equality">@LocalizationService.GetTranslation("RecipeDialog.Share.Equality")</MudButton>
                         @if (list.Any(e => (int)e.Element.Quantity != (int)list.Max(i => i.Element.Quantity)))
                         {
-                            <MudButton OnClick="Equilibrate">Distribute by Quantity</MudButton>
+                            <MudButton OnClick="Equilibrate">@LocalizationService.GetTranslation("RecipeDialog.Share.Equilibrate")</MudButton>
                         }
                     </MudStack>
                 </MudStack>

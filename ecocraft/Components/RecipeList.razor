@@ -8,9 +8,9 @@
           Dense="true"
           Hover="true">
     <HeaderContent>
-        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r))">Recipe name</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.Skill))">Skill</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.CraftingTable))">Crafting Table</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r))">@LocalizationService.GetTranslation("RecipeList.RecipeName")</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.Skill))">@LocalizationService.GetTranslation("Skill")</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.CraftingTable))">@LocalizationService.GetTranslation("CraftingTable")</MudTableSortLabel></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTh>
@@ -43,9 +43,9 @@
                     <MudTable Items="@GetSpecificDisplayForElements(context)" Dense="true" Elevation="0">
                         <HeaderContent>
                             <MudTh Style="width: 35px; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pa-0 pl-2"></MudTh>
-                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">Ingredients</MudTh>
+                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">@LocalizationService.GetTranslation("Ingredients")</MudTh>
                             <MudTh Style="width: 35px; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 border-l-1 pa-0 pl-2"></MudTh>
-                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">Products</MudTh>
+                            <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">@LocalizationService.GetTranslation("Products")</MudTh>
                         </HeaderContent>
                         <RowTemplate Context="ctx">
                             <MudTd Class="pa-0 pl-2 border-0">@(ctx.Item1 is not null ? ctx.Item1.Quantity * -1 : "")</MudTd>

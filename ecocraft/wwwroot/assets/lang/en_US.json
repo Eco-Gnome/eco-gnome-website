@@ -1,7 +1,41 @@
+/*
+    Already traduced :
+    Components/Diagram : all
+    Components/Dialog : CraftingTable, ItemOrTag, Recipe
+
+    Components : RecipeList
+
+
+*/
 {
-    "Welcome": "Welcome",
     "Language": "Language",
-    "Settings": "Settings",
-    "Save": "Save",
-    "Cancel": "Cancel"
+    "RecipeList.RecipeName": "Recipe name",
+    "Skill": "Skill",
+    "CraftingTable": "Crafting Table",
+    "Ingredients": "Ingredients",
+    "Products": "Products",
+    "CraftingTableDialog.RelatedRecipes": "Related recipes",
+    "ItemOrTagDialog.ProducedBy": "Produced by",
+    "ItemOrTagDialog.UsedIn": "Used in",
+    "RecipeDialog.CraftTime": "Craft time",
+    "None": "None",
+    "RecipeDialog.Labor": "Labor",
+    "RecipeDialog.TotalCost": "Total cost:",
+    "RecipeDialog.TotalPrice": "Total price:",
+    "RecipeDialog.Dynamic": "dynamic",
+    "RecipeDialog.Static": "static",
+    "RecipeDialog.ReintegratedToolTip.True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products.",
+    "RecipeDialog.ReintegratedToolTip.False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
+    "RecipeDialog.Share.Title": "Price Sharing between outputs:",
+    "RecipeDialog.Share.FirstOnly": "Only First Product",
+    "RecipeDialog.Share.Honest": "80% First Product",
+    "RecipeDialog.Share.Equality": "Fair Distribution",
+    "RecipeDialog.Share.Equilibrate": "Distribute by Quantity"
+
+
+
+
+
+
+
 }
