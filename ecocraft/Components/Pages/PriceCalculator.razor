@@ -333,7 +333,7 @@
                                                 one by clicking a star.">
                                         <MudNumericField T="decimal?"
                                                          Class="rectangle-input small-adornment"
-                                                         Style="width: 111px"
+                                                         Style="@($"width: 111px; color: {(userPriceItemOrTag.Price == context.MinPrice ? "var(--mud-palette-primary)" : userPriceItemOrTag.Price == context.MaxPrice ? "var(--mud-palette-warning)" : "inherit")};")"
                                                          ReadOnly="@(context.IsTag)"
                                                          HideSpinButtons="@(context.IsTag)"
                                                          Value="userPriceItemOrTag.Price"
@@ -404,7 +404,7 @@
                                                         Text="This value is automatically calculated by the system.">
                                                 <MudNumericField T="decimal?"
                                                                  Class="rectangle-input small-adornment"
-                                                                 Style="width: 85px"
+                                                                 Style="@($"width: 85px; color: {(userPriceItem.Price == item.MinPrice ? "var(--mud-palette-primary)" : userPriceItem.Price == item.MaxPrice ? "var(--mud-palette-warning)" : "inherit")};")"
                                                                  HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
                                                                  Format="N2"
                                                                  Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
