@@ -28,12 +28,12 @@ public class EcoCraftDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
-		
+
 		// * Eco Data
 		// Recipe
 		modelBuilder.Entity<Recipe>()
 			.ToTable("Recipe");
-		
+
 		modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.Skill)
 			.WithMany(s => s.Recipes)
@@ -51,17 +51,17 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(s => s.Recipes)
 			.HasForeignKey(r => r.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.LocalizedName)
 			.WithMany(lt => lt.Recipes)
 			.HasForeignKey(lt => lt.Id)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// Element
 		modelBuilder.Entity<Element>()
 			.ToTable("Element");
-		
+
 		modelBuilder.Entity<Element>()
 			.HasOne(e => e.Recipe)
 			.WithMany(r => r.Elements)
@@ -80,17 +80,17 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(p => p.SkillId)
 			.OnDelete(DeleteBehavior.Cascade)
 			.IsRequired(false);
-		
+
 		// ItemOrTag
 		modelBuilder.Entity<ItemOrTag>()
 			.ToTable("ItemOrTag");
-		
+
 		modelBuilder.Entity<ItemOrTag>()
 			.HasOne(i => i.Server)
 			.WithMany(s => s.ItemOrTags)
 			.HasForeignKey(i => i.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<ItemOrTag>()
 			.HasMany(i => i.AssociatedTags)
 			.WithMany(i => i.AssociatedItems)
@@ -107,39 +107,39 @@ public class EcoCraftDbContext : DbContext
 					.OnDelete(DeleteBehavior.Cascade)
 					.HasPrincipalKey(nameof(ItemOrTag.Id)),
 				j => j.HasKey("ItemId", "TagId"));
-		
+
 		modelBuilder.Entity<ItemOrTag>()
 			.HasOne(i => i.LocalizedName)
 			.WithMany(lt => lt.ItemOrTags)
 			.HasForeignKey(i => i.LocalizedNameId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// Skill
 		modelBuilder.Entity<Skill>()
 			.ToTable("Skill");
-		
+
 		modelBuilder.Entity<Skill>()
 			.HasOne(s => s.Server)
 			.WithMany(s => s.Skills)
 			.HasForeignKey(s => s.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<Skill>()
 			.HasOne(s => s.LocalizedName)
 			.WithMany(lt => lt.Skills)
 			.HasForeignKey(s => s.LocalizedNameId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// CraftingTable
 		modelBuilder.Entity<CraftingTable>()
 			.ToTable("CraftingTable");
-		
+
 		modelBuilder.Entity<CraftingTable>()
 			.HasOne(s => s.Server)
 			.WithMany(s => s.CraftingTables)
 			.HasForeignKey(s => s.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<CraftingTable>()
 			.HasMany(ct => ct.PluginModules)
 			.WithMany(pm => pm.CraftingTables)
@@ -156,7 +156,7 @@ public class EcoCraftDbContext : DbContext
 					.OnDelete(DeleteBehavior.Cascade)
 					.HasPrincipalKey(nameof(CraftingTable.Id)),
 				j => j.HasKey("CraftingTableId", "PluginModuleId"));
-		
+
 		modelBuilder.Entity<CraftingTable>()
 			.HasOne(c => c.LocalizedName)
 			.WithMany(lt => lt.CraftingTables)
@@ -166,28 +166,28 @@ public class EcoCraftDbContext : DbContext
 		// PluginModule
 		modelBuilder.Entity<PluginModule>()
 			.ToTable("PluginModule");
-		
+
 		modelBuilder.Entity<PluginModule>()
 			.HasOne(pm => pm.Server)
 			.WithMany(s => s.PluginModules)
 			.HasForeignKey(pm => pm.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<PluginModule>()
 			.HasOne(pm => pm.LocalizedName)
 			.WithMany(lt => lt.PluginModules)
 			.HasForeignKey(pm => pm.LocalizedNameId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// * User Data
 		// User
 		modelBuilder.Entity<User>()
 			.ToTable("User");
-		
+
 		// UserSetting
 		modelBuilder.Entity<UserSetting>()
 			.ToTable("UserSetting");
-		
+
 		modelBuilder.Entity<UserSetting>()
 			.HasOne(us => us.UserServer)
 			.WithMany(us => us.UserSettings)
@@ -213,20 +213,20 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(us => us.UserCraftingTables)
 			.HasForeignKey(uct => uct.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(uct => uct.CraftingTable)
 			.WithMany(u => u.UserCraftingTables)
 			.HasForeignKey(uct => uct.CraftingTableId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(s => s.PluginModule)
 			.WithMany()
 			.HasForeignKey(s => s.PluginModuleId)
 			.OnDelete(DeleteBehavior.Cascade)
 			.IsRequired(false);
-		
+
 		// UserSkill
 		modelBuilder.Entity<UserSkill>()
 			.ToTable("UserSkill");
@@ -242,7 +242,7 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(use => use.UserSkills)
 			.HasForeignKey(us => us.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// UserElement
 		modelBuilder.Entity<UserElement>()
 			.ToTable("UserElement");
@@ -252,47 +252,47 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(e => e.UserElements)
 			.HasForeignKey(ue => ue.ElementId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserElement>()
 			.HasOne(ue => ue.UserServer)
 			.WithMany(us => us.UserElements)
 			.HasForeignKey(ue => ue.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
 			.ToTable("UserPrice");
-		
+
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.UserMargin)
 			.WithMany(um => um.UserPrices)
 			.HasForeignKey(up => up.UserMarginId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.ItemOrTag)
 			.WithMany(iot => iot.UserPrices)
 			.HasForeignKey(up => up.ItemOrTagId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.UserServer)
 			.WithMany(us => us.UserPrices)
 			.HasForeignKey(up => up.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.PrimaryUserElement)
 			.WithMany()
 			.HasForeignKey(up => up.PrimaryUserElementId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.PrimaryUserPrice)
 			.WithMany()
 			.HasForeignKey(up => up.PrimaryUserPriceId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// UserRecipe
 		modelBuilder.Entity<UserRecipe>()
 			.ToTable("UserRecipe");
@@ -302,13 +302,13 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(r => r.UserRecipes)
 			.HasForeignKey(up => up.RecipeId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		modelBuilder.Entity<UserRecipe>()
 			.HasOne(ur => ur.UserServer)
 			.WithMany(us => us.UserRecipes)
 			.HasForeignKey(ur => ur.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// UserServer
 		modelBuilder.Entity<UserServer>()
 			.ToTable("UserServer");
@@ -318,23 +318,23 @@ public class EcoCraftDbContext : DbContext
 			.WithMany(u => u.UserServers)
 			.HasForeignKey(us => us.UserId)
 			.OnDelete(DeleteBehavior.Cascade);
-			
+
 		modelBuilder.Entity<UserServer>()
 			.HasOne(us => us.Server)
 			.WithMany(s => s.UserServers)
 			.HasForeignKey(us => us.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-		
+
 		// * Server Data
 		// Server
 		modelBuilder.Entity<Server>()
 			.ToTable("Server");
-		
+
 		// * Utils
 		// LocalizedField
 		modelBuilder.Entity<LocalizedField>()
 			.ToTable("LocalizedField");
-		
+
 		modelBuilder.Entity<LocalizedField>()
 			.HasOne(lf => lf.Server)
 			.WithMany()

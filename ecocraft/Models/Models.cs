@@ -285,8 +285,8 @@ public class UserPrice: IHasPrice
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public bool OverrideIsBought { get; set; }
 
-    [ForeignKey("UserMargin")] public Guid UserMarginId { get; set; }
-    public UserMargin UserMargin { get; set; }
+    [ForeignKey("UserMargin")] public Guid? UserMarginId { get; set; }
+    public UserMargin? UserMargin { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
     public UserServer UserServer { get; set; }
     public UserElement? PrimaryUserElement { get; set; }

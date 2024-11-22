@@ -7,6 +7,7 @@
 @using ecocraft.Services.DbServices
 @using System.Globalization;
 @using ecocraft.Components.Utils
+@using Microsoft.EntityFrameworkCore
 @inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
@@ -384,8 +385,8 @@
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
-                                                     Size="Size.Small"/>
-                                            <IconEco Obj="item" Size="24"/>
+                                                     Size="Size.Small" />
+                                            <IconEco Obj="item" Size="24" />
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(item))">
                                                 <MudText Typo="Typo.body2" Class="pt-1">@LocalizationService.GetTranslation(item)</MudText>
                                             </MudLink>
@@ -399,7 +400,7 @@
                                                            Color="Color.Primary"
                                                            Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                            Size="Size.Small"
-                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))"/>
+                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))" />
                                             <MudTooltip Disabled="@(!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)"
                                                         Text="This value is automatically calculated by the system.">
                                                 <MudNumericField T="decimal?"
@@ -416,14 +417,14 @@
                                                                  ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
                                                                  Adornment="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought ? Adornment.End : Adornment.None)"
                                                                  AdornmentIcon="@MDIIcons.Filled.Calculator"
-                                                                 Variant="Variant.Outlined"/>
+                                                                 Variant="Variant.Outlined" />
                                             </MudTooltip>
                                             @if (!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)
                                             {
                                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                tabindex="-1"
                                                                OnClick="() => CopyToClipboard(userPriceItem.Price)"
-                                                               Size="Size.Small"/>
+                                                               Size="Size.Small" />
                                             }
                                         </MudStack>
                                     </MudTd>

@@ -14,6 +14,11 @@
 <PageTitle>Super Admin - Eco Gnome</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+    @if (_isLoading)
+    {
+        <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Class="mb-6" />
+    }
+
     <MudGrid>
         <MudItem lg="6" md="12">
             <MudTable Items="_users"
@@ -26,7 +31,7 @@
                 <HeaderContent>
                     <MudTh>Id</MudTh>
                     <MudTh>Pseudo</MudTh>
-                    <MudTh>Creation Date</MudTh>
+                    <MudTh></MudTh>
                     <MudTh>Servers</MudTh>
                     <MudTh>Action</MudTh>
                 </HeaderContent>
@@ -72,13 +77,17 @@
                         @if (context != ContextService.CurrentUser)
                         {
                             <MudStack Row AlignItems="AlignItems.Center">
-                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
-                                               Size="Size.Small"
-                                               OnClick="@(() => DeleteUser(context))"/>
-                                <MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
-                                               Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
-                                               Size="Size.Small"
-                                               OnClick="@(() => ToggleSuperAdmin(context))"/>
+                                <MudTooltip Text="Delete user">
+                                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => DeleteUser(context))"/>
+                                </MudTooltip>
+                                <MudTooltip Text="@(context.SuperAdmin ? "Demote user from Super Admin" : "Promote user to Super Admin")">
+                                    <MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
+                                                   Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => ToggleSuperAdmin(context))"/>
+                                </MudTooltip>
                             </MudStack>
                         }
                     </MudTd>
@@ -99,7 +108,7 @@
                 <HeaderContent>
                     <MudTh>Id</MudTh>
                     <MudTh>Name</MudTh>
-                    <MudTh>Creation Date</MudTh>
+                    <MudTh></MudTh>
                     <MudTh>JoinCode</MudTh>
                     <MudTh>Players</MudTh>
                     <MudTh>Admins</MudTh>
@@ -138,26 +147,27 @@
                         @context.UserServers.Count
                     </MudTd>
                     <MudTd>
-                        @(String.Join(' ', context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
+                        @(String.Join(", ", context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center">
-                            <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
-                                           Size="Size.Small"
-                                           OnClick="@(() => DeleteServer(context))"/>
-
-                            <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.CreditCardOff : Icons.Material.Outlined.CreditCard )"
-                                           Color="@(context.IsDefault ? Color.Warning : Color.Error )"
-                                           Size="Size.Small"
-                                           OnClick="@(() => ToggleDefault(context))"/>
-
-                            <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Icons
-                                    .Material.Filled
-                                    .ArrowDownward :
-                                    Icons.Material.Filled.ArrowUpward)"
-                                           Size="Size.Small"
-                                           Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
-                                           OnClick="@(() => ToggleSelfAdmin(context))"/>
+                            <MudTooltip Text="Delete server">
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                               Size="Size.Small"
+                                               OnClick="@(() => DeleteServer(context))"/>
+                            </MudTooltip>
+                            <MudTooltip Text="@(context.IsDefault ? "Remove from default servers" : "Add as default server")">
+                                <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.CreditCardOff : Icons.Material.Outlined.CreditCard)"
+                                               Color="@(context.IsDefault ? Color.Warning : Color.Error)"
+                                               Size="Size.Small"
+                                               OnClick="@(() => ToggleDefault(context))"/>
+                            </MudTooltip>
+                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? "Remove yourself from admins" : "Add yourself as admin")">
+                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Icons.Material.Filled.ArrowDownward : Icons.Material.Filled.ArrowUpward)"
+                                               Size="Size.Small"
+                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
+                                               OnClick="@(() => ToggleSelfAdmin(context))"/>
+                            </MudTooltip>
                         </MudStack>
                     </MudTd>
                 </RowTemplate>
@@ -170,6 +180,7 @@
 </MudContainer>
 
 @code {
+    private bool _isLoading = false;
     private protected List<User> _users = [];
     private protected List<Server> _servers = [];
     private string searchUser = "";
@@ -261,9 +272,18 @@
             return;
         }
 
-        UserDbService.Delete(user);
-        await DbContext.SaveChangesAsync();
-        _users = await UserDbService.GetAllAsync();
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user {user.Pseudo} ?");
+
+        if (confirmed)
+        {
+            _isLoading = true;
+            StateHasChanged();
+            UserDbService.Delete(user);
+            await DbContext.SaveChangesAsync();
+            _users = await UserDbService.GetAllAsync();
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task ToggleSelfAdmin(Server server)
@@ -272,14 +292,7 @@
 
         if (currentUserServer is not null)
         {
-            if (currentUserServer.IsAdmin)
-            {
-                await ContextService.LeaveServer(currentUserServer);
-            }
-            else
-            {
-                currentUserServer.IsAdmin = true;
-            }
+            currentUserServer.IsAdmin = !currentUserServer.IsAdmin;
 
             await DbContext.SaveChangesAsync();
         }
@@ -293,9 +306,18 @@
 
     private async Task DeleteServer(Server server)
     {
-        ServerDbService.Delete(server);
-        await DbContext.SaveChangesAsync();
-        _servers = await ServerDbService.GetAllAsync();
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete server {server.Name} ?");
+
+        if (confirmed)
+        {
+            _isLoading = true;
+            StateHasChanged();
+            ServerDbService.Delete(server);
+            await DbContext.SaveChangesAsync();
+            _servers = await ServerDbService.GetAllAsync();
+            _isLoading = false;
+            StateHasChanged();
+        }
     }
 
 }
