@@ -13,8 +13,9 @@
 @using Blazor.Diagrams.Components.Widgets
 @using Blazor.Diagrams.Core.Geometry
 @inject UserServerDataService UserServerDataService
+@inject LocalizationService LocalizationService
 
-<PageTitle>Graph View - Eco Gnome</PageTitle>
+<PageTitle>@LocalizationService.GetTranslation("GraphView.Title") - Eco Gnome</PageTitle>
 
 <MudContainer>
 	<MudGrid>
@@ -23,7 +24,7 @@
 			           Color="Color.Primary"
 			           StartIcon="@Icons.Material.Filled.AutoGraph"
 			           OnClick="GenerateGraph">
-				Reset Graph
+				@LocalizationService.GetTranslation("GraphView.ResetButton")
 			</MudButton>
 		</MudItem>
 		<MudItem sm="12" Class="pa-0 mud-elevation-2">

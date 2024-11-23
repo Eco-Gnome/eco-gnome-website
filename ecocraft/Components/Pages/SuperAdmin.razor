@@ -10,8 +10,9 @@
 @inject UserDbService UserDbService
 @inject ServerDbService ServerDbService
 @inject ISnackbar Snackbar
+@inject LocalizationService LocalizationService
 
-<PageTitle>Super Admin - Eco Gnome</PageTitle>
+<PageTitle>@LocalizationService.GetTranslation("SuperAdmin.Title") - Eco Gnome</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
     @if (_isLoading)
@@ -29,15 +30,15 @@
                       Dense="true"
                       Hover="true">
                 <HeaderContent>
-                    <MudTh>Id</MudTh>
-                    <MudTh>Pseudo</MudTh>
-                    <MudTh></MudTh>
-                    <MudTh>Servers</MudTh>
-                    <MudTh>Action</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.IdCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.CreationDateCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ServersCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ActionCol")</MudTh>
                 </HeaderContent>
                 <ToolBarContent>
                     <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-                        <MudText Typo="Typo.h5">Users</MudText>
+                        <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title")</MudText>
                         <MudStack Style="width: 200px">
                             <MudTextField @bind-Value="searchUser"
                                           Immediate
@@ -64,11 +65,11 @@
                     <MudTd>
                         <MudStack Row Spacing="0" Justify="Justify.Center" Class="gap-0">
                             @context.UserServers.Count
-                            <MudTooltip Class="mr-4" Text="Joined Servers">
+                            <MudTooltip Class="mr-4" Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServers")>
                                 <MudIcon Icon="@Icons.Material.Outlined.Dataset" Size="Size.Small"/>
                             </MudTooltip>
                             @context.UserServers.Count(us => us.IsAdmin)
-                            <MudTooltip Text="Number of servers the user is admin on">
+                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.HowMuchIsAdmin")>
                                 <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" Size="Size.Small"/>
                             </MudTooltip>
                         </MudStack>
@@ -77,12 +78,12 @@
                         @if (context != ContextService.CurrentUser)
                         {
                             <MudStack Row AlignItems="AlignItems.Center">
-                                <MudTooltip Text="Delete user">
+                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.DeleteUser")>
                                     <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
                                                    Size="Size.Small"
                                                    OnClick="@(() => DeleteUser(context))"/>
                                 </MudTooltip>
-                                <MudTooltip Text="@(context.SuperAdmin ? "Demote user from Super Admin" : "Promote user to Super Admin")">
+                                <MudTooltip Text="@(context.SuperAdmin ? @LocalizationService.GetTranslation("SuperAdmin.UserTable.DemoteUser") : @LocalizationService.GetTranslation("SuperAdmin.UserTable.PromoteUser"))">
                                     <MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
                                                    Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
                                                    Size="Size.Small"
@@ -106,17 +107,17 @@
                       Dense="true"
                       Hover="true">
                 <HeaderContent>
-                    <MudTh>Id</MudTh>
-                    <MudTh>Name</MudTh>
-                    <MudTh></MudTh>
-                    <MudTh>JoinCode</MudTh>
-                    <MudTh>Players</MudTh>
-                    <MudTh>Admins</MudTh>
-                    <MudTh>Action</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.Id")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.ServerNameCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("JoinCode")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ActionCol")</MudTh>
                 </HeaderContent>
                 <ToolBarContent>
                     <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-                        <MudText Typo="Typo.h5">Servers</MudText>
+                        <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.Title")</MudText>
                         <MudStack Style="width: 200px">
                             <MudTextField @bind-Value="searchServer"
                                           Immediate
@@ -151,18 +152,18 @@
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center">
-                            <MudTooltip Text="Delete server">
+                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.ServerTable.DeleteServer")>
                                 <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
                                                Size="Size.Small"
                                                OnClick="@(() => DeleteServer(context))"/>
                             </MudTooltip>
-                            <MudTooltip Text="@(context.IsDefault ? "Remove from default servers" : "Add as default server")">
+                            <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
                                 <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.CreditCardOff : Icons.Material.Outlined.CreditCard)"
                                                Color="@(context.IsDefault ? Color.Warning : Color.Error)"
                                                Size="Size.Small"
                                                OnClick="@(() => ToggleDefault(context))"/>
                             </MudTooltip>
-                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? "Remove yourself from admins" : "Add yourself as admin")">
+                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
                                 <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Icons.Material.Filled.ArrowDownward : Icons.Material.Filled.ArrowUpward)"
                                                Size="Size.Small"
                                                Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
@@ -210,22 +211,22 @@
     private async Task CopyToClipboard(string text)
     {
         await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-        Snackbar.Add("Id copied to clipboard", Severity.Info);
+        Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.SnackbarCopy"), Severity.Info);
     }
 
     private async Task ToggleSuperAdmin(User user)
     {
         if (user == ContextService.CurrentUser)
         {
-            this.Snackbar.Add("You can't edit yourself from this page.", Severity.Error);
+            this.Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.SnackbarCantEdit"), Severity.Error);
             return;
         }
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to {(user.SuperAdmin ? "demote" : "promote")} this user {(user.SuperAdmin ? "from" : "to")} Super Admin ?");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.1")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.2") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.3"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.4")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.5") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.6"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.7")}");
 
         if (confirmed)
         {
-            bool confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", "This change has a lot of impact and could corrupt the entire website! Please confirm again.");
+            bool confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("SuperAdmin.ConfirmTwiceSuperAdmin"));
 
             if (confirmedTwice)
             {
@@ -268,11 +269,11 @@
     {
         if (user == ContextService.CurrentUser)
         {
-            this.Snackbar.Add("You can't delete yourself from this page.", Severity.Error);
+            this.Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.SnackBar.CantDeleteYourself"), Severity.Error);
             return;
         }
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user {user.Pseudo} ?");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.1")} {user.Pseudo} {LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.2")}");
 
         if (confirmed)
         {
@@ -306,7 +307,7 @@
 
     private async Task DeleteServer(Server server)
     {
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete server {server.Name} ?");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.1")} {server.Name} {LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.2")}");
 
         if (confirmed)
         {
