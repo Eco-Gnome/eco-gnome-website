@@ -24,7 +24,7 @@
         @if (_lastAcknowledgeVersion is null || _lastAcknowledgeVersion != ReleaseVersionService.ReleaseVersions.First().Date)
         {
             <MudText Color="Color.Warning"
-                     Style="position: absolute; top: -10px; left: 5px; transform: rotate(-15deg)">New!</MudText>
+                     Style="position: absolute; top: -10px; left: 5px; transform: rotate(-15deg)">@LocalizationService.GetTranslation("Header.New")</MudText>
         }
     </MudLink>
     <MudSelect  T="Server"
@@ -119,7 +119,7 @@
     private async Task CreateServer()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
-        var dialog = DialogService.Show<ServerDialog>("Create or join server", options);
+        var dialog = DialogService.Show<ServerDialog>(LocalizationService.GetTranslation("Header.ServerDialog.Title"), options);
 
         var result = await dialog.Result;
 
@@ -152,7 +152,7 @@
     {
         if (string.IsNullOrEmpty(joinCode))
         {
-            Snackbar.Add("You need to add a server code", Severity.Error);
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.JoinError"), Severity.Error);
             return;
         }
 
@@ -162,7 +162,7 @@
         {
             Snackbar.Clear();
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            Snackbar.Add("Server not found", Severity.Error);
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.ServerNotFound"), Severity.Error);
             return;
         }
 
@@ -170,7 +170,7 @@
         {
             Snackbar.Clear();
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            Snackbar.Add("You are already in this server", Severity.Warning);
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.AlreadyInServer"), Severity.Warning);
             return;
         }
 
@@ -181,7 +181,7 @@
     private async Task ConfigureUser()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Medium };
-        await DialogService.ShowAsync<UserConfigurationDialog>("User management", options);
+        await DialogService.ShowAsync<UserConfigurationDialog>(LocalizationService.GetTranslation("Header.UserConfigurationDialog.Title"), options);
     }
 
     private async Task OpenReleaseDialog()
@@ -190,6 +190,6 @@
         await LocalStorageService.AddItem("LastAcknowledgedVersion", _lastAcknowledgeVersion);
 
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
-        await DialogService.ShowAsync<ReleaseDialog>("Releases", options);
+        await DialogService.ShowAsync<ReleaseDialog>(LocalizationService.GetTranslation("Header.ReleaseDialog.Title"), options);
     }
 }

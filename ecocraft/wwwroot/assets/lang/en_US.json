@@ -1,6 +1,7 @@
 {
     "__AlreadyTraduced_Components/Diagram": "all",
     "__AlreadyTraduced_Components/Dialog": "all",
+    "__AlreadyTraduced_Components/Layout": "all",
     "__AlreadyTraduced_Components": "RecipeList",
     "Language": "Language",
     "RecipeList.RecipeName": "Recipe name",
@@ -46,7 +47,20 @@
     "ServerDialog.MaxChar": "Max 25 characters",
     "ServerDialog.MinChar": "Min 3 characters",
     "ServerDialog.Create": "Create",
-    "ServerDialog.Join": "Join"
+    "ServerDialog.Join": "Join",
+    "Header.New": "New!",
+    "Header.ServerDialog.Title": "Create or join server",
+    "Header.ServerDialog.Snackbar.JoinError": "You need to add a server code",
+    "Header.ServerDialog.Snackbar.ServerNotFound": "Server not found",
+    "Header.ServerDialog.Snackbar.AlreadyInServer": "You are already in this server",
+    "Header.UserConfigurationDialog.Title": "User management",
+    "Header.ReleaseDialog.Title": "Releases",
+    "MainLayout.SiteTitle": "Tools for Eco video game",
+    "NavMenu.NavCalculator": "Price Calculator",
+    "NavMenu.NavGraph": "Graph View",
+    "NavMenu.NavAdmin": "Server Management",
+    "NavMenu.NavSuperAdmin": "Super Admin"
+
 
 
 

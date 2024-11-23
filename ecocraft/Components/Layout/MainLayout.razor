@@ -2,20 +2,17 @@
 @inherits LayoutComponentBase
 @using ecocraft.Services
 @inject ContextService ContextService
+@inject LocalizationService LocalizationService
 
 <MudThemeProvider Theme="myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<title>Eco Gnome - Tools for Eco video game</title>
+<title>Eco Gnome - @LocalizationService.GetTranslation("MainLayout.SiteTitle")</title>
 
 <MudLayout>
     <MudAppBar Elevation="2">
-        @* <MudImage Src="/assets/avatar.png" Width="52" /> *@
-
-        @* <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText> *@
-        @* <MudSpacer/> *@
         @if (!_isLoading)
         {
             <Header @bind-isDarkMode="_isDarkMode"></Header>
@@ -35,7 +32,7 @@
             }
             else
             {
-                <MudText>Please join a server !</MudText>
+                <MudText>@LocalizationService.GetTranslation("MainLayout.PleaseJoin")</MudText>
             }
         }
         else

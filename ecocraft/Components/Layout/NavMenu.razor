@@ -1,17 +1,18 @@
 ﻿@implements IDisposable
 @using ecocraft.Services
 @inject ContextService ContextService
+@inject LocalizationService LocalizationService
 
 <MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Balance">Price Calculator</MudNavLink>
-    <MudNavLink Href="graph-view" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GraphicEq">Graph View</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Balance">@LocalizationService.GetTranslation("NavMenu.NavCalculator")</MudNavLink>
+    <MudNavLink Href="graph-view" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
-        <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">Server Management</MudNavLink>
+        <MudNavLink Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
     }
     @if (ContextService.CurrentUser?.SuperAdmin ?? false)
     {
-        <MudNavLink Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">Super Admin</MudNavLink>
+        <MudNavLink Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
     }
 </MudNavMenu>
 
