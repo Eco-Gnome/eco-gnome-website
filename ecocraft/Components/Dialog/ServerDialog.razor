@@ -1,10 +1,12 @@
-﻿
+﻿@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
 <MudDialog>
     <TitleContent>
     </TitleContent>
     <DialogContent>
         <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
-            <MudText Typo="Typo.subtitle1">Do you already have an invitation?</MudText>
+            <MudText Typo="Typo.subtitle1">@LocalizationService.GetTranslation("ServerDialog.HaveAnInvitation")</MudText>
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
                 <MudTextField @bind-Value="JoinCode"
                               Class="mt-0"
@@ -23,7 +25,7 @@
         <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
 
         <MudPaper Elevation="0" Class="pa-2 mb-6" Style="align-items: center; justify-content: space-between; gap: 16px;">
-            <MudText Typo="Typo.subtitle1">Create your server</MudText>
+            <MudText Typo="Typo.subtitle1">@LocalizationService.GetTranslation("ServerDialog.CreateServer")</MudText>
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
                 <MudTextField @bind-Value="ServerName"
                               Class="hack-validation"
@@ -51,9 +53,9 @@
     private IEnumerable<string> MinAndMaxCharacters(string ch)
     {
         if (!string.IsNullOrEmpty(ch) && 25 < ch?.Length)
-            yield return "Max 25 characters";
+            yield return LocalizationService.GetTranslation("ServerDialog.MaxChar");
         if (!string.IsNullOrEmpty(ch) && 3 > ch?.Length)
-            yield return "Min 3 characters";
+            yield return LocalizationService.GetTranslation("ServerDialog.MinChar");
     }
 
 
@@ -86,11 +88,11 @@
             return;
         }
 
-        MudDialog.Close(DialogResult.Ok(new[] { "Create", ServerName }));
+        MudDialog.Close(DialogResult.Ok(new[] { LocalizationService.GetTranslation("ServerDialog.Create"), ServerName }));
     }
 
     private void OnJoinServer()
     {
-        MudDialog.Close(DialogResult.Ok(new[] { "Join", JoinCode }));
+        MudDialog.Close(DialogResult.Ok(new[] { LocalizationService.GetTranslation("ServerDialog.Join"), JoinCode }));
     }
 }

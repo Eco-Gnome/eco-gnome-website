@@ -8,22 +8,23 @@
 @inject UserDbService UserDbService
 @inject LocalStorageService LocalStorageService
 @inject NavigationManager Navigation
+@inject LocalizationService LocalizationService
 
 <MudDialog>
 	<TitleContent>
-		<MudText Typo="Typo.h4" Align="Align.Center">User settings</MudText>
+		<MudText Typo="Typo.h4" Align="Align.Center">@LocalizationService.GetTranslation("UserConfigurationDialog.UserSettings")</MudText>
 	</TitleContent>
 	<DialogContent>
 
 		<MudTextField Value="ContextService.CurrentUser!.Pseudo" Variant="Variant.Outlined" Label="Pseudo" ValueChanged="@((string pseudo) => OnUpdateUserName(pseudo))"/>
 
 		<MudTabs Outlined="true" Position="@Position.Top" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
-			<MudTabPanel Text="My servers">
+			<MudTabPanel Text="@LocalizationService.GetTranslation("UserConfigurationDialog.MyServers")">
 				<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true">
 					<HeaderContent>
-						<MudTh><MudText>Name</MudText></MudTh>
-						<MudTh><MudText>Join code</MudText></MudTh>
-						<MudTh><MudText>In-Game pseudo</MudText></MudTh>
+						<MudTh><MudText>@LocalizationService.GetTranslation("Name")</MudText></MudTh>
+						<MudTh><MudText>@LocalizationService.GetTranslation("JoinCode")</MudText></MudTh>
+						<MudTh><MudText>@LocalizationService.GetTranslation("UserConfigurationDialog.InGamePseudo")</MudText></MudTh>
 						<MudTh></MudTh>
 					</HeaderContent>
 					<RowTemplate>
@@ -39,7 +40,7 @@
 							              Adornment="Adornment.Start"
 							              AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
 							              OnAdornmentClick="@(() => CopyToClipboard(context.Server.JoinCode))"
-							              AdornmentAriaLabel="Copy to clipboard" />
+							              AdornmentAriaLabel="@LocalizationService.GetTranslation("CopyToClipboard")" />
 						</MudTd>
 						<MudTd>
 							<MudTextField Margin="Margin.Dense" Value="@context.Pseudo" Variant="Variant.Outlined" ValueChanged="(string newPseudo) => OnPseudoChanged(context,newPseudo)" > </MudTextField>
@@ -70,14 +71,14 @@
 					</RowTemplate>
 				</MudTable>
 			</MudTabPanel>
-			<MudTabPanel Text="Options">
+			<MudTabPanel Text="@LocalizationService.GetTranslation("Options")">
 				<MudStack>
 					<MudStack Row Spacing="5">
 						<MudButton StartIcon="@Icons.Material.Filled.Download"
 						           Variant="Variant.Filled"
 						           Color="Color.Primary"
 						           OnClick="@(() => ExportUser())">
-							Export/Backup my User
+							@LocalizationService.GetTranslation("UserConfigurationDialog.ExportBackup")
 						</MudButton>
 
 						<MudFileUpload T="IBrowserFile" FilesChanged="ImportUser">
@@ -85,7 +86,7 @@
 								<MudButton Variant="Variant.Filled"
 								           Color="Color.Warning"
 								           StartIcon="@Icons.Material.Filled.CloudUpload">
-									Import/Replace my User
+									@LocalizationService.GetTranslation("UserConfigurationDialog.ImportReplace")
 								</MudButton>
 							</ActivatorContent>
 						</MudFileUpload>
@@ -95,7 +96,7 @@
 		</MudTabs>
 	</DialogContent>
 	<DialogActions>
-		<MudButton OnClick="Cancel" Color="Color.Secondary">Annuler</MudButton>
+		<MudButton OnClick="Cancel" Color="Color.Secondary">@LocalizationService.GetTranslation("Cancel")</MudButton>
 	</DialogActions>
 </MudDialog>
 
@@ -153,7 +154,7 @@
 	private async Task CopyToClipboard(string text)
 	{
 		await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-		Snackbar.Add("Join code copied to clipboard", Severity.Info);
+		Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarCopy"), Severity.Info);
 	}
 
 	private async Task OnUpdateUserName(string newPseudo)
@@ -198,7 +199,7 @@
 
 				if (foundUser is not null)
 				{
-					bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to import the user with pseudo {foundUser.Pseudo} ? This will erase your current saved user. Make sure to export the current user if you want to use it later !");
+					bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportBegin")} {foundUser.Pseudo} {LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportEnd")}");
 
 					if (confirmed)
 					{
@@ -210,12 +211,12 @@
 				}
 				else
 				{
-					Snackbar.Add("Import User Error - Can't find the imported user", Severity.Error);
+					Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarErrorBadUser"), Severity.Error);
 				}
 			}
 			catch (Exception e)
 			{
-				Snackbar.Add("Import User Error - Choose a correct file.", Severity.Error);
+				Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarErrorBadFile"), Severity.Error);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 {
     "__AlreadyTraduced_Components/Diagram": "all",
-    "__AlreadyTraduced_Components/Dialog": "CraftingTable, ItemOrTag, Recipe",
+    "__AlreadyTraduced_Components/Dialog": "all",
     "__AlreadyTraduced_Components": "RecipeList",
     "Language": "Language",
     "RecipeList.RecipeName": "Recipe name",
@@ -8,7 +8,7 @@
     "CraftingTable": "Crafting Table",
     "Ingredients": "Ingredients",
     "Products": "Products",
-    "CraftingTableDialog.RelatedRecipes": "Related recipes",
+    "RelatedRecipes": "Related recipes",
     "ItemOrTagDialog.ProducedBy": "Produced by",
     "ItemOrTagDialog.UsedIn": "Used in",
     "RecipeDialog.CraftTime": "Craft time",
@@ -24,5 +24,35 @@
     "RecipeDialog.Share.FirstOnly": "Only First Product",
     "RecipeDialog.Share.Honest": "80% First Product",
     "RecipeDialog.Share.Equality": "Fair Distribution",
-    "RecipeDialog.Share.Equilibrate": "Distribute by Quantity"
+    "RecipeDialog.Share.Equilibrate": "Distribute by Quantity",
+    "Versions": "Versions",
+    "UserConfigurationDialog.UserSettings": "User settings",
+    "UserConfigurationDialog.MyServers": "My servers",
+    "Name": "Name",
+    "JoinCode": "Join code",
+    "UserConfigurationDialog.InGamePseudo": "In-Game pseudo",
+    "CopyToClipboard": "Copy to clipboard",
+    "Options": "Options",
+    "UserConfigurationDialog.ExportBackup": "Export/Backup my User",
+    "UserConfigurationDialog.ImportReplace": "Import/Replace my User",
+    "Cancel": "Cancel",
+    "UserConfigurationDialog.SnackbarCopy": "Join code copied to clipboard",
+    "UserConfigurationDialog.PopupConfirmImportBegin": "Are you sure you want to import the user with pseudo ",
+    "UserConfigurationDialog.PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
+    "UserConfigurationDialog.SnackbarErrorBadUser": "Import User Error - Can't find the imported user",
+    "UserConfigurationDialog.SnackbarErrorBadFile": "Import User Error - Choose a correct file.",
+    "ServerDialog.HaveAnInvitation": "Do you already have an invitation?",
+    "ServerDialog.CreateServer": "Create your server",
+    "ServerDialog.MaxChar": "Max 25 characters",
+    "ServerDialog.MinChar": "Min 3 characters",
+    "ServerDialog.Create": "Create",
+    "ServerDialog.Join": "Join"
+
+
+
+
+
+
+
+
 }
