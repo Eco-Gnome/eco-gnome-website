@@ -137,20 +137,18 @@ public class PriceCalculatorService(
 
                 var pluginModulePercent = userRecipe.Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule?.Percent ?? 1;
                 var lavishTalentValue = userRecipe.Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false
-                    ? userRecipe.Recipe.Skill.LavishTalentValue
+                    ? userRecipe.Recipe.Skill.LavishTalentValue ?? 1
                     : 1;
 
                 var dynamicReduction = pluginModulePercent * lavishTalentValue;
 
-                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price
-                                                                              * ue.Element.Quantity
-                                                                              * (ue.Element.IsDynamic ? dynamicReduction : 1));
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.GetRoundFactorQuantity(ue.Element.IsDynamic ? dynamicReduction : 1));
 
                 // We remove from ingredientCostSum, the price of reintegrated products
                 foreach (var reintegratedProduct in reintegratedProducts)
                 {
                     reintegratedProduct.Price = -1 * reintegratedProduct.Element.ItemOrTag.CurrentUserPrice!.Price;
-                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.Element.Quantity * (reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
+                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.GetRoundFactorQuantity(reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
                 }
 
                 var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userRecipe.Recipe.Skill.CurrentUserSkill!.Level] ?? 1;
@@ -164,7 +162,7 @@ public class PriceCalculatorService(
                 foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                 {
                     // Calculate the associated User price if needed
-                    var finalQuantity = product.Element.Quantity * (product.Element.IsDynamic ? dynamicReduction : 1);
+                    var finalQuantity = product.GetRoundFactorQuantity(product.Element.IsDynamic ? dynamicReduction! : 1m);
                     product.Price = ingredientCostSum * product.Share / finalQuantity;
 
                     if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");

@@ -33,7 +33,7 @@
                             @if ((int)GetModuleAndLavishReducePercent(false) != 1)
                             {
                                 <MudText Color="Color.Secondary">
-                                    @(Math.Round(1 - GetModuleAndLavishReducePercent(false), 1) * 100) %
+                                    @(Math.Round((1 - GetModuleAndLavishReducePercent(false)) * 100, 2).ToString("0.#####")) %
                                 </MudText>
                             }
                         </MudStack>
@@ -52,7 +52,9 @@
 
                             <MudSpacer/>
 
-                            <MudText Color="Color.Primary" Class="pl-2">@GetCraftMinutePrice() $</MudText>
+                            <MudText Color="Color.Primary" Class="pl-2">
+                                @(Math.Round(GetCraftMinutePrice(), 2).ToString("0.#####")) $
+                            </MudText>
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -78,11 +80,14 @@
                 <MudItem sm="6">
                     <MudStack Spacing="1">
                         <MudStack Row Spacing="3">
-                            <MudText Style="color: #888">@LocalizationService.GetTranslation("RecipeDialog.Labor")</MudText>
+                            <MudText Style="color: #888">
+                                @LocalizationService.GetTranslation("RecipeDialog.Labor")
+                            </MudText>
+
                             @if ((int)GetLaborReducePercent() != 1)
                             {
                                 <MudText Color="Color.Secondary">
-                                    @(Math.Round(1 - GetLaborReducePercent(), 1) * 100) %
+                                    @(Math.Round((1 - GetLaborReducePercent()) * 100, 2).ToString("0.#####")) %
                                 </MudText>
                             }
                         </MudStack>
@@ -94,14 +99,14 @@
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
                                 <MudText Color="Color.Secondary">
-                                    @(Recipe.Labor * GetLaborReducePercent())
+                                    @(Math.Round(Recipe.Labor * GetLaborReducePercent(), 2).ToString("0.#####"))
                                 </MudText>
                             }
 
                             <MudSpacer/>
 
                             <MudText Class="pl-2" Color="Color.Primary">
-                                @(Math.Round(GetLaborPrice(), 3)) $
+                                @(Math.Round(GetLaborPrice(), 2).ToString("0.#####")) $
                             </MudText>
                         </MudStack>
                     </MudStack>
@@ -111,7 +116,7 @@
             <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true">
                 <GroupHeaderTemplate>
                     <MudTh colspan="2" Class="mud-background">
-                        <MudText>@LocalizationService.GetTranslation(context.Key.ToString())</MudText>
+                        <MudText>@LocalizationService.GetTranslation(context.Key!.ToString()!)</MudText>
                     </MudTh>
                     <MudTh colspan="1" Class="mud-background">
                         <MudText>$ / u</MudText>
@@ -141,12 +146,14 @@
                     <!-- quantity -->
                     <MudTd Style="width: 60px">
                         <MudStack Row Spacing="1">
-                            @(Math.Abs(context.Element.Quantity))
+                            @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.#####"))
 
                             @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
-                                <MudText Color="Color.Secondary" Typo="Typo.body2">@(Math.Abs(context.Element.Quantity) * GetModuleAndLavishReducePercent())</MudText>
+                                <MudText Color="Color.Secondary" Typo="Typo.body2">
+                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.#####"))
+                                </MudText>
                             }
                         </MudStack>
                     </MudTd>
@@ -166,11 +173,15 @@
                     <MudTd>
                         @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
                         {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()), 3) * 100) %</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.#####")) %</MudText>
                         }
                         else
                         {
-                            <MudText Typo="Typo.body2">@(context.Element.IsDynamic ? LocalizationService.GetTranslation("RecipeDialog.Dynamic") : LocalizationService.GetTranslation("RecipeDialog.Static"))</MudText>
+                            <MudText Typo="Typo.body2">
+                                @(context.Element.IsDynamic
+                                    ? LocalizationService.GetTranslation("RecipeDialog.Dynamic")
+                                    : LocalizationService.GetTranslation("RecipeDialog.Static"))
+                            </MudText>
                         }
                     </MudTd>
                     <!-- price -->
@@ -179,8 +190,8 @@
                             <MudText Typo="Typo.body2" Color="Color.Primary">
                                 @(context.Price is not null
                                     ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
-                                        ? context.Element.Quantity * GetModuleAndLavishReducePercent()
-                                        : context.Element.Quantity), 2) + " $"
+                                        ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
+                                        : context.GetRoundFactorQuantity()), 2) + " $"
                                     : "")
                             </MudText>
                         </MudStack>
@@ -199,6 +210,20 @@
                     </MudTd>
                 </RowTemplate>
             </MudTable>
+
+            <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
+                <MudText>Crafted by quantity:</MudText>
+                <MudTooltip Text="If you create only 1 unit of a recipe, the game still consumes a whole number of ingredients. Choose the quantity of products you will usually craft to obtain a more precise output price.">
+                    <MudToggleGroup T="int"
+                                    Value="@Recipe.CurrentUserRecipe!.RoundFactor"
+                                    ValueChanged="@(v => RoundFactorChange(v, Recipe.CurrentUserRecipe))">
+                        <MudToggleItem Value="0"><MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Infinity"/></MudToggleItem>
+                        <MudToggleItem Value="100">100</MudToggleItem>
+                        <MudToggleItem Value="10">10</MudToggleItem>
+                        <MudToggleItem Value="1">1</MudToggleItem>
+                    </MudToggleGroup>
+                </MudTooltip>
+            </MudStack>
 
             @if (ShouldDisplayShare())
             {
@@ -254,7 +279,6 @@
     </DialogContent>
 </MudDialog>
 
-
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
 
@@ -274,14 +298,14 @@
 
     private bool ShouldDisplayShare()
     {
-        return Recipe.Elements.Count(e => e.IsProduct() && !e.CurrentUserElement.IsReintegrated) > 1;
+        return Recipe.Elements.Count(e => e.IsProduct() && !e.CurrentUserElement!.IsReintegrated) > 1;
     }
 
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
 
-        if (userElement.Element.ItemOrTag.CurrentUserPrice.PrimaryUserElement == userElement)
+        if (userElement.Element.ItemOrTag.CurrentUserPrice!.PrimaryUserElement == userElement)
         {
             userElement.Element.ItemOrTag.CurrentUserPrice.PrimaryUserElement = null;
         }
@@ -305,8 +329,7 @@
 
     private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
     {
-        var ingredientCostSum = userElements.Sum(ue => ue.Price * ue.Element.Quantity
-                                                                * (ue.Element.IsDynamic & withReduction! ? GetModuleAndLavishReducePercent() : 1)
+        var ingredientCostSum = userElements.Sum(ue => ue.Price * ue.GetRoundFactorQuantity(ue.Element.IsDynamic && withReduction ? GetModuleAndLavishReducePercent() : 1)
                                                                 * (ue.IsReintegrated && reverseDeduction ? -1 : 1));
         return ingredientCostSum ?? 0;
     }
@@ -325,20 +348,20 @@
 
     private decimal GetLaborReducePercent()
     {
-        return Recipe.Skill?.LaborReducePercent[Recipe.Skill.CurrentUserSkill.Level] ?? 1;
+        return Recipe.Skill?.LaborReducePercent[Recipe.Skill.CurrentUserSkill!.Level] ?? 1;
     }
 
     private decimal GetModuleAndLavishReducePercent(bool withLavish = true)
     {
-        var pluginModulePercent = Recipe.CraftingTable.CurrentUserCraftingTable.PluginModule?.Percent ?? 1;
+        var pluginModulePercent = Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule?.Percent ?? 1;
         var lavishTalentValue = withLavish ? Recipe.Skill?.LavishTalentValue ?? 1 : 1;
 
-        return Recipe.Skill?.CurrentUserSkill.HasLavishTalent ?? false ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
+        return Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
     }
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes * Recipe.CraftingTable.CurrentUserCraftingTable.CraftMinuteFee;
+        return Recipe.CraftMinutes * Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee;
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
@@ -349,11 +372,18 @@
         return $"{minutes} min {seconds} s";
     }
 
+    private async Task RoundFactorChange(int value, UserRecipe userRecipe)
+    {
+        userRecipe.RoundFactor = value;
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
     private List<UserElement> GetUserElements()
     {
         return Recipe.Elements.OrderBy(e => e.IsProduct())
                               .ThenBy(e => e.Index)
-                              .Select(e => e.CurrentUserElement)
+                              .Select(e => e.CurrentUserElement!)
                               .ToList();
     }
 

@@ -280,6 +280,17 @@ public class UserElement: IHasPrice
 
     public Element Element { get; set; }
     public UserServer UserServer { get; set; }
+
+    public decimal GetRoundFactorQuantity(decimal factor = 1)
+    {
+        var roundFactor = Element.Recipe.CurrentUserRecipe!.RoundFactor;
+
+        return roundFactor == 0
+            ? Element.Quantity * factor
+            : Element.Quantity < 0
+                ? Math.Floor(Element.Quantity * roundFactor * factor) / roundFactor
+                : Math.Ceiling(Element.Quantity * roundFactor * factor) / roundFactor;
+    }
 }
 
 public class UserPrice: IHasPrice
@@ -308,6 +319,7 @@ public class UserRecipe
     [Key] public Guid Id { get; set; }
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public int RoundFactor { get; set; }
 
     public Recipe Recipe { get; set; }
     public UserServer UserServer { get; set; }
