@@ -28,6 +28,9 @@ public class Recipe: IHasLocalizedName
     public List<Element> Elements { get; set; } = [];
     public List<UserRecipe> UserRecipes { get; set; } = [];
 
+    [NotMapped]
+    public UserRecipe? CurrentUserRecipe { get; set; }
+
     public override string ToString()
     {
         return Name;
@@ -53,6 +56,9 @@ public class Element
     public ItemOrTag ItemOrTag { get; set; }
     public Skill? Skill { get; set; }
     public List<UserElement> UserElements { get; set; } = [];
+
+    [NotMapped]
+    public UserElement? CurrentUserElement { get; set; }
 
     public bool IsIngredient()
     {
@@ -92,6 +98,9 @@ public class ItemOrTag: IHasLocalizedName, IHasIcon
     public int? posX { get; set; }
     public int? posY { get; set; }
 
+    [NotMapped]
+    public UserPrice? CurrentUserPrice { get; set; }
+
     public override string ToString()
     {
         return Name;
@@ -117,6 +126,9 @@ public class Skill: IHasLocalizedName, IHasIcon
     public int? posX { get; set; }
     public int? posY { get; set; }
 
+    [NotMapped]
+    public UserSkill? CurrentUserSkill { get; set; }
+
     public override string ToString()
     {
         return Name;
@@ -138,6 +150,9 @@ public class CraftingTable: IHasLocalizedName, IHasIcon
     public string? imageFile { get; set; }
     public int? posX { get; set; }
     public int? posY { get; set; }
+
+    [NotMapped]
+    public UserCraftingTable? CurrentUserCraftingTable { get; set; }
 
     public override string ToString()
     {
@@ -206,8 +221,6 @@ public class UserSetting
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
 
-    public decimal TimeFee { get; set; } = 0;
-
     public UserServer UserServer { get; set; }
 }
 
@@ -251,7 +264,6 @@ public class UserSkill
 
 internal interface IHasPrice
 {
-
     public decimal? Price { get; set; }
 }
 
@@ -261,8 +273,6 @@ public class UserElement: IHasPrice
     [ForeignKey("Element")] public Guid ElementId { get; set; }
 
     public decimal? Price { get; set; }
-
-    public decimal? MarginPrice { get; set; }
 
     public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }
@@ -278,8 +288,8 @@ public class UserPrice: IHasPrice
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
 
     public decimal? Price { get; set; }
-
     public decimal? MarginPrice { get; set; }
+
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }

@@ -1,7 +1,6 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
-@inject ContextService ContextService
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
@@ -275,17 +274,18 @@
 
     private bool ShouldDisplayShare()
     {
-        return Recipe.Elements.Count(e => e.IsProduct() && !UserServerDataService.UserElements.First(ue => ue.Element == e).IsReintegrated) > 1;
+        return Recipe.Elements.Count(e => e.IsProduct() && !e.CurrentUserElement.IsReintegrated) > 1;
     }
 
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
-        var userPrice = UserServerDataService.UserPrices.First(up =>up.ItemOrTag == userElement.Element.ItemOrTag);
-        if (userPrice.PrimaryUserElement == userElement)
+
+        if (userElement.Element.ItemOrTag.CurrentUserPrice.PrimaryUserElement == userElement)
         {
-            userPrice.PrimaryUserElement = null;
+            userElement.Element.ItemOrTag.CurrentUserPrice.PrimaryUserElement = null;
         }
+
         await FirstOnly();
         await PriceCalculatorService.Calculate();
         StateHasChanged();
@@ -325,24 +325,20 @@
 
     private decimal GetLaborReducePercent()
     {
-        return Recipe.Skill?.LaborReducePercent[UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill).Level] ?? 1;
+        return Recipe.Skill?.LaborReducePercent[Recipe.Skill.CurrentUserSkill.Level] ?? 1;
     }
 
     private decimal GetModuleAndLavishReducePercent(bool withLavish = true)
     {
-        var pluginModulePercent = UserServerDataService.UserCraftingTables.First(uct => uct.CraftingTable == Recipe.CraftingTable).PluginModule?.Percent ?? 1;
-        var userRecipe = UserServerDataService.UserRecipes.First(ur => ur.Recipe == Recipe);
-        var userSkill = UserServerDataService.UserSkills.First(us => us.Skill == Recipe.Skill);
+        var pluginModulePercent = Recipe.CraftingTable.CurrentUserCraftingTable.PluginModule?.Percent ?? 1;
+        var lavishTalentValue = withLavish ? Recipe.Skill?.LavishTalentValue ?? 1 : 1;
 
-        var lavishTalentValue = withLavish ? userRecipe.Recipe.Skill?.LavishTalentValue ?? 1 : 1;
-
-        return userSkill.HasLavishTalent ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
+        return Recipe.Skill?.CurrentUserSkill.HasLavishTalent ?? false ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
     }
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes
-            * UserServerDataService.UserCraftingTables.First(u => u.CraftingTable == Recipe.CraftingTable).CraftMinuteFee;
+        return Recipe.CraftMinutes * Recipe.CraftingTable.CurrentUserCraftingTable.CraftMinuteFee;
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
@@ -355,8 +351,10 @@
 
     private List<UserElement> GetUserElements()
     {
-        return Recipe.Elements.OrderBy(e => e.IsProduct()).ThenBy(e => e.Index).Select(e => UserServerDataService.UserElements.First(ue => ue.Element == e))
-            .ToList();
+        return Recipe.Elements.OrderBy(e => e.IsProduct())
+                              .ThenBy(e => e.Index)
+                              .Select(e => e.CurrentUserElement)
+                              .ToList();
     }
 
     private async Task ChangeShare(UserElement userElement, decimal value)
@@ -394,7 +392,7 @@
 
         foreach (var userElement in userElements)
         {
-            userElement.Share = 1 / userElements.Count;
+            userElement.Share = 1m / userElements.Count;
         }
 
         await PriceCalculatorService.Calculate();

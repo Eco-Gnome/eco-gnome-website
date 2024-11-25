@@ -27,6 +27,7 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	public UserPrice Add(UserPrice userPrice)
 	{
 		context.UserPrices.Add(userPrice);
+		userPrice.ItemOrTag.CurrentUserPrice = userPrice;
 
 		return userPrice;
 	}
@@ -41,6 +42,8 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 
 	public void Delete(UserPrice userPrice)
 	{
+		userPrice.ItemOrTag.CurrentUserPrice = null;
+
 		context.UserPrices.Remove(userPrice);
 	}
 }

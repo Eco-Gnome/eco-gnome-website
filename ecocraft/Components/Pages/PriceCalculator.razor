@@ -297,90 +297,93 @@
                         <MudTh Style="width: 0; padding: 0"></MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        @{
-                            var userPriceItemOrTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
+                        <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
+                            <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <IconEco Obj="@context"/>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
 
-                            <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
-                                <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
-                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        <IconEco Obj="@context"/>
-                                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+                                    @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
+                                    {
+                                        <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
+                                    }
 
-                                        @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
-                                        {
-                                            <MudText Typo="Typo.body2">[@(context.AssociatedItems.Count)]</MudText>
-                                        }
+                                    @if (context.IsTag)
+                                    {
+                                        <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
+                                    }
+                                </MudStack>
+                            </MudLink>
+                            @if (!_showDetailedTags && context.CurrentUserPrice!.PrimaryUserPrice is not null)
+                            {
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
+                                    <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
+                                    <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
+                                        @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserPrice.ItemOrTag)
+                                    </MudText>
+                                </MudStack>
+                            }
+                        </MudTd>
+                        <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                @{
+                                    <MudTooltip Disabled="@(!(
+                                        (context.IsTag && context.CurrentUserPrice!.Price is null)
+                                        || (context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null)
+                                        || (context.CurrentUserPrice.Price == context.MaxPrice && context.CurrentUserPrice!.Price is not null)
+                                                          ))"
+                                                Text="@(context.IsTag && context.CurrentUserPrice!.Price is null
+                                                          ? "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star."
+                                                          : context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null
+                                                              ? "This value is set at the minimum price of the server"
+                                                              : "This value is set at the maximum price of the server")">
 
-                                        @if (context.IsTag)
-                                        {
-                                            <MudIcon Icon="@MDIIcons.Outline.Tag" Size="Size.Small" />
-                                        }
-                                    </MudStack>
-                                </MudLink>
-                                @if (!_showDetailedTags && userPriceItemOrTag.PrimaryUserPrice is not null)
-                                {
-                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
-                                        <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
-                                        <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
-                                            @LocalizationService.GetTranslation(userPriceItemOrTag.PrimaryUserPrice.ItemOrTag)
-                                        </MudText>
-                                    </MudStack>
-                                }
-                            </MudTd>
-                            <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
-                                <MudStack Row AlignItems="AlignItems.Center">
-                                    <MudTooltip Disabled="@(!context.IsTag || userPriceItemOrTag.Price is not null)"
-                                                Text="This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific
-                                                one by clicking a star.">
                                         <MudNumericField T="decimal?"
                                                          Class="rectangle-input small-adornment"
-                                                         Style="@($"width: 111px; color: {(userPriceItemOrTag.Price == context.MinPrice ? "var(--mud-palette-primary)" : userPriceItemOrTag.Price == context.MaxPrice ? "var(--mud-palette-warning)" : "inherit")};")"
+                                                         Style="@($"width: 111px; color: {(context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : context.CurrentUserPrice.Price == context.MaxPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
                                                          ReadOnly="@(context.IsTag)"
                                                          HideSpinButtons="@(context.IsTag)"
-                                                         Value="userPriceItemOrTag.Price"
+                                                         Value="context.CurrentUserPrice.Price"
                                                          Immediate="true"
                                                          Format="N2"
                                                          Variant="Variant.Outlined"
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                          Min="context.MinPrice"
                                                          Max="context.MaxPrice"
-                                                         Adornment="@(context.IsTag && userPriceItemOrTag.Price is null ? Adornment.End : Adornment.None)"
+                                                         Adornment="@(context.IsTag && context.CurrentUserPrice.Price is null ? Adornment.End : Adornment.None)"
                                                          AdornmentIcon="@MDIIcons.Outline.Information"
                                                          AdornmentColor="Color.Warning"
-                                                         ValueChanged="@(value => UpdatePriceCalculation(userPriceItemOrTag, value))"/>
+                                                         ValueChanged="@(value => UpdatePriceCalculation(context.CurrentUserPrice, value))"/>
                                     </MudTooltip>
-                                    @if (!context.IsTag && userPriceItemOrTag.Price is not null)
+                                    @if (!context.IsTag && context.CurrentUserPrice!.Price is not null)
                                     {
                                         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                        tabindex="-1"
-                                                       OnClick="() => CopyToClipboard(userPriceItemOrTag.Price)"
+                                                       OnClick="() => CopyToClipboard(context.CurrentUserPrice!.Price)"
                                                        Size="Size.Small"/>
                                     }
-                                </MudStack>
-                            </MudTd>
-
-                            <MudTd Style="width: 0; padding: 0;"
-                                   Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(userPriceItemOrTag.OverrideIsBought ? "border-l-1" : "")}")">
-                                @if (userPriceItemOrTag.OverrideIsBought)
-                                {
-                                    <MudTooltip Text="Don't override this product price anymore.">
-                                        <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
-                                                       tabindex="-1"
-                                                       OnClick="() => OverridePrice(false, userPriceItemOrTag)"
-                                                       Size="Size.Small" />
-                                    </MudTooltip>
                                 }
-                            </MudTd>
-                        }
+                            </MudStack>
+                        </MudTd>
+
+                        <MudTd Style="width: 0; padding: 0;"
+                               Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(context.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")}")">
+                            @if (context.CurrentUserPrice.OverrideIsBought)
+                            {
+                                <MudTooltip Text="Don't override this product price anymore.">
+                                    <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
+                                                   tabindex="-1"
+                                                   OnClick="() => OverridePrice(false, context.CurrentUserPrice)"
+                                                   Size="Size.Small" />
+                                </MudTooltip>
+                            }
+                        </MudTd>
                     </RowTemplate>
                     <ChildRowContent>
                         @if (_showDetailedTags)
                         {
                             @foreach (var item in context.AssociatedItems)
                             {
-                                var userPriceTag = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
-                                var userPriceItem = UserServerDataService.UserPrices.First(up => up.ItemOrTag == item);
-
                                 <MudTr>
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
@@ -395,46 +398,58 @@
 
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                         <MudStack Row Style="position: relative;">
-                                            <MudIconButton tabindex="-1"
-                                                           Style="margin-right: -12px"
-                                                           Color="Color.Primary"
-                                                           Icon="@(userPriceTag.PrimaryUserPrice == userPriceItem ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                           Size="Size.Small"
-                                                           OnClick="@(() => SetPrimaryUserPrice(userPriceTag, userPriceItem))" />
-                                            <MudTooltip Disabled="@(!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)"
-                                                        Text="This value is automatically calculated by the system.">
-                                                <MudNumericField T="decimal?"
-                                                                 Class="rectangle-input small-adornment"
-                                                                 Style="@($"width: 85px; color: {(userPriceItem.Price == item.MinPrice ? "var(--mud-palette-primary)" : userPriceItem.Price == item.MaxPrice ? "var(--mud-palette-warning)" : "inherit")};")"
-                                                                 HideSpinButtons="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
-                                                                 Format="N2"
-                                                                 Disabled="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought)"
-                                                                 Value="userPriceItem.Price"
-                                                                 Immediate="true"
-                                                                 Min="item.MinPrice"
-                                                                 Max="item.MaxPrice"
-                                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-                                                                 ValueChanged="@(value => UpdatePriceCalculation(userPriceItem, value))"
-                                                                 Adornment="@(PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !userPriceItem.OverrideIsBought ? Adornment.End : Adornment.None)"
-                                                                 AdornmentIcon="@MDIIcons.Filled.Calculator"
-                                                                 Variant="Variant.Outlined" />
-                                            </MudTooltip>
-                                            @if (!PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) || userPriceItem.OverrideIsBought)
-                                            {
-                                                <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
-                                                               tabindex="-1"
-                                                               OnClick="() => CopyToClipboard(userPriceItem.Price)"
-                                                               Size="Size.Small" />
+                                            @{
+                                                var isAutoCalculated = PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !item.CurrentUserPrice!.OverrideIsBought;
+
+                                                <MudIconButton tabindex="-1"
+                                                               Style="margin-right: -12px"
+                                                               Color="Color.Primary"
+                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                               Size="Size.Small"
+                                                               OnClick="@(() => SetPrimaryUserPrice(context.CurrentUserPrice, item.CurrentUserPrice!))"/>
+                                                <MudTooltip Disabled="@(!(
+                                                                          isAutoCalculated
+                                                                          || (item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null)
+                                                                          || item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null))"
+                                                            Text="@(isAutoCalculated
+                                                                  ? "This value is automatically calculated by the system."
+                                                                  : item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null
+                                                                      ? "This value is set at the minimum price of the server"
+                                                                      : "This value is set at the maximum price of the server")">
+                                                    <MudNumericField T="decimal?"
+                                                                     Class="rectangle-input small-adornment"
+                                                                     Style="@($"width: 85px; color: {(item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
+                                                                     HideSpinButtons="@isAutoCalculated"
+                                                                     Format="N2"
+                                                                     Disabled="@isAutoCalculated"
+                                                                     Value="item.CurrentUserPrice.Price"
+                                                                     Immediate="true"
+                                                                     Min="item.MinPrice"
+                                                                     Max="item.MaxPrice"
+                                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                                                     ValueChanged="@(value => UpdatePriceCalculation(item.CurrentUserPrice, value))"
+                                                                     Adornment="@(isAutoCalculated ? Adornment.End : Adornment.None)"
+                                                                     AdornmentIcon="@MDIIcons.Filled.Calculator"
+                                                                     Variant="Variant.Outlined"/>
+                                                </MudTooltip>
+                                                @if (!isAutoCalculated)
+                                                {
+                                                    <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                                   tabindex="-1"
+                                                                   OnClick="() => CopyToClipboard(item.CurrentUserPrice!.Price)"
+                                                                   Size="Size.Small"/>
+                                                }
                                             }
                                         </MudStack>
                                     </MudTd>
-                                    <MudTd Class="@($"pa-0 {(userPriceItem.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
-                                        @if (userPriceItem.OverrideIsBought)
+
+                                    <MudTd Class="@($"pa-0 {(item.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                        @if (item.CurrentUserPrice.OverrideIsBought)
                                         {
                                             <MudTooltip Text="Don't override this product price anymore.">
                                                 <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                tabindex="-1"
-                                                               OnClick="() => OverridePrice(false, userPriceItem)"
+                                                               OnClick="() => OverridePrice(false, item.CurrentUserPrice)"
                                                                Size="Size.Small" />
                                             </MudTooltip>
                                         }
@@ -499,7 +514,6 @@
                     </GroupHeaderTemplate>
                     <RowTemplate>
                         @{
-                            var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
                             var relatedUserElements = UserServerDataService.UserElements
                                 .Where(ue => ue.Element.IsProduct()
                                              && ue.Element.ItemOrTag == context
@@ -512,13 +526,13 @@
                                     <MudIconButton Size="Size.Small"
                                                    tabindex="-1"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
-                                                   OnClick="@(() => OverridePrice(true, userPrice))"/>
+                                                   OnClick="@(() => OverridePrice(true, context.CurrentUserPrice!))"/>
                                 </MudTooltip>
                             </MudTd>
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                    @if (relatedUserElements.First()?.Element.Recipe.Elements.Count(e => e.IsProduct()) == 1)
+                                    @if (relatedUserElements.First().Element.Recipe.Elements.Count(e => e.IsProduct()) == 1)
                                     {
                                         <MudTooltip Text="Open recipe popup, it displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
@@ -551,13 +565,13 @@
                                         </MudTooltip>
                                     }
                                 </MudStack>
-                                @if (!_showDetailedRecipes && userPrice.PrimaryUserElement is not null)
+                                @if (!_showDetailedRecipes && context.CurrentUserPrice!.PrimaryUserElement is not null)
                                 {
                                     <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="pl-6">
                                         <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
-                                        <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userPrice.PrimaryUserElement.Element.Recipe))">
+                                        <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe))">
                                             <MudText Class="pt-1" Typo="Typo.body2">
-                                                @LocalizationService.GetTranslation(userPrice.PrimaryUserElement.Element.Recipe) Recipe
+                                                @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe) Recipe
                                             </MudText>
                                         </MudLink>
                                     </MudStack>
@@ -573,7 +587,7 @@
                                                      HideSpinButtons="true"
                                                      Format="N2"
                                                      ReadOnly="true"
-                                                     Value="userPrice.Price"
+                                                     Value="@context.CurrentUserPrice!.Price"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Variant="Variant.Outlined"/>
                                     <MudNumericField T="decimal?"
@@ -582,21 +596,21 @@
                                                      HideSpinButtons="true"
                                                      Format="N2"
                                                      ReadOnly="true"
-                                                     Adornment="@(userPrice.Price is null ? Adornment.None : Adornment.End)"
+                                                     Adornment="@(context.CurrentUserPrice.Price is null ? Adornment.None : Adornment.End)"
                                                      AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
                                                      AdornmentAriaLabel="Copy content"
-                                                     OnAdornmentClick="@(() => CopyToClipboard(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100)))"
+                                                     OnAdornmentClick="@(() => CopyToClipboard(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100)))"
                                                      Culture="CultureInfo.CurrentUICulture"
-                                                     Value="@(userPrice.Price * (1 + userPrice.UserMargin.Margin / 100))"
+                                                     Value="@(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100))"
                                                      Variant="Variant.Outlined"/>
                                 </MudStack>
                             </MudTd>
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                 <MudSelect
                                     T="UserMargin"
-                                    Value="userPrice.UserMargin"
-                                    ValueChanged="@(value => ChangeUserPriceMargin(userPrice, value))"
-                                    ToStringFunc="@(um => um.Margin + " %")"
+                                    Value="context.CurrentUserPrice!.UserMargin"
+                                    ValueChanged="@(value => ChangeUserPriceMargin(context.CurrentUserPrice, value))"
+                                    ToStringFunc="@(um => (um?.Margin ?? 0) + " %")"
                                     Class="select-dense very-dense"
                                     Dense="true"
                                     Variant="Variant.Outlined"
@@ -624,7 +638,6 @@
                     <ChildRowContent>
                         @if (_showDetailedRecipes)
                         {
-                            var userPrice = UserServerDataService.UserPrices.First(up => up.ItemOrTag == context);
                             var relatedElements = UserServerDataService.UserElements
                                 .Where(ue => ue.Element.IsProduct()
                                              && ue.Element.ItemOrTag == context
@@ -635,12 +648,14 @@
                             {
                                 @foreach (var userElement in relatedElements)
                                 {
+                                    var borderClass = relatedElements.Last() == userElement ? "" : "border-b-0";
+
                                     <MudTr>
                                         <!-- This empty MudTd must stay due to the collapse of the GroupBy -->
                                         <MudTd></MudTd>
-                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pa-0 border-r-1")"></MudTd>
-                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1")"
-                                               Style="white-space: nowrap;overflow: hidden; max-width: 280px">
+                                        <MudTd Class="@($"{borderClass} pa-0 border-r-1")"></MudTd>
+                                        <MudTd Class="@($"{borderClass} pt-0 pb-1")"
+                                               Style="white-space: nowrap; overflow: hidden; max-width: 280px">
                                             <MudStack Row Spacing="1">
                                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                          Size="Size.Small"/>
@@ -649,14 +664,14 @@
                                                 </MudLink>
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1")">
+                                        <MudTd Class="@($"{borderClass} pt-0 pb-1")">
                                             <MudStack Row>
                                                 <MudIconButton tabindex="-1"
                                                                Style="margin-right: -12px"
                                                                Color="Color.Primary"
-                                                               Icon="@(userPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                                Size="Size.Small"
-                                                               OnClick="@(() => SetPrimaryElement(userPrice, userElement))"/>
+                                                               OnClick="@(() => SetPrimaryElement(context.CurrentUserPrice, userElement))"/>
 
                                                 <MudNumericField T="decimal?"
                                                                  Style="width: 75px"
@@ -669,13 +684,13 @@
                                                                  Culture="CultureInfo.CurrentUICulture"/>
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1 px-1")"></MudTd>
-                                        <MudTd Class="@($"{(relatedElements.Last() == userElement ? "" : "border-b-0")} pt-0 pb-1 px-1")">
+                                        <MudTd Class="@($"{borderClass} pt-0 pb-1 px-1")"></MudTd>
+                                        <MudTd Class="@($"{borderClass} pt-0 pb-1 px-1")">
                                             <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                                            aria-label="delete"
                                                            tabindex="-1"
                                                            Size="Size.Small"
-                                                           OnClick="@(() => RemoveUserRecipe(UserServerDataService.UserRecipes.First(ur => ur.Recipe == userElement.Element.Recipe)))" />
+                                                           OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.CurrentUserRecipe!))" />
                                         </MudTd>
                                     </MudTr>
                                 }
@@ -1024,7 +1039,7 @@
     private async Task OnOptionOnlyLevelChanged()
     {
         UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
-        UserServerDataService.RecalculateUserRecipes(ContextService.CurrentUserServer);
+        UserServerDataService.RecalculateUserRecipes(ContextService.CurrentUserServer!);
 
         await PriceCalculatorService.Calculate();
         StateHasChanged();

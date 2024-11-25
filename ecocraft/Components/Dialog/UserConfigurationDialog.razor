@@ -122,7 +122,7 @@
 	{
 		if (newPseudo == "") return;
 		userServer.Pseudo = newPseudo;
-		await ContextService.updateCurrentUser();
+		await ContextService.UpdateCurrentUser();
 	}
 
 	private void LeaveServer(UserServer userServer)

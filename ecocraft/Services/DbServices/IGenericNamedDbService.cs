@@ -1,8 +1,4 @@
-﻿using ecocraft.Services.DbServices;
-
-namespace ecocraft.Services;
-
-using System.Threading.Tasks;
+﻿namespace ecocraft.Services.DbServices;
 
 public interface IGenericNamedDbService<T> : IGenericDbService<T> where T : class
 {

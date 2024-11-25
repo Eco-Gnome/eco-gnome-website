@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ecocraft.Models;
-using ecocraft.Services.DbServices;
+﻿using ecocraft.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ecocraft.Services;
+namespace ecocraft.Services.DbServices;
 
 public class ElementDbService(EcoCraftDbContext context) : IGenericDbService<Element>
 {

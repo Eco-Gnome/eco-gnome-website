@@ -54,6 +54,31 @@ public class UserServerDataService(
         UserPrices = userPricesTask.Result;
         UserRecipes = userRecipesTask.Result;
         UserMargins = userMarginsTask.Result;
+
+        foreach (var skill in serverDataService.Skills)
+        {
+            skill.CurrentUserSkill = UserSkills.FirstOrDefault(x => x.Skill == skill);
+        }
+
+        foreach (var craftingTable in serverDataService.CraftingTables)
+        {
+            craftingTable.CurrentUserCraftingTable = UserCraftingTables.FirstOrDefault(x => x.CraftingTable == craftingTable);
+        }
+
+        foreach (var recipe in serverDataService.Recipes)
+        {
+            recipe.CurrentUserRecipe = UserRecipes.FirstOrDefault(x => x.Recipe == recipe);
+
+            foreach (var element in recipe.Elements)
+            {
+                element.CurrentUserElement = UserElements.FirstOrDefault(x => x.Element == element);
+            }
+        }
+
+        foreach (var itemOrTag in serverDataService.ItemOrTags)
+        {
+            itemOrTag.CurrentUserPrice = UserPrices.FirstOrDefault(x => x.ItemOrTag == itemOrTag);
+        }
     }
 
     public void AddUserSkill(Skill? skill, UserServer userServer, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
@@ -68,19 +93,19 @@ public class UserServerDataService(
         UserSkills.Add(userSkill);
         userSkillDbService.Add(userSkill);
 
-        if (addRecipes) {
-            // Add related recipes
-            var recipes = userSkill.Skill.Recipes;
+        if (!addRecipes) return;
 
-            if (onlyLevelAccessibleRecipes)
-            {
-                recipes = recipes.Where(r => r.SkillLevel <= userSkill.Level).ToList();
-            }
+        // Add related recipes
+        var recipes = userSkill.Skill!.Recipes;
 
-            foreach (var recipe in recipes)
-            {
-                AddUserRecipe(recipe, userServer);
-            }
+        if (onlyLevelAccessibleRecipes)
+        {
+            recipes = recipes.Where(r => r.SkillLevel <= userSkill.Level).ToList();
+        }
+
+        foreach (var recipe in recipes)
+        {
+            AddUserRecipe(recipe, userServer);
         }
     }
 

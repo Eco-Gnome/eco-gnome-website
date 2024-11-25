@@ -18,7 +18,7 @@
                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
                     <IconEco Obj="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>                    
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
                 </MudStack>
             </MudLink>
         </MudTh>
@@ -26,7 +26,7 @@
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                 <IconEco Obj="@context.Skill" Size="32" />
                 <MudText Typo="Typo.body2">@(context.Skill is not null ? LocalizationService.GetTranslation(context.Skill) : "")</MudText>
-            </MudStack>            
+            </MudStack>
         </MudTh>
         <MudTh>
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -55,8 +55,8 @@
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                         <IconEco Obj="@ctx.Item1.ItemOrTag" Size="32"/>
                                         @(LocalizationService.GetTranslation(ctx.Item1.ItemOrTag))
-                                    </MudStack>                                    
-                                }                                
+                                    </MudStack>
+                                }
                             </MudTd>
                             <MudTd Class="pa-0 pl-2 border-b-0 border-l-1">@(ctx.Item2 is not null ? ctx.Item2.Quantity : "")</MudTd>
                             <MudTd Class="border-0 pl-2">
@@ -79,11 +79,6 @@
 @code {
     [Parameter] public List<Recipe> Recipes { get; set; } = [];
     private List<Recipe> _openedDetails = [];
-
-    private UserRecipe? GetUserRecipe(Recipe recipe)
-    {
-        return UserServerDataService.UserRecipes.FirstOrDefault(ur => ur.Recipe == recipe);
-    }
 
     private void ToggleDetails(Recipe recipe)
     {

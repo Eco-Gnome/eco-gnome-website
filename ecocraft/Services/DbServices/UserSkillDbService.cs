@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace ecocraft.Services.DbServices;
 
@@ -28,6 +29,11 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	{
 		context.UserSkills.Add(userSkill);
 
+		if (userSkill.Skill is not null)
+		{
+			userSkill.Skill.CurrentUserSkill = userSkill;
+		}
+
 		return userSkill;
 	}
 
@@ -38,6 +44,11 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 
 	public void Delete(UserSkill userSkill)
 	{
+		if (userSkill.Skill is not null)
+		{
+			userSkill.Skill.CurrentUserSkill = null;
+		}
+
 		context.UserSkills.Remove(userSkill);
 	}
 }
