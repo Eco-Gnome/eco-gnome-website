@@ -822,13 +822,21 @@
     private ItemOrTag? _selectedItemToSell;
     private string _searchItemToSell = "";
 
-    private TableGroupDefinition<ItemOrTag>? _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
+    private readonly TableGroupDefinition<ItemOrTag> _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
     {
         GroupName = "Temporary",
         Indentation = true,
         Expandable = true,
         IsInitiallyExpanded = true,
-        Selector = e => "All Skills"
+        Selector = itemOrTag =>
+        {
+            var relatedElements = itemOrTag.Elements.Where(element => element.CurrentUserElement is not null && element.IsProduct() && !element.CurrentUserElement!.IsReintegrated).ToList();
+            var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
+
+            return bestRelatedElement?.Recipe.Skill is not null
+                ? LocalizationService.GetTranslation(bestRelatedElement.Recipe.Skill)
+                : "No Skill";
+        }
     };
 
     protected override async Task OnInitializedAsync()
@@ -842,25 +850,6 @@
         _expandedMargins = await LocalStorageService.GetItem("ExpandedMargins") != "False";
         _expandedOptions = await LocalStorageService.GetItem("ExpandedOptions") != "False";
         _showMarginNames = await LocalStorageService.GetItem("ShowMarginNames") == "True";
-
-        _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
-        {
-            GroupName = "Skill",
-            Indentation = true,
-            Expandable = true,
-            IsInitiallyExpanded = true,
-            Selector = e =>
-            {
-                var firstRelatedUserElements = UserServerDataService.UserElements
-                    .First(ue => ue.Element.IsProduct()
-                                 && ue.Element.ItemOrTag == e
-                                 && !ue.IsReintegrated);
-
-                return firstRelatedUserElements?.Element.Recipe.Skill is not null
-                    ? LocalizationService.GetTranslation(firstRelatedUserElements.Element.Recipe.Skill)
-                    : "No Skill";
-            },
-        };
     }
 
     public void Dispose()

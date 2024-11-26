@@ -7,7 +7,7 @@ public class LocalizationService(
     LocalStorageService localStorageService,
     IWebHostEnvironment env)
 {
-    public LanguageCode CurrentLanguageCode { get; private set; }
+    public static LanguageCode CurrentLanguageCode { get; private set; }
     private Dictionary<string, string> _translations = new();
 
     public async Task SetLanguageAsync(LanguageCode languageCode)
@@ -40,7 +40,7 @@ public class LocalizationService(
         return $"{key}";
     }
 
-    public string GetTranslation(IHasLocalizedName? hasLocalizedName)
+    public static string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
         if (hasLocalizedName is null) return "BUG_NO_NAME";
 

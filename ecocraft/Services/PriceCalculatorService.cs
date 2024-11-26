@@ -4,14 +4,13 @@ namespace ecocraft.Services;
 
 public class PriceCalculatorService(
     EcoCraftDbContext dbContext,
-    UserServerDataService userServerDataService,
-    LocalizationService localizationService)
+    UserServerDataService userServerDataService)
 {
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags()
     {
         // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
         var listOfProducts = userServerDataService.UserElements
-            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated && !userServerDataService.UserPrices.First(up => up.ItemOrTag == ue.Element.ItemOrTag).OverrideIsBought)
+            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated && !ue.Element.ItemOrTag.CurrentUserPrice!.OverrideIsBought)
             .Select(ue => ue.Element.ItemOrTag)
             .Distinct()
             .ToList();
@@ -35,11 +34,11 @@ public class PriceCalculatorService(
         var (listOfIngredients, listOfProducts) = GetCategorizedItemOrTags();
 
         listOfIngredients = listOfIngredients.Where(i => !i.AssociatedTags.Intersect(listOfIngredients).Any())
-            .OrderBy(n => localizationService.GetTranslation(n))
+            .OrderBy(LocalizationService.GetTranslation)
             .ToList();
 
         listOfProducts = listOfProducts
-            .OrderBy(n => localizationService.GetTranslation(n))
+            .OrderBy(LocalizationService.GetTranslation)
             .ToList();
 
         return (listOfIngredients, listOfProducts);
