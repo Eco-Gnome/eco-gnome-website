@@ -72,6 +72,11 @@
     width: 100px;
 }
 
+.rectangle-input .mud-input-slot {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}
+
 .flex-no-grow {
     flex: 0 1 auto !important;
 }
@@ -87,7 +92,7 @@
 }
 
 .rectangle-input input.mud-input-root {
-    padding-inline-start: 10px !important;
+    padding-inline-start: 6px !important;
 }
 
 .auto-complete-input input.mud-input-root {
@@ -163,4 +168,41 @@
 .release ul {
     padding-left: 16px !important;
     list-style: disc !important;
+}
+
+.margin-select-container .mud-select {
+    flex: 0;
+}
+
+.margin-select .mud-input {
+    padding-right: 0 !important;
+}
+
+.margin-select .mud-input-slot {
+    padding-left: 6px !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    width: 45px !important;
+}
+
+.margin-select .mud-input-outlined-border {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.margin-price .mud-input-outlined-border {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-left-width: 0 !important;
+}
+
+.mud-list .mud-list-item.mud-list-item-dense {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+
+.small-text-field .mud-input-slot {
+    padding-top: 4px !important;
+    padding-bottom: 5px !important;
+    font-size: .875rem !important;
 }

@@ -169,7 +169,7 @@
                                     <MudNumericField T="decimal"
                                                      Style="max-width: 85px;height: 35px;"
                                                      Class="rectangle-input"
-                                                     Format="N2"
+                                                     Format="0.##"
                                                      ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
                                                      Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                      Value="@context.CraftMinuteFee"
@@ -289,8 +289,14 @@
                                                Color="Color.Primary"
                                                Icon="@(_showDetailedTags ? MDIIcons.Outline.FolderOpen : MDIIcons.Outline.Folder)"
                                                OnClick="@(() => ShowDetailedTags = !_showDetailedTags)"/>
-                                <MudTextField @bind-Value="_searchTagToBuy" Immediate Placeholder="Ingredient Items Or Tags" Adornment="Adornment.Start"
-                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                <MudTextField @bind-Value="_searchTagToBuy"
+                                              Clearable
+                                              Immediate
+                                              Placeholder="Ingredient Items Or Tags"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Class="mt-0 small-text-field" />
                             </MudStack>
                         </MudTh>
                         <MudTh>Buy price</MudTh>
@@ -325,7 +331,7 @@
                             }
                         </MudTd>
                         <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
-                            <MudStack Row AlignItems="AlignItems.Center">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                 @{
                                     <MudTooltip Disabled="@(!(
                                         (context.IsTag && context.CurrentUserPrice!.Price is null)
@@ -345,7 +351,7 @@
                                                          HideSpinButtons="@(context.IsTag)"
                                                          Value="context.CurrentUserPrice.Price"
                                                          Immediate="true"
-                                                         Format="N2"
+                                                         Format="0.##"
                                                          Variant="Variant.Outlined"
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                          Min="context.MinPrice"
@@ -397,16 +403,16 @@
                                     </MudTd>
 
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
-                                        <MudStack Row Style="position: relative;">
+                                        <MudStack Row Style="position: relative;" Spacing="0">
                                             @{
                                                 var isAutoCalculated = PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !item.CurrentUserPrice!.OverrideIsBought;
-
-                                                <MudIconButton tabindex="-1"
-                                                               Style="margin-right: -12px"
-                                                               Color="Color.Primary"
-                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                               Size="Size.Small"
-                                                               OnClick="@(() => SetPrimaryUserPrice(context.CurrentUserPrice, item.CurrentUserPrice!))"/>
+                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? "Un-favorite this item" : "Favorite this item, apply its price to the related tag")">
+                                                    <MudIconButton tabindex="-1"
+                                                                   Color="Color.Primary"
+                                                                   Icon="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => SetPrimaryUserPrice(context.CurrentUserPrice, item.CurrentUserPrice!))"/>
+                                                </MudTooltip>
                                                 <MudTooltip Disabled="@(!(
                                                                           isAutoCalculated
                                                                           || (item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null)
@@ -420,7 +426,7 @@
                                                                      Class="rectangle-input small-adornment"
                                                                      Style="@($"width: 85px; color: {(item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
                                                                      HideSpinButtons="@isAutoCalculated"
-                                                                     Format="N2"
+                                                                     Format="0.##"
                                                                      Disabled="@isAutoCalculated"
                                                                      Value="item.CurrentUserPrice.Price"
                                                                      Immediate="true"
@@ -432,7 +438,7 @@
                                                                      AdornmentIcon="@MDIIcons.Filled.Calculator"
                                                                      Variant="Variant.Outlined"/>
                                                 </MudTooltip>
-                                                @if (!isAutoCalculated)
+                                                @if (!isAutoCalculated && item.CurrentUserPrice.Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    tabindex="-1"
@@ -501,12 +507,24 @@
                         </MudTh>
                         <MudTh Class="pl-4">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                <MudTextField @bind-Value="_searchItemToSell" Immediate Placeholder="Product Items" Adornment="Adornment.Start"
-                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                <MudTextField @bind-Value="_searchItemToSell"
+                                              Clearable
+                                              Immediate
+                                              Placeholder="Product Items"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Class="mt-0 small-text-field" />
                             </MudStack>
                         </MudTh>
-                        <MudTh>Prices wo/w margin</MudTh>
-                        <MudTh colspan="2">
+                        <MudTh>
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudText Typo="Typo.body2">Cost Price</MudText>
+                                <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" Size="Size.Small"/>
+                                <MudText Typo="Typo.body2">Sale Price</MudText>
+                            </MudStack>
+                        </MudTh>
+                        <MudTh>
                         </MudTh>
                     </HeaderContent>
                     <GroupHeaderTemplate>
@@ -579,51 +597,55 @@
                                 </MudTd>
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
-                                <MudStack Row>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                     <MudNumericField T="decimal?"
                                                      FullWidth="false"
                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
                                                      Style="width: 101px;"
                                                      HideSpinButtons="true"
-                                                     Format="N2"
-                                                     ReadOnly="true"
+                                                     Format="0.##"
+                                                     Disabled="true"
                                                      Value="@context.CurrentUserPrice!.Price"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Variant="Variant.Outlined"/>
+                                    <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" Size="Size.Small" Class="mx-2"/>
+                                    <div class="margin-select-container">
+                                        <MudSelect T="UserMargin"
+                                                   Adornment="Adornment.None"
+                                                   Value="context.CurrentUserPrice!.UserMargin"
+                                                   ValueChanged="@(value => ChangeUserPriceMargin(context.CurrentUserPrice, value))"
+                                                   ToStringFunc="@(um => (um?.Margin ?? 0) + " %")"
+                                                   Class="margin-select"
+                                                   Dense="true"
+                                                   Variant="Variant.Outlined"
+                                                   AnchorOrigin="Origin.BottomLeft"
+                                                   TransformOrigin="Origin.TopLeft">
+                                            @foreach (var userMargin in UserServerDataService.UserMargins)
+                                            {
+                                                <MudSelectItem T="UserMargin"
+                                                               Value="userMargin">
+                                                    @(userMargin.Margin.ToString("0.##")) %
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </div>
                                     <MudNumericField T="decimal?"
-                                                     Class="mt-0 small-adornment flex-no-grow rectangle-input"
-                                                     Style="width: 95px"
+                                                     Class="mt-0 small-adornment flex-no-grow rectangle-input margin-price"
+                                                     Style="width: 85px"
                                                      HideSpinButtons="true"
-                                                     Format="N2"
-                                                     ReadOnly="true"
-                                                     Adornment="@(context.CurrentUserPrice.Price is null ? Adornment.None : Adornment.End)"
-                                                     AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
-                                                     AdornmentAriaLabel="Copy content"
-                                                     OnAdornmentClick="@(() => CopyToClipboard(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100)))"
+                                                     Format="0.##"
+                                                     Disabled="true"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Value="@(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100))"
-                                                     Variant="Variant.Outlined"/>
-                                </MudStack>
-                            </MudTd>
-                            <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
-                                <MudSelect
-                                    T="UserMargin"
-                                    Value="context.CurrentUserPrice!.UserMargin"
-                                    ValueChanged="@(value => ChangeUserPriceMargin(context.CurrentUserPrice, value))"
-                                    ToStringFunc="@(um => (um?.Margin ?? 0) + " %")"
-                                    Class="select-dense very-dense"
-                                    Dense="true"
-                                    Variant="Variant.Outlined"
-                                    AnchorOrigin="Origin.BottomLeft"
-                                    TransformOrigin="Origin.TopLeft">
-                                    @foreach (var userMargin in UserServerDataService.UserMargins)
+                                                     Variant="Variant.Outlined" />
+
+                                    @if (context.CurrentUserPrice.Price is not null)
                                     {
-                                        <MudSelectItem T="UserMargin"
-                                                       Value="userMargin">
-                                            @userMargin.Margin %
-                                        </MudSelectItem>
+                                        <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => CopyToClipboard(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100)))"/>
                                     }
-                                </MudSelect>
+                                </MudStack>
                             </MudTd>
                             <MudTd Class="@($"{(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")} px-1")">
                                 <MudStack Row Spacing="2">
@@ -666,25 +688,25 @@
                                         </MudTd>
                                         <MudTd Class="@($"{borderClass} pt-0 pb-1")">
                                             <MudStack Row>
-                                                <MudIconButton tabindex="-1"
-                                                               Style="margin-right: -12px"
-                                                               Color="Color.Primary"
-                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
-                                                               Size="Size.Small"
-                                                               OnClick="@(() => SetPrimaryElement(context.CurrentUserPrice, userElement))"/>
-
+                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? "Un-favorite this recipe" : "Favorite this recipe, apply its price to the related product")">
+                                                    <MudIconButton tabindex="-1"
+                                                                   Style="margin-right: -12px"
+                                                                   Color="Color.Primary"
+                                                                   Icon="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => SetPrimaryElement(context.CurrentUserPrice, userElement))"/>
+                                                </MudTooltip>
                                                 <MudNumericField T="decimal?"
                                                                  Style="width: 75px"
                                                                  Class="flex-no-grow small-adornment rectangle-input"
                                                                  HideSpinButtons="true"
-                                                                 Format="N2"
+                                                                 Format="0.##"
                                                                  ReadOnly="true"
                                                                  Value="@userElement.Price"
                                                                  Variant="Variant.Outlined"
                                                                  Culture="CultureInfo.CurrentUICulture"/>
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd Class="@($"{borderClass} pt-0 pb-1 px-1")"></MudTd>
                                         <MudTd Class="@($"{borderClass} pt-0 pb-1 px-1")">
                                             <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                                            aria-label="delete"

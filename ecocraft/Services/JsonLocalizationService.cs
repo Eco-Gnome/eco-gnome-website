@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace ecocraft.Services;
 
 public class LocalizationService(
-    LocalStorageService localStorageService, 
+    LocalStorageService localStorageService,
     IWebHostEnvironment env)
 {
     public LanguageCode CurrentLanguageCode { get; private set; }
@@ -34,8 +34,10 @@ public class LocalizationService(
         {
             return value;
         }
+
         Console.WriteLine($"Missing translation for key: {key}");
-        return $"{key}"; // Indique une clé manquante
+
+        return $"{key}";
     }
 
     public string GetTranslation(IHasLocalizedName? hasLocalizedName)
