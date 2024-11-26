@@ -9,22 +9,37 @@ public class LocalizationService(
 {
     public static LanguageCode CurrentLanguageCode { get; private set; }
     private Dictionary<string, string> _translations = new();
+    private Dictionary<string, string> _translations_enUS = new();
 
     public async Task SetLanguageAsync(LanguageCode languageCode)
     {
         CurrentLanguageCode = languageCode;
         var filePath = Path.Combine(env.WebRootPath, "assets", "lang", $"{languageCode}.json");
+        var filePath_enUS = Path.Combine(env.WebRootPath, "assets", "lang", "en_US.json");
 
-        if (File.Exists(filePath))
+        if (File.Exists(filePath) && File.Exists(filePath_enUS))
         {
             var json = await File.ReadAllTextAsync(filePath);
             _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
+
+            json = await File.ReadAllTextAsync(filePath_enUS);
+            _translations_enUS = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
+        }
+        else if (File.Exists(filePath_enUS))
+        {
+            Console.WriteLine($"Translation file for '{languageCode}' not found at {filePath}. Fallback on en_US.json.");
+            var json = await File.ReadAllTextAsync(filePath_enUS);
+            _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
+            _translations_enUS = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
         }
         else
         {
-            Console.WriteLine($"Translation file for '{languageCode}' not found at {filePath}.");
-            _translations = new(); // Vide si le fichier n'est pas trouvé
+            Console.WriteLine($"Translation file for '{languageCode}' not found at {filePath}. Fallback on en_US.json isn't working.");
+            _translations = new();
+            _translations_enUS = new();
         }
+
+
         await localStorageService.AddItem("LanguageCode", CurrentLanguageCode.ToString());
     }
 
@@ -33,6 +48,9 @@ public class LocalizationService(
         if (_translations.TryGetValue(key, out var value))
         {
             return value;
+        }else if(_translations_enUS.TryGetValue(key, out var value_enUS))
+        {
+            return value_enUS;
         }
 
         Console.WriteLine($"Missing translation for key: {key}");
