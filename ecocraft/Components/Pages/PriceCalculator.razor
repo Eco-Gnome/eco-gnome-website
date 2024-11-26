@@ -329,22 +329,22 @@
                         <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                 @{
-                                    var tagTooltip = context.IsTag && context.CurrentUserPrice!.Price is null;
-                                    var itemTooltip = !context.IsTag && context.CurrentUserPrice!.Price is null;
-                                    var minTooltip = context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null;
-                                    var maxTooltip = context.CurrentUserPrice.Price == context.MaxPrice && !context.IsTag && context.CurrentUserPrice!.Price is not null;
+                                    var isTagEmptyPrice = context.IsTag && context.CurrentUserPrice!.Price is null;
+                                    var isItemEmptyPrice = !context.IsTag && context.CurrentUserPrice!.Price is null;
+                                    var isMinPrice = context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null;
+                                    var isMaxPrice = context.CurrentUserPrice.Price == context.MaxPrice && !context.IsTag && context.CurrentUserPrice!.Price is not null;
 
-                                    <MudTooltip Disabled="@(!(tagTooltip || itemTooltip || minTooltip || maxTooltip))"
-                                                Text="@(tagTooltip
+                                    <MudTooltip Disabled="@(!(isTagEmptyPrice || isItemEmptyPrice || isMinPrice || isMaxPrice))"
+                                                Text="@(isTagEmptyPrice
                                                           ? "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star."
-                                                          : itemTooltip
+                                                          : isItemEmptyPrice
                                                               ? "Set this price to allow calculation of related recipes"
-                                                              : minTooltip
+                                                              : isMinPrice
                                                                   ? "This value is set at the minimum price of the server"
                                                                   : "This value is set at the maximum price of the server")">
 
                                         <MudNumericField T="decimal?"
-                                                         Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(minTooltip ? "min-price" : maxTooltip ? "max-price" : "")}")"
+                                                         Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
                                                          Style="width: 111px;"
                                                          Disabled="@(context.IsTag)"
                                                          HideSpinButtons="@(context.IsTag)"
@@ -404,7 +404,11 @@
                                     <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                         <MudStack Row Style="position: relative;" Spacing="0">
                                             @{
-                                                var isAutoCalculated = PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !item.CurrentUserPrice!.OverrideIsBought;
+                                                var isAutoCalculatedPrice = PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !item.CurrentUserPrice!.OverrideIsBought;
+                                                var isEmptyPrice = !isAutoCalculatedPrice && item.CurrentUserPrice!.Price is null;
+                                                var isMinPrice = item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null;
+                                                var isMaxPrice = item.CurrentUserPrice!.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null;
+
                                                 <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? "Un-favorite this item" : "Favorite this item, apply its price to the related tag")">
                                                     <MudIconButton tabindex="-1"
                                                                    Color="Color.Primary"
@@ -412,32 +416,32 @@
                                                                    Size="Size.Small"
                                                                    OnClick="@(() => SetPrimaryUserPrice(context.CurrentUserPrice, item.CurrentUserPrice!))"/>
                                                 </MudTooltip>
-                                                <MudTooltip Disabled="@(!(
-                                                                          isAutoCalculated
-                                                                          || (item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null)
-                                                                          || item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null))"
-                                                            Text="@(isAutoCalculated
+                                                <MudTooltip Disabled="@(!(isAutoCalculatedPrice || isEmptyPrice || isMinPrice || isMaxPrice))"
+                                                            Text="@(isAutoCalculatedPrice
                                                                   ? "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'"
-                                                                  : item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null
-                                                                      ? "This value is set at the minimum price of the server"
-                                                                      : "This value is set at the maximum price of the server")">
+                                                                  : isEmptyPrice
+                                                                      ? "Set this price to allow calculation of related recipes"
+                                                                      : isMinPrice
+                                                                          ? "This value is set at the minimum price of the server"
+                                                                          : "This value is set at the maximum price of the server")">
                                                     <MudNumericField T="decimal?"
-                                                                     Class="rectangle-input small-adornment"
+                                                                     Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")}")"
                                                                      Style="@($"width: 85px; color: {(item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
-                                                                     HideSpinButtons="@isAutoCalculated"
+                                                                     HideSpinButtons="@isAutoCalculatedPrice"
                                                                      Format="0.##"
-                                                                     Disabled="@isAutoCalculated"
+                                                                     Disabled="@isAutoCalculatedPrice"
                                                                      Value="item.CurrentUserPrice.Price"
                                                                      Immediate="true"
                                                                      Min="item.MinPrice"
                                                                      Max="item.MaxPrice"
                                                                      Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                                      ValueChanged="@(value => UpdatePriceCalculation(item.CurrentUserPrice, value))"
-                                                                     Adornment="@(isAutoCalculated ? Adornment.End : Adornment.None)"
-                                                                     AdornmentIcon="@MDIIcons.Filled.Calculator"
+                                                                     Adornment="@(isAutoCalculatedPrice || item.CurrentUserPrice!.Price is null ? Adornment.End : Adornment.None)"
+                                                                     AdornmentIcon="@(isAutoCalculatedPrice ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
+                                                                     AdornmentColor="@(isAutoCalculatedPrice ? Color.Default : Color.Warning)"
                                                                      Variant="Variant.Outlined"/>
                                                 </MudTooltip>
-                                                @if (!isAutoCalculated && item.CurrentUserPrice.Price is not null)
+                                                @if (!isAutoCalculatedPrice && item.CurrentUserPrice.Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    tabindex="-1"
