@@ -1,0 +1,8 @@
+﻿@using ecocraft.Models
+
+<MudImage Src=@($"/assets/eco-icons/{Item.Name}.png") Width=@Size Height=@Size Elevation="25" Class="rounded-lg" />
+
+@code {
+    [Parameter] public required IHasIconName Item { get; set; }
+    [Parameter] public int Size { get; set; } = 32;
+}

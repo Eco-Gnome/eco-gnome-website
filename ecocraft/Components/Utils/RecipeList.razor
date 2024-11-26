@@ -17,20 +17,20 @@
             <MudLink Color="Color.Default" Underline="Underline.None" OnClick="@(() => ToggleDetails(context))">
                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
-                    <IconEco Obj="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
+                    <EcoIcon Item="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
                 </MudStack>
             </MudLink>
         </MudTh>
         <MudTh>
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                <IconEco Obj="@context.Skill" Size="32" />
+                <EcoIcon Item="@context.Skill" Size="32" />
                 <MudText Typo="Typo.body2">@(context.Skill is not null ? LocalizationService.GetTranslation(context.Skill) : "")</MudText>
             </MudStack>
         </MudTh>
         <MudTh>
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                <IconEco Obj="@context.CraftingTable" Size="32" />
+                <EcoIcon Item="@context.CraftingTable" Size="32" />
                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
             </MudStack>
         </MudTh>
@@ -53,7 +53,7 @@
                                 @if (ctx.Item1 is not null)
                                 {
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        <IconEco Obj="@ctx.Item1.ItemOrTag" Size="32"/>
+                                        <EcoIcon Item="@ctx.Item1.ItemOrTag" Size="32"/>
                                         @(LocalizationService.GetTranslation(ctx.Item1.ItemOrTag))
                                     </MudStack>
                                 }
@@ -63,7 +63,7 @@
                                 @if (ctx.Item2 is not null)
                                 {
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        <IconEco Obj="@ctx.Item2.ItemOrTag" Size="32" />
+                                        <EcoIcon Item="@ctx.Item2.ItemOrTag" Size="32" />
                                         @(LocalizationService.GetTranslation(ctx.Item2.ItemOrTag))
                                     </MudStack>
                                 }

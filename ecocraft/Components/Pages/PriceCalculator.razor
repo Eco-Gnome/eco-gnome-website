@@ -66,7 +66,7 @@
                                 <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowSkillDialog(context.Skill))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                            <IconEco Obj="@context.Skill" />
+                                            <EcoIcon Item="@context.Skill" />
                                             <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
                                         </MudStack>
                                     </MudLink>
@@ -133,7 +133,7 @@
                                 <MudTd Class="pa-1">
                                     <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                            <IconEco Obj="@context.CraftingTable" />
+                                            <EcoIcon Item="@context.CraftingTable" />
                                             <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
                                         </MudStack>
                                     </MudLink>
@@ -300,7 +300,7 @@
                         <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
                             <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                    <IconEco Obj="@context"/>
+                                    <EcoIcon Item="@context"/>
                                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
 
                                     @if (!_showDetailedTags && context.AssociatedItems.Count > 0)
@@ -389,7 +389,7 @@
                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                      Size="Size.Small" />
-                                            <IconEco Obj="item" Size="24" />
+                                            <EcoIcon Item="item" Size="24" />
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(item))">
                                                 <MudText Typo="Typo.body2" Class="pt-1">@LocalizationService.GetTranslation(item)</MudText>
                                             </MudLink>
@@ -537,7 +537,7 @@
                                         <MudTooltip Text="Open recipe popup, it displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <IconEco Obj="@context" />
+                                                    <EcoIcon Item="@context" />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @LocalizationService.GetTranslation(context)
                                                     </MudText>
@@ -550,7 +550,7 @@
                                         <MudTooltip Text="Open recipe popup, it gives ability to control the product price repartition and displays details of calculation">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                    <IconEco Obj=@context />
+                                                    <EcoIcon Item=@context />
                                                     <MudText Typo="Typo.body2" Class="pt-1">
                                                         @LocalizationService.GetTranslation(context)
                                                     </MudText>

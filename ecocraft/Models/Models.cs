@@ -1,7 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ecocraft.Extensions;
 
 namespace ecocraft.Models;
+
+public interface IHasIconName
+{
+    public string Name { get; set; }
+}
 
 // Eco Data
 public class Recipe: IHasLocalizedName
@@ -76,7 +82,7 @@ public class Element
     }
 }
 
-public class ItemOrTag: IHasLocalizedName, IHasIcon
+public class ItemOrTag: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -94,9 +100,6 @@ public class ItemOrTag: IHasLocalizedName, IHasIcon
     public List<UserPrice> UserPrices { get; set; } = [];
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
-    public string? imageFile { get; set; }
-    public int? posX { get; set; }
-    public int? posY { get; set; }
 
     [NotMapped]
     public UserPrice? CurrentUserPrice { get; set; }
@@ -107,7 +110,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIcon
     }
 }
 
-public class Skill: IHasLocalizedName, IHasIcon
+public class Skill: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -122,9 +125,6 @@ public class Skill: IHasLocalizedName, IHasIcon
     public Server Server { get; set; }
     public List<Recipe> Recipes { get; set; } = [];
     public List<UserSkill> UserSkills { get; set; } = [];
-    public string? imageFile { get; set; }
-    public int? posX { get; set; }
-    public int? posY { get; set; }
 
     [NotMapped]
     public UserSkill? CurrentUserSkill { get; set; }
@@ -135,7 +135,7 @@ public class Skill: IHasLocalizedName, IHasIcon
     }
 }
 
-public class CraftingTable: IHasLocalizedName, IHasIcon
+public class CraftingTable: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
@@ -147,9 +147,6 @@ public class CraftingTable: IHasLocalizedName, IHasIcon
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
-    public string? imageFile { get; set; }
-    public int? posX { get; set; }
-    public int? posY { get; set; }
 
     [NotMapped]
     public UserCraftingTable? CurrentUserCraftingTable { get; set; }
@@ -160,12 +157,11 @@ public class CraftingTable: IHasLocalizedName, IHasIcon
     }
 }
 
-public class PluginModule: IHasLocalizedName
+public class PluginModule: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
-
 
     public decimal Percent { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
@@ -183,9 +179,9 @@ public class PluginModule: IHasLocalizedName
 // User Data
 public class User
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; init; }
     public string Pseudo { get; set; }
-    public DateTime CreationDateTime { get; set; }
+    public DateTime CreationDateTime { get; init; }
     public Guid SecretId { get; set; }
     public bool SuperAdmin { get; set; }
     public bool ShowHelp { get; set; }
@@ -201,15 +197,15 @@ public class UserServer
     [ForeignKey("User")] public Guid UserId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
-    public User User { get; set; }
-    public Server Server { get; set; }
-    public List<UserSkill> UserSkills { get; set; } = [];
-    public List<UserElement> UserElements { get; set; } = [];
-    public List<UserPrice> UserPrices { get; set; } = [];
-    public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
-    public List<UserSetting> UserSettings { get; set; } = [];
-    public List<UserRecipe> UserRecipes { get; set; } = [];
-    public List<UserMargin> UserMargins { get; set; } = [];
+    public User User { get; init; }
+    public Server Server { get; init; }
+    public List<UserSkill> UserSkills { get; init; } = [];
+    public List<UserElement> UserElements { get; init; } = [];
+    public List<UserPrice> UserPrices { get; init; } = [];
+    public List<UserCraftingTable> UserCraftingTables { get; init; } = [];
+    public List<UserSetting> UserSettings { get; init; } = [];
+    public List<UserRecipe> UserRecipes { get; init; } = [];
+    public List<UserMargin> UserMargins { get; init; } = [];
 }
 
 public class UserSetting
@@ -340,13 +336,6 @@ public class Server
     public List<Skill> Skills { get; set; } = [];
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
-}
-
-public interface IHasIcon
-{
-    public string? imageFile { get; set; }
-    public int? posX { get; set; }
-    public int? posY { get; set; }
 }
 
 // Utils

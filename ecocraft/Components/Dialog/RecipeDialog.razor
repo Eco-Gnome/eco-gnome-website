@@ -8,7 +8,7 @@
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-            <IconEco Obj="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
+            <EcoIcon Item="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(Recipe)</MudText>
         </MudStack>
     </TitleContent>
@@ -19,7 +19,7 @@
                     <MudStack Spacing="1">
                         <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTable")</MudText>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <IconEco Obj="@Recipe.CraftingTable" />
+                            <EcoIcon Item="@Recipe.CraftingTable" />
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
                         </MudStack>
                     </MudStack>
@@ -65,7 +65,7 @@
                         @if (Recipe.Skill is not null)
                         {
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                <IconEco Obj="@Recipe.Skill" />
+                                <EcoIcon Item="@Recipe.Skill" />
                                 <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
                             </MudStack>
@@ -159,7 +159,7 @@
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <IconEco Obj="@context.Element.ItemOrTag" />
+                            <EcoIcon Item="@context.Element.ItemOrTag" />
                             @LocalizationService.GetTranslation(context.Element.ItemOrTag)
                         </MudStack>
                     </MudTd>
