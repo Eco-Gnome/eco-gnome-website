@@ -145,6 +145,10 @@
     font-size: 1.25rem !important;
 }
 
+.small-adornment.small-adornment-with-spin .mud-input-adornment-end {
+    margin-right: 16px !important;
+}
+
 .no-wrap-select .mud-input-slot {
     white-space: wrap !important;
 }
@@ -183,7 +187,8 @@
     padding-left: 6px !important;
     padding-top: 3px !important;
     padding-bottom: 3px !important;
-    width: 47px !important;
+    padding-right: 3px !important;
+    width: 61px !important;
 }
 
 .margin-select .mud-input-outlined-border {
@@ -210,4 +215,8 @@
 
 .tooltip-text {
     text-decoration: underline dotted 0.09rem;
+}
+
+.server-select .mud-input-label {
+    background-color: var(--mud-palette-appbar-background) !important;
 }

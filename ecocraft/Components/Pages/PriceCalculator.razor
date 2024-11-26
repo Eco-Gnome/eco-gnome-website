@@ -145,14 +145,14 @@
                                 <MudTd>
                                     @if (context.CraftingTable.PluginModules.Count > 0)
                                     {
-                                        var pluginModules = context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm.Name)).ToList();
+                                        var pluginModules = context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm)).ToList();
 
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                             <MudIconButton Icon="@MDIIcons.Filled.Minus"
                                                            Size="Size.Small"
                                                            Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
                                                            OnClick="@(() => DecreasePluginModule(context, pluginModules))" />
-                                            <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) : "No Module")">
+                                            <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]" : "No Module")">
                                                 <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1" />
                                             </MudTooltip>
                                             <MudIconButton Icon="@MDIIcons.Filled.Plus"
@@ -207,7 +207,7 @@
                                         <MudNumericField T="decimal"
                                                          Immediate
                                                          Class="rectangle-input"
-                                                         Style="height: 35px; width: 110px"
+                                                         Style="width: 93px"
                                                          Value="context.Margin"
                                                          Min="@(-99.99m)"
                                                          Max="@(99.99m)"
@@ -227,15 +227,12 @@
                                     </MudTd>
                                 </RowTemplate>
                             </MudTable>
-                            @if (_showMargins)
-                            {
-                                <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
-                                    <MudButton Class="py-1"
-                                               StartIcon="@Icons.Material.Filled.Add"
-                                               tabindex="-1"
-                                               OnClick="OnAddMargin">Add margin</MudButton>
-                                </MudStack>
-                            }
+                            <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudButton Class="py-1"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           tabindex="-1"
+                                           OnClick="OnAddMargin">Add margin</MudButton>
+                            </MudStack>
                         }
                     </MudExpansionPanel>
 
@@ -344,9 +341,9 @@
                                                               : "This value is set at the maximum price of the server")">
 
                                         <MudNumericField T="decimal?"
-                                                         Class="rectangle-input small-adornment"
+                                                         Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")}")"
                                                          Style="@($"width: 111px; color: {(context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : context.CurrentUserPrice.Price == context.MaxPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
-                                                         ReadOnly="@(context.IsTag)"
+                                                         Disabled="@(context.IsTag)"
                                                          HideSpinButtons="@(context.IsTag)"
                                                          Value="context.CurrentUserPrice.Price"
                                                          Immediate="true"
@@ -355,7 +352,7 @@
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                          Min="context.MinPrice"
                                                          Max="context.MaxPrice"
-                                                         Adornment="@(context.IsTag && context.CurrentUserPrice.Price is null ? Adornment.End : Adornment.None)"
+                                                         Adornment="@(context.CurrentUserPrice.Price is null ? Adornment.End : Adornment.None)"
                                                          AdornmentIcon="@MDIIcons.Outline.Information"
                                                          AdornmentColor="Color.Warning"
                                                          ValueChanged="@(value => UpdatePriceCalculation(context.CurrentUserPrice, value))"/>
@@ -417,7 +414,7 @@
                                                                           || (item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null)
                                                                           || item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null))"
                                                             Text="@(isAutoCalculated
-                                                                  ? "This value is automatically calculated by the system."
+                                                                  ? "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'"
                                                                   : item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null
                                                                       ? "This value is set at the minimum price of the server"
                                                                       : "This value is set at the maximum price of the server")">
@@ -520,6 +517,7 @@
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                 <MudText Typo="Typo.body2">Cost Price</MudText>
                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small"/>
+                                <MudIconButton Icon="@(ShowMarginNames ? MDIIcons.Outline.AlphaABox : MDIIcons.Outline.PercentBox)" Size="Size.Small" OnClick="@(() => ShowMarginNames = !ShowMarginNames)"/>
                                 <MudText Typo="Typo.body2">Sale Price</MudText>
                             </MudStack>
                         </MudTh>
@@ -597,23 +595,28 @@
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
-                                    <MudNumericField T="decimal?"
-                                                     FullWidth="false"
-                                                     Class="mt-0 small-adornment flex-no-grow rectangle-input"
-                                                     Style="width: 101px;"
-                                                     HideSpinButtons="true"
-                                                     Format="0.##"
-                                                     Disabled="true"
-                                                     Value="@context.CurrentUserPrice!.Price"
-                                                     Culture="CultureInfo.CurrentUICulture"
-                                                     Variant="Variant.Outlined"/>
+                                    <MudTooltip Disabled="@(context.CurrentUserPrice!.Price is not null)" Text="This value is automatically calculated by the system. Make sure you set the price of all 'Items to buy' to get a value.">
+                                        <MudNumericField T="decimal?"
+                                                         FullWidth="false"
+                                                         Class="mt-0 small-adornment flex-no-grow rectangle-input"
+                                                         Style="width: 101px;"
+                                                         HideSpinButtons="true"
+                                                         Format="0.##"
+                                                         Disabled="true"
+                                                         Value="@context.CurrentUserPrice!.Price"
+                                                         Culture="CultureInfo.CurrentUICulture"
+                                                         Adornment="@(context.CurrentUserPrice!.Price is not null ? Adornment.None : Adornment.End)"
+                                                         AdornmentIcon="@MDIIcons.Outline.Information"
+                                                         AdornmentColor="Color.Warning"
+                                                         Variant="Variant.Outlined"/>
+                                    </MudTooltip>
                                     <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small" Class="mx-2"/>
                                     <div class="margin-select-container">
                                         <MudSelect T="UserMargin"
                                                    Adornment="Adornment.None"
                                                    Value="context.CurrentUserPrice!.UserMargin"
                                                    ValueChanged="@(value => ChangeUserPriceMargin(context.CurrentUserPrice, value))"
-                                                   ToStringFunc="@(um => (um?.Margin ?? 0) + " %")"
+                                                   ToStringFunc="@(um => ShowMarginNames ? "None" : ((um?.Margin ?? 0).ToString("0.##") + " %"))"
                                                    Class="margin-select"
                                                    Dense="true"
                                                    Variant="Variant.Outlined"
@@ -623,7 +626,7 @@
                                             {
                                                 <MudSelectItem T="UserMargin"
                                                                Value="userMargin">
-                                                    @(userMargin.Margin.ToString("0.##")) %
+                                                    @(ShowMarginNames ? userMargin.Name : userMargin.Margin.ToString("0.##") + " %")
                                                 </MudSelectItem>
                                             }
                                         </MudSelect>
@@ -636,7 +639,7 @@
                                                      Disabled="true"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Value="@(GetMarginPrice(context.CurrentUserPrice!))"
-                                                     Variant="Variant.Outlined" />
+                                                     Variant="Variant.Outlined"/>
 
                                     @if (context.CurrentUserPrice.Price is not null)
                                     {
@@ -700,7 +703,7 @@
                                                                  Class="flex-no-grow small-adornment rectangle-input"
                                                                  HideSpinButtons="true"
                                                                  Format="0.##"
-                                                                 ReadOnly="true"
+                                                                 Disabled="true"
                                                                  Value="@userElement.Price"
                                                                  Variant="Variant.Outlined"
                                                                  Culture="CultureInfo.CurrentUICulture"/>
@@ -726,16 +729,6 @@
 </MudContainer>
 
 @code {
-    private bool _showMargins;
-    private bool ShowMargins
-    {
-        set
-        {
-            _showMargins = value;
-            _ = LocalStorageService.AddItem("ShowMargins", value.ToString());
-        }
-    }
-
     private bool _showDetailedTags;
     private bool ShowDetailedTags
     {
@@ -759,10 +752,7 @@
     private bool _expandedSkills;
     private bool ExpandedSkills
     {
-        get
-        {
-            return _expandedSkills;
-        }
+        get => _expandedSkills;
         set
         {
             _expandedSkills = value;
@@ -773,10 +763,7 @@
     private bool _expandedCraftingTables;
     private bool ExpandedCraftingTables
     {
-        get
-        {
-            return _expandedCraftingTables;
-        }
+        get => _expandedCraftingTables;
         set
         {
             _expandedCraftingTables = value;
@@ -787,10 +774,7 @@
     private bool _expandedMargins;
     private bool ExpandedMargins
     {
-        get
-        {
-            return _expandedMargins;
-        }
+        get => _expandedMargins;
         set
         {
             _expandedMargins = value;
@@ -801,14 +785,22 @@
     private bool _expandedOptions;
     private bool ExpandedOptions
     {
-        get
-        {
-            return _expandedOptions;
-        }
+        get => _expandedOptions;
         set
         {
             _expandedOptions = value;
             _ = LocalStorageService.AddItem("ExpandedOptions", value.ToString());
+        }
+    }
+
+    private bool _showMarginNames;
+    private bool ShowMarginNames
+    {
+        get => _showMarginNames;
+        set
+        {
+            _showMarginNames = value;
+            _ = LocalStorageService.AddItem("ShowMarginNames", value.ToString());
         }
     }
 
@@ -836,13 +828,13 @@
     {
         ContextService.OnContextChanged += StateHasChanged;
 
-        _showMargins = await LocalStorageService.GetItem("ShowMargins") != "False";
         _showDetailedTags = await LocalStorageService.GetItem("ShowDetailedTags") != "False";
         _showDetailedRecipes = await LocalStorageService.GetItem("ShowDetailedRecipes") != "False";
         _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
         _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
         _expandedMargins = await LocalStorageService.GetItem("ExpandedMargins") != "False";
         _expandedOptions = await LocalStorageService.GetItem("ExpandedOptions") != "False";
+        _showMarginNames = await LocalStorageService.GetItem("ShowMarginNames") == "True";
 
         _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
         {

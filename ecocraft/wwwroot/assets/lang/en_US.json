@@ -43,7 +43,7 @@
     "UserConfigurationDialog.PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
     "UserConfigurationDialog.SnackbarErrorBadUser": "Import User Error - Can't find the imported user",
     "UserConfigurationDialog.SnackbarErrorBadFile": "Import User Error - Choose a correct file.",
-    "ServerDialog.HaveAnInvitation": "Do you already have an invitation?",
+    "ServerDialog.HaveAnInvitation": "Do you already have a server join code?",
     "ServerDialog.CreateServer": "Create your server",
     "ServerDialog.MaxChar": "Max 25 characters",
     "ServerDialog.MinChar": "Min 3 characters",

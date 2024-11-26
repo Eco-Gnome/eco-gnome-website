@@ -27,16 +27,17 @@
                      Style="position: absolute; top: -10px; left: 5px; transform: rotate(-15deg)">@LocalizationService.GetTranslation("Header.New")</MudText>
         }
     </MudLink>
-    <MudSelect  T="Server"
-                Class="select-dense"
-                Value="@ContextService.CurrentServer"
-                Style="min-width:200px;padding-left:10px"
-                Dense="false"
-                Underline="false"
-                Variant="Variant.Outlined"
-                SelectedValuesChanged="OnSelectedServerChanged"
-                AnchorOrigin="Origin.BottomLeft"
-                TransformOrigin="Origin.TopLeft">
+    <MudSelect T="Server"
+               Class="select-dense server-select"
+               Value="@ContextService.CurrentServer"
+               Style="min-width:200px;padding-left:10px"
+               Label="My Servers"
+               Dense="false"
+               Underline="false"
+               Variant="Variant.Outlined"
+               SelectedValuesChanged="OnSelectedServerChanged"
+               AnchorOrigin="Origin.BottomLeft"
+               TransformOrigin="Origin.TopLeft">
         @foreach (var server in ContextService.AvailableServers)
         {
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
