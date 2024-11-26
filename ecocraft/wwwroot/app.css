@@ -172,6 +172,7 @@
 
 .margin-select-container .mud-select {
     flex: 0;
+    background-color: #45454e !important;
 }
 
 .margin-select .mud-input {
