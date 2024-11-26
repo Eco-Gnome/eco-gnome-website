@@ -126,7 +126,11 @@
                             <HeaderContent>
                                 <MudTh>Name</MudTh>
                                 <MudTh>Upgrade</MudTh>
-                                <MudTh Class="px-1">Cost per min</MudTh>
+                                <MudTh Class="p-0 pl-1">
+                                    <MudTooltip Text="The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...">
+                                        <MudText Class="tooltip-text">Cost/min</MudText>
+                                    </MudTooltip>
+                                </MudTh>
                                 <MudTh Class="px-1"></MudTh>
                             </HeaderContent>
                             <RowTemplate>
@@ -141,33 +145,26 @@
                                 <MudTd>
                                     @if (context.CraftingTable.PluginModules.Count > 0)
                                     {
-                                        <MudSelect T="PluginModule"
-                                                   Class="select-dense very-dense no-wrap-select"
-                                                   Placeholder="Choose a module"
-                                                   Value="context.PluginModule"
-                                                   ValueChanged="@(value => ChangePluginModule(context, value))"
-                                                   Dense="true"
-                                                   Typo="Typo.body2"
-                                                   Variant="Variant.Outlined"
-                                                   ToStringFunc="@(pm => pm == null ? "No Module" : pm.Name)"
-                                                   AnchorOrigin="Origin.BottomLeft"
-                                                   TransformOrigin="Origin.TopLeft">
-                                            <MudSelectItem T="PluginModule" Value="@null">No Module</MudSelectItem>
-                                            @foreach (var pluginModule in context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent))
-                                            {
-                                                <MudSelectItem T="PluginModule" Value="@pluginModule">
-                                                    @* <IconEco ObjName="@pluginModule.Name" /> *@
-                                                    <MudText Typo="Typo.body2">
-                                                        @LocalizationService.GetTranslation(pluginModule)
-                                                    </MudText>
-                                                </MudSelectItem>
-                                            }
-                                        </MudSelect>
+                                        var pluginModules = context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm.Name)).ToList();
+
+                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudIconButton Icon="@MDIIcons.Filled.Minus"
+                                                           Size="Size.Small"
+                                                           Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
+                                                           OnClick="@(() => DecreasePluginModule(context, pluginModules))" />
+                                            <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) : "No Module")">
+                                                <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1" />
+                                            </MudTooltip>
+                                            <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                                                           Size="Size.Small"
+                                                           Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) == pluginModules.Count - 1)"
+                                                           OnClick="@(() => IncreasePluginModule(context, pluginModules))" />
+                                        </MudStack>
                                     }
                                 </MudTd>
                                 <MudTd Class="px-1">
                                     <MudNumericField T="decimal"
-                                                     Style="max-width: 85px;height: 35px;"
+                                                     Style="max-width: 75px;"
                                                      Class="rectangle-input"
                                                      Format="0.##"
                                                      ValueChanged="@(v => UpdateCraftMinuteFee(context, v))"
@@ -221,7 +218,7 @@
                                                          Variant="Variant.Outlined" />
                                     </MudTd>
                                     <MudTd Class="py-1" Style="text-align: right;">
-                                        <MudTooltip Text="Remove margin">
+                                        <MudTooltip Text="Remove margin" Class="flex">
                                             <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                                             tabindex="-1"
                                                             Size="Size.Small"
@@ -399,7 +396,7 @@
                                                      Size="Size.Small" />
                                             <EcoIcon Item="item" Size="24" />
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(item))">
-                                                <MudText Typo="Typo.body2" Class="pt-1">@LocalizationService.GetTranslation(item)</MudText>
+                                                <MudText Typo="Typo.body2" Class="pt-1 ">@LocalizationService.GetTranslation(item)</MudText>
                                             </MudLink>
                                         </MudStack>
                                     </MudTd>
@@ -558,7 +555,7 @@
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <EcoIcon Item="@context" />
-                                                    <MudText Typo="Typo.body2" Class="pt-1">
+                                                    <MudText Typo="Typo.body2" Class="pt-1 ">
                                                         @LocalizationService.GetTranslation(context)
                                                     </MudText>
                                                 </MudStack>
@@ -571,7 +568,7 @@
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <EcoIcon Item=@context />
-                                                    <MudText Typo="Typo.body2" Class="pt-1">
+                                                    <MudText Typo="Typo.body2" Class="pt-1 ">
                                                         @LocalizationService.GetTranslation(context)
                                                     </MudText>
                                                     @if (!_showDetailedRecipes && relatedUserElements.Count > 1)
@@ -590,7 +587,7 @@
                                     <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="pl-6">
                                         <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                         <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe))">
-                                            <MudText Class="pt-1" Typo="Typo.body2">
+                                            <MudText Class="pt-1 " Typo="Typo.body2">
                                                 @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe) Recipe
                                             </MudText>
                                         </MudLink>
@@ -645,7 +642,7 @@
                                     {
                                         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                        Size="Size.Small"
-                                                       OnClick="@(() => CopyToClipboard(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100)))"/>
+                                                       OnClick="@(() => CopyToClipboard(GetMarginPrice(context.CurrentUserPrice!)))"/>
                                     }
                                 </MudStack>
                             </MudTd>
@@ -683,7 +680,7 @@
                                             <MudStack Row Spacing="1">
                                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                          Size="Size.Small"/>
-                                                <MudLink Color="Color.Default" Class="pt-1" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
+                                                <MudLink Color="Color.Default" Class="pt-1 " Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
                                                     @LocalizationService.GetTranslation(userElement.Element.Recipe) Recipe
                                                 </MudLink>
                                             </MudStack>
@@ -1063,13 +1060,6 @@
         StateHasChanged();
     }
 
-    private async Task ChangePluginModule(UserCraftingTable userCraftingTable, PluginModule? pluginModule)
-    {
-        userCraftingTable.PluginModule = pluginModule;
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
-    }
-
     private async Task OnOptionDisplayChanged()
     {
         UserServerDataService.UserSetting!.DisplayNonSkilledRecipes = !UserServerDataService.UserSetting.DisplayNonSkilledRecipes;
@@ -1208,6 +1198,7 @@
     {
         userPrice.OverrideIsBought = value;
         await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task CopyToClipboard(decimal? price)
@@ -1223,9 +1214,40 @@
         Snackbar.Add("Price copied to clipboard", Severity.Success);
     }
 
-    private void OnGlobalSearchChanged(KeyboardEventArgs args)
+    private async Task IncreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
     {
-        StateHasChanged(); // Redessiner la page pour que les filtres s'appliquent
+        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+
+        if (currentIndex == pluginModules.Count - 1)
+        {
+            return;
+        }
+
+        userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules) {
+        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+
+        if (currentIndex == -1)
+        {
+            return;
+        }
+
+        if (currentIndex == 0)
+        {
+            userCraftingTable.PluginModule = null;
+        }
+        else
+        {
+            userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)
@@ -1250,6 +1272,4 @@
             return true;
         return false;
     }
-
-
 }

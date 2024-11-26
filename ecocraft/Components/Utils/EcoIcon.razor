@@ -1,8 +1,18 @@
 ﻿@using ecocraft.Models
 
-<MudImage Src=@($"/assets/eco-icons/{Item.Name}.png") Width=@Size Height=@Size Elevation="25" Class="rounded-lg" />
+@if (Item is not null)
+{
+    <MudImage Src=@($"/assets/eco-icons/{Item.Name}.png") Width=@Size Height=@Size Elevation="25" Class="@($"rounded-lg {Class}")" Style="@($"user-select: none; {Style}")"/>
+}
+else if (FallbackIcon is not null)
+{
+    <MudIcon Icon="@FallbackIcon" Size="MudBlazor.Size.Medium" Class="@Class" Style="@($"user-select: none; width: {Size}px; height: {Size}px; {Style}")"/>
+}
 
 @code {
-    [Parameter] public required IHasIconName Item { get; set; }
+    [Parameter] public required IHasIconName? Item { get; set; }
+    [Parameter] public string? FallbackIcon { get; set; }
     [Parameter] public int Size { get; set; } = 32;
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Class { get; set; }
 }
