@@ -196,7 +196,7 @@
                                       Dense="true">
                                 <HeaderContent>
                                     <MudTh>Name</MudTh>
-                                    <MudTh>Value</MudTh>
+                                    <MudTh>Margin Rate</MudTh>
                                     <MudTh></MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
@@ -208,15 +208,17 @@
                                     </MudTd>
                                     <MudTd Class="py-1">
                                         <MudNumericField T="decimal"
-                                                            Class="rectangle-input"
-                                                            Style="height: 35px; width: 110px"
-                                                            Value="context.Margin"
-                                                            Min="0"
-                                                            Adornment="Adornment.End"
-                                                            AdornmentText="% "
-                                                            Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                            ValueChanged="@(v => UpdateMargin(context, v))"
-                                                            Variant="Variant.Outlined" />
+                                                         Immediate
+                                                         Class="rectangle-input"
+                                                         Style="height: 35px; width: 110px"
+                                                         Value="context.Margin"
+                                                         Min="@(-99.99m)"
+                                                         Max="@(99.99m)"
+                                                         Adornment="Adornment.End"
+                                                         AdornmentText="% "
+                                                         Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                         ValueChanged="@(v => UpdateMargin(context, v))"
+                                                         Variant="Variant.Outlined" />
                                     </MudTd>
                                     <MudTd Class="py-1" Style="text-align: right;">
                                         <MudTooltip Text="Remove margin">
@@ -520,7 +522,7 @@
                         <MudTh>
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                 <MudText Typo="Typo.body2">Cost Price</MudText>
-                                <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" Size="Size.Small"/>
+                                <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small"/>
                                 <MudText Typo="Typo.body2">Sale Price</MudText>
                             </MudStack>
                         </MudTh>
@@ -608,7 +610,7 @@
                                                      Value="@context.CurrentUserPrice!.Price"
                                                      Culture="CultureInfo.CurrentUICulture"
                                                      Variant="Variant.Outlined"/>
-                                    <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" Size="Size.Small" Class="mx-2"/>
+                                    <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small" Class="mx-2"/>
                                     <div class="margin-select-container">
                                         <MudSelect T="UserMargin"
                                                    Adornment="Adornment.None"
@@ -636,7 +638,7 @@
                                                      Format="0.##"
                                                      Disabled="true"
                                                      Culture="CultureInfo.CurrentUICulture"
-                                                     Value="@(context.CurrentUserPrice.Price * (1 + context.CurrentUserPrice.UserMargin?.Margin ?? 0m / 100))"
+                                                     Value="@(GetMarginPrice(context.CurrentUserPrice!))"
                                                      Variant="Variant.Outlined" />
 
                                     @if (context.CurrentUserPrice.Price is not null)
@@ -908,6 +910,23 @@
         result = result.OrderBy(r => r.Name);
 
         return Task.FromResult(result);
+    }
+
+    private decimal? GetMarginPrice(UserPrice userPrice)
+    {
+        var marginRate = userPrice.UserMargin?.Margin ?? 0;
+
+        if (userPrice.Price is null)
+        {
+            return null;
+        }
+
+        if (marginRate >= 100)
+        {
+            return null;
+        }
+
+        return userPrice.Price / (100 - marginRate) * 100;
     }
 
     private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value, CancellationToken token)
