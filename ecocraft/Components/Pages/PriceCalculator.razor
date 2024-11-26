@@ -240,16 +240,22 @@
                         @if (UserServerDataService.UserSetting is not null)
                         {
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                <MudText>Display non-skilled recipes</MudText>
-                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged" />
+                                <MudTooltip Text="Unlock the list of non-skilled recipes in the recipe selector.">
+                                    <MudText Class="tooltip-text">Display non-skilled recipes</MudText>
+                                </MudTooltip>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
                             </MudStack>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                <MudText>Only level-accessible recipes</MudText>
-                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged" />
+                                <MudTooltip Text="Only display recipes that are allowed by your skills levels.">
+                                    <MudText>Only level-accessible recipes</MudText>
+                                </MudTooltip>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
                             </MudStack>
                         }
                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText>Cost per 1000 calories</MudText>
+                            <MudTooltip Text="The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$">
+                                <MudText Class="tooltip-text">Cost per 1000 calories</MudText>
+                            </MudTooltip>
                             @if (UserServerDataService.UserSetting is not null)
                             {
                                 <div>
