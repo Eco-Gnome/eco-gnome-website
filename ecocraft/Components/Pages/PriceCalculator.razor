@@ -329,20 +329,23 @@
                         <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                 @{
-                                    <MudTooltip Disabled="@(!(
-                                        (context.IsTag && context.CurrentUserPrice!.Price is null)
-                                        || (context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null)
-                                        || (context.CurrentUserPrice.Price == context.MaxPrice && context.CurrentUserPrice!.Price is not null)
-                                                          ))"
-                                                Text="@(context.IsTag && context.CurrentUserPrice!.Price is null
+                                    var tagTooltip = context.IsTag && context.CurrentUserPrice!.Price is null;
+                                    var itemTooltip = !context.IsTag && context.CurrentUserPrice!.Price is null;
+                                    var minTooltip = context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null;
+                                    var maxTooltip = context.CurrentUserPrice.Price == context.MaxPrice && !context.IsTag && context.CurrentUserPrice!.Price is not null;
+
+                                    <MudTooltip Disabled="@(!(tagTooltip || itemTooltip || minTooltip || maxTooltip))"
+                                                Text="@(tagTooltip
                                                           ? "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star."
-                                                          : context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null
-                                                              ? "This value is set at the minimum price of the server"
-                                                              : "This value is set at the maximum price of the server")">
+                                                          : itemTooltip
+                                                              ? "Set this price to allow calculation of related recipes"
+                                                              : minTooltip
+                                                                  ? "This value is set at the minimum price of the server"
+                                                                  : "This value is set at the maximum price of the server")">
 
                                         <MudNumericField T="decimal?"
-                                                         Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")}")"
-                                                         Style="@($"width: 111px; color: {(context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : context.CurrentUserPrice.Price == context.MaxPrice && context.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
+                                                         Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(minTooltip ? "min-price" : maxTooltip ? "max-price" : "")}")"
+                                                         Style="width: 111px;"
                                                          Disabled="@(context.IsTag)"
                                                          HideSpinButtons="@(context.IsTag)"
                                                          Value="context.CurrentUserPrice.Price"
@@ -517,7 +520,7 @@
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                 <MudText Typo="Typo.body2">Cost Price</MudText>
                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small"/>
-                                <MudIconButton Icon="@(ShowMarginNames ? MDIIcons.Outline.AlphaABox : MDIIcons.Outline.PercentBox)" Size="Size.Small" OnClick="@(() => ShowMarginNames = !ShowMarginNames)"/>
+                                <MudIconButton Color="Color.Primary" Icon="@(ShowMarginNames ? MDIIcons.Outline.AlphaABox : MDIIcons.Outline.PercentBox)" Size="Size.Small" OnClick="@(() => ShowMarginNames = !ShowMarginNames)"/>
                                 <MudText Typo="Typo.body2">Sale Price</MudText>
                             </MudStack>
                         </MudTh>
