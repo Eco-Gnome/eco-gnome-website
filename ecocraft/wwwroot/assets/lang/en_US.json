@@ -3,7 +3,7 @@
     "__AlreadyTraduced_Components/Dialog": "all",
     "__AlreadyTraduced_Components/Layout": "all",
     "__AlreadyTraduced_Components/Utils": "all",
-    "__AlreadyTraduced_Components/Pages": "Error, GraphView, SuperAdmin",
+    "__AlreadyTraduced_Components/Pages": "Error, GraphView, SuperAdmin, ServerManagement",
     "Language": "Language",
     "RecipeList.RecipeName": "Recipe name",
     "Skill": "Skill",
@@ -31,6 +31,7 @@
     "UserConfigurationDialog.UserSettings": "User settings",
     "UserConfigurationDialog.MyServers": "My servers",
     "Name": "Name",
+    "TagName": "Tag name",
     "JoinCode": "Join code",
     "UserConfigurationDialog.InGamePseudo": "In-Game pseudo",
     "CopyToClipboard": "Copy to clipboard",
@@ -98,7 +99,32 @@
     "SuperAdmin.ConfirmUserDeletion.1": "Are you sure you want to delete user ",
     "SuperAdmin.ConfirmUserDeletion.2": "?",
     "SuperAdmin.ConfirmServerDeletion.1": "Are you sure you want to delete user ",
-    "SuperAdmin.ConfirmServerDeletion.2": "?"
+    "SuperAdmin.ConfirmServerDeletion.2": "?",
+    "ServerManagement.ServerSettings": "Server Settings",
+    "ServerManagement.ServerSettings.Recipes": "Recipes:",
+    "ServerManagement.ServerSettings.Items": "Items:",
+    "ServerManagement.ServerSettings.Skills": "Skills:",
+    "ServerManagement.ServerSettings.Crafting": "Crafting Tables:",
+    "ServerManagement.ServerSettings.Modules": "Modules:",
+    "ServerManagement.ServerSettings.Upload": "Upload Server Data",
+    "ServerManagement.ServerSettings.Delete": "Delete Server",
+    "ServerManagement.Members": "Members",
+    "Search": "Search",
+    "ServerManagement.Members.Tooltip.Admin": "Admin",
+    "ServerManagement.Members.DemoteAdmin": "Demote Admin",
+    "ServerManagement.Members.PromoteAdmin": "Promote Admin",
+    "ServerManagement.Members.KickUser": "Kick user",
+    "ServerManagement.Items.Min": "Min price",
+    "ServerManagement.Items.Min.Tooltip": "Clear min prices",
+    "ServerManagement.Items.Max": "Max price",
+    "ServerManagement.Items.Max.Tooltip": "Clear max prices",
+    "ServerManagement.Snackbar.UploadOk": "Upload Successful",
+    "ServerManagement.Snackbar.CantEditYourself": "You can't edit yourself",
+    "ServerManagement.Confirm.ClearAllMin": "Are you sure you want to clear all min prices ?",
+    "ServerManagement.Confirm.ClearAllMax": "Are you sure you want to clear all max prices ?"
+
+
+
 
 
 

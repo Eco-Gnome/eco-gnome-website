@@ -17,7 +17,7 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Server Management - Eco Gnome (alpha)</PageTitle>
+<PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
 	<MudGrid Style="height: auto">
@@ -27,7 +27,7 @@
 				          Style="width: 100%; height: 45px; background-color: #303038 !important; border-radius: var(--mud-default-borderradius) 0px 0px 0px;
 				           border-bottom: 1px solid var(--mud-palette-table-lines)"
 				          Elevation="0">
-					<MudText>Server Settings</MudText>
+					<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings")</MudText>
 				</MudPaper>
 				<MudStack Class="pa-4">
 					<MudStack Row>
@@ -35,7 +35,7 @@
 						<MudTextField Class="flex-no-grow"
 						              Readonly
 						              Value="@ContextService.CurrentServer!.JoinCode"
-						              Label="Join code"
+						              Label="@LocalizationService.GetTranslation("JoinCode")"
 						              Adornment="Adornment.End"
 						              AdornmentColor="Color.Tertiary"
 						              AdornmentIcon="@Icons.Material.Filled.Refresh"
@@ -44,11 +44,11 @@
 					</MudStack>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
 						<MudStack Spacing="0">
-							<MudText>Recipes: @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
-							<MudText>Items: @ServerDataService.ItemOrTags.Where(i => !i.IsTag).Count() / Tags: @ServerDataService.ItemOrTags.Where(i => i.IsTag).Count()</MudText>
-							<MudText>Skills: @ServerDataService.Skills.Count(s => s.Profession is not null)</MudText>
-							<MudText>Crafting Tables: @ServerDataService.CraftingTables.Count</MudText>
-							<MudText>Modules: @ServerDataService.PluginModules.Count</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes") @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items") @ServerDataService.ItemOrTags.Where(i => !i.IsTag).Count() / Tags: @ServerDataService.ItemOrTags.Where(i => i.IsTag).Count()</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills") @ServerDataService.Skills.Count(s => s.Profession is not null)</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting") @ServerDataService.CraftingTables.Count</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules") @ServerDataService.PluginModules.Count</MudText>
 						</MudStack>
 						<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
 							<ActivatorContent>
@@ -56,7 +56,7 @@
 								           Variant="Variant.Filled"
 								           Color="Color.Primary"
 								           StartIcon="@Icons.Material.Filled.CloudUpload">
-									Upload Server Data
+									@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
 									@if (_showUploadServerDataLoader)
 									{
 										<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
@@ -72,7 +72,7 @@
 						           Color="Color.Error"
 						           StartIcon="@Icons.Material.Filled.DeleteForever"
 						           OnClick="DeleteServer">
-							Delete Server
+							@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
 							@if (_showDeleteServerLoader)
 							{
 								<MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
@@ -102,8 +102,8 @@
 				<HeaderContent>
 					<MudTh>
 						<MudStack Row AlignItems="AlignItems.Center">
-							<MudText>Members</MudText>
-							<MudTextField @bind-Value="_searchPseudo" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.Members")</MudText>
+							<MudTextField @bind-Value="_searchPseudo" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 						</MudStack>
 					</MudTh>
 					<MudTh></MudTh>
@@ -111,7 +111,7 @@
 				<RowTemplate>
 					<MudTd>
 						<MudStack Row AlignItems="AlignItems.Center">
-							<MudTooltip Text="Admin">
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Members.Tooltip.Admin")">
 								<MudIcon Class="mt-1" Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small"></MudIcon>
 							</MudTooltip>
 							<MudText Typo="Typo.body2">@context.Pseudo</MudText>
@@ -125,7 +125,7 @@
 								           Color="@(context.IsAdmin ? Color.Warning : Color.Error)"
 								           StartIcon="@(context.IsAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
 								           OnClick="@(() => ToggleAdmin(context))">
-									@(context.IsAdmin ? "Demote Admin" : "Promote Admin")
+									@(context.IsAdmin ? LocalizationService.GetTranslation("ServerManagement.Members.DemoteAdmin") : LocalizationService.GetTranslation("ServerManagement.Members.PromoteAdmin"))
 								</MudButton>
 							}
 
@@ -136,7 +136,7 @@
 								           Color="Color.Primary"
 								           StartIcon="@Icons.Material.Filled.ExitToApp"
 								           OnClick="@(() => KickUser(context))">
-									Kick User
+									@LocalizationService.GetTranslation("ServerManagement.Members.KickUser")
 								</MudButton>
 								@if (_askKickConfirmations.ContainsKey(context))
 								{
@@ -172,8 +172,8 @@
 				<HeaderContent>
 					<MudTh>
 						<MudStack Row AlignItems="AlignItems.Center">
-							Name
-							<MudTextField @bind-Value="_searchTag" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							<MudText>@LocalizationService.GetTranslation("TagName")</MudText>
+							<MudTextField @bind-Value="_searchTag" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 						</MudStack>
 					</MudTh>
 				</HeaderContent>
@@ -206,14 +206,15 @@
 				<HeaderContent>
 					<MudTh>
 						<MudStack Row AlignItems="AlignItems.Center">
-							<MudText>Name</MudText>
-							<MudTextField @bind-Value="_searchItem" Immediate Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							<MudText>@LocalizationService.GetTranslation("Name")</MudText>
+							<MudTextField @bind-Value="_searchItem" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 						</MudStack>
 					</MudTh>
 					<MudTh>
 						<MudStack Row>
-							<MudText>Min price</MudText>
-							<MudTooltip Text="Clear min prices">
+							<MudText>
+								@LocalizationService.GetTranslation("ServerManagement.Items.Min")</MudText>
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Min.Tooltip")">
 								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
 								               OnClick="@(() => OnClearMinPrices(GetItems()))"
 								               Color="Color.Primary"
@@ -221,13 +222,16 @@
 							</MudTooltip>
 						</MudStack>
 					</MudTh>
-					<MudTh>Max price
-						<MudTooltip Text="Clear max prices">
-							<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
-							               OnClick="@(() => OnClearMaxPrices(GetItems()))"
-							               Color="Color.Primary"
-							               Size="Size.Small" />
-						</MudTooltip>
+					<MudTh>
+						<MudStack Row>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.Items.Max")</MudText>
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Max.Tooltip")">
+								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
+											   OnClick="@(() => OnClearMaxPrices(GetItems()))"
+											   Color="Color.Primary"
+											   Size="Size.Small" />
+							</MudTooltip>
+						</MudStack>
 					</MudTh>
 				</HeaderContent>
 				<RowTemplate>
@@ -337,7 +341,7 @@
 
 			Snackbar.Clear();
 			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-			Snackbar.Add("Upload Successful", Severity.Success);
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadOk"), Severity.Success);
 		}
 	}
 
@@ -345,7 +349,7 @@
 	{
 		if (userServer == ContextService.CurrentUserServer)
 		{
-			Snackbar.Add("You can't edit yourself", Severity.Error);
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
 			return;
 		}
 
@@ -367,7 +371,7 @@
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to clear all min prices ?");
+		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -379,7 +383,7 @@
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to clear all max prices ?");
+		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -450,7 +454,7 @@
 	{
 		if (userServerToKick == ContextService.CurrentUserServer)
 		{
-			Snackbar.Add("You can't edit yourself", Severity.Error);
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
 			return;
 		}
 
