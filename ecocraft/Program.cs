@@ -1,5 +1,6 @@
 using System.Globalization;
 using ecocraft.Components;
+using ecocraft.Extensions;
 using ecocraft.Models;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
@@ -110,5 +111,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+StaticEnvironmentAccessor.WebHostEnvironment = app.Services.GetRequiredService<IWebHostEnvironment>();
 
 app.Run();

@@ -7,7 +7,6 @@
 @using ecocraft.Services.DbServices
 @using System.Globalization;
 @using ecocraft.Components.Utils
-@using Microsoft.EntityFrameworkCore
 @inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
@@ -18,7 +17,7 @@
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Price Calculator - Eco Gnome</PageTitle>
 
@@ -192,8 +191,14 @@
                                       Class="mt-4"
                                       Dense="true">
                                 <HeaderContent>
-                                    <MudTh>Name</MudTh>
-                                    <MudTh>Margin Rate</MudTh>
+                                    <MudTh>
+                                        <MudText>Name</MudText>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTooltip Text="The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.">
+                                            <MudText Class="tooltip-text">Margin Percent</MudText>
+                                        </MudTooltip>
+                                    </MudTh>
                                     <MudTh></MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
@@ -209,8 +214,6 @@
                                                          Class="rectangle-input"
                                                          Style="width: 93px"
                                                          Value="context.Margin"
-                                                         Min="@(-99.99m)"
-                                                         Max="@(99.99m)"
                                                          Adornment="Adornment.End"
                                                          AdornmentText="% "
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimal"
@@ -237,36 +240,56 @@
                     </MudExpansionPanel>
 
                     <MudExpansionPanel Text="Options" @bind-Expanded="ExpandedOptions">
-                        @if (UserServerDataService.UserSetting is not null)
-                        {
+                        <MudStack Spacing="1" Class="pa-2">
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                 <MudTooltip Text="Unlock the list of non-skilled recipes in the recipe selector.">
                                     <MudText Class="tooltip-text">Display non-skilled recipes</MudText>
                                 </MudTooltip>
-                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
                             </MudStack>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                 <MudTooltip Text="Only display recipes that are allowed by your skills levels.">
-                                    <MudText>Only level-accessible recipes</MudText>
+                                    <MudText Class="tooltip-text">Only level-accessible recipes</MudText>
                                 </MudTooltip>
-                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
+                                <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
                             </MudStack>
-                        }
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudTooltip Text="The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$">
-                                <MudText Class="tooltip-text">Cost per 1000 calories</MudText>
-                            </MudTooltip>
-                            @if (UserServerDataService.UserSetting is not null)
-                            {
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudTooltip>
+                                    <TooltipContent>
+                                        <MudStack Spacing="0">
+                                            <MudText>Margin calculation method</MudText>
+                                            <MudText Typo="Typo.body2">MarkUp (default): you sum the CostPrice and Margin*CostPrice/100 to get the SalePrice</MudText>
+                                            <MudText Typo="Typo.body2">Gross Margin: The Margin percent is the percent of benefit of your SaleCost, that is capped between -99.99% and 99.99%.</MudText>
+                                        </MudStack>
+                                    </TooltipContent>
+                                    <ChildContent>
+                                        <MudText Class="tooltip-text">Margin Calculation Type</MudText>
+                                    </ChildContent>
+                                </MudTooltip>
+                                <div class="flex-no-grow">
+                                    <MudSelect T="MarginType"
+                                               Class="select-dense very-dense"
+                                               Value="UserServerDataService.UserSetting!.MarginType"
+                                               Variant="Variant.Outlined"
+                                               ValueChanged="OnOptionMarginTypeChanged">
+                                        <MudSelectItem Value="@MarginType.MarkUp">Mark-Up</MudSelectItem>
+                                        <MudSelectItem Value="@MarginType.GrossMargin">Gross Margin</MudSelectItem>
+                                    </MudSelect>
+                                </div>
+                            </MudStack>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                <MudTooltip Text="The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$">
+                                    <MudText Class="tooltip-text">Cost per 1000 calories</MudText>
+                                </MudTooltip>
                                 <div>
                                     <MudNumericField T="decimal"
                                                      ValueChanged="UpdateCalorieCost"
                                                      Style="height: 35px; width: 100px"
-                                                     Value="UserServerDataService.UserSetting.CalorieCost"
+                                                     Value="UserServerDataService.UserSetting!.CalorieCost"
                                                      Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                     Variant="Variant.Outlined" />
+                                                     Variant="Variant.Outlined"/>
                                 </div>
-                            }
+                            </MudStack>
                         </MudStack>
                     </MudExpansionPanel>
                 </MudExpansionPanels>
@@ -362,8 +385,8 @@
                                                          Min="context.MinPrice"
                                                          Max="context.MaxPrice"
                                                          Adornment="@(context.CurrentUserPrice.Price is null ? Adornment.End : Adornment.None)"
-                                                         AdornmentIcon="@MDIIcons.Outline.Information"
-                                                         AdornmentColor="Color.Warning"
+                                                         AdornmentIcon="@(context.IsTag ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
+                                                         AdornmentColor="@(context.IsTag ? Color.Default : Color.Warning)"
                                                          ValueChanged="@(value => UpdatePriceCalculation(context.CurrentUserPrice, value))"/>
                                     </MudTooltip>
                                     @if (!context.IsTag && context.CurrentUserPrice!.Price is not null)
@@ -538,7 +561,7 @@
                         </MudTh>
                     </HeaderContent>
                     <GroupHeaderTemplate>
-                        <MudTh Class="mud-background-gray pl-8" colspan="5">@context.Key [@context.Items.Count()]</MudTh>
+                        <MudTh Class="mud-background-gray pl-8" colspan="5">@LocalizationService.GetTranslation((IHasLocalizedName)context.Key) [@context.Items.Count()]</MudTh>
                     </GroupHeaderTemplate>
                     <RowTemplate>
                         @{
@@ -644,16 +667,26 @@
                                             }
                                         </MudSelect>
                                     </div>
-                                    <MudNumericField T="decimal?"
-                                                     Class="mt-0 small-adornment flex-no-grow rectangle-input margin-price"
-                                                     Style="width: 85px"
-                                                     HideSpinButtons="true"
-                                                     Format="0.##"
-                                                     Disabled="true"
-                                                     Culture="CultureInfo.CurrentUICulture"
-                                                     Value="@(GetMarginPrice(context.CurrentUserPrice!))"
-                                                     Variant="Variant.Outlined"/>
+                                    @{
+                                        var marginPrice = GetMarginPrice(context.CurrentUserPrice!);
+                                        var hasMarginPriceError = context.CurrentUserPrice!.Price is not null && marginPrice is null;
 
+                                        <MudTooltip Disabled="@(!hasMarginPriceError)"
+                                                    Text="Your Margin configuration does not allow to calculate a Sale Price. Check your Margin Percent and Margin Calculation Type.">
+                                            <MudNumericField T="decimal?"
+                                                             Class="mt-0 small-adornment flex-no-grow rectangle-input margin-price"
+                                                             Style="width: 85px"
+                                                             HideSpinButtons="true"
+                                                             Format="0.##"
+                                                             Disabled="true"
+                                                             Culture="CultureInfo.CurrentUICulture"
+                                                             Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
+                                                             AdornmentIcon="@MDIIcons.Outline.Information"
+                                                             AdornmentColor="Color.Warning"
+                                                             Value="@marginPrice"
+                                                             Variant="Variant.Outlined"/>
+                                        </MudTooltip>
+                                    }
                                     @if (context.CurrentUserPrice.Price is not null)
                                     {
                                         <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
@@ -839,9 +872,7 @@
             var relatedElements = itemOrTag.Elements.Where(element => element.CurrentUserElement is not null && element.IsProduct() && !element.CurrentUserElement!.IsReintegrated).ToList();
             var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
 
-            return bestRelatedElement?.Recipe.Skill is not null
-                ? LocalizationService.GetTranslation(bestRelatedElement.Recipe.Skill)
-                : "No Skill";
+            return bestRelatedElement?.Recipe.Skill;
         }
     };
 
@@ -912,12 +943,24 @@
             return null;
         }
 
-        if (marginRate >= 100)
+        if (UserServerDataService.UserSetting!.MarginType == MarginType.MarkUp)
         {
-            return null;
+            return userPrice.Price * (1 + marginRate / 100);
         }
 
-        return userPrice.Price / (100 - marginRate) * 100;
+        if (UserServerDataService.UserSetting!.MarginType == MarginType.GrossMargin)
+        {
+            var divisionFactor = 1 - marginRate / 100;
+
+            if (divisionFactor <= 0)
+            {
+                return null;
+            }
+
+            return userPrice.Price / divisionFactor;
+        }
+
+        return userPrice.Price;
     }
 
     private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value, CancellationToken token)
@@ -1070,6 +1113,13 @@
         StateHasChanged();
     }
 
+    private async Task OnOptionMarginTypeChanged(MarginType marginType)
+    {
+        UserServerDataService.UserSetting!.MarginType = marginType;
+        await EcoCraftDbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+
     private async Task UpdateCalorieCost(decimal calorieCost)
     {
         UserServerDataService.UserSetting!.CalorieCost = calorieCost;
@@ -1204,7 +1254,7 @@
         }
 
         var text = Math.Round((double) price,2).ToString("0.00");
-        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
         Snackbar.Add("Price copied to clipboard", Severity.Success);
     }
 

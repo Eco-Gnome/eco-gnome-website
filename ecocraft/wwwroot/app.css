@@ -106,8 +106,11 @@
 }
 
 .select-dense.very-dense .mud-input-slot {
-    padding-top: 6px !important;
-    padding-bottom: 7px !important;
+    padding: 6px 3px 7px 6px !important;
+}
+
+.select-dense.very-dense .mud-input {
+    padding-right: 0 !important;
 }
 
 .mud-table-head .mud-table-row .mud-table-cell {
@@ -184,10 +187,7 @@
 }
 
 .margin-select .mud-input-slot {
-    padding-left: 6px !important;
-    padding-top: 3px !important;
-    padding-bottom: 3px !important;
-    padding-right: 3px !important;
+    padding: 3px 3px 3px 6px !important;
     width: 61px !important;
 }
 
@@ -227,4 +227,8 @@
 
 .min-price .mud-input-numeric-spin button:nth-child(2) {
     visibility: hidden;
+}
+
+.app-bar .mud-toolbar {
+    padding-left: 4px;
 }

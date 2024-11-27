@@ -1,146 +1,152 @@
 ﻿using ecocraft.Models;
 using System.Text.Json;
+using ecocraft.Extensions;
 
 namespace ecocraft.Services;
 
-public class LocalizationService(
-    LocalStorageService localStorageService,
-    IWebHostEnvironment env)
+public partial class LocalizationService(LocalStorageService localStorageService)
 {
-    public static LanguageCode CurrentLanguageCode { get; private set; }
-    private Dictionary<string, string> _translations = new();
-    private Dictionary<string, string> _translations_enUS = new();
+    [System.Text.RegularExpressions.GeneratedRegex(@"\{[^\}]+\}")]
+    private static partial System.Text.RegularExpressions.Regex ReplacerRegexp();
+
+    private const LanguageCode DefaultLanguageCode = LanguageCode.en_US;
+    private static readonly Dictionary<LanguageCode, Dictionary<string, object>> AllTranslations = new();
+    private static readonly JsonSerializerOptions JsonSerializerOpts = new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public LanguageCode CurrentLanguageCode { get; private set; }
+
+    static LocalizationService()
+    {
+        foreach (LanguageCode languageCode in Enum.GetValues(typeof(LanguageCode)))
+        {
+            var filePath = Path.Combine(StaticEnvironmentAccessor.WebHostEnvironment!.WebRootPath, "assets", "lang", $"{languageCode}.json");
+
+            if (File.Exists(filePath))
+            {
+                AllTranslations.Add(languageCode, LoadTranslationFile(filePath));
+            }
+            else
+            {
+                Console.WriteLine($"LanguageCode {languageCode} has no translation file.");
+
+                if (languageCode == DefaultLanguageCode)
+                {
+                    throw new Exception("Can't start the server without the default language file.");
+                }
+            }
+        }
+    }
 
     public async Task SetLanguageAsync(LanguageCode languageCode)
     {
         CurrentLanguageCode = languageCode;
-        var filePath = Path.Combine(env.WebRootPath, "assets", "lang", $"{languageCode}.json");
-        var filePath_enUS = Path.Combine(env.WebRootPath, "assets", "lang", "en_US.json");
-
-        if (File.Exists(filePath) && File.Exists(filePath_enUS))
-        {
-            var json = await File.ReadAllTextAsync(filePath);
-            _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
-
-            json = await File.ReadAllTextAsync(filePath_enUS);
-            _translations_enUS = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
-        }
-        else if (File.Exists(filePath_enUS))
-        {
-            Console.WriteLine($"Translation file for '{languageCode}' not found at {filePath}. Fallback on en_US.json.");
-            var json = await File.ReadAllTextAsync(filePath_enUS);
-            _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
-            _translations_enUS = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
-        }
-        else
-        {
-            Console.WriteLine($"Translation file for '{languageCode}' not found at {filePath}. Fallback on en_US.json isn't working.");
-            _translations = new();
-            _translations_enUS = new();
-        }
-
-
         await localStorageService.AddItem("LanguageCode", CurrentLanguageCode.ToString());
     }
 
-    public string GetTranslation(string key)
+    private static Dictionary<string, object> LoadTranslationFile(string path)
     {
-        if (_translations.TryGetValue(key, out var value))
+        return ParseJsonElement(JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(path), JsonSerializerOpts));
+    }
+
+    private static Dictionary<string, object> ParseJsonElement(JsonElement element)
+    {
+        var dictionary = new Dictionary<string, object>();
+
+        foreach (var property in element.EnumerateObject())
         {
-            return value;
-        }else if(_translations_enUS.TryGetValue(key, out var value_enUS))
+            dictionary[property.Name] = property.Value.ValueKind switch
+            {
+                JsonValueKind.Object => ParseJsonElement(property.Value),
+                JsonValueKind.String => property.Value.GetString()!,
+                JsonValueKind.Number => property.Value.GetDecimal(),
+                JsonValueKind.Array => property.Value.EnumerateArray().Select(e => e.ValueKind == JsonValueKind.String ? e.GetString()! : e.ToString()).ToArray(),
+                _ => property.Value.ToString()
+            };
+        }
+
+        return dictionary;
+    }
+
+    public string GetTranslation(string key, params string[] args)
+    {
+        AllTranslations.TryGetValue(CurrentLanguageCode, out var translations);
+        translations ??= AllTranslations[DefaultLanguageCode];
+
+        if (TryGetTranslation(translations, key, out var value))
         {
-            return value_enUS;
+            return ReplacePlaceholders(value, args);
         }
 
         Console.WriteLine($"Missing translation for key: {key}");
-
-        return $"{key}";
+        return key;
     }
 
-    public static string GetTranslation(IHasLocalizedName? hasLocalizedName)
+    private static bool TryGetTranslation(Dictionary<string, object> translations, string key, out string value)
+    {
+        value = string.Empty;
+        var segments = key.Split('.');
+        object current = translations;
+
+        foreach (var segment in segments)
+        {
+            if (current is Dictionary<string, object> dict && dict.TryGetValue(segment, out var next))
+            {
+                current = next;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if (current is not string strValue) return false;
+
+        value = strValue;
+        return true;
+    }
+
+    private string ReplacePlaceholders(string template, string[] args)
+    {
+        var index = 0;
+
+        return ReplacerRegexp().Replace(template, match => index < args.Length ? args[index++] : match.Value);
+    }
+
+    public string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
         if (hasLocalizedName is null) return "BUG_NO_NAME";
 
-        string translation;
-
-        switch (CurrentLanguageCode)
+        var translation = CurrentLanguageCode switch
         {
-            case LanguageCode.en_US:
-                translation = hasLocalizedName.LocalizedName.en_US;
-                break;
-            case LanguageCode.fr:
-                translation = hasLocalizedName.LocalizedName.fr;
-                break;
-            case LanguageCode.es:
-                translation = hasLocalizedName.LocalizedName.es;
-                break;
-            case LanguageCode.de:
-                translation = hasLocalizedName.LocalizedName.de;
-                break;
-            case LanguageCode.ko:
-                translation = hasLocalizedName.LocalizedName.ko;
-                break;
-            case LanguageCode.pt_BR:
-                translation = hasLocalizedName.LocalizedName.pt_BR;
-                break;
-            case LanguageCode.zh_Hans:
-                translation = hasLocalizedName.LocalizedName.zh_Hans;
-                break;
-            case LanguageCode.ru:
-                translation = hasLocalizedName.LocalizedName.ru;
-                break;
-            case LanguageCode.it:
-                translation = hasLocalizedName.LocalizedName.it;
-                break;
-            case LanguageCode.pt_PT:
-                translation = hasLocalizedName.LocalizedName.pt_PT;
-                break;
-            case LanguageCode.hu:
-                translation = hasLocalizedName.LocalizedName.hu;
-                break;
-            case LanguageCode.ja:
-                translation = hasLocalizedName.LocalizedName.ja;
-                break;
-            case LanguageCode.nn:
-                translation = hasLocalizedName.LocalizedName.nn;
-                break;
-            case LanguageCode.pl:
-                translation = hasLocalizedName.LocalizedName.pl;
-                break;
-            case LanguageCode.nl:
-                translation = hasLocalizedName.LocalizedName.nl;
-                break;
-            case LanguageCode.ro:
-                translation = hasLocalizedName.LocalizedName.ro;
-                break;
-            case LanguageCode.da:
-                translation = hasLocalizedName.LocalizedName.da;
-                break;
-            case LanguageCode.cs:
-                translation = hasLocalizedName.LocalizedName.cs;
-                break;
-            case LanguageCode.sv:
-                translation = hasLocalizedName.LocalizedName.sv;
-                break;
-            case LanguageCode.uk:
-                translation = hasLocalizedName.LocalizedName.uk;
-                break;
-            case LanguageCode.el:
-                translation = hasLocalizedName.LocalizedName.el;
-                break;
-            case LanguageCode.ar_sa:
-                translation = hasLocalizedName.LocalizedName.ar_sa;
-                break;
-            case LanguageCode.vi:
-                translation = hasLocalizedName.LocalizedName.vi;
-                break;
-            case LanguageCode.tr:
-                translation = hasLocalizedName.LocalizedName.tr;
-                break;
-            default:
-                throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}");
-        }
+            LanguageCode.en_US => hasLocalizedName.LocalizedName.en_US,
+            LanguageCode.fr => hasLocalizedName.LocalizedName.fr,
+            LanguageCode.es => hasLocalizedName.LocalizedName.es,
+            LanguageCode.de => hasLocalizedName.LocalizedName.de,
+            LanguageCode.ko => hasLocalizedName.LocalizedName.ko,
+            LanguageCode.pt_BR => hasLocalizedName.LocalizedName.pt_BR,
+            LanguageCode.zh_Hans => hasLocalizedName.LocalizedName.zh_Hans,
+            LanguageCode.ru => hasLocalizedName.LocalizedName.ru,
+            LanguageCode.it => hasLocalizedName.LocalizedName.it,
+            LanguageCode.pt_PT => hasLocalizedName.LocalizedName.pt_PT,
+            LanguageCode.hu => hasLocalizedName.LocalizedName.hu,
+            LanguageCode.ja => hasLocalizedName.LocalizedName.ja,
+            LanguageCode.nn => hasLocalizedName.LocalizedName.nn,
+            LanguageCode.pl => hasLocalizedName.LocalizedName.pl,
+            LanguageCode.nl => hasLocalizedName.LocalizedName.nl,
+            LanguageCode.ro => hasLocalizedName.LocalizedName.ro,
+            LanguageCode.da => hasLocalizedName.LocalizedName.da,
+            LanguageCode.cs => hasLocalizedName.LocalizedName.cs,
+            LanguageCode.sv => hasLocalizedName.LocalizedName.sv,
+            LanguageCode.uk => hasLocalizedName.LocalizedName.uk,
+            LanguageCode.el => hasLocalizedName.LocalizedName.el,
+            LanguageCode.ar_sa => hasLocalizedName.LocalizedName.ar_sa,
+            LanguageCode.vi => hasLocalizedName.LocalizedName.vi,
+            LanguageCode.tr => hasLocalizedName.LocalizedName.tr,
+            _ => throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}")
+        };
 
         if (string.IsNullOrEmpty(translation))
         {
@@ -149,5 +155,4 @@ public class LocalizationService(
 
         return translation;
     }
-
 }

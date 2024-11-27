@@ -1,25 +1,177 @@
 {
-    "Language": "Langue",
-    "RecipeList.RecipeName": "Nom de la recette",
-    "Skill": "Compétence",
+    "Cancel": "Annuler",
+    "CopyToClipboard": "Copier dans le presse-papier",
     "CraftingTable": "Table de fabrication",
+    "GraphView": {
+        "ResetButton": "Réinitialiser le graphique",
+        "Title": "Vue graphique"
+    },
+    "Header": {
+        "CreateServer": "Créer un serveur",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Mes serveurs",
+        "New": "Nouveau !",
+        "ReleaseDialog": {
+            "Title": "Versions"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Vous êtes déjà sur ce serveur",
+                "JoinError": "Vous devez ajouter un code serveur",
+                "ServerNotFound": "Serveur introuvable"
+            },
+            "Title": "Créer ou rejoindre un serveur"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Gestion de l'utilisateur"
+        }
+    },
     "Ingredients": "Ingrédients",
-    "Products": "Produits",
-    "CraftingTableDialog.RelatedRecipes": "Recettes associées",
-    "ItemOrTagDialog.ProducedBy": "Produit par",
-    "ItemOrTagDialog.UsedIn": "Utilisé dans",
-    "RecipeDialog.CraftTime": "Temps de fabrication",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produit par",
+        "UsedIn": "Utilisé dans"
+    },
+    "JoinCode": "Code d'invitation",
+    "Language": "Langue",
+    "MainLayout": {
+        "SiteTitle": "Outils pour le jeu vidéo Eco"
+    },
+    "Name": "Nom",
+    "NavMenu": {
+        "NavAdmin": "Gestion des serveurs",
+        "NavCalculator": "Calculateur de prix",
+        "NavGraph": "Vue graphique (en développement)",
+        "NavSuperAdmin": "Super Admin"
+    },
     "None": "Aucun",
-    "RecipeDialog.Labor": "Travail",
-    "RecipeDialog.TotalCost": "Coût total :",
-    "RecipeDialog.TotalPrice": "Prix total :",
-    "RecipeDialog.Dynamic": "dynamique",
-    "RecipeDialog.Static": "statique",
-    "RecipeDialog.ReintegratedToolTip.True": "Déduisez cet article du prix de revient. À utiliser lorsque vous pouvez réutiliser ce produit dans la même recette ou dans une précédente (moules, barils, ...). Cela réduira mathématiquement le prix des autres produits.",
-    "RecipeDialog.ReintegratedToolTip.False": "Arrêtez de déduire cet article du prix de revient. Cela augmentera mathématiquement le prix des autres produits.",
-    "RecipeDialog.Share.Title": "Partage des prix entre les produits :",
-    "RecipeDialog.Share.FirstOnly": "Seulement le premier produit",
-    "RecipeDialog.Share.Honest": "80 % pour le premier produit",
-    "RecipeDialog.Share.Equality": "Répartition équitable",
-    "RecipeDialog.Share.Equilibrate": "Répartition par quantité"
+    "Options": "Options",
+    "Products": "Produits",
+    "RecipeDialog": {
+        "CraftTime": "Temps de fabrication",
+        "Dynamic": "dynamique",
+        "Labor": "Travail",
+        "ReintegratedToolTip": {
+            "False": "Ne déduisez pas cet article du prix de revient. Cela augmentera mathématiquement le prix des autres produits.",
+            "True": "Déduisez cet article du prix de revient, utile lorsque vous pouvez réutiliser ce produit dans la même recette ou dans une précédente (Moules, Barils, ...). Cela diminuera mathématiquement le prix des autres produits."
+        },
+        "Share": {
+            "Equality": "Répartition équitable",
+            "Equilibrate": "Distribuer par quantité",
+            "FirstOnly": "Seulement le premier produit",
+            "Honest": "80% pour le premier produit",
+            "Title": "Répartition des prix entre les sorties :"
+        },
+        "Static": "statique",
+        "TotalCost": "Coût total :",
+        "TotalPrice": "Prix total :"
+    },
+    "RecipeList": {
+        "RecipeName": "Nom de la recette"
+    },
+    "RelatedRecipes": "Recettes liées",
+    "Search": "Rechercher",
+    "ServerDialog": {
+        "Create": "Créer",
+        "CreateServer": "Créer votre serveur",
+        "HaveAnInvitation": "Avez-vous déjà un code serveur ?",
+        "Join": "Rejoindre",
+        "MaxChar": "Max 25 caractères",
+        "MinChar": "Min 3 caractères"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Êtes-vous sûr de vouloir réinitialiser tous les prix max ?",
+            "ClearAllMin": "Êtes-vous sûr de vouloir réinitialiser tous les prix min ?"
+        },
+        "Items": {
+            "Max": "Prix max",
+            "Max.Tooltip": "Réinitialiser les prix max",
+            "Min": "Prix min",
+            "Min.Tooltip": "Réinitialiser les prix min"
+        },
+        "Members": {
+            "DemoteAdmin": "Rétrograder Admin",
+            "KickUser": "Exclure l'utilisateur",
+            "PromoteAdmin": "Promouvoir Admin",
+            "Tooltip.Admin": "Admin"
+        },
+        "ServerSettings": {
+            "Crafting": "Tables de fabrication :",
+            "Delete": "Supprimer le serveur",
+            "Items": "Articles :",
+            "Modules": "Modules :",
+            "Recipes": "Recettes :",
+            "Skills": "Compétences :",
+            "Upload": "Téléverser les données du serveur"
+        },
+        "Snackbar": {
+            "CantEditYourself": "Vous ne pouvez pas vous modifier vous-même",
+            "UploadOk": "Téléversement réussi"
+        }
+    },
+    "Skill": "Compétence",
+    "SuperAdmin": {
+        "ActionCol": "Action",
+        "ConfirmServerDeletion": {
+            "1": "Êtes-vous sûr de vouloir supprimer l'utilisateur ",
+            "2": " ?"
+        },
+        "ConfirmSuperAdmin": {
+            "1": "Êtes-vous sûr de vouloir ",
+            "2": "rétrograder",
+            "3": "promouvoir",
+            "4": " cet utilisateur ",
+            "5": "de",
+            "6": "à",
+            "7": " Super Admin ?"
+        },
+        "ConfirmTwiceSuperAdmin": "Ce changement a un grand impact et pourrait corrompre tout le site web ! Veuillez confirmer à nouveau.",
+        "ConfirmUserDeletion": {
+            "1": "Êtes-vous sûr de vouloir supprimer l'utilisateur ",
+            "2": " ?"
+        },
+        "CreationDateCol": "Date de création",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Supprimer le serveur",
+            "DemoteAdmin": "Vous retirer des admins",
+            "PlayersCol": "Joueurs",
+            "PromoteAdmin": "Vous ajouter comme admin",
+            "ServerNameCol": "Nom",
+            "SetDefault": "Définir comme serveur par défaut",
+            "Title": "Serveurs",
+            "UnsetDefault": "Retirer des serveurs par défaut"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Vous ne pouvez pas vous supprimer depuis cette page.",
+            "SnackbarCantEdit": "Vous ne pouvez pas vous modifier depuis cette page.",
+            "SnackbarCopy": "Id copié dans le presse-papier"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Nombre de serveurs où l'utilisateur est admin",
+            "DemoteUser": "Rétrograder l'utilisateur de Super Admin",
+            "HowMuchIsAdmin": "Nombre de serveurs où l'utilisateur est admin",
+            "JoinedServers": "Serveurs rejoints",
+            "PromoteUser": "Promouvoir l'utilisateur en tant que Super Admin",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Serveurs",
+            "Title": "Utilisateurs"
+        }
+    },
+    "TagName": "Nom de l'étiquette",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Exporter/Sauvegarder mon utilisateur",
+        "ImportReplace": "Importer/Remplacer mon utilisateur",
+        "InGamePseudo": "Pseudo en jeu",
+        "MyServers": "Mes serveurs",
+        "PopupConfirmImportBegin": "Êtes-vous sûr de vouloir importer l'utilisateur avec le pseudo ",
+        "PopupConfirmImportEnd": " ? Cela effacera votre utilisateur actuel. Assurez-vous d'exporter l'utilisateur actuel si vous souhaitez l'utiliser plus tard !",
+        "SnackbarCopy": "Code d'invitation copié dans le presse-papier",
+        "SnackbarErrorBadFile": "Erreur d'importation - Choisissez un fichier valide.",
+        "SnackbarErrorBadUser": "Erreur d'importation - Impossible de trouver l'utilisateur importé",
+        "UserSettings": "Paramètres utilisateur"
+    },
+    "Versions": "Versions"
 }

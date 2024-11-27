@@ -9,6 +9,12 @@ public interface IHasIconName
     public string Name { get; set; }
 }
 
+public enum MarginType
+{
+    MarkUp,
+    GrossMargin,
+}
+
 // Eco Data
 public class Recipe: IHasLocalizedName
 {
@@ -213,6 +219,7 @@ public class UserSetting
     [Key] public Guid Id { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
 
+    public MarginType MarginType { get; set; } = MarginType.MarkUp;
     public decimal CalorieCost { get; set; } = 0;
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;

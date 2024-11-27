@@ -16,11 +16,11 @@
 @inject LocalStorageService LocalStorageService
 @inject LocalizationService LocalizationService
 
-<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-    <MudImage Src="/assets/avatar.png" Width="52" />
-    <MudText Typo="Typo.h5" Class="ml-3">Eco Gnome</MudText>
-    <MudLink Style="position: relative;" Color="Color.Primary" OnClick="() => OpenReleaseDialog()">
-        <MudText Color="Color.Primary" Class="mt-2 ml-n2">@ReleaseVersionService.ReleaseVersions.First().Title</MudText>
+<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="pl-3">
+    <MudImage Src="/assets/avatar.png" Width="52"/>
+    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("Header.EcoGnome")</MudText>
+    <MudLink Style="position: relative;" Color="Color.Tertiary" OnClick="() => OpenReleaseDialog()">
+        <MudText Color="Color.Tertiary" Class="mt-2 ml-n1">@ReleaseVersionService.ReleaseVersions.First().Title</MudText>
         @if (_lastAcknowledgeVersion is null || _lastAcknowledgeVersion != ReleaseVersionService.ReleaseVersions.First().Date)
         {
             <MudText Color="Color.Warning"
@@ -31,7 +31,7 @@
                Class="select-dense server-select"
                Value="@ContextService.CurrentServer"
                Style="min-width:200px;padding-left:10px"
-               Label="My Servers"
+               Label="@LocalizationService.GetTranslation("Header.MyServers")"
                Dense="false"
                Underline="false"
                Variant="Variant.Outlined"
@@ -45,9 +45,9 @@
     </MudSelect>
     <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
                    Size="Size.Medium"
-                   aria-label="Create server"
+                   aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
                    Color="Color.Tertiary"
-                   OnClick="CreateServer" />
+                   OnClick="CreateServer"/>
 </MudStack>
 
 <MudSpacer />
@@ -57,13 +57,13 @@
                Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
 
     <MudSelect T="LanguageCode"
-                Class="select-dense"
+               Class="select-dense"
                Value="@LocalizationService.CurrentLanguageCode"
-                Dense="false"
-                Variant="Variant.Outlined"
-                SelectedValuesChanged="OnSelectedLanguageChanged"
-                AnchorOrigin="Origin.BottomLeft"
-                TransformOrigin="Origin.TopLeft">
+               Dense="false"
+               Variant="Variant.Outlined"
+               SelectedValuesChanged="OnSelectedLanguageChanged"
+               AnchorOrigin="Origin.BottomLeft"
+               TransformOrigin="Origin.TopLeft">
         @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
         {
             <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
@@ -124,7 +124,7 @@
 
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result!.Canceled)
         {
             if (result.Data is string[] resultArray)
             {

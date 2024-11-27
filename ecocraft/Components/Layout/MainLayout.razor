@@ -12,15 +12,17 @@
 <title>Eco Gnome - @LocalizationService.GetTranslation("MainLayout.SiteTitle")</title>
 
 <MudLayout>
-    <MudAppBar Elevation="2">
+    <MudAppBar Elevation="2" Class="app-bar">
+        <MudIconButton Icon="@MDIIcons.Filled.Menu" Size="Size.Medium" OnClick="() => ToggleMenu()" />
+
         @if (!_isLoading)
         {
             <Header @bind-isDarkMode="_isDarkMode"></Header>
         }
     </MudAppBar>
 
-    <MudDrawer @bind-Open="@_open" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true" ClipMode="DrawerClipMode.Docked" Elevation="4">
-        <NavMenu/>
+    <MudDrawer @bind-Open="@_menuOpened" Variant="@DrawerVariant.Mini" OpenMiniOnHover="false" ClipMode="DrawerClipMode.Docked" Elevation="4">
+        <NavMenu Opened="_menuOpened"/>
     </MudDrawer>
 
     <MudMainContent Class="mt-16 pa-6">
@@ -48,10 +50,15 @@
 @code {
     // private bool _drawerOpen = true;
     private bool _isLoading = true;
-    private bool _open = false;
+    private bool _menuOpened = false;
 
     //private MudTheme _theme = new();
     private bool _isDarkMode = true;
+
+    private void ToggleMenu()
+    {
+        _menuOpened = !_menuOpened;
+    }
 
     private MudTheme myDarkTheme = new MudTheme()
         {

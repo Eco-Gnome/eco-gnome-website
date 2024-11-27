@@ -4,7 +4,8 @@ namespace ecocraft.Services;
 
 public class PriceCalculatorService(
     EcoCraftDbContext dbContext,
-    UserServerDataService userServerDataService)
+    UserServerDataService userServerDataService,
+    LocalizationService localizationService)
 {
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags()
     {
@@ -34,11 +35,11 @@ public class PriceCalculatorService(
         var (listOfIngredients, listOfProducts) = GetCategorizedItemOrTags();
 
         listOfIngredients = listOfIngredients.Where(i => !i.AssociatedTags.Intersect(listOfIngredients).Any())
-            .OrderBy(LocalizationService.GetTranslation)
+            .OrderBy(localizationService.GetTranslation)
             .ToList();
 
         listOfProducts = listOfProducts
-            .OrderBy(LocalizationService.GetTranslation)
+            .OrderBy(localizationService.GetTranslation)
             .ToList();
 
         return (listOfIngredients, listOfProducts);

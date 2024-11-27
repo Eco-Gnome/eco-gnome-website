@@ -1,138 +1,177 @@
 {
-    "__AlreadyTraduced_Components/Diagram": "all",
-    "__AlreadyTraduced_Components/Dialog": "all",
-    "__AlreadyTraduced_Components/Layout": "all",
-    "__AlreadyTraduced_Components/Utils": "all",
-    "__AlreadyTraduced_Components/Pages": "Error, GraphView, SuperAdmin, ServerManagement",
-    "Language": "Language",
-    "RecipeList.RecipeName": "Recipe name",
-    "Skill": "Skill",
-    "CraftingTable": "Crafting Table",
-    "Ingredients": "Ingredients",
-    "Products": "Products",
-    "RelatedRecipes": "Related recipes",
-    "ItemOrTagDialog.ProducedBy": "Produced by",
-    "ItemOrTagDialog.UsedIn": "Used in",
-    "RecipeDialog.CraftTime": "Craft time",
-    "None": "None",
-    "RecipeDialog.Labor": "Labor",
-    "RecipeDialog.TotalCost": "Total cost:",
-    "RecipeDialog.TotalPrice": "Total price:",
-    "RecipeDialog.Dynamic": "dynamic",
-    "RecipeDialog.Static": "static",
-    "RecipeDialog.ReintegratedToolTip.True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products.",
-    "RecipeDialog.ReintegratedToolTip.False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
-    "RecipeDialog.Share.Title": "Price Sharing between outputs:",
-    "RecipeDialog.Share.FirstOnly": "Only First Product",
-    "RecipeDialog.Share.Honest": "80% First Product",
-    "RecipeDialog.Share.Equality": "Fair Distribution",
-    "RecipeDialog.Share.Equilibrate": "Distribute by Quantity",
-    "Versions": "Versions",
-    "UserConfigurationDialog.UserSettings": "User settings",
-    "UserConfigurationDialog.MyServers": "My servers",
-    "Name": "Name",
-    "TagName": "Tag name",
-    "JoinCode": "Join code",
-    "UserConfigurationDialog.InGamePseudo": "In-Game pseudo",
-    "CopyToClipboard": "Copy to clipboard",
-    "Options": "Options",
-    "UserConfigurationDialog.ExportBackup": "Export/Backup my User",
-    "UserConfigurationDialog.ImportReplace": "Import/Replace my User",
     "Cancel": "Cancel",
-    "UserConfigurationDialog.SnackbarCopy": "Join code copied to clipboard",
-    "UserConfigurationDialog.PopupConfirmImportBegin": "Are you sure you want to import the user with pseudo ",
-    "UserConfigurationDialog.PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
-    "UserConfigurationDialog.SnackbarErrorBadUser": "Import User Error - Can't find the imported user",
-    "UserConfigurationDialog.SnackbarErrorBadFile": "Import User Error - Choose a correct file.",
-    "ServerDialog.HaveAnInvitation": "Do you already have a server join code?",
-    "ServerDialog.CreateServer": "Create your server",
-    "ServerDialog.MaxChar": "Max 25 characters",
-    "ServerDialog.MinChar": "Min 3 characters",
-    "ServerDialog.Create": "Create",
-    "ServerDialog.Join": "Join",
-    "Header.New": "New!",
-    "Header.ServerDialog.Title": "Create or join server",
-    "Header.ServerDialog.Snackbar.JoinError": "You need to add a server code",
-    "Header.ServerDialog.Snackbar.ServerNotFound": "Server not found",
-    "Header.ServerDialog.Snackbar.AlreadyInServer": "You are already in this server",
-    "Header.UserConfigurationDialog.Title": "User management",
-    "Header.ReleaseDialog.Title": "Releases",
-    "MainLayout.SiteTitle": "Tools for Eco video game",
-    "NavMenu.NavCalculator": "Price Calculator",
-    "NavMenu.NavGraph": "Graph View",
-    "NavMenu.NavAdmin": "Server Management",
-    "NavMenu.NavSuperAdmin": "Super Admin",
-    "GraphView.Title": "Graph View",
-    "GraphView.ResetButton": "Reset Graph",
-    "SuperAdmin.Title": "Super Admin",
-    "SuperAdmin.IdCol": "Id",
-    "SuperAdmin.UserTable.PseudoCol": "Pseudo",
-    "SuperAdmin.CreationDateCol": "Creation Date",
-    "SuperAdmin.UserTable.ServersCol": "Servers",
-    "SuperAdmin.ActionCol": "Action",
-    "SuperAdmin.UserTable.Title": "Users",
-    "SuperAdmin.UserTable.JoinedServers": "Joined Servers",
-    "SuperAdmin.UserTable.HowMuchIsAdmin": "Number of servers the user is admin on",
-    "SuperAdmin.UserTable.DeleteUser": "Number of servers the user is admin on",
-    "SuperAdmin.UserTable.PromoteUser": "Promote user to Super Admin",
-    "SuperAdmin.UserTable.DemoteUser": "Demote user from Super Admin",
-    "SuperAdmin.ServerTable.ServerNameCol": "Name",
-    "SuperAdmin.ServerTable.PlayersCol": "Players",
-    "SuperAdmin.ServerTable.AdminsCol": "Admins",
-    "SuperAdmin.ServerTable.Title": "Servers",
-    "SuperAdmin.ServerTable.DeleteServer": "Delete server",
-    "SuperAdmin.ServerTable.UnsetDefault": "Remove from default servers",
-    "SuperAdmin.ServerTable.SetDefault": "Add as default server",
-    "SuperAdmin.ServerTable.DemoteAdmin": "Remove yourself from admins",
-    "SuperAdmin.ServerTable.PromoteAdmin": "Add yourself as admin",
-    "SuperAdmin.SnackbarCopy": "Id copied to clipboard",
-    "SuperAdmin.SnackbarCantEdit": "You can't edit yourself from this page.",
-    "SuperAdmin.ConfirmSuperAdmin.1": "Are you sure you want to ",
-    "SuperAdmin.ConfirmSuperAdmin.2": "demote",
-    "SuperAdmin.ConfirmSuperAdmin.3": "promote",
-    "SuperAdmin.ConfirmSuperAdmin.4": " this user ",
-    "SuperAdmin.ConfirmSuperAdmin.5": "from",
-    "SuperAdmin.ConfirmSuperAdmin.6": "to",
-    "SuperAdmin.ConfirmSuperAdmin.7": " Super Admin?",
-    "SuperAdmin.ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
-    "SuperAdmin.SnackBar.CantDeleteYourself": "You can't delete yourself from this page.",
-    "SuperAdmin.ConfirmUserDeletion.1": "Are you sure you want to delete user ",
-    "SuperAdmin.ConfirmUserDeletion.2": "?",
-    "SuperAdmin.ConfirmServerDeletion.1": "Are you sure you want to delete user ",
-    "SuperAdmin.ConfirmServerDeletion.2": "?",
-    "ServerManagement.ServerSettings": "Server Settings",
-    "ServerManagement.ServerSettings.Recipes": "Recipes:",
-    "ServerManagement.ServerSettings.Items": "Items:",
-    "ServerManagement.ServerSettings.Skills": "Skills:",
-    "ServerManagement.ServerSettings.Crafting": "Crafting Tables:",
-    "ServerManagement.ServerSettings.Modules": "Modules:",
-    "ServerManagement.ServerSettings.Upload": "Upload Server Data",
-    "ServerManagement.ServerSettings.Delete": "Delete Server",
-    "ServerManagement.Members": "Members",
+    "CopyToClipboard": "Copy to clipboard",
+    "CraftingTable": "Crafting Table",
+    "GraphView": {
+        "ResetButton": "Reset Graph",
+        "Title": "Graph View"
+    },
+    "Header": {
+        "CreateServer": "Create server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "My Servers",
+        "New": "New!",
+        "ReleaseDialog": {
+            "Title": "Releases"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "You are already in this server",
+                "JoinError": "You need to add a server code",
+                "ServerNotFound": "Server not found"
+            },
+            "Title": "Create or join server"
+        },
+        "UserConfigurationDialog": {
+            "Title": "User management"
+        }
+    },
+    "Ingredients": "Ingredients",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produced by",
+        "UsedIn": "Used in"
+    },
+    "JoinCode": "Join code",
+    "Language": "Language",
+    "MainLayout": {
+        "SiteTitle": "Tools for Eco video game"
+    },
+    "Name": "Name",
+    "NavMenu": {
+        "NavAdmin": "Server Management",
+        "NavCalculator": "Price Calculator",
+        "NavGraph": "Graph View (WIP)",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "None",
+    "Options": "Options",
+    "Products": "Products",
+    "RecipeDialog": {
+        "CraftTime": "Craft time",
+        "Dynamic": "dynamic",
+        "Labor": "Labor",
+        "ReintegratedToolTip": {
+            "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
+            "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
+        },
+        "Share": {
+            "Equality": "Fair Distribution",
+            "Equilibrate": "Distribute by Quantity",
+            "FirstOnly": "Only First Product",
+            "Honest": "80% First Product",
+            "Title": "Price Sharing between outputs:"
+        },
+        "Static": "static",
+        "TotalCost": "Total cost:",
+        "TotalPrice": "Total price:"
+    },
+    "RecipeList": {
+        "RecipeName": "Recipe name"
+    },
+    "RelatedRecipes": "Related recipes",
     "Search": "Search",
-    "ServerManagement.Members.Tooltip.Admin": "Admin",
-    "ServerManagement.Members.DemoteAdmin": "Demote Admin",
-    "ServerManagement.Members.PromoteAdmin": "Promote Admin",
-    "ServerManagement.Members.KickUser": "Kick user",
-    "ServerManagement.Items.Min": "Min price",
-    "ServerManagement.Items.Min.Tooltip": "Clear min prices",
-    "ServerManagement.Items.Max": "Max price",
-    "ServerManagement.Items.Max.Tooltip": "Clear max prices",
-    "ServerManagement.Snackbar.UploadOk": "Upload Successful",
-    "ServerManagement.Snackbar.CantEditYourself": "You can't edit yourself",
-    "ServerManagement.Confirm.ClearAllMin": "Are you sure you want to clear all min prices ?",
-    "ServerManagement.Confirm.ClearAllMax": "Are you sure you want to clear all max prices ?"
-
-
-
-
-
-
-
-
-
-
-
-
-
+    "ServerDialog": {
+        "Create": "Create",
+        "CreateServer": "Create your server",
+        "HaveAnInvitation": "Do you already have a server join code?",
+        "Join": "Join",
+        "MaxChar": "Max 25 characters",
+        "MinChar": "Min 3 characters"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Are you sure you want to clear all max prices?",
+            "ClearAllMin": "Are you sure you want to clear all min prices?"
+        },
+        "Items": {
+            "Max": "Max price",
+            "Max.Tooltip": "Clear max prices",
+            "Min": "Min price",
+            "Min.Tooltip": "Clear min prices"
+        },
+        "Members": {
+            "DemoteAdmin": "Demote Admin",
+            "KickUser": "Kick user",
+            "PromoteAdmin": "Promote Admin",
+            "Tooltip.Admin": "Admin"
+        },
+        "ServerSettings": {
+            "Crafting": "Crafting Tables:",
+            "Delete": "Delete Server",
+            "Items": "Items:",
+            "Modules": "Modules:",
+            "Recipes": "Recipes:",
+            "Skills": "Skills:",
+            "Upload": "Upload Server Data"
+        },
+        "Snackbar": {
+            "CantEditYourself": "You can't edit yourself",
+            "UploadOk": "Upload Successful"
+        }
+    },
+    "Skill": "Skill",
+    "SuperAdmin": {
+        "ActionCol": "Action",
+        "ConfirmServerDeletion": {
+            "1": "Are you sure you want to delete user ",
+            "2": "?"
+        },
+        "ConfirmSuperAdmin": {
+            "1": "Are you sure you want to ",
+            "2": "demote",
+            "3": "promote",
+            "4": " this user ",
+            "5": "from",
+            "6": "to",
+            "7": " Super Admin?"
+        },
+        "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
+        "ConfirmUserDeletion": {
+            "1": "Are you sure you want to delete user ",
+            "2": "?"
+        },
+        "CreationDateCol": "Creation Date",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Delete server",
+            "DemoteAdmin": "Remove yourself from admins",
+            "PlayersCol": "Players",
+            "PromoteAdmin": "Add yourself as admin",
+            "ServerNameCol": "Name",
+            "SetDefault": "Add as default server",
+            "Title": "Servers",
+            "UnsetDefault": "Remove from default servers"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "You can't delete yourself from this page.",
+            "SnackbarCantEdit": "You can't edit yourself from this page.",
+            "SnackbarCopy": "Id copied to clipboard"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Number of servers the user is admin on",
+            "DemoteUser": "Demote user from Super Admin",
+            "HowMuchIsAdmin": "Number of servers the user is admin on",
+            "JoinedServers": "Joined Servers",
+            "PromoteUser": "Promote user to Super Admin",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servers",
+            "Title": "Users"
+        }
+    },
+    "TagName": "Tag name",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Export/Backup my User",
+        "ImportReplace": "Import/Replace my User",
+        "InGamePseudo": "In-Game pseudo",
+        "MyServers": "My servers",
+        "PopupConfirmImportBegin": "Are you sure you want to import the user with pseudo ",
+        "PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
+        "SnackbarCopy": "Join code copied to clipboard",
+        "SnackbarErrorBadFile": "Import User Error - Choose a correct file.",
+        "SnackbarErrorBadUser": "Import User Error - Can't find the imported user",
+        "UserSettings": "User settings"
+    },
+    "Versions": "Versions"
 }
