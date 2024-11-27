@@ -39,6 +39,7 @@
     "Name": "Name",
     "Level": "Level",
     "Upgrade": "Upgrade",
+    "Margins": "Margins",
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
@@ -212,10 +213,18 @@
         "CalorieCost": {
             "Tooltip": "The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$",
             "CalorieCost": "Cost per 1000 calories"
-        }
-    },
-    "Margins": "Margins",
-    "Options": "Options"
-    
+        },
+        "ItemsToBuy": "Items to buy",
+        "IngredientSearch": "Ingredient Items Or Tags",
+        "BuyPrice": "Buy price",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
+            "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
+            "isMinPrice": "This value is set at the minimum price of the server",
+            "isMaxPrice": "This value is set at the maximum price of the server"
+        },
+        "CancelOverride": "Don't override this product price anymore."
+    }
+
 
 }

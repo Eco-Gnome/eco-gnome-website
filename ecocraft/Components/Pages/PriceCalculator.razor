@@ -304,7 +304,7 @@
                           Hover="true"
                           Virtualize="false">
                     <ToolBarContent>
-                        <MudText Typo="Typo.h6">Items to buy</MudText>
+                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToBuy")</MudText>
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh Class="pl-1">
@@ -317,14 +317,14 @@
                                 <MudTextField @bind-Value="_searchTagToBuy"
                                               Clearable
                                               Immediate
-                                              Placeholder="Ingredient Items Or Tags"
+                                              Placeholder="@LocalizationService.GetTranslation("PriceCalculator.IngredientSearch")"
                                               Adornment="Adornment.Start"
                                               AdornmentIcon="@Icons.Material.Filled.Search"
                                               IconSize="Size.Small"
                                               Class="mt-0 small-text-field" />
                             </MudStack>
                         </MudTh>
-                        <MudTh>Buy price</MudTh>
+                        <MudTh>@LocalizationService.GetTranslation("PriceCalculator.BuyPrice")</MudTh>
                         <MudTh Style="width: 0; padding: 0"></MudTh>
                     </HeaderContent>
                     <RowTemplate>
@@ -365,12 +365,12 @@
 
                                     <MudTooltip Disabled="@(!(isTagEmptyPrice || isItemEmptyPrice || isMinPrice || isMaxPrice))"
                                                 Text="@(isTagEmptyPrice
-                                                          ? "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star."
+                                                          ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isTagEmptyPrice")
                                                           : isItemEmptyPrice
-                                                              ? "Set this price to allow calculation of related recipes"
+                                                              ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isItemEmptyPrice")
                                                               : isMinPrice
-                                                                  ? "This value is set at the minimum price of the server"
-                                                                  : "This value is set at the maximum price of the server")">
+                                                                  ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
+                                                                  : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
 
                                         <MudNumericField T="decimal?"
                                                          Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
@@ -404,7 +404,7 @@
                                Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(context.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")}")">
                             @if (context.CurrentUserPrice.OverrideIsBought)
                             {
-                                <MudTooltip Text="Don't override this product price anymore.">
+                                <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                     <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                    tabindex="-1"
                                                    OnClick="() => OverridePrice(false, context.CurrentUserPrice)"
