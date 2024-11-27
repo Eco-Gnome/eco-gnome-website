@@ -27,13 +27,13 @@
             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
 
                 <MudExpansionPanels MultiExpansion="true">
-                    <MudExpansionPanel Text="@($"Skills ({UserServerDataService.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({UserServerDataService.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
                         <MudAutocomplete T="Skill"
                                          Value="_emptySkill"
                                          Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
                                          SearchFunc="SearchSkills"
                                          ValueChanged="AddUserSkill"
-                                         Placeholder="Add skill"
+                                         Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddSkill")"
                                          Dense="true"
                                          Class="auto-complete-input"
                                          MaxItems="null"
@@ -57,8 +57,8 @@
                                   Dense="true"
                                   Class="mt-4">
                             <HeaderContent>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Level</MudTh>
+                                <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+                                <MudTh>@LocalizationService.GetTranslation("Level")</MudTh>
                                 <MudTh></MudTh>
                             </HeaderContent>
                             <RowTemplate>
@@ -99,13 +99,13 @@
                         </MudTable>
                     </MudExpansionPanel>
 
-                    <MudExpansionPanel Text="@($"Crafting tables ({UserServerDataService.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({UserServerDataService.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
                         <MudAutocomplete T="CraftingTable"
                                          Value="_emptyCraftingTable"
                                          Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
                                          SearchFunc="SearchCraftingTables"
                                          ValueChanged="AddUserCraftingTable"
-                                         Placeholder="Add crafting table"
+                                         Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddCraftingTable")"
                                          Dense="true"
                                          Class="mt-4 auto-complete-input"
                                          MaxItems="null"
@@ -123,11 +123,11 @@
                                   Class="mt-4"
                                   Dense="true">
                             <HeaderContent>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Upgrade</MudTh>
+                                <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+                                <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
                                 <MudTh Class="p-0 pl-1">
-                                    <MudTooltip Text="The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...">
-                                        <MudText Class="tooltip-text">Cost/min</MudText>
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CostMin.Tooltip")">
+                                        <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudText>
                                     </MudTooltip>
                                 </MudTh>
                                 <MudTh Class="px-1"></MudTh>
@@ -151,7 +151,7 @@
                                                            Size="Size.Small"
                                                            Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
                                                            OnClick="@(() => DecreasePluginModule(context, pluginModules))" />
-                                            <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]" : "No Module")">
+                                            <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
                                                 <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1" />
                                             </MudTooltip>
                                             <MudIconButton Icon="@MDIIcons.Filled.Plus"
@@ -182,7 +182,7 @@
                         </MudTable>
                     </MudExpansionPanel>
 
-                    <MudExpansionPanel Text="@($"Margins ({UserServerDataService.UserMargins.Count})")" @bind-Expanded="ExpandedMargins">
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("Margins")} ({UserServerDataService.UserMargins.Count})")" @bind-Expanded="ExpandedMargins">
                         @if (UserServerDataService.UserSetting is not null)
                         {
                             <MudTable Items="UserServerDataService.UserMargins"
@@ -192,11 +192,11 @@
                                       Dense="true">
                                 <HeaderContent>
                                     <MudTh>
-                                        <MudText>Name</MudText>
+                                        <MudText>@LocalizationService.GetTranslation("Name")</MudText>
                                     </MudTh>
                                     <MudTh>
-                                        <MudTooltip Text="The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.">
-                                            <MudText Class="tooltip-text">Margin Percent</MudText>
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.MarginPercent.Tooltip")">
+                                            <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.MarginPercent.MarginPercent")</MudText>
                                         </MudTooltip>
                                     </MudTh>
                                     <MudTh></MudTh>
@@ -234,22 +234,22 @@
                                 <MudButton Class="py-1"
                                            StartIcon="@Icons.Material.Filled.Add"
                                            tabindex="-1"
-                                           OnClick="OnAddMargin">Add margin</MudButton>
+                                           OnClick="OnAddMargin">@LocalizationService.GetTranslation("PriceCalculator.AddMargin")</MudButton>
                             </MudStack>
                         }
                     </MudExpansionPanel>
 
-                    <MudExpansionPanel Text="Options" @bind-Expanded="ExpandedOptions">
+                    <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
                         <MudStack Spacing="1" Class="pa-2">
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                <MudTooltip Text="Unlock the list of non-skilled recipes in the recipe selector.">
-                                    <MudText Class="tooltip-text">Display non-skilled recipes</MudText>
+                                <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.Tooltip")">
+                                    <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.NonSkilled")</MudText>
                                 </MudTooltip>
                                 <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
                             </MudStack>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                <MudTooltip Text="Only display recipes that are allowed by your skills levels.">
-                                    <MudText Class="tooltip-text">Only level-accessible recipes</MudText>
+                                <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.Tooltip")">
+                                    <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.LevelAccessible")</MudText>
                                 </MudTooltip>
                                 <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
                             </MudStack>
@@ -257,13 +257,13 @@
                                 <MudTooltip>
                                     <TooltipContent>
                                         <MudStack Spacing="0">
-                                            <MudText>Margin calculation method</MudText>
-                                            <MudText Typo="Typo.body2">MarkUp (default): you sum the CostPrice and Margin*CostPrice/100 to get the SalePrice</MudText>
-                                            <MudText Typo="Typo.body2">Gross Margin: The Margin percent is the percent of benefit of your SaleCost, that is capped between -99.99% and 99.99%.</MudText>
+                                            <MudText>@LocalizationService.GetTranslation("PriceCalculator.MarginType.Tooltip.1")</MudText>
+                                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.MarginType.Tooltip.2")</MudText>
+                                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.MarginType.Tooltip.3")</MudText>
                                         </MudStack>
                                     </TooltipContent>
                                     <ChildContent>
-                                        <MudText Class="tooltip-text">Margin Calculation Type</MudText>
+                                        <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.MarginType.MarginType")</MudText>
                                     </ChildContent>
                                 </MudTooltip>
                                 <div class="flex-no-grow">
@@ -272,14 +272,14 @@
                                                Value="UserServerDataService.UserSetting!.MarginType"
                                                Variant="Variant.Outlined"
                                                ValueChanged="OnOptionMarginTypeChanged">
-                                        <MudSelectItem Value="@MarginType.MarkUp">Mark-Up</MudSelectItem>
-                                        <MudSelectItem Value="@MarginType.GrossMargin">Gross Margin</MudSelectItem>
+                                        <MudSelectItem Value="@MarginType.MarkUp">@LocalizationService.GetTranslation("PriceCalculator.MarginType.MarkUp")</MudSelectItem>
+                                        <MudSelectItem Value="@MarginType.GrossMargin">@LocalizationService.GetTranslation("PriceCalculator.MarginType.GrossMargin")</MudSelectItem>
                                     </MudSelect>
                                 </div>
                             </MudStack>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                <MudTooltip Text="The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$">
-                                    <MudText Class="tooltip-text">Cost per 1000 calories</MudText>
+                                <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CalorieCost.Tooltip")">
+                                    <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CalorieCost.CalorieCost")</MudText>
                                 </MudTooltip>
                                 <div>
                                     <MudNumericField T="decimal"
