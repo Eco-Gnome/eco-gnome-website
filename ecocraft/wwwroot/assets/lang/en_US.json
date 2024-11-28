@@ -219,12 +219,36 @@
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
+            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'",
             "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
             "isMinPrice": "This value is set at the minimum price of the server",
             "isMaxPrice": "This value is set at the maximum price of the server"
         },
-        "CancelOverride": "Don't override this product price anymore."
+        "CancelOverride": "Don't override this product price anymore.",
+        "AddFavoriteItem": "Favorite this item, apply its price to the related tag",
+        "CancelFavoriteItem": "Un-favorite this item",
+        "ItemsToSell": "Items to sell",
+        "AddRecipe": "Add recipe",
+        "ProductItems": "Product items",
+        "CostPrice": "Cost price",
+        "SalePrice": "Sale price",
+        "AddOverride": "Override this price, considering it's not a product to sell but a product to buy",
+        "RecipeTooltip": "Open recipe popup, it displays details of calculation",
+        "RecipeTooltipWithShare": "Open recipe popup, it gives ability to control the product price repartition and displays details of calculation",
+        "MarginTooltip": "Your Margin configuration does not allow to calculate a Sale Price. Check your Margin Percent and Margin Calculation Type.",
+        "AddFavoriteRecipe": "Favorite this recipe, apply its price to the related product",
+        "CancelFavoriteRecipe": "Un-favorite this recipe",
+        "Snackbar": {
+            "CantRemoveLastMargin": "You can't remove your last margin",
+            "PriceNotWellConfigured": "This price isn't well configured",
+            "PriceCopied": "Price copied to clipboard"
+        }
+    },
+    "Recipe": "Recipe",
+    "ContextService": {
+        "DefaultMargin": "Default margin"
+    },
+    "UserServerDataService": {
+        "NewMargin": "New margin"
     }
-
-
 }

@@ -168,7 +168,7 @@ public class ContextService(
         userServer.UserMargins.Add(new UserMargin
         {
             UserServer = userServer,
-            Name = "Default margin",
+            Name = localizationService.GetTranslation("ContextService.DefaultMargin"),
             Margin = 20,
         });
 

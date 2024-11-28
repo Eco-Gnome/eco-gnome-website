@@ -438,7 +438,7 @@
                                                 var isMinPrice = item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null;
                                                 var isMaxPrice = item.CurrentUserPrice!.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null;
 
-                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? "Un-favorite this item" : "Favorite this item, apply its price to the related tag")">
+                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteItem") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteItem"))">
                                                     <MudIconButton tabindex="-1"
                                                                    Color="Color.Primary"
                                                                    Icon="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
@@ -447,12 +447,12 @@
                                                 </MudTooltip>
                                                 <MudTooltip Disabled="@(!(isAutoCalculatedPrice || isEmptyPrice || isMinPrice || isMaxPrice))"
                                                             Text="@(isAutoCalculatedPrice
-                                                                  ? "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'"
+                                                                  ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")
                                                                   : isEmptyPrice
-                                                                      ? "Set this price to allow calculation of related recipes"
+                                                                      ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isItemEmptyPrice")
                                                                       : isMinPrice
-                                                                          ? "This value is set at the minimum price of the server"
-                                                                          : "This value is set at the maximum price of the server")">
+                                                                          ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
+                                                                          : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
                                                     <MudNumericField T="decimal?"
                                                                      Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")}")"
                                                                      Style="@($"width: 85px; color: {(item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
@@ -484,7 +484,7 @@
                                     <MudTd Class="@($"pa-0 {(item.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                         @if (item.CurrentUserPrice.OverrideIsBought)
                                         {
-                                            <MudTooltip Text="Don't override this product price anymore.">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                                 <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                tabindex="-1"
                                                                OnClick="() => OverridePrice(false, item.CurrentUserPrice)"
@@ -510,14 +510,14 @@
                           Hover="true"
                           Virtualize="false">
                     <ToolBarContent>
-                        <MudText Typo="Typo.h6">Items to sell</MudText>
+                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToSell")</MudText>
                         <MudSpacer/>
                         <MudAutocomplete T="Recipe"
                                          Value="_emptyRecipe"
                                          Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
                                          SearchFunc="SearchRecipes"
                                          ValueChanged="AddUserRecipe"
-                                         Placeholder="Add recipe"
+                                         Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
                                          Class="auto-complete-input"
                                          Dense="true"
                                          MaxItems="null"
@@ -542,7 +542,7 @@
                                 <MudTextField @bind-Value="_searchItemToSell"
                                               Clearable
                                               Immediate
-                                              Placeholder="Product Items"
+                                              Placeholder="@LocalizationService.GetTranslation("PriceCalculator.ProductItems")"
                                               Adornment="Adornment.Start"
                                               AdornmentIcon="@Icons.Material.Filled.Search"
                                               IconSize="Size.Small"
@@ -551,10 +551,10 @@
                         </MudTh>
                         <MudTh>
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                <MudText Typo="Typo.body2">Cost Price</MudText>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.CostPrice")</MudText>
                                 <MudIcon Icon="@MDIIcons.Filled.ArrowRightThin" Size="Size.Small"/>
                                 <MudIconButton Color="Color.Primary" Icon="@(ShowMarginNames ? MDIIcons.Outline.AlphaABox : MDIIcons.Outline.PercentBox)" Size="Size.Small" OnClick="@(() => ShowMarginNames = !ShowMarginNames)"/>
-                                <MudText Typo="Typo.body2">Sale Price</MudText>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.SalePrice")</MudText>
                             </MudStack>
                         </MudTh>
                         <MudTh>
@@ -573,7 +573,7 @@
 
                             <MudTd Style="width: 0; padding: 0; vertical-align: top; padding-top: 9px;"
                                    Class="@($"{(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")} border-r-1")">
-                                <MudTooltip Text="Override this price, considering it's not a product to sell but a product to buy">
+                                <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.AddOverride")">
                                     <MudIconButton Size="Size.Small"
                                                    tabindex="-1"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
@@ -585,7 +585,7 @@
                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                     @if (relatedUserElements.First().Element.Recipe.Elements.Count(e => e.IsProduct()) == 1)
                                     {
-                                        <MudTooltip Text="Open recipe popup, it displays details of calculation">
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.RecipeTooltip")">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <EcoIcon Item="@context" />
@@ -598,7 +598,7 @@
                                     }
                                     else
                                     {
-                                        <MudTooltip Text="Open recipe popup, it gives ability to control the product price repartition and displays details of calculation">
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.RecipeTooltipWithShare")">
                                             <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(relatedUserElements.First().Element.Recipe))">
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                     <EcoIcon Item=@context />
@@ -622,7 +622,7 @@
                                         <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                         <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe))">
                                             <MudText Class="pt-1 " Typo="Typo.body2">
-                                                @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe) Recipe
+                                                @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe) @LocalizationService.GetTranslation("Recipe")
                                             </MudText>
                                         </MudLink>
                                     </MudStack>
@@ -631,7 +631,7 @@
 
                             <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
-                                    <MudTooltip Disabled="@(context.CurrentUserPrice!.Price is not null)" Text="This value is automatically calculated by the system. Make sure you set the price of all 'Items to buy' to get a value.">
+                                    <MudTooltip Disabled="@(context.CurrentUserPrice!.Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
                                         <MudNumericField T="decimal?"
                                                          FullWidth="false"
                                                          Class="mt-0 small-adornment flex-no-grow rectangle-input"
@@ -672,7 +672,7 @@
                                         var hasMarginPriceError = context.CurrentUserPrice!.Price is not null && marginPrice is null;
 
                                         <MudTooltip Disabled="@(!hasMarginPriceError)"
-                                                    Text="Your Margin configuration does not allow to calculate a Sale Price. Check your Margin Percent and Margin Calculation Type.">
+                                                    Text="@LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")">
                                             <MudNumericField T="decimal?"
                                                              Class="mt-0 small-adornment flex-no-grow rectangle-input margin-price"
                                                              Style="width: 85px"
@@ -736,7 +736,7 @@
                                         </MudTd>
                                         <MudTd Class="@($"{borderClass} pt-0 pb-1")">
                                             <MudStack Row>
-                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? "Un-favorite this recipe" : "Favorite this recipe, apply its price to the related product")">
+                                                <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteRecipe") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteRecipe"))">
                                                     <MudIconButton tabindex="-1"
                                                                    Style="margin-right: -12px"
                                                                    Color="Color.Primary"
@@ -1151,7 +1151,7 @@
     {
         if(UserServerDataService.UserMargins.Count == 1)
         {
-            Snackbar.Add("You can't remove your last margin", Severity.Error);
+            Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.CantRemoveLastMargin"), Severity.Error);
             return;
         }
         UserServerDataService.RemoveUserMargin(userMargin);
@@ -1249,13 +1249,13 @@
     {
         if (price is null)
         {
-            Snackbar.Add("This price isn't well configured", Severity.Warning);
+            Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.PriceNotWellConfigured"), Severity.Warning);
             return;
         }
 
         var text = Math.Round((double) price,2).ToString("0.00");
         await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
-        Snackbar.Add("Price copied to clipboard", Severity.Success);
+        Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.PriceCopied"), Severity.Success);
     }
 
     private async Task IncreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)

@@ -11,7 +11,8 @@ public class UserServerDataService(
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
     UserMarginDbService userMarginDbService,
-    ServerDataService serverDataService)
+    ServerDataService serverDataService,
+    LocalizationService localizationService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
@@ -126,7 +127,7 @@ public class UserServerDataService(
     {
         var userMargin = new UserMargin
         {
-            Name = "New margin",
+            Name = localizationService.GetTranslation("UserServerDataService.NewMargin"),
             UserServer = userServer,
             Margin = 0,
         };
