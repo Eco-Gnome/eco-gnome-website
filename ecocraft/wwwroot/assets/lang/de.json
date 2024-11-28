@@ -3,7 +3,7 @@
     "CopyToClipboard": "In die Zwischenablage kopieren",
     "CraftingTable": "Werkbank",
     "GraphView": {
-        "ResetButton": "Graph zurücksetzen",
+        "ResetButton": "Graph zurÃ¼cksetzen",
         "Title": "Graph-Ansicht"
     },
     "Header": {
@@ -12,12 +12,12 @@
         "MyServers": "Meine Server",
         "New": "Neu!",
         "ReleaseDialog": {
-            "Title": "Veröffentlichungen"
+            "Title": "VerÃ¶ffentlichungen"
         },
         "ServerDialog": {
             "Snackbar": {
                 "AlreadyInServer": "Sie sind bereits auf diesem Server",
-                "JoinError": "Sie müssen einen Servercode hinzufügen",
+                "JoinError": "Sie mÃ¼ssen einen Servercode hinzufÃ¼gen",
                 "ServerNotFound": "Server nicht gefunden"
             },
             "Title": "Server erstellen oder beitreten"
@@ -34,7 +34,7 @@
     "JoinCode": "Einladungscode",
     "Language": "Sprache",
     "MainLayout": {
-        "SiteTitle": "Werkzeuge für das Videospiel Eco",
+        "SiteTitle": "Werkzeuge fÃ¼r das Videospiel Eco",
         "PleaseJoin": "Bitte einem Server beitreten"
     },
     "Name": "Name",
@@ -55,8 +55,8 @@
         "Dynamic": "dynamisch",
         "Labor": "Arbeit",
         "ReintegratedToolTip": {
-            "False": "Hören Sie auf, diesen Artikel vom Selbstkostenpreis abzuziehen. Dies wird den Preis anderer Produkte mathematisch erhöhen.",
-            "True": "Ziehen Sie diesen Artikel vom Selbstkostenpreis ab, wenn Sie dieses Produkt in derselben oder in einer vorherigen Rezeptur wiederverwenden können (Formen, Fässer, ...). Dies wird den Preis anderer Produkte mathematisch senken."
+            "False": "HÃ¶ren Sie auf, diesen Artikel vom Selbstkostenpreis abzuziehen. Dies wird den Preis anderer Produkte mathematisch erhÃ¶hen.",
+            "True": "Ziehen Sie diesen Artikel vom Selbstkostenpreis ab, wenn Sie dieses Produkt in derselben oder in einer vorherigen Rezeptur wiederverwenden kÃ¶nnen (Formen, FÃ¤sser, ...). Dies wird den Preis anderer Produkte mathematisch senken."
         },
         "Share": {
             "Equality": "Gerechte Verteilung",
@@ -84,63 +84,63 @@
     },
     "ServerManagement": {
         "Confirm": {
-            "ClearAllMax": "Sind Sie sicher, dass Sie alle Maximalpreise löschen möchten?",
-            "ClearAllMin": "Sind Sie sicher, dass Sie alle Minimalpreise löschen möchten?"
+            "ClearAllMax": "Sind Sie sicher, dass Sie alle Maximalpreise lÃ¶schen mÃ¶chten?",
+            "ClearAllMin": "Sind Sie sicher, dass Sie alle Minimalpreise lÃ¶schen mÃ¶chten?"
         },
         "Items": {
             "Max": "Maximalpreis",
-            "Max.Tooltip": "Maximalpreise löschen",
+            "Max.Tooltip": "Maximalpreise lÃ¶schen",
             "Min": "Minimalpreis",
-            "Min.Tooltip": "Minimalpreise löschen"
+            "Min.Tooltip": "Minimalpreise lÃ¶schen"
         },
         "Members": {
             "DemoteAdmin": "Admin degradieren",
             "KickUser": "Benutzer entfernen",
-            "PromoteAdmin": "Admin befördern",
+            "PromoteAdmin": "Admin befÃ¶rdern",
             "Tooltip.Admin": "Admin",
             "Title": "Mitglieder"
         },
         "ServerSettings": {
-            "Crafting": "Werkbänke:",
-            "Delete": "Server löschen",
-            "Items": "Gegenstände:",
+            "Crafting": "WerkbÃ¤nke:",
+            "Delete": "Server lÃ¶schen",
+            "Items": "GegenstÃ¤nde:",
             "Modules": "Module:",
             "Recipes": "Rezepte:",
-            "Skills": "Fähigkeiten:",
+            "Skills": "FÃ¤higkeiten:",
             "Upload": "Serverdaten hochladen",
             "Title": "Servereinstellungen"
         },
         "Snackbar": {
-            "CantEditYourself": "Sie können sich selbst nicht bearbeiten",
+            "CantEditYourself": "Sie kÃ¶nnen sich selbst nicht bearbeiten",
             "UploadOk": "Upload erfolgreich"
         }
     },
-    "Skill": "Fähigkeit",
+    "Skill": "FÃ¤higkeit",
     "SuperAdmin": {
         "ActionCol": "Aktion",
         "ConfirmServerDeletion": {
             "1": "Sind Sie sicher, dass Sie den Benutzer ",
-            "2": " löschen möchten?"
+            "2": " lÃ¶schen mÃ¶chten?"
         },
         "ConfirmSuperAdmin": {
             "1": "Sind Sie sicher, dass Sie den Benutzer ",
             "2": "degradieren",
-            "3": "befördern",
-            "4": " möchten ",
+            "3": "befÃ¶rdern",
+            "4": " mÃ¶chten ",
             "5": "von",
             "6": "zu",
             "7": " Super-Admin?"
         },
-        "ConfirmTwiceSuperAdmin": "Diese Änderung hat große Auswirkungen und könnte die gesamte Website beschädigen! Bitte bestätigen Sie erneut.",
+        "ConfirmTwiceSuperAdmin": "Diese Ã„nderung hat groÃŸe Auswirkungen und kÃ¶nnte die gesamte Website beschÃ¤digen! Bitte bestÃ¤tigen Sie erneut.",
         "ConfirmUserDeletion": {
             "1": "Sind Sie sicher, dass Sie den Benutzer ",
-            "2": " löschen möchten?"
+            "2": " lÃ¶schen mÃ¶chten?"
         },
         "CreationDateCol": "Erstellungsdatum",
         "IdCol": "ID",
         "ServerTable": {
             "AdminsCol": "Admins",
-            "DeleteServer": "Server löschen",
+            "DeleteServer": "Server lÃ¶schen",
             "DemoteAdmin": "Admin-Rechte entziehen",
             "PlayersCol": "Spieler",
             "PromoteAdmin": "Admin-Rechte geben",
@@ -150,17 +150,17 @@
             "UnsetDefault": "Von Standardservern entfernen"
         },
         "SnackBar": {
-            "CantDeleteYourself": "Sie können sich auf dieser Seite nicht löschen.",
-            "SnackbarCantEdit": "Sie können sich auf dieser Seite nicht bearbeiten.",
+            "CantDeleteYourself": "Sie kÃ¶nnen sich auf dieser Seite nicht lÃ¶schen.",
+            "SnackbarCantEdit": "Sie kÃ¶nnen sich auf dieser Seite nicht bearbeiten.",
             "SnackbarCopy": "ID in die Zwischenablage kopiert"
         },
         "Title": "Super-Admin",
         "UserTable": {
-            "DeleteUser": "Benutzer löschen",
+            "DeleteUser": "Benutzer lÃ¶schen",
             "DemoteUser": "Benutzer als Super-Admin degradieren",
             "HowMuchIsAdmin": "Anzahl der Server, auf denen der Benutzer Admin ist",
             "JoinedServers": "Beigetretene Server",
-            "PromoteUser": "Benutzer als Super-Admin befördern",
+            "PromoteUser": "Benutzer als Super-Admin befÃ¶rdern",
             "PseudoCol": "Pseudonym",
             "ServersCol": "Server",
             "Title": "Benutzer",
@@ -174,35 +174,35 @@
         "InGamePseudo": "Spiel-Pseudonym",
         "MyServers": "Meine Server",
         "PopupConfirmImportBegin": "Sind Sie sicher, dass Sie den Benutzer mit dem Pseudonym ",
-        "PopupConfirmImportEnd": " importieren möchten? Dies wird Ihren derzeit gespeicherten Benutzer löschen. Stellen Sie sicher, dass Sie ihn exportieren, wenn Sie ihn später verwenden möchten!",
+        "PopupConfirmImportEnd": " importieren mÃ¶chten? Dies wird Ihren derzeit gespeicherten Benutzer lÃ¶schen. Stellen Sie sicher, dass Sie ihn exportieren, wenn Sie ihn spÃ¤ter verwenden mÃ¶chten!",
         "SnackbarCopy": "Einladungscode in die Zwischenablage kopiert",
-        "SnackbarErrorBadFile": "Importfehler - Wählen Sie eine gültige Datei.",
+        "SnackbarErrorBadFile": "Importfehler - WÃ¤hlen Sie eine gÃ¼ltige Datei.",
         "SnackbarErrorBadUser": "Importfehler - Benutzer konnte nicht gefunden werden",
         "UserSettings": "Benutzereinstellungen"
     },
     "Versions": "Versionen",
     "PriceCalculator": {
-        "Skills": "Fähigkeiten",
-        "AddSkill": "Fähigkeit hinzufügen",
-        "CraftingTables": "Werkbänke",
-        "AddCraftingTable": "Werkbank hinzufügen",
+        "Skills": "FÃ¤higkeiten",
+        "AddSkill": "FÃ¤higkeit hinzufÃ¼gen",
+        "CraftingTables": "WerkbÃ¤nke",
+        "AddCraftingTable": "Werkbank hinzufÃ¼gen",
         "CostMin": {
-            "Tooltip": "Die Kosten, die mit dieser Werkbank pro Minute verbunden sind. Repräsentiert den Kraftstoffverbrauch, den Austausch von Teilen, eventuelle Fertigungsgebühren ...",
+            "Tooltip": "Die Kosten, die mit dieser Werkbank pro Minute verbunden sind. ReprÃ¤sentiert den Kraftstoffverbrauch, den Austausch von Teilen, eventuelle FertigungsgebÃ¼hren ...",
             "CostMin": "Kosten/Min"
         },
         "NoModule": "Kein Modul",
         "MarginPercent": {
-            "Tooltip": "Der Prozentsatz der Marge, der auf Ihren Verkaufspreis angewendet wird. Sehen Sie sich die Option 'Margenberechnungstyp' für Details an.",
+            "Tooltip": "Der Prozentsatz der Marge, der auf Ihren Verkaufspreis angewendet wird. Sehen Sie sich die Option 'Margenberechnungstyp' fÃ¼r Details an.",
             "MarginPercent": "Margenprozentsatz"
         },
-        "AddMargin": "Marge hinzufügen",
+        "AddMargin": "Marge hinzufÃ¼gen",
         "NonSkilled": {
-            "Tooltip": "Entsperren Sie die Liste der nicht-fähigkeitsgebundenen Rezepte im Rezeptwähler.",
-            "NonSkilled": "Nicht-fähigkeitsgebundene Rezepte anzeigen"
+            "Tooltip": "Entsperren Sie die Liste der nicht-fÃ¤higkeitsgebundenen Rezepte im RezeptwÃ¤hler.",
+            "NonSkilled": "Nicht-fÃ¤higkeitsgebundene Rezepte anzeigen"
         },
         "LevelAccessible": {
-            "Tooltip": "Zeigt nur Rezepte an, die durch Ihre Fähigkeitsstufen erlaubt sind.",
-            "LevelAccessible": "Nur nach Stufen zugängliche Rezepte"
+            "Tooltip": "Zeigt nur Rezepte an, die durch Ihre FÃ¤higkeitsstufen erlaubt sind.",
+            "LevelAccessible": "Nur nach Stufen zugÃ¤ngliche Rezepte"
         },
         "MarginType": {
             "Tooltip": {
@@ -215,35 +215,35 @@
             "GrossMargin": "Bruttomarge"
         },
         "CalorieCost": {
-            "Tooltip": "Die Kosten für das Essen, das Sie konsumieren, für 1000 Kalorien, die in einer Fertigung verbraucht werden. Wenn Sie nur Salate kaufen, die 700 Kalorien für 5 $ bringen, dann sind die Kosten pro 1000 Kalorien 1000 * 5 / 700 = 7,14 $",
+            "Tooltip": "Die Kosten fÃ¼r das Essen, das Sie konsumieren, fÃ¼r 1000 Kalorien, die in einer Fertigung verbraucht werden. Wenn Sie nur Salate kaufen, die 700 Kalorien fÃ¼r 5 $ bringen, dann sind die Kosten pro 1000 Kalorien 1000 * 5 / 700 = 7,14 $",
             "CalorieCost": "Kosten pro 1000 Kalorien"
         },
         "ItemsToBuy": "Zu kaufende Artikel",
         "IngredientSearch": "Zutaten oder Tags suchen",
         "BuyPrice": "Kaufpreis",
         "PriceTooltip": {
-            "isTagEmptyPrice": "Dieser Wert wird der Mindestpreis seiner zugehörigen Artikel (wenn alle Werte definiert sind!), es sei denn, Sie wählen einen spezifischen durch Klicken auf einen Stern.",
+            "isTagEmptyPrice": "Dieser Wert wird der Mindestpreis seiner zugehÃ¶rigen Artikel (wenn alle Werte definiert sind!), es sei denn, Sie wÃ¤hlen einen spezifischen durch Klicken auf einen Stern.",
             "isAutoCalculatedPrice": "Dieser Wert wird automatisch vom System berechnet. Wenn er leer ist, stellen Sie sicher, dass Sie den Preis aller 'Zu kaufenden Artikel' festlegen.",
-            "isItemEmptyPrice": "Legen Sie diesen Preis fest, um die Berechnung verwandter Rezepte zu ermöglichen",
+            "isItemEmptyPrice": "Legen Sie diesen Preis fest, um die Berechnung verwandter Rezepte zu ermÃ¶glichen",
             "isMinPrice": "Dieser Wert wird als Mindestpreis des Servers festgelegt",
-            "isMaxPrice": "Dieser Wert wird als Höchstpreis des Servers festgelegt"
+            "isMaxPrice": "Dieser Wert wird als HÃ¶chstpreis des Servers festgelegt"
         },
-        "CancelOverride": "Den Preis dieses Produkts nicht mehr überschreiben.",
-        "AddFavoriteItem": "Favorisieren Sie diesen Artikel, wenden Sie seinen Preis auf das zugehörige Tag an",
+        "CancelOverride": "Den Preis dieses Produkts nicht mehr Ã¼berschreiben.",
+        "AddFavoriteItem": "Favorisieren Sie diesen Artikel, wenden Sie seinen Preis auf das zugehÃ¶rige Tag an",
         "CancelFavoriteItem": "Diesen Artikel aus den Favoriten entfernen",
         "ItemsToSell": "Zu verkaufende Artikel",
-        "AddRecipe": "Rezept hinzufügen",
+        "AddRecipe": "Rezept hinzufÃ¼gen",
         "ProductItems": "Produzierte Artikel",
         "CostPrice": "Selbstkostenpreis",
         "SalePrice": "Verkaufspreis",
-        "AddOverride": "Diesen Preis überschreiben, da es sich nicht um ein Produkt zum Verkauf, sondern um ein zu kaufendes Produkt handelt",
-        "RecipeTooltip": "Rezept-Popup öffnen, zeigt Berechnungsdetails an",
-        "RecipeTooltipWithShare": "Rezept-Popup öffnen, ermöglicht die Kontrolle der Produktpreisaufteilung und zeigt Berechnungsdetails an",
-        "MarginTooltip": "Ihre Margenkonfiguration erlaubt keine Berechnung eines Verkaufspreises. Überprüfen Sie Ihren Margenprozentsatz und den Typ der Margenberechnung.",
-        "AddFavoriteRecipe": "Favorisieren Sie dieses Rezept, wenden Sie seinen Preis auf das zugehörige Produkt an",
+        "AddOverride": "Diesen Preis Ã¼berschreiben, da es sich nicht um ein Produkt zum Verkauf, sondern um ein zu kaufendes Produkt handelt",
+        "RecipeTooltip": "Rezept-Popup Ã¶ffnen, zeigt Berechnungsdetails an",
+        "RecipeTooltipWithShare": "Rezept-Popup Ã¶ffnen, ermÃ¶glicht die Kontrolle der Produktpreisaufteilung und zeigt Berechnungsdetails an",
+        "MarginTooltip": "Ihre Margenkonfiguration erlaubt keine Berechnung eines Verkaufspreises. ÃœberprÃ¼fen Sie Ihren Margenprozentsatz und den Typ der Margenberechnung.",
+        "AddFavoriteRecipe": "Favorisieren Sie dieses Rezept, wenden Sie seinen Preis auf das zugehÃ¶rige Produkt an",
         "CancelFavoriteRecipe": "Dieses Rezept aus den Favoriten entfernen",
         "Snackbar": {
-            "CantRemoveLastMargin": "Sie können Ihre letzte Marge nicht entfernen",
+            "CantRemoveLastMargin": "Sie kÃ¶nnen Ihre letzte Marge nicht entfernen",
             "PriceNotWellConfigured": "Dieser Preis ist nicht richtig konfiguriert",
             "PriceCopied": "Preis in die Zwischenablage kopiert"
         }
