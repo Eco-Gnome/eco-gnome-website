@@ -10,6 +10,7 @@
         "CreateServer": "Create server",
         "EcoGnome": "Eco Gnome",
         "MyServers": "My Servers",
+        "AddServer": "Join an existing server, or create a new one.",
         "New": "New!",
         "ReleaseDialog": {
             "Title": "Releases"

@@ -43,11 +43,13 @@
             <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
         }
     </MudSelect>
-    <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
-                   Size="Size.Medium"
-                   aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
-                   Color="Color.Tertiary"
-                   OnClick="CreateServer"/>
+    <MudTooltip Text="@LocalizationService.GetTranslation("Header.AddServer")">
+        <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
+                       Size="Size.Medium"
+                       aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
+                       Color="Color.Tertiary"
+                       OnClick="CreateServer"/>
+    </MudTooltip>
 </MudStack>
 
 <MudSpacer />

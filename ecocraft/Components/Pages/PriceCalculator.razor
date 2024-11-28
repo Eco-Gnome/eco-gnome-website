@@ -1180,7 +1180,7 @@
         {
             ["Recipe"] = recipe,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;
@@ -1193,7 +1193,7 @@
         {
             ["CraftingTable"] = craftingTable,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
 
         await dialog.Result;
@@ -1205,7 +1205,7 @@
         {
             ["Skill"] = skill,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
 
         await dialog.Result;
@@ -1218,7 +1218,7 @@
         {
             ["ItemOrTag"] = itemOrTag,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         var dialog = DialogService.Show<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
 
         await dialog.Result;

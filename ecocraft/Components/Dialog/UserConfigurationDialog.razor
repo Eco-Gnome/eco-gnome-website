@@ -15,7 +15,6 @@
 		<MudText Typo="Typo.h4" Align="Align.Center">@LocalizationService.GetTranslation("UserConfigurationDialog.UserSettings")</MudText>
 	</TitleContent>
 	<DialogContent>
-
 		<MudTextField Value="ContextService.CurrentUser!.Pseudo" Variant="Variant.Outlined" Label="Pseudo" ValueChanged="@((string pseudo) => OnUpdateUserName(pseudo))"/>
 
 		<MudTabs Outlined="true" Position="@Position.Top" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
@@ -54,10 +53,12 @@
 												   OnClick="@(() => CancelLeaveServer(context))">
 									</MudIconButton>
 								}
-								<MudIconButton Color="Color.Error"
-								               Icon="@Icons.Material.Filled.ExitToApp"
-										       OnClick="@(() => LeaveServer(context))">
-								</MudIconButton>
+								<MudTooltip Text="Leave this server, removing all your personal configuration. Confirmation required.">
+									<MudIconButton Color="Color.Error"
+									               Icon="@Icons.Material.Filled.ExitToApp"
+									               OnClick="@(() => LeaveServer(context))">
+									</MudIconButton>
+								</MudTooltip>
 								@if (_askLeaveConfirmations.ContainsKey(context))
 								{
 									<MudIconButton
@@ -95,9 +96,6 @@
 			</MudTabPanel>
 		</MudTabs>
 	</DialogContent>
-	<DialogActions>
-		<MudButton OnClick="Cancel" Color="Color.Secondary">@LocalizationService.GetTranslation("Cancel")</MudButton>
-	</DialogActions>
 </MudDialog>
 
 
