@@ -34,7 +34,8 @@
     "JoinCode": "Join code",
     "Language": "Language",
     "MainLayout": {
-        "SiteTitle": "Tools for Eco video game"
+        "SiteTitle": "Tools for Eco video game",
+        "PleaseJoin": "Please join a server"
     },
     "Name": "Name",
     "Level": "Level",
@@ -96,7 +97,8 @@
             "DemoteAdmin": "Demote Admin",
             "KickUser": "Kick user",
             "PromoteAdmin": "Promote Admin",
-            "Tooltip.Admin": "Admin"
+            "Tooltip.Admin": "Admin",
+            "Title": "Members"
         },
         "ServerSettings": {
             "Crafting": "Crafting Tables:",
@@ -105,7 +107,8 @@
             "Modules": "Modules:",
             "Recipes": "Recipes:",
             "Skills": "Skills:",
-            "Upload": "Upload Server Data"
+            "Upload": "Upload Server Data",
+            "Title": "Server Settings"
         },
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",
@@ -153,14 +156,15 @@
         },
         "Title": "Super Admin",
         "UserTable": {
-            "DeleteUser": "Number of servers the user is admin on",
+            "DeleteUser": "Delete user",
             "DemoteUser": "Demote user from Super Admin",
             "HowMuchIsAdmin": "Number of servers the user is admin on",
             "JoinedServers": "Joined Servers",
             "PromoteUser": "Promote user to Super Admin",
             "PseudoCol": "Pseudo",
             "ServersCol": "Servers",
-            "Title": "Users"
+            "Title": "Users",
+            "ActionCol": "Action"
         }
     },
     "TagName": "Tag name",

@@ -1,0 +1,258 @@
+{
+    "Cancel": "Abbrechen",
+    "CopyToClipboard": "In die Zwischenablage kopieren",
+    "CraftingTable": "Werkbank",
+    "GraphView": {
+        "ResetButton": "Graph zurücksetzen",
+        "Title": "Graph-Ansicht"
+    },
+    "Header": {
+        "CreateServer": "Server erstellen",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Meine Server",
+        "New": "Neu!",
+        "ReleaseDialog": {
+            "Title": "Veröffentlichungen"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Sie sind bereits auf diesem Server",
+                "JoinError": "Sie müssen einen Servercode hinzufügen",
+                "ServerNotFound": "Server nicht gefunden"
+            },
+            "Title": "Server erstellen oder beitreten"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Benutzerverwaltung"
+        }
+    },
+    "Ingredients": "Zutaten",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Hergestellt von",
+        "UsedIn": "Verwendet in"
+    },
+    "JoinCode": "Einladungscode",
+    "Language": "Sprache",
+    "MainLayout": {
+        "SiteTitle": "Werkzeuge für das Videospiel Eco",
+        "PleaseJoin": "Bitte einem Server beitreten"
+    },
+    "Name": "Name",
+    "Level": "Stufe",
+    "Upgrade": "Verbesserung",
+    "Margins": "Margen",
+    "NavMenu": {
+        "NavAdmin": "Serververwaltung",
+        "NavCalculator": "Preisrechner",
+        "NavGraph": "Graph-Ansicht (in Arbeit)",
+        "NavSuperAdmin": "Super-Admin"
+    },
+    "None": "Keine",
+    "Options": "Optionen",
+    "Products": "Produkte",
+    "RecipeDialog": {
+        "CraftTime": "Herstellungszeit",
+        "Dynamic": "dynamisch",
+        "Labor": "Arbeit",
+        "ReintegratedToolTip": {
+            "False": "Hören Sie auf, diesen Artikel vom Selbstkostenpreis abzuziehen. Dies wird den Preis anderer Produkte mathematisch erhöhen.",
+            "True": "Ziehen Sie diesen Artikel vom Selbstkostenpreis ab, wenn Sie dieses Produkt in derselben oder in einer vorherigen Rezeptur wiederverwenden können (Formen, Fässer, ...). Dies wird den Preis anderer Produkte mathematisch senken."
+        },
+        "Share": {
+            "Equality": "Gerechte Verteilung",
+            "Equilibrate": "Nach Menge verteilen",
+            "FirstOnly": "Nur erstes Produkt",
+            "Honest": "80% erstes Produkt",
+            "Title": "Preisaufteilung zwischen den Ergebnissen:"
+        },
+        "Static": "statisch",
+        "TotalCost": "Gesamtkosten:",
+        "TotalPrice": "Gesamtpreis:"
+    },
+    "RecipeList": {
+        "RecipeName": "Rezeptname"
+    },
+    "RelatedRecipes": "Verwandte Rezepte",
+    "Search": "Suche",
+    "ServerDialog": {
+        "Create": "Erstellen",
+        "CreateServer": "Erstellen Sie Ihren Server",
+        "HaveAnInvitation": "Haben Sie bereits einen Serverbeitrittscode?",
+        "Join": "Beitreten",
+        "MaxChar": "Maximal 25 Zeichen",
+        "MinChar": "Mindestens 3 Zeichen"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Sind Sie sicher, dass Sie alle Maximalpreise löschen möchten?",
+            "ClearAllMin": "Sind Sie sicher, dass Sie alle Minimalpreise löschen möchten?"
+        },
+        "Items": {
+            "Max": "Maximalpreis",
+            "Max.Tooltip": "Maximalpreise löschen",
+            "Min": "Minimalpreis",
+            "Min.Tooltip": "Minimalpreise löschen"
+        },
+        "Members": {
+            "DemoteAdmin": "Admin degradieren",
+            "KickUser": "Benutzer entfernen",
+            "PromoteAdmin": "Admin befördern",
+            "Tooltip.Admin": "Admin",
+            "Title": "Mitglieder"
+        },
+        "ServerSettings": {
+            "Crafting": "Werkbänke:",
+            "Delete": "Server löschen",
+            "Items": "Gegenstände:",
+            "Modules": "Module:",
+            "Recipes": "Rezepte:",
+            "Skills": "Fähigkeiten:",
+            "Upload": "Serverdaten hochladen",
+            "Title": "Servereinstellungen"
+        },
+        "Snackbar": {
+            "CantEditYourself": "Sie können sich selbst nicht bearbeiten",
+            "UploadOk": "Upload erfolgreich"
+        }
+    },
+    "Skill": "Fähigkeit",
+    "SuperAdmin": {
+        "ActionCol": "Aktion",
+        "ConfirmServerDeletion": {
+            "1": "Sind Sie sicher, dass Sie den Benutzer ",
+            "2": " löschen möchten?"
+        },
+        "ConfirmSuperAdmin": {
+            "1": "Sind Sie sicher, dass Sie den Benutzer ",
+            "2": "degradieren",
+            "3": "befördern",
+            "4": " möchten ",
+            "5": "von",
+            "6": "zu",
+            "7": " Super-Admin?"
+        },
+        "ConfirmTwiceSuperAdmin": "Diese Änderung hat große Auswirkungen und könnte die gesamte Website beschädigen! Bitte bestätigen Sie erneut.",
+        "ConfirmUserDeletion": {
+            "1": "Sind Sie sicher, dass Sie den Benutzer ",
+            "2": " löschen möchten?"
+        },
+        "CreationDateCol": "Erstellungsdatum",
+        "IdCol": "ID",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Server löschen",
+            "DemoteAdmin": "Admin-Rechte entziehen",
+            "PlayersCol": "Spieler",
+            "PromoteAdmin": "Admin-Rechte geben",
+            "ServerNameCol": "Name",
+            "SetDefault": "Als Standardserver festlegen",
+            "Title": "Server",
+            "UnsetDefault": "Von Standardservern entfernen"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Sie können sich auf dieser Seite nicht löschen.",
+            "SnackbarCantEdit": "Sie können sich auf dieser Seite nicht bearbeiten.",
+            "SnackbarCopy": "ID in die Zwischenablage kopiert"
+        },
+        "Title": "Super-Admin",
+        "UserTable": {
+            "DeleteUser": "Benutzer löschen",
+            "DemoteUser": "Benutzer als Super-Admin degradieren",
+            "HowMuchIsAdmin": "Anzahl der Server, auf denen der Benutzer Admin ist",
+            "JoinedServers": "Beigetretene Server",
+            "PromoteUser": "Benutzer als Super-Admin befördern",
+            "PseudoCol": "Pseudonym",
+            "ServersCol": "Server",
+            "Title": "Benutzer",
+            "ActionCol": "Aktion"
+        }
+    },
+    "TagName": "Tag-Name",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Export/Backup meines Benutzers",
+        "ImportReplace": "Importieren/Ersetzen meines Benutzers",
+        "InGamePseudo": "Spiel-Pseudonym",
+        "MyServers": "Meine Server",
+        "PopupConfirmImportBegin": "Sind Sie sicher, dass Sie den Benutzer mit dem Pseudonym ",
+        "PopupConfirmImportEnd": " importieren möchten? Dies wird Ihren derzeit gespeicherten Benutzer löschen. Stellen Sie sicher, dass Sie ihn exportieren, wenn Sie ihn später verwenden möchten!",
+        "SnackbarCopy": "Einladungscode in die Zwischenablage kopiert",
+        "SnackbarErrorBadFile": "Importfehler - Wählen Sie eine gültige Datei.",
+        "SnackbarErrorBadUser": "Importfehler - Benutzer konnte nicht gefunden werden",
+        "UserSettings": "Benutzereinstellungen"
+    },
+    "Versions": "Versionen",
+    "PriceCalculator": {
+        "Skills": "Fähigkeiten",
+        "AddSkill": "Fähigkeit hinzufügen",
+        "CraftingTables": "Werkbänke",
+        "AddCraftingTable": "Werkbank hinzufügen",
+        "CostMin": {
+            "Tooltip": "Die Kosten, die mit dieser Werkbank pro Minute verbunden sind. Repräsentiert den Kraftstoffverbrauch, den Austausch von Teilen, eventuelle Fertigungsgebühren ...",
+            "CostMin": "Kosten/Min"
+        },
+        "NoModule": "Kein Modul",
+        "MarginPercent": {
+            "Tooltip": "Der Prozentsatz der Marge, der auf Ihren Verkaufspreis angewendet wird. Sehen Sie sich die Option 'Margenberechnungstyp' für Details an.",
+            "MarginPercent": "Margenprozentsatz"
+        },
+        "AddMargin": "Marge hinzufügen",
+        "NonSkilled": {
+            "Tooltip": "Entsperren Sie die Liste der nicht-fähigkeitsgebundenen Rezepte im Rezeptwähler.",
+            "NonSkilled": "Nicht-fähigkeitsgebundene Rezepte anzeigen"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Zeigt nur Rezepte an, die durch Ihre Fähigkeitsstufen erlaubt sind.",
+            "LevelAccessible": "Nur nach Stufen zugängliche Rezepte"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Margenberechnungsmethode",
+                "2": "MarkUp (Standard): Sie summieren den Selbstkostenpreis und die Marge * Selbstkostenpreis/100, um den Verkaufspreis zu erhalten",
+                "3": "Bruttomarge: Der Margenprozentsatz ist der Prozentsatz des Gewinns Ihres Verkaufspreises, der zwischen -99,99 % und 99,99 % begrenzt ist."
+            },
+            "MarginType": "Margenberechnungstyp",
+            "MarkUp": "Mark-Up",
+            "GrossMargin": "Bruttomarge"
+        },
+        "CalorieCost": {
+            "Tooltip": "Die Kosten für das Essen, das Sie konsumieren, für 1000 Kalorien, die in einer Fertigung verbraucht werden. Wenn Sie nur Salate kaufen, die 700 Kalorien für 5 $ bringen, dann sind die Kosten pro 1000 Kalorien 1000 * 5 / 700 = 7,14 $",
+            "CalorieCost": "Kosten pro 1000 Kalorien"
+        },
+        "ItemsToBuy": "Zu kaufende Artikel",
+        "IngredientSearch": "Zutaten oder Tags suchen",
+        "BuyPrice": "Kaufpreis",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Dieser Wert wird der Mindestpreis seiner zugehörigen Artikel (wenn alle Werte definiert sind!), es sei denn, Sie wählen einen spezifischen durch Klicken auf einen Stern.",
+            "isAutoCalculatedPrice": "Dieser Wert wird automatisch vom System berechnet. Wenn er leer ist, stellen Sie sicher, dass Sie den Preis aller 'Zu kaufenden Artikel' festlegen.",
+            "isItemEmptyPrice": "Legen Sie diesen Preis fest, um die Berechnung verwandter Rezepte zu ermöglichen",
+            "isMinPrice": "Dieser Wert wird als Mindestpreis des Servers festgelegt",
+            "isMaxPrice": "Dieser Wert wird als Höchstpreis des Servers festgelegt"
+        },
+        "CancelOverride": "Den Preis dieses Produkts nicht mehr überschreiben.",
+        "AddFavoriteItem": "Favorisieren Sie diesen Artikel, wenden Sie seinen Preis auf das zugehörige Tag an",
+        "CancelFavoriteItem": "Diesen Artikel aus den Favoriten entfernen",
+        "ItemsToSell": "Zu verkaufende Artikel",
+        "AddRecipe": "Rezept hinzufügen",
+        "ProductItems": "Produzierte Artikel",
+        "CostPrice": "Selbstkostenpreis",
+        "SalePrice": "Verkaufspreis",
+        "AddOverride": "Diesen Preis überschreiben, da es sich nicht um ein Produkt zum Verkauf, sondern um ein zu kaufendes Produkt handelt",
+        "RecipeTooltip": "Rezept-Popup öffnen, zeigt Berechnungsdetails an",
+        "RecipeTooltipWithShare": "Rezept-Popup öffnen, ermöglicht die Kontrolle der Produktpreisaufteilung und zeigt Berechnungsdetails an",
+        "MarginTooltip": "Ihre Margenkonfiguration erlaubt keine Berechnung eines Verkaufspreises. Überprüfen Sie Ihren Margenprozentsatz und den Typ der Margenberechnung.",
+        "AddFavoriteRecipe": "Favorisieren Sie dieses Rezept, wenden Sie seinen Preis auf das zugehörige Produkt an",
+        "CancelFavoriteRecipe": "Dieses Rezept aus den Favoriten entfernen",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Sie können Ihre letzte Marge nicht entfernen",
+            "PriceNotWellConfigured": "Dieser Preis ist nicht richtig konfiguriert",
+            "PriceCopied": "Preis in die Zwischenablage kopiert"
+        }
+    },
+    "Recipe": "Rezept",
+    "ContextService": {
+        "DefaultMargin": "Standardmarge"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Neue Marge"
+    }
+}
