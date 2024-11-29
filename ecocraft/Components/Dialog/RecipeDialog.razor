@@ -5,7 +5,7 @@
 @inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
 
-<MudDialog Style="min-height: 500px;">
+<MudDialog Style="min-height: 500px;" Class="pb-4">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             <EcoIcon Item="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
@@ -33,7 +33,7 @@
                             @if ((int)GetModuleAndLavishReducePercent(false) != 1)
                             {
                                 <MudText Color="Color.Secondary">
-                                    @(Math.Round((1 - GetModuleAndLavishReducePercent(false)) * 100, 2).ToString("0.#####")) %
+                                    @(Math.Round((1 - GetModuleAndLavishReducePercent(false)) * 100, 2).ToString("0.##")) %
                                 </MudText>
                             }
                         </MudStack>
@@ -53,7 +53,7 @@
                             <MudSpacer/>
 
                             <MudText Color="Color.Primary" Class="pl-2">
-                                @(Math.Round(GetCraftMinutePrice(), 2).ToString("0.#####")) $
+                                @(Math.Round(GetCraftMinutePrice(), 2).ToString("0.##")) $
                             </MudText>
                         </MudStack>
                     </MudStack>
@@ -87,7 +87,7 @@
                             @if ((int)GetLaborReducePercent() != 1)
                             {
                                 <MudText Color="Color.Secondary">
-                                    @(Math.Round((1 - GetLaborReducePercent()) * 100, 2).ToString("0.#####")) %
+                                    @(Math.Round((1 - GetLaborReducePercent()) * 100, 2).ToString("0.##")) %
                                 </MudText>
                             }
                         </MudStack>
@@ -99,21 +99,21 @@
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
 
                                 <MudText Color="Color.Secondary">
-                                    @(Math.Round(Recipe.Labor * GetLaborReducePercent(), 2).ToString("0.#####"))
+                                    @(Math.Round(Recipe.Labor * GetLaborReducePercent(), 2).ToString("0.##"))
                                 </MudText>
                             }
 
                             <MudSpacer/>
 
                             <MudText Class="pl-2" Color="Color.Primary">
-                                @(Math.Round(GetLaborPrice(), 2).ToString("0.#####")) $
+                                @(Math.Round(GetLaborPrice(), 2).ToString("0.##")) $
                             </MudText>
                         </MudStack>
                     </MudStack>
                 </MudItem>
             </MudGrid>
 
-            <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true">
+            <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true" Elevation="3" Class="mb-3">
                 <GroupHeaderTemplate>
                     <MudTh colspan="2" Class="mud-background">
                         <MudText>@LocalizationService.GetTranslation(context.Key!.ToString()!)</MudText>
@@ -127,14 +127,14 @@
                             {
                                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalCost")</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(-1 * ElementSum(context.Items.ToList(), true) + GetLaborPrice(), 2)) $
+                                    @(Math.Round(-1 * ElementSum(context.Items.ToList(), true) + GetLaborPrice() + GetCraftMinutePrice(), 2).ToString("0.##")) $
                                 </MudText>
                             }
                             else
                             {
                                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalPrice")</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2)) $
+                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2).ToString("0.##")) $
                                 </MudText>
                             }
                         </MudStack>
@@ -146,13 +146,13 @@
                     <!-- quantity -->
                     <MudTd Style="width: 60px">
                         <MudStack Row Spacing="1">
-                            @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.#####"))
+                            @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.##"))
 
                             @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
                             {
                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
                                 <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.#####"))
+                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.##"))
                                 </MudText>
                             }
                         </MudStack>
@@ -166,14 +166,14 @@
                     <!-- unit price -->
                     <MudTd>
                         <MudText Typo="Typo.body2" Color="Color.Primary">
-                            @(context.Price is not null ? Math.Round((decimal)context.Price!, 2) + " $" : "")
+                            @(context.Price is not null ? Math.Round((decimal)context.Price!, 2).ToString("0.##") + " $" : "")
                         </MudText>
                     </MudTd>
                     <!-- dynamic info -->
                     <MudTd>
                         @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
                         {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.#####")) %</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.##")) %</MudText>
                         }
                         else
                         {
@@ -191,7 +191,7 @@
                                 @(context.Price is not null
                                     ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
                                         ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
-                                        : context.GetRoundFactorQuantity()), 2) + " $"
+                                        : context.GetRoundFactorQuantity()), 2).ToString("0.##") + " $"
                                     : "")
                             </MudText>
                         </MudStack>
@@ -211,19 +211,23 @@
                 </RowTemplate>
             </MudTable>
 
-            <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
-                <MudText>Crafted by quantity:</MudText>
-                <MudTooltip Text="If you create only 1 unit of a recipe, the game still consumes a whole number of ingredients. Choose the quantity of products you will usually craft to obtain a more precise output price.">
-                    <MudToggleGroup T="int"
-                                    Value="@Recipe.CurrentUserRecipe!.RoundFactor"
-                                    ValueChanged="@(v => RoundFactorChange(v, Recipe.CurrentUserRecipe))">
-                        <MudToggleItem Value="0"><MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Infinity"/></MudToggleItem>
-                        <MudToggleItem Value="100">100</MudToggleItem>
-                        <MudToggleItem Value="10">10</MudToggleItem>
-                        <MudToggleItem Value="1">1</MudToggleItem>
-                    </MudToggleGroup>
-                </MudTooltip>
-            </MudStack>
+            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity) != e.Quantity || Math.Truncate(GetModuleAndLavishReducePercent() * e.Quantity) != GetModuleAndLavishReducePercent() * e.Quantity))
+            {
+                <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
+                    <MudText>Crafted by quantity:</MudText>
+                    <MudTooltip Text="If you create only 1 unit of a recipe, the game still consumes a whole number of ingredients. Choose the quantity of products you will usually craft to obtain a more precise output price.">
+                        <MudToggleGroup T="int"
+                                        Value="@Recipe.CurrentUserRecipe!.RoundFactor"
+                                        ValueChanged="@(v => RoundFactorChange(v, Recipe.CurrentUserRecipe))">
+                            <MudToggleItem Value="0"><MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Infinity"/></MudToggleItem>
+                            <MudToggleItem Value="100">100</MudToggleItem>
+                            <MudToggleItem Value="10">10</MudToggleItem>
+                            <MudToggleItem Value="1">1</MudToggleItem>
+                        </MudToggleGroup>
+                    </MudTooltip>
+                </MudStack>            
+            }
+
 
             @if (ShouldDisplayShare())
             {
