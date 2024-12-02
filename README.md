@@ -18,8 +18,8 @@ This website uses C# with Blazor and the front library MudBlazor.
 
 ## Contact
 
-Zangdar (Discord: #zangdar1111)
-Joridan (Discord: #joridan)
+Zangdar (Discord: #zangdar1111)  
+Joridan (Discord: #joridan)  
 
 ## Contributing
 
