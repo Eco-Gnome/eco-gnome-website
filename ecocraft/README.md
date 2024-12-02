@@ -9,6 +9,9 @@ considering chosen professions and associated recipes.
 
 It's adapted to any kind of modded servers thanks to our DataExporter available here: [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod)
 
+It's future goal is to provide several tools that help eco players and server admins 
+(production planner, map generator, ...)
+
 ## Tech
 
 This website uses C# with Blazor and the front library MudBlazor.
