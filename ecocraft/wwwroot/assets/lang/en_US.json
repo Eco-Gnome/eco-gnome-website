@@ -186,6 +186,8 @@
     },
     "Versions": "Versions",
     "PriceCalculator": {
+        "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
+        "Reset": "Reset",
         "Skills": "Skills",
         "AddSkill": "Add skill",
         "CraftingTables": "Crafting tables",
@@ -200,6 +202,7 @@
             "MarginPercent": "Margin Percent"
         },
         "AddMargin": "Add margin",
+        "RemoveMargin": "Remove margin",
         "NonSkilled": {
             "Tooltip": "Unlock the list of non-skilled recipes in the recipe selector.",
             "NonSkilled": "Display non-skilled recipes"
