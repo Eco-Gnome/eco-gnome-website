@@ -31,7 +31,7 @@ public class ContextService(
         await userDbService.UpdateAndSave(CurrentUser!);
     }
 
-    public async Task ChangeServer(Server? server)
+    public async Task ChangeServer(Server server)
     {
         var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server?.Id);
 
@@ -197,6 +197,12 @@ public class ContextService(
 
         serverDbService.Delete(CurrentServer!);
         await dbContext.SaveChangesAsync();
-        await ChangeServer(null);
+        
+        var server = CurrentUser!.UserServers.FirstOrDefault()?.Server;
+        
+        if (server is not null)
+        {
+            await ChangeServer(CurrentUser!.UserServers.First().Server);
+        }
     }
 }

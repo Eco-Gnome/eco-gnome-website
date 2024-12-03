@@ -148,7 +148,7 @@
                         @context.UserServers.Count
                     </MudTd>
                     <MudTd>
-                        @(String.Join(", ", context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
+                        @(string.Join(", ", context.UserServers.Where(us => us.IsAdmin).Select(us => us.Pseudo)))
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center">

@@ -90,11 +90,19 @@ public partial class LocalizationService(LocalStorageService localStorageService
         var segments = key.Split('.');
         object current = translations;
 
-        foreach (var segment in segments)
+        for (var index = 0; index < segments.Length; index++)
         {
-            if (current is Dictionary<string, object> dict && dict.TryGetValue(segment, out var next))
+            var segment = segments[index];
+
+            if (current is Dictionary<string, object> dict1 && index < segments.Length - 1 &&
+                dict1.TryGetValue($"{segment}.{segments[index + 1]}", out var next1))
             {
-                current = next;
+                current = next1;
+                index++;
+            }
+            else if (current is Dictionary<string, object> dict2 && dict2.TryGetValue(segment, out var next2))
+            {
+                current = next2;
             }
             else
             {

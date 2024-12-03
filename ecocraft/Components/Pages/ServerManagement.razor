@@ -15,7 +15,7 @@
 @inject UserServerDataService UserServerDataService
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
 
@@ -24,7 +24,7 @@
 		<MudItem sm="6">
 			<MudPaper Style="height: 100%">
 				<MudPaper Class="pa-2 pl-4 border-5 d-flex align-center"
-				          Style="width: 100%; height: 45px; background-color: #303038 !important; border-radius: var(--mud-default-borderradius) 0px 0px 0px;
+				          Style="width: 100%; height: 45px; background-color: #303038 !important; border-radius: var(--mud-default-borderradius) 0 0 0;
 				           border-bottom: 1px solid var(--mud-palette-table-lines)"
 				          Elevation="0">
 					<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Title")</MudText>
@@ -45,7 +45,7 @@
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
 						<MudStack Spacing="0">
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes") @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items") @ServerDataService.ItemOrTags.Where(i => !i.IsTag).Count() / Tags: @ServerDataService.ItemOrTags.Where(i => i.IsTag).Count()</MudText>
+							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items") @ServerDataService.ItemOrTags.Count(i => !i.IsTag) / Tags: @ServerDataService.ItemOrTags.Count(i => i.IsTag)</MudText>
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills") @ServerDataService.Skills.Count(s => s.Profession is not null)</MudText>
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting") @ServerDataService.CraftingTables.Count</MudText>
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules") @ServerDataService.PluginModules.Count</MudText>
@@ -72,23 +72,12 @@
 						           Color="Color.Error"
 						           StartIcon="@Icons.Material.Filled.DeleteForever"
 						           OnClick="DeleteServer">
-							@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
+							@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Delete")
 							@if (_showDeleteServerLoader)
 							{
 								<MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
 							}
 						</MudButton>
-						@if (_askDeleteConfirmation)
-						{
-							<MudButton Variant="Variant.Filled"
-							           Color="Color.Success"
-							           StartIcon="@Icons.Material.Filled.Close"
-							           OnClick="CancelDeleteServer" />
-							<MudButton Variant="Variant.Filled"
-							           Color="Color.Warning"
-							           StartIcon="@Icons.Material.Filled.Check"
-							           OnClick="ConfirmDeleteServer" />
-						}
 					</MudStack>
 				</MudStack>
 			</MudPaper>
@@ -318,7 +307,17 @@
 
 	private async Task UploadFiles(IBrowserFile? file)
 	{
-		if (file is { ContentType: "application/json" })
+		Snackbar.Clear();
+		Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+
+		if (file is not { ContentType: "application/json" })
+		{
+			Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok")}: not a JSON file", Severity.Error);
+			
+			return;
+		}
+
+		try
 		{
 			await using var stream = file.OpenReadStream(10_000_000);
 			using var memoryStream = new MemoryStream();
@@ -330,19 +329,30 @@
 
 			_showUploadServerDataLoader = true;
 			StateHasChanged();
-			await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
+			var (errorCount, recipeErrorNames) = await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
 			_showUploadServerDataLoader = false;
 			StateHasChanged();
 
 			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
 			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
 
-			StateHasChanged();
-
-			Snackbar.Clear();
-			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadOk"), Severity.Success);
+			if (errorCount == 0)
+			{
+				Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadOk"), Severity.Success);
+			}
+			else
+			{
+				Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNok", errorCount.ToString(), string.Join(", ", recipeErrorNames))}", Severity.Warning);
+			}
 		}
+		catch (ImportException)
+		{
+			_showUploadServerDataLoader = false;
+
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok"), Severity.Error);
+		}			
+		
+		StateHasChanged();
 	}
 
 	private void ToggleAdmin(UserServer userServer)
@@ -371,7 +381,7 @@
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
+		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -383,7 +393,7 @@
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
+		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -414,32 +424,24 @@
 			.ToList();
 	}
 
-	private void DeleteServer()
+	private async Task DeleteServer()
 	{
-		_askDeleteConfirmation = true;
-	}
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ServerDeletion"));
 
-	private void CancelDeleteServer()
-	{
-		_askDeleteConfirmation = false;
-	}
-
-	private async void ConfirmDeleteServer()
-	{
-		_askDeleteConfirmation = false;
-		_showDeleteServerLoader = true;
-		StateHasChanged();
-		await ContextService.DeleteCurrentServer();
-		_showDeleteServerLoader = false;
-		Navigation.NavigateTo("/");
+		if (confirmed)
+		{
+			_showDeleteServerLoader = true;
+			await InvokeAsync(StateHasChanged);
+			await ContextService.DeleteCurrentServer();
+			_showDeleteServerLoader = false;
+			await InvokeAsync(StateHasChanged);
+			Navigation.NavigateTo("/");
+		}
 	}
 
 	private void KickUser(UserServer userServer)
 	{
-		if (!_askKickConfirmations.ContainsKey(userServer))
-		{
-			_askKickConfirmations.Add(userServer, true);
-		}
+		_askKickConfirmations.TryAdd(userServer, true);
 	}
 
 	private void CancelKick(UserServer userServer)
@@ -450,11 +452,12 @@
 		}
 	}
 
-	private async void ConfirmKick(UserServer userServerToKick)
+	private async Task ConfirmKick(UserServer userServerToKick)
 	{
 		if (userServerToKick == ContextService.CurrentUserServer)
 		{
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
+			
 			return;
 		}
 

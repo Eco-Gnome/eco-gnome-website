@@ -86,7 +86,8 @@
     "ServerManagement": {
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
-            "ClearAllMin": "Are you sure you want to clear all min prices?"
+            "ClearAllMin": "Are you sure you want to clear all min prices?",
+            "ServerDeletion": "Are your sure you want to delete your server? There won't be no rollback!"
         },
         "Items": {
             "Max": "Max price",
@@ -113,7 +114,9 @@
         },
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",
-            "UploadOk": "Upload Successful"
+            "UploadOk": "Upload Successful",
+            "UploadNok": "Upload Error",
+            "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported: {errorNames}. Review your mods and server edits. You can contact Eco Gnome admins for help."
         }
     },
     "Skill": "Skill",
