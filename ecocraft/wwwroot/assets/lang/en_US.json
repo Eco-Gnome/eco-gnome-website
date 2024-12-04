@@ -52,19 +52,23 @@
     "Options": "Options",
     "Products": "Products",
     "RecipeDialog": {
+        "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
+        "LaborReductionTooltip": "{initialValue} with {percent}% reduction due to skill level {skillLevel}",
+        "QuantityReductionTooltip": "{percent}% reduction due to upgrade module {skillLevel}",
+        "QuantityReductionLavishTooltip": "and lavish talent",
         "ReintegratedToolTip": {
             "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
             "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
         },
         "Share": {
-            "Equality": "Fair Distribution",
-            "Equilibrate": "Distribute by Quantity",
-            "FirstOnly": "Only First Product",
-            "Honest": "80% First Product",
-            "Title": "Price Sharing between outputs:"
+            "EqualityTooltip": "Split equally between products.",
+            "EquilibrateTooltip": "Split by quantity between products.",
+            "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
+            "HonestTooltip": "Grant 80% to first product and split the rest equally."
         },
         "Static": "static",
         "TotalCost": "Total cost:",
