@@ -111,106 +111,198 @@
                         </MudStack>
                     </MudStack>
                 </MudItem>
-            </MudGrid>
+                
+                <MudItem sm="6">
+                    <MudTable Items="GetUserElements()" Dense="true" Hover="true" Elevation="3" Class="mb-3">
+                        <HeaderContent>
+                            <MudTh colspan="2" Class="mud-background">
+                                <MudText>@LocalizationService.GetTranslation("ingredients")</MudText>
+                            </MudTh>
+                            <MudTh colspan="1" Class="mud-background">
+                                <MudText>$ / u</MudText>
+                            </MudTh>
+                            <MudTh colspan="2" Class="mud-background">
+                                <MudStack Row Justify="Justify.FlexEnd">
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalCost")</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Primary">
+                                        @(Math.Round(-1 * ElementSum([], true) + GetLaborPrice() + GetCraftMinutePrice(), 2).ToString("0.##")) $
+                                    </MudText>
+                                </MudStack>
+                            </MudTh>
+                            <MudTh Class="mud-background" Style="width: 40px">
+                            </MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <!-- quantity -->
+                            <MudTd Style="width: 60px">
+                                <MudStack Row Spacing="1">
+                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.##"))
 
-            <MudTable Items="GetUserElements()" GroupBy="_userElementsDefinition" Dense="true" Hover="true" Elevation="3" Class="mb-3">
-                <GroupHeaderTemplate>
-                    <MudTh colspan="2" Class="mud-background">
-                        <MudText>@LocalizationService.GetTranslation(context.Key!.ToString()!)</MudText>
-                    </MudTh>
-                    <MudTh colspan="1" Class="mud-background">
-                        <MudText>$ / u</MudText>
-                    </MudTh>
-                    <MudTh colspan="2" Class="mud-background">
-                        <MudStack Row Justify="Justify.FlexEnd">
-                            @if (context.Key!.ToString() == "Ingredients")
-                            {
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalCost")</MudText>
+                                    @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
+                                        <MudText Color="Color.Secondary" Typo="Typo.body2">
+                                            @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.##"))
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudTd>
+                            <MudTd>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <EcoIcon Item="@context.Element.ItemOrTag"/>
+                                    @LocalizationService.GetTranslation(context.Element.ItemOrTag)
+                                </MudStack>
+                            </MudTd>
+                            <!-- unit price -->
+                            <MudTd>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(-1 * ElementSum(context.Items.ToList(), true) + GetLaborPrice() + GetCraftMinutePrice(), 2).ToString("0.##")) $
+                                    @(context.Price is not null ? Math.Round((decimal)context.Price!, 2).ToString("0.##") + " $" : "")
                                 </MudText>
+                            </MudTd>
+                            <!-- dynamic info -->
+                            <MudTd>
+                                @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.##")) %</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2">
+                                        @(context.Element.IsDynamic
+                                            ? LocalizationService.GetTranslation("RecipeDialog.Dynamic")
+                                            : LocalizationService.GetTranslation("RecipeDialog.Static"))
+                                    </MudText>
+                                }
+                            </MudTd>
+                            <!-- price -->
+                            <MudTd>
+                                <MudStack Row Justify="Justify.FlexEnd">
+                                    <MudText Typo="Typo.body2" Color="Color.Primary">
+                                        @(context.Price is not null
+                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
+                                                ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
+                                                : context.GetRoundFactorQuantity()), 2).ToString("0.##") + " $"
+                                            : "")
+                                    </MudText>
+                                </MudStack>
+                            </MudTd>
+                            <!-- deduction -->
+                            <MudTd>
+                                @if (context.Element.Index > 0 && context.Element.IsProduct())
+                                {
+                                    <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
+                                        <MudIconButton Icon="@(context.IsReintegrated ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+                                                       Size="Size.Small"
+                                                       Color="Color.Primary"
+                                                       OnClick="@(() => ChangeReintegrate(context, !context.IsReintegrated))"/>
+                                    </MudTooltip>
+                                }
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+                
+                <MudItem sm="6">
+                <MudTable Items="GetUserElements()" Dense="true" Hover="true" Elevation="3" Class="mb-3">
+                    <GroupHeaderTemplate>
+                        <MudTh colspan="2" Class="mud-background">
+                            <MudText>@LocalizationService.GetTranslation(context.Key!.ToString()!)</MudText>
+                        </MudTh>
+                        <MudTh colspan="1" Class="mud-background">
+                            <MudText>$ / u</MudText>
+                        </MudTh>
+                        <MudTh colspan="2" Class="mud-background">
+                            <MudStack Row Justify="Justify.FlexEnd">
+                                @if (context.Key!.ToString() == "Ingredients")
+                                {
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalCost")</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Primary">
+                                        @(Math.Round(-1 * ElementSum(context.Items.ToList(), true) + GetLaborPrice() + GetCraftMinutePrice(), 2).ToString("0.##")) $
+                                    </MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalPrice")</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Primary">
+                                        @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2).ToString("0.##")) $
+                                    </MudText>
+                                }
+                            </MudStack>
+                        </MudTh>
+                        <MudTh Class="mud-background" Style="width: 40px">
+                        </MudTh>
+                    </GroupHeaderTemplate>
+                    <RowTemplate>
+                        <!-- quantity -->
+                        <MudTd Style="width: 60px">
+                            <MudStack Row Spacing="1">
+                                @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.##"))
+
+                                @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                                {
+                                    <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
+                                    <MudText Color="Color.Secondary" Typo="Typo.body2">
+                                        @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.##"))
+                                    </MudText>
+                                }
+                            </MudStack>
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                <EcoIcon Item="@context.Element.ItemOrTag"/>
+                                @LocalizationService.GetTranslation(context.Element.ItemOrTag)
+                            </MudStack>
+                        </MudTd>
+                        <!-- unit price -->
+                        <MudTd>
+                            <MudText Typo="Typo.body2" Color="Color.Primary">
+                                @(context.Price is not null ? Math.Round((decimal)context.Price!, 2).ToString("0.##") + " $" : "")
+                            </MudText>
+                        </MudTd>
+                        <!-- dynamic info -->
+                        <MudTd>
+                            @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.##")) %</MudText>
                             }
                             else
                             {
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalPrice")</MudText>
+                                <MudText Typo="Typo.body2">
+                                    @(context.Element.IsDynamic
+                                        ? LocalizationService.GetTranslation("RecipeDialog.Dynamic")
+                                        : LocalizationService.GetTranslation("RecipeDialog.Static"))
+                                </MudText>
+                            }
+                        </MudTd>
+                        <!-- price -->
+                        <MudTd>
+                            <MudStack Row Justify="Justify.FlexEnd">
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
-                                    @(Math.Round(ElementSum(GetProductsWithoutReintegratedElements()), 2).ToString("0.##")) $
+                                    @(context.Price is not null
+                                        ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
+                                            ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
+                                            : context.GetRoundFactorQuantity()), 2).ToString("0.##") + " $"
+                                        : "")
                                 </MudText>
-                            }
-                        </MudStack>
-                    </MudTh>
-                    <MudTh Class="mud-background" Style="width: 40px">
-                    </MudTh>
-                </GroupHeaderTemplate>
-                <RowTemplate>
-                    <!-- quantity -->
-                    <MudTd Style="width: 60px">
-                        <MudStack Row Spacing="1">
-                            @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.##"))
-
-                            @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                            </MudStack>
+                        </MudTd>
+                        <!-- deduction -->
+                        <MudTd>
+                            @if (context.Element.Index > 0 && context.Element.IsProduct())
                             {
-                                <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
-                                <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2)).ToString("0.##"))
-                                </MudText>
+                                <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
+                                    <MudIconButton Icon="@(context.IsReintegrated ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => ChangeReintegrate(context, !context.IsReintegrated))"/>
+                                </MudTooltip>
                             }
-                        </MudStack>
-                    </MudTd>
-                    <MudTd>
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <EcoIcon Item="@context.Element.ItemOrTag" />
-                            @LocalizationService.GetTranslation(context.Element.ItemOrTag)
-                        </MudStack>
-                    </MudTd>
-                    <!-- unit price -->
-                    <MudTd>
-                        <MudText Typo="Typo.body2" Color="Color.Primary">
-                            @(context.Price is not null ? Math.Round((decimal)context.Price!, 2).ToString("0.##") + " $" : "")
-                        </MudText>
-                    </MudTd>
-                    <!-- dynamic info -->
-                    <MudTd>
-                        @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
-                        {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">@(Math.Round((1 - GetModuleAndLavishReducePercent()) * 100, 2).ToString("0.##")) %</MudText>
-                        }
-                        else
-                        {
-                            <MudText Typo="Typo.body2">
-                                @(context.Element.IsDynamic
-                                    ? LocalizationService.GetTranslation("RecipeDialog.Dynamic")
-                                    : LocalizationService.GetTranslation("RecipeDialog.Static"))
-                            </MudText>
-                        }
-                    </MudTd>
-                    <!-- price -->
-                    <MudTd>
-                        <MudStack Row Justify="Justify.FlexEnd">
-                            <MudText Typo="Typo.body2" Color="Color.Primary">
-                                @(context.Price is not null
-                                    ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
-                                        ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
-                                        : context.GetRoundFactorQuantity()), 2).ToString("0.##") + " $"
-                                    : "")
-                            </MudText>
-                        </MudStack>
-                    </MudTd>
-                    <!-- deduction -->
-                    <MudTd>
-                        @if (context.Element.Index > 0 && context.Element.IsProduct())
-                        {
-                            <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
-                                <MudIconButton Icon="@(context.IsReintegrated ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
-                                               Size="Size.Small"
-                                               Color="Color.Primary"
-                                               OnClick="@(() => ChangeReintegrate(context, !context.IsReintegrated))"/>
-                            </MudTooltip>
-                        }
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+                </MudItem>
+            </MudGrid>
+            
             @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity) != e.Quantity || Math.Truncate(GetModuleAndLavishReducePercent() * e.Quantity) != GetModuleAndLavishReducePercent() * e.Quantity))
             {
                 <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
@@ -227,58 +319,6 @@
                     </MudTooltip>
                 </MudStack>            
             }
-
-
-            @if (ShouldDisplayShare())
-            {
-                var list = GetProductsWithoutReintegratedElements();
-
-                <MudStack>
-                    <MudText Class="mt-2" Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.Share.Title")</MudText>
-                    <MudChart ChartType="ChartType.Donut"
-                              LegendPosition="Position.Right"
-                              Width="150px"
-                              Height="150px"
-                              InputData="@(list.Select(ue => (double)ue.Share).ToArray())"
-                              InputLabels="@(list.Select(ue => LocalizationService.GetTranslation(ue.Element.ItemOrTag) + " (" + Math.Round(ue.Share * 100) + "%)").ToArray())"/>
-                    <MudStack>
-                        @for (var i = 0; i < list.Count; i++)
-                        {
-                            var product = list[i];
-                            int index = i;
-
-                            <MudStack Row>
-                                <MudText Style="min-width: 100px">
-                                    @(LocalizationService.GetTranslation(product.Element.ItemOrTag)):
-                                </MudText>
-                                <MudSlider T="decimal"
-                                           Style="max-width: 350px"
-                                           Color="@_sliderColors[index % 3]"
-                                           Immediate="false"
-                                           Value="product.Share"
-                                           ValueChanged="@(v => ChangeShare(product, v))"
-                                           Max="1"
-                                           Min="0"
-                                           Disabled="_lockedSliders.Contains(product)"
-                                           Step="0.01m"/>
-                                <MudIconButton
-                                    Size="Size.Small"
-                                    OnClick="@(() => ChangeLockSliders(product))"
-                                    Icon="@(_lockedSliders.Contains(product) ? Icons.Material.Filled.Lock : Icons.Material.Outlined.Lock)"/>
-                            </MudStack>
-                        }
-                    </MudStack>
-                    <MudStack Row>
-                        <MudButton OnClick="FirstOnly">@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnly")</MudButton>
-                        <MudButton OnClick="Honest">@LocalizationService.GetTranslation("RecipeDialog.Share.Honest")</MudButton>
-                        <MudButton OnClick="Equality">@LocalizationService.GetTranslation("RecipeDialog.Share.Equality")</MudButton>
-                        @if (list.Any(e => (int)e.Element.Quantity != (int)list.Max(i => i.Element.Quantity)))
-                        {
-                            <MudButton OnClick="Equilibrate">@LocalizationService.GetTranslation("RecipeDialog.Share.Equilibrate")</MudButton>
-                        }
-                    </MudStack>
-                </MudStack>
-            }
         </MudStack>
     </DialogContent>
 </MudDialog>
@@ -291,14 +331,6 @@
 
     private readonly Color[] _sliderColors = [Color.Primary, Color.Tertiary, Color.Warning];
     private readonly List<UserElement> _lockedSliders = [];
-
-    private readonly TableGroupDefinition<UserElement> _userElementsDefinition = new()
-    {
-        Indentation = false,
-        Expandable = false,
-        IsInitiallyExpanded = true,
-        Selector = e => e.Element.IsIngredient() || e.IsReintegrated ? "Ingredients" : "Products"
-    };
 
     private bool ShouldDisplayShare()
     {
@@ -390,36 +422,7 @@
                               .Select(e => e.CurrentUserElement!)
                               .ToList();
     }
-
-    private async Task ChangeShare(UserElement userElement, decimal value)
-    {
-        var others = GetProductsWithoutReintegratedElements().Where(ue => ue != userElement).ToList();
-        var lockedOthers = others.Where(ue => _lockedSliders.Contains(ue)).ToList();
-        var unlockedOthers = others.Where(ue => !_lockedSliders.Contains(ue)).ToList();
-
-        if (unlockedOthers.Count == 0)
-        {
-            return;
-        }
-
-        var result = (1 - lockedOthers.Sum(l => l.Share) - value) / unlockedOthers.Count;
-
-        if (result < 0)
-        {
-            return;
-        }
-
-        userElement.Share = value;
-
-        foreach (var other in unlockedOthers)
-        {
-            other.Share = (1 - lockedOthers.Sum(l => l.Share) - userElement.Share) / unlockedOthers.Count;
-        }
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
-    }
-
+    
     private async Task Equality()
     {
         var userElements = GetProductsWithoutReintegratedElements();
