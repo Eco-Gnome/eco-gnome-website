@@ -42,6 +42,14 @@
 						              OnAdornmentClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"
 						              Variant="Variant.Outlined" />
 					</MudStack>
+					<MudStack Row>
+						<MudTextField Value="ContextService.CurrentServer!.EcoServerId" 
+						              Label="Eco Server Id" 
+						              Variant="Variant.Outlined"
+						              Adornment="Adornment.End"
+						              AdornmentIcon="@Icons.Material.Filled.DeleteForever"
+						              OnAdornmentClick="@(() => DissociateServer())"/>
+					</MudStack>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
 						<MudStack Spacing="0">
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes") @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
@@ -297,6 +305,16 @@
 		_selectedTag = tag == _selectedTag ? null : tag;
 	}
 
+	private async Task DissociateServer()
+	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ServerDissociate"));
+		if (!confirmed) return;
+
+		ServerDataService.Dissociate(ContextService.CurrentServer!);
+		await EcoCraftDbContext.SaveChangesAsync();
+		StateHasChanged();
+	}
+
 	private List<ItemOrTag> GetTags()
 	{
 		return ServerDataService.ItemOrTags
@@ -381,7 +399,7 @@
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -393,7 +411,7 @@
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)

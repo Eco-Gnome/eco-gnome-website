@@ -87,7 +87,8 @@
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
             "ClearAllMin": "Are you sure you want to clear all min prices?",
-            "ServerDeletion": "Are your sure you want to delete your server? There won't be no rollback!"
+            "ServerDeletion": "Are you sure you want to delete your server? There won't be no rollback!",
+            "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!"
         },
         "Items": {
             "Max": "Max price",

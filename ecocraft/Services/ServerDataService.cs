@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
@@ -47,6 +48,11 @@ public class ServerDataService(
         Recipes = recipesTask.Result;
         ItemOrTags = itemOrTagsTask.Result;
         JoinCode = server.JoinCode;
+    }
+
+    public void Dissociate(Server server)
+    {
+        server.EcoServerId = null;
     }
 
     public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)

@@ -39,6 +39,8 @@ builder.Services.AddDbContext<EcoCraftDbContext>(options =>
         }))
     );
 
+builder.Services.AddControllers();
+
 // DB Services
 builder.Services.AddScoped<CraftingTableDbService>();
 builder.Services.AddScoped<ElementDbService>();
@@ -104,9 +106,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+app.MapControllers();
 app.UseAntiforgery();
 
-//app.UseAuthentication();
+//app.UseAuthentication();.
 //app.UseAuthorization();
 
 app.MapRazorComponents<App>()

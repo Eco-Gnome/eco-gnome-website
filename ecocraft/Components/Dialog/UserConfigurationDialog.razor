@@ -197,7 +197,7 @@
 
 				if (foundUser is not null)
 				{
-					bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportBegin")} {foundUser.Pseudo} {LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportEnd")}");
+					var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportBegin")} {foundUser.Pseudo} {LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportEnd")}");
 
 					if (confirmed)
 					{

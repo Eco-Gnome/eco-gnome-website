@@ -16,7 +16,7 @@
         <MudTooltip RootClass="mud-nav-item" Color="Color.Warning" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavAdmin")">
             <MudNavLink IconColor="Color.Warning" ActiveClass="" Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
         </MudTooltip>
-        }
+    }
     @if (ContextService.CurrentUser?.SuperAdmin ?? false)
     {
         <MudTooltip RootClass="mud-nav-item" Color="Color.Error" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")">
