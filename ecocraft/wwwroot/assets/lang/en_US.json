@@ -91,8 +91,13 @@
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
             "ClearAllMin": "Are you sure you want to clear all min prices?",
-            "ServerDeletion": "Are your sure you want to delete your server? There won't be no rollback!"
+            "ServerDeletion": "Are you sure you want to delete your server? There won't be no rollback!",
+            "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!",
+            "UpdateJoinCode": "Are you sure you want to refresh your JoinCode? This will disabled any previously generated codes!"
         },
+        "EcoServerId": "Eco Server Id",
+        "EcoServerIdTooltip": "This field will be filled once this server is registered in-game thanks to the EcoGnomeMod.",
+        "JoinCodeTooltip": "Give this code to your players so they can join your server.",
         "Items": {
             "Max": "Max price",
             "Max.Tooltip": "Clear max prices",
@@ -107,14 +112,20 @@
             "Title": "Members"
         },
         "ServerSettings": {
-            "Crafting": "Crafting Tables:",
+            "ServerName": "Server name",
+            "Crafting": "Crafting Tables",
             "Delete": "Delete Server",
-            "Items": "Items:",
-            "Modules": "Modules:",
-            "Recipes": "Recipes:",
-            "Skills": "Skills:",
+            "Items": "Items",
+            "Tags": "Tags",
+            "Modules": "Upgrade Modules",
+            "Recipes": "Recipes",
+            "Elements": "Recipe Elements",
+            "Skills": "Skills",
             "Upload": "Upload Server Data",
-            "Title": "Server Settings"
+            "Title": "Server Settings",
+            "Stats": "Data Statistics",
+            "EcoGnomeModExplanation1": "Eco Gnome is capable of reading data from your Eco server to accurately calculate the prices of your items. It extracts skills, crafting tables, modules, items, and all recipes. It can read both modified vanilla data and data added by external mods.",
+            "EcoGnomeModExplanation2": "To do this, you need to download and install our server mod, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), on your Eco server. Once your server is restarted, a file named exported_data.json should be created at the root of your game server. You need to retrieve this file and upload it using the button below."
         },
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",
@@ -180,7 +191,14 @@
         "ExportBackup": "Export/Backup my User",
         "ImportReplace": "Import/Replace my User",
         "InGamePseudo": "In-Game pseudo",
+        "InGamePseudoTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
+        "InGameId": "In-Game Id",
+        "InGameIdTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
         "MyServers": "My servers",
+        "Pseudo": "Pseudo",
+        "PublicId": "Public Id",
+        "SecretId": "Secret Id (used inside Eco for registration)",
+        "ResetRegistration": "Are you sure you want to reset your current registration on this server? You won't be able to use in-game features on this server anymore!",
         "PopupConfirmImportBegin": "Are you sure you want to import the user with pseudo ",
         "PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
         "SnackbarCopy": "Join code copied to clipboard",

@@ -16,6 +16,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<CraftingTable> CraftingTables { get; set; }
 	public DbSet<PluginModule> PluginModules { get; set; }
 	public DbSet<User> Users { get; set; }
+	public DbSet<UserServer> UserServers { get; set; }
 	public DbSet<UserSetting> UserSettings { get; set; }
 	public DbSet<UserCraftingTable> UserCraftingTables { get; set; }
 	public DbSet<UserSkill> UserSkills { get; set; }

@@ -21,49 +21,74 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
 	<MudGrid Style="height: auto">
-		<MudItem sm="6">
+		<MudItem lg="6" md="12">
 			<MudPaper Style="height: 100%">
 				<MudPaper Class="pa-2 pl-4 border-5 d-flex align-center"
-				          Style="width: 100%; height: 45px; background-color: #303038 !important; border-radius: var(--mud-default-borderradius) 0 0 0;
-				           border-bottom: 1px solid var(--mud-palette-table-lines)"
+				          Style="width: 100%; height: 45px; background-color: #303038 !important; border-radius: var(--mud-default-borderradius) 0 0 0; border-bottom: 1px solid var(--mud-palette-table-lines)"
 				          Elevation="0">
 					<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Title")</MudText>
 				</MudPaper>
 				<MudStack Class="pa-4">
 					<MudStack Row>
-						<MudTextField Value="ContextService.CurrentServer!.Name" Label="Server name" Variant="Variant.Outlined" ValueChanged="(string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!, newServerName)"/>
-						<MudTextField Class="flex-no-grow"
-						              Readonly
-						              Value="@ContextService.CurrentServer!.JoinCode"
-						              Label="@LocalizationService.GetTranslation("JoinCode")"
-						              Adornment="Adornment.End"
-						              AdornmentColor="Color.Tertiary"
-						              AdornmentIcon="@Icons.Material.Filled.Refresh"
-						              OnAdornmentClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"
-						              Variant="Variant.Outlined" />
+						<MudTextField Value="ContextService.CurrentServer!.Name"
+						              Label="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.ServerName")"
+						              Variant="Variant.Outlined"
+						              ValueChanged="@((string newServerName) => OnServerNameChanged(ContextService.CurrentUserServer!, newServerName))" />
 					</MudStack>
-					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Center" Spacing="6">
-						<MudStack Spacing="0">
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes") @ServerDataService.Recipes.Count / Elements: @ServerDataService.Recipes.SelectMany(r => r.Elements).Count()</MudText>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items") @ServerDataService.ItemOrTags.Count(i => !i.IsTag) / Tags: @ServerDataService.ItemOrTags.Count(i => i.IsTag)</MudText>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills") @ServerDataService.Skills.Count(s => s.Profession is not null)</MudText>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting") @ServerDataService.CraftingTables.Count</MudText>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules") @ServerDataService.PluginModules.Count</MudText>
+					<MudStack Row>
+						<MudTooltip RootClass="flex-1" Text="@LocalizationService.GetTranslation("ServerManagement.JoinCodeTooltip")">
+							<MudTextField Readonly
+							              Value="@ContextService.CurrentServer!.JoinCode"
+							              Label="@LocalizationService.GetTranslation("JoinCode")"
+							              Adornment="Adornment.End"
+							              AdornmentColor="Color.Tertiary"
+							              AdornmentIcon="@Icons.Material.Filled.Refresh"
+							              OnAdornmentClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"
+							              Variant="Variant.Outlined"/>
+						</MudTooltip>
+						<MudTooltip RootClass="flex-1" Text="@LocalizationService.GetTranslation("ServerManagement.EcoServerIdTooltip")">
+							<MudTextField Value="@ContextService.CurrentServer!.EcoServerId"
+							              ReadOnly
+							              Label="@LocalizationService.GetTranslation("ServerManagement.EcoServerId")"
+							              ShrinkLabel
+							              Variant="Variant.Outlined"
+							              Adornment="Adornment.End"
+							              AdornmentIcon="@Icons.Material.Filled.DeleteForever"
+							              OnAdornmentClick="@(() => DissociateServer())"/>
+						</MudTooltip>
+					</MudStack>
+					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Start" Spacing="6">
+						<MudStack Spacing="0" Style="min-width: 220px">
+							<MudTable Items="_stats" Dense Hover>
+								<HeaderContent>
+									<MudTh colspan="2">@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Stats")</MudTh>
+								</HeaderContent>
+								<RowTemplate>
+									<MudTd>@context.Item1</MudTd>
+									<MudTd>@context.Item2</MudTd>
+								</RowTemplate>
+							</MudTable>
 						</MudStack>
-						<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
-							<ActivatorContent>
-								<MudButton Disabled="_showUploadServerDataLoader"
-								           Variant="Variant.Filled"
-								           Color="Color.Primary"
-								           StartIcon="@Icons.Material.Filled.CloudUpload">
-									@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
-									@if (_showUploadServerDataLoader)
-									{
-										<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
-									}
-								</MudButton>
-							</ActivatorContent>
-						</MudFileUpload>
+						<MudPaper Class="mud-background pa-3">
+							<MudStack AlignItems="AlignItems.Center" Style="text-indent: 8px">
+								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation1")" />
+								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation2")" />
+								<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+									<ActivatorContent>
+										<MudButton Disabled="_showUploadServerDataLoader"
+										           Variant="Variant.Filled"
+										           Color="Color.Primary"
+										           StartIcon="@Icons.Material.Filled.CloudUpload">
+											@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
+											@if (_showUploadServerDataLoader)
+											{
+												<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+											}
+										</MudButton>
+									</ActivatorContent>
+								</MudFileUpload>
+							</MudStack>
+						</MudPaper>
 					</MudStack>
 					<MudStack Row Justify="Justify.FlexEnd">
 						<MudButton HtmlTag="label"
@@ -82,17 +107,23 @@
 				</MudStack>
 			</MudPaper>
 		</MudItem>
-		<MudItem sm="6">
-			<MudTable Items="GetUserServers()"
+		<MudItem lg="6" md="12">
+			<MudTable Items="@GetUserServers()"
 			          Filter="new Func<UserServer,bool>(FilterPseudo)"
 			          FixedHeader="true"
-			          Height="300px"
+			          Height="500px"
 			          Dense="true">
 				<HeaderContent>
 					<MudTh>
 						<MudStack Row AlignItems="AlignItems.Center">
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.Members.Title")</MudText>
-							<MudTextField @bind-Value="_searchPseudo" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							<MudTextField @bind-Value="_searchPseudo"
+							              Immediate
+							              Placeholder="@LocalizationService.GetTranslation("Search")"
+							              Adornment="Adornment.Start"
+							              AdornmentIcon="@Icons.Material.Filled.Search"
+							              IconSize="Size.Medium"
+							              Class="mt-0" />
 						</MudStack>
 					</MudTh>
 					<MudTh></MudTh>
@@ -101,9 +132,9 @@
 					<MudTd>
 						<MudStack Row AlignItems="AlignItems.Center">
 							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Members.Tooltip.Admin")">
-								<MudIcon Class="mt-1" Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small"></MudIcon>
+								<MudIcon Class="mt-1" Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" />
 							</MudTooltip>
-							<MudText Typo="Typo.body2">@context.Pseudo</MudText>
+							<MudText Typo="Typo.body2">@context.GetPseudo()</MudText>
 						</MudStack>
 					</MudTd>
 					<MudTd>
@@ -133,13 +164,11 @@
 									<MudButton Variant="Variant.Filled"
 									           Color="Color.Success"
 									           StartIcon="@Icons.Material.Filled.Close"
-									           OnClick="@(() => CancelKick(context))">
-									</MudButton>
+									           OnClick="@(() => CancelKick(context))" />
 									<MudButton Variant="Variant.Filled"
 									           Color="Color.Warning"
 									           StartIcon="@Icons.Material.Filled.Check"
-									           OnClick="@(() => ConfirmKick(context))">
-									</MudButton>
+									           OnClick="@(() => ConfirmKick(context))" />
 								}
 							}
 						</MudStack>
@@ -150,7 +179,7 @@
 				</PagerContent>
 			</MudTable>
 		</MudItem>
-		<MudItem sm="4">
+		<MudItem lg="4" md="12">
 			<MudTable Items="@GetTags()"
 			          Filter="new Func<ItemOrTag,bool>(FilterTag)"
 			          Virtualize="false"
@@ -190,7 +219,7 @@
 				</PagerContent>
 			</MudTable>
 		</MudItem>
-		<MudItem sm="8">
+		<MudItem lg="8" md="12">
 			<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag,bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
 				<HeaderContent>
 					<MudTh>
@@ -265,6 +294,7 @@
 	private string _searchTag = "";
 	private string _searchItem = "";
 	private ItemOrTag? _selectedTag;
+	private List<(string, decimal)> _stats = [];
 
 	protected override void OnInitialized()
 	{
@@ -278,7 +308,22 @@
 	{
 		ContextService.OnContextChanged += StateHasChanged;
 
+		RecalculateStats();
+
 		return Task.CompletedTask;
+	}
+
+	private void RecalculateStats()
+	{
+		_stats.Clear();
+
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills"), ServerDataService.Skills.Count(s => s.Profession is not null)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting"), ServerDataService.CraftingTables.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules"), ServerDataService.PluginModules.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes"), ServerDataService.Recipes.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ServerDataService.Recipes.SelectMany(r => r.Elements).Count()));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ServerDataService.ItemOrTags.Count(i => !i.IsTag)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ServerDataService.ItemOrTags.Count(i => i.IsTag)));
 	}
 
 	public void Dispose()
@@ -297,6 +342,16 @@
 		_selectedTag = tag == _selectedTag ? null : tag;
 	}
 
+	private async Task DissociateServer()
+	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ServerDissociate"));
+		if (!confirmed) return;
+
+		ServerDataService.Dissociate(ContextService.CurrentServer!);
+		await EcoCraftDbContext.SaveChangesAsync();
+		StateHasChanged();
+	}
+
 	private List<ItemOrTag> GetTags()
 	{
 		return ServerDataService.ItemOrTags
@@ -313,7 +368,7 @@
 		if (file is not { ContentType: "application/json" })
 		{
 			Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok")}: not a JSON file", Severity.Error);
-			
+
 			return;
 		}
 
@@ -344,14 +399,16 @@
 			{
 				Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNok", errorCount.ToString(), string.Join(", ", recipeErrorNames))}", Severity.Warning);
 			}
+
+			RecalculateStats();
 		}
 		catch (ImportException)
 		{
 			_showUploadServerDataLoader = false;
 
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok"), Severity.Error);
-		}			
-		
+		}
+
 		StateHasChanged();
 	}
 
@@ -381,7 +438,7 @@
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -393,7 +450,7 @@
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
 	{
-		bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
 		if (!confirmed) return;
 
 		foreach (var itemOrTag in itemOrTags)
@@ -412,6 +469,9 @@
 
 	private async Task UpdateJoinCode(UserServer userServer)
 	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.UpdateJoinCode"));
+		if (!confirmed) return;
+
 		userServer.Server.GenerateJoinCode();
 		await ServerDbService.UpdateAndSave(userServer.Server);
 	}
@@ -457,7 +517,7 @@
 		if (userServerToKick == ContextService.CurrentUserServer)
 		{
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
-			
+
 			return;
 		}
 
@@ -470,11 +530,7 @@
 
 	private bool FilterPseudo(UserServer userServer)
 	{
-		if (string.IsNullOrWhiteSpace(_searchPseudo))
-			return true;
-		if (userServer.Pseudo.Contains(_searchPseudo, StringComparison.OrdinalIgnoreCase))
-			return true;
-		return false;
+		return string.IsNullOrWhiteSpace(_searchPseudo) || userServer.GetPseudo().Contains(_searchPseudo, StringComparison.OrdinalIgnoreCase);
 	}
 
 	private bool FilterTag(ItemOrTag itemOrTag)

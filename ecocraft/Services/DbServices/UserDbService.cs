@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace ecocraft.Services.DbServices;
 
@@ -17,6 +18,22 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 		return context.Users.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
 			.FirstOrDefaultAsync(u => u.Id == id);
+	}
+
+	public Task<User?> GetBySecretIdAsync(Guid secretId)
+	{
+		return context.Users
+			.Include(u => u.UserServers)
+			.ThenInclude(us => us.Server)
+			.FirstOrDefaultAsync(u => u.SecretId == secretId);
+	}
+
+	public Task<UserServer?> GetUserServerByEcoIdsAsync(string ecoUserId, string ecoServerId)
+	{
+		return context.UserServers
+			.Include(us => us.Server)
+			.Where(us => us.Server.EcoServerId == ecoServerId)
+			.FirstOrDefaultAsync(us => us.EcoUserId == ecoUserId);
 	}
 
 	public Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId)

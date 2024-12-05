@@ -157,7 +157,6 @@ public class ContextService(
             UserId = CurrentUser!.Id,
             ServerId = server.Id,
             IsAdmin = isAdmin,
-            Pseudo = CurrentUser.Pseudo,
         };
 
         userServer.UserSettings.Add(new UserSetting
@@ -197,9 +196,9 @@ public class ContextService(
 
         serverDbService.Delete(CurrentServer!);
         await dbContext.SaveChangesAsync();
-        
+
         var server = CurrentUser!.UserServers.FirstOrDefault()?.Server;
-        
+
         if (server is not null)
         {
             await ChangeServer(CurrentUser!.UserServers.First().Server);

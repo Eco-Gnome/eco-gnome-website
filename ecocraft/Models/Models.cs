@@ -198,7 +198,8 @@ public class User
 public class UserServer
 {
     [Key] public Guid Id { get; set; }
-    public string Pseudo { get; set; }
+    public string? Pseudo { get; set; }
+    public string? EcoUserId { get; set; }
     public bool IsAdmin { get; set; }
     [ForeignKey("User")] public Guid UserId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
@@ -212,6 +213,11 @@ public class UserServer
     public List<UserSetting> UserSettings { get; init; } = [];
     public List<UserRecipe> UserRecipes { get; init; } = [];
     public List<UserMargin> UserMargins { get; init; } = [];
+
+    public string GetPseudo()
+    {
+        return Pseudo is not null ? this.Pseudo : this.User.Pseudo;
+    }
 }
 
 public class UserSetting
@@ -333,6 +339,7 @@ public class Server
 {
     [Key] public Guid Id { get; set; }
     public string Name { get; set; }
+    public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
     public DateTime CreationDateTime { get; set; }
 	public string JoinCode { get; set; }

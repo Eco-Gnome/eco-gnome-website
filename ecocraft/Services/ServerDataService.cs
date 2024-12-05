@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
@@ -17,8 +18,6 @@ public class ServerDataService(
     public List<Recipe> Recipes { get; private set; } = [];
     public List<ItemOrTag> ItemOrTags { get; private set; } = [];
 
-    public string JoinCode { get; private set; } = "";
-
     public async Task RetrieveServerData(Server? server)
     {
         if (server is null)
@@ -28,7 +27,6 @@ public class ServerDataService(
             PluginModules = [];
             Recipes = [];
             ItemOrTags = [];
-            JoinCode = "";
 
             return;
         }
@@ -46,7 +44,11 @@ public class ServerDataService(
         PluginModules = pluginModulesTask.Result;
         Recipes = recipesTask.Result;
         ItemOrTags = itemOrTagsTask.Result;
-        JoinCode = server.JoinCode;
+    }
+
+    public void Dissociate(Server server)
+    {
+        server.EcoServerId = null;
     }
 
     public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)

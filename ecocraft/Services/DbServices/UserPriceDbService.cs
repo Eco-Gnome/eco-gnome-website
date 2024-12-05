@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace ecocraft.Services.DbServices;
 
@@ -15,6 +16,15 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	{
 		return context.UserPrices
 			.Where(s => s.UserServerId == userServer.Id)
+			.ToListAsync();
+	}
+
+	public Task<List<UserPrice>> GetByServerIdAndEcoUserId(Guid serverId, string ecoUserId)
+	{
+		return context.UserPrices
+			.Include(up => up.UserServer)
+			.Where(up => up.UserServer.ServerId == serverId && up.UserServer.EcoUserId == ecoUserId)
+			.Include(up => up.ItemOrTag)
 			.ToListAsync();
 	}
 

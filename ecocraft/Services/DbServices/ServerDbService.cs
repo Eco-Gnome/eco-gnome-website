@@ -15,13 +15,23 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 
 	public Task<List<Server>> GetAllDefaultAsync()
 	{
-		return context.Servers.Where(s => s.IsDefault).ToListAsync();
+		return context.Servers
+			.Where(s => s.IsDefault)
+			.ToListAsync();
 	}
 
 	public Task<Server?> GetByIdAsync(Guid id)
 	{
-		return context.Servers.Include(s => s.UserServers)
+		return context.Servers
+			.Include(s => s.UserServers)
+			.ThenInclude(us => us.User)
 			.FirstOrDefaultAsync(s => s.Id == id);
+	}
+
+	public Task<Server?> GetByEcoServerIdAsync(string ecoServerId)
+	{
+		return context.Servers
+			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 	}
 
     public Task<Server?> GetByJoinCodeAsync(string joinCode)

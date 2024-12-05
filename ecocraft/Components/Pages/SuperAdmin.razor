@@ -222,11 +222,11 @@
             return;
         }
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.1")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.2") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.3"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.4")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.5") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.6"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.7")}");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.1")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.2") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.3"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.4")} {(user.SuperAdmin ? LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.5") : LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.6"))} {LocalizationService.GetTranslation("SuperAdmin.ConfirmSuperAdmin.7")}");
 
         if (confirmed)
         {
-            bool confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("SuperAdmin.ConfirmTwiceSuperAdmin"));
+            var confirmedTwice = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("SuperAdmin.ConfirmTwiceSuperAdmin"));
 
             if (confirmedTwice)
             {
@@ -273,7 +273,7 @@
             return;
         }
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.1")} {user.Pseudo} {LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.2")}");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.1")} {user.Pseudo} {LocalizationService.GetTranslation("SuperAdmin.ConfirmUserDeletion.2")}");
 
         if (confirmed)
         {
@@ -307,7 +307,7 @@
 
     private async Task DeleteServer(Server server)
     {
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.1")} {server.Name} {LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.2")}");
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.1")} {server.Name} {LocalizationService.GetTranslation("SuperAdmin.ConfirmServerDeletion.2")}");
 
         if (confirmed)
         {
