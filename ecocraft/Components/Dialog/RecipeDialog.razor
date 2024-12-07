@@ -131,7 +131,7 @@
                                 </MudStack>
                             </MudTd>
                             <!-- deduction -->
-                            <MudTd Class="@($"pa-0 {(context.Element.IsProduct() ? "border-l-1" : "")}")">
+                            <MudTd Style="width: 0; padding: 0;" Class="@($"pa-0 {(context.Element.IsProduct() ? "border-l-1" : "")}")">
                                 @if (context.Element.IsProduct())
                                 {
                                     <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
@@ -236,15 +236,15 @@
                 </MudItem>
 
                 <MudItem sm="6">
-                <MudTable Items="GetProductUserElements()" Dense="true" Hover="true" Elevation="3" Class="mb-3">
+                <MudTable Items="GetProductUserElements()" Dense="true" Hover="true" Elevation="3" CustomFooter="true" Class="mb-3">
                     <HeaderContent>
                         <MudTh Class="mud-background pa-0"></MudTh>
-                        <MudTh colspan="2" Class="mud-background pl-0">
+                        <MudTh colspan="2" Class="mud-background pl-0 px-1">
                             <MudText>@LocalizationService.GetTranslation("Products")</MudText>
                         </MudTh>
-                        <MudTh colspan="1" Class="mud-background">
+                        <MudTh colspan="1" Class="px-1 mud-background">
                         </MudTh>
-                        <MudTh colspan="2" Class="mud-background">
+                        <MudTh colspan="2" Class="px-1 mud-background">
                             <MudStack Row Justify="Justify.FlexEnd">
                                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("RecipeDialog.TotalPrice")</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
@@ -255,7 +255,7 @@
                     </HeaderContent>
                     <RowTemplate>
                         <!-- reintegration -->
-                        <MudTd Style="width: 0; vertical-align: top; padding: 9px 0 0;" Class="border-r-1">
+                        <MudTd Style="height: 0; width: 0; vertical-align: top; padding: 9px 0 0;" Class="border-r-1">
                             <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True")">
                                 <MudIconButton Size="Size.Small"
                                                tabindex="-1"
@@ -264,7 +264,7 @@
                             </MudTooltip>
                         </MudTd>
                         <!-- quantity -->
-                        <MudTd Style="width: 60px">
+                        <MudTd Style="width: 60px" Class="px-1 pl-2">
                             <MudStack Row Spacing="1">
                                 @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2)).ToString("0.##"))
 
@@ -282,24 +282,36 @@
                             </MudStack>
                         </MudTd>
                         <!-- icon and name -->
-                        <MudTd>
+                        <MudTd Class="px-1 pl-2">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                 <EcoIcon Item="@context.Element.ItemOrTag"/>
                                 @LocalizationService.GetTranslation(context.Element.ItemOrTag)
                             </MudStack>
                         </MudTd>
                         <!-- unit price -->
-                        <MudTd>
+                        <MudTd Class="px-1">
                             <MudText Typo="Typo.body2" Color="Color.Primary" Style="text-align: end;">
                                 @(context.Price is not null ? Math.Round((decimal)context.Price!, 2).ToString("0.##") + " $/u" : "")
                             </MudText>
                         </MudTd>
                         <!-- share -->
-                        <MudTd>
-                            share here
+                        <MudTd Class="px-1">
+                            <MudNumericField T="decimal"
+                                             Class="rectangle-input"
+                                             Style="width: 90px; color: var(--mud-palette-primary)"
+                                             Format="0.##"
+                                             Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                             Adornment="Adornment.End"
+                                             AdornmentText="% "
+                                             Min="0"
+                                             Max="100"
+                                             Variant="Variant.Outlined"
+                                             Step="@(0.1m)"
+                                             Value="@(context.Share * 100)"
+                                             ValueChanged="@(v => UpdateShare(context, v / 100))"/>
                         </MudTd>
                         <!-- price -->
-                        <MudTd>
+                        <MudTd Class="px-1">
                             <MudStack Row Justify="Justify.FlexEnd">
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
                                     @(context.Price is not null
@@ -311,6 +323,43 @@
                             </MudStack>
                         </MudTd>
                     </RowTemplate>
+                    <FooterContent>
+                        <MudTr>
+                            <MudTd colspan="4" Class="mud-background"></MudTd>
+                            <MudTd Class="pa-0 py-1 mud-background">
+                                <MudStack Row Spacing="0">
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.HonestTooltip")">
+                                        <MudIconButton Size="Size.Small"
+                                                       Icon="@MDIIcons.Filled.ChartPie"
+                                                       OnClick="@(() => Honest())"/>
+                                    </MudTooltip>
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnlyTooltip")">
+                                        <MudIconButton Size="Size.Small"
+                                                       Icon="@MDIIcons.Filled.Numeric1Box"
+                                                       OnClick="@(() => FirstOnly())"/>
+                                    </MudTooltip>
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EqualityTooltip")">
+                                        <MudIconButton Size="Size.Small"
+                                                       Icon="@MDIIcons.Filled.EqualBox"
+                                                       OnClick="@(() => Equality())"/>
+                                    </MudTooltip>
+                                    @{
+                                        var firstQuantity = GetProductUserElements().First().Element.Quantity;
+
+                                        @if (GetProductUserElements().Any(ue => ue.Element.Quantity != firstQuantity))
+                                        {
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EquilibrateTooltip")">
+                                                <MudIconButton Size="Size.Small"
+                                                               Icon="@MDIIcons.Filled.Equalizer"
+                                                               OnClick="@(() => Equilibrate())"/>
+                                            </MudTooltip>
+                                        }
+                                    }
+                                </MudStack>
+                            </MudTd>
+                            <MudTd Class="mud-background"></MudTd>
+                        </MudTr>
+                    </FooterContent>
                 </MudTable>
                 </MudItem>
             </MudGrid>
@@ -431,6 +480,35 @@
                               .OrderBy(e => e.Index)
                               .Select(e => e.CurrentUserElement!)
                               .ToList();
+    }
+
+    private async Task UpdateShare(UserElement ue, decimal value)
+    {
+        ue.Share = Math.Clamp(value, 0, 1);
+
+        var others = GetProductUserElements().Where(e => e != ue).ToList();
+        var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
+        Console.WriteLine("----");
+        Console.WriteLine(remaining);
+
+        foreach (var other in others)
+        {
+            other.Share += Math.Round(remaining / others.Count, 4);
+            Console.WriteLine(other.Share);
+
+        }
+
+        var remainingF = 1 - GetProductUserElements().Sum(e => e.Share);
+        Console.WriteLine("remainingF");
+        Console.WriteLine(remainingF);
+
+        if (remainingF != 0)
+        {
+            others.First().Share += remainingF;
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task Equality()
