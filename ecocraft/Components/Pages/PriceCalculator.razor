@@ -1201,7 +1201,7 @@
         {
             ["Recipe"] = recipe,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
         var dialog = DialogService.Show<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
 
         await dialog.Result;

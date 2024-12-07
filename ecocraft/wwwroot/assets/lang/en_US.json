@@ -52,9 +52,14 @@
     "Options": "Options",
     "Products": "Products",
     "RecipeDialog": {
+        "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
+        "LaborReductionTooltip": "{initialValue} with {percent}% reduction due to skill level {skillLevel}",
+        "QuantityReductionTooltip": "{percent}% reduction due to upgrade module {skillLevel}",
+        "QuantityReductionLavishTooltip": "and lavish talent",
         "ReintegratedToolTip": {
             "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
             "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
