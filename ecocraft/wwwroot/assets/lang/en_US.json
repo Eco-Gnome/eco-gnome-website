@@ -135,6 +135,7 @@
         }
     },
     "Skill": "Skill",
+    "NoSkill": "No Skill",
     "SuperAdmin": {
         "ActionCol": "Action",
         "ConfirmServerDeletion": {

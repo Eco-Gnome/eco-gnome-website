@@ -564,7 +564,10 @@
                             </MudTh>
                         </HeaderContent>
                         <GroupHeaderTemplate>
-                            <MudTh Class="mud-background-gray pl-8" colspan="5">@LocalizationService.GetTranslation((IHasLocalizedName)context.Key) [@context.Items.Count()]</MudTh>
+                            <MudTh Class="mud-background-gray pl-8" colspan="5">
+                                @(context.Key is not null ? LocalizationService.GetTranslation((IHasLocalizedName)context.Key) : LocalizationService.GetTranslation("NoSkill"))
+                                [@context.Items.Count()]
+                            </MudTh>
                         </GroupHeaderTemplate>
                         <RowTemplate>
                             @{

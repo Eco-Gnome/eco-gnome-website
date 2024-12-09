@@ -19,11 +19,10 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 			.ToListAsync();
 	}
 
-	public Task<List<UserPrice>> GetByServerIdAndEcoUserId(Guid serverId, string ecoUserId)
+	public Task<List<UserPrice>> GetByUserServerId(UserServer userServer)
 	{
 		return context.UserPrices
-			.Include(up => up.UserServer)
-			.Where(up => up.UserServer.ServerId == serverId && up.UserServer.EcoUserId == ecoUserId)
+			.Where(up => up.UserServer == userServer && up.Price != null)
 			.Include(up => up.ItemOrTag)
 			.ToListAsync();
 	}

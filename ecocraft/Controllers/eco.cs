@@ -1,13 +1,11 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Controllers;
 
 [ApiController]
-[Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+[Route("api/[controller]")]
 public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userPriceDbService, ServerDbService serverDbService, UserDbService userDbService) : ControllerBase
 {
     /*
@@ -35,6 +33,9 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
     [HttpGet("register-server")]
     public async Task<IActionResult> RegisterServer([FromQuery] string joinCode, [FromQuery] string ecoServerId)
     {
+        Console.WriteLine(joinCode);
+        Console.WriteLine(ecoServerId);
+
         var server = await serverDbService.GetByJoinCodeAsync(joinCode);
 
         if (server == null)
@@ -42,7 +43,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
             return NotFound("Eco-Gnome server not found. Please create your server in Eco-Gnome and retrieve the correct server id from server-management page.");
         }
 
-        if (server.EcoServerId != ecoServerId)
+        if (server.EcoServerId is not null && server.EcoServerId != ecoServerId)
         {
             return BadRequest();
         }
@@ -78,7 +79,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
             return NotFound("Please join the server first on Eco-Gnome thanks to the JoinCode provided by your server admin.");
         }
 
-        if (userServer.EcoUserId != ecoUserId)
+        if (userServer.EcoUserId is not null && userServer.EcoUserId != ecoUserId)
         {
             return BadRequest("Eco-Gnome User is already associated to an Eco user.");
         }
@@ -91,18 +92,30 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
         return Ok();
     }
 
-
     [HttpGet("user-prices")]
-    public async Task<IActionResult> GetUserPrices([FromQuery] string serverId, [FromQuery] string ecoUserId)
+    public async Task<IActionResult> GetUserPrices([FromQuery] string ecoServerId, [FromQuery] string ecoUserId)
     {
-        if (string.IsNullOrWhiteSpace(serverId) || string.IsNullOrWhiteSpace(ecoUserId))
+        if (string.IsNullOrWhiteSpace(ecoServerId) || string.IsNullOrWhiteSpace(ecoUserId))
         {
-            return BadRequest(new { Error = "serverId and ecoUserId are required and cannot be empty." });
+            return BadRequest(new { Error = "ecoServerId and ecoUserId are required and cannot be empty." });
         }
 
-        var userPrices = await userPriceDbService.GetByServerIdAndEcoUserId(new Guid(serverId), ecoUserId);
+        var userServer = await userDbService.GetUserServerByEcoIdsAsync(ecoUserId, ecoServerId);
 
-        return Ok(userPrices.Select(up => (Name: up.ItemOrTag.Name, Price: up.Price)));
+        if (userServer is null)
+        {
+            return BadRequest(new { Error = "Can't find user or server." });
+        }
+
+        var userPrices = await userPriceDbService.GetByUserServerId(userServer);
+
+        return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, (decimal)up.Price!)));
     }
+}
 
+
+public class EcoGnomePrice(string name, decimal price)
+{
+    public string Name { get; set; } = name;
+    public decimal Price { get; set; } = price;
 }
