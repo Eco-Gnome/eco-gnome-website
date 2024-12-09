@@ -296,19 +296,22 @@
                         </MudTd>
                         <!-- share -->
                         <MudTd Class="px-1">
-                            <MudNumericField T="decimal"
-                                             Class="rectangle-input"
-                                             Style="width: 90px; color: var(--mud-palette-primary)"
-                                             Format="0.##"
-                                             Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                             Adornment="Adornment.End"
-                                             AdornmentText="% "
-                                             Min="0"
-                                             Max="100"
-                                             Variant="Variant.Outlined"
-                                             Step="@(0.1m)"
-                                             Value="@(context.Share * 100)"
-                                             ValueChanged="@(v => UpdateShare(context, v / 100))"/>
+                            @if (GetProductUserElements().Count > 1)
+                            {
+                                <MudNumericField T="decimal"
+                                                 Class="rectangle-input"
+                                                 Style="width: 90px; color: var(--mud-palette-primary)"
+                                                 Format="0.##"
+                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                 Adornment="Adornment.End"
+                                                 AdornmentText="% "
+                                                 Min="0"
+                                                 Max="100"
+                                                 Variant="Variant.Outlined"
+                                                 Step="@(0.1m)"
+                                                 Value="@(context.Share * 100)"
+                                                 ValueChanged="@(v => UpdateShare(context, v / 100))"/>
+                            }
                         </MudTd>
                         <!-- price -->
                         <MudTd Class="px-1">
