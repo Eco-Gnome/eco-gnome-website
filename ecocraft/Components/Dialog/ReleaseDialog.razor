@@ -9,11 +9,13 @@
         </MudStack>
     </TitleContent>
     <DialogContent>
-        <MudStack>
-            @foreach (var releaseVersion in ReleaseVersionService.ReleaseVersions)
-            {
-                <ReleaseCard ReleaseVersion="@releaseVersion" />
-            }
+        <MudStack Class="mb-6">
+            <MudStack Spacing="6">
+                @foreach (var releaseVersion in ReleaseVersionService.ReleaseVersions)
+                {
+                    <ReleaseCard ReleaseVersion="@releaseVersion"/>
+                }
+            </MudStack>
         </MudStack>
     </DialogContent>
 </MudDialog>

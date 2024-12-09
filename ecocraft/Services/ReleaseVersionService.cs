@@ -13,6 +13,17 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "0.2.0",
+            "2024-12-09",
+            "Official second beta version",
+            """
+            - UI Improvements: UI has been improved to increase readability and usability of the website
+            - Eco Sync: Synchronize your prices in-game thanks to a chat command of the [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod)
+            - Translations: Website is designed to be translated in all Eco-supported languages. Translations are still WIP.
+            - Margin Calculation: You can now select between two types of margin calculation: MarkUp or GrossMargin
+            """
+        ),
+        new ReleaseVersion(
             "0.1.0",
             "2024-11-18",
             "Official first beta version",
