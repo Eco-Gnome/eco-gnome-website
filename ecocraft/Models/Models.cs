@@ -321,6 +321,35 @@ public class UserPrice: IHasPrice
     public UserServer UserServer { get; set; }
     public UserElement? PrimaryUserElement { get; set; }
     public UserPrice? PrimaryUserPrice { get; set; }
+
+    public void SetPrices(decimal? price, MarginType? marginType)
+    {
+        Price = price;
+
+        if (Price is null || UserMargin is null || marginType is null)
+        {
+            MarginPrice = null;
+            return;
+        }
+
+        switch (marginType)
+        {
+            case MarginType.MarkUp:
+                MarginPrice = Price * (1 + UserMargin.Margin / 100);
+                break;
+            case MarginType.GrossMargin:
+            {
+                var divisionFactor = 1 - UserMargin.Margin / 100;
+
+                if (divisionFactor > 0)
+                {
+                    MarginPrice = Price / divisionFactor;
+                }
+
+                break;
+            }
+        }
+    }
 }
 
 public class UserRecipe

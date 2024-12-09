@@ -6,7 +6,7 @@ namespace ecocraft.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userPriceDbService, ServerDbService serverDbService, UserDbService userDbService) : ControllerBase
+public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userPriceDbService, UserSettingDbService userSettingDbService, ServerDbService serverDbService, UserDbService userDbService) : ControllerBase
 {
     /*
      * Registrations:
@@ -109,7 +109,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
 
         var userPrices = await userPriceDbService.GetByUserServerId(userServer);
 
-        return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, (decimal)up.Price!)));
+        return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, Math.Round(up.MarginPrice ?? (decimal)up.Price!, 2))));
     }
 }
 

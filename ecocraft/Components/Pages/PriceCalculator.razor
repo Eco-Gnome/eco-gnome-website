@@ -674,8 +674,7 @@
                                             </MudSelect>
                                         </div>
                                         @{
-                                            var marginPrice = GetMarginPrice(context.CurrentUserPrice!);
-                                            var hasMarginPriceError = context.CurrentUserPrice!.Price is not null && marginPrice is null;
+                                            var hasMarginPriceError = context.CurrentUserPrice!.Price is not null && context.CurrentUserPrice!.MarginPrice is null;
 
                                             <MudTooltip Disabled="@(!hasMarginPriceError)"
                                                         Text="@LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")">
@@ -689,15 +688,16 @@
                                                                  Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
                                                                  AdornmentIcon="@MDIIcons.Outline.Information"
                                                                  AdornmentColor="Color.Warning"
-                                                                 Value="@marginPrice"
+                                                                 Value="@context.CurrentUserPrice!.MarginPrice"
                                                                  Variant="Variant.Outlined"/>
                                             </MudTooltip>
                                         }
+
                                         @if (context.CurrentUserPrice.Price is not null)
                                         {
                                             <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                            Size="Size.Small"
-                                                           OnClick="@(() => CopyToClipboard(GetMarginPrice(context.CurrentUserPrice!)))"/>
+                                                           OnClick="@(() => CopyToClipboard(context.CurrentUserPrice!.MarginPrice))"/>
                                         }
                                     </MudStack>
                                 </MudTd>
@@ -958,35 +958,6 @@
         Navigation.NavigateTo("/", forceLoad: true);
     }
 
-    private decimal? GetMarginPrice(UserPrice userPrice)
-    {
-        var marginRate = userPrice.UserMargin?.Margin ?? 0;
-
-        if (userPrice.Price is null)
-        {
-            return null;
-        }
-
-        if (UserServerDataService.UserSetting!.MarginType == MarginType.MarkUp)
-        {
-            return userPrice.Price * (1 + marginRate / 100);
-        }
-
-        if (UserServerDataService.UserSetting!.MarginType == MarginType.GrossMargin)
-        {
-            var divisionFactor = 1 - marginRate / 100;
-
-            if (divisionFactor <= 0)
-            {
-                return null;
-            }
-
-            return userPrice.Price / divisionFactor;
-        }
-
-        return userPrice.Price;
-    }
-
     private Task<IEnumerable<CraftingTable>> SearchCraftingTables(string value, CancellationToken token)
     {
         IEnumerable<CraftingTable> result;
@@ -1187,7 +1158,8 @@
     {
         userPrice.UserMargin = userMargin;
         UserPriceDbService.Update(userPrice);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)

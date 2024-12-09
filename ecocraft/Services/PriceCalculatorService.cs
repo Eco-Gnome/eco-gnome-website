@@ -56,6 +56,9 @@ public class PriceCalculatorService(
             .ToList()
             .ForEach(up => up.Price = null);
 
+        userServerDataService.UserPrices.ForEach(up => up.MarginPrice = null);
+
+        var marginType = userServerDataService.UserSetting!.MarginType;
         List<UserRecipe> remainingUserRecipes = userServerDataService.UserRecipes.ToList();
         int nbHandled;
 
@@ -173,7 +176,7 @@ public class PriceCalculatorService(
                     // We choose the PrimaryUserElement.Price
                     if (product.Element.ItemOrTag.CurrentUserPrice!.PrimaryUserElement == product)
                     {
-                        product.Element.ItemOrTag.CurrentUserPrice!.Price = product.Price;
+                        product.Element.ItemOrTag.CurrentUserPrice!.SetPrices(product.Price, marginType);
                     }
                     else if (product.Element.ItemOrTag.CurrentUserPrice!.PrimaryUserElement is null)
                     {
@@ -184,7 +187,7 @@ public class PriceCalculatorService(
 
                         if (relatedUserElements.All(ue => ue.Price is not null))
                         {
-                            product.Element.ItemOrTag.CurrentUserPrice!.Price = relatedUserElements.Min(ue => ue.Price);
+                            product.Element.ItemOrTag.CurrentUserPrice!.SetPrices(relatedUserElements.Min(ue => ue.Price), marginType);
                         }
                     }
                 }
