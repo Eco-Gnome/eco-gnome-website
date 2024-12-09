@@ -125,7 +125,7 @@
             "Title": "Server Settings",
             "Stats": "Data Statistics",
             "EcoGnomeModExplanation1": "Eco Gnome is capable of reading data from your Eco server to accurately calculate the prices of your items. It extracts skills, crafting tables, modules, items, and all recipes. It can read both modified vanilla data and data added by external mods.",
-            "EcoGnomeModExplanation2": "To do this, you need to download and install our server mod, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), on your Eco server. Once your server is restarted, a file named exported_data.json should be created at the root of your game server. You need to retrieve this file and upload it using the button below."
+            "EcoGnomeModExplanation2": "To do this, you need to download and install our server mod, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), on your Eco server. Once your server is restarted, a file named eco_gnome_data.json should be created in the root folder of your game server. You need to retrieve this file and upload it using the button below."
         },
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",

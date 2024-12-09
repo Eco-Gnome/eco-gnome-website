@@ -24,7 +24,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
      *
      *   - Player registers his userId:
      *     - User type command /eco-gnome register <userSecretId>
-     *     - The mod calls eco-gnome with /api/eco/register-user ecoServerId, userSecretId, ecoUserId
+     *     - The mod calls eco-gnome with /api/eco/register-user ecoServerId, userSecretId, ecoUserId, serverPseudo
      *       - if the server is not found, throw error
      *       - if the user is not found, throw error
      *       - if the userServer does not exist, throw error (TODO: allow to join the server automatically)
@@ -102,7 +102,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
 
         var userPrices = await userPriceDbService.GetByServerIdAndEcoUserId(new Guid(serverId), ecoUserId);
 
-        return Ok(userPrices);
+        return Ok(userPrices.Select(up => (Name: up.ItemOrTag.Name, Price: up.Price)));
     }
 
 }
