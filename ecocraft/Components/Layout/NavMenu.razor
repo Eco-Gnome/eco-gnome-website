@@ -5,22 +5,22 @@
 
 <MudNavMenu>
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavCalculator")">
-        <MudNavLink Href="" ActiveClass="" Match="NavLinkMatch.All" IconColor="Color.Primary" Icon="@Icons.Material.Filled.Balance">@LocalizationService.GetTranslation("NavMenu.NavCalculator")</MudNavLink>
+        <MudNavLink Href="" Match="NavLinkMatch.All" IconColor="Color.Primary" Icon="@Icons.Material.Filled.Balance">@LocalizationService.GetTranslation("NavMenu.NavCalculator")</MudNavLink>
     </MudTooltip>
     <MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
-        <MudNavLink Href="graph-view" ActiveClass="" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
+        <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>
 
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
         <MudTooltip RootClass="mud-nav-item" Color="Color.Warning" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavAdmin")">
-            <MudNavLink IconColor="Color.Warning" ActiveClass="" Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
+            <MudNavLink IconColor="Color.Warning" Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
         </MudTooltip>
     }
     @if (ContextService.CurrentUser?.SuperAdmin ?? false)
     {
         <MudTooltip RootClass="mud-nav-item" Color="Color.Error" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")">
-            <MudNavLink IconColor="Color.Error" ActiveClass="" Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
+            <MudNavLink IconColor="Color.Error" Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
         </MudTooltip>
     }
 </MudNavMenu>

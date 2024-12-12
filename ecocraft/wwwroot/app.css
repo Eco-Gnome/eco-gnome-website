@@ -232,3 +232,7 @@
 .app-bar .mud-toolbar {
     padding-left: 4px;
 }
+
+.mud-list .mud-selected-item.mud-primary-text {
+    color: inherit!important;
+}

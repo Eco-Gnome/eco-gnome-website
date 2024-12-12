@@ -264,6 +264,7 @@
 						                 Value="context.MinPrice"
 						                 Format="F2"
 						                 Variant="Variant.Outlined"
+						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
 						                 ValueChanged="@(value => OnMinValueChange(context,value))" />
 					</MudTd>
 					<MudTd>
@@ -274,6 +275,7 @@
 						                 Value="context.MaxPrice"
 						                 Format="F2"
 						                 Variant="Variant.Outlined"
+						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
 						                 ValueChanged="@(value => OnMaxValueChange(context,value))" />
 					</MudTd>
 				</RowTemplate>
