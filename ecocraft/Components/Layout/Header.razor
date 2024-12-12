@@ -48,7 +48,7 @@
                        Size="Size.Medium"
                        aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
                        Color="Color.Tertiary"
-                       OnClick="CreateServer"/>
+                       OnClick="OpenServerDialog"/>
     </MudTooltip>
 </MudStack>
 
@@ -119,66 +119,10 @@
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
-    private async Task CreateServer()
+    private void OpenServerDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
-        var dialog = DialogService.Show<ServerDialog>(LocalizationService.GetTranslation("Header.ServerDialog.Title"), options);
-
-        var result = await dialog.Result;
-
-        if (!result!.Canceled)
-        {
-            if (result.Data is string[] resultArray)
-            {
-                var returnType = resultArray[0];
-                var returnData = resultArray[1];
-                if (returnType == "Create")
-                {
-                    Server newServer = new Server { Name = returnData!, IsDefault = false, CreationDateTime = DateTime.UtcNow };
-                    newServer.GenerateJoinCode();
-                    await ServerDbService.AddAndSave(newServer);
-
-                    await ContextService.JoinServer(newServer, true);
-
-                    await ContextService.ChangeServer(newServer);
-                    Navigation.NavigateTo("/server-management");
-                }
-                else if(returnType == "Join")
-                {
-                    await OnJoinServer(returnData);
-                }
-            }
-        }
-    }
-
-    private async Task OnJoinServer(string? joinCode)
-    {
-        if (string.IsNullOrEmpty(joinCode))
-        {
-            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.JoinError"), Severity.Error);
-            return;
-        }
-
-        var server = ServerDbService.GetByJoinCodeAsync(joinCode).Result;
-
-        if (server is null)
-        {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.ServerNotFound"), Severity.Error);
-            return;
-        }
-
-        if (ContextService.AvailableServers.Contains(server))
-        {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.AlreadyInServer"), Severity.Warning);
-            return;
-        }
-
-        await ContextService.JoinServer(server);
-        await ContextService.ChangeServer(server);
+        DialogService.Show<ServerDialog>(LocalizationService.GetTranslation("Header.ServerDialog.Title"), options);
     }
 
     private async Task ConfigureUser()

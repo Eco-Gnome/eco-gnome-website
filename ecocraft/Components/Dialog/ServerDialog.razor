@@ -1,5 +1,12 @@
-﻿@using ecocraft.Services
+﻿@using ecocraft.Extensions
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
 @inject LocalizationService LocalizationService
+@inject ServerDbService ServerDbService
+@inject ContextService ContextService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <TitleContent>
@@ -81,18 +88,51 @@
         }
     }
 
-    private void OnCreateServer()
+    private async Task OnCreateServer()
     {
         if (ServerName.Length < 3)
         {
             return;
         }
 
-        MudDialog.Close(DialogResult.Ok(new[] { LocalizationService.GetTranslation("ServerDialog.Create"), ServerName }));
+        Server newServer = new Server { Name = ServerName, IsDefault = false, CreationDateTime = DateTime.UtcNow };
+        newServer.GenerateJoinCode();
+        await ServerDbService.AddAndSave(newServer);
+
+        await ContextService.JoinServer(newServer, true);
+
+        await ContextService.ChangeServer(newServer);
+        Navigation.NavigateTo("/server-management");
     }
 
-    private void OnJoinServer()
+    private async Task OnJoinServer()
     {
-        MudDialog.Close(DialogResult.Ok(new[] { LocalizationService.GetTranslation("ServerDialog.Join"), JoinCode }));
+        if (string.IsNullOrEmpty(JoinCode))
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.JoinError"), Severity.Error);
+            return;
+        }
+
+        var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
+
+        if (server is null)
+        {
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.ServerNotFound"), Severity.Error);
+            return;
+        }
+
+        if (ContextService.AvailableServers.Contains(server))
+        {
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+            Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.AlreadyInServer"), Severity.Warning);
+            return;
+        }
+
+        await ContextService.JoinServer(server);
+        await ContextService.ChangeServer(server);
+        MudDialog.Close();
     }
 }

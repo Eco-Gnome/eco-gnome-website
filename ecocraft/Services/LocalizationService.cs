@@ -73,11 +73,15 @@ public partial class LocalizationService(LocalStorageService localStorageService
     public string GetTranslation(string key, params string[] args)
     {
         AllTranslations.TryGetValue(CurrentLanguageCode, out var translations);
-        translations ??= AllTranslations[DefaultLanguageCode];
 
-        if (TryGetTranslation(translations, key, out var value))
+        if (translations is not null && TryGetTranslation(translations, key, out var value))
         {
             return ReplacePlaceholders(value, args);
+        }
+
+        if (TryGetTranslation(AllTranslations[DefaultLanguageCode], key, out var value2))
+        {
+            return ReplacePlaceholders(value2, args);
         }
 
         Console.WriteLine($"Missing translation for key: {key}");
