@@ -457,8 +457,8 @@
                                                                                   ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
                                                                                   : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
                                                         <MudNumericField T="decimal?"
-                                                                         Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")}")"
-                                                                         Style="@($"width: 85px; color: {(item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-primary)" : item.CurrentUserPrice.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null ? "var(--mud-palette-warning)" : "inherit")};")"
+                                                                         Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
+                                                                         Style="width: 85px;"
                                                                          HideSpinButtons="@isAutoCalculatedPrice"
                                                                          Format="0.##"
                                                                          Disabled="@isAutoCalculatedPrice"
