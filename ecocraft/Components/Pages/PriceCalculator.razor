@@ -1125,9 +1125,9 @@
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
     {
-
         userMargin.Margin = margin;
-        await EcoCraftDbContext.SaveChangesAsync();
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task UpdateMarginName(UserMargin userMargin, string name)
