@@ -79,6 +79,7 @@ builder.Services.AddScoped<ShoppingListDataService>();
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
 builder.Services.AddScoped<LocalizationService>();
+builder.Services.AddScoped<JSInteropService>();
 
 // Authorization
 builder.Services.AddScoped<Authorization>();
