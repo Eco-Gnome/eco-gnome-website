@@ -42,11 +42,30 @@
     "Level": "Level",
     "Upgrade": "Upgrade",
     "Margins": "Margins",
+    "MapGenerator": {
+        "Title": "MAP Generator",
+        "CreationTitle": "MAP Creation",
+        "LoadTitle": "MAP Load",
+        "ImportButton": "Import Existing Map",
+        "RebaseHeightmap": "Rebase Heightmap",
+        "CreateButton": "Create",
+        "Snackbar": {
+            "TooMuchFiles": "You can't upload more than {number} files!",
+            "NoFiles": "No files have been uploaded",
+            "WrongFiles": "You need to upload correct files!"
+        },
+        "2dToolbar": {
+            "Title": "2D Toolbar",
+            "Pen": "Pen",
+            "Fill": "Fill"
+        }
+    },
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
         "NavGraph": "Graph View (WIP)",
-        "NavSuperAdmin": "Super Admin"
+        "NavSuperAdmin": "Super Admin",
+        "MapGenerator": "Map Generator"
     },
     "None": "None",
     "Options": "Options",
