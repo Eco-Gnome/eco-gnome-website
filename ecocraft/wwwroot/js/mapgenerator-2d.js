@@ -55,7 +55,7 @@
 
         this.container.addEventListener("mousemove", (event) => this.onMouseMove(event));
 
-        this.container.addEventListener("mouseup", (event) => this.onMouseLeaveOrUp(event));
+        this.container.addEventListener("mouseup", (event) => this.onMouseLeaveOrUp(event, "up"));
         this.container.addEventListener("mouseleave", (event) => this.onMouseLeaveOrUp(event));
     },
     loadAllCanvas(defaultColors) {
@@ -101,10 +101,17 @@
         const ctx = this.activeCanvasObj.bufferContext;
         ctx.save();
         ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = "source-over";
         ctx.imageSmoothingEnabled = false;
-        ctx.fillStyle = this.toolColor;
-        ctx.strokeStyle = this.toolColor;
+
+        if (this.currentTool === "pen") {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = this.toolColor;
+            ctx.strokeStyle = this.toolColor;
+        } else {
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.fillStyle = "#000000";
+            ctx.strokeStyle = "#000000";
+        }
 
         this.drawInterpolatedLine(ctx, this.lastX, this.lastY, realX, realY, this.toolSize);
 
@@ -216,13 +223,18 @@
         ctx.putImageData(imageData, 0, 0);
         this.redraw(this.activeCanvasObj);
     },
-    onMouseLeaveOrUp(event) {
+    onMouseLeaveOrUp(event, type) {
         this.isPanning = false;
         this.isDrawing = false;
         this.lastX = null;
         this.lastY = null;
         this.activeCanvasObj.canvas.style.cursor = "inherit";
-        this.onMouseMove(event);
+
+        if (type === "up") {
+            this.onMouseMove(event);
+        } else {
+            this.redraw(this.activeCanvasObj);
+        }
     },
     onMouseDown(event) {
         if (event.button === 2) {
@@ -234,6 +246,7 @@
         } else if (event.button === 0) {
             switch (this.currentTool) {
                 case "pen":
+                case "eraser":
                     this.isDrawing = true;
                     break;
                 case "fill":
@@ -251,22 +264,19 @@
             let newOffsetX = event.clientX - this.startX;
             let newOffsetY = event.clientY - this.startY;
 
-            // Taille réelle du canvas après zoom
             const scaledWidth = this.size * this.scale;
             const scaledHeight = this.size * this.scale;
 
-            // Calcul des limites de pan pour empêcher de sortir du container
             let maxOffsetX = Math.max(0, (this.container.clientWidth - scaledWidth) / 2);
             let maxOffsetY = Math.max(0, (this.container.clientHeight - scaledHeight) / 2);
 
-            // Appliquer les contraintes
             this.offsetX = Math.min(maxOffsetX, Math.max(newOffsetX, this.container.clientWidth - scaledWidth - maxOffsetX));
             this.offsetY = Math.min(maxOffsetY, Math.max(newOffsetY, this.container.clientHeight - scaledHeight - maxOffsetY));
 
-            this.allCanvasObj.forEach(canvasObj => this.redraw(canvasObj));
+            this.redraw(this.activeCanvasObj);
         }
 
-        if (!this.isPanning && this.currentTool === "pen") {
+        if (!this.isPanning && this.currentTool === "pen" || this.currentTool === "eraser") {
             this.drawPreviz(event);
         }
     },
@@ -285,26 +295,20 @@
         const mouseX = clientX - rect.left;
         const mouseY = clientY - rect.top;
 
-        // Convertir en coordonnées de l'image avant zoom
         const zoomX = (mouseX - this.offsetX) / this.scale;
         const zoomY = (mouseY - this.offsetY) / this.scale;
 
-        // Calculer la nouvelle échelle
         let newScale = Math.min(Math.max(this.scale * zoomFactor, this.minScale), this.maxScale);
 
-        // Taille réelle après zoom
         const scaledWidth = this.size * newScale;
         const scaledHeight = this.size * newScale;
 
-        // Limites pour empêcher de dépasser les bords
         let maxOffsetX = Math.max(0, (this.container.clientWidth - scaledWidth) / 2);
         let maxOffsetY = Math.max(0, (this.container.clientHeight - scaledHeight) / 2);
 
-        // Ajuster l'offset pour centrer le zoom sur la souris
         this.offsetX -= (zoomX * newScale - zoomX * this.scale);
         this.offsetY -= (zoomY * newScale - zoomY * this.scale);
 
-        // Appliquer les limites de pan
         this.offsetX = Math.min(maxOffsetX, Math.max(this.offsetX, this.container.clientWidth - scaledWidth - maxOffsetX));
         this.offsetY = Math.min(maxOffsetY, Math.max(this.offsetY, this.container.clientHeight - scaledHeight - maxOffsetY));
 
@@ -331,7 +335,13 @@
         this.activeCanvasObj.context.translate(this.offsetX, this.offsetY);
         this.activeCanvasObj.context.scale(this.scale, this.scale);
         this.activeCanvasObj.context.globalAlpha = 0.75;
-        this.activeCanvasObj.context.fillStyle = this.toolColor;
+
+        if (this.currentTool === "pen") {
+            this.activeCanvasObj.context.fillStyle = this.toolColor;
+        } else {
+            this.activeCanvasObj.context.fillStyle = "#00000000";
+        }
+
         this.activeCanvasObj.context.strokeStyle = "#000000";
         this.activeCanvasObj.context.lineWidth = 1;
         this.activeCanvasObj.context.beginPath();
