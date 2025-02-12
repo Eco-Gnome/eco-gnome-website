@@ -56,8 +56,12 @@
         },
         "2dToolbar": {
             "Title": "2D Toolbar",
+            "ToolSize": "Tool size",
             "Pen": "Pen",
-            "Fill": "Fill"
+            "Eraser": "Eraser",
+            "Fill": "Fill",
+            "River": "River",
+            "Lake": "Lake"
         }
     },
     "NavMenu": {
