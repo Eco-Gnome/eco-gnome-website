@@ -35,14 +35,14 @@ with open("ecocraft/wwwroot/assets/lang/en_US.json", "r", encoding="utf-8") as f
     english_data = json.load(f)
 
 def translate_text(text, target_language):
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": f"You are a translation assistant. You will translate a file for a website named Eco Gnome, that is a production & economy assistant for the video game called Eco. Translate the following json file to {LANGUAGES[target_language]}. Make sure you do not remove any existing line. Keep the original json structure:"},
             {"role": "user", "content": text}
         ]
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return response.choices[0].message.content.strip()
 
 for lang_code, lang_name in LANGUAGES.items():
     translated_data = {}
