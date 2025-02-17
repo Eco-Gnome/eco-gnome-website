@@ -39,7 +39,13 @@ public class PriceCalculatorService(
             .ToList();
 
         listOfProducts = listOfProducts
-            .OrderBy(localizationService.GetTranslation)
+            .OrderBy(i =>
+            {
+                var relatedElements = i.Elements.Where(element => element.CurrentUserElement is not null && element.IsProduct() && !element.CurrentUserElement!.IsReintegrated).ToList();
+                var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
+                return localizationService.GetTranslation(bestRelatedElement?.Recipe.Skill);
+            })
+            .ThenBy(localizationService.GetTranslation)
             .ToList();
 
         return (listOfIngredients, listOfProducts);
@@ -79,7 +85,7 @@ public class PriceCalculatorService(
                 {
                     if (ingredient.Element.ItemOrTag.CurrentUserPrice!.Price is not null)
                     {
-                        ingredient.Price = ingredient.Element.ItemOrTag.CurrentUserPrice.Price;
+                        SetPriceOrMarginPrice(ingredient, ingredient.Element.ItemOrTag.CurrentUserPrice, userRecipe);
                         if (debug) Console.WriteLine($"=> Ingredient {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
 
                         continue;
@@ -90,7 +96,9 @@ public class PriceCalculatorService(
                     if (ingredient.Element.ItemOrTag.CurrentUserPrice.PrimaryUserPrice?.Price is not null)
                     {
                         ingredient.Element.ItemOrTag.CurrentUserPrice.Price = ingredient.Element.ItemOrTag.CurrentUserPrice.PrimaryUserPrice.Price;
-                        ingredient.Price = ingredient.Element.ItemOrTag.CurrentUserPrice.Price;
+                        ingredient.Element.ItemOrTag.CurrentUserPrice.MarginPrice = ingredient.Element.ItemOrTag.CurrentUserPrice.PrimaryUserPrice.MarginPrice;
+
+                        SetPriceOrMarginPrice(ingredient, ingredient.Element.ItemOrTag.CurrentUserPrice, userRecipe);
                         if (debug) Console.WriteLine($"=> Ingredient Tag (from primary) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
 
                         continue;
@@ -100,8 +108,10 @@ public class PriceCalculatorService(
 
                     if (!associatedItemsUserPrices.All(up => up.Price is not null)) continue;
 
-                    ingredient.Element.ItemOrTag.CurrentUserPrice.Price = associatedItemsUserPrices.Select(up => up.Price).Min();
-                    ingredient.Price = ingredient.Element.ItemOrTag.CurrentUserPrice.Price;
+                    ingredient.Element.ItemOrTag.CurrentUserPrice.Price = associatedItemsUserPrices.Min(up => up.Price);
+                    ingredient.Element.ItemOrTag.CurrentUserPrice.MarginPrice = associatedItemsUserPrices.First(up => up.Price == ingredient.Element.ItemOrTag.CurrentUserPrice.Price).MarginPrice;
+                    SetPriceOrMarginPrice(ingredient, ingredient.Element.ItemOrTag.CurrentUserPrice, userRecipe);
+
                     if (debug) Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
                 }
 
@@ -150,7 +160,9 @@ public class PriceCalculatorService(
                 // We remove from ingredientCostSum, the price of reintegrated products
                 foreach (var reintegratedProduct in reintegratedProducts)
                 {
-                    reintegratedProduct.Price = -1 * reintegratedProduct.Element.ItemOrTag.CurrentUserPrice!.Price;
+                    SetPriceOrMarginPrice(reintegratedProduct, reintegratedProduct.Element.ItemOrTag.CurrentUserPrice!, userRecipe);
+
+                    reintegratedProduct.Price *= -1;
                     ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.GetRoundFactorQuantity(reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
                 }
 
@@ -197,5 +209,27 @@ public class PriceCalculatorService(
         } while (nbHandled > 0);
 
         await dbContext.SaveChangesAsync();
+    }
+
+    private void SetPriceOrMarginPrice(UserElement ingredient, UserPrice userPrice, UserRecipe userRecipe)
+    {
+        var recipesThatProduceMyIngredient = userServerDataService.UserElements
+            .Where(ue => ue.Element.IsProduct() && (ingredient.Element.ItemOrTag.IsTag
+                ? ingredient.Element.ItemOrTag.AssociatedItems.Contains(ue.Element.ItemOrTag)
+                : ue.Element.ItemOrTag == ingredient.Element.ItemOrTag))
+            .Select(ue => ue.Element.Recipe)
+            .Where(r => r.Skill is not null)
+            .ToList();
+
+        if (userServerDataService.UserSetting!.ApplyMarginBetweenSkills && recipesThatProduceMyIngredient.Count > 0 && recipesThatProduceMyIngredient.Any(r => r.Skill != userRecipe.Recipe.Skill))
+        {
+            ingredient.Price = userPrice.MarginPrice;
+            ingredient.IsMarginPrice = true;
+        }
+        else
+        {
+            ingredient.Price = userPrice.Price;
+            ingredient.IsMarginPrice = false;
+        }
     }
 }

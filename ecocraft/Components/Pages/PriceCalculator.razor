@@ -257,6 +257,12 @@
                                     <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
                                 </MudStack>
                                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.ApplyMarginBetweenSkills.Tooltip")">
+                                        <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.ApplyMarginBetweenSkills.ApplyMarginBetweenSkills")</MudText>
+                                    </MudTooltip>
+                                    <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.ApplyMarginBetweenSkills" Variant="Variant.Outlined" ValueChanged="OnOptionApplyMarginBetweenSkillsChanged"/>
+                                </MudStack>
+                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                     <MudTooltip>
                                         <TooltipContent>
                                             <MudStack Spacing="0">
@@ -1108,6 +1114,14 @@
         StateHasChanged();
     }
 
+    private async Task OnOptionApplyMarginBetweenSkillsChanged()
+    {
+        UserServerDataService.UserSetting!.ApplyMarginBetweenSkills = !UserServerDataService.UserSetting.ApplyMarginBetweenSkills;
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
     private async Task OnOptionMarginTypeChanged(MarginType marginType)
     {
         UserServerDataService.UserSetting!.MarginType = marginType;
@@ -1249,7 +1263,7 @@
             return;
         }
 
-        var text = Math.Round((double) price,2).ToString("0.00");
+        var text = Math.Round((double) price, 2, MidpointRounding.AwayFromZero).ToString("0.00");
         await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
         Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.PriceCopied"), Severity.Success);
     }

@@ -20,7 +20,7 @@ public static class CultureInvariantConverter
 
     public static readonly Converter<decimal?> DotOrCommaDecimalNull = new Converter<decimal?>
     {
-        SetFunc = value => value is null ? null : $"{Math.Round((decimal)value, 2):0.##}",
+        SetFunc = value => value is null ? null : $"{Math.Round((decimal)value, 2, MidpointRounding.AwayFromZero):0.##}",
         GetFunc = number =>
         {
             if (String.IsNullOrWhiteSpace(number)) return null;

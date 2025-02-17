@@ -229,6 +229,7 @@ public class UserSetting
     public decimal CalorieCost { get; set; } = 0;
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
+    public bool ApplyMarginBetweenSkills { get; set; } = true;
 
     public UserServer UserServer { get; set; }
 }
@@ -282,6 +283,7 @@ public class UserElement: IHasPrice
     [ForeignKey("Element")] public Guid ElementId { get; set; }
 
     public decimal? Price { get; set; }
+    public bool IsMarginPrice { get; set; } = false;
 
     public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }

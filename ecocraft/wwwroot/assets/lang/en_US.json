@@ -221,6 +221,10 @@
             "Tooltip": "Only display recipes that are allowed by your skills levels.",
             "LevelAccessible": "Only level-accessible recipes"
         },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "When the system retrieve the price of an ingredient, if this ingredient is from an other skill that the current recipe, then it's margin price will be used instead of it's production price. This allows a more fair production price for other citizens that does not have both skills.",
+            "ApplyMarginBetweenSkills": "Apply margin between skills"
+        },
         "MarginType": {
             "Tooltip": {
                 "1": "Margin calculation method",
@@ -243,7 +247,8 @@
             "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'",
             "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
             "isMinPrice": "This value is set at the minimum price of the server",
-            "isMaxPrice": "This value is set at the maximum price of the server"
+            "isMaxPrice": "This value is set at the maximum price of the server",
+            "IsMarginPrice": "This value is a margin price, because option 'Apply margin between skills' is activated."
         },
         "CancelOverride": "Don't override this product price anymore.",
         "AddFavoriteItem": "Favorite this item, apply its price to the related tag",

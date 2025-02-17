@@ -109,7 +109,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
 
         var userPrices = await userPriceDbService.GetByUserServerId(userServer);
 
-        return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, Math.Round(up.MarginPrice ?? (decimal)up.Price!, 2))));
+        return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, Math.Round(up.MarginPrice ?? (decimal)up.Price!, 2, MidpointRounding.AwayFromZero))));
     }
 }
 
