@@ -1,9 +1,6 @@
 ﻿name: Translate JSON
 
 on:
-  push:
-    paths:
-      - 'ecocraft/wwwroot/assets/lang/en_US.json'
   workflow_dispatch:
 
 jobs:
@@ -23,7 +20,7 @@ jobs:
 
       - name: Run translation script
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: python translate_json.py
 
       - name: Commit and push changes
