@@ -1,6 +1,6 @@
 ﻿import json
-import openai
 import os
+import requests
 
 DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
 DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
