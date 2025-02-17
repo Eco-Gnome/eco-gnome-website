@@ -10,6 +10,9 @@
     <MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.MapGenerator")">
+        <MudNavLink Href="map-generator" Match="NavLinkMatch.All" Icon="@MDIIcons.Filled.Earth">@LocalizationService.GetTranslation("NavMenu.MapGenerator")</MudNavLink>
+    </MudTooltip>
 
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
