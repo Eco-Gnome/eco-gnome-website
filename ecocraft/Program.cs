@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
 using ecocraft.Services.ImportData;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 
@@ -20,6 +21,15 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.DefaultRequestCulture = new RequestCulture("en-US");
     options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
     options.SupportedUICultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+});
+
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
+
+builder.Services.Configure<CircuitOptions>(options =>
+{
+    options.DetailedErrors = true;
 });
 
 // Add services to the container.
