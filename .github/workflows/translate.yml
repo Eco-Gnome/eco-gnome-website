@@ -1,12 +1,10 @@
 ﻿name: Translate JSON
 
 on:
+  push:
+    paths:
+      - 'ecocraft/wwwroot/assets/lang/en_US.json'
   workflow_dispatch:
-    inputs:
-      message:
-        description: 'Message personnalisé'
-        required: true
-        default: 'Hello'
 
 jobs:
   translate:
