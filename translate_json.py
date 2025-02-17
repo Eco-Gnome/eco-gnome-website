@@ -41,8 +41,17 @@ def translate_text(text, target_language):
         "target_lang": target_language
     }
     response = requests.post(DEEPL_API_URL, data=params)
-    result = response.json()
-    return result["translations"][0]["text"] if "translations" in result else text
+
+    if response.status_code != 200:
+        print(f"⚠️ Erreur lors de la traduction en {target_language}: {response.status_code} - {response.text}")
+        return text  # Retourne le texte original en cas d'erreur
+
+    try:
+        result = response.json()
+        return result["translations"][0]["text"] if "translations" in result else text
+    except json.JSONDecodeError:
+        print(f"⚠️ Réponse invalide de DeepL pour {target_language}: {response.text}")
+        return text  # Retourne le texte original en cas d'erreur de parsing
 
 # Générer les fichiers traduits
 for lang_code, lang_name in LANGUAGES.items():
