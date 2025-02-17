@@ -138,24 +138,11 @@
     "NoSkill": "No Skill",
     "SuperAdmin": {
         "ActionCol": "Action",
-        "ConfirmServerDeletion": {
-            "1": "Are you sure you want to delete user ",
-            "2": "?"
-        },
-        "ConfirmSuperAdmin": {
-            "1": "Are you sure you want to ",
-            "2": "demote",
-            "3": "promote",
-            "4": " this user ",
-            "5": "from",
-            "6": "to",
-            "7": " Super Admin?"
-        },
+        "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
+        "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
+        "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",
         "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
-        "ConfirmUserDeletion": {
-            "1": "Are you sure you want to delete user ",
-            "2": "?"
-        },
+        "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "IdCol": "Id",
         "ServerTable": {
