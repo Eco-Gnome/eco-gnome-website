@@ -2,8 +2,8 @@
 import openai
 import os
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
+DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
+DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
 
 LANGUAGES = {
     "fr": "French",
@@ -35,24 +35,26 @@ with open("ecocraft/wwwroot/assets/lang/en_US.json", "r", encoding="utf-8") as f
     english_data = json.load(f)
 
 def translate_text(text, target_language):
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": f"You are a translation assistant. You will translate a file for a website named Eco Gnome, that is a production & economy assistant for the video game called Eco. Translate the following json file to {LANGUAGES[target_language]}. Make sure you do not remove any existing line. Keep the original json structure:"},
-            {"role": "user", "content": text}
-        ]
-    )
-    return response.choices[0].message.content.strip()
+    params = {
+        "auth_key": DEEPL_API_KEY,
+        "text": text,
+        "target_lang": target_language
+    }
+    response = requests.post(DEEPL_API_URL, data=params)
+    result = response.json()
+    return result["translations"][0]["text"] if "translations" in result else text
 
+# Générer les fichiers traduits
 for lang_code, lang_name in LANGUAGES.items():
     translated_data = {}
     for key, text in english_data.items():
-        translated_data[key] = translate_text(text, lang_code)
+        translated_data[key] = translate_text(text, lang_name)
 
+    # Sauvegarde du fichier traduit
     output_path = f"ecocraft/wwwroot/assets/lang/{lang_code}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(translated_data, f, indent=2, ensure_ascii=False)
-    print(f"✅ Traduction en {lang_name} enregistrée: {output_path}")
+    print(f"✅ Traduction en {lang_code} enregistrée: {output_path}")
 
 os.system("git config --global user.name 'github-actions'")
 os.system("git config --global user.email 'github-actions@github.com'")
