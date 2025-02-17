@@ -2,6 +2,11 @@
 
 on:
   workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message personnalisé'
+        required: true
+        default: 'Hello'
 
 jobs:
   translate:

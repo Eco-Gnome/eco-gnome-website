@@ -131,8 +131,6 @@ LANGUAGES = {
     "tr": "Turkish"
 }
 
-
-
 convert_json_to_txt("ecocraft/wwwroot/assets/lang/en_US.json", "ecocraft/wwwroot/assets/lang/en_US.txt")
 
 for lang_code, lang_name in LANGUAGES.items():
