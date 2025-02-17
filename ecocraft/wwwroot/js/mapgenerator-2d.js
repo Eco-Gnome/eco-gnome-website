@@ -1,5 +1,6 @@
 ﻿window.MapGenerator2d = {
-    initAllCanvas(canvasNames, size, canvasContainer, currentTool, toolSize, toolColor) {
+    initialize(canvasNames, size, canvasContainer, currentTool, toolSize, toolColor) {
+        console.log("Initialize MapGenerator2d");
         this.size = size;
         this.container = document.getElementById(canvasContainer);
         this.currentTool = currentTool;
@@ -58,11 +59,22 @@
         this.container.addEventListener("mouseup", (event) => this.onMouseLeaveOrUp(event, "up"));
         this.container.addEventListener("mouseleave", (event) => this.onMouseLeaveOrUp(event));
     },
-    loadAllCanvas(defaultColors) {
+    generateDefaultMap(defaultColors) {
         for (let i = 0; i < defaultColors.length; i++) {
             const canvasObj = this.allCanvasObj[i];
             canvasObj.bufferContext.fillStyle = defaultColors[i];
             canvasObj.bufferContext.fillRect(0, 0, this.size, this.size);
+            this.recalculateScaleAndTranslate(0, this.container.clientWidth / 2, this.container.clientHeight / 2);
+            this.redraw(canvasObj);
+        }
+    },
+    importExistingMap(imageIds) {
+        console.log("importExistingMap");
+        for (let i = 0; i < imageIds.length; i++) {
+            const canvasObj = this.allCanvasObj[i];
+            const image = window.MapGenerator1d.importedImages[canvasObj.name];
+
+            canvasObj.bufferContext.drawImage(image, 0, 0);
             this.recalculateScaleAndTranslate(0, this.container.clientWidth / 2, this.container.clientHeight / 2);
             this.redraw(canvasObj);
         }
@@ -137,9 +149,9 @@
         let stepCount = Math.ceil(dist / step);
 
         for (let i = 0; i < stepCount; i++) {
-            this.drawAliasedCircle(ctx, x, y, radius);
-            x += Math.floor(dx / stepCount);
-            y += Math.floor(dy / stepCount);
+            this.drawAliasedCircle(ctx, Math.floor(x), Math.floor(y), radius);
+            x += dx / stepCount;
+            y += dy / stepCount;
         }
     },
     drawAliasedCircle(ctx, xc, yc, width) {

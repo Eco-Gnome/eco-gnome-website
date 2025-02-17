@@ -99,13 +99,19 @@
             <MudItem xs="2">
                 @switch (_currentDimension)
                 {
+                    case 1:
+                        <MudPaper>
+                            <MudButton Color="Color.Warning"
+                                       OnClick="@(() => ExportMap())">@LocalizationService.GetTranslation("MapGenerator.Export")</MudButton>
+                        </MudPaper>
+                        break;
                     case 2:
                         <MudCard>
                             <MudCardHeader>@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Title")</MudCardHeader>
                             <MudCardContent>
                                 <MudStack>
                                     <MudDivider />
-                                    @if (_currentContribution?.Name == "Biomes" || _currentContribution?.Name == "Water")
+                                    @if (_currentContribution?.Name is "Biomes" or "Water")
                                     {
                                         <MudStack Spacing="0">
                                             <MudStack Row Justify="Justify.SpaceBetween">
@@ -219,8 +225,9 @@
 
     protected override void OnInitialized()
     {
+        Snackbar.Configuration.MaxDisplayedSnackbars = 6;
         ChangeTool(_currentTool);
-        JSService.EnqueueAction(async js => await js.InvokeVoidAsync("MapGenerator1d.initialize", "MapFileUpload"));
+        JSService.EnqueueAction(async js => await js.InvokeVoidAsync("MapGenerator1d.initialize", DotNetObjectReference.Create(this), "MapFileUpload", Contributions.Select(c => c.Name)));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -291,17 +298,65 @@
         });
     }
 
+    private async Task ExportMap()
+    {
+        await JSService.ExecuteActionAsync(async js => await js.InvokeAsync<Task>("MapGenerator1d.downloadImages", Contributions.Select(c => c.ImageName)));
+    }
+
     private void CreateNewMap()
     {
         JSService.EnqueueAction(async js =>
         {
-            await js.InvokeVoidAsync("MapGenerator2d.initAllCanvas", Contributions.Select(c => c.CanvasName), _mapSize * 10, "canvasContainer", _currentTool, _toolSize, _currentColor.ToString());
-            await js.InvokeVoidAsync("MapGenerator2d.loadAllCanvas", Contributions.Select(c => c.DefaultColor.ToString()));
+            await js.InvokeVoidAsync("MapGenerator2d.initialize", Contributions.Select(c => c.CanvasName), _mapSize * 10, "canvasContainer", _currentTool, _toolSize, _currentColor.ToString());
+            await js.InvokeVoidAsync("MapGenerator2d.generateDefaultMap", Contributions.Select(c => c.DefaultColor.ToString()));
         });
 
         _mapLoaded = true;
         _currentContribution = Contributions.First();
     }
+
+    [JSInvokable]
+    public void ImportMap(int mapSize)
+    {
+        _mapSize = mapSize / 10;
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.initialize", Contributions.Select(c => c.CanvasName), _mapSize * 10, "canvasContainer", _currentTool, _toolSize, _currentColor.ToString());
+            await js.InvokeVoidAsync("MapGenerator2d.importExistingMap", Contributions.Select(c => c.ImageName));
+        });
+
+        _mapLoaded = true;
+        _currentContribution = Contributions.First();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void WarnUser(string type, string additional = "")
+    {
+        switch (type)
+        {
+            case "IMAGE_WRONG_SIZE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ImageWrongSize", additional), Severity.Error);
+                break;
+            case "IMAGE_NOT_SQUARE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ImageNotSquare", additional), Severity.Error);
+                break;
+            case "NO_BIOMES_FILE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.NoBiomesFile"), Severity.Error);
+                break;
+            case "WRONG_FILE_TYPE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.WrongFileType", additional), Severity.Warning);
+                break;
+            case "UNABLE_TO_PROCESS":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.UnprocessableFile", additional), Severity.Warning);
+                break;
+            case "PROCESS_SUCCESS":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ProcessedFile", additional), Severity.Success);
+                break;
+        }
+    }
+
 }
 
 
