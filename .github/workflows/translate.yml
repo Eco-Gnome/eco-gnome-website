@@ -19,7 +19,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install openai
+        run: pip install requests
 
       - name: Run translation script
         env:
