@@ -45,7 +45,7 @@
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
-        "NavGraph": "Graph View [WIP]",
+        "NavGraph": "Graph View (WIP)",
         "NavSuperAdmin": "Super Admin"
     },
     "None": "None",

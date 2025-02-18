@@ -13,7 +13,7 @@ def flatten_json_values(nested_json):
             for value in obj.values():
                 extract_values(value)
         else:
-            values_list.append(f'"{obj}"')
+            values_list.append(f'{obj}')
 
     extract_values(nested_json)
     return values_list
@@ -26,7 +26,7 @@ def convert_json_to_txt(json_file, output_txt):
     values = flatten_json_values(data)
 
     with open(output_txt, "w", encoding="utf-8") as f:
-        f.write("\n".join(values))
+        f.write("\n".join(values))  # Écriture en une seule ligne
 
     print(f"✅ Conversion terminée : {output_txt}")
 
@@ -56,18 +56,18 @@ def modify_json_with_txt(json_file, txt_file, output_json):
         data = json.load(f)
 
     with open(txt_file, "r", encoding="utf-8") as f:
-        values = [line.strip().strip('"') for line in f.readlines()]
+        values = f.read().strip().split("\n")
 
     modified_data = replace_json_values(data, values)
 
     with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(modified_data, f, indent=2, ensure_ascii=False)
+        json.dump(modified_data, f, indent=4, ensure_ascii=False)
 
     print(f"✅ Mise à jour terminée : {output_json}")
 
 def translate_text_deepl(text, target_lang):
     """
-    Envoie un texte à l'API DeepL pour traduction.
+    Envoie un texte complet à l'API DeepL pour traduction.
     """
     DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
     DEEPL_API_URL = "https://api-free.deepl.com/v2/translate"
@@ -75,7 +75,10 @@ def translate_text_deepl(text, target_lang):
     params = {
         "auth_key": DEEPL_API_KEY,
         "text": text,
-        "target_lang": target_lang
+        "target_lang": target_lang,
+        "split_sentences": "1",
+        "preserve_formatting": "1",
+        "formality": "prefer_more"
     }
     response = requests.post(DEEPL_API_URL, data=params)
 
@@ -90,17 +93,18 @@ def translate_text_deepl(text, target_lang):
         print(f"⚠️ Réponse invalide de DeepL : {response.text}")
         return text
 
+
 def translate_txt_file(input_txt, output_txt, target_lang):
     """
-    Traduit un fichier .txt via DeepL et enregistre la sortie.
+    Traduit un fichier .txt via DeepL en une seule requête et enregistre la sortie.
     """
     with open(input_txt, "r", encoding="utf-8") as f:
-        lines = [line.strip().strip('"') for line in f.readlines()]
+        text = f.read().strip()
 
-    translated_lines = [translate_text_deepl(line, target_lang) for line in lines]
+    translated_text = translate_text_deepl(text, target_lang)
 
     with open(output_txt, "w", encoding="utf-8") as f:
-        f.write("\n".join(f'"{line}"' for line in translated_lines))
+        f.write(translated_text)
 
     print(f"✅ Traduction terminée : {output_txt}")
 
@@ -108,37 +112,37 @@ def translate_txt_file(input_txt, output_txt, target_lang):
 LANGUAGES = {
     "fr": "French",
     "es": "Spanish",
-    "de": "German",
-    "ko": "Korean",
-    "pt_BR": "Brazilian Portuguese",
-    "zh_Hans": "Simplified Chinese",
-    "ru": "Russian",
-    "it": "Italian",
-    "pt_PT": "Portuguese",
-    "hu": "Hungarian",
-    "ja": "Japanese",
-    "nn": "Norwegian",
-    "pl": "Polish",
-    "nl": "Dutch",
-    "ro": "Romanian",
-    "da": "Danish",
-    "cs": "Czech",
-    "sv": "Swedish",
-    "uk": "Ukrainian",
-    "el": "Greek",
-    "ar_sa": "Arabic",
-    "vi": "Vietnamese",
-    "tr": "Turkish"
+#    "de": "German",
+#    "ko": "Korean",
+#    "pt_BR": "Brazilian Portuguese",
+#    "zh_Hans": "Simplified Chinese",
+#    "ru": "Russian",
+#    "it": "Italian",
+#    "pt_PT": "Portuguese",
+#    "hu": "Hungarian",
+#    "ja": "Japanese",
+#    "nn": "Norwegian",
+#    "pl": "Polish",
+#    "nl": "Dutch",
+#    "ro": "Romanian",
+#    "da": "Danish",
+#    "cs": "Czech",
+#    "sv": "Swedish",
+#    "uk": "Ukrainian",
+#    "el": "Greek",
+#    "ar_sa": "Arabic",
+#    "vi": "Vietnamese",
+#    "tr": "Turkish"
 }
 
 convert_json_to_txt("ecocraft/wwwroot/assets/lang/en_US.json", "ecocraft/wwwroot/assets/lang/en_US.txt")
 
 for lang_code, lang_name in LANGUAGES.items():
-    translate_txt_file("ecocraft/wwwroot/assets/lang/en_US.txt", "ecocraft/wwwroot/assets/lang/{lang_code}.txt", lang_code)
-    modify_json_with_txt("ecocraft/wwwroot/assets/lang/en_US.json", "ecocraft/wwwroot/assets/lang/{lang_code}.txt", "ecocraft/wwwroot/assets/lang/{lang_code}.json")
+    translate_txt_file("ecocraft/wwwroot/assets/lang/en_US.txt", f"ecocraft/wwwroot/assets/lang/{lang_code}.txt", lang_code)
+    modify_json_with_txt("ecocraft/wwwroot/assets/lang/en_US.json", f"ecocraft/wwwroot/assets/lang/{lang_code}.txt", f"ecocraft/wwwroot/assets/lang/{lang_code}.json")
 
-os.system("git config --global user.name 'github-actions'")
-os.system("git config --global user.email 'github-actions@github.com'")
+os.system("git config --global user.name \"github-actions\"")
+os.system("git config --global user.email \"github-actions@github.com\"")
 os.system("git add ecocraft/wwwroot/assets/lang/*.json")
-os.system("git commit -m 'Mise à jour des traductions' || echo 'Aucune modification'")
+os.system("git commit -m \"Mise à jour des traductions\" || echo \"Aucune modification\"")
 os.system("git push")
