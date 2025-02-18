@@ -1,0 +1,280 @@
+{
+    "Cancel": "Annuleren",
+    "CopyToClipboard": "Kopiëren naar klembord",
+    "CraftingTable": "Knutseltabel",
+    "GraphView": {
+        "ResetButton": "Grafiek resetten",
+        "Title": "Grafiekweergave"
+    },
+    "Header": {
+        "CreateServer": "Server maken",
+        "EcoGnome": "Eco Kabouter",
+        "MyServers": "Mijn servers",
+        "AddServer": "Sluit u aan bij een bestaande server, of maak een nieuwe aan.",
+        "New": "Nieuw!",
+        "ReleaseDialog": {
+            "Title": "Releases"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "U bent al in deze server",
+                "JoinError": "U moet een servercode toevoegen",
+                "ServerNotFound": "Server niet gevonden"
+            },
+            "Title": "Server aanmaken of aanmelden"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Beheer gebruikers"
+        }
+    },
+    "Ingredients": "Ingrediënten",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Geproduceerd door",
+        "UsedIn": "Gebruikt in"
+    },
+    "JoinCode": "Join code",
+    "Language": "Taal",
+    "MainLayout": {
+        "SiteTitle": "Gereedschap voor Eco videospel",
+        "PleaseJoin": "Neem deel aan een server"
+    },
+    "Name": "Naam",
+    "Level": "Niveau",
+    "Upgrade": "Upgrade",
+    "Margins": "Marges",
+    "NavMenu": {
+        "NavAdmin": "Serverbeheer",
+        "NavCalculator": "Prijscalculator",
+        "NavGraph": "Grafiekweergave [WIP]",
+        "NavSuperAdmin": "Super beheerder"
+    },
+    "None": "Geen",
+    "Options": "Opties",
+    "Products": "Producten",
+    "RecipeDialog": {
+        "AdditionalCosts": "Extra kosten",
+        "CraftTime": "Handwerktijd",
+        "CraftTimeReductionTooltip": "{initialValue} met {percent}% reductie als gevolg van upgrade module {upgradeModuleName}",
+        "Dynamic": "dynamisch",
+        "Labor": "Arbeid",
+        "LaborReductionTooltip": "{initialValue} met {percent}% reductie als gevolg van vaardigheidsniveau {skillLevel}",
+        "QuantityReductionTooltip": "{procent}% vermindering als gevolg van upgrademodule {skillLevel}",
+        "QuantityReductionLavishTooltip": "en weelderig talent",
+        "ReintegratedToolTip": {
+            "False": "Stop met het aftrekken van dit item van de kostprijs. Dit zal de prijs van andere producten mathematisch verhogen.",
+            "True": "Trek dit item af van de kostprijs, te gebruiken wanneer u dit product kunt hergebruiken in hetzelfde recept of in een vorig recept (Mallen, Vaten, ...). Dit zal de prijs van andere producten mathematisch verlagen."
+        },
+        "Share": {
+            "EqualityTooltip": "Gelijk verdelen tussen producten.",
+            "EquilibrateTooltip": "Verdelen naar hoeveelheid tussen producten.",
+            "FirstOnlyTooltip": "Geef 100% aan het eerste product en nul aan de rest. Kies dit als u andere producten als afval beschouwt.",
+            "HonestTooltip": "Geef 80% aan het eerste product en verdeel de rest gelijkmatig."
+        },
+        "Static": "statisch",
+        "TotalCost": "Totale kosten:",
+        "TotalPrice": "Totale prijs:"
+    },
+    "RecipeList": {
+        "RecipeName": "Naam recept"
+    },
+    "RelatedRecipes": "Gerelateerde recepten",
+    "Search": "Zoeken",
+    "ServerDialog": {
+        "Create": "Maak",
+        "CreateServer": "Uw server aanmaken",
+        "HaveAnInvitation": "Hebt u al een lidmaatschapscode voor uw server?",
+        "Join": "Word lid",
+        "MaxChar": "Max 25 tekens",
+        "MinChar": "Min 3 tekens"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Weet u zeker dat u alle maximumprijzen wilt wissen?",
+            "ClearAllMin": "Weet u zeker dat u alle minimumprijzen wilt wissen?",
+            "ServerDeletion": "Weet u zeker dat u uw server wilt verwijderen? Er vindt geen terugdraaiing plaats!",
+            "ServerDissociate": "Weet u zeker dat u uw Eco-Gnome server wilt loskoppelen van uw Eco-server? Er zal geen terugdraaiing zijn!",
+            "UpdateJoinCode": "Weet u zeker dat u uw JoinCode wilt vernieuwen? Hierdoor worden eerder gegenereerde codes uitgeschakeld!"
+        },
+        "EcoServerId": "Eco-server id",
+        "EcoServerIdTooltip": "Dit veld wordt gevuld zodra deze server in-game geregistreerd is dankzij de EcoGnomeMod.",
+        "JoinCodeTooltip": "Geef deze code aan uw spelers zodat ze zich bij uw server kunnen aansluiten.",
+        "Items": {
+            "Max": "Max prijs",
+            "Max.Tooltip": "Max prijzen wissen",
+            "Min": "Min prijs",
+            "Min.Tooltip": "Minprijzen wissen"
+        },
+        "Members": {
+            "DemoteAdmin": "Admin degraderen",
+            "KickUser": "Gebruiker schoppen",
+            "PromoteAdmin": "Promoveer Admin",
+            "Tooltip.Admin": "Admin",
+            "Title": "Leden"
+        },
+        "ServerSettings": {
+            "ServerName": "Naam server",
+            "Crafting": "Knutseltabellen",
+            "Delete": "Server verwijderen",
+            "Items": "Items",
+            "Tags": "Tags",
+            "Modules": "Upgrade modules",
+            "Recipes": "Recepten",
+            "Elements": "Recept Elementen",
+            "Skills": "Vaardigheden",
+            "Upload": "Servergegevens uploaden",
+            "Title": "Serverinstellingen",
+            "Stats": "Gegevensstatistieken",
+            "EcoGnomeModExplanation1": "Eco Gnome kan gegevens van uw Eco-server lezen om de prijzen van uw items nauwkeurig te berekenen. Het haalt vaardigheden, crafting tabellen, modules, items en alle recepten eruit. Het kan zowel gewijzigde vanillegegevens lezen als gegevens die door externe mods zijn toegevoegd.",
+            "EcoGnomeModExplanation2": "Om dit te doen, moet u onze servermod, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), downloaden en installeren op uw Eco-server. Zodra uw server opnieuw is opgestart, moet er een bestand met de naam eco_gnome_data.json worden aangemaakt in de hoofdmap van uw gameserver. U moet dit bestand ophalen en uploaden met de knop hieronder."
+        },
+        "Snackbar": {
+            "CantEditYourself": "U kunt het niet zelf bewerken",
+            "UploadOk": "Upload succesvol",
+            "UploadNok": "Fout bij uploaden",
+            "UploadPartiallyNok": "Waarschuwing: {errorCount} elementen zijn niet geïmporteerd: {errorNames}. Controleer uw mods en serverbewerkingen. U kunt contact opnemen met Eco Gnome admins voor hulp."
+        }
+    },
+    "Skill": "Vaardigheid",
+    "NoSkill": "Geen vaardigheid",
+    "SuperAdmin": {
+        "ActionCol": "Actie",
+        "ConfirmServerDeletion": "Weet u zeker dat u server {server} wilt verwijderen?",
+        "ConfirmSuperAdminPromote": "Weet u zeker dat u deze gebruiker wilt promoveren tot Superbeheerder?",
+        "ConfirmSuperAdminDemote": "Weet u zeker dat u deze gebruiker wilt degraderen van Super Admin?",
+        "ConfirmTwiceSuperAdmin": "Deze wijziging heeft veel impact en kan de hele website beschadigen! Bevestig nogmaals.",
+        "ConfirmUserDeletion": "Weet u zeker dat u gebruiker {user} wilt verwijderen?",
+        "CreationDateCol": "Datum aanmaak",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Server verwijderen",
+            "DemoteAdmin": "Verwijder uzelf uit admins",
+            "PlayersCol": "Spelers",
+            "PromoteAdmin": "Voeg jezelf toe als admin",
+            "ServerNameCol": "Naam",
+            "SetDefault": "Toevoegen als standaard server",
+            "Title": "Servers",
+            "UnsetDefault": "Verwijderen van standaard servers"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "U kunt uzelf niet verwijderen van deze pagina.",
+            "SnackbarCantEdit": "U kunt uzelf niet bewerken vanaf deze pagina.",
+            "SnackbarCopy": "Id gekopieerd naar klembord"
+        },
+        "Title": "Superbeheerder",
+        "UserTable": {
+            "DeleteUser": "Gebruiker verwijderen",
+            "DemoteUser": "Gebruiker uit Superbeheerder degraderen",
+            "HowMuchIsAdmin": "Aantal servers waarop de gebruiker admin is",
+            "JoinedServers": "Servers toegevoegd",
+            "PromoteUser": "Gebruiker tot Superbeheerder promoveren",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servers",
+            "Title": "Gebruikers",
+            "ActionCol": "Actie"
+        }
+    },
+    "TagName": "Naam tag",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Exporteer/Back-up van mijn gebruiker",
+        "ImportReplace": "Mijn gebruiker importeren/vervangen",
+        "InGamePseudo": "In-Game pseudo",
+        "InGamePseudoTooltip": "Wordt automatisch ingevuld bij het voltooien van de gebruikersregistratie in Eco dankzij de EcoGnomeMod.",
+        "InGameId": "In-Game Id",
+        "InGameIdTooltip": "Wordt automatisch ingevuld bij de gebruikersregistratie in Eco dankzij de EcoGnomeMod.",
+        "MyServers": "Mijn servers",
+        "Pseudo": "Pseudo",
+        "PublicId": "Publiek id",
+        "SecretId": "Geheime Id (gebruikt binnen Eco voor registratie)",
+        "ResetRegistration": "Weet u zeker dat u uw huidige registratie op deze server wilt resetten? U zult geen in-game functies meer kunnen gebruiken op deze server!",
+        "PopupConfirmImportBegin": "Weet u zeker dat u de gebruiker met pseudo",
+        "PopupConfirmImportEnd": " ? Dit zal uw huidige opgeslagen gebruiker wissen. Zorg ervoor dat u de huidige gebruiker exporteert als u deze later wilt gebruiken!",
+        "SnackbarCopy": "Join code gekopieerd naar klembord",
+        "SnackbarErrorBadFile": "Fout bij importeren gebruiker - Kies een correct bestand.",
+        "SnackbarErrorBadUser": "Fout bij importeren gebruiker - Kan de geïmporteerde gebruiker niet vinden",
+        "UserSettings": "Gebruikersinstellingen"
+    },
+    "Versions": "Versies",
+    "PriceCalculator": {
+        "LoadError": "Er is een fout opgetreden tijdens het laden. U kunt proberen al uw gegevens opnieuw in te stellen om de fout te herstellen.",
+        "Reset": "Reset",
+        "Skills": "Vaardigheden",
+        "AddSkill": "Vaardigheid toevoegen",
+        "CraftingTables": "Knutseltabellen",
+        "AddCraftingTable": "Knutseltafel toevoegen",
+        "CostMin": {
+            "Tooltip": "De kosten gerelateerd aan deze knutseltabel voor elke minuut knutselen. Vertegenwoordig het brandstofverbruik, vervanging van onderdelen, eventuele craftingkosten...",
+            "CostMin": "Kosten/min"
+        },
+        "NoModule": "Geen module",
+        "MarginPercent": {
+            "Tooltip": "Het margepercentage dat zal worden toegepast op uw verkoopprijs. Bekijk de tooltipoptie \"Margeberekeningstype\" voor meer informatie over de berekening.",
+            "MarginPercent": "Marge Percentage"
+        },
+        "AddMargin": "Marge toevoegen",
+        "RemoveMargin": "Marge verwijderen",
+        "NonSkilled": {
+            "Tooltip": "Deblokkeer de lijst met niet-geschoolde recepten in de receptenselector.",
+            "NonSkilled": "Niet-vaardige recepten weergeven"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Geef alleen recepten weer die zijn toegestaan door uw vaardigheidsniveaus.",
+            "LevelAccessible": "Alleen niveau-toegankelijke recepten"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Als het systeem de prijs van een ingrediënt ophaalt, als dit ingrediënt van een andere vaardigheid is dan het huidige recept, dan wordt de margeprijs gebruikt in plaats van de productieprijs. Dit zorgt voor een eerlijkere productieprijs voor andere burgers die niet beide vaardigheden hebben.",
+            "ApplyMarginBetweenSkills": "Marge toepassen tussen vaardigheden"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Berekeningsmethode marge",
+                "2": "MarkUp (standaard): som de Kostprijs en Marge*Kostprijs/100 op om de Verkoopprijs te krijgen",
+                "3": "Brutomarge: Het Margepercentage is het percentage van het voordeel van uw VerkoopKost, dat begrensd is tussen -99,99% en 99,99%."
+            },
+            "MarginType": "Type margeberekening",
+            "MarkUp": "Winstmarge",
+            "GrossMargin": "Brutomarge"
+        },
+        "CalorieCost": {
+            "Tooltip": "De kosten van het voedsel dat u eet, voor 1000 calorieën die u in een ambacht besteedt. Als u alleen salades koopt die 700cal opleveren voor 5$, dan zijn de kosten per 1000 calorieën 1000 * 5 / 700 = 7,14$",
+            "CalorieCost": "Kosten per 1000 calorieën"
+        },
+        "ItemsToBuy": "Items om te kopen",
+        "IngredientSearch": "Ingrediënten of labels",
+        "BuyPrice": "Prijs kopen",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Deze waarde is de minimumprijs van de gerelateerde items (als alle waarden gedefinieerd zijn !), tenzij u een specifieke kiest door op een ster te klikken.",
+            "isAutoCalculatedPrice": "Deze waarde wordt automatisch door het systeem berekend. Als deze waarde leeg is, zorg er dan voor dat u de prijs van alle \"Te kopen artikelen\" instelt",
+            "isItemEmptyPrice": "Stel deze prijs in om de berekening van gerelateerde recepten mogelijk te maken",
+            "isMinPrice": "Deze waarde wordt ingesteld op de minimumprijs van de server",
+            "isMaxPrice": "Deze waarde wordt ingesteld op de maximumprijs van de server",
+            "IsMarginPrice": "Deze waarde is een margeprijs, omdat de optie \"Marge tussen vaardigheden toepassen\" geactiveerd is."
+        },
+        "CancelOverride": "Overschrijf deze productprijs niet meer.",
+        "AddFavoriteItem": "Favoriseer dit item, pas de prijs toe op de gerelateerde tag",
+        "CancelFavoriteItem": "Des-favoriet dit item",
+        "ItemsToSell": "Items om te verkopen",
+        "AddRecipe": "Recept toevoegen",
+        "ProductItems": "Product items",
+        "CostPrice": "Kostprijs",
+        "SalePrice": "Verkoopprijs",
+        "AddOverride": "Overschrijf deze prijs, aangezien het geen product is om te verkopen maar een product om te kopen",
+        "RecipeTooltip": "Recept popup openen, toont details van berekening",
+        "RecipeTooltipWithShare": "Open recept popup, deze geeft de mogelijkheid om de verdeling van de productprijs te regelen en geeft de details van de berekening weer",
+        "MarginTooltip": "Met uw margeconfiguratie kunt u geen verkoopprijs berekenen. Controleer uw margepercentage en het type margeberekening.",
+        "AddFavoriteRecipe": "Favoriseer dit recept, pas de prijs toe op het gerelateerde product",
+        "CancelFavoriteRecipe": "Dit recept niet-favorieten",
+        "Snackbar": {
+            "CantRemoveLastMargin": "U kunt uw laatste marge niet verwijderen",
+            "PriceNotWellConfigured": "Deze prijs is niet goed geconfigureerd",
+            "PriceCopied": "Prijs gekopieerd naar klembord"
+        }
+    },
+    "Recipe": "Recept",
+    "ContextService": {
+        "DefaultMargin": "Standaard marge"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Nieuwe marge"
+    }
+}

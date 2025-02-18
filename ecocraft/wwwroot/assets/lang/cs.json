@@ -1,0 +1,280 @@
+{
+    "Cancel": "Zrušit",
+    "CopyToClipboard": "Kopírování do schránky",
+    "CraftingTable": "Crafting Table",
+    "GraphView": {
+        "ResetButton": "Obnovení grafu",
+        "Title": "Zobrazení grafu"
+    },
+    "Header": {
+        "CreateServer": "Vytvořit server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Moje servery",
+        "AddServer": "Připojte se k existujícímu serveru nebo vytvořte nový.",
+        "New": "Nový!",
+        "ReleaseDialog": {
+            "Title": "Novinky"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Již jste na tomto serveru",
+                "JoinError": "Potřebujete přidat kód serveru",
+                "ServerNotFound": "Server nebyl nalezen"
+            },
+            "Title": "Vytvořit nebo se připojit k serveru"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Správa uživatelů"
+        }
+    },
+    "Ingredients": "Složky",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Vyrobeno",
+        "UsedIn": "Používá se v"
+    },
+    "JoinCode": "Připojovací kód",
+    "Language": "Jazyk",
+    "MainLayout": {
+        "SiteTitle": "Nástroje pro videohru Eco",
+        "PleaseJoin": "Připojte se prosím k serveru"
+    },
+    "Name": "Jméno",
+    "Level": "Úroveň",
+    "Upgrade": "Upgrade",
+    "Margins": "Margins",
+    "NavMenu": {
+        "NavAdmin": "Správa serveru",
+        "NavCalculator": "Cenová kalkulačka",
+        "NavGraph": "Zobrazení grafu [WIP]",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "Žádné",
+    "Options": "Možnosti",
+    "Products": "Produkty",
+    "RecipeDialog": {
+        "AdditionalCosts": "Další náklady",
+        "CraftTime": "Doba řemesla",
+        "CraftTimeReductionTooltip": "{počátečníhodnota} s {procentním}% snížením díky modulu upgradu {název modulu}",
+        "Dynamic": "dynamic",
+        "Labor": "Práce",
+        "LaborReductionTooltip": "{iniciálníHodnota} s {procentním}% snížením v důsledku úrovně dovedností {skillLevel}",
+        "QuantityReductionTooltip": "{procento}% snížení díky modulu upgradu {skillLevel}",
+        "QuantityReductionLavishTooltip": "a štědrý talent",
+        "ReintegratedToolTip": {
+            "False": "Přestat odečítat tuto položku z nákladové ceny. Tím se matematicky zvýší cena ostatních výrobků.",
+            "True": "Odečíst tuto položku od nákladové ceny, která se použije, když můžete tento výrobek znovu použít ve stejném nebo předchozím receptu (formy, sudy, ...). Tím se matematicky sníží cena ostatních výrobků."
+        },
+        "Share": {
+            "EqualityTooltip": "Rozdělte rovnoměrně mezi výrobky.",
+            "EquilibrateTooltip": "Rozdělit podle množství mezi výrobky.",
+            "FirstOnlyTooltip": "Udělte 100 % prvnímu výrobku a nulu ostatním. Tuto možnost zvolte, pokud ostatní výrobky považujete za odpad.",
+            "HonestTooltip": "Udělte 80 % prvnímu výrobku a zbytek rozdělte rovným dílem."
+        },
+        "Static": "statické",
+        "TotalCost": "Celkové náklady:",
+        "TotalPrice": "Celková cena:"
+    },
+    "RecipeList": {
+        "RecipeName": "Název receptu"
+    },
+    "RelatedRecipes": "Související recepty",
+    "Search": "Hledat na",
+    "ServerDialog": {
+        "Create": "Vytvořit",
+        "CreateServer": "Vytvořte svůj server",
+        "HaveAnInvitation": "Máte již kód pro připojení k serveru?",
+        "Join": "Připojte se k serveru",
+        "MaxChar": "Maximálně 25 znaků",
+        "MinChar": "Min. 3 znaky"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Jste si jisti, že chcete vymazat všechny maximální ceny?",
+            "ClearAllMin": "Jste si jisti, že chcete vymazat všechny min. ceny?",
+            "ServerDeletion": "Jste si jisti, že chcete smazat svůj server? Nebude žádné vrácení zpět!",
+            "ServerDissociate": "Jste si jisti, že chcete oddělit svůj server Eco-Gnome od svého serveru Eco? Žádný návrat zpět nebude!",
+            "UpdateJoinCode": "Jste si jisti, že chcete obnovit svůj JoinCode? Tím budou zakázány všechny dříve vygenerované kódy!"
+        },
+        "EcoServerId": "Identifikace serveru Eco",
+        "EcoServerIdTooltip": "Toto pole bude vyplněno, jakmile bude tento server zaregistrován ve hře díky EcoGnomeModu.",
+        "JoinCodeTooltip": "Poskytněte tento kód svým hráčům, aby se mohli připojit k vašemu serveru.",
+        "Items": {
+            "Max": "Maximální cena",
+            "Max.Tooltip": "Vymažte maximální ceny",
+            "Min": "Min. cena",
+            "Min.Tooltip": "Vymazat min. ceny"
+        },
+        "Members": {
+            "DemoteAdmin": "Odvolat správce",
+            "KickUser": "Vykopnout uživatele",
+            "PromoteAdmin": "Povýšit správce",
+            "Tooltip.Admin": "Admin",
+            "Title": "Členové"
+        },
+        "ServerSettings": {
+            "ServerName": "Název serveru",
+            "Crafting": "Tabulky řemesel",
+            "Delete": "Smazat server",
+            "Items": "Položky",
+            "Tags": "Štítky",
+            "Modules": "Upgrade modulů",
+            "Recipes": "Recepty",
+            "Elements": "Prvky receptů",
+            "Skills": "Dovednosti",
+            "Upload": "Nahrát data serveru",
+            "Title": "Nastavení serveru",
+            "Stats": "Statistiky dat",
+            "EcoGnomeModExplanation1": "Eco Gnome dokáže načíst data ze serveru Eco a přesně vypočítat ceny vašich položek. Vytáhne dovednosti, craftovací tabulky, moduly, předměty a všechny recepty. Dokáže číst jak upravená vanilková data, tak data přidaná externími mody.",
+            "EcoGnomeModExplanation2": "K tomu je třeba stáhnout a nainstalovat náš serverový mod [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) na váš server Eco. Po restartování serveru by se měl v kořenové složce herního serveru vytvořit soubor s názvem eco_gnome_data.json. Tento soubor musíte načíst a nahrát pomocí níže uvedeného tlačítka."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Nemůžete jej sami upravovat",
+            "UploadOk": "Nahrání proběhlo úspěšně",
+            "UploadNok": "Chyba při nahrávání",
+            "UploadPartiallyNok": "Upozornění: Při zadávání dat do souboru se zobrazí chybová hláška: prvky {errorCount} nebyly importovány: {errorNames}. Zkontrolujte své mody a úpravy serveru. Pro pomoc se můžete obrátit na administrátory Eco Gnome."
+        }
+    },
+    "Skill": "Dovednost",
+    "NoSkill": "Žádná dovednost",
+    "SuperAdmin": {
+        "ActionCol": "Akce",
+        "ConfirmServerDeletion": "Jste si jisti, že chcete smazat server {server}?",
+        "ConfirmSuperAdminPromote": "Jste si jisti, že chcete tohoto uživatele povýšit na superadmina?",
+        "ConfirmSuperAdminDemote": "Jste si jisti, že chcete tohoto uživatele degradovat ze Superadmina?",
+        "ConfirmTwiceSuperAdmin": "Tato změna má velký dopad a může poškodit celý web! Potvrďte to prosím ještě jednou.",
+        "ConfirmUserDeletion": "Jste si jisti, že chcete odstranit uživatele {user}?",
+        "CreationDateCol": "Datum vytvoření",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Smazat server",
+            "DemoteAdmin": "Odstraňte se z admins",
+            "PlayersCol": "Hráči",
+            "PromoteAdmin": "Přidejte se jako admin",
+            "ServerNameCol": "Jméno",
+            "SetDefault": "Přidat jako výchozí server",
+            "Title": "Servery",
+            "UnsetDefault": "Odebrat z výchozích serverů"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Na této stránce se nemůžete odstranit.",
+            "SnackbarCantEdit": "Na této stránce se nemůžete upravovat.",
+            "SnackbarCopy": "Id zkopírované do schránky"
+        },
+        "Title": "Superadministrátor",
+        "UserTable": {
+            "DeleteUser": "Odstranit uživatele",
+            "DemoteUser": "Odvolání uživatele z funkce Super Admin",
+            "HowMuchIsAdmin": "Počet serverů, na kterých je uživatel administrátorem",
+            "JoinedServers": "Připojené servery",
+            "PromoteUser": "Povýšení uživatele na Superadmina",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servery",
+            "Title": "Uživatelé",
+            "ActionCol": "Akce"
+        }
+    },
+    "TagName": "Název značky",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Exportovat/zálohovat mého uživatele",
+        "ImportReplace": "Importovat/nahradit mého uživatele",
+        "InGamePseudo": "Ve hře pseudo",
+        "InGamePseudoTooltip": "Automaticky se vyplní při dokončení registrace uživatele uvnitř Eca díky EcoGnomeModu.",
+        "InGameId": "In-Game Id",
+        "InGameIdTooltip": "Automaticky vyplněno při dokončení registrace uživatele uvnitř Eco díky EcoGnomeModu.",
+        "MyServers": "Moje servery",
+        "Pseudo": "Pseudo",
+        "PublicId": "Veřejné Id",
+        "SecretId": "Tajné Id (používá se uvnitř Eca při registraci)",
+        "ResetRegistration": "Jste si jisti, že chcete obnovit svou aktuální registraci na tomto serveru? Na tomto serveru již nebudete moci používat herní funkce!",
+        "PopupConfirmImportBegin": "Jste si jisti, že chcete importovat uživatele s pseudo",
+        "PopupConfirmImportEnd": " ? Tím se vymaže váš současný uložený uživatel. Ujistěte se, že jste aktuálního uživatele vyexportovali, pokud ho chcete později používat !",
+        "SnackbarCopy": "Kód pro připojení zkopírovaný do schránky",
+        "SnackbarErrorBadFile": "Chyba při importu uživatele - Vyberte správný soubor.",
+        "SnackbarErrorBadUser": "Chyba importu uživatele - Nelze najít importovaného uživatele",
+        "UserSettings": "Nastavení uživatele"
+    },
+    "Versions": "Verze",
+    "PriceCalculator": {
+        "LoadError": "Při načítání došlo k chybě. Můžete zkusit obnovit všechna data, abyste chybu opravili.",
+        "Reset": "Resetujte stránky",
+        "Skills": "Dovednosti",
+        "AddSkill": "Přidat dovednost",
+        "CraftingTables": "Tabulky řemesel",
+        "AddCraftingTable": "Přidat tabulku řemeslných dovedností",
+        "CostMin": {
+            "Tooltip": "Náklady související s touto tabulkou řemesel za každou minutu řemesla. Představuje spotřebu paliva, výměnu dílů, případné poplatky za crafting...",
+            "CostMin": "Náklady/min"
+        },
+        "NoModule": "Žádný modul",
+        "MarginPercent": {
+            "Tooltip": "Procento marže, které se uplatní na prodejní cenu. Podrobnosti o výpočtu najdete v nápovědě k volbě \"Typ výpočtu marže\".",
+            "MarginPercent": "Procento marže"
+        },
+        "AddMargin": "Přidat marži",
+        "RemoveMargin": "Odebrat marži",
+        "NonSkilled": {
+            "Tooltip": "Odemknutí seznamu nekvalifikovaných receptů ve voliči receptů.",
+            "NonSkilled": "Zobrazit nekvalifikované recepty"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Zobrazí pouze recepty, které jsou povoleny vašimi úrovněmi dovedností.",
+            "LevelAccessible": "Pouze recepty, které jsou přístupné podle úrovně"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Když systém načte cenu ingredience, pokud je tato ingredience z jiné dovednosti, než je aktuální recept, pak se místo její výrobní ceny použije cena marže. To umožňuje spravedlivější výrobní cenu pro ostatní občany, kteří nemají obě dovednosti.",
+            "ApplyMarginBetweenSkills": "Použití marže mezi dovednostmi"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Metoda výpočtu marže",
+                "2": "MarkUp (výchozí): sečtete CostPrice a Margin*CostPrice/100, abyste získali SalePrice",
+                "3": "Hrubá marže: Marže v procentech je procento přínosu vaší ProdejníCeny, které je omezeno v rozmezí -99,99 % až 99,99 %."
+            },
+            "MarginType": "Typ výpočtu marže",
+            "MarkUp": "Mark-Up",
+            "GrossMargin": "Hrubá marže"
+        },
+        "CalorieCost": {
+            "Tooltip": "Náklady na jídlo, které sníte, na 1000 kalorií vydaných v řemesle. Pokud kupujete pouze saláty, které přinášejí 700 kcal za 5$, pak Cost per 1000 calories je 1000 * 5 / 700 = 7,14$",
+            "CalorieCost": "Náklady na 1000 kalorií"
+        },
+        "ItemsToBuy": "Položky k nákupu",
+        "IngredientSearch": "Přísady Položky nebo značky",
+        "BuyPrice": "Nákupní cena",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Tato hodnota bude minimální cenou souvisejících položek (pokud jsou definovány všechny hodnoty !), pokud kliknutím na hvězdičku nezvolíte konkrétní položku.",
+            "isAutoCalculatedPrice": "Tato hodnota je automaticky vypočítána systémem. Pokud je prázdná, ujistěte se, že jste nastavili cenu všech \"Položek ke koupi\"",
+            "isItemEmptyPrice": "Nastavte tuto cenu, aby bylo možné vypočítat související recepty",
+            "isMinPrice": "Tato hodnota je nastavena na minimální cenu serveru",
+            "isMaxPrice": "Tato hodnota je nastavena na maximální cenu serveru",
+            "IsMarginPrice": "Tato hodnota je cenou marže, protože je aktivována volba \"Použít marži mezi dovednostmi\"."
+        },
+        "CancelOverride": "Tuto cenu výrobku již nepřepisujte.",
+        "AddFavoriteItem": "Oblíbit tuto položku, použít její cenu na související značku",
+        "CancelFavoriteItem": "Zrušit oblíbení této položky",
+        "ItemsToSell": "Položky k prodeji",
+        "AddRecipe": "Přidat recept",
+        "ProductItems": "Položky produktu",
+        "CostPrice": "Nákladová cena",
+        "SalePrice": "Prodejní cena",
+        "AddOverride": "Přepište tuto cenu, protože se nejedná o výrobek k prodeji, ale o výrobek k nákupu",
+        "RecipeTooltip": "Otevřete vyskakovací okno receptu, zobrazí se podrobnosti o výpočtu",
+        "RecipeTooltipWithShare": "Otevřete vyskakovací okno receptu, dává možnost kontrolovat přerozdělení ceny výrobku a zobrazuje podrobnosti výpočtu",
+        "MarginTooltip": "Vaše konfigurace marže neumožňuje vypočítat prodejní cenu. Zkontrolujte procento marže a typ výpočtu marže.",
+        "AddFavoriteRecipe": "Oblíbený tento recept, použijte jeho cenu na související produkt",
+        "CancelFavoriteRecipe": "Zrušit oblíbení tohoto receptu",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Nelze odstranit poslední marži",
+            "PriceNotWellConfigured": "Tato cena není dobře nakonfigurovaná",
+            "PriceCopied": "Cena zkopírována do schránky"
+        }
+    },
+    "Recipe": "Recept",
+    "ContextService": {
+        "DefaultMargin": "Výchozí marže"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Nová marže"
+    }
+}

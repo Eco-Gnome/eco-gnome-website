@@ -1,0 +1,280 @@
+{
+    "Cancel": "Annullamento",
+    "CopyToClipboard": "Copia negli appunti",
+    "CraftingTable": "Tabella dell'artigianato",
+    "GraphView": {
+        "ResetButton": "Azzera il grafico",
+        "Title": "Vista del grafico"
+    },
+    "Header": {
+        "CreateServer": "Creare un server",
+        "EcoGnome": "Eco Gnomo",
+        "MyServers": "I miei server",
+        "AddServer": "Si unisca ad un server esistente o ne crei uno nuovo.",
+        "New": "Nuovo!",
+        "ReleaseDialog": {
+            "Title": "Rilasci"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Lei è già in questo server",
+                "JoinError": "Deve aggiungere un codice server",
+                "ServerNotFound": "Il server non è stato trovato"
+            },
+            "Title": "Creare o unirsi al server"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Gestione degli utenti"
+        }
+    },
+    "Ingredients": "Ingredienti",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Prodotto da",
+        "UsedIn": "Utilizzato in"
+    },
+    "JoinCode": "Codice di adesione",
+    "Language": "Lingua",
+    "MainLayout": {
+        "SiteTitle": "Strumenti per il videogioco Eco",
+        "PleaseJoin": "Si unisca ad un server"
+    },
+    "Name": "Nome",
+    "Level": "Livello",
+    "Upgrade": "Aggiornamento",
+    "Margins": "Margini",
+    "NavMenu": {
+        "NavAdmin": "Gestione del server",
+        "NavCalculator": "Calcolatore dei prezzi",
+        "NavGraph": "Vista grafica [WIP]",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "Nessuno",
+    "Options": "Opzioni",
+    "Products": "Prodotti",
+    "RecipeDialog": {
+        "AdditionalCosts": "Costi aggiuntivi",
+        "CraftTime": "Tempo di lavorazione",
+        "CraftTimeReductionTooltip": "{valore iniziale} con {percentuale} di riduzione dovuta al modulo di aggiornamento {nomeModuloAggiornamento}",
+        "Dynamic": "dinamico",
+        "Labor": "Lavoro",
+        "LaborReductionTooltip": "{Valore iniziale} con una riduzione del {percentuale}% dovuta al livello di abilità {skillLevel}",
+        "QuantityReductionTooltip": "riduzione del {percento}% dovuta al modulo di aggiornamento {skillLevel}",
+        "QuantityReductionLavishTooltip": "e al Talento Ricco",
+        "ReintegratedToolTip": {
+            "False": "Smettere di detrarre questo articolo dal prezzo di costo. Questo aumenterà matematicamente il prezzo degli altri prodotti.",
+            "True": "Detrarre questo articolo dal prezzo di costo, da utilizzare quando può riutilizzare questo prodotto nella stessa ricetta o in una precedente (Stampi, Botti, ...). Questo diminuirà matematicamente il prezzo degli altri prodotti."
+        },
+        "Share": {
+            "EqualityTooltip": "Dividere equamente tra i prodotti.",
+            "EquilibrateTooltip": "Dividere per quantità tra i prodotti.",
+            "FirstOnlyTooltip": "Concedere il 100% al primo prodotto e zero agli altri. Scelga questa opzione se considera gli altri prodotti come spazzatura.",
+            "HonestTooltip": "Concedere l'80% al primo prodotto e dividere il resto in parti uguali."
+        },
+        "Static": "statico",
+        "TotalCost": "Costo totale:",
+        "TotalPrice": "Prezzo totale:"
+    },
+    "RecipeList": {
+        "RecipeName": "Nome della ricetta"
+    },
+    "RelatedRecipes": "Ricette correlate",
+    "Search": "Ricerca",
+    "ServerDialog": {
+        "Create": "Creare",
+        "CreateServer": "Creare il suo server",
+        "HaveAnInvitation": "Possiede già un codice di adesione al server?",
+        "Join": "Adesione",
+        "MaxChar": "Massimo 25 caratteri",
+        "MinChar": "Min 3 caratteri"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "È sicuro di voler cancellare tutti i prezzi massimi?",
+            "ClearAllMin": "È sicuro di voler cancellare tutti i prezzi minimi?",
+            "ServerDeletion": "È sicuro di voler cancellare il suo server? Non ci sarà nessun rollback!",
+            "ServerDissociate": "È sicuro di voler dissociare il suo server Eco-Gnome dal suo server Eco? Non ci sarà alcun rollback!",
+            "UpdateJoinCode": "È sicuro di voler aggiornare il suo JoinCode? Questo disabiliterà qualsiasi codice generato in precedenza!"
+        },
+        "EcoServerId": "Id del server Eco",
+        "EcoServerIdTooltip": "Questo campo sarà riempito una volta che il server sarà registrato nel gioco grazie alla EcoGnomeMod.",
+        "JoinCodeTooltip": "Fornisca questo codice ai suoi giocatori affinché possano unirsi al suo server.",
+        "Items": {
+            "Max": "Prezzo massimo",
+            "Max.Tooltip": "Cancella i prezzi massimi",
+            "Min": "Prezzo minimo",
+            "Min.Tooltip": "Cancella i prezzi minimi"
+        },
+        "Members": {
+            "DemoteAdmin": "Retrocessione dell'amministratore",
+            "KickUser": "Calcificare l'utente",
+            "PromoteAdmin": "Promuova l'amministratore",
+            "Tooltip.Admin": "Amministratore",
+            "Title": "Membri"
+        },
+        "ServerSettings": {
+            "ServerName": "Nome del server",
+            "Crafting": "Tabelle di crafting",
+            "Delete": "Cancellare il server",
+            "Items": "Oggetti",
+            "Tags": "Tag",
+            "Modules": "Moduli di aggiornamento",
+            "Recipes": "Ricette",
+            "Elements": "Elementi di ricetta",
+            "Skills": "Competenze",
+            "Upload": "Caricare i dati del server",
+            "Title": "Impostazioni del server",
+            "Stats": "Statistiche dei dati",
+            "EcoGnomeModExplanation1": "Eco Gnome è in grado di leggere i dati del suo server Eco per calcolare con precisione i prezzi dei suoi oggetti. Estrae le abilità, le tabelle di crafting, i moduli, gli oggetti e tutte le ricette. Può leggere sia i dati vanilla modificati che quelli aggiunti da mod esterne.",
+            "EcoGnomeModExplanation2": "Per fare questo, deve scaricare e installare la nostra mod server, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), sul suo server Eco. Una volta riavviato il server, nella cartella principale del suo server di gioco dovrebbe essere creato un file chiamato eco_gnome_data.json. Deve recuperare questo file e caricarlo utilizzando il pulsante sottostante."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Non può modificarlo da solo",
+            "UploadOk": "Caricamento riuscito",
+            "UploadNok": "Errore di caricamento",
+            "UploadPartiallyNok": "Attenzione: gli elementi {errorCount} non sono stati importati: {errorNames}. Riveda le sue mod e le modifiche al server. Può contattare gli amministratori di Eco Gnome per chiedere aiuto."
+        }
+    },
+    "Skill": "Abilità",
+    "NoSkill": "Nessuna abilità",
+    "SuperAdmin": {
+        "ActionCol": "Azione",
+        "ConfirmServerDeletion": "È sicuro di voler eliminare il server {server}?",
+        "ConfirmSuperAdminPromote": "È sicuro di voler promuovere questo utente a Super Admin?",
+        "ConfirmSuperAdminDemote": "È sicuro di voler retrocedere questo utente da Super Admin?",
+        "ConfirmTwiceSuperAdmin": "Questa modifica ha un impatto notevole e potrebbe danneggiare l'intero sito web! La prego di confermare nuovamente.",
+        "ConfirmUserDeletion": "È sicuro di voler eliminare l'utente {user}?",
+        "CreationDateCol": "Data di creazione",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Amministratori",
+            "DeleteServer": "Eliminare il server",
+            "DemoteAdmin": "Si rimuova dagli amministratori",
+            "PlayersCol": "Giocatori",
+            "PromoteAdmin": "Aggiungersi come amministratore",
+            "ServerNameCol": "Nome",
+            "SetDefault": "Aggiungi come server predefinito",
+            "Title": "Server",
+            "UnsetDefault": "Rimuovere dai server predefiniti"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Non può cancellarsi da questa pagina.",
+            "SnackbarCantEdit": "Non può modificarsi da questa pagina.",
+            "SnackbarCopy": "Id copiato negli appunti"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Eliminare l'utente",
+            "DemoteUser": "Retrocessione dell'utente da Super Admin",
+            "HowMuchIsAdmin": "Numero di server su cui l'utente è amministratore",
+            "JoinedServers": "Server uniti",
+            "PromoteUser": "Promuove l'utente a Super Admin",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Server",
+            "Title": "Utenti",
+            "ActionCol": "Azione"
+        }
+    },
+    "TagName": "Nome del tag",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Esportazione/Backup del mio utente",
+        "ImportReplace": "Importazione/Sostituzione del mio utente",
+        "InGamePseudo": "Pseudo in gioco",
+        "InGamePseudoTooltip": "Riempito automaticamente quando completa la registrazione dell'utente all'interno di Eco grazie alla EcoGnomeMod.",
+        "InGameId": "Id nel gioco",
+        "InGameIdTooltip": "Compilato automaticamente quando completa la registrazione dell'utente all'interno di Eco grazie alla EcoGnomeMod.",
+        "MyServers": "I miei server",
+        "Pseudo": "Pseudo",
+        "PublicId": "Id pubblico",
+        "SecretId": "Id segreto (utilizzato all'interno di Eco per la registrazione)",
+        "ResetRegistration": "È sicuro di voler resettare la sua attuale registrazione su questo server? Non potrà più utilizzare le funzioni di gioco su questo server!",
+        "PopupConfirmImportBegin": "È sicuro di voler importare l'utente con pseudo",
+        "PopupConfirmImportEnd": " ? Questo cancellerà il suo attuale utente salvato. Si assicuri di esportare l'utente attuale se vuole utilizzarlo in seguito!",
+        "SnackbarCopy": "Codice di adesione copiato negli appunti",
+        "SnackbarErrorBadFile": "Errore di importazione dell'utente - Scelga un file corretto.",
+        "SnackbarErrorBadUser": "Errore di importazione dell'utente - Impossibile trovare l'utente importato",
+        "UserSettings": "Impostazioni utente"
+    },
+    "Versions": "Versioni",
+    "PriceCalculator": {
+        "LoadError": "Si è verificato un errore durante il caricamento. Può provare a resettare tutti i suoi dati per risolvere l'errore.",
+        "Reset": "Azzeramento",
+        "Skills": "Abilità",
+        "AddSkill": "Aggiungi abilità",
+        "CraftingTables": "Tavole di artigianato",
+        "AddCraftingTable": "Aggiungi tabella di crafting",
+        "CostMin": {
+            "Tooltip": "Il costo relativo a questa tabella di crafting per ogni minuto di crafting. Rappresenta il consumo di carburante, la sostituzione dei pezzi, le eventuali spese di crafting...",
+            "CostMin": "Costo/min"
+        },
+        "NoModule": "Nessun modulo",
+        "MarginPercent": {
+            "Tooltip": "La percentuale di margine che verrà applicata al suo prezzo di vendita. Verifichi l'opzione 'Tipo di calcolo del margine' per i dettagli del calcolo.",
+            "MarginPercent": "Percentuale di margine"
+        },
+        "AddMargin": "Aggiungi margine",
+        "RemoveMargin": "Rimuovere il margine",
+        "NonSkilled": {
+            "Tooltip": "Sblocca l'elenco delle ricette non qualificate nel selettore di ricette.",
+            "NonSkilled": "Visualizzare le ricette non qualificate"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Visualizza solo le ricette consentite dai suoi livelli di abilità.",
+            "LevelAccessible": "Solo ricette accessibili al livello"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Quando il sistema recupera il prezzo di un ingrediente, se questo ingrediente proviene da un'altra abilità rispetto alla ricetta corrente, verrà utilizzato il suo prezzo di margine invece del suo prezzo di produzione. Questo consente un prezzo di produzione più equo per gli altri cittadini che non possiedono entrambe le abilità.",
+            "ApplyMarginBetweenSkills": "Applicare il margine tra le abilità"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Metodo di calcolo del margine",
+                "2": "MarkUp (predefinito): somma il Prezzo di costo e il Margine*Prezzo di costo/100 per ottenere il Prezzo di vendita",
+                "3": "Margine lordo: La percentuale di Margine è la percentuale di beneficio del suo Costo di Vendita, con un limite compreso tra -99,99% e 99,99%."
+            },
+            "MarginType": "Tipo di calcolo del margine",
+            "MarkUp": "Mark-Up",
+            "GrossMargin": "Margine lordo"
+        },
+        "CalorieCost": {
+            "Tooltip": "Il costo del cibo che mangia, per 1000 calorie spese in un mestiere. Se acquista solo insalate che apportano 700 calorie per 5 dollari, il costo per 1000 calorie è 1000 * 5 / 700 = 7,14 dollari",
+            "CalorieCost": "Costo per 1000 calorie"
+        },
+        "ItemsToBuy": "Articoli da acquistare",
+        "IngredientSearch": "Articoli o etichette degli ingredienti",
+        "BuyPrice": "Prezzo di acquisto",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Questo valore sarà il prezzo minimo degli articoli correlati (se tutti i valori sono definiti!), a meno che non ne scelga uno specifico cliccando su una stella.",
+            "isAutoCalculatedPrice": "Questo valore viene calcolato automaticamente dal sistema. Se è vuoto, si assicuri di impostare il prezzo di tutti gli 'Articoli da acquistare'",
+            "isItemEmptyPrice": "Impostare questo prezzo per consentire il calcolo delle ricette correlate",
+            "isMinPrice": "Questo valore è impostato al prezzo minimo del server",
+            "isMaxPrice": "Questo valore è impostato al prezzo massimo del server",
+            "IsMarginPrice": "Questo valore è un prezzo di margine, perché l'opzione 'Applica margine tra le competenze' è attivata."
+        },
+        "CancelOverride": "Non sovrascriva più il prezzo di questo prodotto.",
+        "AddFavoriteItem": "Favorisca questo articolo, applichi il suo prezzo al tag correlato",
+        "CancelFavoriteItem": "Disfavorisca questo articolo",
+        "ItemsToSell": "Articoli da vendere",
+        "AddRecipe": "Aggiungere una ricetta",
+        "ProductItems": "Articoli del prodotto",
+        "CostPrice": "Prezzo di costo",
+        "SalePrice": "Prezzo di vendita",
+        "AddOverride": "Sovrascriva questo prezzo, considerando che non si tratta di un prodotto da vendere, ma di un prodotto da acquistare",
+        "RecipeTooltip": "Aprire il popup della ricetta, visualizza i dettagli del calcolo",
+        "RecipeTooltipWithShare": "Aprire il popup della ricetta, dà la possibilità di controllare la ripartizione del prezzo del prodotto e visualizza i dettagli del calcolo",
+        "MarginTooltip": "La configurazione del margine non consente di calcolare un prezzo di vendita. Controlli la percentuale di margine e il tipo di calcolo del margine.",
+        "AddFavoriteRecipe": "Preferisca questa ricetta, applicherà il suo prezzo al prodotto correlato",
+        "CancelFavoriteRecipe": "Disfavorisca questa ricetta",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Non è possibile rimuovere l'ultimo margine",
+            "PriceNotWellConfigured": "Questo prezzo non è ben configurato",
+            "PriceCopied": "Prezzo copiato negli appunti"
+        }
+    },
+    "Recipe": "Ricetta",
+    "ContextService": {
+        "DefaultMargin": "Margine predefinito"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Nuovo margine"
+    }
+}

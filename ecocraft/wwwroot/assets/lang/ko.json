@@ -1,0 +1,280 @@
+{
+    "Cancel": "취소",
+    "CopyToClipboard": "클립보드에 복사",
+    "CraftingTable": "제작 테이블",
+    "GraphView": {
+        "ResetButton": "그래프 초기화",
+        "Title": "그래프 보기"
+    },
+    "Header": {
+        "CreateServer": "서버 만들기",
+        "EcoGnome": "에코 그놈",
+        "MyServers": "내 서버",
+        "AddServer": "기존 서버에 가입하거나 새 서버를 만드세요.",
+        "New": "신규!",
+        "ReleaseDialog": {
+            "Title": "릴리스"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "이미 이 서버에 있습니다",
+                "JoinError": "서버 코드를 추가해야 합니다",
+                "ServerNotFound": "서버를 찾을 수 없음"
+            },
+            "Title": "서버 만들기 또는 가입"
+        },
+        "UserConfigurationDialog": {
+            "Title": "사용자 관리"
+        }
+    },
+    "Ingredients": "재료",
+    "ItemOrTagDialog": {
+        "ProducedBy": "제작자",
+        "UsedIn": "사용처"
+    },
+    "JoinCode": "가입 코드",
+    "Language": "언어",
+    "MainLayout": {
+        "SiteTitle": "에코 비디오 게임용 도구",
+        "PleaseJoin": "서버에 가입하세요"
+    },
+    "Name": "이름",
+    "Level": "레벨",
+    "Upgrade": "업그레이드",
+    "Margins": "마진",
+    "NavMenu": {
+        "NavAdmin": "서버 관리",
+        "NavCalculator": "가격 계산기",
+        "NavGraph": "그래프 보기 [WIP]",
+        "NavSuperAdmin": "슈퍼 관리자"
+    },
+    "None": "없음",
+    "Options": "옵션",
+    "Products": "제품",
+    "RecipeDialog": {
+        "AdditionalCosts": "추가 비용",
+        "CraftTime": "제작 시간",
+        "CraftTimeReductionTooltip": "업그레이드 모듈 {업그레이드모듈명}으로 인해 {퍼센트}% 감소한 {초기값}입니다",
+        "Dynamic": "동적",
+        "Labor": "노동력",
+        "LaborReductionTooltip": "스킬 레벨 {스킬레벨}로 인해 {퍼센트}% 감소한 {초기값}입니다",
+        "QuantityReductionTooltip": "업그레이드 모듈 {스킬 레벨}로 인한 {퍼센트}% 감소",
+        "QuantityReductionLavishTooltip": "그리고 호화로운 재능",
+        "ReintegratedToolTip": {
+            "False": "이 아이템을 비용 가격에서 차감하지 않습니다. 이렇게 하면 다른 상품의 가격이 수학적으로 증가합니다.",
+            "True": "이 아이템을 원가에서 차감하여 동일한 레시피 또는 이전 레시피에서 이 제품을 재사용할 수 있을 때 사용합니다(금형, 통 등). 이렇게 하면 다른 제품의 가격이 수학적으로 낮아집니다."
+        },
+        "Share": {
+            "EqualityTooltip": "제품 간에 균등하게 분할합니다.",
+            "EquilibrateTooltip": "제품 간 수량으로 분할합니다.",
+            "FirstOnlyTooltip": "첫 번째 제품에는 100%를, 나머지 제품에는 0을 부여합니다. 다른 제품을 쓰레기로 간주하는 경우 이 옵션을 선택합니다.",
+            "HonestTooltip": "첫 번째 제품에 80%를 부여하고 나머지는 균등하게 분할합니다."
+        },
+        "Static": "정적",
+        "TotalCost": "총 비용:",
+        "TotalPrice": "총 가격입니다:"
+    },
+    "RecipeList": {
+        "RecipeName": "레시피 이름"
+    },
+    "RelatedRecipes": "관련 레시피",
+    "Search": "검색",
+    "ServerDialog": {
+        "Create": "만들기",
+        "CreateServer": "서버 만들기",
+        "HaveAnInvitation": "이미 서버 가입 코드가 있으신가요?",
+        "Join": "가입",
+        "MaxChar": "최대 25자",
+        "MinChar": "최소 3자"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "최대 가격을 모두 지우시겠습니까?",
+            "ClearAllMin": "모든 최소 가격을 지우시겠습니까?",
+            "ServerDeletion": "서버를 삭제하시겠습니까? 롤백은 없습니다!",
+            "ServerDissociate": "에코 그놈 서버를 에코 서버에서 분리하시겠습니까? 롤백은 없습니다!",
+            "UpdateJoinCode": "조인코드를 새로 고치시겠습니까? 이렇게 하면 이전에 생성된 모든 코드가 비활성화됩니다!"
+        },
+        "EcoServerId": "에코 서버 ID",
+        "EcoServerIdTooltip": "이 필드는 에코 그놈 모드 덕분에 이 서버가 게임 내에 등록되면 채워집니다.",
+        "JoinCodeTooltip": "플레이어가 서버에 참여할 수 있도록 이 코드를 플레이어에게 제공하세요.",
+        "Items": {
+            "Max": "최대 가격",
+            "Max.Tooltip": "최대 가격 지우기",
+            "Min": "최소 가격",
+            "Min.Tooltip": "최소 가격 지우기"
+        },
+        "Members": {
+            "DemoteAdmin": "관리자 강등",
+            "KickUser": "사용자 내보내기",
+            "PromoteAdmin": "관리자 승격",
+            "Tooltip.Admin": "관리자",
+            "Title": "회원"
+        },
+        "ServerSettings": {
+            "ServerName": "서버 이름",
+            "Crafting": "제작 테이블",
+            "Delete": "서버 삭제",
+            "Items": "아이템",
+            "Tags": "태그",
+            "Modules": "모듈 업그레이드",
+            "Recipes": "레시피",
+            "Elements": "레시피 요소",
+            "Skills": "스킬",
+            "Upload": "서버 데이터 업로드",
+            "Title": "서버 설정",
+            "Stats": "데이터 통계",
+            "EcoGnomeModExplanation1": "에코 그놈은 에코 서버에서 데이터를 읽어 아이템의 가격을 정확하게 계산할 수 있습니다. 스킬, 제작 테이블, 모듈, 아이템, 모든 레시피를 추출합니다. 수정된 바닐라 데이터와 외부 모드에서 추가한 데이터를 모두 읽을 수 있습니다.",
+            "EcoGnomeModExplanation2": "이렇게 하려면 에코 서버에 서버 모드인 [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod)를 다운로드하여 설치해야 합니다. 서버가 재시작되면 게임 서버의 루트 폴더에 eco_gnome_data.json이라는 파일이 생성됩니다. 이 파일을 검색하여 아래 버튼을 사용하여 업로드해야 합니다."
+        },
+        "Snackbar": {
+            "CantEditYourself": "직접 편집할 수 없습니다",
+            "UploadOk": "업로드 성공",
+            "UploadNok": "업로드 오류",
+            "UploadPartiallyNok": "경고: {오류 수} 요소를 가져오지 못했습니다: {오류 이름}. 모드와 서버 편집 내용을 검토하세요. 에코 그놈 관리자에게 도움을 요청할 수 있습니다."
+        }
+    },
+    "Skill": "스킬",
+    "NoSkill": "스킬 없음",
+    "SuperAdmin": {
+        "ActionCol": "Action",
+        "ConfirmServerDeletion": "서버 {서버}를 삭제하시겠습니까?",
+        "ConfirmSuperAdminPromote": "이 사용자를 슈퍼 관리자로 승격하시겠습니까?",
+        "ConfirmSuperAdminDemote": "이 사용자를 슈퍼 관리자에서 강등하시겠습니까?",
+        "ConfirmTwiceSuperAdmin": "이 변경은 많은 영향을 미치며 전체 웹사이트가 손상될 수 있습니다! 다시 확인해 주세요.",
+        "ConfirmUserDeletion": "사용자 {사용자}를 삭제하시겠습니까?",
+        "CreationDateCol": "생성 날짜",
+        "IdCol": "아이디",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "서버 삭제",
+            "DemoteAdmin": "관리자에서 본인 삭제",
+            "PlayersCol": "플레이어",
+            "PromoteAdmin": "관리자로 본인 추가",
+            "ServerNameCol": "이름",
+            "SetDefault": "기본 서버로 추가",
+            "Title": "서버",
+            "UnsetDefault": "기본 서버에서 삭제"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "이 페이지에서는 자신을 삭제할 수 없습니다.",
+            "SnackbarCantEdit": "이 페이지에서는 자신을 수정할 수 없습니다.",
+            "SnackbarCopy": "아이디가 클립보드에 복사됨"
+        },
+        "Title": "슈퍼 관리자",
+        "UserTable": {
+            "DeleteUser": "사용자 삭제",
+            "DemoteUser": "사용자를 슈퍼 관리자에서 강등",
+            "HowMuchIsAdmin": "사용자가 관리자 권한이 있는 서버 수",
+            "JoinedServers": "가입한 서버",
+            "PromoteUser": "사용자를 슈퍼 관리자로 승격",
+            "PseudoCol": "의사",
+            "ServersCol": "서버",
+            "Title": "사용자",
+            "ActionCol": "작업"
+        }
+    },
+    "TagName": "태그 이름",
+    "UserConfigurationDialog": {
+        "ExportBackup": "내 사용자 내보내기/백업",
+        "ImportReplace": "내 사용자 가져오기/바꾸기",
+        "InGamePseudo": "게임 내 의사",
+        "InGamePseudoTooltip": "에코에서 사용자 등록을 완료할 때 EcoGnomeMod를 통해 자동으로 채워집니다.",
+        "InGameId": "게임 내 아이디",
+        "InGameIdTooltip": "EcoGnomeMod를 통해 Eco 내에서 사용자 등록을 완료하면 자동으로 채워집니다.",
+        "MyServers": "내 서버",
+        "Pseudo": "Pseudo",
+        "PublicId": "공개 아이디",
+        "SecretId": "비밀 아이디(Eco 내부에서 등록 시 사용)",
+        "ResetRegistration": "이 서버의 현재 등록을 초기화하시겠습니까? 이 서버에서는 더 이상 게임 내 기능을 사용할 수 없습니다!",
+        "PopupConfirmImportBegin": "의사 공개 아이디로 사용자를 가져오시겠습니까?",
+        "PopupConfirmImportEnd": " ? 그러면 현재 저장된 사용자가 지워집니다. 나중에 사용하려면 현재 사용자를 내보내세요!",
+        "SnackbarCopy": "클립보드에 복사된 조인 코드",
+        "SnackbarErrorBadFile": "사용자 가져오기 오류 - 올바른 파일을 선택하세요.",
+        "SnackbarErrorBadUser": "사용자 가져오기 오류 - 가져온 사용자를 찾을 수 없습니다",
+        "UserSettings": "사용자 설정"
+    },
+    "Versions": "버전",
+    "PriceCalculator": {
+        "LoadError": "로드하는 동안 오류가 발생했습니다. 모든 데이터를 초기화하여 오류를 해결할 수 있습니다.",
+        "Reset": "초기화",
+        "Skills": "스킬",
+        "AddSkill": "스킬 추가",
+        "CraftingTables": "제작 테이블",
+        "AddCraftingTable": "제작 테이블 추가",
+        "CostMin": {
+            "Tooltip": "이 제작 테이블과 관련된 각 제작 분의 비용입니다. 연료 소비, 부품 교체, 최종 제작 비용을 나타냅니다...",
+            "CostMin": "비용/분"
+        },
+        "NoModule": "모듈 없음",
+        "MarginPercent": {
+            "Tooltip": "판매 가격에 적용될 마진 비율입니다. 자세한 계산 방법은 '마진 계산 유형' 툴팁 옵션을 확인하세요.",
+            "MarginPercent": "마진 퍼센트"
+        },
+        "AddMargin": "마진 추가",
+        "RemoveMargin": "마진 제거",
+        "NonSkilled": {
+            "Tooltip": "레시피 선택기에서 비숙련 레시피 목록을 잠금 해제합니다.",
+            "NonSkilled": "비숙련 레시피 표시"
+        },
+        "LevelAccessible": {
+            "Tooltip": "스킬 레벨에 따라 허용되는 레시피만 표시합니다.",
+            "LevelAccessible": "레벨에 따라 접근 가능한 레시피만 표시"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "시스템에서 재료의 가격을 검색할 때 이 재료가 현재 레시피가 아닌 다른 스킬의 재료인 경우, 해당 재료의 생산 가격 대신 해당 스킬의 마진 가격이 사용됩니다. 이를 통해 두 기술을 모두 보유하지 않은 다른 시민에게도 보다 공정한 생산 가격이 적용될 수 있습니다.",
+            "ApplyMarginBetweenSkills": "스킬 간 마진 적용"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "마진 계산 방법",
+                "2": "마크업(기본값): 원가와 마진*원가 100을 합산하여 판매가를 구합니다",
+                "3": "총 마진: 마진 퍼센트는 SaleCost의 이익 비율로, -99.99%에서 99.99% 사이로 제한됩니다."
+            },
+            "MarginType": "마진 계산 유형",
+            "MarkUp": "마크업",
+            "GrossMargin": "총 마진"
+        },
+        "CalorieCost": {
+            "Tooltip": "1000칼로리를 소비한 음식의 원가입니다. 700칼로리를 제공하는 샐러드만 5$에 구매하는 경우 1000칼로리당 비용은 1000 * 5 / 700 = 7,14$입니다",
+            "CalorieCost": "1000 칼로리당 비용"
+        },
+        "ItemsToBuy": "구매 품목",
+        "IngredientSearch": "재료 항목 또는 태그",
+        "BuyPrice": "구매 가격",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "이 값은 별표를 클릭하여 특정 항목을 선택하지 않는 한 관련 항목의 최소 가격이 됩니다(모든 값이 정의된 경우!).",
+            "isAutoCalculatedPrice": "이 값은 시스템에서 자동으로 계산됩니다. 비어 있으면 모든 '구매할 품목'의 가격을 설정했는지 확인하세요",
+            "isItemEmptyPrice": "관련 레시피의 계산을 허용하려면 이 가격을 설정하세요",
+            "isMinPrice": "이 값은 서버의 최소 가격으로 설정됩니다",
+            "isMaxPrice": "이 값은 서버의 최대 가격으로 설정됩니다",
+            "IsMarginPrice": "이 값은 '스킬 간 마진 적용' 옵션이 활성화되어 있으므로 마진 가격입니다."
+        },
+        "CancelOverride": "더 이상 이 상품 가격을 재정의하지 마세요.",
+        "AddFavoriteItem": "이 아이템을 즐겨찾기에 추가하면 관련 태그에 해당 가격이 적용됩니다",
+        "CancelFavoriteItem": "이 아이템 즐겨찾기 해제",
+        "ItemsToSell": "판매할 아이템",
+        "AddRecipe": "레시피 추가",
+        "ProductItems": "제품 항목",
+        "CostPrice": "원가 가격",
+        "SalePrice": "판매 가격",
+        "AddOverride": "판매할 제품이 아니라 구매할 제품이라는 점을 고려하여 이 가격을 재정의합니다",
+        "RecipeTooltip": "레시피 팝업을 열면 계산 세부 정보가 표시됩니다",
+        "RecipeTooltipWithShare": "레시피 팝업을 열면 제품 가격 재분할을 제어하고 계산 세부 정보를 표시하는 기능이 제공됩니다",
+        "MarginTooltip": "마진 구성으로 판매 가격을 계산할 수 없습니다. 마진 퍼센트와 마진 계산 유형을 확인합니다.",
+        "AddFavoriteRecipe": "이 레시피를 즐겨찾기에 추가하고 관련 제품에 해당 가격 적용",
+        "CancelFavoriteRecipe": "이 레시피 즐겨찾기 해제",
+        "Snackbar": {
+            "CantRemoveLastMargin": "마지막 마진을 제거할 수 없습니다",
+            "PriceNotWellConfigured": "이 가격은 제대로 구성되지 않았습니다",
+            "PriceCopied": "가격이 클립보드에 복사됨"
+        }
+    },
+    "Recipe": "레시피",
+    "ContextService": {
+        "DefaultMargin": "기본 마진"
+    },
+    "UserServerDataService": {
+        "NewMargin": "새 마진"
+    }
+}

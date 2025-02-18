@@ -1,0 +1,280 @@
+{
+    "Cancel": "Avbryt",
+    "CopyToClipboard": "Kopiera till urklipp",
+    "CraftingTable": "Tabell för hantverk",
+    "GraphView": {
+        "ResetButton": "Återställ graf",
+        "Title": "Visa graf"
+    },
+    "Header": {
+        "CreateServer": "Skapa server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Mina servrar",
+        "AddServer": "Gå med i en befintlig server eller skapa en ny.",
+        "New": "Nya server!",
+        "ReleaseDialog": {
+            "Title": "Utgivningar"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Du är redan på den här servern",
+                "JoinError": "Du behöver lägga till en serverkod",
+                "ServerNotFound": "Servern hittades inte"
+            },
+            "Title": "Skapa eller gå med i server"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Användarhantering"
+        }
+    },
+    "Ingredients": "Ingredienser",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produceras av",
+        "UsedIn": "Används i"
+    },
+    "JoinCode": "Join-kod",
+    "Language": "Språk",
+    "MainLayout": {
+        "SiteTitle": "Verktyg för Eco-videospel",
+        "PleaseJoin": "Vänligen gå med i en server"
+    },
+    "Name": "Ditt namn",
+    "Level": "Nivå",
+    "Upgrade": "Uppgradering",
+    "Margins": "Marginaler",
+    "NavMenu": {
+        "NavAdmin": "Serverhantering",
+        "NavCalculator": "Prisberäknare",
+        "NavGraph": "Grafvisning [WIP]",
+        "NavSuperAdmin": "Superadministratör"
+    },
+    "None": "Ingen",
+    "Options": "Alternativ",
+    "Products": "Produkter",
+    "RecipeDialog": {
+        "AdditionalCosts": "Ytterligare kostnader",
+        "CraftTime": "Hantverkstid",
+        "CraftTimeReductionTooltip": "{initialValue} med {percent}% minskning på grund av uppgraderingsmodul {upgradeModuleName}",
+        "Dynamic": "dynamisk",
+        "Labor": "Arbete",
+        "LaborReductionTooltip": "{initialValue} med {procent}% minskning på grund av färdighetsnivå {skillLevel}",
+        "QuantityReductionTooltip": "{procent}% minskning på grund av uppgraderingsmodul {skillLevel}",
+        "QuantityReductionLavishTooltip": "och överdådig talang",
+        "ReintegratedToolTip": {
+            "False": "Sluta dra av detta objekt från inköpspriset. Detta kommer matematiskt att öka priset på andra produkter.",
+            "True": "Dra av denna post från självkostnadspriset, för att användas när du kan återanvända denna produkt i samma recept eller i ett tidigare (formar, fat, ...). Detta kommer matematiskt att sänka priset på andra produkter."
+        },
+        "Share": {
+            "EqualityTooltip": "Dela lika mellan produkterna.",
+            "EquilibrateTooltip": "Dela upp efter kvantitet mellan produkterna.",
+            "FirstOnlyTooltip": "Ge 100% till den första produkten och noll till resten. Välj detta om du anser att andra produkter är skräp.",
+            "HonestTooltip": "Ge 80 % till den första produkten och dela resten lika."
+        },
+        "Static": "statisk",
+        "TotalCost": "Total kostnad:",
+        "TotalPrice": "Totalt pris:"
+    },
+    "RecipeList": {
+        "RecipeName": "Receptets namn"
+    },
+    "RelatedRecipes": "Relaterade recept",
+    "Search": "Sök efter",
+    "ServerDialog": {
+        "Create": "Skapa",
+        "CreateServer": "Skapa din server",
+        "HaveAnInvitation": "Har du redan en kod för att ansluta dig till en server?",
+        "Join": "Ansluta",
+        "MaxChar": "Max 25 tecken",
+        "MinChar": "Min 3 tecken"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Är du säker på att du vill rensa alla maxpriser?",
+            "ClearAllMin": "Är du säker på att du vill rensa alla min-priser?",
+            "ServerDeletion": "Är du säker på att du vill radera din server? Det kommer inte att finnas någon rollback!",
+            "ServerDissociate": "Är du säker på att du vill separera din Eco-Gnome-server från din Eco-server? Det kommer inte att ske någon rollback!",
+            "UpdateJoinCode": "Är du säker på att du vill uppdatera din JoinCode? Detta kommer att inaktivera alla tidigare genererade koder!"
+        },
+        "EcoServerId": "Id för Eco-server",
+        "EcoServerIdTooltip": "Detta fält kommer att fyllas i när denna server är registrerad i spelet tack vare EcoGnomeMod.",
+        "JoinCodeTooltip": "Ge den här koden till dina spelare så att de kan ansluta sig till din server.",
+        "Items": {
+            "Max": "Max pris",
+            "Max.Tooltip": "Rensa maxpriser",
+            "Min": "Min pris",
+            "Min.Tooltip": "Rensa min-priser"
+        },
+        "Members": {
+            "DemoteAdmin": "Demotera administratör",
+            "KickUser": "Sparka användare",
+            "PromoteAdmin": "Befordra Admin",
+            "Tooltip.Admin": "Admin",
+            "Title": "Medlemmar"
+        },
+        "ServerSettings": {
+            "ServerName": "Serverns namn",
+            "Crafting": "Tabeller för hantverk",
+            "Delete": "Ta bort server",
+            "Items": "Föremål",
+            "Tags": "Taggar",
+            "Modules": "Uppgradera moduler",
+            "Recipes": "Recept",
+            "Elements": "Receptelement",
+            "Skills": "Färdigheter",
+            "Upload": "Ladda upp serverdata",
+            "Title": "Serverinställningar",
+            "Stats": "Statistik för data",
+            "EcoGnomeModExplanation1": "Eco Gnome kan läsa data från din Eco-server för att exakt beräkna priserna på dina föremål. Den extraherar färdigheter, hantverkstabeller, moduler, föremål och alla recept. Den kan läsa både modifierad vaniljdata och data som lagts till av externa mods.",
+            "EcoGnomeModExplanation2": "För att göra detta måste du ladda ner och installera vår servermod, [EcoGnomeMod] (https://github.com/Eco-Gnome/eco-gnome-mod), på din Eco-server. När din server startas om ska en fil med namnet eco_gnome_data.json skapas i rotmappen på din spelserver. Du måste hämta den här filen och ladda upp den med hjälp av knappen nedan."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Du kan inte redigera dig själv",
+            "UploadOk": "Uppladdning lyckad",
+            "UploadNok": "Fel vid uppladdning",
+            "UploadPartiallyNok": "Warning (Varning): {errorCount} element har inte importerats: {felNamn}. Granska dina mods och serverredigeringar. Du kan kontakta Eco Gnome-administratörer för hjälp."
+        }
+    },
+    "Skill": "Färdighet",
+    "NoSkill": "Ingen färdighet",
+    "SuperAdmin": {
+        "ActionCol": "Åtgärd",
+        "ConfirmServerDeletion": "Är du säker på att du vill ta bort server {server}?",
+        "ConfirmSuperAdminPromote": "Är du säker på att du vill befordra den här användaren till superadministratör?",
+        "ConfirmSuperAdminDemote": "Är du säker på att du vill degradera den här användaren från Super Admin?",
+        "ConfirmTwiceSuperAdmin": "Den här ändringen har stor inverkan och kan förstöra hela webbplatsen! Vänligen bekräfta igen.",
+        "ConfirmUserDeletion": "Är du säker på att du vill ta bort användaren {user}?",
+        "CreationDateCol": "Datum för skapande",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Administratörer",
+            "DeleteServer": "Ta bort server",
+            "DemoteAdmin": "Ta bort dig själv från admins",
+            "PlayersCol": "Spelare",
+            "PromoteAdmin": "Lägg till dig själv som admin",
+            "ServerNameCol": "Lägg till namn",
+            "SetDefault": "Lägg till som standardserver",
+            "Title": "Servrar",
+            "UnsetDefault": "Ta bort från standardservrar"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Du kan inte ta bort dig själv från den här sidan.",
+            "SnackbarCantEdit": "Du kan inte redigera dig själv från den här sidan.",
+            "SnackbarCopy": "Id kopierat till klippbordet"
+        },
+        "Title": "Superadministratör",
+        "UserTable": {
+            "DeleteUser": "Ta bort användare",
+            "DemoteUser": "Degradera användare från Super Admin",
+            "HowMuchIsAdmin": "Antal servrar som användaren är admin på",
+            "JoinedServers": "Anslutna servrar",
+            "PromoteUser": "Befordra användare till superadministratör",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servrar",
+            "Title": "Användare",
+            "ActionCol": "Åtgärd"
+        }
+    },
+    "TagName": "Tagg namn",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Exportera/Säkerhetskopiera min användare",
+        "ImportReplace": "Importera/ersätt min användare",
+        "InGamePseudo": "Pseudo i spelet",
+        "InGamePseudoTooltip": "Fylls i automatiskt när du slutför användarregistreringen inuti Eco tack vare EcoGnomeMod.",
+        "InGameId": "Id i spelet",
+        "InGameIdTooltip": "Fylls i automatiskt när du slutför användarregistreringen i Eco tack vare EcoGnomeMod.",
+        "MyServers": "Mina servrar",
+        "Pseudo": "Pseudo",
+        "PublicId": "Offentligt id",
+        "SecretId": "Hemligt Id (används inuti Eco för registrering)",
+        "ResetRegistration": "Är du säker på att du vill återställa din nuvarande registrering på den här servern? Du kommer inte att kunna använda funktioner i spelet på den här servern längre!",
+        "PopupConfirmImportBegin": "Är du säker på att du vill importera användaren med pseudo",
+        "PopupConfirmImportEnd": " ? Detta kommer att radera din nuvarande sparade användare. Se till att exportera den nuvarande användaren om du vill använda den senare!",
+        "SnackbarCopy": "Join-kod kopierad till urklipp",
+        "SnackbarErrorBadFile": "Import User Error - Välj en korrekt fil.",
+        "SnackbarErrorBadUser": "Import User Error - Kan inte hitta den importerade användaren",
+        "UserSettings": "Inställningar för användare"
+    },
+    "Versions": "Versioner",
+    "PriceCalculator": {
+        "LoadError": "Ett fel inträffade under laddningen. Du kan försöka återställa alla dina data för att åtgärda felet.",
+        "Reset": "Återställ",
+        "Skills": "Färdigheter",
+        "AddSkill": "Lägg till färdighet",
+        "CraftingTables": "Bord för hantverk",
+        "AddCraftingTable": "Lägg till hantverksbord",
+        "CostMin": {
+            "Tooltip": "Kostnaden relaterad till denna hantverkstabell för varje minut av hantverk. Representerar bränsleförbrukning, byte av delar, eventuella hantverksavgifter...",
+            "CostMin": "Kostnad/min"
+        },
+        "NoModule": "Ingen modul",
+        "MarginPercent": {
+            "Tooltip": "Den marginalprocent som kommer att tillämpas på ditt försäljningspris. Kontrollera verktygstipsalternativet \"Marginalberäkningstyp\" för beräkningsdetaljer.",
+            "MarginPercent": "Marginalprocent"
+        },
+        "AddMargin": "Lägg till marginal",
+        "RemoveMargin": "Ta bort marginal",
+        "NonSkilled": {
+            "Tooltip": "Lås upp listan med recept som inte är färdiglagade i receptväljaren.",
+            "NonSkilled": "Visa icke-kvalificerade recept"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Visa endast recept som är tillåtna enligt din kompetensnivå.",
+            "LevelAccessible": "Endast recept som är tillgängliga på nivå"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "När systemet hämtar priset på en ingrediens, om denna ingrediens är från en annan färdighet än det aktuella receptet, kommer dess marginalpris att användas istället för dess produktionspris. Detta ger ett mer rättvist produktionspris för andra medborgare som inte har båda färdigheterna.",
+            "ApplyMarginBetweenSkills": "Tillämpa marginal mellan färdigheter"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Metod för beräkning av marginal",
+                "2": "MarkUp (standard): du summerar CostPrice och Margin*CostPrice/100 för att få SalePrice",
+                "3": "Bruttomarginal: Marginalprocenten är den procentuella fördelen av din SaleCost, som är begränsad mellan -99,99 % och 99,99 %."
+            },
+            "MarginType": "Typ av marginalberäkning",
+            "MarkUp": "Uppräkning",
+            "GrossMargin": "Bruttomarginal"
+        },
+        "CalorieCost": {
+            "Tooltip": "Kostnaden för den mat du äter, för 1000 kalorier som spenderas i ett hantverk. Om du bara köper sallader som ger 700 kcal för 5 $, är kostnaden per 1000 kalorier 1000 * 5 / 700 = 7,14 $",
+            "CalorieCost": "Kostnad per 1000 kalorier"
+        },
+        "ItemsToBuy": "Föremål att köpa",
+        "IngredientSearch": "Ingrediensobjekt eller taggar",
+        "BuyPrice": "Köpa pris",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Detta värde kommer att vara det lägsta priset för dess relaterade artiklar (om alla värden är definierade!), såvida du inte väljer en specifik artikel genom att klicka på en stjärna.",
+            "isAutoCalculatedPrice": "Detta värde beräknas automatiskt av systemet. Om det är tomt, se till att du anger priset för alla \"Artiklar att köpa\"",
+            "isItemEmptyPrice": "Ställ in detta pris för att tillåta beräkning av relaterade recept",
+            "isMinPrice": "Detta värde är inställt på serverns lägsta pris",
+            "isMaxPrice": "Detta värde är inställt på serverns högsta pris",
+            "IsMarginPrice": "Detta värde är ett marginalpris, eftersom alternativet \"Tillämpa marginal mellan färdigheter\" är aktiverat."
+        },
+        "CancelOverride": "Åsidosätt inte det här produktpriset längre.",
+        "AddFavoriteItem": "Favoritmarkera den här artikeln, tillämpa dess pris på den relaterade taggen",
+        "CancelFavoriteItem": "Avfavorisera detta objekt",
+        "ItemsToSell": "Artiklar att sälja",
+        "AddRecipe": "Lägg till recept",
+        "ProductItems": "Produktartiklar",
+        "CostPrice": "Inköpspris",
+        "SalePrice": "Försäljningspris",
+        "AddOverride": "Åsidosätt detta pris, eftersom det inte är en produkt att sälja utan en produkt att köpa",
+        "RecipeTooltip": "Öppna popup-fönstret för recept, det visar detaljer om beräkningen",
+        "RecipeTooltipWithShare": "Öppna popup-fönstret för recept, det ger möjlighet att styra fördelningen av produktpriset och visar detaljer om beräkningen",
+        "MarginTooltip": "Din Marginalkonfiguration tillåter inte att ett försäljningspris beräknas. Kontrollera din Marginalprocent och Marginalberäkningstyp.",
+        "AddFavoriteRecipe": "Favoritmarkera det här receptet, tillämpa dess pris på den relaterade produkten",
+        "CancelFavoriteRecipe": "Avfavorisera det här receptet",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Du kan inte ta bort din sista marginal",
+            "PriceNotWellConfigured": "Detta pris är inte väl konfigurerat",
+            "PriceCopied": "Priset kopierat till urklipp"
+        }
+    },
+    "Recipe": "Recept",
+    "ContextService": {
+        "DefaultMargin": "Standardmarginal"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Ny marginal"
+    }
+}

@@ -1,0 +1,280 @@
+{
+    "Cancel": "Annuller",
+    "CopyToClipboard": "Kopier til udklipsholder",
+    "CraftingTable": "Håndværkstabel",
+    "GraphView": {
+        "ResetButton": "Nulstil graf",
+        "Title": "Grafvisning"
+    },
+    "Header": {
+        "CreateServer": "Opret server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Mine servere",
+        "AddServer": "Deltag i en eksisterende server, eller opret en ny.",
+        "New": "Nyhed!",
+        "ReleaseDialog": {
+            "Title": "Udgivelser"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Du er allerede på denne server",
+                "JoinError": "Du skal tilføje en serverkode",
+                "ServerNotFound": "Serveren blev ikke fundet"
+            },
+            "Title": "Opret eller deltag i server"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Brugeradministration"
+        }
+    },
+    "Ingredients": "Ingredienser",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produceret af",
+        "UsedIn": "Brugt i"
+    },
+    "JoinCode": "Join-kode",
+    "Language": "Sprog",
+    "MainLayout": {
+        "SiteTitle": "Værktøjer til Eco-videospil",
+        "PleaseJoin": "Deltag venligst i en server"
+    },
+    "Name": "Navn",
+    "Level": "Niveau",
+    "Upgrade": "Opgradering",
+    "Margins": "Marginaler",
+    "NavMenu": {
+        "NavAdmin": "Serveradministration",
+        "NavCalculator": "Prisberegner",
+        "NavGraph": "Grafvisning [WIP]",
+        "NavSuperAdmin": "Superadministrator"
+    },
+    "None": "Ingen",
+    "Options": "Indstillinger",
+    "Products": "Produkter",
+    "RecipeDialog": {
+        "AdditionalCosts": "Yderligere omkostninger",
+        "CraftTime": "Håndværkstid",
+        "CraftTimeReductionTooltip": "{initialValue} med {procent}% reduktion på grund af opgraderingsmodul {upgradeModuleName}",
+        "Dynamic": "dynamisk",
+        "Labor": "Arbejde",
+        "LaborReductionTooltip": "{initialValue} med {procent}% reduktion på grund af færdighedsniveau {skillLevel}",
+        "QuantityReductionTooltip": "{procent}% reduktion på grund af opgraderingsmodul {skillLevel}",
+        "QuantityReductionLavishTooltip": "og overdådigt talent",
+        "ReintegratedToolTip": {
+            "False": "Stop med at trække dette element fra kostprisen. Dette vil matematisk set øge prisen på andre produkter.",
+            "True": "Træk denne vare fra kostprisen, der skal bruges, når du kan genbruge dette produkt i den samme opskrift eller i en tidligere (forme, tønder, ...). Dette vil matematisk set sænke prisen på andre produkter."
+        },
+        "Share": {
+            "EqualityTooltip": "Deles ligeligt mellem produkter.",
+            "EquilibrateTooltip": "Opdel efter mængde mellem produkter.",
+            "FirstOnlyTooltip": "Giv 100 % til det første produkt og nul til resten. Vælg dette, hvis du anser andre produkter for at være affald.",
+            "HonestTooltip": "Giv 80% til det første produkt og del resten ligeligt."
+        },
+        "Static": "statisk",
+        "TotalCost": "Samlede omkostninger:",
+        "TotalPrice": "Samlet pris:"
+    },
+    "RecipeList": {
+        "RecipeName": "Opskriftsnavn"
+    },
+    "RelatedRecipes": "Relaterede opskrifter",
+    "Search": "Søg efter",
+    "ServerDialog": {
+        "Create": "Opret",
+        "CreateServer": "Opret din server",
+        "HaveAnInvitation": "Har du allerede en kode til en server?",
+        "Join": "Deltagelse",
+        "MaxChar": "Max 25 tegn",
+        "MinChar": "Min 3 tegn"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Er du sikker på, at du vil slette alle max-priser?",
+            "ClearAllMin": "Er du sikker på, at du vil slette alle min-priser?",
+            "ServerDeletion": "Er du sikker på, at du vil slette din server? Der vil ikke være nogen tilbagerulning!",
+            "ServerDissociate": "Er du sikker på, at du vil adskille din Eco-Gnome-server fra din Eco-server? Der bliver ikke noget rollback!",
+            "UpdateJoinCode": "Er du sikker på, at du vil opdatere din JoinCode? Dette vil deaktivere alle tidligere genererede koder!"
+        },
+        "EcoServerId": "Eco-server-id",
+        "EcoServerIdTooltip": "Dette felt vil blive udfyldt, når denne server er registreret i spillet takket være EcoGnomeMod.",
+        "JoinCodeTooltip": "Giv denne kode til dine spillere, så de kan tilslutte sig din server.",
+        "Items": {
+            "Max": "Maks. pris",
+            "Max.Tooltip": "Ryd maks. priser",
+            "Min": "Min pris",
+            "Min.Tooltip": "Ryd min. priser"
+        },
+        "Members": {
+            "DemoteAdmin": "Degrader administrator",
+            "KickUser": "Spark brugeren ud",
+            "PromoteAdmin": "Forfremme administrator",
+            "Tooltip.Admin": "Administrator",
+            "Title": "Medlemmer"
+        },
+        "ServerSettings": {
+            "ServerName": "Serverens navn",
+            "Crafting": "Crafting-tabeller",
+            "Delete": "Slet server",
+            "Items": "Genstande",
+            "Tags": "Tags",
+            "Modules": "Opgrader moduler",
+            "Recipes": "Opskrifter",
+            "Elements": "Opskriftselementer",
+            "Skills": "Færdigheder",
+            "Upload": "Upload serverdata",
+            "Title": "Serverindstillinger",
+            "Stats": "Statistik over data",
+            "EcoGnomeModExplanation1": "Eco Gnome er i stand til at læse data fra din Eco-server for nøjagtigt at beregne priserne på dine genstande. Den udtrækker færdigheder, håndværkstabeller, moduler, genstande og alle opskrifter. Den kan læse både modificerede vaniljedata og data, der er tilføjet af eksterne mods.",
+            "EcoGnomeModExplanation2": "For at gøre dette skal du downloade og installere vores servermod, [EcoGnomeMod] (https://github.com/Eco-Gnome/eco-gnome-mod), på din Eco-server. Når din server er genstartet, skal der oprettes en fil med navnet eco_gnome_data.json i rodmappen på din spilserver. Du skal hente denne fil og uploade den ved hjælp af knappen nedenfor."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Du kan ikke redigere selv",
+            "UploadOk": "Upload vellykket",
+            "UploadNok": "Fejl ved upload",
+            "UploadPartiallyNok": "Advarsel: {errorCount} elementer er ikke blevet importeret: {errorNames}. Gennemgå dine mods og serverredigeringer. Du kan kontakte Eco Gnome-administratorerne for at få hjælp."
+        }
+    },
+    "Skill": "Færdighed",
+    "NoSkill": "Ingen færdighed",
+    "SuperAdmin": {
+        "ActionCol": "Handling",
+        "ConfirmServerDeletion": "Er du sikker på, at du vil slette server {server}?",
+        "ConfirmSuperAdminPromote": "Er du sikker på, at du vil forfremme denne bruger til superadministrator?",
+        "ConfirmSuperAdminDemote": "Er du sikker på, at du vil degradere denne bruger fra Super Admin?",
+        "ConfirmTwiceSuperAdmin": "Denne ændring har stor betydning og kan ødelægge hele websitet! Bekræft venligst igen.",
+        "ConfirmUserDeletion": "Er du sikker på, at du vil slette bruger {bruger}?",
+        "CreationDateCol": "Oprettelsesdato",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Administratorer",
+            "DeleteServer": "Slet server",
+            "DemoteAdmin": "Fjern dig selv fra admins",
+            "PlayersCol": "Spillere",
+            "PromoteAdmin": "Tilføj dig selv som administrator",
+            "ServerNameCol": "Navn",
+            "SetDefault": "Tilføj som standardserver",
+            "Title": "Servere",
+            "UnsetDefault": "Fjern fra standardservere"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Du kan ikke slette dig selv fra denne side.",
+            "SnackbarCantEdit": "Du kan ikke redigere dig selv fra denne side.",
+            "SnackbarCopy": "Id kopieret til udklipsholder"
+        },
+        "Title": "Superadministrator",
+        "UserTable": {
+            "DeleteUser": "Slet bruger",
+            "DemoteUser": "Degrader brugeren fra superadministrator",
+            "HowMuchIsAdmin": "Antal servere, som brugeren er administrator på",
+            "JoinedServers": "Tilsluttede servere",
+            "PromoteUser": "Forfrem bruger til superadministrator",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servere",
+            "Title": "Brugere",
+            "ActionCol": "Handling"
+        }
+    },
+    "TagName": "Tag-navn",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Eksportér/sikkerhedskopier min bruger",
+        "ImportReplace": "Importer/erstat min bruger",
+        "InGamePseudo": "Pseudo i spillet",
+        "InGamePseudoTooltip": "Udfyldes automatisk, når brugerregistreringen i Eco afsluttes takket være EcoGnomeMod.",
+        "InGameId": "Id i spillet",
+        "InGameIdTooltip": "Udfyldes automatisk, når brugerregistreringen i Eco afsluttes takket være EcoGnomeMod.",
+        "MyServers": "Mine servere",
+        "Pseudo": "Pseudo",
+        "PublicId": "Offentligt id",
+        "SecretId": "Hemmeligt id (bruges i Eco til registrering)",
+        "ResetRegistration": "Er du sikker på, at du vil nulstille din nuværende registrering på denne server? Du vil ikke længere kunne bruge funktioner i spillet på denne server!",
+        "PopupConfirmImportBegin": "Er du sikker på, at du vil importere brugeren med pseudo",
+        "PopupConfirmImportEnd": " ? Dette vil slette din nuværende gemte bruger. Sørg for at eksportere den nuværende bruger, hvis du vil bruge den senere!",
+        "SnackbarCopy": "Join-kode kopieret til udklipsholder",
+        "SnackbarErrorBadFile": "Importer brugerfejl - Vælg en korrekt fil.",
+        "SnackbarErrorBadUser": "Import User Error - Kan ikke finde den importerede bruger",
+        "UserSettings": "Brugerindstillinger"
+    },
+    "Versions": "Versioner",
+    "PriceCalculator": {
+        "LoadError": "Der opstod en fejl under indlæsningen. Du kan prøve at nulstille alle dine data for at rette fejlen.",
+        "Reset": "Nulstil",
+        "Skills": "Færdigheder",
+        "AddSkill": "Tilføj færdighed",
+        "CraftingTables": "Bord til håndværk",
+        "AddCraftingTable": "Tilføj håndværksbord",
+        "CostMin": {
+            "Tooltip": "Omkostningerne i forbindelse med denne håndværkstabel for hvert minuts håndværk. Repræsenterer brændstofforbrug, udskiftning af dele, eventuelle håndværksgebyrer ...",
+            "CostMin": "Omkostninger/min"
+        },
+        "NoModule": "Intet modul",
+        "MarginPercent": {
+            "Tooltip": "Den marginprocent, der vil blive anvendt på din salgspris. Tjek værktøjstippet 'Margin Calculation Type' for detaljer om beregningen.",
+            "MarginPercent": "Marginprocent"
+        },
+        "AddMargin": "Tilføj margin",
+        "RemoveMargin": "Fjern margin",
+        "NonSkilled": {
+            "Tooltip": "Lås op for listen over ikke-faglærte opskrifter i opskriftsvælgeren.",
+            "NonSkilled": "Vis ikke-faglærte opskrifter"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Vis kun opskrifter, der er tilladt i henhold til dit færdighedsniveau.",
+            "LevelAccessible": "Kun opskrifter, der er tilgængelige på niveau"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Når systemet henter prisen på en ingrediens, hvis denne ingrediens er fra en anden færdighed end den aktuelle opskrift, så bruges dens marginpris i stedet for dens produktionspris. Dette giver en mere retfærdig produktionspris for andre borgere, der ikke har begge færdigheder.",
+            "ApplyMarginBetweenSkills": "Anvend margin mellem færdigheder"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Metode til beregning af margen",
+                "2": "MarkUp (standard): du summerer CostPrice og Margin*CostPrice/100 for at få SalePrice",
+                "3": "Bruttomargin: Marginprocenten er den procentvise fordel af din SaleCost, som er begrænset til mellem -99,99 % og 99,99 %."
+            },
+            "MarginType": "Type af margenberegning",
+            "MarkUp": "Opskrivning",
+            "GrossMargin": "Bruttomargin"
+        },
+        "CalorieCost": {
+            "Tooltip": "Omkostningerne ved den mad, du spiser, for 1000 kalorier brugt på et håndværk. Hvis du kun køber salater, der giver 700 kalorier for 5 $, så er omkostningerne pr. 1000 kalorier 1000 * 5 / 700 = 7,14 $",
+            "CalorieCost": "Omkostninger pr. 1000 kalorier"
+        },
+        "ItemsToBuy": "Varer at købe",
+        "IngredientSearch": "Ingredienselementer eller tags",
+        "BuyPrice": "Køb pris",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Denne værdi er minimumsprisen for de relaterede varer (hvis alle værdier er defineret!), medmindre du vælger en bestemt vare ved at klikke på en stjerne.",
+            "isAutoCalculatedPrice": "Denne værdi beregnes automatisk af systemet. Hvis den er tom, skal du sørge for at indstille prisen for alle 'Varer til køb'",
+            "isItemEmptyPrice": "Indstil denne pris for at tillade beregning af relaterede opskrifter",
+            "isMinPrice": "Denne værdi er sat til serverens mindstepris",
+            "isMaxPrice": "Denne værdi indstilles til serverens maksimumspris",
+            "IsMarginPrice": "Denne værdi er en marginpris, fordi indstillingen 'Anvend margin mellem færdigheder' er aktiveret."
+        },
+        "CancelOverride": "Tilsidesæt ikke længere denne produktpris.",
+        "AddFavoriteItem": "Favoritér denne vare, anvend dens pris på det relaterede tag",
+        "CancelFavoriteItem": "Fjern favorisering af denne vare",
+        "ItemsToSell": "Varer til salg",
+        "AddRecipe": "Tilføj opskrift",
+        "ProductItems": "Produktvarer",
+        "CostPrice": "Kostpris",
+        "SalePrice": "Salgspris",
+        "AddOverride": "Tilsidesæt denne pris, da det ikke er et produkt, der skal sælges, men et produkt, der skal købes",
+        "RecipeTooltip": "Åbn opskrifts-popup, den viser detaljer om beregning",
+        "RecipeTooltipWithShare": "Åbn opskrifts-popup, den giver mulighed for at kontrollere produktprisfordelingen og viser detaljer om beregningen",
+        "MarginTooltip": "Din Margin-konfiguration tillader ikke beregning af en salgspris. Tjek din Margin Percent og Margin Calculation Type.",
+        "AddFavoriteRecipe": "Favoritér denne opskrift, anvend dens pris på det relaterede produkt",
+        "CancelFavoriteRecipe": "Fjern favoriseringen af denne opskrift",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Du kan ikke fjerne din sidste margin",
+            "PriceNotWellConfigured": "Denne pris er ikke godt konfigureret",
+            "PriceCopied": "Pris kopieret til udklipsholder"
+        }
+    },
+    "Recipe": "Opskrift",
+    "ContextService": {
+        "DefaultMargin": "Standard margen"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Ny margen"
+    }
+}

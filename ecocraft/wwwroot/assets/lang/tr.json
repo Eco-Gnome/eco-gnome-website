@@ -1,0 +1,280 @@
+{
+    "Cancel": "İptal",
+    "CopyToClipboard": "Panoya kopyala",
+    "CraftingTable": "Üretim Masası",
+    "GraphView": {
+        "ResetButton": "Grafiği Sıfırla",
+        "Title": "Grafik Görünümü"
+    },
+    "Header": {
+        "CreateServer": "Sunucu oluşturun",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Sunucularım",
+        "AddServer": "Mevcut bir sunucuya katılın veya yeni bir sunucu oluşturun.",
+        "New": "Yeni!",
+        "ReleaseDialog": {
+            "Title": "Bültenler"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Zaten bu sunucudasınız",
+                "JoinError": "Bir sunucu kodu eklemeniz gerekir",
+                "ServerNotFound": "Sunucu bulunamadı"
+            },
+            "Title": "Sunucu oluşturma veya sunucuya katılma"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Kullanıcı yönetimi"
+        }
+    },
+    "Ingredients": "İçindekiler",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Tarafından üretilmiştir",
+        "UsedIn": "İçinde kullanılır"
+    },
+    "JoinCode": "Katılma kodu",
+    "Language": "Dil",
+    "MainLayout": {
+        "SiteTitle": "Eco video oyunu için araçlar",
+        "PleaseJoin": "Lütfen bir sunucuya katılın"
+    },
+    "Name": "İsim",
+    "Level": "Seviye",
+    "Upgrade": "Yükseltme",
+    "Margins": "Kenar Boşlukları",
+    "NavMenu": {
+        "NavAdmin": "Sunucu Yönetimi",
+        "NavCalculator": "Fiyat Hesaplayıcı",
+        "NavGraph": "Grafik Görünümü [WIP]",
+        "NavSuperAdmin": "Süper Yönetici"
+    },
+    "None": "Hiçbiri",
+    "Options": "Seçenekler",
+    "Products": "Ürünler",
+    "RecipeDialog": {
+        "AdditionalCosts": "Ek Maliyetler",
+        "CraftTime": "El işi zamanı",
+        "CraftTimeReductionTooltip": "yükseltme modülü {upgradeModuleName} nedeniyle {yüzde}% azalma ile {initialValue}",
+        "Dynamic": "dinamik",
+        "Labor": "İşgücü",
+        "LaborReductionTooltip": "beceri seviyesi {skillLevel} nedeniyle {yüzde}% azaltma ile {initialValue}",
+        "QuantityReductionTooltip": "yükseltme modülü {beceriSeviyesi} nedeniyle {yüzde}% azalma",
+        "QuantityReductionLavishTooltip": "ve cömert yetenek",
+        "ReintegratedToolTip": {
+            "False": "Bu kalemi maliyet fiyatından düşmeyi bırakın. Bu, diğer ürünlerin fiyatını matematiksel olarak artıracaktır.",
+            "True": "Bu ürünü aynı tarifte veya önceki bir tarifte (Kalıplar, Fıçılar, ...) yeniden kullanabileceğiniz zaman kullanılmak üzere bu kalemi maliyet fiyatından düşürün. Bu, diğer ürünlerin fiyatını matematiksel olarak düşürecektir."
+        },
+        "Share": {
+            "EqualityTooltip": "Ürünler arasında eşit olarak bölünür.",
+            "EquilibrateTooltip": "Ürünler arasında miktara göre bölüştürme.",
+            "FirstOnlyTooltip": "İlk ürüne %100 ve diğerlerine sıfır verin. Diğer ürünlerin çöp olduğunu düşünüyorsanız bunu seçin.",
+            "HonestTooltip": "80'ini ilk ürüne verin ve geri kalanını eşit olarak paylaşın."
+        },
+        "Static": "statik",
+        "TotalCost": "Toplam maliyet:",
+        "TotalPrice": "Toplam fiyat:"
+    },
+    "RecipeList": {
+        "RecipeName": "Tarif adı"
+    },
+    "RelatedRecipes": "İlgili tarifler",
+    "Search": "Arama",
+    "ServerDialog": {
+        "Create": "Oluştur",
+        "CreateServer": "Sunucunuzu oluşturun",
+        "HaveAnInvitation": "Zaten bir sunucu katılım kodunuz var mı?",
+        "Join": "Katılın",
+        "MaxChar": "Maksimum 25 karakter",
+        "MinChar": "En az 3 karakter"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Tüm maksimum fiyatları temizlemek istediğinizden emin misiniz?",
+            "ClearAllMin": "Tüm minimum fiyatları temizlemek istediğinizden emin misiniz?",
+            "ServerDeletion": "Sunucunuzu silmek istediğinizden emin misiniz? Geri dönüş olmayacak!",
+            "ServerDissociate": "Eco-Gnome sunucunuzu Eco sunucunuzdan ayırmak istediğinizden emin misiniz? Geri dönüş olmayacak!",
+            "UpdateJoinCode": "JoinCode'unuzu yenilemek istediğinizden emin misiniz? Bu, önceden oluşturulmuş kodları devre dışı bırakacaktır!"
+        },
+        "EcoServerId": "Eco Sunucu Kimliği",
+        "EcoServerIdTooltip": "EcoGnomeMod sayesinde bu sunucu oyun içinde kaydedildiğinde bu alan doldurulacaktır.",
+        "JoinCodeTooltip": "Sunucunuza katılabilmeleri için bu kodu oyuncularınıza verin.",
+        "Items": {
+            "Max": "Maksimum fiyat",
+            "Max.Tooltip": "Maksimum fiyatları temizleyin",
+            "Min": "Min fiyat",
+            "Min.Tooltip": "Minimum fiyatları temizleyin"
+        },
+        "Members": {
+            "DemoteAdmin": "Yönetici Görevden Alma",
+            "KickUser": "Tekme kullanıcısı",
+            "PromoteAdmin": "Yönetici Tanıtımı",
+            "Tooltip.Admin": "Yönetici",
+            "Title": "Üyeler"
+        },
+        "ServerSettings": {
+            "ServerName": "Sunucu adı",
+            "Crafting": "Üretim Masaları",
+            "Delete": "Sunucuyu Sil",
+            "Items": "Eşyalar",
+            "Tags": "Etiketler",
+            "Modules": "Yükseltme Modülleri",
+            "Recipes": "Yemek Tarifleri",
+            "Elements": "Tarif Öğeleri",
+            "Skills": "Beceriler",
+            "Upload": "Sunucu Verilerini Yükleme",
+            "Title": "Sunucu Ayarları",
+            "Stats": "Veri İstatistikleri",
+            "EcoGnomeModExplanation1": "Eco Gnome, eşyalarınızın fiyatlarını doğru bir şekilde hesaplamak için Eco sunucunuzdan veri okuyabilir. Becerileri, işçilik tablolarını, modülleri, eşyaları ve tüm tarifleri çıkarır. Hem değiştirilmiş vanilya verilerini hem de harici modlar tarafından eklenen verileri okuyabilir.",
+            "EcoGnomeModExplanation2": "Bunu yapmak için, sunucu modumuz [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod)'u Eco sunucunuza indirmeniz ve yüklemeniz gerekir. Sunucunuz yeniden başlatıldığında, oyun sunucunuzun kök klasöründe eco_gnome_data.json adlı bir dosya oluşturulmalıdır. Bu dosyayı almanız ve aşağıdaki düğmeyi kullanarak yüklemeniz gerekir."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Kendinizi düzenleyemezsiniz",
+            "UploadOk": "Yükleme Başarılı",
+            "UploadNok": "Yükleme Hatası",
+            "UploadPartiallyNok": "Uyarı: {errorCount} öğeleri içe aktarılmadı: {errorNames}. Modlarınızı ve sunucu düzenlemelerinizi gözden geçirin. Yardım için Eco Gnome yöneticileriyle iletişime geçebilirsiniz."
+        }
+    },
+    "Skill": "Beceri",
+    "NoSkill": "Beceri Yok",
+    "SuperAdmin": {
+        "ActionCol": "Eylem",
+        "ConfirmServerDeletion": "Sunucu {sunucu}'yu silmek istediğinizden emin misiniz?",
+        "ConfirmSuperAdminPromote": "Bu kullanıcıyı Süper Yönetici yapmak istediğinizden emin misiniz?",
+        "ConfirmSuperAdminDemote": "Bu kullanıcıyı Süper Yöneticilikten düşürmek istediğinizden emin misiniz?",
+        "ConfirmTwiceSuperAdmin": "Bu değişiklik çok fazla etkiye sahiptir ve tüm web sitesini bozabilir! Lütfen tekrar onaylayın.",
+        "ConfirmUserDeletion": "Kullanıcı {user}'ı silmek istediğinizden emin misiniz?",
+        "CreationDateCol": "Oluşturulma Tarihi",
+        "IdCol": "Kimlik",
+        "ServerTable": {
+            "AdminsCol": "Yöneticiler",
+            "DeleteServer": "Sunucuyu sil",
+            "DemoteAdmin": "Kendinizi yöneticilerden çıkarın",
+            "PlayersCol": "Oyuncular",
+            "PromoteAdmin": "Kendinizi yönetici olarak ekleyin",
+            "ServerNameCol": "İsim",
+            "SetDefault": "Varsayılan sunucu olarak ekle",
+            "Title": "Sunucular",
+            "UnsetDefault": "Varsayılan sunuculardan kaldırın"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Kendinizi bu sayfadan silemezsiniz.",
+            "SnackbarCantEdit": "Bu sayfadan kendinizi düzenleyemezsiniz.",
+            "SnackbarCopy": "Panoya kopyalanan kimlik"
+        },
+        "Title": "Süper Yönetici",
+        "UserTable": {
+            "DeleteUser": "Kullanıcı sil",
+            "DemoteUser": "Kullanıcının Süper Yöneticilik unvanını kaldırma",
+            "HowMuchIsAdmin": "Kullanıcının yönetici olduğu sunucu sayısı",
+            "JoinedServers": "Katılan Sunucular",
+            "PromoteUser": "Kullanıcıyı Süper Yönetici'ye yükseltme",
+            "PseudoCol": "Sözde",
+            "ServersCol": "Sunucular",
+            "Title": "Kullanıcılar",
+            "ActionCol": "Eylem"
+        }
+    },
+    "TagName": "Etiket adı",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Kullanıcımı Dışa Aktar/Yedekle",
+        "ImportReplace": "Kullanıcımı İçe Aktar/Değiştir",
+        "InGamePseudo": "Oyun içi sözde",
+        "InGamePseudoTooltip": "EcoGnomeMod sayesinde Eco içinde kullanıcı kaydı tamamlandığında otomatik olarak doldurulur.",
+        "InGameId": "Oyun İçi Kimlik",
+        "InGameIdTooltip": "EcoGnomeMod sayesinde Eco içinde kullanıcı kaydı tamamlandığında otomatik olarak doldurulur.",
+        "MyServers": "Sunucularım",
+        "Pseudo": "Sözde",
+        "PublicId": "Kamu Kimliği",
+        "SecretId": "Gizli Kimlik (kayıt için Eco içinde kullanılır)",
+        "ResetRegistration": "Bu sunucudaki mevcut kaydınızı sıfırlamak istediğinizden emin misiniz? Artık bu sunucuda oyun içi özellikleri kullanamayacaksınız!",
+        "PopupConfirmImportBegin": "Kullanıcıyı pseudo ile içe aktarmak istediğinizden emin misiniz?",
+        "PopupConfirmImportEnd": " ? Bu, mevcut kayıtlı kullanıcınızı silecektir. Daha sonra kullanmak istiyorsanız mevcut kullanıcıyı dışa aktardığınızdan emin olun!",
+        "SnackbarCopy": "Panoya kopyalanan birleştirme kodu",
+        "SnackbarErrorBadFile": "Kullanıcı İçe Aktarma Hatası - Doğru bir dosya seçin.",
+        "SnackbarErrorBadUser": "Kullanıcı İçe Aktarma Hatası - İçe aktarılan kullanıcı bulunamıyor",
+        "UserSettings": "Kullanıcı ayarları"
+    },
+    "Versions": "Versiyonlar",
+    "PriceCalculator": {
+        "LoadError": "Yükleme sırasında bir hata oluştu. Hatayı düzeltmek için tüm verilerinizi sıfırlamayı deneyebilirsiniz.",
+        "Reset": "Sıfırla",
+        "Skills": "Beceriler",
+        "AddSkill": "Beceri ekle",
+        "CraftingTables": "Üretim masaları",
+        "AddCraftingTable": "Üretim masası ekleyin",
+        "CostMin": {
+            "Tooltip": "Her dakika için bu işçilik tablosuyla ilgili maliyet. Yakıt tüketimini, parça değişimini, olası işçilik ücretlerini temsil eder...",
+            "CostMin": "Maliyet/dk"
+        },
+        "NoModule": "Modül yok",
+        "MarginPercent": {
+            "Tooltip": "Satış fiyatınıza uygulanacak marj yüzdesi. Hesaplama ayrıntıları için 'Marj Hesaplama Türü' araç ipucu seçeneğini kontrol edin.",
+            "MarginPercent": "Marj Yüzdesi"
+        },
+        "AddMargin": "Marj ekleyin",
+        "RemoveMargin": "Kenar boşluğunu kaldırın",
+        "NonSkilled": {
+            "Tooltip": "Tarif seçicideki vasıfsız tarifler listesinin kilidini açın.",
+            "NonSkilled": "Vasıfsız tarifleri görüntüle"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Yalnızca beceri seviyelerinizin izin verdiği tarifleri görüntüleyin.",
+            "LevelAccessible": "Sadece seviye tarafından erişilebilen tarifler"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Sistem bir malzemenin fiyatını aldığında, bu malzeme mevcut tariften başka bir beceriden geliyorsa, üretim fiyatı yerine marj fiyatı kullanılacaktır. Bu, her iki beceriye de sahip olmayan diğer vatandaşlar için daha adil bir üretim fiyatı sağlar.",
+            "ApplyMarginBetweenSkills": "Beceriler arasında marj uygulayın"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Marj hesaplama yöntemi",
+                "2": "MarkUp (varsayılan): SalePrice'ı elde etmek için CostPrice ve Margin*CostPrice/100 değerlerini toplarsınız",
+                "3": "Brüt Marj: Marj yüzdesi, -99,99% ile 99,99% arasında sınırlandırılmış olan SaleCost'unuzun fayda yüzdesidir."
+            },
+            "MarginType": "Marj hesaplama türü",
+            "MarkUp": "Mark-Up",
+            "GrossMargin": "Brüt kar marjı"
+        },
+        "CalorieCost": {
+            "Tooltip": "Bir zanaatta harcanan 1000 kalori için yediğiniz yemeğin maliyeti. Eğer 5$'a sadece 700cal getiren salata alırsanız, 1000 kalori başına maliyet 1000 * 5 / 700 = 7,14$ olur",
+            "CalorieCost": "1000 kalori başına maliyet"
+        },
+        "ItemsToBuy": "Satın alınacak ürünler",
+        "IngredientSearch": "İçerik Öğeleri veya Etiketler",
+        "BuyPrice": "Fiyat satın al",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Bu değer, bir yıldıza tıklayarak belirli bir tanesini seçmediğiniz sürece, ilgili öğelerin minimum fiyatı olacaktır (tüm değerler tanımlanmışsa!).",
+            "isAutoCalculatedPrice": "Bu değer sistem tarafından otomatik olarak hesaplanır. Boşsa, tüm 'Satın alınacak öğelerin' fiyatını ayarladığınızdan emin olun",
+            "isItemEmptyPrice": "İlgili tariflerin hesaplanmasına izin vermek için bu fiyatı ayarlayın",
+            "isMinPrice": "Bu değer sunucunun minimum fiyatına ayarlanır",
+            "isMaxPrice": "Bu değer sunucunun maksimum fiyatına ayarlanır",
+            "IsMarginPrice": "Bu değer bir marj fiyatıdır, çünkü 'Beceriler arasında marj uygula' seçeneği etkinleştirilmiştir."
+        },
+        "CancelOverride": "Bu ürün fiyatını artık geçersiz kılmayın.",
+        "AddFavoriteItem": "Bu öğeyi favorilere ekle, fiyatını ilgili etikete uygula",
+        "CancelFavoriteItem": "Bu öğeyi beğenmedim",
+        "ItemsToSell": "Satılacak ürünler",
+        "AddRecipe": "Tarif ekle",
+        "ProductItems": "Ürün kalemleri",
+        "CostPrice": "Maliyet fiyatı",
+        "SalePrice": "Satış fiyatı",
+        "AddOverride": "Bunun satılacak bir ürün değil, satın alınacak bir ürün olduğunu göz önünde bulundurarak bu fiyatı geçersiz kılın",
+        "RecipeTooltip": "Tarif açılır penceresini açın, hesaplama ayrıntılarını görüntüler",
+        "RecipeTooltipWithShare": "Tarif açılır penceresini açın, ürün fiyatının yeniden bölümlenmesini kontrol etme olanağı sağlar ve hesaplama ayrıntılarını görüntüler",
+        "MarginTooltip": "Marj yapılandırmanız Satış Fiyatının hesaplanmasına izin vermiyor. Marj Yüzdesi ve Marj Hesaplama Türünüzü kontrol edin.",
+        "AddFavoriteRecipe": "Bu tarifi favorilerinize ekleyin, fiyatını ilgili ürüne uygulayın",
+        "CancelFavoriteRecipe": "Bu tarifi sevmedim",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Son marjınızı kaldıramazsınız",
+            "PriceNotWellConfigured": "Bu fiyat iyi yapılandırılmamış",
+            "PriceCopied": "Fiyat panoya kopyalandı"
+        }
+    },
+    "Recipe": "Yemek Tarifi",
+    "ContextService": {
+        "DefaultMargin": "Varsayılan marj"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Yeni marj"
+    }
+}

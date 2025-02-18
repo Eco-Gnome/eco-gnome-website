@@ -1,0 +1,280 @@
+{
+    "Cancel": "Törölje",
+    "CopyToClipboard": "Másolás a vágólapra",
+    "CraftingTable": "Kézműves asztal",
+    "GraphView": {
+        "ResetButton": "Grafikon visszaállítása",
+        "Title": "Grafikon nézet"
+    },
+    "Header": {
+        "CreateServer": "Kiszolgáló létrehozása",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Saját szerverek",
+        "AddServer": "Csatlakozzon egy meglévő szerverhez, vagy hozzon létre egy újat.",
+        "New": "Új!",
+        "ReleaseDialog": {
+            "Title": "Kiadványok"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Te már ezen a szerveren vagy",
+                "JoinError": "Szerver kódot kell hozzáadnod",
+                "ServerNotFound": "Nem található szerver"
+            },
+            "Title": "Hozzon létre vagy csatlakozzon a szerverhez"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Felhasználó kezelése"
+        }
+    },
+    "Ingredients": "Összetevők",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Készítette",
+        "UsedIn": "Felhasználva"
+    },
+    "JoinCode": "Csatlakozási kód",
+    "Language": "Nyelv",
+    "MainLayout": {
+        "SiteTitle": "Eszközök az Eco videojátékhoz",
+        "PleaseJoin": "Kérjük, csatlakozzon egy szerverhez"
+    },
+    "Name": "Név",
+    "Level": "Szint",
+    "Upgrade": "Frissítés",
+    "Margins": "Margins",
+    "NavMenu": {
+        "NavAdmin": "Kiszolgáló kezelése",
+        "NavCalculator": "Árkalkulátor",
+        "NavGraph": "Grafikus nézet [WIP]",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "Nincs",
+    "Options": "Opciók",
+    "Products": "Termékek",
+    "RecipeDialog": {
+        "AdditionalCosts": "További költségek",
+        "CraftTime": "Kézműves idő",
+        "CraftTimeReductionTooltip": "{initialValue} a {százalék}%-os csökkenéssel a {upgradeModuleName} frissítőmodul miatt",
+        "Dynamic": "dinamikus",
+        "Labor": "Munkaerő",
+        "LaborReductionTooltip": "{initialValue} a képzettségi szint {skillLevel} miatti {százalékos}%-os csökkentéssel",
+        "QuantityReductionTooltip": "{százalékos}%-os csökkenés a {skillLevel} frissítőmodulnak köszönhetően",
+        "QuantityReductionLavishTooltip": "és pazarló tehetség",
+        "ReintegratedToolTip": {
+            "False": "Ne vonja le ezt az elemet az önköltségből. Ez matematikailag növeli a többi termék árát.",
+            "True": "Vonja le ezt az elemet az önköltségből, akkor kell használni, ha ezt a terméket újra fel tudja használni ugyanabban a receptben vagy egy korábbi receptben (Formák, hordók, ...). Ez matematikailag csökkenti a többi termék árát."
+        },
+        "Share": {
+            "EqualityTooltip": "Egyenlő arányban oszlik meg a termékek között.",
+            "EquilibrateTooltip": "Mennyiség szerint felosztva a termékek között.",
+            "FirstOnlyTooltip": "Adjon 100%-ot az első terméknek és nullát a többi terméknek. Ezt válassza, ha a többi terméket szemétnek tekinti.",
+            "HonestTooltip": "Adjon 80%-ot az első terméknek, a többit pedig ossza meg egyenlően."
+        },
+        "Static": "statikus",
+        "TotalCost": "Teljes költség:",
+        "TotalPrice": "Teljes ár:"
+    },
+    "RecipeList": {
+        "RecipeName": "Recept neve"
+    },
+    "RelatedRecipes": "Kapcsolódó receptek",
+    "Search": "Keresés",
+    "ServerDialog": {
+        "Create": "Hozzon létre",
+        "CreateServer": "Hozzon létre szervert",
+        "HaveAnInvitation": "Van már szerver csatlakozási kódja?",
+        "Join": "Csatlakozás",
+        "MaxChar": "Max 25 karakter",
+        "MinChar": "Min. 3 karakter"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Biztos, hogy törölni akarod az összes maximális árat?",
+            "ClearAllMin": "Biztos vagy benne, hogy az összes min árat törölni akarod?",
+            "ServerDeletion": "Biztos vagy benne, hogy törölni akarod a szervered? Nem lesz visszaállítás!",
+            "ServerDissociate": "Biztos vagy benne, hogy el akarod választani az Eco-Gnome szerveredet az Eco szerveredtől? Nem lesz visszaállítás!",
+            "UpdateJoinCode": "Biztos vagy benne, hogy frissíteni akarod a JoinCode-odat? Ez letiltja a korábban generált kódokat!"
+        },
+        "EcoServerId": "Eco szerver azonosítója",
+        "EcoServerIdTooltip": "Ez a mező akkor fog kitöltődni, ha ez a szerver az EcoGnomeMod-nak köszönhetően regisztrálva lesz a játékban.",
+        "JoinCodeTooltip": "Add meg ezt a kódot a játékosoknak, hogy csatlakozhassanak a szerveredhez.",
+        "Items": {
+            "Max": "Maximális ár",
+            "Max.Tooltip": "Maximális árak törlése",
+            "Min": "Min ár",
+            "Min.Tooltip": "Min árak törlése"
+        },
+        "Members": {
+            "DemoteAdmin": "Admin lefokozása",
+            "KickUser": "Felhasználó kirúgása",
+            "PromoteAdmin": "Admin előléptetése",
+            "Tooltip.Admin": "Admin",
+            "Title": "Tagok"
+        },
+        "ServerSettings": {
+            "ServerName": "Kiszolgáló neve",
+            "Crafting": "Crafting táblák",
+            "Delete": "Szerver törlése",
+            "Items": "Tárgyak",
+            "Tags": "Címkék",
+            "Modules": "Modulok frissítése",
+            "Recipes": "Receptek",
+            "Elements": "Recept elemek",
+            "Skills": "Képességek",
+            "Upload": "Szerveradatok feltöltése",
+            "Title": "Szerver beállítások",
+            "Stats": "Adatok statisztikája",
+            "EcoGnomeModExplanation1": "Az Eco Gnome képes adatokat olvasni az Eco szerveréről, hogy pontosan ki tudja számolni a tételek árait. Kivonja a készségeket, a kézműves táblákat, a modulokat, a tárgyakat és az összes receptet. Mind a módosított vanilla adatokat, mind a külső modok által hozzáadott adatokat képes beolvasni.",
+            "EcoGnomeModExplanation2": "Ehhez le kell töltened és telepítened a szerver modunkat, az [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), az Eco szerveredre. A szerver újraindítása után a játékszerver gyökérmappájában létre kell hoznia egy eco_gnome_data.json nevű fájlt. Ezt a fájlt le kell hívnod és fel kell töltened az alábbi gomb segítségével."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Nem szerkesztheted magad",
+            "UploadOk": "Feltöltés sikeres",
+            "UploadNok": "Feltöltési hiba",
+            "UploadPartiallyNok": "Figyelmeztetés: {errorCount} elemek nem lettek importálva: {errorNames}. Tekintse át a modokat és a szerver szerkesztéseit. Segítségért fordulhatsz az Eco Gnome adminokhoz."
+        }
+    },
+    "Skill": "Skill",
+    "NoSkill": "Nincs készség",
+    "SuperAdmin": {
+        "ActionCol": "Művelet",
+        "ConfirmServerDeletion": "Biztos vagy benne, hogy törölni akarod a {szerver} szervert?",
+        "ConfirmSuperAdminPromote": "Biztos benne, hogy ezt a felhasználót Super Admin-nak akarja előléptetni?",
+        "ConfirmSuperAdminDemote": "Biztos, hogy ezt a felhasználót Super Adminból le akarja léptetni?",
+        "ConfirmTwiceSuperAdmin": "Ennek a változtatásnak nagy hatása van, és megrongálhatja az egész webhelyet! Kérjük, erősítse meg még egyszer.",
+        "ConfirmUserDeletion": "Biztos, hogy törölni akarja a {felhasználó} felhasználót?",
+        "CreationDateCol": "Létrehozás dátuma",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Adminok",
+            "DeleteServer": "Kiszolgáló törlése",
+            "DemoteAdmin": "Távolítsa el magát az adminok közül",
+            "PlayersCol": "Játékosok",
+            "PromoteAdmin": "Add magad adminként",
+            "ServerNameCol": "Név",
+            "SetDefault": "Hozzáadás alapértelmezett szerverhez",
+            "Title": "Szerverek",
+            "UnsetDefault": "Eltávolítás az alapértelmezett szerverekről"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Nem törölheti magát erről az oldalról.",
+            "SnackbarCantEdit": "Nem szerkesztheti magát erről az oldalról.",
+            "SnackbarCopy": "Id másolva a vágólapra"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Felhasználó törlése",
+            "DemoteUser": "Felhasználó visszaminősítése Super Adminból",
+            "HowMuchIsAdmin": "A felhasználó által adminisztrált szerverek száma",
+            "JoinedServers": "Csatlakozott szerverek",
+            "PromoteUser": "Felhasználó előléptetése szuperadminisztrátorrá",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Szerverek",
+            "Title": "Felhasználók",
+            "ActionCol": "Művelet"
+        }
+    },
+    "TagName": "Címke neve",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Felhasználó exportálása/mentése",
+        "ImportReplace": "Felhasználóm importálása/helyettesítése",
+        "InGamePseudo": "Játékon belüli ál",
+        "InGamePseudoTooltip": "Automatikusan kitöltődik, amikor a felhasználó regisztrációja befejeződik az Eco-n belül az EcoGnomeModnak köszönhetően.",
+        "InGameId": "In-Game Id",
+        "InGameIdTooltip": "Automatikusan kitöltődik, amikor a felhasználó regisztrációja Eco-n belül befejeződik az EcoGnomeMod-nak köszönhetően.",
+        "MyServers": "Saját szerverek",
+        "Pseudo": "Pseudo",
+        "PublicId": "Nyilvános azonosító",
+        "SecretId": "Secret Id (Eco-n belül a regisztrációhoz használják)",
+        "ResetRegistration": "Biztos, hogy vissza akarja állítani a jelenlegi regisztrációját ezen a szerveren? Többé nem fogod tudni használni a játékon belüli funkciókat ezen a szerveren!",
+        "PopupConfirmImportBegin": "Biztos vagy benne, hogy importálni akarod a felhasználót a pseudo",
+        "PopupConfirmImportEnd": " ? Ez törölni fogja a jelenlegi elmentett felhasználódat. Győződj meg róla, hogy exportálod az aktuális felhasználót, ha később is használni akarod !",
+        "SnackbarCopy": "Csatlakozási kód másolva a vágólapra",
+        "SnackbarErrorBadFile": "Felhasználó importálása hiba - Válasszon egy helyes fájlt.",
+        "SnackbarErrorBadUser": "Import User Error - Nem találja az importált felhasználót",
+        "UserSettings": "Felhasználói beállítások"
+    },
+    "Versions": "Verziók",
+    "PriceCalculator": {
+        "LoadError": "Hiba történt a betöltés során. Megpróbálhatja visszaállítani az összes adatot, hogy kijavítsa a hibát.",
+        "Reset": "Reset",
+        "Skills": "Skills",
+        "AddSkill": "Képesség hozzáadása",
+        "CraftingTables": "Kézműves táblázatok",
+        "AddCraftingTable": "Kézműves táblázat hozzáadása",
+        "CostMin": {
+            "Tooltip": "Az ehhez a kézműves asztalhoz kapcsolódó költség minden egyes kézműves perc után. Képviseli az üzemanyag-fogyasztást, az alkatrészek cseréjét, az esetleges kézműves munkadíjakat...",
+            "CostMin": "Költség/min"
+        },
+        "NoModule": "Nincs modul",
+        "MarginPercent": {
+            "Tooltip": "Az árrés százalékos aránya, amelyet az eladási árra alkalmaznak. A számítás részleteiért ellenőrizze a 'Margin Calculation Type' (Árrésszámítás típusa) eszköztár opciót.",
+            "MarginPercent": "Árrés százalék"
+        },
+        "AddMargin": "Árrés hozzáadása",
+        "RemoveMargin": "Árrés eltávolítása",
+        "NonSkilled": {
+            "Tooltip": "A nem szakképzett receptek listájának feloldása a receptválasztóban.",
+            "NonSkilled": "Nem szakképzett receptek megjelenítése"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Csak a képzettségi szintek által megengedett receptek megjelenítése.",
+            "LevelAccessible": "Csak a szintek által elérhető receptek"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Amikor a rendszer lekérdezi egy összetevő árát, ha ez az összetevő egy másik készségből származik, mint az aktuális recept, akkor annak árrés-árát fogja használni a gyártási ára helyett. Ez lehetővé teszi, hogy a többi polgár számára, akik nem rendelkeznek mindkét készséggel, igazságosabb legyen a termelési ár.",
+            "ApplyMarginBetweenSkills": "Árrés alkalmazása a készségek között"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Árrésszámítási módszer",
+                "2": "MarkUp (alapértelmezett): összeadod a CostPrice és a Margin*CostPrice/100 értéket, hogy megkapd az Eladási árat",
+                "3": "Bruttó árrés: A Margin százalék az EladásiKöltséged hasznának százalékos aránya, amely -99,99% és 99,99% között van korlátozva."
+            },
+            "MarginType": "Margin számítási típus",
+            "MarkUp": "Felár",
+            "GrossMargin": "Bruttó árrés"
+        },
+        "CalorieCost": {
+            "Tooltip": "Az elfogyasztott élelmiszer költsége, 1000 kalóriára vetítve egy kézművességben elköltött kalóriára. Ha csak salátákat vásárol, amelyek 5$-ért 700cal-t hoznak, akkor az 1000 kalóriára jutó költség 1000 * 5 / 700 = 7,14$",
+            "CalorieCost": "1000 kalóriára jutó költség"
+        },
+        "ItemsToBuy": "Megvásárolható tételek",
+        "IngredientSearch": "Hozzávaló elemek vagy címkék",
+        "BuyPrice": "Vásárlási ár",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Ez az érték lesz a hozzá tartozó tételek minimális ára (ha minden érték meg van határozva !), kivéve, ha egy csillagra kattintva egy konkrétat választ ki.",
+            "isAutoCalculatedPrice": "Ezt az értéket a rendszer automatikusan kiszámítja. Ha üres, győződjön meg róla, hogy az összes \"Vásárolni kívánt tétel\" árát beállította",
+            "isItemEmptyPrice": "Állítsa be ezt az árat, hogy lehetővé tegye a kapcsolódó receptek kiszámítását",
+            "isMinPrice": "Ez az érték a kiszolgáló minimális árán van beállítva",
+            "isMaxPrice": "Ez az érték a kiszolgáló maximális árán van beállítva",
+            "IsMarginPrice": "Ez az érték egy árrés ár, mivel a 'Szakértelem közötti árrés alkalmazása' opció aktiválva van."
+        },
+        "CancelOverride": "Ezt a termékárat már ne írja felül.",
+        "AddFavoriteItem": "Kedvenc ez a termék, alkalmazza az árát a kapcsolódó címkére",
+        "CancelFavoriteItem": "Törölje a termék kedveltségét",
+        "ItemsToSell": "Eladandó tételek",
+        "AddRecipe": "Recept hozzáadása",
+        "ProductItems": "Terméktételek",
+        "CostPrice": "Önköltség",
+        "SalePrice": "Eladási ár",
+        "AddOverride": "Felülírja ezt az árat, mivel nem eladandó, hanem megvásárolható termékről van szó",
+        "RecipeTooltip": "Nyissa meg a recept felugró ablakát, megjeleníti a számítás részleteit",
+        "RecipeTooltipWithShare": "Nyissa meg a recept felugró ablakot, ez lehetővé teszi a termék árfelosztásának szabályozását, és megjeleníti a számítás részleteit",
+        "MarginTooltip": "A Margin konfigurációja nem teszi lehetővé az Eladási ár kiszámítását. Ellenőrizze a Margin százalék és a Margin számítási típusát.",
+        "AddFavoriteRecipe": "Kedvenc ez a recept, alkalmazza az árát a kapcsolódó termékre",
+        "CancelFavoriteRecipe": "Kedvencek eltávolítása",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Nem tudja eltávolítani az utolsó árrést",
+            "PriceNotWellConfigured": "Ez az ár nincs jól konfigurálva",
+            "PriceCopied": "Az árat a vágólapra másolták"
+        }
+    },
+    "Recipe": "Recept",
+    "ContextService": {
+        "DefaultMargin": "Alapértelmezett árrés"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Új árrés"
+    }
+}

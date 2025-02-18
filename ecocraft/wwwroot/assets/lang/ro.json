@@ -1,0 +1,280 @@
+{
+    "Cancel": "Anulare",
+    "CopyToClipboard": "Copiere în clipboard",
+    "CraftingTable": "Tabel de artizanat",
+    "GraphView": {
+        "ResetButton": "Resetați graficul",
+        "Title": "Vizualizare grafic"
+    },
+    "Header": {
+        "CreateServer": "Creează server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "Serverele mele",
+        "AddServer": "Alăturați-vă unui server existent sau creați unul nou.",
+        "New": "Nou!",
+        "ReleaseDialog": {
+            "Title": "Lansări"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "Sunteți deja în acest server",
+                "JoinError": "Trebuie să adăugați un cod de server",
+                "ServerNotFound": "Serverul nu a fost găsit"
+            },
+            "Title": "Creați sau alăturați-vă serverului"
+        },
+        "UserConfigurationDialog": {
+            "Title": "Gestionarea utilizatorilor"
+        }
+    },
+    "Ingredients": "Ingrediente",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produs de",
+        "UsedIn": "Folosit în"
+    },
+    "JoinCode": "Cod de asociere",
+    "Language": "Limbaj",
+    "MainLayout": {
+        "SiteTitle": "Instrumente pentru jocul video Eco",
+        "PleaseJoin": "Vă rugăm să vă alăturați unui server"
+    },
+    "Name": "Nume",
+    "Level": "Nivel",
+    "Upgrade": "Upgrade",
+    "Margins": "Marje",
+    "NavMenu": {
+        "NavAdmin": "Managementul serverului",
+        "NavCalculator": "Calculator preț",
+        "NavGraph": "Vizualizare grafică [WIP]",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "Niciunul",
+    "Options": "Opțiuni",
+    "Products": "Produse",
+    "RecipeDialog": {
+        "AdditionalCosts": "Costuri suplimentare",
+        "CraftTime": "Timp de fabricație",
+        "CraftTimeReductionTooltip": "{initialValue} cu {percent}% reducere datorită modulului de upgrade {upgradeModuleName}",
+        "Dynamic": "dinamic",
+        "Labor": "Muncă",
+        "LaborReductionTooltip": "{initialValue} cu {percent}% reducere datorată nivelului de calificare {skillLevel}",
+        "QuantityReductionTooltip": "{percent}% reducere datorată modulului de upgrade {skillLevel}",
+        "QuantityReductionLavishTooltip": "și talent generos",
+        "ReintegratedToolTip": {
+            "False": "Oprirea deducerii acestui element din prețul de cost. Acest lucru va crește matematic prețul altor produse.",
+            "True": "Deduceți acest element din prețul de cost, pentru a fi utilizat atunci când puteți reutiliza acest produs în aceeași rețetă sau în una anterioară (matrițe, butoaie, ...). Acest lucru va reduce matematic prețul altor produse."
+        },
+        "Share": {
+            "EqualityTooltip": "Împărțiți în mod egal între produse.",
+            "EquilibrateTooltip": "Împărțiți în funcție de cantitate între produse.",
+            "FirstOnlyTooltip": "Acordă 100% primului produs și zero celorlalte. Alegeți această opțiune dacă considerați că celelalte produse sunt gunoi.",
+            "HonestTooltip": "Acordă 80% primului produs și împarte restul în mod egal."
+        },
+        "Static": "static",
+        "TotalCost": "Cost total:",
+        "TotalPrice": "Prețul total:"
+    },
+    "RecipeList": {
+        "RecipeName": "Numele rețetei"
+    },
+    "RelatedRecipes": "Rețete conexe",
+    "Search": "Căutare",
+    "ServerDialog": {
+        "Create": "Creați",
+        "CreateServer": "Creați serverul dvs",
+        "HaveAnInvitation": "Aveți deja un cod de conectare la server?",
+        "Join": "Alăturare",
+        "MaxChar": "Max 25 caractere",
+        "MinChar": "Min 3 caractere"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Sunteți sigur că doriți să ștergeți toate prețurile maxime?",
+            "ClearAllMin": "Sunteți sigur că doriți să ștergeți toate prețurile minime?",
+            "ServerDeletion": "Ești sigur că vrei să-ți ștergi serverul? Nu va fi nicio revenire!",
+            "ServerDissociate": "Sunteți sigur că doriți să disociați serverul Eco-Gnome de serverul Eco? Nu va exista niciun rollback!",
+            "UpdateJoinCode": "Sunteți sigur că doriți să vă reîmprospătați codul JoinCode? Acest lucru va dezactiva toate codurile generate anterior!"
+        },
+        "EcoServerId": "Id server Eco",
+        "EcoServerIdTooltip": "Acest câmp va fi completat odată ce acest server este înregistrat în joc datorită EcoGnomeMod.",
+        "JoinCodeTooltip": "Dați acest cod jucătorilor dvs. astfel încât să se poată alătura serverului dvs.",
+        "Items": {
+            "Max": "Preț maxim",
+            "Max.Tooltip": "Șterge prețurile maxime",
+            "Min": "Preț minim",
+            "Min.Tooltip": "Ștergeți prețurile minime"
+        },
+        "Members": {
+            "DemoteAdmin": "Demite Admin",
+            "KickUser": "Kick utilizator",
+            "PromoteAdmin": "Promovează Admin",
+            "Tooltip.Admin": "Admin",
+            "Title": "Membri"
+        },
+        "ServerSettings": {
+            "ServerName": "Numele serverului",
+            "Crafting": "Tabele de artizanat",
+            "Delete": "Șterge serverul",
+            "Items": "Obiecte",
+            "Tags": "Etichete",
+            "Modules": "Upgrade module",
+            "Recipes": "Rețete",
+            "Elements": "Elemente de rețetă",
+            "Skills": "Abilități",
+            "Upload": "Încărcare date server",
+            "Title": "Setări server",
+            "Stats": "Date statistice",
+            "EcoGnomeModExplanation1": "Eco Gnome este capabil să citească date de pe serverul Eco pentru a calcula cu exactitate prețurile articolelor dvs. Acesta extrage abilități, tabele de meșteșuguri, module, articole și toate rețetele. Acesta poate citi atât date vanilla modificate, cât și date adăugate de moduri externe.",
+            "EcoGnomeModExplanation2": "Pentru a face acest lucru, trebuie să descărcați și să instalați modul nostru de server, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), pe serverul Eco. Odată ce serverul dvs. este repornit, un fișier numit eco_gnome_data.json ar trebui să fie creat în folderul rădăcină al serverului dvs. de joc. Trebuie să recuperați acest fișier și să îl încărcați folosind butonul de mai jos."
+        },
+        "Snackbar": {
+            "CantEditYourself": "Nu vă puteți edita singur",
+            "UploadOk": "Încărcare reușită",
+            "UploadNok": "Eroare la încărcare",
+            "UploadPartiallyNok": "Avertisment: {errorCount} elementele nu au fost importate: {errorNames}. Revizuiește-ți modurile și editările serverului. Puteți contacta administratorii Eco Gnome pentru ajutor."
+        }
+    },
+    "Skill": "Abilități",
+    "NoSkill": "Fără abilitate",
+    "SuperAdmin": {
+        "ActionCol": "Acțiune",
+        "ConfirmServerDeletion": "Sunteți sigur că doriți să ștergeți serverul {server}?",
+        "ConfirmSuperAdminPromote": "Sunteți sigur că doriți să promovați acest utilizator la Super Admin?",
+        "ConfirmSuperAdminDemote": "Sunteți sigur că doriți să retrogradați acest utilizator din Super Admin?",
+        "ConfirmTwiceSuperAdmin": "Această schimbare are un impact foarte mare și ar putea corupe întregul site web! Vă rugăm să confirmați din nou.",
+        "ConfirmUserDeletion": "Sunteți sigur că doriți să ștergeți utilizatorul {user}?",
+        "CreationDateCol": "Data creării",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Administratori",
+            "DeleteServer": "Ștergeți serverul",
+            "DemoteAdmin": "Îndepărtează-te de la administratori",
+            "PlayersCol": "Jucători",
+            "PromoteAdmin": "Adăugați-vă ca admin",
+            "ServerNameCol": "Nume",
+            "SetDefault": "Adăugați ca server implicit",
+            "Title": "Servere",
+            "UnsetDefault": "Eliminați din serverele implicite"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "Nu vă puteți șterge de pe această pagină.",
+            "SnackbarCantEdit": "Nu vă puteți edita de pe această pagină.",
+            "SnackbarCopy": "Id copiat în clipboard"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Ștergeți utilizatorul",
+            "DemoteUser": "Retrogradează utilizatorul din Super Admin",
+            "HowMuchIsAdmin": "Numărul de servere pe care utilizatorul este administrator",
+            "JoinedServers": "Servere alăturate",
+            "PromoteUser": "Promovarea utilizatorului la Super Admin",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servere",
+            "Title": "Utilizatori",
+            "ActionCol": "Acțiune"
+        }
+    },
+    "TagName": "Nume etichetă",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Export/Salvare de rezervă a utilizatorului meu",
+        "ImportReplace": "Import/Reînlocuirea utilizatorului meu",
+        "InGamePseudo": "Pseudo în joc",
+        "InGamePseudoTooltip": "Completat automat la finalizarea înregistrării utilizatorului în Eco datorită EcoGnomeMod.",
+        "InGameId": "Id în joc",
+        "InGameIdTooltip": "Completat automat la finalizarea înregistrării utilizatorului în Eco datorită EcoGnomeMod.",
+        "MyServers": "Serverele mele",
+        "Pseudo": "Pseudo",
+        "PublicId": "Id public",
+        "SecretId": "Id secret (utilizat în Eco pentru înregistrare)",
+        "ResetRegistration": "Sunteți sigur că doriți să vă resetați înregistrarea curentă pe acest server? Nu veți mai putea utiliza funcțiile din joc pe acest server!",
+        "PopupConfirmImportBegin": "Sunteți sigur că doriți să importați utilizatorul cu pseudo",
+        "PopupConfirmImportEnd": " ? Acest lucru va șterge utilizatorul dvs. salvat curent. Asigurați-vă că exportați utilizatorul curent dacă doriți să îl utilizați mai târziu!",
+        "SnackbarCopy": "Codul de conectare copiat în clipboard",
+        "SnackbarErrorBadFile": "Import User Error - Alegeți un fișier corect.",
+        "SnackbarErrorBadUser": "Import User Error - Nu se poate găsi utilizatorul importat",
+        "UserSettings": "Setări utilizator"
+    },
+    "Versions": "Versiuni",
+    "PriceCalculator": {
+        "LoadError": "A apărut o eroare în timpul încărcării. Puteți încerca să resetați toate datele pentru a remedia eroarea.",
+        "Reset": "Resetare",
+        "Skills": "Competențe",
+        "AddSkill": "Adăugați abilități",
+        "CraftingTables": "Mese de artizanat",
+        "AddCraftingTable": "Adaugă masă de meșteșugărit",
+        "CostMin": {
+            "Tooltip": "Costul aferent acestui tabel de meșteșuguri pentru fiecare minut de meșteșug. Reprezintă consumul de combustibil, înlocuirea pieselor, eventualele taxe de artizanat...",
+            "CostMin": "Cost/min"
+        },
+        "NoModule": "Fără modul",
+        "MarginPercent": {
+            "Tooltip": "Procentul de marjă care va fi aplicat prețului de vânzare. Verificați opțiunea \"Tip de calcul al marjei\" pentru detalii de calcul.",
+            "MarginPercent": "Marjă procentuală"
+        },
+        "AddMargin": "Adaugă marjă",
+        "RemoveMargin": "Elimină marja",
+        "NonSkilled": {
+            "Tooltip": "Deblocați lista de rețete necalificate în selectorul de rețete.",
+            "NonSkilled": "Afișați rețete necalificate"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Afișați numai rețetele care sunt permise de nivelurile dvs. de competențe.",
+            "LevelAccessible": "Numai rețete accesibile pe niveluri"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "Atunci când sistemul extrage prețul unui ingredient, dacă acest ingredient provine dintr-o altă abilitate decât rețeta curentă, se va utiliza prețul său de marjă în locul prețului său de producție. Acest lucru permite un preț de producție mai corect pentru ceilalți cetățeni care nu au ambele competențe.",
+            "ApplyMarginBetweenSkills": "Aplicarea marjei între competențe"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Metoda de calcul a marjei",
+                "2": "MarkUp (implicit): însumați prețul de cost și marja*prețul de cost/100 pentru a obține prețul de vânzare",
+                "3": "Marjă brută: Marja procentuală este procentul de beneficiu din Costul de vânzare, care este plafonat între -99,99% și 99,99%."
+            },
+            "MarginType": "Tipul de calcul al marjei",
+            "MarkUp": "Marjă",
+            "GrossMargin": "Marja brută"
+        },
+        "CalorieCost": {
+            "Tooltip": "Costul alimentelor pe care le consumați, pentru 1000 de calorii cheltuite într-o meserie. Dacă cumpărați doar salate care aduc 700cal pentru 5$, atunci Costul pe 1000 calorii este 1000 * 5 / 700 = 7,14$",
+            "CalorieCost": "Cost per 1000 calorii"
+        },
+        "ItemsToBuy": "Elemente de cumpărat",
+        "IngredientSearch": "Ingrediente articole sau etichete",
+        "BuyPrice": "Preț de cumpărare",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "Această valoare va fi prețul minim al articolelor aferente (dacă toate valorile sunt definite !), cu excepția cazului în care alegeți unul specific făcând clic pe o stea.",
+            "isAutoCalculatedPrice": "Această valoare este calculată automat de sistem. Dacă este goală, asigurați-vă că ați setat prețul tuturor \"Articolelor de cumpărat\"",
+            "isItemEmptyPrice": "Setați acest preț pentru a permite calcularea rețetelor aferente",
+            "isMinPrice": "Această valoare este setată la prețul minim al serverului",
+            "isMaxPrice": "Această valoare este setată la prețul maxim al serverului",
+            "IsMarginPrice": "Această valoare este un preț de marjă, deoarece opțiunea \"Apply margin between skills\" este activată."
+        },
+        "CancelOverride": "Nu mai suprascrieți prețul acestui produs.",
+        "AddFavoriteItem": "Favorizați acest articol, aplicați prețul său etichetei aferente",
+        "CancelFavoriteItem": "Dezfavorizați acest articol",
+        "ItemsToSell": "Articole de vândut",
+        "AddRecipe": "Adăugați rețeta",
+        "ProductItems": "Articole produs",
+        "CostPrice": "Preț de cost",
+        "SalePrice": "Preț de vânzare",
+        "AddOverride": "Suprapuneți acest preț, având în vedere că nu este un produs de vânzare, ci un produs de cumpărare",
+        "RecipeTooltip": "Deschideți fereastra pop-up a rețetei, care afișează detaliile calculului",
+        "RecipeTooltipWithShare": "Deschideți fereastra pop-up pentru rețete, aceasta oferă posibilitatea de a controla repartizarea prețului produsului și afișează detaliile calculului",
+        "MarginTooltip": "Configurația marjei dvs. nu permite calcularea unui preț de vânzare. Verificați procentul marjei și tipul de calcul al marjei.",
+        "AddFavoriteRecipe": "Preferați această rețetă, aplicați prețul acesteia la produsul aferent",
+        "CancelFavoriteRecipe": "Dezafavorizați această rețetă",
+        "Snackbar": {
+            "CantRemoveLastMargin": "Nu puteți elimina ultima dvs. marjă",
+            "PriceNotWellConfigured": "Acest preț nu este bine configurat",
+            "PriceCopied": "Preț copiat în clipboard"
+        }
+    },
+    "Recipe": "Rețetă",
+    "ContextService": {
+        "DefaultMargin": "Marjă implicită"
+    },
+    "UserServerDataService": {
+        "NewMargin": "Marjă nouă"
+    }
+}

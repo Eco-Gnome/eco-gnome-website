@@ -1,0 +1,280 @@
+{
+    "Cancel": "Cancel",
+    "CopyToClipboard": "Copy to clipboard",
+    "CraftingTable": "Crafting Table",
+    "GraphView": {
+        "ResetButton": "Reset Graph",
+        "Title": "Graph View"
+    },
+    "Header": {
+        "CreateServer": "Create server",
+        "EcoGnome": "Eco Gnome",
+        "MyServers": "My Servers",
+        "AddServer": "Join an existing server, or create a new one.",
+        "New": "New!",
+        "ReleaseDialog": {
+            "Title": "Releases"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "You are already in this server",
+                "JoinError": "You need to add a server code",
+                "ServerNotFound": "Server not found"
+            },
+            "Title": "Create or join server"
+        },
+        "UserConfigurationDialog": {
+            "Title": "User management"
+        }
+    },
+    "Ingredients": "Ingredients",
+    "ItemOrTagDialog": {
+        "ProducedBy": "Produced by",
+        "UsedIn": "Used in"
+    },
+    "JoinCode": "Join code",
+    "Language": "Language",
+    "MainLayout": {
+        "SiteTitle": "Tools for Eco video game",
+        "PleaseJoin": "Please join a server"
+    },
+    "Name": "Name",
+    "Level": "Level",
+    "Upgrade": "Upgrade",
+    "Margins": "Margins",
+    "NavMenu": {
+        "NavAdmin": "Server Management",
+        "NavCalculator": "Price Calculator",
+        "NavGraph": "Graph View [WIP]",
+        "NavSuperAdmin": "Super Admin"
+    },
+    "None": "None",
+    "Options": "Options",
+    "Products": "Products",
+    "RecipeDialog": {
+        "AdditionalCosts": "Additional Costs",
+        "CraftTime": "Craft time",
+        "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
+        "Dynamic": "dynamic",
+        "Labor": "Labor",
+        "LaborReductionTooltip": "{initialValue} with {percent}% reduction due to skill level {skillLevel}",
+        "QuantityReductionTooltip": "{percent}% reduction due to upgrade module {skillLevel}",
+        "QuantityReductionLavishTooltip": "and lavish talent",
+        "ReintegratedToolTip": {
+            "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
+            "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
+        },
+        "Share": {
+            "EqualityTooltip": "Split equally between products.",
+            "EquilibrateTooltip": "Split by quantity between products.",
+            "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
+            "HonestTooltip": "Grant 80% to first product and split the rest equally."
+        },
+        "Static": "static",
+        "TotalCost": "Total cost:",
+        "TotalPrice": "Total price:"
+    },
+    "RecipeList": {
+        "RecipeName": "Recipe name"
+    },
+    "RelatedRecipes": "Related recipes",
+    "Search": "Search",
+    "ServerDialog": {
+        "Create": "Create",
+        "CreateServer": "Create your server",
+        "HaveAnInvitation": "Do you already have a server join code?",
+        "Join": "Join",
+        "MaxChar": "Max 25 characters",
+        "MinChar": "Min 3 characters"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "Are you sure you want to clear all max prices?",
+            "ClearAllMin": "Are you sure you want to clear all min prices?",
+            "ServerDeletion": "Are you sure you want to delete your server? There won't be no rollback!",
+            "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!",
+            "UpdateJoinCode": "Are you sure you want to refresh your JoinCode? This will disabled any previously generated codes!"
+        },
+        "EcoServerId": "Eco Server Id",
+        "EcoServerIdTooltip": "This field will be filled once this server is registered in-game thanks to the EcoGnomeMod.",
+        "JoinCodeTooltip": "Give this code to your players so they can join your server.",
+        "Items": {
+            "Max": "Max price",
+            "Max.Tooltip": "Clear max prices",
+            "Min": "Min price",
+            "Min.Tooltip": "Clear min prices"
+        },
+        "Members": {
+            "DemoteAdmin": "Demote Admin",
+            "KickUser": "Kick user",
+            "PromoteAdmin": "Promote Admin",
+            "Tooltip.Admin": "Admin",
+            "Title": "Members"
+        },
+        "ServerSettings": {
+            "ServerName": "Server name",
+            "Crafting": "Crafting Tables",
+            "Delete": "Delete Server",
+            "Items": "Items",
+            "Tags": "Tags",
+            "Modules": "Upgrade Modules",
+            "Recipes": "Recipes",
+            "Elements": "Recipe Elements",
+            "Skills": "Skills",
+            "Upload": "Upload Server Data",
+            "Title": "Server Settings",
+            "Stats": "Data Statistics",
+            "EcoGnomeModExplanation1": "Eco Gnome is capable of reading data from your Eco server to accurately calculate the prices of your items. It extracts skills, crafting tables, modules, items, and all recipes. It can read both modified vanilla data and data added by external mods.",
+            "EcoGnomeModExplanation2": "To do this, you need to download and install our server mod, [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), on your Eco server. Once your server is restarted, a file named eco_gnome_data.json should be created in the root folder of your game server. You need to retrieve this file and upload it using the button below."
+        },
+        "Snackbar": {
+            "CantEditYourself": "You can't edit yourself",
+            "UploadOk": "Upload Successful",
+            "UploadNok": "Upload Error",
+            "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported: {errorNames}. Review your mods and server edits. You can contact Eco Gnome admins for help."
+        }
+    },
+    "Skill": "Skill",
+    "NoSkill": "No Skill",
+    "SuperAdmin": {
+        "ActionCol": "Action",
+        "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
+        "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
+        "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",
+        "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
+        "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
+        "CreationDateCol": "Creation Date",
+        "IdCol": "Id",
+        "ServerTable": {
+            "AdminsCol": "Admins",
+            "DeleteServer": "Delete server",
+            "DemoteAdmin": "Remove yourself from admins",
+            "PlayersCol": "Players",
+            "PromoteAdmin": "Add yourself as admin",
+            "ServerNameCol": "Name",
+            "SetDefault": "Add as default server",
+            "Title": "Servers",
+            "UnsetDefault": "Remove from default servers"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "You can't delete yourself from this page.",
+            "SnackbarCantEdit": "You can't edit yourself from this page.",
+            "SnackbarCopy": "Id copied to clipboard"
+        },
+        "Title": "Super Admin",
+        "UserTable": {
+            "DeleteUser": "Delete user",
+            "DemoteUser": "Demote user from Super Admin",
+            "HowMuchIsAdmin": "Number of servers the user is admin on",
+            "JoinedServers": "Joined Servers",
+            "PromoteUser": "Promote user to Super Admin",
+            "PseudoCol": "Pseudo",
+            "ServersCol": "Servers",
+            "Title": "Users",
+            "ActionCol": "Action"
+        }
+    },
+    "TagName": "Tag name",
+    "UserConfigurationDialog": {
+        "ExportBackup": "Export/Backup my User",
+        "ImportReplace": "Import/Replace my User",
+        "InGamePseudo": "In-Game pseudo",
+        "InGamePseudoTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
+        "InGameId": "In-Game Id",
+        "InGameIdTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
+        "MyServers": "My servers",
+        "Pseudo": "Pseudo",
+        "PublicId": "Public Id",
+        "SecretId": "Secret Id (used inside Eco for registration)",
+        "ResetRegistration": "Are you sure you want to reset your current registration on this server? You won't be able to use in-game features on this server anymore!",
+        "PopupConfirmImportBegin": "Are you sure you want to import the user with pseudo ",
+        "PopupConfirmImportEnd": " ? This will erase your current saved user. Make sure to export the current user if you want to use it later !",
+        "SnackbarCopy": "Join code copied to clipboard",
+        "SnackbarErrorBadFile": "Import User Error - Choose a correct file.",
+        "SnackbarErrorBadUser": "Import User Error - Can't find the imported user",
+        "UserSettings": "User settings"
+    },
+    "Versions": "Versions",
+    "PriceCalculator": {
+        "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
+        "Reset": "Reset",
+        "Skills": "Skills",
+        "AddSkill": "Add skill",
+        "CraftingTables": "Crafting tables",
+        "AddCraftingTable": "Add crafting table",
+        "CostMin": {
+            "Tooltip": "The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...",
+            "CostMin": "Cost/min"
+        },
+        "NoModule": "No module",
+        "MarginPercent": {
+            "Tooltip": "The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.",
+            "MarginPercent": "Margin Percent"
+        },
+        "AddMargin": "Add margin",
+        "RemoveMargin": "Remove margin",
+        "NonSkilled": {
+            "Tooltip": "Unlock the list of non-skilled recipes in the recipe selector.",
+            "NonSkilled": "Display non-skilled recipes"
+        },
+        "LevelAccessible": {
+            "Tooltip": "Only display recipes that are allowed by your skills levels.",
+            "LevelAccessible": "Only level-accessible recipes"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "When the system retrieve the price of an ingredient, if this ingredient is from an other skill that the current recipe, then it's margin price will be used instead of it's production price. This allows a more fair production price for other citizens that does not have both skills.",
+            "ApplyMarginBetweenSkills": "Apply margin between skills"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "Margin calculation method",
+                "2": "MarkUp (default): you sum the CostPrice and Margin*CostPrice/100 to get the SalePrice",
+                "3": "Gross Margin: The Margin percent is the percent of benefit of your SaleCost, that is capped between -99.99% and 99.99%."
+            },
+            "MarginType": "Margin calculation type",
+            "MarkUp": "Mark-Up",
+            "GrossMargin": "Gross margin"
+        },
+        "CalorieCost": {
+            "Tooltip": "The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$",
+            "CalorieCost": "Cost per 1000 calories"
+        },
+        "ItemsToBuy": "Items to buy",
+        "IngredientSearch": "Ingredient Items Or Tags",
+        "BuyPrice": "Buy price",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
+            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'",
+            "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
+            "isMinPrice": "This value is set at the minimum price of the server",
+            "isMaxPrice": "This value is set at the maximum price of the server",
+            "IsMarginPrice": "This value is a margin price, because option 'Apply margin between skills' is activated."
+        },
+        "CancelOverride": "Don't override this product price anymore.",
+        "AddFavoriteItem": "Favorite this item, apply its price to the related tag",
+        "CancelFavoriteItem": "Un-favorite this item",
+        "ItemsToSell": "Items to sell",
+        "AddRecipe": "Add recipe",
+        "ProductItems": "Product items",
+        "CostPrice": "Cost price",
+        "SalePrice": "Sale price",
+        "AddOverride": "Override this price, considering it's not a product to sell but a product to buy",
+        "RecipeTooltip": "Open recipe popup, it displays details of calculation",
+        "RecipeTooltipWithShare": "Open recipe popup, it gives ability to control the product price repartition and displays details of calculation",
+        "MarginTooltip": "Your Margin configuration does not allow to calculate a Sale Price. Check your Margin Percent and Margin Calculation Type.",
+        "AddFavoriteRecipe": "Favorite this recipe, apply its price to the related product",
+        "CancelFavoriteRecipe": "Un-favorite this recipe",
+        "Snackbar": {
+            "CantRemoveLastMargin": "You can't remove your last margin",
+            "PriceNotWellConfigured": "This price isn't well configured",
+            "PriceCopied": "Price copied to clipboard"
+        }
+    },
+    "Recipe": "Recipe",
+    "ContextService": {
+        "DefaultMargin": "Default margin"
+    },
+    "UserServerDataService": {
+        "NewMargin": "New margin"
+    }
+}

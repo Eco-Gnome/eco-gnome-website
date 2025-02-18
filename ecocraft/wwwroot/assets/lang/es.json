@@ -45,7 +45,7 @@
     "NavMenu": {
         "NavAdmin": "Gestión del servidor",
         "NavCalculator": "Calculadora de precios",
-        "NavGraph": "Vista gráfica (WIP)",
+        "NavGraph": "Vista gráfica [WIP]",
         "NavSuperAdmin": "Super Admin"
     },
     "None": "Ninguno",

@@ -1,0 +1,280 @@
+{
+    "Cancel": "キャンセル",
+    "CopyToClipboard": "クリップボードにコピー",
+    "CraftingTable": "クラフト表",
+    "GraphView": {
+        "ResetButton": "グラフをリセット",
+        "Title": "グラフ表示"
+    },
+    "Header": {
+        "CreateServer": "サーバーの作成",
+        "EcoGnome": "エコ・ノーム",
+        "MyServers": "マイ・サーバー",
+        "AddServer": "既存のサーバーに参加するか、新しいサーバーを作成してください。",
+        "New": "新しい",
+        "ReleaseDialog": {
+            "Title": "リリース"
+        },
+        "ServerDialog": {
+            "Snackbar": {
+                "AlreadyInServer": "あなたはすでにこのサーバーにいます",
+                "JoinError": "サーバーコードを追加する必要があります",
+                "ServerNotFound": "サーバーが見つかりません"
+            },
+            "Title": "サーバーの作成または参加"
+        },
+        "UserConfigurationDialog": {
+            "Title": "ユーザー管理"
+        }
+    },
+    "Ingredients": "成分",
+    "ItemOrTagDialog": {
+        "ProducedBy": "生産者",
+        "UsedIn": "使用"
+    },
+    "JoinCode": "参加コード",
+    "Language": "使用言語",
+    "MainLayout": {
+        "SiteTitle": "エコ・ビデオゲーム用ツール",
+        "PleaseJoin": "サーバーに参加してください"
+    },
+    "Name": "サーバー名",
+    "Level": "レベル",
+    "Upgrade": "アップグレード",
+    "Margins": "マージン",
+    "NavMenu": {
+        "NavAdmin": "サーバー管理",
+        "NavCalculator": "価格計算",
+        "NavGraph": "グラフ表示[WIP］",
+        "NavSuperAdmin": "スーパー管理者"
+    },
+    "None": "なし",
+    "Options": "オプション",
+    "Products": "商品一覧",
+    "RecipeDialog": {
+        "AdditionalCosts": "追加費用",
+        "CraftTime": "クラフト時間",
+        "CraftTimeReductionTooltip": "{初期値}にアップグレードモジュール{upgradeModuleName}による{%}の削減を加えたものです。",
+        "Dynamic": "ダイナミック",
+        "Labor": "労働力",
+        "LaborReductionTooltip": "スキルレベル{skillLevel}による{パーセント}%削減で{initialValue}。",
+        "QuantityReductionTooltip": "アップグレードモジュール{skillLevel}による{percent}%減少",
+        "QuantityReductionLavishTooltip": "と贅沢な才能",
+        "ReintegratedToolTip": {
+            "False": "このアイテムをコストから差し引くのを止めます。これによって他の商品の価格が数学的に上昇します。",
+            "True": "このアイテムをコストから差し引きます。このアイテムを同じレシピや以前のレシピで再利用できる場合に使用します（金型、樽、...）。これは数学的に他の製品の価格を下げます。"
+        },
+        "Share": {
+            "EqualityTooltip": "製品間で均等に分割",
+            "EquilibrateTooltip": "製品間の量で分割。",
+            "FirstOnlyTooltip": "最初の製品に100％、残りの製品にゼロを割り当てます。他の製品をゴミと見なす場合に選択します。",
+            "HonestTooltip": "最初の製品に80%を付与し、残りを均等に分割します。"
+        },
+        "Static": "静的",
+        "TotalCost": "総コスト：",
+        "TotalPrice": "合計金額："
+    },
+    "RecipeList": {
+        "RecipeName": "レシピ名"
+    },
+    "RelatedRecipes": "関連レシピ",
+    "Search": "検索",
+    "ServerDialog": {
+        "Create": "作成",
+        "CreateServer": "サーバーを作成",
+        "HaveAnInvitation": "すでにサーバー参加コードをお持ちですか？",
+        "Join": "参加",
+        "MaxChar": "最大25文字",
+        "MinChar": "最小3文字"
+    },
+    "ServerManagement": {
+        "Confirm": {
+            "ClearAllMax": "すべての最高価格をクリアしますか？",
+            "ClearAllMin": "本当に最低価格をクリアしますか？",
+            "ServerDeletion": "本当にサーバーを削除しますか？ロールバックはありません！",
+            "ServerDissociate": "本当にEco-GnomeサーバーをEcoサーバーから切り離したいですか？ロールバックはありません！",
+            "UpdateJoinCode": "本当に JoinCode を更新しますか？これにより、以前に生成されたコードが無効になります！"
+        },
+        "EcoServerId": "Eco サーバー ID",
+        "EcoServerIdTooltip": "このフィールドは、EcoGnomeMod のおかげでこのサーバーがゲーム内に登録されると入力されます。",
+        "JoinCodeTooltip": "このコードをプレイヤーに渡して、あなたのサーバーに参加できるようにしてください。",
+        "Items": {
+            "Max": "最大価格",
+            "Max.Tooltip": "最大価格をクリアします。",
+            "Min": "最低価格",
+            "Min.Tooltip": "最低価格をクリアします。"
+        },
+        "Members": {
+            "DemoteAdmin": "管理者の解任",
+            "KickUser": "ユーザーをキック",
+            "PromoteAdmin": "管理者の昇格",
+            "Tooltip.Admin": "管理者",
+            "Title": "メンバー"
+        },
+        "ServerSettings": {
+            "ServerName": "サーバー名",
+            "Crafting": "クラフトテーブル",
+            "Delete": "サーバー削除",
+            "Items": "アイテム",
+            "Tags": "タグ",
+            "Modules": "アップグレードモジュール",
+            "Recipes": "レシピ",
+            "Elements": "レシピ要素",
+            "Skills": "スキル",
+            "Upload": "サーバーデータのアップロード",
+            "Title": "サーバー設定",
+            "Stats": "データ統計",
+            "EcoGnomeModExplanation1": "Eco Gnome は、お客様のEcoサーバーからデータを読み取り、アイテムの価格を正確に計算することができます。スキル、クラフト・テーブル、モジュール、アイテム、そしてすべてのレシピを抽出します。修正されたバニラ・データと、外部MODによって追加されたデータの両方を読み込むことができます。",
+            "EcoGnomeModExplanation2": "これを行うには、Eco サーバーに当社のサーバー MOD、[EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) をダウンロードしてインストールする必要があります。サーバーを再起動すると、ゲーム・サーバーのルート・フォルダーに eco_gnome_data.json というファイルが作成されます。このファイルを取り出して、下のボタンを使ってアップロードしてください。"
+        },
+        "Snackbar": {
+            "CantEditYourself": "自分で編集することはできません",
+            "UploadOk": "アップロード成功",
+            "UploadNok": "アップロードエラー",
+            "UploadPartiallyNok": "警告{errorCount}要素がインポートされていません：{errorNames}です。MOD とサーバーの編集を見直してください。Eco Gnome 管理者にお問い合わせください。"
+        }
+    },
+    "Skill": "スキル",
+    "NoSkill": "スキルなし",
+    "SuperAdmin": {
+        "ActionCol": "アクション",
+        "ConfirmServerDeletion": "本当にサーバ {server} を削除しますか？",
+        "ConfirmSuperAdminPromote": "このユーザをスーパー管理者に昇格させてよろしいですか？",
+        "ConfirmSuperAdminDemote": "本当にこのユーザーを Super Admin から降格させますか?",
+        "ConfirmTwiceSuperAdmin": "この変更は影響が大きく、ウェブサイト全体を破壊する可能性があります！もう一度確認してください。",
+        "ConfirmUserDeletion": "本当にユーザー{user}を削除しますか？",
+        "CreationDateCol": "作成日",
+        "IdCol": "ユーザーID",
+        "ServerTable": {
+            "AdminsCol": "管理者",
+            "DeleteServer": "サーバーの削除",
+            "DemoteAdmin": "管理者から削除",
+            "PlayersCol": "プレイヤー",
+            "PromoteAdmin": "管理者として追加",
+            "ServerNameCol": "名前",
+            "SetDefault": "デフォルトサーバーに追加",
+            "Title": "サーバー",
+            "UnsetDefault": "デフォルトサーバーから削除"
+        },
+        "SnackBar": {
+            "CantDeleteYourself": "このページから自分を削除することはできません。",
+            "SnackbarCantEdit": "このページから自分を編集することはできません。",
+            "SnackbarCopy": "クリップボードにコピーされたID"
+        },
+        "Title": "スーパー管理者",
+        "UserTable": {
+            "DeleteUser": "ユーザーを削除",
+            "DemoteUser": "スーパー管理者からユーザーを降格",
+            "HowMuchIsAdmin": "そのユーザーが管理者であるサーバーの数",
+            "JoinedServers": "参加サーバー数",
+            "PromoteUser": "スーパー管理者への昇格",
+            "PseudoCol": "擬似",
+            "ServersCol": "擬似サーバー",
+            "Title": "ユーザー",
+            "ActionCol": "アクション"
+        }
+    },
+    "TagName": "タグ名",
+    "UserConfigurationDialog": {
+        "ExportBackup": "ユーザーのエクスポート/バックアップ",
+        "ImportReplace": "ユーザーのインポート/入れ替え",
+        "InGamePseudo": "ゲーム内擬似",
+        "InGamePseudoTooltip": "EcoGnomeMod のおかげで、Eco 内でのユーザー登録完了時に自動的に入力されます。",
+        "InGameId": "ゲーム内 ID",
+        "InGameIdTooltip": "EcoGnomeMod のおかげで、Eco 内でユーザー登録が完了すると自動的に入力されます。",
+        "MyServers": "マイ・サーバー",
+        "Pseudo": "疑似",
+        "PublicId": "パブリック ID",
+        "SecretId": "シークレットID（Eco 内で登録に使用）",
+        "ResetRegistration": "このサーバーの現在の登録をリセットしてもよろしいですか？このサーバーではゲーム内の機能を使用できなくなります！",
+        "PopupConfirmImportBegin": "本当に擬似公開 ID を持つユーザーをインポートしますか？",
+        "PopupConfirmImportEnd": " ?現在保存しているユーザーを消去します。現在のユーザーを後で使用したい場合は、必ずエクスポートしてください！",
+        "SnackbarCopy": "クリップボードにコピーされた参加コード",
+        "SnackbarErrorBadFile": "ユーザのインポートエラー - 正しいファイルを選択してください。",
+        "SnackbarErrorBadUser": "ユーザのインポートエラー - インポートされたユーザが見つかりません。",
+        "UserSettings": "ユーザー設定"
+    },
+    "Versions": "バージョン",
+    "PriceCalculator": {
+        "LoadError": "ロード中にエラーが発生しました。エラーを修正するために、すべてのデータをリセットしてみてください。",
+        "Reset": "リセット",
+        "Skills": "スキル",
+        "AddSkill": "スキル追加",
+        "CraftingTables": "クラフトテーブル",
+        "AddCraftingTable": "クラフトテーブルを追加",
+        "CostMin": {
+            "Tooltip": "このクラフトテーブルに関連するコストは、クラフトの各分です。燃料消費、部品交換、最終的な工作費用などを表します。",
+            "CostMin": "コスト/分"
+        },
+        "NoModule": "モジュールなし",
+        "MarginPercent": {
+            "Tooltip": "販売価格に適用されるマージンのパーセンテージです。計算の詳細については、'マージン計算タイプ'ツールチップオプションをチェックしてください。",
+            "MarginPercent": "マージンパーセント"
+        },
+        "AddMargin": "マージンを追加",
+        "RemoveMargin": "マージンを削除",
+        "NonSkilled": {
+            "Tooltip": "レシピセレクターの非熟練レシピリストのロックを解除します。",
+            "NonSkilled": "非熟練レシピを表示"
+        },
+        "LevelAccessible": {
+            "Tooltip": "スキルレベルで許可されているレシピのみを表示します。",
+            "LevelAccessible": "レベルでアクセス可能なレシピのみ表示"
+        },
+        "ApplyMarginBetweenSkills": {
+            "Tooltip": "システムが食材の価格を取得する際、その食材が現在のレシピと別のスキルのものである場合、生産価格の代わりにマージン価格が使用されます。これにより、両方のスキルを持っていない他の市民に対して、より公平な生産価格を提供することができます。",
+            "ApplyMarginBetweenSkills": "スキル間のマージン適用"
+        },
+        "MarginType": {
+            "Tooltip": {
+                "1": "マージンの計算方法",
+                "2": "MarkUp (デフォルト): CostPriceとMargin*CostPrice/100を合計してSalePriceを得ます。",
+                "3": "グロスマージン：マージンのパーセンテージは販売価格の利益のパーセンテージで、上限は-99.99%から99.99%です。"
+            },
+            "MarginType": "マージン計算タイプ",
+            "MarkUp": "マークアップ",
+            "GrossMargin": "グロスマージン"
+        },
+        "CalorieCost": {
+            "Tooltip": "1,000キロカロリー分の食費。700calのサラダを5$で購入した場合、1000calあたりの原価は1000 * 5 / 700 = 7,14$ となります。",
+            "CalorieCost": "1000カロリーあたりのコスト"
+        },
+        "ItemsToBuy": "購入アイテム",
+        "IngredientSearch": "食材アイテムまたはタグ",
+        "BuyPrice": "購入価格",
+        "PriceTooltip": {
+            "isTagEmptyPrice": "この値は、あなたが星をクリックして特定のものを選択しない限り、関連アイテムの最低価格となります（すべての値が定義されている場合！）。",
+            "isAutoCalculatedPrice": "この値はシステムによって自動的に計算されます。空の場合は、すべての「購入するアイテム」の価格を設定してください。",
+            "isItemEmptyPrice": "関連レシピの計算を許可するために、この価格を設定します",
+            "isMinPrice": "この値はサーバーの最低価格に設定されます。",
+            "isMaxPrice": "この値はサーバーの最高価格に設定されます。",
+            "IsMarginPrice": "スキル間にマージンを適用する'オプションが有効になっているため、この値はマージン価格です。"
+        },
+        "CancelOverride": "この商品価格を上書きしないでください。",
+        "AddFavoriteItem": "この商品をお気に入り登録し、関連タグに価格を適用します。",
+        "CancelFavoriteItem": "この商品のお気に入りを解除",
+        "ItemsToSell": "販売するアイテム",
+        "AddRecipe": "レシピを追加",
+        "ProductItems": "商品アイテム",
+        "CostPrice": "原価",
+        "SalePrice": "販売価格",
+        "AddOverride": "この価格を上書きしてください。",
+        "RecipeTooltip": "レシピのポップアップを開くと計算の詳細が表示されます",
+        "RecipeTooltipWithShare": "レシピのポップアップを開くと、商品価格の分割をコントロールし、計算の詳細を表示します。",
+        "MarginTooltip": "マージン設定が販売価格の計算を許可していません。マージンパーセンテージとマージン計算タイプを確認してください。",
+        "AddFavoriteRecipe": "このレシピをお気に入りに登録し、その価格を関連商品に適用します。",
+        "CancelFavoriteRecipe": "このレシピのお気に入りを解除",
+        "Snackbar": {
+            "CantRemoveLastMargin": "最後のマージンを削除できません",
+            "PriceNotWellConfigured": "この価格はうまく設定されていません",
+            "PriceCopied": "価格がクリップボードにコピーされました"
+        }
+    },
+    "Recipe": "レシピ",
+    "ContextService": {
+        "DefaultMargin": "デフォルトマージン"
+    },
+    "UserServerDataService": {
+        "NewMargin": "新しいマージン"
+    }
+}

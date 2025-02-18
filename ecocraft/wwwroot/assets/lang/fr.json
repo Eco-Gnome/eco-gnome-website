@@ -17,7 +17,7 @@
         },
         "ServerDialog": {
             "Snackbar": {
-                "AlreadyInServer": "Vous êtes déjà sur ce serveur",
+                "AlreadyInServer": "Vous êtes déjà dans ce serveur",
                 "JoinError": "Vous devez ajouter un code de serveur",
                 "ServerNotFound": "Serveur non trouvé"
             },
@@ -45,7 +45,7 @@
     "NavMenu": {
         "NavAdmin": "Gestion du serveur",
         "NavCalculator": "Calculateur de prix",
-        "NavGraph": "Vue graphique (WIP)",
+        "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin"
     },
     "None": "Aucun",
@@ -65,7 +65,7 @@
             "True": "Déduire cet élément du prix de revient, à utiliser lorsque vous pouvez réutiliser ce produit dans la même recette ou dans une recette précédente (Moules, Barils, ...). Cela diminuera mathématiquement le prix des autres produits."
         },
         "Share": {
-            "EqualityTooltip": "Répartir à parts égales entre les produits.",
+            "EqualityTooltip": "Répartir de manière égale entre les produits.",
             "EquilibrateTooltip": "Répartir par quantité entre les produits.",
             "FirstOnlyTooltip": "Accorder 100 % au premier produit et zéro aux autres. Choisissez cette option si vous considérez les autres produits comme des déchets.",
             "HonestTooltip": "Accordez 80 % au premier produit et répartissez les autres à parts égales."
@@ -251,7 +251,7 @@
             "IsMarginPrice": "Cette valeur est un prix de marge, car l'option 'Appliquer une marge entre les compétences' est activée."
         },
         "CancelOverride": "Ne modifiez plus le prix de ce produit.",
-        "AddFavoriteItem": "Favoriser cet article, appliquer son prix au tag associé",
+        "AddFavoriteItem": "Favoriser cet article, appliquer son prix à la balise associée",
         "CancelFavoriteItem": "Dé-favoriser cet article",
         "ItemsToSell": "Articles à vendre",
         "AddRecipe": "Ajouter une recette",
