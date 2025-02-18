@@ -140,9 +140,3 @@ convert_json_to_txt("ecocraft/wwwroot/assets/lang/en_US.json", "ecocraft/wwwroot
 for lang_code, lang_name in LANGUAGES.items():
     translate_txt_file("ecocraft/wwwroot/assets/lang/en_US.txt", f"ecocraft/wwwroot/assets/lang/{lang_code}.txt", lang_code)
     modify_json_with_txt("ecocraft/wwwroot/assets/lang/en_US.json", f"ecocraft/wwwroot/assets/lang/{lang_code}.txt", f"ecocraft/wwwroot/assets/lang/{lang_code}.json")
-
-os.system("git config --global user.name \"github-actions\"")
-os.system("git config --global user.email \"github-actions@github.com\"")
-os.system("git add ecocraft/wwwroot/assets/lang/*.json")
-os.system("git commit -m \"Mise à jour des traductions\" || echo \"Aucune modification\"")
-os.system("git push")
