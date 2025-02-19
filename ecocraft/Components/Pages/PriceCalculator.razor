@@ -742,7 +742,7 @@
                                                     <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                              Size="Size.Small"/>
                                                     <MudLink Color="Color.Default" Class="pt-1 " Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
-                                                        @LocalizationService.GetTranslation(userElement.Element.Recipe) Recipe
+                                                        @LocalizationService.GetTranslation(userElement.Element.Recipe) @LocalizationService.GetTranslation("Recipe")
                                                     </MudLink>
                                                 </MudStack>
                                             </MudTd>
