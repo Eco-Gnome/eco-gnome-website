@@ -136,7 +136,7 @@
 	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
 
 	[CascadingParameter]
-	private MudDialogInstance MudDialog { get; set; }
+	private IMudDialogInstance MudDialog { get; set; }
 
 	private void Submit()
 	{
