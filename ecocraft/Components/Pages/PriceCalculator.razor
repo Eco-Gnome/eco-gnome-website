@@ -1310,9 +1310,9 @@
             ["Recipe"] = recipe,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
-        var dialog = DialogService.Show<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
+        var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
 
-        await dialog.Result;
+        //await dialog.Result;
         StateHasChanged();
     }
 
@@ -1330,9 +1330,8 @@
             ["CraftingTable"] = craftingTable,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
+        var dialog = await DialogService.ShowAsync<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
 
-        await dialog.Result;
     }
 
     private async Task ShowSkillDialog(Skill skill)
@@ -1342,9 +1341,8 @@
             ["Skill"] = skill,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
+        var dialog = await DialogService.ShowAsync<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
 
-        await dialog.Result;
         StateHasChanged();
     }
 
@@ -1355,9 +1353,8 @@
             ["ItemOrTag"] = itemOrTag,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
-        var dialog = DialogService.Show<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
+        var dialog = await DialogService.ShowAsync<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
 
-        await dialog.Result;
         StateHasChanged();
     }
 

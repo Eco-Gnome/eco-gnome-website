@@ -135,7 +135,7 @@
     private void OpenServerDialog()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = false, CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
-        DialogService.Show<ServerDialog>(LocalizationService.GetTranslation("Header.ServerDialog.Title"), options);
+        DialogService.ShowAsync<ServerDialog>(LocalizationService.GetTranslation("Header.ServerDialog.Title"), options);
     }
 
     private async Task ConfigureUser()

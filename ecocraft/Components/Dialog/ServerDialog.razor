@@ -60,7 +60,7 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     private string ServerName { get; set; } = "";
     private string JoinCode { get; set; } = "";
