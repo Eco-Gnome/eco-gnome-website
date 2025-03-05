@@ -33,9 +33,6 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
     [HttpGet("register-server")]
     public async Task<IActionResult> RegisterServer([FromQuery] string joinCode, [FromQuery] string ecoServerId)
     {
-        Console.WriteLine(joinCode);
-        Console.WriteLine(ecoServerId);
-
         var server = await serverDbService.GetByJoinCodeAsync(joinCode);
 
         if (server == null)

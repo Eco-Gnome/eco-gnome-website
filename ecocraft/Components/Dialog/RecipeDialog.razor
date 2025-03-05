@@ -496,19 +496,13 @@
 
         var others = GetProductUserElements().Where(e => e != ue).ToList();
         var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
-        Console.WriteLine("----");
-        Console.WriteLine(remaining);
 
         foreach (var other in others)
         {
             other.Share += Math.Round(remaining / others.Count, 4);
-            Console.WriteLine(other.Share);
-
         }
 
         var remainingF = 1 - GetProductUserElements().Sum(e => e.Share);
-        Console.WriteLine("remainingF");
-        Console.WriteLine(remainingF);
 
         if (remainingF != 0)
         {
