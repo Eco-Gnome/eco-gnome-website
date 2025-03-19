@@ -12,42 +12,50 @@
     <TitleContent>
     </TitleContent>
     <DialogContent>
-        <MudPaper Elevation="0" Class="pa-2" Style="align-items: center; justify-content: space-between; gap: 16px;">
-            <MudText Typo="Typo.subtitle1">@LocalizationService.GetTranslation("ServerDialog.HaveAnInvitation")</MudText>
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
-                <MudTextField @bind-Value="JoinCode"
-                              Class="mt-0"
-                              Immediate="true"
-                              Label="Join code"
-                              Variant="Variant.Outlined"
-                              OnKeyDown="OnKeyDownJoinAsync" />
-                <MudIconButton
-                    Disabled="@(JoinCode.Length < 8)"
-                    Icon="@MDIIcons.Outline.ArrowRightBoldBox"
-                    Color="Color.Tertiary"
-                    OnClick="OnJoinServer" />
-            </MudStack>
-        </MudPaper>
+        <MudGrid>
+            <MudItem xs="6" Class="pb-6">
 
-        <MudDivider DividerType="DividerType.FullWidth" Class="my-6" />
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudText Typo="Typo.h5" Class="mb-4">@LocalizationService.GetTranslation("ServerDialog.JoinServer")</MudText>
 
-        <MudPaper Elevation="0" Class="pa-2 mb-6" Style="align-items: center; justify-content: space-between; gap: 16px;">
-            <MudText Typo="Typo.subtitle1">@LocalizationService.GetTranslation("ServerDialog.CreateServer")</MudText>
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
-                <MudTextField @bind-Value="ServerName"
-                              Class="hack-validation"
-                              Immediate="true"
-                              Validation="@(new Func<string, IEnumerable<string>>(MinAndMaxCharacters))"
-                              Variant="Variant.Outlined"
-                              Label="Your server name"
-                              OnKeyDown="OnKeyDownCreateAsync" />
-                <MudIconButton
-                    Disabled="@(ServerName.Length < 3)"
-                    Icon="@Icons.Material.Filled.AddBox"
-                    Color="Color.Tertiary"
-                    OnClick="OnCreateServer" />
-            </MudStack>
-        </MudPaper>
+                    <MudTextField @bind-Value="JoinCode"
+                                  Immediate="true"
+                                  Label="Join code"
+                                  Validation="@(new Func<string, IEnumerable<string>>(JoinCodeLength))"
+                                  Variant="Variant.Outlined"
+                                  OnKeyDown="OnKeyDownJoinAsync"/>
+                    <MudButton
+                        Disabled="@(JoinCode.Length < 8)"
+                        StartIcon="@MDIIcons.Outline.ArrowRightBoldBox"
+                        Color="Color.Primary"
+                        Variant="Variant.Filled"
+                        OnClick="OnJoinServer">
+                        @LocalizationService.GetTranslation("ServerDialog.Join")
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="6" Class="border-l-1 pb-6">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudText Typo="Typo.h5" Class="mb-4">@LocalizationService.GetTranslation("ServerDialog.CreateServer")</MudText>
+
+                    <MudTextField @bind-Value="ServerName"
+                                  Immediate="true"
+                                  Validation="@(new Func<string, IEnumerable<string>>(MinAndMaxCharacters))"
+                                  Variant="Variant.Outlined"
+                                  Label="Your server name"
+                                  OnKeyDown="OnKeyDownCreateAsync"/>
+                    <MudButton
+                        Disabled="@(ServerName.Length < 3)"
+                        StartIcon="@Icons.Material.Filled.AddBox"
+                        Color="Color.Primary"
+                        Variant="Variant.Filled"
+                        OnClick="OnCreateServer">
+                        @LocalizationService.GetTranslation("ServerDialog.Create")
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
     </DialogContent>
 </MudDialog>
 
@@ -63,6 +71,12 @@
             yield return LocalizationService.GetTranslation("ServerDialog.MaxChar");
         if (!string.IsNullOrEmpty(ch) && 3 > ch?.Length)
             yield return LocalizationService.GetTranslation("ServerDialog.MinChar");
+    }
+
+    private IEnumerable<string> JoinCodeLength(string ch)
+    {
+        if (!string.IsNullOrEmpty(ch) && ch?.Length != 8)
+            yield return LocalizationService.GetTranslation("ServerDialog.JoinCodeLength");
     }
 
 

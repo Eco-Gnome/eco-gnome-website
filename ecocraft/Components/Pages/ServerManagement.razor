@@ -73,20 +73,70 @@
 							<MudStack AlignItems="AlignItems.Center" Style="text-indent: 8px">
 								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation1")" />
 								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation2")" />
-								<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
-									<ActivatorContent>
-										<MudButton Disabled="_showUploadServerDataLoader"
-										           Variant="Variant.Filled"
-										           Color="Color.Primary"
-										           StartIcon="@Icons.Material.Filled.CloudUpload">
-											@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
-											@if (_showUploadServerDataLoader)
+								<MudStack Row>
+									<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+										<ActivatorContent>
+											<MudButton Disabled="_showUploadServerDataLoader"
+											           Variant="Variant.Filled"
+											           Color="Color.Primary"
+											           StartIcon="@Icons.Material.Filled.CloudUpload">
+												@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
+												@if (_showUploadServerDataLoader)
+												{
+													<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+												}
+											</MudButton>
+										</ActivatorContent>
+									</MudFileUpload>
+
+									<div class="py-4 ml-4 mr-2 border-l-1"></div>
+
+									<MudStack>
+										@if (!_copyExistingServerClicked)
+										{
+											<MudButton StartIcon="@Icons.Material.Filled.ImportExport"
+											           Variant="Variant.Filled"
+											           OnClick="() => _copyExistingServerClicked = true"
+											           Color="Color.Tertiary">
+												@LocalizationService.GetTranslation("ServerManagement.ServerSettings.CopyExistingServer")
+											</MudButton>
+										}
+										else
+										{
+											if (!_showCopyExistingServerLoader)
 											{
-												<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+												<MudSelect T="Server"
+												           @bind-Value="_copyServer"
+												           Class="select-dense copy-server-select"
+												           Style="min-width:200px;padding-left:10px"
+												           Label="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.ChooseServer")"
+												           Dense="false"
+												           Underline="false"
+												           Variant="Variant.Outlined"
+												           AnchorOrigin="Origin.BottomLeft"
+												           TransformOrigin="Origin.TopLeft">
+													@foreach (var server in ContextService.AvailableServers.Where(r => r != ContextService.CurrentServer))
+													{
+														<MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+													}
+												</MudSelect>
 											}
-										</MudButton>
-									</ActivatorContent>
-								</MudFileUpload>
+
+											<MudButton Disabled="@(_showCopyExistingServerLoader || _copyServer is null)"
+											           StartIcon="@Icons.Material.Filled.ImportExport"
+											           Variant="Variant.Filled"
+											           OnClick="() => CopyExistingServer()"
+											           Color="Color.Tertiary">
+												@LocalizationService.GetTranslation("ServerManagement.ServerSettings.CopyThisServer")
+
+												@if (_showCopyExistingServerLoader)
+												{
+													<MudProgressCircular Size="Size.Small" Color="Color.Tertiary" Indeterminate="true" Class="ml-2"/>
+												}
+											</MudButton>
+										}
+									</MudStack>
+								</MudStack>
 							</MudStack>
 						</MudPaper>
 					</MudStack>
@@ -313,11 +363,14 @@
 @code {
 	private bool _askDeleteConfirmation;
 	private bool _showUploadServerDataLoader;
+	private bool _copyExistingServerClicked;
+	private bool _showCopyExistingServerLoader;
 	private bool _showDeleteServerLoader;
 	private readonly Dictionary<UserServer, bool> _askKickConfirmations = new ();
 	private string _searchPseudo = "";
 	private string _searchTag = "";
 	private string _searchItem = "";
+	private Server? _copyServer = null;
 	private ItemOrTag? _selectedTag;
 	private List<(string, decimal)> _stats = [];
 
@@ -354,6 +407,24 @@
 	public void Dispose()
 	{
 		ContextService.OnContextChanged -= StateHasChanged;
+	}
+
+	private async Task CopyExistingServer()
+	{
+		if (_copyServer is null) return;
+
+		_showCopyExistingServerLoader = true;
+
+		StateHasChanged();
+		await Task.Yield();
+
+		await ImportDataService.CopyServerData(_copyServer!, ContextService.CurrentServer!);
+		await ServerDataService.CopyServerContribution(_copyServer!);
+
+		_showCopyExistingServerLoader = false;
+		_copyExistingServerClicked = false;
+
+		StateHasChanged();
 	}
 
 	private List<ItemOrTag> GetItems()
@@ -410,11 +481,12 @@
 			_showUploadServerDataLoader = true;
 			StateHasChanged();
 			var (errorCount, recipeErrorNames) = await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
-			_showUploadServerDataLoader = false;
-			StateHasChanged();
 
 			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
 			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
+
+			_showUploadServerDataLoader = false;
+			StateHasChanged();
 
 			if (errorCount == 0)
 			{
