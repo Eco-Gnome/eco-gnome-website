@@ -313,7 +313,12 @@
                               Hover="true"
                               Virtualize="false">
                         <ToolBarContent>
-                            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToBuy")</MudText>
+                            <MudStack Row>
+                                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToBuy")</MudText>
+                                <MudTooltip RootClass="pt-1" Text="@LocalizationService.GetTranslation("ServerPricesDialog.OpenTooltip")">
+                                    <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@MDIIcons.Filled.CurrencyUsd" OnClick="() => OpenServerPricesDialog()" />
+                                </MudTooltip>
+                            </MudStack>
                         </ToolBarContent>
                         <HeaderContent>
                             <MudTh Class="pl-1">
@@ -1325,5 +1330,11 @@
         if (LocalizationService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
+    }
+
+    private void OpenServerPricesDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        DialogService.Show<ServerPricesDialog>("", options);
     }
 }

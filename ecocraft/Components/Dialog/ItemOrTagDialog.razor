@@ -13,18 +13,50 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="12">
-            @if (!ItemOrTag.IsTag)
+            @if (ItemOrTag.MinPrice is not null || ItemOrTag.DefaultPrice is not null || ItemOrTag.MaxPrice is not null)
             {
-            <MudStack>
-                    <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.ProducedBy")</MudText>
-                <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsProduct()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
-            </MudStack>
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ItemOrTagDialog.ServerPrices")</MudText>
+                    <MudStack Row Spacing="18">
+                        @if (ItemOrTag.MinPrice is not null)
+                        {
+                            <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.MinPrice"): @ItemOrTag.MinPrice $</MudText>
+                        }
+                        @if (ItemOrTag.DefaultPrice is not null)
+                        {
+                            <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.DefaultPrice"): @ItemOrTag.DefaultPrice $</MudText>
+                        }
+                        @if (ItemOrTag.MaxPrice is not null)
+                        {
+                            <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.MaxPrice"): @ItemOrTag.MaxPrice $</MudText>
+                        }
+                    </MudStack>
+                </MudStack>
             }
 
-            <MudStack>
-                <MudText>@LocalizationService.GetTranslation("ItemOrTagDialog.UsedIn")</MudText>
-                <RecipeList Recipes="@ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsIngredient()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList()"/>
-            </MudStack>
+            @if (!ItemOrTag.IsTag)
+            {
+                var recipes = ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsProduct()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList();
+
+                @if (recipes.Count > 0)
+                {
+                    <MudStack>
+                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ItemOrTagDialog.ProducedBy")</MudText>
+                        <RecipeList Recipes="@recipes"/>
+                    </MudStack>
+                }
+            }
+
+            @{
+                var recipes2 = ServerDataService.Recipes.Where(r => r.Elements.Where(e => e.IsIngredient()).Select(e => e.ItemOrTag).Contains(ItemOrTag)).ToList();
+
+                @if (recipes2.Count > 0) {
+                    <MudStack>
+                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ItemOrTagDialog.UsedIn")</MudText>
+                        <RecipeList Recipes="@recipes2"/>
+                    </MudStack>
+                }
+            }
         </MudStack>
     </DialogContent>
 </MudDialog>

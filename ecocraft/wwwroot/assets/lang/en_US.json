@@ -30,7 +30,11 @@
     "Ingredients": "Ingredients",
     "ItemOrTagDialog": {
         "ProducedBy": "Produced by",
-        "UsedIn": "Used in"
+        "UsedIn": "Used in",
+        "ServerPrices": "Server prices",
+        "MinPrice": "Minimum",
+        "DefaultPrice": "Default",
+        "MaxPrice": "Maximum"
     },
     "JoinCode": "Join code",
     "Language": "Language",
@@ -91,6 +95,7 @@
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
             "ClearAllMin": "Are you sure you want to clear all min prices?",
+            "ClearAllDefault": "Are you sure you want to clear all default prices?",
             "ServerDeletion": "Are you sure you want to delete your server? There won't be no rollback!",
             "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!",
             "UpdateJoinCode": "Are you sure you want to refresh your JoinCode? This will disabled any previously generated codes!"
@@ -102,7 +107,9 @@
             "Max": "Max price",
             "Max.Tooltip": "Clear max prices",
             "Min": "Min price",
-            "Min.Tooltip": "Clear min prices"
+            "Min.Tooltip": "Clear min prices",
+            "Default": "Default price",
+            "Default.Tooltip": "Clear default prices"
         },
         "Members": {
             "DemoteAdmin": "Demote Admin",
@@ -133,6 +140,13 @@
             "UploadNok": "Upload Error",
             "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported: {errorNames}. Review your mods and server edits. You can contact Eco Gnome admins for help."
         }
+    },
+    "ServerPricesDialog": {
+        "Title": "Server Prices",
+        "OpenTooltip": "Show server prices dialog",
+        "Min": "Min",
+        "Default": "Default",
+        "Max": "Max"
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",

@@ -392,7 +392,7 @@ public class UserServerDataService(
             UserServer = userServer,
             UserMargin = UserMargins.First(),
             OverrideIsBought = false,
-            Price = itemOrTag.MinPrice,
+            Price = itemOrTag.DefaultPrice ?? itemOrTag.MinPrice,
         };
 
         UserPrices.Add(userPrice);

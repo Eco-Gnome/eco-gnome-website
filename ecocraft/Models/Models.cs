@@ -96,7 +96,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public bool IsTag { get; set; }
 
     public decimal? MinPrice { get; set; }
-
+    public decimal? DefaultPrice { get; set; }
     public decimal? MaxPrice { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 

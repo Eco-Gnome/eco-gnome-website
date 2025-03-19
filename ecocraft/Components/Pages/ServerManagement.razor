@@ -242,6 +242,18 @@
 					</MudTh>
 					<MudTh>
 						<MudStack Row>
+							<MudText>
+								@LocalizationService.GetTranslation("ServerManagement.Items.Default")</MudText>
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Default.Tooltip")">
+								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
+								               OnClick="@(() => OnClearDefaultPrices(GetItems()))"
+								               Color="Color.Primary"
+								               Size="Size.Small"/>
+							</MudTooltip>
+						</MudStack>
+					</MudTh>
+					<MudTh>
+						<MudStack Row>
 							<MudText>@LocalizationService.GetTranslation("ServerManagement.Items.Max")</MudText>
 							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Max.Tooltip")">
 								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
@@ -266,6 +278,17 @@
 						                 Variant="Variant.Outlined"
 						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
 						                 ValueChanged="@(value => OnMinValueChange(context,value))" />
+					</MudTd>
+					<MudTd>
+						<MudNumericField T="decimal?"
+						                 Class="rectangle-input"
+						                 Disabled="@(context.IsTag)"
+						                 HideSpinButtons="@(context.IsTag)"
+						                 Value="context.DefaultPrice"
+						                 Format="F2"
+						                 Variant="Variant.Outlined"
+						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+						                 ValueChanged="@(value => OnDefaultValueChange(context,value))" />
 					</MudTd>
 					<MudTd>
 						<MudNumericField T="decimal?"
@@ -432,6 +455,12 @@
 		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
+	private async Task OnDefaultValueChange(ItemOrTag context, decimal? defaultValue)
+	{
+		context.DefaultPrice = defaultValue;
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
 	private async Task OnMaxValueChange(ItemOrTag context, decimal? maxPrice)
 	{
 		context.MaxPrice = maxPrice;
@@ -446,6 +475,18 @@
 		foreach (var itemOrTag in itemOrTags)
 		{
 			itemOrTag.MinPrice = null;
+		}
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task OnClearDefaultPrices(List<ItemOrTag> itemOrTags)
+	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllDefault"));
+		if (!confirmed) return;
+
+		foreach (var itemOrTag in itemOrTags)
+		{
+			itemOrTag.DefaultPrice = null;
 		}
 		await EcoCraftDbContext.SaveChangesAsync();
 	}
