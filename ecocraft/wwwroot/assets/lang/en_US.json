@@ -86,10 +86,12 @@
     "ServerDialog": {
         "Create": "Create",
         "CreateServer": "Create your server",
+        "JoinServer": "Join a server",
         "HaveAnInvitation": "Do you already have a server join code?",
         "Join": "Join",
         "MaxChar": "Max 25 characters",
-        "MinChar": "Min 3 characters"
+        "MinChar": "Min 3 characters",
+        "JoinCodeLength": "Join code should be 8 characters"
     },
     "ServerManagement": {
         "Confirm": {
@@ -121,6 +123,9 @@
         "ServerSettings": {
             "ServerName": "Server name",
             "Crafting": "Crafting Tables",
+            "CopyExistingServer": "Copy existing server",
+            "ChooseServer": "Choose a server to copy",
+            "CopyThisServer": "Copy this server",
             "Delete": "Delete Server",
             "Items": "Items",
             "Tags": "Tags",

@@ -221,6 +221,10 @@
     background-color: var(--mud-palette-appbar-background) !important;
 }
 
+.copy-server-select .mud-input-label {
+    background-color: var(--mud-palette-background) !important;
+}
+
 .max-price .mud-input-numeric-spin button:first-child{
     visibility: hidden;
 }

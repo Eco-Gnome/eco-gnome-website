@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using ecocraft.Extensions;
 using ecocraft.Models;
 
 namespace ecocraft.Services.ImportData;
@@ -28,6 +29,31 @@ public class ImportDataService(
         await dbContext.SaveChangesAsync();
 
         return (errorCount, itemErrorNames.Concat(recipeErrorNames).ToArray());
+    }
+
+    public async Task CopyServerData(Server copyServer, Server targetServer)
+    {
+        var data = await GetServerDataAsDto(copyServer);
+
+        ImportSkills(targetServer, data.Skills);
+        ImportItems(targetServer, data.Items, out _);
+        ImportTags(targetServer, data.Tags);
+        ImportRecipes(targetServer, data.Recipes, out _);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private async Task<ImportDataDto> GetServerDataAsDto(Server server)
+    {
+        var serverData = await serverDataService.GetServerData(server);
+
+        return new ImportDataDto()
+        {
+            Skills = serverData.skills.Select(SkillToDto).ToList(),
+            Items = serverData.itemOrTags.Where(iot => !iot.IsTag).Select(s => ItemToDto(s, serverData.craftingTables, serverData.pluginModules)).ToList(),
+            Tags = serverData.itemOrTags.Where(iot => iot.IsTag).Select(TagToDto).ToList(),
+            Recipes = serverData.recipes.Select(RecipeToDto).ToList(),
+        };
     }
 
     private void ImportSkills(Server server, List<SkillDto> newSkills)
@@ -68,7 +94,7 @@ public class ImportDataService(
         {
             var nameOccurence = new Dictionary<string, int>();
 
-            foreach (var item in items.Where(i => i.IsPluginModule is not null))
+            foreach (var item in items.Where(i => i.IsPluginModule is true))
             {
                 nameOccurence.Add(item.Name, 1);
 
@@ -84,7 +110,7 @@ public class ImportDataService(
         {
             var nameOccurence = new Dictionary<string, int>();
 
-            foreach (var item in items.Where(i => i.IsCraftingTable is not null))
+            foreach (var item in items.Where(i => i.IsCraftingTable is true))
             {
                 nameOccurence.Add(item.Name, 1);
 
@@ -108,7 +134,6 @@ public class ImportDataService(
             foreach (var item in items)
             {
                 nameOccurence.Add(item.Name, 1);
-
 
                 ImportItem(server, item);
             }
@@ -500,6 +525,120 @@ public class ImportDataService(
 
         // ! This is not in the json file, it's calculated after
         public int Index { get; set; }
+    }
+
+    private static Dictionary<LanguageCode, string> LocalizedFieldToDto(LocalizedField localizedField)
+    {
+        var result = new Dictionary<LanguageCode, string>();
+
+        result.Add(LanguageCode.en_US, localizedField.en_US);
+        result.Add(LanguageCode.fr, localizedField.fr);
+        result.Add(LanguageCode.es, localizedField.es);
+        result.Add(LanguageCode.de, localizedField.de);
+        result.Add(LanguageCode.ko, localizedField.ko);
+        result.Add(LanguageCode.pt_BR, localizedField.pt_BR);
+        result.Add(LanguageCode.zh_Hans, localizedField.zh_Hans);
+        result.Add(LanguageCode.ru, localizedField.ru);
+        result.Add(LanguageCode.it, localizedField.it);
+        result.Add(LanguageCode.pt_PT, localizedField.pt_PT);
+        result.Add(LanguageCode.hu, localizedField.hu);
+        result.Add(LanguageCode.ja, localizedField.ja);
+        result.Add(LanguageCode.nn, localizedField.nn);
+        result.Add(LanguageCode.pl, localizedField.pl);
+        result.Add(LanguageCode.nl, localizedField.nl);
+        result.Add(LanguageCode.ro, localizedField.ro);
+        result.Add(LanguageCode.da, localizedField.da);
+        result.Add(LanguageCode.cs, localizedField.cs);
+        result.Add(LanguageCode.sv, localizedField.sv);
+        result.Add(LanguageCode.uk, localizedField.uk);
+        result.Add(LanguageCode.el, localizedField.el);
+        result.Add(LanguageCode.ar_sa, localizedField.ar_sa);
+        result.Add(LanguageCode.vi, localizedField.vi);
+        result.Add(LanguageCode.tr, localizedField.tr);
+
+        return result;
+    }
+
+    private static SkillDto SkillToDto(Skill skill)
+    {
+        return new SkillDto
+        {
+            Name = skill.Name,
+            LocalizedName = LocalizedFieldToDto(skill.LocalizedName),
+            Profession = skill.Profession,
+            LaborReducePercent = skill.LaborReducePercent,
+            LavishTalentValue = skill.LavishTalentValue,
+        };
+    }
+
+    private static ItemDto ItemToDto(ItemOrTag item, List<CraftingTable> craftingTables, List<PluginModule> pluginModules)
+    {
+        var itemDto = new ItemDto
+        {
+            Name = item.Name,
+            LocalizedName = LocalizedFieldToDto(item.LocalizedName),
+            IsCraftingTable = false,
+            IsPluginModule = false,
+        };
+
+        var associatedCraftingTable = craftingTables.FirstOrDefault(c => c.Name == item.Name);
+        if (associatedCraftingTable is not null)
+        {
+            itemDto.IsCraftingTable = true;
+            itemDto.CraftingTablePluginModules = associatedCraftingTable.PluginModules.Select(p => p.Name).ToList();
+
+            return itemDto;
+        }
+
+        var associatedPluginModule = pluginModules.FirstOrDefault(c => c.Name == item.Name);
+        if (associatedPluginModule is not null)
+        {
+            itemDto.IsPluginModule = true;
+            itemDto.PluginModulePercent = associatedPluginModule.Percent;
+        }
+
+        return itemDto;
+    }
+
+    private static TagDto TagToDto(ItemOrTag tag)
+    {
+        return new TagDto
+        {
+            Name = tag.Name,
+            LocalizedName = LocalizedFieldToDto(tag.LocalizedName),
+            AssociatedItems = tag.AssociatedItems.Select(i => i.Name).ToList(),
+        };
+    }
+
+    private static RecipeDto RecipeToDto(Recipe recipe)
+    {
+        return new RecipeDto
+        {
+            Name = recipe.Name,
+            LocalizedName = LocalizedFieldToDto(recipe.LocalizedName),
+            Ingredients = recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index).Select(ElementToDto).ToList(),
+            Products = recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).Select(ElementToDto).ToList(),
+            Labor = recipe.Labor,
+            CraftingTable = recipe.CraftingTable.Name,
+            CraftMinutes = recipe.CraftMinutes,
+            FamilyName = recipe.FamilyName,
+            IsBlueprint = recipe.IsBlueprint,
+            IsDefault = recipe.IsDefault,
+            RequiredSkill = recipe.Skill?.Name ?? "",
+            RequiredSkillLevel = (int)recipe.SkillLevel,
+        };
+    }
+
+    private static ElementDto ElementToDto(Element element)
+    {
+        return new ElementDto
+        {
+            ItemOrTag = element.ItemOrTag.Name,
+            Quantity = Math.Abs(element.Quantity),
+            IsDynamic = element.IsDynamic,
+            Skill = element.Skill?.Name ?? "",
+            LavishTalent = element.LavishTalent,
+        };
     }
 }
 

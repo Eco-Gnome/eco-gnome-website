@@ -448,6 +448,4 @@ public class LocalizedField
             [SupportedLanguage.Vietnamese] = LanguageCode.vi,
             [SupportedLanguage.Turkish] = LanguageCode.tr
         };
-
-
 }

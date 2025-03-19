@@ -1,10 +1,10 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
 public class ServerDataService(
+    EcoCraftDbContext dbContext,
     SkillDbService skillDbService,
     CraftingTableDbService craftingTableDbService,
     RecipeDbService recipeDbService,
@@ -31,19 +31,45 @@ public class ServerDataService(
             return;
         }
 
+        var data = await GetServerData(server);
+
+        Skills = data.skills;
+        CraftingTables = data.craftingTables;
+        PluginModules = data.pluginModules;
+        Recipes = data.recipes;
+        ItemOrTags = data.itemOrTags;
+    }
+
+    public async Task<(List<Skill> skills, List<CraftingTable> craftingTables, List<PluginModule> pluginModules, List<Recipe> recipes, List<ItemOrTag> itemOrTags)> GetServerData(Server server)
+    {
         var skillsTask = skillDbService.GetByServerAsync(server);
         var craftingTablesTask = craftingTableDbService.GetByServerAsync(server);
-        var pluginModulesTask = pluginModuleDbService.GetByServerAsync(server);
         var recipesTask = recipeDbService.GetByServerAsync(server);
         var itemOrTagsTask = itemOrTagDbService.GetByServerAsync(server);
+        var pluginModulesTask = pluginModuleDbService.GetByServerAsync(server);
 
         await Task.WhenAll(skillsTask, craftingTablesTask, recipesTask, itemOrTagsTask, pluginModulesTask);
 
-        Skills = skillsTask.Result;
-        CraftingTables = craftingTablesTask.Result;
-        PluginModules = pluginModulesTask.Result;
-        Recipes = recipesTask.Result;
-        ItemOrTags = itemOrTagsTask.Result;
+        return (skillsTask.Result, craftingTablesTask.Result, pluginModulesTask.Result, recipesTask.Result, itemOrTagsTask.Result);
+    }
+
+    public async Task CopyServerContribution(Server copyServer)
+    {
+        var data = await itemOrTagDbService.GetByServerAsync(copyServer);
+
+        foreach (var item in ItemOrTags)
+        {
+            var copyItem = data.FirstOrDefault(i => i.Name == item.Name);
+
+            if (copyItem is not null)
+            {
+                item.MinPrice = copyItem.MinPrice;
+                item.DefaultPrice = copyItem.DefaultPrice;
+                item.MaxPrice = copyItem.MaxPrice;
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 
     public void Dissociate(Server server)
