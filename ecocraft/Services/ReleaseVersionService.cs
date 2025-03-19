@@ -13,6 +13,16 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "0.3.0",
+            "2025-03-19",
+            "Official third beta version",
+            """
+            - Translations: Website is now translated to a lot of languages thanks to AI. Contribute to improve them !
+            - Margin Calculation: You can now apply margin prices between skills, allowing more fair prices between citizens who buy items vs citizens who produce them.
+            - Default Prices: Server admin may now define default prices, which are set on item by default. Users can now see this configuration.
+            """
+        ),
+        new ReleaseVersion(
             "0.2.0",
             "2024-12-09",
             "Official second beta version",
