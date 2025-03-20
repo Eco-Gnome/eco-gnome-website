@@ -19,7 +19,7 @@ public class ImportDataService(
         var errorCount = 0;
 
         if (importedData is null) throw new ImportException();
-        
+
         ImportSkills(server, importedData.Skills);
         errorCount += ImportItems(server, importedData.Items, out var itemErrorNames);
         ImportTags(server, importedData.Tags);
@@ -64,7 +64,7 @@ public class ImportDataService(
     {
         var errorCount = 0;
         var errorNames = new List<string>();
-        
+
         {
             var nameOccurence = new Dictionary<string, int>();
 
@@ -91,7 +91,7 @@ public class ImportDataService(
                 var error = ImportCraftingTable(server, item);
 
                 if (error <= 0) continue;
-                
+
                 errorCount += error;
                 errorNames.Add(item.Name);
             }
@@ -298,6 +298,9 @@ public class ImportDataService(
                     var dbElement = dbElements.FirstOrDefault(e =>
                         e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
 
+                    // Specific for BarrelItem, still need to figure a way to auto calculate this
+                    var specificBarrel = element is { ItemOrTag: "BarrelItem", Quantity: > 0, Index: > 0 };
+
                     if (dbElement is null)
                     {
                         serverDataService.ImportElement(
@@ -307,7 +310,9 @@ public class ImportDataService(
                             element.Quantity,
                             element.IsDynamic,
                             skill,
-                            element.LavishTalent
+                            element.LavishTalent,
+                            element.Quantity < 0 ? recipe.Ingredients.Count - 1 : recipe.Products.Count - 1,
+                            specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
                     }
                     else
@@ -320,7 +325,9 @@ public class ImportDataService(
                             element.Quantity,
                             element.IsDynamic,
                             skill,
-                            element.LavishTalent
+                            element.LavishTalent,
+                            element.Quantity < 0 ? recipe.Ingredients.Count - 1 : recipe.Products.Count - 1,
+                            specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
 
                         dbRecipe.Elements.Add(dbElement);
