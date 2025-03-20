@@ -1288,7 +1288,8 @@
         StateHasChanged();
     }
 
-    private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules) {
+    private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
+    {
         var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
 
         if (currentIndex == -1)
