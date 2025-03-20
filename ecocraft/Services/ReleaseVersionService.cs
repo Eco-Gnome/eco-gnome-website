@@ -17,9 +17,9 @@ public class ReleaseVersionService
             "2025-03-19",
             "Official third beta version",
             """
-            - Translations: Website is now translated to a lot of languages thanks to AI. Contribute to improve them !
-            - Margin Calculation: You can now apply margin prices between skills, allowing more fair prices between citizens who buy items vs citizens who produce them.
-            - Default Prices: Server admin may now define default prices, which are set on item by default. Users can now see this configuration.
+            - Translations: The website has now been translated into multiple languages using AI. Feel free to help improve them by contributing on Github!
+            - Margin Calculation: You can now apply margin pricing between skills, ensuring fairer prices between citizens who buy items and those who produce them.
+            - Default Prices: Server admins can now set default item prices, which will apply automatically. Users can now view this configuration.
             """
         ),
         new ReleaseVersion(
