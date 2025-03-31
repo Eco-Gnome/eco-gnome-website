@@ -374,6 +374,12 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ue => ue.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<UserElement>()
+			.HasOne(ue => ue.UserRecipe)
+			.WithMany(ur => ur.UserElements)
+			.HasForeignKey(ue => ue.UserRecipeId)
+			.OnDelete(DeleteBehavior.Cascade);
+
 		// UserPrice
 		modelBuilder.Entity<UserPrice>()
 			.ToTable("UserPrice");
@@ -398,7 +404,7 @@ public class EcoCraftDbContext : DbContext
 
 		modelBuilder.Entity<UserPrice>()
 			.HasOne(up => up.PrimaryUserElement)
-			.WithMany()
+			.WithMany(ue => ue.UserPricesPrimaryOf)
 			.HasForeignKey(up => up.PrimaryUserElementId)
 			.OnDelete(DeleteBehavior.Cascade);
 
@@ -422,6 +428,12 @@ public class EcoCraftDbContext : DbContext
 			.HasOne(ur => ur.DataContext)
 			.WithMany(us => us.UserRecipes)
 			.HasForeignKey(ur => ur.DataContextId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<UserRecipe>()
+			.HasOne(ur => ur.ParentUserRecipe)
+			.WithMany(us => us.ChildrenUserRecipes)
+			.HasForeignKey(ur => ur.ParentUserRecipeId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserServer
@@ -473,5 +485,6 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
+
 	}
 }

@@ -15,6 +15,7 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
     {
         return context.UserRecipes
             .Where(s => s.DataContextId == dataContext.Id)
+            .Include(r => r.UserElements)
             .ToListAsync();
     }
 
@@ -36,10 +37,10 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
             .FirstOrDefaultAsync(up => up.Id == id);
     }
 
-    public UserRecipe Add(UserRecipe talent)
+    public UserRecipe Add(UserRecipe userRecipe)
     {
-        context.UserRecipes.Add(talent);
-        return talent;
+        context.UserRecipes.Add(userRecipe);
+        return userRecipe;
     }
 
     public void Update(UserRecipe userRecipe)

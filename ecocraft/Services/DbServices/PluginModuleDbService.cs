@@ -34,11 +34,11 @@ public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbS
             .FirstOrDefaultAsync(pm => pm.Name == name);
     }
 
-    public PluginModule Add(PluginModule talent)
+    public PluginModule Add(PluginModule pluginModule)
     {
-        context.PluginModules.Add(talent);
+        context.PluginModules.Add(pluginModule);
 
-        return talent;
+        return pluginModule;
     }
 
     public void Update(PluginModule pluginModule)

@@ -56,7 +56,7 @@ public class PriceCalculatorService(
         // Reset Prices
         var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
 
-        userServerDataService.UserElements.ForEach(ue => ue.Price = null);
+        userServerDataService.UserRecipes.ForEach(ur => ur.UserElements.ForEach(ue => ue.Price = null));
         userServerDataService.UserPrices
             .Where(up => (itemOrTagsToSell.Contains(up.ItemOrTag) || up.ItemOrTag.IsTag) && !up.OverrideIsBought)
             .ToList()
@@ -104,7 +104,9 @@ public class PriceCalculatorService(
                         continue;
                     }
 
-                    var associatedItemsUserPrices = ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.ItemOrTag.AssociatedItems.Select(iot => iot.GetCurrentUserPrice(dataContext)!).ToList();
+                    var associatedItemsUserPrices = ingredient.Element.ItemOrTag.AssociatedItems
+                        .Select(iot => iot.GetCurrentUserPrice(dataContext)!)
+                        .ToList();
 
                     if (!associatedItemsUserPrices.All(up => up.Price is not null)) continue;
 
@@ -182,13 +184,11 @@ public class PriceCalculatorService(
                     else if (product.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.PrimaryUserElement is null)
                     {
                         // Or we choose the min price of all related user element
-                        var relatedUserElements = userServerDataService.UserElements.Where(ue => ue.Element.ItemOrTag == product.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.ItemOrTag
-                                                                                                 && ue.Element.IsProduct()
-                                                                                                 && !ue.IsReintegrated).ToList();
+                        var relatedUserElements = product.Element.ItemOrTag.Elements.Where(e => e.IsProduct()).Select(e => e.GetCurrentUserElement(dataContext)).Where(ue => ue is not null && !ue.IsReintegrated).ToList();
 
-                        if (relatedUserElements.All(ue => ue.Price is not null))
+                        if (relatedUserElements.All(ue => ue!.Price is not null))
                         {
-                            product.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.SetPrices(relatedUserElements.Min(ue => ue.Price), marginType);
+                            product.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.SetPrices(relatedUserElements.Min(ue => ue!.Price), marginType);
                         }
                     }
                 }
@@ -202,13 +202,21 @@ public class PriceCalculatorService(
 
     private void SetPriceOrMarginPrice(DataContext dataContext, UserElement ingredient, UserPrice userPrice, UserRecipe userRecipe)
     {
-        var recipesThatProduceMyIngredient = userServerDataService.UserElements
+        var recipesThatProduceMyIngredient = ingredient.Element.ItemOrTag.GetAssociatedItemsAndSelf().SelectMany(i => i.Elements)
+            .Where(e => e.IsProduct())
+            .Select(e => e.GetCurrentUserElement(dataContext))
+            .Where(ue => ue is not null)
+            .Select(ue => ue!.UserRecipe.Recipe)
+            .Where(r => r.Skill is not null)
+            .ToList();
+
+        /*var recipesThatProduceMyIngredient2 = userServerDataService.UserElements
             .Where(ue => ue.Element.IsProduct() && (ingredient.Element.ItemOrTag.IsTag
                 ? ingredient.Element.ItemOrTag.AssociatedItems.Contains(ue.Element.ItemOrTag)
                 : ue.Element.ItemOrTag == ingredient.Element.ItemOrTag))
             .Select(ue => ue.Element.Recipe)
             .Where(r => r.Skill is not null && r.GetCurrentUserRecipe(dataContext) is not null)
-            .ToList();
+            .ToList();*/
 
         if (userServerDataService.UserSetting!.ApplyMarginBetweenSkills
             && userPrice is { OverrideIsBought: false, MarginPrice: not null }

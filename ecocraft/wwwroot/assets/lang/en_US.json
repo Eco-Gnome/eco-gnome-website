@@ -51,6 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
+        "ShoppingList": "Shopping List",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Source Code",
@@ -181,6 +182,18 @@
         "Default": "Default",
         "Max": "Max"
     },
+    "ShoppingList": {
+        "PageTitle": "Shopping Lists",
+        "Settings": "Settings",
+        "ItemsToBuy": "Items to buy:",
+        "ItemsProduced": "Items produced:",
+        "AddShoppingList": "Add shopping list",
+        "NewShoppingList": "Shopping list #",
+        "NameLabel": "Shopping list name",
+        "ConfirmDeleteShoppingList": "Are you sure you want to delete shopping list {name}?",
+        "Skills": "Skills Configuration",
+        "CraftingTables": "Crafting Tables Configuration"
+    },
     "Skill": "Skill",
     "NoSkill": "No Skill",
     "SuperAdmin": {
@@ -262,7 +275,13 @@
         "NewContext": "New Context",
         "DeletionConfirmation": "Are you sure you want to delete the context “{contextName}”? This action cannot be undone."
     },
+    "DevFeature": {
+        "1": "This feature is in development ! Give us",
+        "2": "feedback here",
+        "3": " !"
+    },
     "PriceCalculator": {
+        "PageTitle": "Price Calculator",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",

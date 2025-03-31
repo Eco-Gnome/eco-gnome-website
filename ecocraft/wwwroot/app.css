@@ -91,6 +91,11 @@
     padding-bottom: 7px !important;
 }
 
+.rectangle-input input.mud-input-root-filled, .square-input input.mud-input-root-filled {
+    padding-top: 6px !important;
+    padding-bottom: 7px !important;
+}
+
 .rectangle-input input.mud-input-root {
     padding-inline-start: 6px !important;
 }
@@ -265,6 +270,10 @@
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.75) !important;
 }
 
+.grey-filter {
+    filter: grayscale(100%);
+}
+
 #custom-reconnect {
     position: fixed;
     bottom: 1rem;
@@ -276,4 +285,11 @@
     z-index: 9999;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     font-weight: bold;
+}
+
+.text-shadow-black {
+    text-shadow: 1px 0 0 #000,
+                 0 1px 0 #000,
+                 -1px 0 0 #000,
+                 0 -1px 0 #000
 }

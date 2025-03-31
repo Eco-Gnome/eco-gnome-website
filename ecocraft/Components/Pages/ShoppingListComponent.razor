@@ -1,0 +1,586 @@
+﻿@page "/shopping-list"
+@implements IDisposable
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@inject ContextService ContextService
+@inject LocalStorageService LocalStorageService
+@inject ShoppingListDataService ShoppingListDataService
+@inject ShoppingListService ShoppingListService
+@inject EcoCraftDbContext EcoCraftDbContext
+@inject LocalizationService LocalizationService
+@inject UserServerDataService UserServerDataService
+@inject ServerDataService ServerDataService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager Navigation
+
+<PageTitle>@LocalizationService.GetTranslation("ShoppingList.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
+    <ChildContent>
+        <MudGrid Style="height: auto">
+            <MudItem xs="12" Class="pa-2 mt-2">
+                <MudPaper>
+                    <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center" Class="pa-2">
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">
+                            @LocalizationService.GetTranslation("DevFeature.1") <MudLink Href="https://github.com/Eco-Gnome/eco-gnome-website/discussions/new?category=ideas">@LocalizationService.GetTranslation("DevFeature.2")</MudLink>@LocalizationService.GetTranslation("DevFeature.3")
+                        </MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" Class="pa-2">
+                <MudStack Row Spacing="3">
+                    @foreach (var shoppingList in ContextService.CurrentUserServer!.DataContexts.Where(d => d.IsShoppingList))
+                    {
+                        <MudButton Color="_selectedShoppingList == shoppingList ? Color.Primary : Color.Default"
+                                   Variant="Variant.Filled"
+                                   OnClick="() => SelectShoppingList(shoppingList)">
+                            @shoppingList.Name
+                            <MudIconButton Icon="@MDIIcons.Filled.Close"
+                                           Size="Size.Medium"
+                                           Class="pa-0 ml-2"
+                                           OnClick="() => DeleteShoppingList(shoppingList)"/>
+                        </MudButton>
+                    }
+                    <MudButton Color="Color.Tertiary"
+                               EndIcon="@MDIIcons.Filled.Plus"
+                               Variant="Variant.Outlined"
+                               OnClick="() => AddShoppingList()">
+                        @LocalizationService.GetTranslation("ShoppingList.AddShoppingList")
+                    </MudButton>
+                </MudStack>
+            </MudItem>
+
+            @if (_isLoadingData)
+            {
+                <MudItem xs="12" Class="px-4 pt-4">
+                    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                        <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+                    </MudStack>
+                </MudItem>
+            }
+            else if (_selectedShoppingList is not null && ServerDataService.IsDataRetrieved && UserServerDataService.IsDataRetrieved)
+            {
+                <ErrorBoundary>
+                    <ChildContent>
+                        <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
+                            <MudExpansionPanels MultiExpansion="true">
+                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Settings")" @bind-Expanded="ExpandedShoppingLists">
+                                    <MudStack Class="pa-3">
+                                        <MudTextField T="string"
+                                                      Value="_selectedShoppingList.Name"
+                                                      Typo="Typo.body2"
+                                                      Immediate
+                                                      Label="@LocalizationService.GetTranslation("ShoppingList.NameLabel")"
+                                                      Style="border-bottom-color: gray"
+                                                      ValueChanged="@(v => UpdateShoppingListName(v))"/>
+                                    </MudStack>
+                                </MudExpansionPanel>
+                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Skills")" @bind-Expanded="ExpandedSkills">
+                                    <MudStack Class="pa-3">
+                                        @foreach (var shoppingListSkill in _selectedShoppingList.UserSkills)
+                                        {
+                                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                                <EcoIcon Item="shoppingListSkill.Skill"/>
+                                                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(shoppingListSkill.Skill)</MudText>
+                                                <MudNumericField T="int"
+                                                                 Value="shoppingListSkill.Level"
+                                                                 Class="square-input flex-no-grow"
+                                                                 Min="1"
+                                                                 Max="7"
+                                                                 Variant="Variant.Outlined"
+                                                                 Immediate="true"
+                                                                 ValueChanged="(int newValue) => OnLevelChanged(shoppingListSkill, newValue)"/>
+                                            </MudStack>
+                                        }
+                                    </MudStack>
+                                </MudExpansionPanel>
+                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.CraftingTables")" @bind-Expanded="ExpandedCraftingTables">
+                                    <MudStack Class="pa-3">
+                                        @foreach (var craftingTable in _selectedShoppingList.UserCraftingTables)
+                                        {
+                                            var pluginModules = craftingTable.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm)).ToList();
+
+                                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                                <EcoIcon Item="@craftingTable.CraftingTable"/>
+                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(craftingTable.CraftingTable)</MudText>
+                                                <MudIconButton Icon="@MDIIcons.Filled.Minus"
+                                                               Size="Size.Small"
+                                                               Disabled="@(pluginModules.FindIndex(pm => pm == craftingTable.PluginModule) <= -1)"
+                                                               OnClick="@(() => DecreasePluginModule(craftingTable, pluginModules))"/>
+                                                <MudTooltip Text="@(craftingTable.PluginModule is not null ? LocalizationService.GetTranslation(craftingTable.PluginModule) + $" [{((1 - craftingTable.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                    <EcoIcon Item="@craftingTable.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
+                                                </MudTooltip>
+                                                <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                                                               Size="Size.Small"
+                                                               Disabled="@(pluginModules.FindIndex(pm => pm == craftingTable.PluginModule) == pluginModules.Count - 1)"
+                                                               OnClick="@(() => IncreasePluginModule(craftingTable, pluginModules))"/>
+                                            </MudStack>
+                                        }
+                                    </MudStack>
+                                </MudExpansionPanel>
+                            </MudExpansionPanels>
+                        </MudItem>
+                        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
+                            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
+                                @{
+                                    var aggregatedOutputs = ShoppingListService.GetAggregatedOutputs(_selectedShoppingList, _selectedShoppingList.GetRootShoppingListRecipes());
+
+                                    <MudStack>
+                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</MudText>
+
+                                        @foreach (var element in aggregatedOutputs.Where(o => o.Value < 0))
+                                        {
+                                            <MudStack Row>
+                                                <EcoIcon Item="element.Key"/>
+                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(element.Key)</MudText>
+                                                <MudNumericField T="decimal"
+                                                                 Class="rectangle-input"
+                                                                 Style="width: 111px;"
+                                                                 ReadOnly
+                                                                 HideSpinButtons
+                                                                 Value="@Math.Abs(element.Value)"
+                                                                 Format="0"
+                                                                 Variant="Variant.Outlined"/>
+                                            </MudStack>
+                                        }
+                                    </MudStack>
+                                    <MudStack Class="mt-4">
+                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</MudText>
+
+                                        @foreach (var element in aggregatedOutputs.Where(o => o.Value > 0))
+                                        {
+                                            <MudStack Row>
+                                                <EcoIcon Item="element.Key"/>
+                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(element.Key)</MudText>
+                                                <MudNumericField T="decimal"
+                                                                 Class="rectangle-input"
+                                                                 Style="width: 111px;"
+                                                                 ReadOnly
+                                                                 HideSpinButtons
+                                                                 Value="@element.Value"
+                                                                 Format="0"
+                                                                 Variant="Variant.Outlined"/>
+                                            </MudStack>
+                                        }
+                                    </MudStack>
+                                }
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
+                            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
+                                <MudAutocomplete T="Recipe"
+                                                 Value="_emptyRecipe"
+                                                 Disabled="@(ContextService.CurrentServer!.Recipes.Count == 0)"
+                                                 SearchFunc="SearchRecipes"
+                                                 ValueChanged="AddShoppingListRecipe"
+                                                 Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
+                                                 Class="auto-complete-input"
+                                                 Dense="true"
+                                                 MaxItems="null"
+                                                 Variant="Variant.Outlined"
+                                                 AnchorOrigin="Origin.BottomLeft"
+                                                 TransformOrigin="Origin.TopLeft">
+                                    <ItemTemplate>
+                                        <MudStack Row Class="pl-2" Spacing="2">
+                                            <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
+                                            <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                        </MudStack>
+                                    </ItemTemplate>
+                                </MudAutocomplete>
+                                <MudTreeView Items="_TreeItems">
+                                    <ItemTemplate>
+                                        <MudTreeViewItem Items="@context.Children" Expanded="@context.Expanded">
+                                            <BodyContent Context="other">
+                                                <MudStack Row Class="flex-grow-1" AlignItems="AlignItems.Center">
+                                                    @{
+                                                        var firstProduct = context.Value.Recipe.Elements.First(e => e.IsProduct() && e.Index == 0);
+                                                        var number = firstProduct.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
+                                                        var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
+                                                            .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Contains(firstProduct.ItemOrTag))
+                                                            .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
+
+                                                        <MudTooltip Text="@(number + " " + LocalizationService.GetTranslation(firstProduct.ItemOrTag))">
+                                                            <MudStack Row AlignItems="AlignItems.Center">
+                                                                <EcoIcon Size="48"
+                                                                         Item="firstProduct.ItemOrTag"
+                                                                         NumberTypo="Typo.h6"
+                                                                         NumberClass="mb-n1 text-shadow-black"
+                                                                         ForegroundIconColor="Color.Dark"
+                                                                         ForegroundIcon="@(fullfills ? MDIIcons.Outline.CheckCircle : null)"
+                                                                         Number="number"/>
+                                                            </MudStack>
+                                                        </MudTooltip>
+                                                    }
+                                                    <MudStack Spacing="0" AlignItems="AlignItems.Start">
+                                                        <MudStack Row AlignItems="AlignItems.Start">
+                                                            <MudText>@LocalizationService.GetTranslation(context.Value.Recipe) @LocalizationService.GetTranslation("Recipe")</MudText>
+                                                        </MudStack>
+                                                        <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                                            @foreach (var product in context.Value.Recipe.Elements.Where(e => e.IsProduct() && e.Index > 0))
+                                                            {
+                                                                var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
+                                                                    .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Contains(product.ItemOrTag))
+                                                                    .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
+
+                                                                <MudTooltip Text="@LocalizationService.GetTranslation(product.ItemOrTag)">
+                                                                    <MudStack Row AlignItems="AlignItems.Center">
+                                                                        <EcoIcon Size="24"
+                                                                                 Item="product.ItemOrTag"
+                                                                                 NumberClass="mb-n1 tsb"
+                                                                                 Number="@(product.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor)"
+                                                                                 ForegroundIconColor="Color.Dark"
+                                                                                 ForegroundIcon="@(fullfills ? MDIIcons.Outline.CheckCircle : null)"/>
+                                                                    </MudStack>
+                                                                </MudTooltip>
+                                                            }
+                                                        </MudStack>
+                                                    </MudStack>
+                                                    <MudStack AlignItems="AlignItems.Center" Row>
+                                                        <MudNumericField T="int"
+                                                                         Value="context.Value.RoundFactor"
+                                                                         ValueChanged="@(v => OnQuantityToCraftChanged(context.Value, v))"
+                                                                         Format="0"
+                                                                         Variant="Variant.Filled"
+                                                                         Class="rectangle-input"
+                                                                         Min="1"
+                                                                         Style="width: 65px;"
+                                                                         Immediate/>
+                                                    </MudStack>
+                                                    <MudStack Class="flex-grow-1"></MudStack>
+                                                    <MudStack Row AlignItems="AlignItems.Center">
+                                                        @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()))
+                                                        {
+                                                            var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
+                                                            var possibleRecipes = ServerDataService.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))).ToList();
+                                                            var isFullfilled = context.Value.ChildrenUserRecipes
+                                                                .Sum(ur => ur.Recipe.Elements
+                                                                    .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))
+                                                                    .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * ur.RoundFactor))
+                                                                ) >= ingredientNumber;
+
+                                                            <MudTooltip Text="@LocalizationService.GetTranslation(ingredient.ItemOrTag)">
+                                                                <MudLink Color="Color.Default" OnClick="@(
+                                                                                                        isFullfilled || possibleRecipes.Count == 0
+                                                                                                            ? () => { }
+                                                                                                            : possibleRecipes.Count == 1
+                                                                                                                ? () => AddChildRecipe(context.Value, ingredient, Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor), possibleRecipes.First())
+                                                                                                                : () => ToggleAddChildren(context, ingredient)
+                                                                                                        )">
+                                                                    <MudStack Row AlignItems="AlignItems.Center">
+                                                                        <EcoIcon Size="32"
+                                                                                 Item="ingredient.ItemOrTag"
+                                                                                 NumberClass="mb-n1 text-shadow-black"
+                                                                                 Number="ingredientNumber"
+                                                                                 NumberColor="Color.Default"
+                                                                                 ForegroundIconColor="Color.Dark"
+                                                                                 ForegroundIcon="@(isFullfilled ? MDIIcons.Outline.CheckCircle : null)"/>
+                                                                    </MudStack>
+                                                                </MudLink>
+                                                            </MudTooltip>
+
+                                                            @if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+                                                            {
+                                                                <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
+                                                                @foreach (var recipe in possibleRecipes)
+                                                                {
+                                                                    <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
+                                                                        <MudLink OnClick="@(() => AddChildRecipe(context.Value, ingredient, Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor), recipe))">
+                                                                            <EcoIcon Size="24" Item="recipe.CraftingTable"/>
+                                                                        </MudLink>
+                                                                    </MudTooltip>
+                                                                }
+
+                                                                <MudIcon Icon="@MDIIcons.Filled.ArrowLeftBold"/>
+                                                            }
+                                                        }
+                                                    </MudStack>
+                                                    <MudIconButton Icon="@MDIIcons.Filled.Close"
+                                                                   Size="Size.Small"
+                                                                   OnClick="() => RemoveShoppingListRecipe(context.Value)"/>
+                                                </MudStack>
+                                            </BodyContent>
+                                        </MudTreeViewItem>
+                                    </ItemTemplate>
+                                </MudTreeView>
+                            </MudPaper>
+                        </MudItem>
+                    </ChildContent>
+                    <ErrorContent>
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                            <MudAlert Severity="Severity.Error">@LocalizationService.GetTranslation("PriceCalculator.LoadError")</MudAlert>
+                            <MudButton Variant="Variant.Filled" StartIcon="@MDIIcons.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => RemoveAllUserData())">@LocalizationService.GetTranslation("PriceCalculator.Reset")</MudButton>
+                        </MudStack>
+                    </ErrorContent>
+                </ErrorBoundary>
+            }
+        </MudGrid>
+    </ChildContent>
+</MudContainer>
+
+@code {
+    private DataContext? _selectedShoppingList;
+    private bool _isLoadingData;
+    private List<TreeItemData<UserRecipe>> _TreeItems { get; set; } = [];
+
+    private bool _expandedShoppingLists;
+    private bool ExpandedShoppingLists
+    {
+        get => _expandedShoppingLists;
+        set
+        {
+            _expandedShoppingLists = value;
+            _ = LocalStorageService.AddItem("ExpandedShoppingLists", value.ToString());
+        }
+    }
+
+    private bool _expandedSkills;
+    private bool ExpandedSkills
+    {
+        get => _expandedSkills;
+        set
+        {
+            _expandedSkills = value;
+            _ = LocalStorageService.AddItem("ExpandedSkills", value.ToString());
+        }
+    }
+
+    private bool _expandedCraftingTables;
+    private bool ExpandedCraftingTables
+    {
+        get => _expandedCraftingTables;
+        set
+        {
+            _expandedCraftingTables = value;
+            _ = LocalStorageService.AddItem("ExpandedCraftingTables", value.ToString());
+        }
+    }
+
+    private Recipe? _emptyRecipe;
+    private TreeItemData<UserRecipe>? _openedAddChildrenContext;
+    private Element? _openedAddChildrenIngredient;
+
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += OnContextChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _expandedShoppingLists = await LocalStorageService.GetItem("ExpandedShoppingLists") != "False";
+        _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
+        _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RetrieveData();
+        }
+    }
+
+    private void RebuildTree()
+    {
+        _TreeItems.Clear();
+
+        if (_selectedShoppingList is not null) {
+            foreach (var rootShoppingListRecipe in _selectedShoppingList!.GetRootShoppingListRecipes())
+            {
+                _TreeItems.Add(CreateTreeItemData(rootShoppingListRecipe));
+            }
+        }
+    }
+
+    private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
+    {
+        var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(element.ItemOrTag) && e.IsProduct()).Quantity.GetDynamicValue(_selectedShoppingList));
+        ShoppingListDataService.AddUserRecipe(_selectedShoppingList, recipe, userRecipe, (int)quantityToCraft);
+        _openedAddChildrenContext = null;
+        _openedAddChildrenIngredient = null;
+        await Calculate();
+    }
+
+    private TreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
+    {
+        return new TreeItemData<UserRecipe>
+        {
+            Value = userRecipe,
+            Expanded = true,
+            Children = userRecipe.ChildrenUserRecipes.Select(CreateTreeItemData).ToList()
+        };
+    }
+
+    private void ToggleAddChildren(TreeItemData<UserRecipe> context, Element ingredient)
+    {
+        if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+        {
+            _openedAddChildrenContext = null;
+            _openedAddChildrenIngredient = null;
+        }
+        else
+        {
+            _openedAddChildrenContext = context;
+            _openedAddChildrenIngredient = ingredient;
+        }
+    }
+
+    private async Task OnQuantityToCraftChanged(UserRecipe userRecipe, int value)
+    {
+        userRecipe.RoundFactor = value;
+        await Calculate();
+    }
+
+    private void OnContextChanged()
+    {
+        _ = RetrieveData();
+    }
+
+    private async Task RetrieveData(DataContext? shoppingList = null)
+    {
+        _selectedShoppingList = shoppingList ?? ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.IsShoppingList);
+        _isLoadingData = true;
+        StateHasChanged();
+        await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
+        await UserServerDataService.RetrieveUserData(_selectedShoppingList);
+        _isLoadingData = false;
+        RebuildTree();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= OnContextChanged;
+    }
+
+    public async Task SelectShoppingList(DataContext? shoppingList)
+    {
+        await RetrieveData(shoppingList);
+    }
+
+    public async Task AddShoppingList()
+    {
+        var shoppingList = ShoppingListDataService.CreateShoppingList(ContextService.CurrentUserServer!);
+        await EcoCraftDbContext.SaveChangesAsync();
+        await SelectShoppingList(shoppingList);
+        StateHasChanged();
+    }
+
+    private async Task UpdateShoppingListName(string name)
+    {
+        _selectedShoppingList!.Name = name;
+        await EcoCraftDbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+
+    private async Task DeleteShoppingList(DataContext shoppingList)
+    {
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ShoppingList.ConfirmDeleteShoppingList", shoppingList.Name));
+        if (!confirmed) return;
+
+        ShoppingListDataService.RemoveShoppingList(shoppingList);
+        await EcoCraftDbContext.SaveChangesAsync();
+
+        if (_selectedShoppingList == shoppingList)
+        {
+            await RetrieveData();
+        }
+    }
+
+    private async Task RemoveShoppingListRecipe(UserRecipe userRecipe)
+    {
+        ShoppingListDataService.RemoveUserRecipe(_selectedShoppingList!, userRecipe);
+        await Calculate();
+    }
+
+    private async Task Calculate()
+    {
+        // await ShoppingListService.Calculate(_selectedShoppingList!, _selectedShoppingList!.GetRootShoppingListRecipes());
+        await EcoCraftDbContext.SaveChangesAsync();
+        RebuildTree();
+        StateHasChanged();
+    }
+
+    public async Task OnLevelChanged(UserSkill userSkill, int level)
+    {
+        userSkill.Level = level;
+        await Calculate();
+    }
+
+    private async Task IncreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
+    {
+        var currentIndex = pluginModules.FindIndex(pm => pm == shoppingListCraftingTable.PluginModule);
+
+        if (currentIndex == pluginModules.Count - 1)
+        {
+            return;
+        }
+
+        shoppingListCraftingTable.PluginModule = pluginModules[currentIndex + 1];
+
+        await Calculate();
+    }
+
+    private async Task DecreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
+    {
+        var currentIndex = pluginModules.FindIndex(pm => pm == shoppingListCraftingTable.PluginModule);
+
+        if (currentIndex == -1)
+        {
+            return;
+        }
+
+        if (currentIndex == 0)
+        {
+            shoppingListCraftingTable.PluginModule = null;
+        }
+        else
+        {
+            shoppingListCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+        }
+
+        await Calculate();
+    }
+
+    private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
+    {
+        IEnumerable<Recipe> result;
+
+        if (string.IsNullOrEmpty(value))
+        {
+            result = ContextService.CurrentServer!.Recipes;
+        }
+        else
+        {
+            result = ContextService.CurrentServer!.Recipes
+                .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+        }
+
+        var selectedRecipes = _selectedShoppingList!.UserRecipes.Where(slr => slr.ParentUserRecipe is not null).Select(slr => slr.Recipe);
+        result = result.Where(r => !selectedRecipes.Contains(r)).OrderBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
+
+        return Task.FromResult(result);
+    }
+
+
+    private async Task AddShoppingListRecipe(Recipe? recipe)
+    {
+        if (recipe is null) return;
+
+        ShoppingListDataService.AddUserRecipe(_selectedShoppingList!, recipe);
+
+        _emptyRecipe = null;
+
+        await Calculate();
+    }
+
+    private async Task RemoveAllUserData()
+    {
+        var currentServer = ContextService.CurrentServer!;
+        await ContextService.LeaveServer(ContextService.CurrentUserServer!);
+        await ContextService.ChangeServer(currentServer);
+
+        Navigation.NavigateTo("/shopping-list", forceLoad: true);
+    }
+}

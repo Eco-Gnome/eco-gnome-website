@@ -277,6 +277,16 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
         return UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
     }
 
+    public List<ItemOrTag> GetAssociatedItemsAndSelf()
+    {
+        return AssociatedItems.Prepend(this).ToList();
+    }
+
+    public List<ItemOrTag> GetAssociatedTagsAndSelf()
+    {
+        return AssociatedTags.Prepend(this).ToList();
+    }
+
     public override string ToString()
     {
         return Name;
@@ -454,6 +464,7 @@ public class DataContext
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public string Name { get; set; }
     public bool IsDefault { get; set; }
+    public bool IsShoppingList { get; set; }
 
     public UserServer UserServer { get; set; }
     public List<UserSkill> UserSkills { get; init; } = [];
@@ -461,9 +472,14 @@ public class DataContext
     public List<UserElement> UserElements { get; init; } = [];
     public List<UserPrice> UserPrices { get; init; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; init; } = [];
-    public List<UserSetting> UserSettings { get; init; } = [];
-    public List<UserRecipe> UserRecipes { get; init; } = [];
-    public List<UserMargin> UserMargins { get; init; } = [];
+    public List<UserSetting> UserSettings { get; set; } = [];
+    public List<UserRecipe> UserRecipes { get; set; } = [];
+    public List<UserMargin> UserMargins { get; set; } = [];
+
+    public List<UserRecipe> GetRootShoppingListRecipes()
+    {
+        return UserRecipes.Where(ur => ur.ParentUserRecipe is null).ToList();
+    }
 }
 
 public class UserSetting
@@ -552,9 +568,12 @@ public class UserElement: IHasPrice
     public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("UserRecipe")] public Guid UserRecipeId { get; set; }
 
     public Element Element { get; set; }
     public DataContext DataContext { get; set; }
+    public UserRecipe UserRecipe { get; set; }
+    public List<UserPrice> UserPricesPrimaryOf { get; set; } = [];
 }
 
 public class UserPrice: IHasPrice
@@ -622,6 +641,12 @@ public class UserRecipe
 
     public Recipe Recipe { get; set; }
     public DataContext DataContext { get; set; }
+
+    // For Shopping List only
+    [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }
+    public UserRecipe? ParentUserRecipe { get; set; }
+    public List<UserRecipe> ChildrenUserRecipes { get; set; } = [];
+    public List<UserElement> UserElements { get; set; } = [];
 }
 
 // Server Data

@@ -2,29 +2,51 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 
-@if (Item is not null)
-{
-    <MudImage @key="GetIconName(Item)"
-              Src=@($"/assets/eco-icons/{GetIconName(Item)}.png?serverId={ContextService.CurrentServer?.Id}")
-              FallbackSrc="/assets/eco-icons/EmptyIcon.png"
-              Width=@Size
-              Height=@Size
-              Elevation="25"
-              Class="@($"rounded-lg {Class}")"
-              Style="@($"user-select: none; {Style}")"/>
-}
-else if (FallbackIcon is not null)
-{
-    <MudIcon Icon="@FallbackIcon"
-             Size="MudBlazor.Size.Medium"
-             Class="@Class"
-             Style="@($"user-select: none; width: {Size}px; height: {Size}px; {Style}")"/>
-}
+<div style="@($"position: relative; height: {Size}px;")">
+    @if (Item is not null)
+    {
+        <MudImage @key="GetIconName(Item)"
+                  Src=@($"/assets/eco-icons/{GetIconName(Item)}.png?serverId={ContextService.CurrentServer?.Id}")
+                  FallbackSrc="/assets/eco-icons/EmptyIcon.png"
+                  Width=@Size
+                  Height=@Size
+                  Elevation="25"
+                  Class="@Class"
+                  Style="@($"user-select: none; {Style}")"/>
+    }
+    else if (FallbackIcon is not null)
+    {
+        <MudIcon Icon="@FallbackIcon"
+                 Size="MudBlazor.Size.Medium"
+                 Class="@Class"
+                 Style="@($"user-select: none; width: {Size}px; height: {Size}px; {Style}")"/>
+    }
+
+    @if (Number is not null)
+    {
+        <MudStack Style="@($"position: absolute; top: 0; left: 0; height: {Size}px; width: {Size}px;")" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+            <MudText Class="@NumberClass" Typo="@NumberTypo" Color="NumberColor">@Math.Round((decimal)Number, 0, MidpointRounding.AwayFromZero)</MudText>
+        </MudStack>
+    }
+
+    @if (ForegroundIcon is not null)
+    {
+        <MudStack Style="@($"position: absolute; top: 0; left: 0; height: {Size}px; width: {Size}px;")" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+            <MudIcon Style="@($"height: {Size}px; width: {Size}px;")" Icon="@ForegroundIcon" Color="ForegroundIconColor" />
+        </MudStack>
+    }
+</div>
 
 @code {
     [Parameter] public required IHasIconName? Item { get; set; }
     [Parameter] public string? FallbackIcon { get; set; }
     [Parameter] public int Size { get; set; } = 32;
+    [Parameter] public decimal? Number { get; set; }
+    [Parameter] public Color NumberColor { get; set; } = Color.Default;
+    [Parameter] public string NumberClass { get; set; } = "";
+    [Parameter] public Typo NumberTypo { get; set; } = Typo.body2;
+    [Parameter] public string? ForegroundIcon { get; set; }
+    [Parameter] public Color ForegroundIconColor { get; set; } = Color.Tertiary;
     [Parameter] public string? Style { get; set; }
     [Parameter] public string? Class { get; set; }
 

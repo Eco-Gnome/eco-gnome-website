@@ -181,6 +181,18 @@
         "Default": "Par défaut",
         "Max": "Max"
     },
+    "ShoppingList": {
+        "PageTitle": "Listes de course",
+        "Settings": "Paramètres",
+        "ItemsToBuy": "Objets à acheter:",
+        "ItemsProduced": "Objets produits:",
+        "AddShoppingList": "Ajouter une liste de course",
+        "NewShoppingList": "Liste de course #",
+        "NameLabel": "Nom de la liste de course",
+        "ConfirmDeleteShoppingList": "Êtes vous sur de vouloir supprimer la liste de course {name} ?",
+        "Skills": "Configuration des métiers",
+        "CraftingTables": "Configuration des Tables d'artisanat"
+    },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",
     "SuperAdmin": {
@@ -261,6 +273,11 @@
         "DefaultContext": "Contexte par défaut",
         "NewContext": "Nouveau contexte",
         "DeletionConfirmation": "Êtes-vous sûr de vouloir supprimer le contexte \"{nom du contexte}\" ? Cette action ne peut pas être annulée."
+    },
+    "DevFeature": {
+        "1": "Cette fonctionnalité est en cours de développement ! Partagez vos",
+        "2": "retours et idées ici",
+        "3": "!"
     },
     "PriceCalculator": {
         "ContextName": "Nom du contexte",

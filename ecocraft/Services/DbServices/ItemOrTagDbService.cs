@@ -33,11 +33,11 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
 
-	public ItemOrTag Add(ItemOrTag talent)
+	public ItemOrTag Add(ItemOrTag itemOrTag)
 	{
-		context.ItemOrTags.Add(talent);
+		context.ItemOrTags.Add(itemOrTag);
 
-		return talent;
+		return itemOrTag;
 	}
 
 	public void Update(ItemOrTag itemOrTag)

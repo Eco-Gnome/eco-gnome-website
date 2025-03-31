@@ -24,11 +24,11 @@ public class UserMarginDbService(EcoCraftDbContext context) : IGenericDbService<
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserMargin Add(UserMargin talent)
+	public UserMargin Add(UserMargin userMargin)
 	{
-		context.UserMargins.Add(talent);
+		context.UserMargins.Add(userMargin);
 
-		return talent;
+		return userMargin;
 	}
 
 	public void Update(UserMargin UserMargin)

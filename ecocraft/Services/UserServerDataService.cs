@@ -1,5 +1,6 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using MudBlazor.Extensions;
 
 namespace ecocraft.Services;
 
@@ -22,10 +23,10 @@ public class UserServerDataService(
     public List<UserTalent> UserTalents { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
     public UserSetting? UserSetting { get; private set; }
-    public List<UserElement> UserElements { get; private set; } = [];
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
     public List<UserMargin> UserMargins { get; private set; } = [];
+
 
     public async Task RetrieveUserData(DataContext? dataContext, bool force = false)
     {
@@ -35,7 +36,6 @@ public class UserServerDataService(
             UserTalents = [];
             UserCraftingTables = [];
             UserSetting = null;
-            UserElements = [];
             UserPrices = [];
             UserRecipes = [];
             UserMargins = [];
@@ -54,19 +54,16 @@ public class UserServerDataService(
         var userTalentsTask = userTalentDbService.GetByDataContextAsync(dataContext);
         var userCraftingTablesTask = userCraftingTableDbService.GetByDataContextAsync(dataContext);
         var userSettingsTask = userSettingDbService.GetByDataContextAsync(dataContext);
-        var userElementsTask = userElementDbService.GetByDataContextAsync(dataContext);
         var userPricesTask = userPriceDbService.GetByDataContextAsync(dataContext);
         var userRecipesTask = userRecipeDbService.GetByDataContextAsync(dataContext);
         var userMarginsTask = userMarginDbService.GetByDataContextAsync(dataContext);
 
-        await Task.WhenAll(userSkillsTask, userTalentsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
-            userRecipesTask, userMarginsTask);
+        await Task.WhenAll(userSkillsTask, userTalentsTask, userCraftingTablesTask, userSettingsTask, userPricesTask, userRecipesTask, userMarginsTask);
 
         UserSkills = userSkillsTask.Result;
         UserTalents = userTalentsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
         UserSetting = userSettingsTask.Result;
-        UserElements = userElementsTask.Result;
         UserPrices = userPricesTask.Result;
         UserRecipes = userRecipesTask.Result;
         UserMargins = userMarginsTask.Result;
@@ -265,8 +262,7 @@ public class UserServerDataService(
         UserCraftingTables.Remove(userCraftingTable);
         userCraftingTableDbService.Delete(userCraftingTable);
 
-        foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable)
-                     .ToList())
+        foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable).ToList())
         {
             RemoveUserRecipe(userRecipe, false);
         }
@@ -290,7 +286,7 @@ public class UserServerDataService(
 
         foreach (var element in recipe.Elements)
         {
-            AddUserElement(element, dataContext);
+            AddUserElement(element, userRecipe, dataContext);
         }
 
         if (!UserCraftingTables.Select(uct => uct.CraftingTable).Contains(recipe.CraftingTable))
@@ -301,7 +297,7 @@ public class UserServerDataService(
 
     public void RemoveUserRecipe(UserRecipe userRecipe, bool removeCraftingTables = true)
     {
-        foreach (var userElement in UserElements.Where(ue => ue.Element.Recipe == userRecipe.Recipe).ToList())
+        foreach (var userElement in userRecipe.UserElements.ToList())
         {
             RemoveUserElement(userElement);
         }
@@ -317,33 +313,24 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserElement(Element element, DataContext dataContext)
+    private void AddUserElement(Element element, UserRecipe userRecipe, DataContext dataContext)
     {
         var userElement = new UserElement
         {
             Element = element,
             DataContext = dataContext,
             Share = element.DefaultShare,
-            IsReintegrated = element.DefaultIsReintegrated
+            IsReintegrated = element.DefaultIsReintegrated,
+            UserRecipe = userRecipe
         };
 
-        UserElements.Add(userElement);
         userElementDbService.Add(userElement);
 
-        // If the related ItemOrTag has no UserPrice, create it
-        if (UserPrices.FirstOrDefault(up => up.ItemOrTag == userElement.Element.ItemOrTag) is null)
+        foreach (var itemOrTag in element.ItemOrTag.GetAssociatedItemsAndSelf())
         {
-            AddUserPrice(element.ItemOrTag, dataContext);
-
-            if (element.ItemOrTag.IsTag)
+            if (itemOrTag.GetCurrentUserPrice(dataContext) is null)
             {
-                foreach (var item in element.ItemOrTag.AssociatedItems)
-                {
-                    if (UserPrices.FirstOrDefault(up => up.ItemOrTag == item) is null)
-                    {
-                        AddUserPrice(item, dataContext);
-                    }
-                }
+                AddUserPrice(itemOrTag, dataContext);
             }
         }
     }
@@ -351,42 +338,37 @@ public class UserServerDataService(
     private void RemoveUserElement(UserElement userElement)
     {
         // Remove any existing PrimaryUserPrice
-        foreach (var userPrice in UserPrices.Where(up => up.PrimaryUserElement == userElement))
+        foreach (var userPrice in userElement.UserPricesPrimaryOf)
         {
             userPrice.PrimaryUserElement = null;
         }
 
+        var itemOrTagAssociated = userElement.Element.ItemOrTag;
+        var dataContext = userElement.DataContext;
+
         userElement.DataContext.UserElements.Remove(userElement);
-        UserElements.Remove(userElement);
+        userElement.Element.UserElements.Remove(userElement);
+        userElement.UserRecipe.UserElements.Remove(userElement);
         userElementDbService.Delete(userElement);
 
-        // Remove the UserPrice if no other UserElement target it or no other tag.
-        var otherUserElementsOfSameItemOrTag =
-            UserElements.Where(u => u.Element.ItemOrTag == userElement.Element.ItemOrTag || u.Element.ItemOrTag.AssociatedItems.Contains(userElement.Element.ItemOrTag)).ToList();
-
-        if (!otherUserElementsOfSameItemOrTag.Any())
+        // Remove the UserPrice of the related itemOrTag and it's associated items, if no other related Elements have a UserElement
+        if (itemOrTagAssociated.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(dataContext) is null))
         {
-            var removedUserPrice = UserPrices.FirstOrDefault(up => up.ItemOrTag == userElement.Element.ItemOrTag);
+            var itemOrTagAssociatedUserPrice = itemOrTagAssociated.GetCurrentUserPrice(dataContext);
 
-            if (removedUserPrice is not null)
+            if (itemOrTagAssociatedUserPrice is not null)
             {
-                RemoveUserPrice(removedUserPrice);
+                RemoveUserPrice(itemOrTagAssociatedUserPrice);
 
-                if (removedUserPrice.ItemOrTag.IsTag)
+                foreach (var itemOrTag in itemOrTagAssociated.AssociatedItems)
                 {
-                    foreach (var item in removedUserPrice.ItemOrTag.AssociatedItems)
+                    if (itemOrTag.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(dataContext) is null))
                     {
-                        var otherUserElementsOfSameItem =
-                            UserElements.Where(u => u.Element.ItemOrTag == item || u.Element.ItemOrTag.AssociatedItems.Contains(item)).ToList();
+                        var itemOrTagUserPrice = itemOrTag.GetCurrentUserPrice(dataContext);
 
-                        if (!otherUserElementsOfSameItem.Any())
+                        if (itemOrTagUserPrice is not null)
                         {
-                            var itemUserPrice = UserPrices.FirstOrDefault(up => up.ItemOrTag == item);
-
-                            if (itemUserPrice is not null)
-                            {
-                                RemoveUserPrice(itemUserPrice);
-                            }
+                            RemoveUserPrice(itemOrTagUserPrice);
                         }
                     }
                 }
@@ -412,6 +394,7 @@ public class UserServerDataService(
     private void RemoveUserPrice(UserPrice userPrice)
     {
         userPrice.DataContext.UserPrices.Remove(userPrice);
+        userPrice.ItemOrTag.UserPrices.Remove(userPrice);
         UserPrices.Remove(userPrice);
         userPriceDbService.Delete(userPrice);
     }
@@ -455,4 +438,6 @@ public class UserServerDataService(
             !userCraftingTables.Contains(ct) && ct.Recipes.Select(r => r.Skill)
                 .Any(s => UserSkills.Select(us => us.Skill).Contains(s))).ToList();
     }
+
+
 }

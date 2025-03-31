@@ -32,11 +32,11 @@ public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDb
 			.FirstOrDefaultAsync(ct => ct.Name == name);
 	}
 
-	public CraftingTable Add(CraftingTable talent)
+	public CraftingTable Add(CraftingTable craftingTable)
 	{
-		context.CraftingTables.Add(talent);
+		context.CraftingTables.Add(craftingTable);
 
-		return talent;
+		return craftingTable;
 	}
 
 	public void Update(CraftingTable craftingTable)
