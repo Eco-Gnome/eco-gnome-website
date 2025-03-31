@@ -27,7 +27,7 @@ public class EcoCraftDbContext : DbContext
     public DbSet<UserMargin> UserMargins { get; set; }
     public DbSet<UserShoppingList> UserShoppingLists { get; set; }
     public DbSet<UserShoppingListRecipe> UserShoppingListRecipes { get; set; }
-    public DbSet<UserShoppingListElement> UserShoppingListElements { get; set; }
+    public DbSet<UserShoppingListItemOrTag> UserShoppingListElements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -350,7 +350,7 @@ public class EcoCraftDbContext : DbContext
         // 1) UserShoppingList -> UserShoppingListRecipe (One-to-many)
         // ─────────────────────────────────────────────────────────────────
         modelBuilder.Entity<UserShoppingList>()
-            .HasMany(list => list.Recipes)
+            .HasMany(list => list.UserShoppingListRecipes)
             .WithOne(recipe => recipe.UserShoppingList)
             .HasForeignKey(recipe => recipe.UserShoppingListId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -361,7 +361,7 @@ public class EcoCraftDbContext : DbContext
         // 2) UserShoppingList -> UserShoppingListElement (One-to-many)
         // ─────────────────────────────────────────────────────────────────
         modelBuilder.Entity<UserShoppingList>()
-            .HasMany(list => list.ElementsToBuy)
+            .HasMany(list => list.UserShoppingListItemOrTagToBuy)
             .WithOne(element => element.UserShoppingList)
             .HasForeignKey(element => element.UserShoppingListId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -403,7 +403,7 @@ public class EcoCraftDbContext : DbContext
         // ─────────────────────────────────────────────────────────────────
         // 6) UserShoppingListElement -> ItemOrTag (Many-to-one)
         // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingListElement>()
+        modelBuilder.Entity<UserShoppingListItemOrTag>()
             .HasOne(e => e.ItemOrTag)
             .WithMany() // ou .WithMany(iot => iot.ShoppingListElements) si tu veux la navigation inverse
             .HasForeignKey(e => e.ItemOrTagId)

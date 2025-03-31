@@ -393,10 +393,10 @@ public class UserShoppingList
     public UserServer UserServer { get; set; }
     public string Name { get; set; } = "";
     // Les recettes que l'utilisateur veut fabriquer dans cette liste
-    public List<UserShoppingListRecipe> Recipes { get; set; } = [];
+    public List<UserShoppingListRecipe> UserShoppingListRecipes { get; set; } = [];
     // La liste finale (agrégée) des matières premières à acheter.
     // Optionnellement, on peut stocker ça si on veut sauvegarder le résultat du calcul
-    public List<UserShoppingListElement> ElementsToBuy { get; set; } = [];
+    public List<UserShoppingListItemOrTag> UserShoppingListItemOrTagToBuy { get; set; } = [];
 }
 
 public class UserShoppingListRecipe
@@ -423,7 +423,7 @@ public class UserShoppingListRecipe
 }
 
 
-public class UserShoppingListElement
+public class UserShoppingListItemOrTag
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("UserShoppingList")] public Guid UserShoppingListId { get; set; }

@@ -28,6 +28,46 @@
             <MudGrid Style="height: auto">
             <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
                 Manage lists here (create, delete, visualise, rename)
+
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("ShoppingLists")} ({UserServerDataService.UserShoppingLists.Count})")" @bind-Expanded="ExpandedMargins">
+                        @if (UserServerDataService.UserSetting is not null)
+                        {
+                            <MudTable Items="UserServerDataService.UserShoppingLists"
+                                      FixedHeader="true"
+                                      Hover="true"
+                                      Class="mt-4"
+                                      Dense="true">
+                                <HeaderContent>
+                                    <MudTh>
+                                        <MudText>@LocalizationService.GetTranslation("Name")</MudText>
+                                    </MudTh>
+                                    <MudTh></MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd Class="py-1">
+                                        <MudTextField Value="context.Name"
+                                                      Typo="Typo.body2"
+                                                      Style="border-bottom-color: gray"
+                                                      ValueChanged="@((string v) => UpdateShoppingList(context, v))" />
+                                    </MudTd>
+                                    <MudTd Class="py-1" Style="text-align: right;">
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.RemoveShoppingList")" Class="flex">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                                                           tabindex="-1"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => OnRemoveShoppingList(context))" />
+                                        </MudTooltip>
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                            <MudStack Row Class="mt-1" Style="width: 100%" Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <MudButton Class="py-1"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           tabindex="-1"
+                                           OnClick="OnAddShoppingList">@LocalizationService.GetTranslation("PriceCalculator.AddShoppingList")</MudButton>
+                            </MudStack>
+                        }
+                    </MudExpansionPanel>
             </MudItem>
 
             <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
@@ -867,33 +907,21 @@
         StateHasChanged();
     }
 
-    private async Task UpdateMargin(UserMargin userMargin, decimal margin)
+    private async Task UpdateShoppingList(UserShoppingList userShoppingList, string name)
     {
-        userMargin.Margin = margin;
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
-    }
-
-    private async Task UpdateMarginName(UserMargin userMargin, string name)
-    {
-        userMargin.Name = name;
+        userShoppingList.Name = name;
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
-    private async Task OnAddMargin()
+    private async Task OnAddShoppingList()
     {
-        UserServerDataService.CreateUserMargin(ContextService.CurrentUserServer!);
+        UserServerDataService.createUserShoppingList(ContextService.CurrentUserServer!);
         await EcoCraftDbContext.SaveChangesAsync();
     }
 
-    private async Task OnRemoveMargin(UserMargin userMargin)
+    private async Task OnRemoveShoppingList(UserShoppingList userShoppingList)
     {
-        if(UserServerDataService.UserMargins.Count == 1)
-        {
-            Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.CantRemoveLastMargin"), Severity.Error);
-            return;
-        }
-        UserServerDataService.RemoveUserMargin(userMargin);
+        UserServerDataService.removeUserShoppingList(userShoppingList);
         await EcoCraftDbContext.SaveChangesAsync();
         StateHasChanged();
     }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250331205718_update shopping list models")]
+    partial class updateshoppinglistmodels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -669,7 +672,7 @@ namespace ecocraft.Migrations
                     b.ToTable("UserShoppingLists");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.UserShoppingListItemOrTag", b =>
+            modelBuilder.Entity("ecocraft.Models.UserShoppingListElement", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1083,7 +1086,7 @@ namespace ecocraft.Migrations
                     b.Navigation("UserServer");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.UserShoppingListItemOrTag", b =>
+            modelBuilder.Entity("ecocraft.Models.UserShoppingListElement", b =>
                 {
                     b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
                         .WithMany()
@@ -1092,7 +1095,7 @@ namespace ecocraft.Migrations
                         .IsRequired();
 
                     b.HasOne("ecocraft.Models.UserShoppingList", "UserShoppingList")
-                        .WithMany("UserShoppingListItemOrTagToBuy")
+                        .WithMany("ElementsToBuy")
                         .HasForeignKey("UserShoppingListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1121,7 +1124,7 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ecocraft.Models.UserShoppingList", "UserShoppingList")
-                        .WithMany("UserShoppingListRecipes")
+                        .WithMany("Recipes")
                         .HasForeignKey("UserShoppingListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1243,9 +1246,9 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.UserShoppingList", b =>
                 {
-                    b.Navigation("UserShoppingListItemOrTagToBuy");
+                    b.Navigation("ElementsToBuy");
 
-                    b.Navigation("UserShoppingListRecipes");
+                    b.Navigation("Recipes");
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserShoppingListRecipe", b =>

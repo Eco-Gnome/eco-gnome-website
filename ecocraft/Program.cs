@@ -57,6 +57,9 @@ builder.Services.AddScoped<UserRecipeDbService>();
 builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
+builder.Services.AddScoped<UserShoppingListDbService>();
+builder.Services.AddScoped<UserShoppingListRecipeDbService>();
+builder.Services.AddScoped<UserShoppingListElementDbService>();
 
 // Business Services
 builder.Services.AddScoped<ContextService>();
