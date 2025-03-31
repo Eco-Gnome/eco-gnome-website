@@ -1,0 +1,99 @@
+﻿@using ecocraft.Models
+@using ecocraft.Services
+@inject ShoppingListDataService ShoppingListDataService
+@inject LocalizationService LocalizationService
+@inject ServerDataService ServerDataService
+
+<MudStack Class="@($"pl-{Indent}")">
+    <MudStack Row>
+        <MudText>@ShoppingListRecipe.Recipe.Name</MudText>
+        <MudNumericField T="decimal"
+                         Value="ShoppingListRecipe.QuantityToCraft"
+                         ValueChanged="v => OnQuantityToCraftChanged(v)"
+                         Format="0"
+                         Immediate />
+        <MudIconButton Icon="@MDIIcons.Filled.Close"
+                       Size="Size.Small"
+                       OnClick="() => RemoveShoppingListRecipe()" />
+    </MudStack>
+
+    @foreach (var product in ShoppingListRecipe.ShoppingListItemOrTags.Where(s => !s.IsIngredient))
+    {
+        <MudStack Row>
+            <EcoIcon Item="product.ItemOrTag" />
+            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(product.ItemOrTag)</MudText>
+            <MudNumericField T="decimal"
+                             Class="rectangle-input"
+                             Style="width: 111px;"
+                             ReadOnly
+                             HideSpinButtons
+                             Value="product.Quantity"
+                             Format="0"
+                             Variant="Variant.Outlined"/>
+        </MudStack>
+    }
+
+    <MudDivider />
+
+    @foreach (var ingredient in ShoppingListRecipe.ShoppingListItemOrTags.Where(s => s.IsIngredient))
+    {
+        var childRecipes = ShoppingListRecipe.ChildrenShoppingListRecipes.Where(c => c.ShoppingListItemOrTags.Any(s => s.ItemOrTag == ingredient.ItemOrTag && !s.IsIngredient));
+
+        <MudStack Row>
+            <EcoIcon Item="ingredient.ItemOrTag" />
+            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(ingredient.ItemOrTag)</MudText>
+            <MudNumericField T="decimal"
+                             Class="rectangle-input"
+                             Style="width: 111px;"
+                             ReadOnly
+                             HideSpinButtons
+                             Value="ingredient.RemainingQuantity"
+                             Format="0"
+                             Variant="Variant.Outlined"/>
+            @if (!childRecipes.Any())
+            {
+                <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                               Size="Size.Small"
+                               OnClick="() => AddChildRecipe(ingredient, ingredient.RemainingQuantity)"/>
+            }
+        </MudStack>
+
+        @foreach (var childRecipe in childRecipes)
+        {
+            <ShoppingListRecipeComponent Calculate="Calculate" SelectedShoppingList="SelectedShoppingList" ShoppingListRecipe="childRecipe" Indent="@(Indent + 4)" />
+        }
+    }
+</MudStack>
+
+@code {
+    [Parameter] public required ShoppingList SelectedShoppingList { get; set; }
+    [Parameter] public required ShoppingListRecipe ShoppingListRecipe { get; set; }
+    [Parameter] public EventCallback Calculate { get; set; }
+    [Parameter] public int Indent { get; set; }
+
+    private async Task OnQuantityToCraftChanged(decimal value)
+    {
+        ShoppingListRecipe.QuantityToCraft = value;
+        await Calculate.InvokeAsync();
+    }
+
+    private async Task RemoveShoppingListRecipe()
+    {
+        ShoppingListDataService.RemoveUserShoppingListRecipe(SelectedShoppingList, ShoppingListRecipe);
+        await Calculate.InvokeAsync();
+    }
+
+    private async Task AddChildRecipe(ShoppingListItemOrTag shoppingListItemOrTag, decimal quantityGoal)
+    {
+        // TODO: allow to select a recipe
+        var recipe = ServerDataService.Recipes.FirstOrDefault(r => r.Elements.Any(e => e.Index == 0 && e.IsProduct() && e.ItemOrTag == shoppingListItemOrTag.ItemOrTag));
+
+        if (recipe is not null)
+        {
+            var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag == shoppingListItemOrTag.ItemOrTag && e.IsProduct() && e.Index == 0).Quantity.GetBaseValue());
+
+            ShoppingListDataService.AddShoppingListRecipe(SelectedShoppingList, recipe, ShoppingListRecipe, quantityToCraft);
+            await Calculate.InvokeAsync();
+        }
+    }
+}

@@ -441,6 +441,7 @@ public class DataContext
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public string Name { get; set; }
     public bool IsDefault { get; set; }
+    public bool IsShoppingList { get; set; }
 
     public UserServer UserServer { get; set; }
     public List<UserSkill> UserSkills { get; init; } = [];
