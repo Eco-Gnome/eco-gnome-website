@@ -386,6 +386,56 @@ public class Server
     public List<Recipe> Recipes { get; set; } = [];
 }
 
+public class UserShoppingList
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public UserServer UserServer { get; set; }
+    public string Name { get; set; } = "";
+    // Les recettes que l'utilisateur veut fabriquer dans cette liste
+    public List<UserShoppingListRecipe> Recipes { get; set; } = [];
+    // La liste finale (agrégée) des matières premières à acheter.
+    // Optionnellement, on peut stocker ça si on veut sauvegarder le résultat du calcul
+    public List<UserShoppingListElement> ElementsToBuy { get; set; } = [];
+}
+
+public class UserShoppingListRecipe
+{
+    [Key] public Guid Id { get; set; }
+
+    [ForeignKey("UserShoppingList")] public Guid UserShoppingListId { get; set; }
+    public UserShoppingList UserShoppingList { get; set; }
+
+    [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
+    public Recipe Recipe { get; set; }
+
+    public decimal QuantityToCraft { get; set; }
+
+    [ForeignKey("UserCraftingTable")] public Guid? UserCraftingTableId { get; set; }
+    public UserCraftingTable? UserCraftingTable { get; set; }
+
+    // Champ pour la relation "Parent"
+    public Guid? ParentRecipeId { get; set; }
+    public UserShoppingListRecipe? ParentRecipe { get; set; }
+
+    // Relation pour la liste des recettes enfants
+    public List<UserShoppingListRecipe> ChildrenRecipes { get; set; } = new();
+}
+
+
+public class UserShoppingListElement
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("UserShoppingList")] public Guid UserShoppingListId { get; set; }
+    public UserShoppingList UserShoppingList { get; set; }
+    // L'item ou tag nécessaire.
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
+    // Quantité totale à acheter pour satisfaire toutes les recettes sélectionnées
+    public decimal QuantityNeeded { get; set; }
+}
+
+
 // Utils
 public class LocalizedField
 {

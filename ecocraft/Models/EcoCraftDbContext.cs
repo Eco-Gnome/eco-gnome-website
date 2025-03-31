@@ -341,5 +341,73 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-	}
+
+
+        // ─────────────────────────────────────────────────────────────────
+        // 1) UserShoppingList -> UserShoppingListRecipe (One-to-many)
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingList>()
+            .HasMany(list => list.Recipes)
+            .WithOne(recipe => recipe.UserShoppingList)
+            .HasForeignKey(recipe => recipe.UserShoppingListId)
+            .OnDelete(DeleteBehavior.Cascade);
+        // Ici, si on supprime une UserShoppingList, 
+        // toutes ses Recipes associées seront aussi supprimées.
+
+        // ─────────────────────────────────────────────────────────────────
+        // 2) UserShoppingList -> UserShoppingListElement (One-to-many)
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingList>()
+            .HasMany(list => list.ElementsToBuy)
+            .WithOne(element => element.UserShoppingList)
+            .HasForeignKey(element => element.UserShoppingListId)
+            .OnDelete(DeleteBehavior.Cascade);
+        // De même, si on supprime la liste, 
+        // on supprime les éléments qui y sont rattachés.
+
+        // ─────────────────────────────────────────────────────────────────
+        // 3) Auto-référencement : ParentRecipe -> ChildrenRecipes
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingListRecipe>()
+            .HasOne(r => r.ParentRecipe)
+            .WithMany(r => r.ChildrenRecipes)
+            .HasForeignKey(r => r.ParentRecipeId)
+            .OnDelete(DeleteBehavior.Restrict);
+        // On utilise souvent Restrict pour éviter des suppressions en cascade
+        // qui risqueraient de "couper" la totalité de la branche.
+
+        // ─────────────────────────────────────────────────────────────────
+        // 4) UserShoppingListRecipe -> Recipe (Many-to-one)
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingListRecipe>()
+            .HasOne(r => r.Recipe)
+            .WithMany() // ou .WithMany(x => x.UserShoppingListRecipes) si tu veux naviguer depuis Recipe
+            .HasForeignKey(r => r.RecipeId)
+            .OnDelete(DeleteBehavior.Restrict);
+        // Restrict : on ne supprime pas la Recipe en base si on supprime l'association.
+        // (À adapter selon ta logique.)
+
+        // ─────────────────────────────────────────────────────────────────
+        // 5) UserShoppingListRecipe -> UserCraftingTable (Many-to-one)
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingListRecipe>()
+            .HasOne(r => r.UserCraftingTable)
+            .WithMany() // ou .WithMany(ct => ct.SomeCollection) si tu souhaites la navigation inverse
+            .HasForeignKey(r => r.UserCraftingTableId)
+            .OnDelete(DeleteBehavior.Restrict);
+        // Pour éviter qu'une suppression de la table supprime toutes les recettes, etc.
+
+        // ─────────────────────────────────────────────────────────────────
+        // 6) UserShoppingListElement -> ItemOrTag (Many-to-one)
+        // ─────────────────────────────────────────────────────────────────
+        modelBuilder.Entity<UserShoppingListElement>()
+            .HasOne(e => e.ItemOrTag)
+            .WithMany() // ou .WithMany(iot => iot.ShoppingListElements) si tu veux la navigation inverse
+            .HasForeignKey(e => e.ItemOrTagId)
+            .OnDelete(DeleteBehavior.Restrict);
+        // On ne veut pas forcément supprimer un ItemOrTag si on supprime le lien
+        // (sinon, toutes les listes de courses utilisant cet item seraient impactées).
+
+
+    }
 }
