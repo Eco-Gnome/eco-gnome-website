@@ -45,11 +45,11 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 		return context.Users.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
 	}
 
-	public User Add(User talent)
+	public User Add(User user)
 	{
-		context.Users.Add(talent);
+		context.Users.Add(user);
 
-		return talent;
+		return user;
 	}
 
 	public void Update(User user)

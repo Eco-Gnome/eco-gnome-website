@@ -24,10 +24,10 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserSkill Add(UserSkill talent)
+	public UserSkill Add(UserSkill userSkill)
 	{
-		context.UserSkills.Add(talent);
-		return talent;
+		context.UserSkills.Add(userSkill);
+		return userSkill;
 	}
 
 	public void Update(UserSkill userSkill)

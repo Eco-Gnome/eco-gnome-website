@@ -41,11 +41,11 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 			.FirstOrDefaultAsync(r => r.Id == id);
 	}
 
-	public Recipe Add(Recipe talent)
+	public Recipe Add(Recipe recipe)
 	{
-		context.Recipes.Add(talent);
+		context.Recipes.Add(recipe);
 
-		return talent;
+		return recipe;
 	}
 
 	public void Update(Recipe recipe)

@@ -31,6 +31,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
     public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
+    public DbSet<ShoppingList> ShoppingLists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -473,5 +474,11 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
+
+		// * Shopping List Data
+		// Shopping List
+		modelBuilder.Entity<ShoppingList>()
+			.ToTable("ShoppingList");
+
 	}
 }
