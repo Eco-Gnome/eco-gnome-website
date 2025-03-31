@@ -10,6 +10,7 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 		return context.Servers
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.User)
+			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
 	}
 
