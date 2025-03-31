@@ -24,12 +24,12 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 			.FirstOrDefaultAsync(ue => ue.Id == id);
 	}
 
-	public UserElement Add(UserElement talent)
+	public UserElement Add(UserElement userElement)
 	{
-		context.UserElements.Add(talent);
-		talent.Element.CurrentUserElement = talent;
+		context.UserElements.Add(userElement);
+		userElement.Element.CurrentUserElement = userElement;
 
-		return talent;
+		return userElement;
 	}
 
 	public void Update(UserElement userElement)

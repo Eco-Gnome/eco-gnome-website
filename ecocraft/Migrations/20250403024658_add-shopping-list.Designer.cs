@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250403024658_add-shopping-list")]
+    partial class addshoppinglist
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -72,25 +75,6 @@ namespace ecocraft.Migrations
                     b.ToTable("CraftingTable", (string)null);
                 });
 
-            modelBuilder.Entity("ecocraft.Models.DynamicValue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("BaseValue")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ServerId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ServerId");
-
-                    b.ToTable("DynamicValue", (string)null);
-                });
-
             modelBuilder.Entity("ecocraft.Models.Element", b =>
                 {
                     b.Property<Guid>("Id")
@@ -106,10 +90,16 @@ namespace ecocraft.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsDynamic")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("ItemOrTagId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("QuantityId")
+                    b.Property<bool>("LavishTalent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Quantity")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("RecipeId")
@@ -121,8 +111,6 @@ namespace ecocraft.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ItemOrTagId");
-
-                    b.HasIndex("QuantityId");
 
                     b.HasIndex("RecipeId");
 
@@ -280,36 +268,6 @@ namespace ecocraft.Migrations
                     b.ToTable("LocalizedField", (string)null);
                 });
 
-            modelBuilder.Entity("ecocraft.Models.Modifier", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DynamicType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("DynamicValueId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("SkillId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("TalentId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DynamicValueId");
-
-                    b.HasIndex("SkillId");
-
-                    b.HasIndex("TalentId");
-
-                    b.ToTable("Modifier", (string)null);
-                });
-
             modelBuilder.Entity("ecocraft.Models.PluginModule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -341,10 +299,9 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CraftMinutesId")
+                    b.Property<decimal>("CraftMinutes")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("CraftingTableId")
@@ -360,7 +317,7 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("LaborId")
+                    b.Property<decimal>("Labor")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("LocalizedNameId")
@@ -381,13 +338,7 @@ namespace ecocraft.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CraftMinutesId");
-
                     b.HasIndex("CraftingTableId");
-
-                    b.HasIndex("LaborId");
-
-                    b.HasIndex("LocalizedNameId");
 
                     b.HasIndex("ServerId");
 
@@ -485,9 +436,6 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("RemainingQuantity")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("ShoppingListRecipeId")
                         .HasColumnType("TEXT");
 
@@ -576,11 +524,11 @@ namespace ecocraft.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("LocalizedNameId")
+                    b.Property<decimal?>("LavishTalentValue")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("MaxLevel")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid?>("LocalizedNameId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -599,41 +547,6 @@ namespace ecocraft.Migrations
                     b.HasIndex("ServerId");
 
                     b.ToTable("Skill", (string)null);
-                });
-
-            modelBuilder.Entity("ecocraft.Models.Talent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("LocalizedNameId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("SkillId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TalentGroupName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocalizedNameId");
-
-                    b.HasIndex("SkillId");
-
-                    b.ToTable("Talent", (string)null);
                 });
 
             modelBuilder.Entity("ecocraft.Models.User", b =>
@@ -884,6 +797,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("HasLavishTalent")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Level")
                         .HasColumnType("INTEGER");
 
@@ -900,27 +816,6 @@ namespace ecocraft.Migrations
                     b.HasIndex("UserServerId");
 
                     b.ToTable("UserSkill", (string)null);
-                });
-
-            modelBuilder.Entity("ecocraft.Models.UserTalent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("TalentId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserServerId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TalentId");
-
-                    b.HasIndex("UserServerId");
-
-                    b.ToTable("UserTalent", (string)null);
                 });
 
             modelBuilder.Entity("CraftingTablePluginModule", b =>
@@ -971,28 +866,11 @@ namespace ecocraft.Migrations
                     b.Navigation("Server");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.DynamicValue", b =>
-                {
-                    b.HasOne("ecocraft.Models.Server", "Server")
-                        .WithMany("DynamicValues")
-                        .HasForeignKey("ServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Server");
-                });
-
             modelBuilder.Entity("ecocraft.Models.Element", b =>
                 {
                     b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
                         .WithMany("Elements")
                         .HasForeignKey("ItemOrTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ecocraft.Models.DynamicValue", "Quantity")
-                        .WithMany("QuantityElements")
-                        .HasForeignKey("QuantityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1004,11 +882,10 @@ namespace ecocraft.Migrations
 
                     b.HasOne("ecocraft.Models.Skill", "Skill")
                         .WithMany()
-                        .HasForeignKey("SkillId");
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ItemOrTag");
-
-                    b.Navigation("Quantity");
 
                     b.Navigation("Recipe");
 
@@ -1044,31 +921,6 @@ namespace ecocraft.Migrations
                     b.Navigation("Server");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.Modifier", b =>
-                {
-                    b.HasOne("ecocraft.Models.DynamicValue", "DynamicValue")
-                        .WithMany("Modifiers")
-                        .HasForeignKey("DynamicValueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ecocraft.Models.Skill", "Skill")
-                        .WithMany("Modifiers")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ecocraft.Models.Talent", "Talent")
-                        .WithMany("Modifiers")
-                        .HasForeignKey("TalentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("DynamicValue");
-
-                    b.Navigation("Skill");
-
-                    b.Navigation("Talent");
-                });
-
             modelBuilder.Entity("ecocraft.Models.PluginModule", b =>
                 {
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
@@ -1089,28 +941,17 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
                 {
-                    b.HasOne("ecocraft.Models.DynamicValue", "CraftMinutes")
-                        .WithMany("CraftMinutesRecipes")
-                        .HasForeignKey("CraftMinutesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ecocraft.Models.CraftingTable", "CraftingTable")
                         .WithMany("Recipes")
                         .HasForeignKey("CraftingTableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ecocraft.Models.DynamicValue", "Labor")
-                        .WithMany("LaborRecipes")
-                        .HasForeignKey("LaborId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
                         .WithMany("Recipes")
-                        .HasForeignKey("LocalizedNameId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ecocraft.Models.Server", "Server")
                         .WithMany("Recipes")
@@ -1123,11 +964,7 @@ namespace ecocraft.Migrations
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("CraftMinutes");
-
                     b.Navigation("CraftingTable");
-
-                    b.Navigation("Labor");
 
                     b.Navigation("LocalizedName");
 
@@ -1267,24 +1104,6 @@ namespace ecocraft.Migrations
                     b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
-                });
-
-            modelBuilder.Entity("ecocraft.Models.Talent", b =>
-                {
-                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
-                        .WithMany("Talents")
-                        .HasForeignKey("LocalizedNameId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ecocraft.Models.Skill", "Skill")
-                        .WithMany("Talents")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LocalizedName");
-
-                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
@@ -1450,40 +1269,11 @@ namespace ecocraft.Migrations
                     b.Navigation("UserServer");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.UserTalent", b =>
-                {
-                    b.HasOne("ecocraft.Models.Talent", "Talent")
-                        .WithMany("UserTalents")
-                        .HasForeignKey("TalentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ecocraft.Models.UserServer", "UserServer")
-                        .WithMany("UserTalents")
-                        .HasForeignKey("UserServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Talent");
-
-                    b.Navigation("UserServer");
-                });
-
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
                 {
                     b.Navigation("Recipes");
 
                     b.Navigation("UserCraftingTables");
-                });
-
-            modelBuilder.Entity("ecocraft.Models.DynamicValue", b =>
-                {
-                    b.Navigation("CraftMinutesRecipes");
-
-                    b.Navigation("LaborRecipes");
-
-                    b.Navigation("Modifiers");
-
-                    b.Navigation("QuantityElements");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Element", b =>
@@ -1509,8 +1299,6 @@ namespace ecocraft.Migrations
                     b.Navigation("Recipes");
 
                     b.Navigation("Skills");
-
-                    b.Navigation("Talents");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
@@ -1523,8 +1311,6 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Server", b =>
                 {
                     b.Navigation("CraftingTables");
-
-                    b.Navigation("DynamicValues");
 
                     b.Navigation("ItemOrTags");
 
@@ -1565,20 +1351,9 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.Skill", b =>
                 {
-                    b.Navigation("Modifiers");
-
                     b.Navigation("Recipes");
 
-                    b.Navigation("Talents");
-
                     b.Navigation("UserSkills");
-                });
-
-            modelBuilder.Entity("ecocraft.Models.Talent", b =>
-                {
-                    b.Navigation("Modifiers");
-
-                    b.Navigation("UserTalents");
                 });
 
             modelBuilder.Entity("ecocraft.Models.User", b =>
@@ -1608,8 +1383,6 @@ namespace ecocraft.Migrations
                     b.Navigation("UserSettings");
 
                     b.Navigation("UserSkills");
-
-                    b.Navigation("UserTalents");
                 });
 #pragma warning restore 612, 618
         }

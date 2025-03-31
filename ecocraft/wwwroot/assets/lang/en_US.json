@@ -50,6 +50,7 @@
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
+        "ShoppingList": "Shopping List",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Source Code",
@@ -166,6 +167,17 @@
         "Min": "Min",
         "Default": "Default",
         "Max": "Max"
+    },
+    "ShoppingList": {
+        "Settings": "Settings",
+        "RemoveShoppingList": "Remove shopping list",
+        "AddShoppingList": "Add shopping list",
+        "DeleteShoppingList": "Delete shopping list",
+        "NewShoppingList": "My new shopping list",
+        "NameLabel": "Shopping list name",
+        "ConfirmDeleteShoppingList": "Are you sure you want to delete shopping list {name}?",
+        "Skills": "Skills Configuration",
+        "CraftingTables": "Crafting Tables Configuration"
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",

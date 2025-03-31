@@ -400,6 +400,7 @@ public class UserServer
     public List<UserSetting> UserSettings { get; init; } = [];
     public List<UserRecipe> UserRecipes { get; init; } = [];
     public List<UserMargin> UserMargins { get; init; } = [];
+    public List<ShoppingList> ShoppingLists { get; init; } = [];
 
     public string GetPseudo()
     {
@@ -570,6 +571,81 @@ public class Server
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<DynamicValue> DynamicValues { get; set; } = [];
+}
+
+public class ShoppingList
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public string Name { get; set; } = "";
+
+    public UserServer UserServer { get; set; }
+    public List<ShoppingListRecipe> ShoppingListRecipes { get; set; } = [];
+    public List<ShoppingListCraftingTable> ShoppingListCraftingTables { get; set; } = [];
+    public List<ShoppingListSkill> ShoppingListSkills { get; set; } = [];
+
+    public List<ShoppingListRecipe> GetRootShoppingListRecipes()
+    {
+        return ShoppingListRecipes.Where(s => s.ParentShoppingListRecipe is null).ToList();
+    }
+}
+
+public class ShoppingListRecipe
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("ShoppingList")] public Guid ShoppingListId { get; set; }
+    [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
+    [ForeignKey("ShoppingListRecipe")] public Guid? ParentShoppingListRecipeId { get; set; }
+    [ForeignKey("ShoppingListCraftingTable")] public Guid ShoppingListCraftingTableId { get; set; }
+    [ForeignKey("ShoppingListSkill")] public Guid? ShoppingListSkillId { get; set; }
+    public decimal QuantityToCraft { get; set; }
+
+    public ShoppingList ShoppingList { get; set; }
+    public Recipe Recipe { get; set; }
+    public ShoppingListRecipe? ParentShoppingListRecipe { get; set; }
+    public ShoppingListCraftingTable ShoppingListCraftingTable { get; set; }
+    public ShoppingListSkill? ShoppingListSkill { get; set; }
+    public List<ShoppingListItemOrTag> ShoppingListItemOrTags { get; set; } = [];
+    public List<ShoppingListRecipe> ChildrenShoppingListRecipes { get; set; } = [];
+}
+
+public class ShoppingListItemOrTag
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("ShoppingListRecipe")] public Guid ShoppingListRecipeId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+    public decimal Quantity { get; set; }
+    public decimal RemainingQuantity { get; set; }
+    public bool IsIngredient { get; set; }
+
+    public ItemOrTag ItemOrTag { get; set; }
+    public ShoppingListRecipe ShoppingListRecipe { get; set; }
+}
+
+public class ShoppingListCraftingTable
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
+    [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
+    [ForeignKey("ShoppingList")] public Guid ShoppingListId { get; set; }
+
+    public CraftingTable CraftingTable { get; set; }
+    public PluginModule? PluginModule { get; set; }
+    public ShoppingList ShoppingList { get; set; }
+    public List<ShoppingListRecipe> ShoppingListRecipes { get; set; }
+}
+
+public class ShoppingListSkill
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("Skill")] public Guid SkillId { get; set; }
+    [ForeignKey("ShoppingList")] public Guid ShoppingListId { get; set; }
+    public int Level { get; set; }
+    public bool HasLavishTalent { get; set; }
+
+    public Skill Skill { get; set; }
+    public ShoppingList ShoppingList { get; set; }
+    public List<ShoppingListRecipe> ShoppingListRecipes { get; set; }
 }
 
 // Utils

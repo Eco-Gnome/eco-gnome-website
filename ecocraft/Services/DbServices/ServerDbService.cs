@@ -45,11 +45,11 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
         return context.Servers.FirstOrDefaultAsync(s => s.JoinCode == joinCode);
     }
 
-    public Server Add(Server talent)
+    public Server Add(Server server)
 	{
-		context.Servers.Add(talent);
+		context.Servers.Add(server);
 
-		return talent;
+		return server;
 	}
 
 	public void Update(Server server)

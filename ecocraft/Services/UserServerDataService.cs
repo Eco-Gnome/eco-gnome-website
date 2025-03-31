@@ -23,6 +23,7 @@ public class UserServerDataService(
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
     public List<UserMargin> UserMargins { get; private set; } = [];
+    
 
     public async Task RetrieveUserData(UserServer? userServer)
     {
@@ -474,4 +475,6 @@ public class UserServerDataService(
             !userCraftingTables.Contains(ct) && ct.Recipes.Select(r => r.Skill)
                 .Any(s => UserSkills.Select(us => us.Skill).Contains(s))).ToList();
     }
+
+
 }

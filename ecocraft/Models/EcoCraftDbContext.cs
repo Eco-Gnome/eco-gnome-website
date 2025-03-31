@@ -30,6 +30,11 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
+    public DbSet<ShoppingList> ShoppingLists { get; set; }
+    public DbSet<ShoppingListRecipe> ShoppingListRecipes { get; set; }
+    public DbSet<ShoppingListItemOrTag> ShoppingListItemOrTags { get; set; }
+    public DbSet<ShoppingListCraftingTable> ShoppingListCraftingTables { get; set; }
+    public DbSet<ShoppingListSkill> ShoppingListSkills { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -421,5 +426,92 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-	}
+
+		// * Shopping List Data
+		// Shopping List
+		modelBuilder.Entity<ShoppingList>()
+			.ToTable("ShoppingList");
+
+		modelBuilder.Entity<ShoppingList>()
+			.HasOne(sl => sl.UserServer)
+			.WithMany(us => us.ShoppingLists)
+			.HasForeignKey(sl => sl.UserServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Skill
+		modelBuilder.Entity<ShoppingListSkill>()
+			.ToTable("ShoppingListSkill");
+
+		modelBuilder.Entity<ShoppingListSkill>()
+			.HasOne(sls => sls.ShoppingList)
+			.WithMany(sl => sl.ShoppingListSkills)
+			.HasForeignKey(slr => slr.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListSkill>()
+			.HasOne(sls => sls.Skill)
+			.WithMany()
+			.HasForeignKey(sls => sls.SkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Crafting Table
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.ToTable("ShoppingListCraftingTable");
+
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.ShoppingList)
+			.WithMany(sl => sl.ShoppingListCraftingTables)
+			.HasForeignKey(slct => slct.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.CraftingTable)
+			.WithMany()
+			.HasForeignKey(sls => sls.CraftingTableId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.PluginModule)
+			.WithMany()
+			.HasForeignKey(sls => sls.PluginModuleId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Recipe
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.ToTable("ShoppingListRecipe");
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingList)
+			.WithMany(sl => sl.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingListCraftingTable)
+			.WithMany(slct => slct.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListCraftingTableId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingListSkill)
+			.WithMany(sls => sls.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListSkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Item Or Tag
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.ToTable("ShoppingListItemOrTag");
+
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.HasOne(sliot => sliot.ShoppingListRecipe)
+			.WithMany(slr => slr.ShoppingListItemOrTags)
+			.HasForeignKey(slr => slr.ShoppingListRecipeId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.HasOne(sliot => sliot.ItemOrTag)
+			.WithMany()
+			.HasForeignKey(slr => slr.ItemOrTagId)
+			.OnDelete(DeleteBehavior.Cascade);
+    }
 }
