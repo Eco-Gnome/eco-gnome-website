@@ -25,6 +25,9 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
+    public DbSet<UserShoppingList> UserShoppingLists { get; set; }
+    public DbSet<UserShoppingListRecipe> UserShoppingListRecipes { get; set; }
+    public DbSet<UserShoppingListElement> UserShoppingListElements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
