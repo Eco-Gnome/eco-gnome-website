@@ -242,7 +242,7 @@ public class ServerDataService(
         recipeDbService.Delete(recipe);
     }
 
-    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, int numberOfOtherElements, bool shouldReintegrate)
+    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, bool shouldReintegrate)
     {
         var element = new Element
         {
@@ -253,7 +253,7 @@ public class ServerDataService(
             IsDynamic = isDynamic,
             Skill = skill,
             LavishTalent = lavishTalent,
-            DefaultShare = index == 0 ? 0.8m : 0.2m / numberOfOtherElements,
+            DefaultShare = 0,
             DefaultIsReintegrated = shouldReintegrate
         };
 
@@ -262,7 +262,7 @@ public class ServerDataService(
         return element;
     }
 
-    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, int numberOfOtherElements, bool shouldReintegrate)
+    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, bool shouldReintegrate)
     {
         element.Recipe = recipe;
         element.ItemOrTag = itemOrTag;
@@ -271,7 +271,7 @@ public class ServerDataService(
         element.IsDynamic = isDynamic;
         element.Skill = skill;
         element.LavishTalent = lavishTalent;
-        element.DefaultShare = index == 0 ? 0.8m : 0.2m / numberOfOtherElements;
+        element.DefaultShare = 0;
         element.DefaultIsReintegrated = shouldReintegrate;
 
         elementDbService.Update(element);

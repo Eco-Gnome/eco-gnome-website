@@ -336,7 +336,6 @@ public class ImportDataService(
                             element.IsDynamic,
                             skill,
                             element.LavishTalent,
-                            element.Quantity < 0 ? recipe.Ingredients.Count - 1 : recipe.Products.Count - 1,
                             specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
                     }
@@ -351,12 +350,18 @@ public class ImportDataService(
                             element.IsDynamic,
                             skill,
                             element.LavishTalent,
-                            element.Quantity < 0 ? recipe.Ingredients.Count - 1 : recipe.Products.Count - 1,
                             specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
 
                         dbRecipe.Elements.Add(dbElement);
                     }
+                }
+
+                var productsToEdit = dbRecipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index).ToList();
+
+                for (int i = 0; i < productsToEdit.Count; i++)
+                {
+                    productsToEdit[i].DefaultShare = (productsToEdit.Count > 1 ? i == 0 ? 0.8m : 0.2m / (productsToEdit.Count - 1) : 1);
                 }
             }
             catch (Exception)
