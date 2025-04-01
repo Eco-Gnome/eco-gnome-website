@@ -92,7 +92,7 @@
                             <!-- unit price -->
                             <MudTd Class="px-1">
                                 @{
-                                    var canContributePrice = !context.Element.ItemOrTag.IsTag && PriceCalculatorService.GetCategorizedItemOrTags().ToBuy.Contains(context.Element.ItemOrTag);
+                                    var canContributePrice = !context.Element.ItemOrTag.IsTag && PriceCalculatorService.GetCategorizedItemOrTags().ToBuy.Contains(context.Element.ItemOrTag) && !context.IsReintegrated;
 
                                     <MudTooltip Disabled="@(context.Element.ItemOrTag.CurrentUserPrice!.Price is not null && canContributePrice)"
                                                 Text="@(LocalizationService.GetTranslation(canContributePrice

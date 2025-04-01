@@ -115,6 +115,16 @@ public class PriceCalculatorService(
                     if (debug) Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
                 }
 
+                var userElementProducts = userRecipe.Recipe.Elements.Where(e => e.IsProduct()).Select(e => e.CurrentUserElement!).ToList();
+                var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
+
+                // We calculate the element price of reintegrated products
+                foreach (var reintegratedProduct in reintegratedProducts)
+                {
+                    SetPriceOrMarginPrice(reintegratedProduct, reintegratedProduct.Element.ItemOrTag.CurrentUserPrice!, userRecipe);
+                    reintegratedProduct.Price *= -1;
+                }
+
                 if (userElementIngredients.Any(ue => ue.Price is null))
                 {
                     iterator++;
@@ -128,8 +138,6 @@ public class PriceCalculatorService(
                     continue;
                 }
 
-                var userElementProducts = userRecipe.Recipe.Elements.Where(e => e.IsProduct()).Select(e => e.CurrentUserElement!).ToList();
-                var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
 
                 if (reintegratedProducts.Any(ue => ue.Element.ItemOrTag.CurrentUserPrice!.Price is null))
                 {
@@ -160,9 +168,6 @@ public class PriceCalculatorService(
                 // We remove from ingredientCostSum, the price of reintegrated products
                 foreach (var reintegratedProduct in reintegratedProducts)
                 {
-                    SetPriceOrMarginPrice(reintegratedProduct, reintegratedProduct.Element.ItemOrTag.CurrentUserPrice!, userRecipe);
-
-                    reintegratedProduct.Price *= -1;
                     ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.GetRoundFactorQuantity(reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
                 }
 
