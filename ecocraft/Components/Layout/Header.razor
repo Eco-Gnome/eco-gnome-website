@@ -62,20 +62,21 @@
     {
         <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
                    Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+
+        <MudSelect T="LanguageCode"
+                   Class="select-dense"
+                   Value="@LocalizationService.CurrentLanguageCode"
+                   Dense="false"
+                   Variant="Variant.Outlined"
+                   SelectedValuesChanged="OnSelectedLanguageChanged"
+                   AnchorOrigin="Origin.BottomLeft"
+                   TransformOrigin="Origin.TopLeft">
+            @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
+            {
+                <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
+            }
+        </MudSelect>
     }
-    <MudSelect T="LanguageCode"
-               Class="select-dense"
-               Value="@LocalizationService.CurrentLanguageCode"
-               Dense="false"
-               Variant="Variant.Outlined"
-               SelectedValuesChanged="OnSelectedLanguageChanged"
-               AnchorOrigin="Origin.BottomLeft"
-               TransformOrigin="Origin.TopLeft">
-        @foreach (var supportedLanguages in LocalizedField.SupportedLanguageToCode)
-        {
-            <MudSelectItem T="LanguageCode" Value="@supportedLanguages.Value">@supportedLanguages.Key</MudSelectItem>
-        }
-    </MudSelect>
 </MudStack>
 
 @code {
