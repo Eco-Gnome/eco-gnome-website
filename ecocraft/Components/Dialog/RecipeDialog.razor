@@ -22,6 +22,29 @@
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <EcoIcon Item="@Recipe.CraftingTable" />
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
+
+                            @if (Recipe.CraftingTable.PluginModules.Count > 0)
+                            {
+                                var pluginModules = Recipe.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm)).ToList();
+
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIconButton Icon="@MDIIcons.Filled.Minus"
+                                                   Size="Size.Small"
+                                                   Disabled="@(pluginModules.FindIndex(pm => pm == Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule) <= -1)"
+                                                   OnClick="@(() => DecreasePluginModule(Recipe.CraftingTable.CurrentUserCraftingTable, pluginModules))"/>
+                                    <MudTooltip Text="@(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule is not null ? LocalizationService.GetTranslation(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule) + $" [{((1 - Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                        <EcoIcon Item="@Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
+                                    </MudTooltip>
+                                    <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                                                   Size="Size.Small"
+                                                   Disabled="@(pluginModules.FindIndex(pm => pm == Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule) == pluginModules.Count - 1)"
+                                                   OnClick="@(() => IncreasePluginModule(Recipe.CraftingTable.CurrentUserCraftingTable!, pluginModules))"/>
+                                        @if (Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule?.Percent is not null)
+                                        {
+                                            <MudText Color="Color.Warning">@LocalizationService.GetTranslation("RecipeDialog.ReductionOf") @(Math.Round(100 - Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule!.Percent * 100)) %</MudText>
+                                        }
+                                </MudStack>
+                            }
                         </MudStack>
                     </MudStack>
                 </MudItem>
@@ -35,6 +58,7 @@
                                 <EcoIcon Item="@Recipe.Skill" />
                                 <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
+                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.CurrentUserSkill!.Level) -> @(Math.Round(100 - Recipe.Skill.LaborReducePercent[Recipe.Skill.CurrentUserSkill.Level] * 100)) %)</MudText>
                             </MudStack>
                         }
                         else
@@ -488,6 +512,43 @@
                               .OrderBy(e => e.Index)
                               .Select(e => e.CurrentUserElement!)
                               .ToList();
+    }
+
+    private async Task IncreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
+    {
+        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+
+        if (currentIndex == pluginModules.Count - 1)
+        {
+            return;
+        }
+
+        userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
+    {
+        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+
+        if (currentIndex == -1)
+        {
+            return;
+        }
+
+        if (currentIndex == 0)
+        {
+            userCraftingTable.PluginModule = null;
+        }
+        else
+        {
+            userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+        }
+
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
     }
 
     private async Task UpdateShare(UserElement ue, decimal value)

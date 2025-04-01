@@ -62,6 +62,8 @@
     "Options": "Options",
     "Products": "Products",
     "RecipeDialog": {
+        "Level": "Level",
+        "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
