@@ -17,11 +17,12 @@ public class ReleaseVersionService
             "2025-04-02",
             "1.0.0 Release Candidate 1",
             """
-            - Server Data Copy: You can now import server data from an other server you have joined. It allows you to specify your own min/default/max prices on a server you play on, in your settlement, for instance.
-            - Default Reintegration: Recipes that obviously require products reintegration (molds, barrels, ...) now reintegrate these products by default.
-            - Default Share: Recipes that produce multiple items now offers 80% share for the first product, and the rest share the remaining 20%.
-            - Source Code & Contacts: Eco Gnome now displays the source code link and a way to contact its creators.
-            - Minor improvements: Better header loading, Button improvements in Server Admin page, small bug fixes...
+            - Server Data Import: You can now import data from other servers you’ve joined. This allows you to define your own min/default/max prices for use on a different server — for example, in your own settlement.
+            - Automatic Reintegration: Recipes that logically require reintegration of input items (e.g., molds, barrels) now do so automatically by default.
+            - Default Value Sharing: For recipes that yield multiple products, 80% of the value is now assigned to the first item, with the remaining 20% distributed across the others.
+            - Source Code & Contact: Eco Gnome now includes a link to its source code and a way to contact the development team.
+            - Graph View: This feature has been temporarily hidden until it can be reworked.
+            - Minor Enhancements: Faster header loading, improved buttons on the Server Admin page, and various bug fixes.
             """
         ),
         new ReleaseVersion(
@@ -29,9 +30,9 @@ public class ReleaseVersionService
             "2025-03-19",
             "Official third beta version",
             """
-            - Translations: The website has now been translated into multiple languages using AI. Feel free to help improve them by contributing on Github!
-            - Margin Calculation: You can now apply margin pricing between skills, ensuring fairer prices between citizens who buy items and those who produce them.
-            - Default Prices: Server admins can now set default item prices, which will apply automatically. Users can now view this configuration.
+            - Translations: The website is now available in multiple languages via AI-powered translations. You can help improve them by contributing on GitHub!
+            - Margin Calculation: Apply margin-based pricing between skills to ensure fairer trade between producers and buyers.
+            - Default Prices: Server admins can now define default prices for items. These are automatically applied and can be viewed by users.
             """
         ),
         new ReleaseVersion(
@@ -39,10 +40,10 @@ public class ReleaseVersionService
             "2024-12-09",
             "Official second beta version",
             """
-            - UI Improvements: UI has been improved to increase readability and usability of the website
-            - Eco Sync: Synchronize your prices in-game thanks to a chat command of the [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod)
-            - Translations: Website is designed to be translated in all Eco-supported languages. Translations are still WIP.
-            - Margin Calculation: You can now select between two types of margin calculation: MarkUp or GrossMargin
+            - UI Improvements: Enhanced interface for better readability and overall user experience.
+            - Eco Sync: Sync your in-game prices using a chat command from the [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod).
+            - Translation Support: The website is now structured to support all languages available in Eco (translations are still in progress).
+            - Margin Options: Choose between two margin calculation modes: Markup or Gross Margin.
             """
         ),
         new ReleaseVersion(
@@ -50,11 +51,12 @@ public class ReleaseVersionService
             "2024-11-18",
             "Official first beta version",
             """
-            - Price Calculator: calculate all prices of Eco Items, with advanced behaviours
-            - Graph View: visualize your chain of production
-            - User Management: Save your configuration online with simple account management
-            - Server Management: Export your server data thanks to our [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), and import your specific recipes and configurations
+            - Price Calculator: Compute item prices with advanced behavior and custom rules.
+            - Graph View: Visualize your production chains as interactive graphs.
+            - User Management: Save and load your configuration online with simple account handling.
+            - Server Management: Export your server data using the [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), and import custom recipes and settings.
             """
         ),
+
     ];
 }
