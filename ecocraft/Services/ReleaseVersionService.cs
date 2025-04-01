@@ -13,6 +13,18 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.0.0-rc1",
+            "2025-04-02",
+            "1.0.0 Release Candidate 1",
+            """
+            - Server Data Copy: You can now import server data from an other server you have joined. It allows you to specify your own min/default/max prices on a server you play on, in your settlement, for instance.
+            - Default Reintegration: Recipes that obviously require products reintegration (molds, barrels, ...) now reintegrate these products by default.
+            - Default Share: Recipes that produce multiple items now offers 80% share for the first product, and the rest share the remaining 20%.
+            - Source Code & Contacts: Eco Gnome now displays the source code link and a way to contact its creators.
+            - Minor improvements: Better header loading, Button improvements in Server Admin page, small bug fixes...
+            """
+        ),
+        new ReleaseVersion(
             "0.3.0",
             "2025-03-19",
             "Official third beta version",
