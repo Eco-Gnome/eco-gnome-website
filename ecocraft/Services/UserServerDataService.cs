@@ -12,8 +12,7 @@ public class UserServerDataService(
     UserRecipeDbService userRecipeDbService,
     UserMarginDbService userMarginDbService,
     ServerDataService serverDataService,
-    LocalizationService localizationService,
-    UserShoppingListDbService userShoppingListDbService)
+    LocalizationService localizationService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
@@ -22,7 +21,7 @@ public class UserServerDataService(
     public List<UserPrice> UserPrices { get; private set; } = [];
     public List<UserRecipe> UserRecipes { get; private set; } = [];
     public List<UserMargin> UserMargins { get; private set; } = [];
-    public List<UserShoppingList> UserShoppingLists { get; private set; } = [];
+    
 
     public async Task RetrieveUserData(UserServer? userServer)
     {
@@ -35,7 +34,6 @@ public class UserServerDataService(
             UserPrices = [];
             UserRecipes = [];
             UserMargins = [];
-            UserShoppingLists = [];
 
             return;
         }
@@ -47,10 +45,9 @@ public class UserServerDataService(
         var userPricesTask = userPriceDbService.GetByUserServerAsync(userServer);
         var userRecipesTask = userRecipeDbService.GetByUserServerAsync(userServer);
         var userMarginsTask = userMarginDbService.GetByUserServerAsync(userServer);
-        var UserShoppingListsTask = userShoppingListDbService.GetByUserServerAsync(userServer);
 
         await Task.WhenAll(userSkillsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
-            userRecipesTask, userMarginsTask, UserShoppingListsTask);
+            userRecipesTask, userMarginsTask);
 
         UserSkills = userSkillsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
@@ -59,7 +56,6 @@ public class UserServerDataService(
         UserPrices = userPricesTask.Result;
         UserRecipes = userRecipesTask.Result;
         UserMargins = userMarginsTask.Result;
-        UserShoppingLists = UserShoppingListsTask.Result;
 
         foreach (var skill in serverDataService.Skills)
         {
@@ -451,21 +447,5 @@ public class UserServerDataService(
                 .Any(s => UserSkills.Select(us => us.Skill).Contains(s))).ToList();
     }
 
-    public void createUserShoppingList(UserServer userServer)
-    {
-        var userShoppingList = new UserShoppingList
-        {
-            Name = localizationService.GetTranslation("UserServerDataService.NewShoppingList"),
-            UserServer = userServer,
-        };
 
-        UserShoppingLists.Add(userShoppingList);
-        userShoppingListDbService.Add(userShoppingList);
-    }
-
-    public void removeUserShoppingList(UserShoppingList userShoppingList)
-    {
-        UserShoppingLists.Remove(userShoppingList);
-        userShoppingListDbService.Delete(userShoppingList);
-    }
 }
