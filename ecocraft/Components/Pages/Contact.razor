@@ -1,0 +1,15 @@
+﻿@page "/contact"
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudContainer>
+    <MudPaper Class="pa-4">
+        <MudStack>
+            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("Contact.ContactInfo")</MudText>
+            <MudText Typo="Typo.body2">Zangdar: #zangdar1111</MudText>
+            <MudText Typo="Typo.body2">Joridan: #joridan</MudText>
+
+            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("Contact.JoinEcoDiscord"): <MudLink Href="https://discord.gg/eco">https://discord.gg/eco</MudLink></MudText>
+        </MudStack>
+    </MudPaper>
+</MudContainer>

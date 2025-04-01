@@ -3,13 +3,13 @@
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 
-<MudNavMenu>
+<MudNavMenu Style="display: flex; flex-direction: column; flex: 1 0 auto;">
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavCalculator")">
         <MudNavLink Href="" Match="NavLinkMatch.All" IconColor="Color.Primary" Icon="@Icons.Material.Filled.Balance">@LocalizationService.GetTranslation("NavMenu.NavCalculator")</MudNavLink>
     </MudTooltip>
-    <MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
+    <!--<MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
-    </MudTooltip>
+    </MudTooltip>-->
 
     @if (ContextService.CurrentUserServer?.IsAdmin ?? false)
     {
@@ -23,6 +23,13 @@
             <MudNavLink IconColor="Color.Error" Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
         </MudTooltip>
     }
+    <MudSpacer />
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Default" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.SourceCode")">
+        <MudNavLink IconColor="Color.Default" Target="_blank" Href="https://github.com/Eco-Gnome/eco-gnome-website" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.Github">@LocalizationService.GetTranslation("NavMenu.SourceCode")</MudNavLink>
+    </MudTooltip>
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Default" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.Contact")">
+        <MudNavLink IconColor="Color.Default" Href="contact" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.Contacts">@LocalizationService.GetTranslation("NavMenu.Contact")</MudNavLink>
+    </MudTooltip>
 </MudNavMenu>
 
 @code {

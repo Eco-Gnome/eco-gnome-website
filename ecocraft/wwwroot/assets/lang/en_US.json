@@ -50,7 +50,13 @@
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
         "NavGraph": "Graph View [WIP]",
-        "NavSuperAdmin": "Super Admin"
+        "NavSuperAdmin": "Super Admin",
+        "SourceCode": "Source Code",
+        "Contact": "Contact"
+    },
+    "Contact": {
+        "ContactInfo": "Contact us on Discord",
+        "JoinEcoDiscord": "If needed, join official ECO Discord"
     },
     "None": "None",
     "Options": "Options",
