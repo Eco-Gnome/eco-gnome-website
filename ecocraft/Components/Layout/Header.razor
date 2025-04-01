@@ -1,6 +1,5 @@
 ﻿@implements IDisposable
 @using ecocraft.Components.Dialog
-@using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
@@ -21,43 +20,49 @@
     <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("Header.EcoGnome")</MudText>
     <MudLink Style="position: relative;" Color="Color.Tertiary" OnClick="() => OpenReleaseDialog()">
         <MudText Color="Color.Tertiary" Class="mt-2 ml-n1">@ReleaseVersionService.ReleaseVersions.First().Title</MudText>
-        @if (_lastAcknowledgeVersion is null || _lastAcknowledgeVersion != ReleaseVersionService.ReleaseVersions.First().Date)
+        @if (_lastAcknowledgeVersion != ReleaseVersionService.ReleaseVersions.First().Date && _lastAcknowledgeVersion is not null)
         {
             <MudText Color="Color.Warning"
                      Style="position: absolute; top: -10px; left: 5px; transform: rotate(-15deg)">@LocalizationService.GetTranslation("Header.New")</MudText>
         }
     </MudLink>
-    <MudSelect T="Server"
-               Class="select-dense server-select"
-               Value="@ContextService.CurrentServer"
-               Style="min-width:200px;padding-left:10px"
-               Label="@LocalizationService.GetTranslation("Header.MyServers")"
-               Dense="false"
-               Underline="false"
-               Variant="Variant.Outlined"
-               SelectedValuesChanged="OnSelectedServerChanged"
-               AnchorOrigin="Origin.BottomLeft"
-               TransformOrigin="Origin.TopLeft">
-        @foreach (var server in ContextService.AvailableServers)
-        {
-            <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
-        }
-    </MudSelect>
-    <MudTooltip Text="@LocalizationService.GetTranslation("Header.AddServer")">
-        <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
-                       Size="Size.Medium"
-                       aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
-                       Color="Color.Tertiary"
-                       OnClick="OpenServerDialog"/>
-    </MudTooltip>
+
+    @if (!IsLoading)
+    {
+        <MudSelect T="Server"
+                   Class="select-dense server-select"
+                   Value="@ContextService.CurrentServer"
+                   Style="min-width:200px;padding-left:10px"
+                   Label="@LocalizationService.GetTranslation("Header.MyServers")"
+                   Dense="false"
+                   Underline="false"
+                   Variant="Variant.Outlined"
+                   SelectedValuesChanged="OnSelectedServerChanged"
+                   AnchorOrigin="Origin.BottomLeft"
+                   TransformOrigin="Origin.TopLeft">
+            @foreach (var server in ContextService.AvailableServers)
+            {
+                <MudSelectItem T="Server" Value="@server">@server.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudTooltip Text="@LocalizationService.GetTranslation("Header.AddServer")">
+            <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
+                           Size="Size.Medium"
+                           aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
+                           Color="Color.Tertiary"
+                           OnClick="OpenServerDialog"/>
+        </MudTooltip>
+    }
 </MudStack>
 
-<MudSpacer />
+<MudSpacer/>
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
-    <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
-               Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
-
+    @if (!IsLoading)
+    {
+        <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
+                   Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+    }
     <MudSelect T="LanguageCode"
                Class="select-dense"
                Value="@LocalizationService.CurrentLanguageCode"
@@ -75,6 +80,9 @@
 
 @code {
     [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
     public bool IsDarkMode { get; set; }
 
     [Parameter]
@@ -83,9 +91,9 @@
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     private string? _lastAcknowledgeVersion;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _lastAcknowledgeVersion = await LocalStorageService.GetItem("LastAcknowledgedVersion");
+        _lastAcknowledgeVersion = await LocalStorageService.GetItem("LastAcknowledgedVersion") ?? "";
 
         ContextService.OnContextChanged += StateHasChanged;
     }

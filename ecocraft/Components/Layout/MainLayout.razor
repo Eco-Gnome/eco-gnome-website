@@ -15,10 +15,7 @@
     <MudAppBar Elevation="2" Class="app-bar">
         <MudIconButton Icon="@MDIIcons.Filled.Menu" Size="Size.Medium" OnClick="() => ToggleMenu()" />
 
-        @if (!_isLoading)
-        {
-            <Header @bind-isDarkMode="_isDarkMode"></Header>
-        }
+        <Header IsLoading="@_isLoading" @bind-isDarkMode="_isDarkMode"></Header>
     </MudAppBar>
 
     <MudDrawer @bind-Open="@_menuOpened" Variant="@DrawerVariant.Mini" OpenMiniOnHover="false" ClipMode="DrawerClipMode.Docked" Elevation="4">
