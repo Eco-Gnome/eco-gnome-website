@@ -5,13 +5,18 @@ namespace ecocraft.Services.DbServices;
 
 public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Server>
 {
-	public Task<List<Server>> GetAllAsync()
+	public async Task<List<Server>> GetAllAsync()
 	{
-		return context.Servers
+		var servers = await context.Servers
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.User)
 			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
+
+		foreach (var server in servers)
+			server.IsEmpty = !await context.Entry(server).Collection(s => s.Skills).Query().AnyAsync();
+
+		return servers;
 	}
 
 	public Task<List<Server>> GetAllDefaultAsync()

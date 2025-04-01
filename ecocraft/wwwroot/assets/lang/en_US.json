@@ -172,6 +172,7 @@
         "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
+        "DataCol": "Data",
         "IdCol": "Id",
         "ServerTable": {
             "AdminsCol": "Admins",

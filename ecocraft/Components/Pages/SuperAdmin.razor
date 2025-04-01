@@ -110,6 +110,7 @@
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.ServerNameCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.DataCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("JoinCode")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol")</MudTh>
@@ -140,6 +141,9 @@
                         <MudTooltip Text="@context.CreationDateTime.ToString()">
                             <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
                         </MudTooltip>
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Size="Size.Small" Color="Color.Default" Icon="@(context.IsEmpty ? MDIIcons.Outline.Battery : MDIIcons.Filled.BatteryHigh)"/>
                     </MudTd>
                     <MudTd>
                         @context.JoinCode

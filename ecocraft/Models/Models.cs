@@ -375,6 +375,9 @@ public class Server
     public DateTime CreationDateTime { get; set; }
 	public string JoinCode { get; set; }
 
+    [NotMapped]
+    public bool IsEmpty { get; set; }
+
 	public List<UserServer> UserServers { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
