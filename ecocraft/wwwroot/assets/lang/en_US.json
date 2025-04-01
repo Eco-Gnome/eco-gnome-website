@@ -110,6 +110,7 @@
             "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!",
             "UpdateJoinCode": "Are you sure you want to refresh your JoinCode? This will disabled any previously generated codes!"
         },
+        "RefreshJoinCodeTooltip": "Refresh Join Code",
         "EcoServerId": "Eco Server Id",
         "EcoServerIdTooltip": "This field will be filled once this server is registered in-game thanks to the EcoGnomeMod.",
         "JoinCodeTooltip": "Give this code to your players so they can join your server.",

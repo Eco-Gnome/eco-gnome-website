@@ -41,10 +41,13 @@
 							              Value="@ContextService.CurrentServer!.JoinCode"
 							              Label="@LocalizationService.GetTranslation("JoinCode")"
 							              Adornment="Adornment.End"
-							              AdornmentColor="Color.Tertiary"
-							              AdornmentIcon="@Icons.Material.Filled.Refresh"
-							              OnAdornmentClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"
+							              AdornmentColor="Color.Default"
+							              AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
+							              OnAdornmentClick="@(() => CopyToClipboard(ContextService.CurrentServer!.JoinCode))"
 							              Variant="Variant.Outlined"/>
+						</MudTooltip>
+						<MudTooltip RootStyle="display: flex; flex: 0 0 auto; align-items: center" Text="@LocalizationService.GetTranslation("ServerManagement.RefreshJoinCodeTooltip")">
+							<MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => UpdateJoinCode(ContextService.CurrentUserServer!))"/>
 						</MudTooltip>
 						<MudTooltip RootClass="flex-1" Text="@LocalizationService.GetTranslation("ServerManagement.EcoServerIdTooltip")">
 							<MudTextField Value="@ContextService.CurrentServer!.EcoServerId"
@@ -561,6 +564,12 @@
 			itemOrTag.DefaultPrice = null;
 		}
 		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task CopyToClipboard(string text)
+	{
+		await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+		Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarCopy"), Severity.Info);
 	}
 
 	private async Task OnClearMaxPrices(List<ItemOrTag> itemOrTags)
