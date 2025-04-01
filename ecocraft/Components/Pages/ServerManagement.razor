@@ -387,7 +387,11 @@
 
 	protected override Task OnInitializedAsync()
 	{
-		ContextService.OnContextChanged += StateHasChanged;
+		ContextService.OnContextChanged += () =>
+		{
+			RecalculateStats();
+			StateHasChanged();
+		};
 
 		RecalculateStats();
 
@@ -427,6 +431,7 @@
 		_showCopyExistingServerLoader = false;
 		_copyExistingServerClicked = false;
 
+		RecalculateStats();
 		StateHasChanged();
 	}
 
