@@ -255,8 +255,8 @@ public class ImportDataService(
             {
                 if (nameOccurence.TryGetValue(recipe.Name, out var index))
                 {
-                    recipe.Name += $"__{index}";
                     nameOccurence[recipe.Name] += 1;
+                    recipe.Name += $"__{index}";
                 }
                 else
                 {
