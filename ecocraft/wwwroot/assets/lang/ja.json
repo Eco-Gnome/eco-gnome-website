@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "自分で編集することはできません",
             "UploadOk": "アップロード成功",
-            "UploadNok": "アップロードエラー",
-            "UploadPartiallyNok": "警告{errorCount}要素がインポートされていません：{errorNames}です。MOD とサーバーの編集を見直してください。Eco Gnome 管理者にお問い合わせください。"
+            "UploadNok": "アップロードエラー"
         }
     },
     "Skill": "スキル",

@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",
             "UploadOk": "Upload Successful",
-            "UploadNok": "Upload Error",
-            "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported: {errorNames}. Review your mods and server edits. You can contact Eco Gnome admins for help."
+            "UploadNok": "Upload Error"
         }
     },
     "Skill": "Skill",

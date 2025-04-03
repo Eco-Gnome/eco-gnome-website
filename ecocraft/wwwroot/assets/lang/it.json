@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Non può modificarlo da solo",
             "UploadOk": "Caricamento riuscito",
-            "UploadNok": "Errore di caricamento",
-            "UploadPartiallyNok": "Attenzione: gli elementi {errorCount} non sono stati importati: {errorNames}. Riveda le sue mod e le modifiche al server. Può contattare gli amministratori di Eco Gnome per chiedere aiuto."
+            "UploadNok": "Errore di caricamento"
         }
     },
     "Skill": "Abilità",

@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Nie mogą Państwo edytować pliku samodzielnie",
             "UploadOk": "Przesyłanie powiodło się",
-            "UploadNok": "Błąd przesyłania",
-            "UploadPartiallyNok": "Ostrzeżenie: {errorCount} elementy nie zostały zaimportowane: {errorNames}. Proszę przejrzeć swoje mody i zmiany na serwerze. Mogą Państwo skontaktować się z administratorami Eco Gnome w celu uzyskania pomocy."
+            "UploadNok": "Błąd przesyłania"
         }
     },
     "Skill": "Umiejętność",

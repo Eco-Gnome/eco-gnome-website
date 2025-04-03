@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "No se puede editar",
             "UploadOk": "Carga correcta",
-            "UploadNok": "Error de carga",
-            "UploadPartiallyNok": "Advertencia: {errorCount} elementos no han sido importados: {errorNames}. Revise sus mods y ediciones del servidor. Puede ponerse en contacto con los administradores de Eco Gnome para obtener ayuda."
+            "UploadNok": "Error de carga"
         }
     },
     "Skill": "Habilidad",

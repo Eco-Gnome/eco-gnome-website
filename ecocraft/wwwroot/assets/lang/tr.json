@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Kendinizi düzenleyemezsiniz",
             "UploadOk": "Yükleme Başarılı",
-            "UploadNok": "Yükleme Hatası",
-            "UploadPartiallyNok": "Uyarı: {errorCount} öğeleri içe aktarılmadı: {errorNames}. Modlarınızı ve sunucu düzenlemelerinizi gözden geçirin. Yardım için Eco Gnome yöneticileriyle iletişime geçebilirsiniz."
+            "UploadNok": "Yükleme Hatası"
         }
     },
     "Skill": "Beceri",

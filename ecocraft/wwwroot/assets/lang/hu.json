@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Nem szerkesztheted magad",
             "UploadOk": "Feltöltés sikeres",
-            "UploadNok": "Feltöltési hiba",
-            "UploadPartiallyNok": "Figyelmeztetés: {errorCount} elemek nem lettek importálva: {errorNames}. Tekintse át a modokat és a szerver szerkesztéseit. Segítségért fordulhatsz az Eco Gnome adminokhoz."
+            "UploadNok": "Feltöltési hiba"
         }
     },
     "Skill": "Skill",

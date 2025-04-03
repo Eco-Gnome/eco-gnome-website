@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Nu vă puteți edita singur",
             "UploadOk": "Încărcare reușită",
-            "UploadNok": "Eroare la încărcare",
-            "UploadPartiallyNok": "Avertisment: {errorCount} elementele nu au fost importate: {errorNames}. Revizuiește-ți modurile și editările serverului. Puteți contacta administratorii Eco Gnome pentru ajutor."
+            "UploadNok": "Eroare la încărcare"
         }
     },
     "Skill": "Abilități",

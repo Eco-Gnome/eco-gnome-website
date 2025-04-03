@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "직접 편집할 수 없습니다",
             "UploadOk": "업로드 성공",
-            "UploadNok": "업로드 오류",
-            "UploadPartiallyNok": "경고: {오류 수} 요소를 가져오지 못했습니다: {오류 이름}. 모드와 서버 편집 내용을 검토하세요. 에코 그놈 관리자에게 도움을 요청할 수 있습니다."
+            "UploadNok": "업로드 오류"
         }
     },
     "Skill": "스킬",

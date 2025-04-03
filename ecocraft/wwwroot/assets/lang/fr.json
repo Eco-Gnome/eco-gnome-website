@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Vous ne pouvez pas vous éditer vous-même",
             "UploadOk": "Téléchargement réussi",
-            "UploadNok": "Erreur de téléchargement",
-            "UploadPartiallyNok": "Attention : les éléments {errorCount} n'ont pas été importés : {errorNames}. Passez en revue vos mods et vos modifications de serveur. Vous pouvez contacter les administrateurs d'Eco Gnome pour obtenir de l'aide."
+            "UploadNok": "Erreur de téléchargement"
         }
     },
     "Skill": "Compétence",

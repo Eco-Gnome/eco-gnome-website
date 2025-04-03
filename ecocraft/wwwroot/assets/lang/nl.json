@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "U kunt het niet zelf bewerken",
             "UploadOk": "Upload succesvol",
-            "UploadNok": "Fout bij uploaden",
-            "UploadPartiallyNok": "Waarschuwing: {errorCount} elementen zijn niet geïmporteerd: {errorNames}. Controleer uw mods en serverbewerkingen. U kunt contact opnemen met Eco Gnome admins voor hulp."
+            "UploadNok": "Fout bij uploaden"
         }
     },
     "Skill": "Vaardigheid",

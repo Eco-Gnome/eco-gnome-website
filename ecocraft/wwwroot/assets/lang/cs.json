@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Nemůžete jej sami upravovat",
             "UploadOk": "Nahrání proběhlo úspěšně",
-            "UploadNok": "Chyba při nahrávání",
-            "UploadPartiallyNok": "Upozornění: Při zadávání dat do souboru se zobrazí chybová hláška: prvky {errorCount} nebyly importovány: {errorNames}. Zkontrolujte své mody a úpravy serveru. Pro pomoc se můžete obrátit na administrátory Eco Gnome."
+            "UploadNok": "Chyba při nahrávání"
         }
     },
     "Skill": "Dovednost",

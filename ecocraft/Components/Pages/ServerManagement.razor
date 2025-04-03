@@ -502,7 +502,23 @@
 			}
 			else
 			{
-				Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNok", errorCount.ToString(), string.Join(", ", recipeErrorNames))}", Severity.Warning);
+				Snackbar.Add(
+					@<div>
+						@LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNok", errorCount.ToString())
+						<ul>
+							@foreach (var recipeErrorName in recipeErrorNames)
+							{
+								<li>- @recipeErrorName</li>
+							}
+						</ul>
+						@LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNokEnd")
+					</div>,
+					Severity.Warning,
+					config =>
+					{
+						config.RequireInteraction = true;
+					});
+
 			}
 
 			RecalculateStats();

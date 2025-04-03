@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Du kan ikke redigere selv",
             "UploadOk": "Upload vellykket",
-            "UploadNok": "Fejl ved upload",
-            "UploadPartiallyNok": "Advarsel: {errorCount} elementer er ikke blevet importeret: {errorNames}. Gennemgå dine mods og serverredigeringer. Du kan kontakte Eco Gnome-administratorerne for at få hjælp."
+            "UploadNok": "Fejl ved upload"
         }
     },
     "Skill": "Færdighed",

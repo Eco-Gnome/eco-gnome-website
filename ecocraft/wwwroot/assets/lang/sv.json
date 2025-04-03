@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Du kan inte redigera dig själv",
             "UploadOk": "Uppladdning lyckad",
-            "UploadNok": "Fel vid uppladdning",
-            "UploadPartiallyNok": "Warning (Varning): {errorCount} element har inte importerats: {felNamn}. Granska dina mods och serverredigeringar. Du kan kontakta Eco Gnome-administratörer för hjälp."
+            "UploadNok": "Fel vid uppladdning"
         }
     },
     "Skill": "Färdighet",

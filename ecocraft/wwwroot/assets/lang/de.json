@@ -130,8 +130,7 @@
         "Snackbar": {
             "CantEditYourself": "Sie können sie nicht selbst bearbeiten",
             "UploadOk": "Upload erfolgreich",
-            "UploadNok": "Fehler beim Hochladen",
-            "UploadPartiallyNok": "Warnung: {errorCount} Elemente wurden nicht importiert: {errorNames}. Überprüfen Sie Ihre Mods und Server-Edits. Sie können die Eco Gnome-Administratoren um Hilfe bitten."
+            "UploadNok": "Fehler beim Hochladen"
         }
     },
     "Skill": "Geschicklichkeit",

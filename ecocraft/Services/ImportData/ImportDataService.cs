@@ -265,7 +265,16 @@ public class ImportDataService(
 
                 var dbRecipe = serverDataService.Recipes.FirstOrDefault(p => p.Name == recipe.Name);
                 var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == recipe.RequiredSkill);
-                var dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipe.CraftingTable);
+                CraftingTable dbCraftingTable;
+                try
+                {
+                    dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipe.CraftingTable);
+
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Missing CraftingTable: " + recipe.CraftingTable, e);
+                }
 
                 if (dbRecipe is null)
                 {
@@ -316,7 +325,16 @@ public class ImportDataService(
                 foreach (var element in recipe.Ingredients.Concat(recipe.Products))
                 {
                     var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
-                    var dbItemOrTag = serverDataService.ItemOrTags.First(e => e.Name == element.ItemOrTag);
+                    ItemOrTag dbItemOrTag;
+
+                    try
+                    {
+                        dbItemOrTag = serverDataService.ItemOrTags.First(e => e.Name == element.ItemOrTag);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Missing ItemOrTag: " + element.ItemOrTag, e);
+                    }
 
                     // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
                     // so we need to be sure dbElement is the correct-retrieved element)
@@ -364,10 +382,10 @@ public class ImportDataService(
                     productsToEdit[i].DefaultShare = (productsToEdit.Count > 1 ? i == 0 ? 0.8m : 0.2m / (productsToEdit.Count - 1) : 1);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 errorCount++;
-                errorNames.Add(recipe.Name);
+                errorNames.Add(recipe.Name + $" ({ex.Message})");
             }
         }
 
