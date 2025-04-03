@@ -478,7 +478,7 @@
 
 		try
 		{
-			await using var stream = file.OpenReadStream(10_000_000);
+			await using var stream = file.OpenReadStream(40_000_000);
 			using var memoryStream = new MemoryStream();
 			await stream.CopyToAsync(memoryStream);
 
