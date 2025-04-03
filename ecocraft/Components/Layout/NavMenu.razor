@@ -7,6 +7,9 @@
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavCalculator")">
         <MudNavLink Href="" Match="NavLinkMatch.All" IconColor="Color.Primary" Icon="@Icons.Material.Filled.Balance">@LocalizationService.GetTranslation("NavMenu.NavCalculator")</MudNavLink>
     </MudTooltip>
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.ShoppingList")">
+        <MudNavLink IconColor="Color.Primary" Href="shopping-list" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.Cart">@LocalizationService.GetTranslation("NavMenu.ShoppingList")</MudNavLink>
+    </MudTooltip>
     <!--<MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>-->
@@ -22,7 +25,6 @@
         <MudTooltip RootClass="mud-nav-item" Color="Color.Error" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")">
             <MudNavLink IconColor="Color.Error" Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
         </MudTooltip>
-        <MudNavLink IconColor="Color.Error" Href="shopping-lists" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ShoppingCart">Shopping lists</MudNavLink>
     }
     <MudSpacer />
     <MudTooltip RootClass="mud-nav-item" Color="Color.Default" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.SourceCode")">

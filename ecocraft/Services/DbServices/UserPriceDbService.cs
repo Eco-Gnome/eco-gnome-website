@@ -33,12 +33,12 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 			.FirstOrDefaultAsync(up => up.Id == id);
 	}
 
-	public UserPrice Add(UserPrice userPrice)
+	public UserPrice Add(UserPrice shoppingListCraftingTable)
 	{
-		context.UserPrices.Add(userPrice);
-		userPrice.ItemOrTag.CurrentUserPrice = userPrice;
+		context.UserPrices.Add(shoppingListCraftingTable);
+		shoppingListCraftingTable.ItemOrTag.CurrentUserPrice = shoppingListCraftingTable;
 
-		return userPrice;
+		return shoppingListCraftingTable;
 	}
 
 	public void Update(UserPrice userPrice)

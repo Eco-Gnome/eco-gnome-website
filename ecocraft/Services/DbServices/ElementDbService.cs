@@ -17,11 +17,11 @@ public class ElementDbService(EcoCraftDbContext context) : IGenericDbService<Ele
 			.FirstOrDefaultAsync(p => p.Id == id);
 	}
 
-	public Element Add(Element element)
+	public Element Add(Element shoppingListCraftingTable)
 	{
-		context.Elements.Add(element);
+		context.Elements.Add(shoppingListCraftingTable);
 
-		return element;
+		return shoppingListCraftingTable;
 	}
 
 	public void Update(Element element)

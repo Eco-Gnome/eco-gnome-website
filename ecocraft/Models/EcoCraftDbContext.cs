@@ -25,9 +25,11 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
-    public DbSet<UserShoppingList> UserShoppingLists { get; set; }
-    public DbSet<UserShoppingListRecipe> UserShoppingListRecipes { get; set; }
-    public DbSet<UserShoppingListItemOrTag> UserShoppingListElements { get; set; }
+    public DbSet<ShoppingList> ShoppingLists { get; set; }
+    public DbSet<ShoppingListRecipe> ShoppingListRecipes { get; set; }
+    public DbSet<ShoppingListItemOrTag> ShoppingListItemOrTags { get; set; }
+    public DbSet<ShoppingListCraftingTable> ShoppingListCraftingTables { get; set; }
+    public DbSet<ShoppingListSkill> ShoppingListSkills { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -345,72 +347,91 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		// * Shopping List Data
+		// Shopping List
+		modelBuilder.Entity<ShoppingList>()
+			.ToTable("ShoppingList");
 
-        // ─────────────────────────────────────────────────────────────────
-        // 1) UserShoppingList -> UserShoppingListRecipe (One-to-many)
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingList>()
-            .HasMany(list => list.UserShoppingListRecipes)
-            .WithOne(recipe => recipe.UserShoppingList)
-            .HasForeignKey(recipe => recipe.UserShoppingListId)
-            .OnDelete(DeleteBehavior.Cascade);
-        // Ici, si on supprime une UserShoppingList, 
-        // toutes ses Recipes associées seront aussi supprimées.
+		modelBuilder.Entity<ShoppingList>()
+			.HasOne(sl => sl.UserServer)
+			.WithMany(us => us.ShoppingLists)
+			.HasForeignKey(sl => sl.UserServerId)
+			.OnDelete(DeleteBehavior.Cascade);
 
-        // ─────────────────────────────────────────────────────────────────
-        // 2) UserShoppingList -> UserShoppingListElement (One-to-many)
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingList>()
-            .HasMany(list => list.UserShoppingListItemOrTagToBuy)
-            .WithOne(element => element.UserShoppingList)
-            .HasForeignKey(element => element.UserShoppingListId)
-            .OnDelete(DeleteBehavior.Cascade);
-        // De même, si on supprime la liste, 
-        // on supprime les éléments qui y sont rattachés.
+		// Shopping List Skill
+		modelBuilder.Entity<ShoppingListSkill>()
+			.ToTable("ShoppingListSkill");
 
-        // ─────────────────────────────────────────────────────────────────
-        // 3) Auto-référencement : ParentRecipe -> ChildrenRecipes
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingListRecipe>()
-            .HasOne(r => r.ParentRecipe)
-            .WithMany(r => r.ChildrenRecipes)
-            .HasForeignKey(r => r.ParentRecipeId)
-            .OnDelete(DeleteBehavior.Restrict);
-        // On utilise souvent Restrict pour éviter des suppressions en cascade
-        // qui risqueraient de "couper" la totalité de la branche.
+		modelBuilder.Entity<ShoppingListSkill>()
+			.HasOne(sls => sls.ShoppingList)
+			.WithMany(sl => sl.ShoppingListSkills)
+			.HasForeignKey(slr => slr.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
 
-        // ─────────────────────────────────────────────────────────────────
-        // 4) UserShoppingListRecipe -> Recipe (Many-to-one)
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingListRecipe>()
-            .HasOne(r => r.Recipe)
-            .WithMany() // ou .WithMany(x => x.UserShoppingListRecipes) si tu veux naviguer depuis Recipe
-            .HasForeignKey(r => r.RecipeId)
-            .OnDelete(DeleteBehavior.Restrict);
-        // Restrict : on ne supprime pas la Recipe en base si on supprime l'association.
-        // (À adapter selon ta logique.)
+		modelBuilder.Entity<ShoppingListSkill>()
+			.HasOne(sls => sls.Skill)
+			.WithMany()
+			.HasForeignKey(sls => sls.SkillId)
+			.OnDelete(DeleteBehavior.Cascade);
 
-        // ─────────────────────────────────────────────────────────────────
-        // 5) UserShoppingListRecipe -> UserCraftingTable (Many-to-one)
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingListRecipe>()
-            .HasOne(r => r.UserCraftingTable)
-            .WithMany() // ou .WithMany(ct => ct.SomeCollection) si tu souhaites la navigation inverse
-            .HasForeignKey(r => r.UserCraftingTableId)
-            .OnDelete(DeleteBehavior.Restrict);
-        // Pour éviter qu'une suppression de la table supprime toutes les recettes, etc.
+		// Shopping List Crafting Table
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.ToTable("ShoppingListCraftingTable");
 
-        // ─────────────────────────────────────────────────────────────────
-        // 6) UserShoppingListElement -> ItemOrTag (Many-to-one)
-        // ─────────────────────────────────────────────────────────────────
-        modelBuilder.Entity<UserShoppingListItemOrTag>()
-            .HasOne(e => e.ItemOrTag)
-            .WithMany() // ou .WithMany(iot => iot.ShoppingListElements) si tu veux la navigation inverse
-            .HasForeignKey(e => e.ItemOrTagId)
-            .OnDelete(DeleteBehavior.Restrict);
-        // On ne veut pas forcément supprimer un ItemOrTag si on supprime le lien
-        // (sinon, toutes les listes de courses utilisant cet item seraient impactées).
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.ShoppingList)
+			.WithMany(sl => sl.ShoppingListCraftingTables)
+			.HasForeignKey(slct => slct.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.CraftingTable)
+			.WithMany()
+			.HasForeignKey(sls => sls.CraftingTableId)
+			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<ShoppingListCraftingTable>()
+			.HasOne(slct => slct.PluginModule)
+			.WithMany()
+			.HasForeignKey(sls => sls.PluginModuleId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Recipe
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.ToTable("ShoppingListRecipe");
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingList)
+			.WithMany(sl => sl.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingListCraftingTable)
+			.WithMany(slct => slct.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListCraftingTableId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListRecipe>()
+			.HasOne(slr => slr.ShoppingListSkill)
+			.WithMany(sls => sls.ShoppingListRecipes)
+			.HasForeignKey(slr => slr.ShoppingListSkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Shopping List Item Or Tag
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.ToTable("ShoppingListItemOrTag");
+
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.HasOne(sliot => sliot.ShoppingListRecipe)
+			.WithMany(slr => slr.ShoppingListItemOrTags)
+			.HasForeignKey(slr => slr.ShoppingListRecipeId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ShoppingListItemOrTag>()
+			.HasOne(sliot => sliot.ItemOrTag)
+			.WithMany()
+			.HasForeignKey(slr => slr.ItemOrTagId)
+			.OnDelete(DeleteBehavior.Cascade);
     }
 }

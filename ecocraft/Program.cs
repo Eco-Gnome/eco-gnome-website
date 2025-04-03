@@ -57,9 +57,11 @@ builder.Services.AddScoped<UserRecipeDbService>();
 builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
-builder.Services.AddScoped<UserShoppingListDbService>();
-builder.Services.AddScoped<UserShoppingListRecipeDbService>();
-builder.Services.AddScoped<UserShoppingListElementDbService>();
+builder.Services.AddScoped<ShoppingListDbService>();
+builder.Services.AddScoped<ShoppingListRecipeDbService>();
+builder.Services.AddScoped<ShoppingListItemOrTagDbService>();
+builder.Services.AddScoped<ShoppingListCraftingTableDbService>();
+builder.Services.AddScoped<ShoppingListSkillDbService>();
 
 // Business Services
 builder.Services.AddScoped<ContextService>();
@@ -67,7 +69,8 @@ builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
 builder.Services.AddScoped<UserServerDataService>();
-builder.Services.AddScoped<UserShoppingListsDataService>();
+builder.Services.AddScoped<ShoppingListDataService>();
+builder.Services.AddScoped<ShoppingListService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();

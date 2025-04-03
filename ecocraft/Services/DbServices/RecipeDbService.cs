@@ -35,11 +35,11 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 			.FirstOrDefaultAsync(r => r.Id == id);
 	}
 
-	public Recipe Add(Recipe recipe)
+	public Recipe Add(Recipe shoppingListCraftingTable)
 	{
-		context.Recipes.Add(recipe);
+		context.Recipes.Add(shoppingListCraftingTable);
 
-		return recipe;
+		return shoppingListCraftingTable;
 	}
 
 	public void Update(Recipe recipe)

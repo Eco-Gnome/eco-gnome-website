@@ -31,11 +31,11 @@ public class SkillDbService(EcoCraftDbContext context)
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
 
-	public Skill Add(Skill skill)
+	public Skill Add(Skill shoppingListCraftingTable)
 	{
-		context.Skills.Add(skill);
+		context.Skills.Add(shoppingListCraftingTable);
 
-		return skill;
+		return shoppingListCraftingTable;
 	}
 
 	public void Update(Skill skill)

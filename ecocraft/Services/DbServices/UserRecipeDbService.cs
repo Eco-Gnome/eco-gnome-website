@@ -25,12 +25,12 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
             .FirstOrDefaultAsync(up => up.Id == id);
     }
 
-    public UserRecipe Add(UserRecipe userRecipe)
+    public UserRecipe Add(UserRecipe shoppingListCraftingTable)
     {
-        context.UserRecipes.Add(userRecipe);
-        userRecipe.Recipe.CurrentUserRecipe = userRecipe;
+        context.UserRecipes.Add(shoppingListCraftingTable);
+        shoppingListCraftingTable.Recipe.CurrentUserRecipe = shoppingListCraftingTable;
 
-        return userRecipe;
+        return shoppingListCraftingTable;
     }
 
     public void Update(UserRecipe userRecipe)
