@@ -2,11 +2,22 @@
 
 @if (Item is not null)
 {
-    <MudImage Src=@($"/assets/eco-icons/{Item.Name}.png") Width=@Size Height=@Size Elevation="25" Class="@($"rounded-lg {Class}")" Style="@($"user-select: none; {Style}")"/>
+    <MudImage Src=@($"/assets/eco-icons/{Item.Name}.png")
+              UserAttributes="@(new Dictionary<string, object> {
+                                  { "onerror", $"this.onerror=null;this.src='/assets/eco-icons/EmptyIcon.png';" }
+                              })"
+              Width=@Size
+              Height=@Size
+              Elevation="25"
+              Class="@($"rounded-lg {Class}")"
+              Style="@($"user-select: none; {Style}")"/>
 }
 else if (FallbackIcon is not null)
 {
-    <MudIcon Icon="@FallbackIcon" Size="MudBlazor.Size.Medium" Class="@Class" Style="@($"user-select: none; width: {Size}px; height: {Size}px; {Style}")"/>
+    <MudIcon Icon="@FallbackIcon"
+             Size="MudBlazor.Size.Medium"
+             Class="@Class"
+             Style="@($"user-select: none; width: {Size}px; height: {Size}px; {Style}")"/>
 }
 
 @code {
