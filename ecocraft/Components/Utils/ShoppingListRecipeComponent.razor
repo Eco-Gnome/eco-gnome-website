@@ -54,7 +54,7 @@
             {
                 <MudIconButton Icon="@MDIIcons.Filled.Plus"
                                Size="Size.Small"
-                               OnClick="() => AddChildRecipe(ingredient)"/>
+                               OnClick="() => AddChildRecipe(ingredient, ingredient.RemainingQuantity)"/>
             }
         </MudStack>
 
@@ -83,14 +83,16 @@
         await Calculate.InvokeAsync();
     }
 
-    private async Task AddChildRecipe(ShoppingListItemOrTag shoppingListItemOrTag)
+    private async Task AddChildRecipe(ShoppingListItemOrTag shoppingListItemOrTag, decimal quantityGoal)
     {
         // TODO: allow to select a recipe
         var recipe = ServerDataService.Recipes.FirstOrDefault(r => r.Elements.Any(e => e.Index == 0 && e.IsProduct() && e.ItemOrTag == shoppingListItemOrTag.ItemOrTag));
 
         if (recipe is not null)
         {
-            ShoppingListDataService.AddShoppingListRecipe(SelectedShoppingList, recipe, ShoppingListRecipe);
+            var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag == shoppingListItemOrTag.ItemOrTag && e.IsProduct() && e.Index == 0).Quantity);
+
+            ShoppingListDataService.AddShoppingListRecipe(SelectedShoppingList, recipe, ShoppingListRecipe, quantityToCraft);
             await Calculate.InvokeAsync();
         }
     }

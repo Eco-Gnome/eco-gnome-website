@@ -65,6 +65,18 @@ public class ShoppingListService(EcoCraftDbContext dbContext)
                 shoppingListItemOrTags.Add(ingredient);
             }
 
+            var products = shoppingListRecipe.ShoppingListItemOrTags.Where(sliot => !sliot.IsIngredient && sliot.RemainingQuantity > 0);
+
+            foreach (var product in products)
+            {
+                shoppingListItemOrTags.Add(new ShoppingListItemOrTag
+                {
+                    ItemOrTag = product.ItemOrTag,
+                    IsIngredient = product.IsIngredient,
+                    RemainingQuantity = -product.RemainingQuantity,
+                });
+            }
+
             if (shoppingListRecipe.ChildrenShoppingListRecipes.Count > 0)
             {
                 shoppingListItemOrTags.AddRange(GetAllIngredients(shoppingListRecipe.ChildrenShoppingListRecipes));

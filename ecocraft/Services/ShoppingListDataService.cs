@@ -50,7 +50,7 @@ namespace ecocraft.Services
             shoppingListDbService.Delete(shoppingList);
         }
 
-        public void AddShoppingListRecipe(ShoppingList shoppingList, Recipe recipe, ShoppingListRecipe? parent = null)
+        public void AddShoppingListRecipe(ShoppingList shoppingList, Recipe recipe, ShoppingListRecipe? parent = null, decimal quantityToCraft = 1)
         {
             var userShoppingListRecipe = new ShoppingListRecipe
             {
@@ -58,7 +58,7 @@ namespace ecocraft.Services
                 ShoppingList = shoppingList,
                 ShoppingListCraftingTable = GetOrCreateShoppingListCraftingTable(shoppingList, recipe.CraftingTable),
                 ShoppingListSkill = recipe.Skill is not null ? GetOrCreateShoppingListSkill(shoppingList, recipe.Skill) : null,
-                QuantityToCraft = 1,
+                QuantityToCraft = quantityToCraft,
                 ParentShoppingListRecipe = parent,
             };
 

@@ -3,7 +3,6 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
-@using ecocraft.Extensions
 @using ecocraft.Services.DbServices
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
@@ -65,7 +64,7 @@
                                 @foreach (var shoppingListSkill in _selectedShoppingList.ShoppingListSkills)
                                 {
                                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                        <EcoIcon Item="shoppingListSkill.Skill" Size="64"/>
+                                        <EcoIcon Item="shoppingListSkill.Skill" />
                                         <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(shoppingListSkill.Skill)</MudText>
                                         <MudNumericField T="int"
                                                          Value="shoppingListSkill.Level"
@@ -122,7 +121,9 @@
                                           .Select(e => new {
                                               ItemOrTag = e.Key,
                                               TotalAmount = e.Sum(x => x.RemainingQuantity)
-                                          }))
+                                          })
+                                          .Where(s => s.TotalAmount > 0))
+
                             {
                                 <MudStack Row>
                                     <EcoIcon Item="element.ItemOrTag" />
@@ -338,7 +339,7 @@
                 .ToList();
         }
 
-        var selectedRecipes = _selectedShoppingList!.ShoppingListRecipes.Select(slr => slr.Recipe);
+        var selectedRecipes = _selectedShoppingList!.ShoppingListRecipes.Where(slr => slr.ParentShoppingListRecipe is not null).Select(slr => slr.Recipe);
         result = result.Where(r => !selectedRecipes.Contains(r)).OrderBy(r => r.Name);
 
         return Task.FromResult(result);
