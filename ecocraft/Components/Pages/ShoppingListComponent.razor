@@ -117,7 +117,7 @@
                         <MudStack>
                             <MudText Typo="Typo.h6">Items à acheter:</MudText>
 
-                            @foreach (var element in ShoppingListService.GetAllIngredients(_selectedShoppingList.ShoppingListRecipes)
+                            @foreach (var element in ShoppingListService.GetAllIngredients(_selectedShoppingList.GetRootShoppingListRecipes())
                                           .GroupBy(e => e.ItemOrTag)
                                           .Select(e => new {
                                               ItemOrTag = e.Key,
