@@ -2,7 +2,8 @@
 
 @if (Item is not null)
 {
-    <MudImage Src=@($"/assets/eco-icons/{Item.Name}.png")
+    <MudImage @key="GetIconName(Item)"
+              Src=@($"/assets/eco-icons/{GetIconName(Item)}.png")
               UserAttributes="@(new Dictionary<string, object> {
                                   { "onerror", $"this.onerror=null;this.src='/assets/eco-icons/EmptyIcon.png';" }
                               })"
@@ -26,4 +27,11 @@ else if (FallbackIcon is not null)
     [Parameter] public int Size { get; set; } = 32;
     [Parameter] public string? Style { get; set; }
     [Parameter] public string? Class { get; set; }
+
+    public static string GetIconName(IHasIconName item)
+        => item switch
+        {
+            Talent t => t.TalentGroupName,
+            _ => item.Name
+        };
 }

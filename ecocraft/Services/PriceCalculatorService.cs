@@ -138,7 +138,6 @@ public class PriceCalculatorService(
                     continue;
                 }
 
-
                 if (reintegratedProducts.Any(ue => ue.Element.ItemOrTag.CurrentUserPrice!.Price is null))
                 {
                     iterator++;
@@ -156,33 +155,18 @@ public class PriceCalculatorService(
 
                 remainingUserRecipes.RemoveAt(iterator);
 
-                var pluginModulePercent = userRecipe.Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule?.Percent ?? 1;
-                var lavishTalentValue = userRecipe.Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false
-                    ? userRecipe.Recipe.Skill.LavishTalentValue ?? 1
-                    : 1;
-
-                var dynamicReduction = pluginModulePercent * lavishTalentValue;
-
-                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.GetRoundFactorQuantity(ue.Element.IsDynamic ? dynamicReduction : 1));
-
+                var ingredientCostSum = -1 * userElementIngredients.Sum(ue => ue.Price * ue.Element.Quantity.GetRoundFactorDynamicValue());
                 // We remove from ingredientCostSum, the price of reintegrated products
-                foreach (var reintegratedProduct in reintegratedProducts)
-                {
-                    ingredientCostSum += reintegratedProduct.Price * reintegratedProduct.GetRoundFactorQuantity(reintegratedProduct.Element.IsDynamic ? dynamicReduction : 1);
-                }
-
-                var skillReducePercent = userRecipe.Recipe.Skill?.LaborReducePercent[userRecipe.Recipe.Skill.CurrentUserSkill!.Level] ?? 1;
-                ingredientCostSum += userRecipe.Recipe.Labor * userServerDataService.UserSetting!.CalorieCost / 1000 * skillReducePercent;
-
-                var craftMinuteFee = userRecipe.Recipe.CraftingTable.CurrentUserCraftingTable.CraftMinuteFee;
-
-                ingredientCostSum += craftMinuteFee * userRecipe.Recipe.CraftMinutes * pluginModulePercent;
-                // TODO: add talent related to craft time
+                ingredientCostSum += reintegratedProducts.Sum(ue => ue.Price * ue.Element.Quantity.GetRoundFactorDynamicValue());
+                // We add the labor cost
+                ingredientCostSum += userRecipe.Recipe.Labor.GetDynamicValue() * userServerDataService.UserSetting!.CalorieCost / 1000;
+                // We add the craft minute fee
+                ingredientCostSum += userRecipe.Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee * userRecipe.Recipe.CraftMinutes.GetDynamicValue();
 
                 foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                 {
                     // Calculate the associated User price if needed
-                    var finalQuantity = product.GetRoundFactorQuantity(product.Element.IsDynamic ? dynamicReduction! : 1m);
+                    var finalQuantity = product.Element.Quantity.GetRoundFactorDynamicValue();
                     product.Price = ingredientCostSum * product.Share / finalQuantity;
 
                     if (debug) Console.WriteLine($"=> Product {product.Element.ItemOrTag.Name}: {product.Price}");

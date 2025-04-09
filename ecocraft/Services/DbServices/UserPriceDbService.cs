@@ -1,6 +1,5 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 
 namespace ecocraft.Services.DbServices;
 
@@ -33,12 +32,12 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 			.FirstOrDefaultAsync(up => up.Id == id);
 	}
 
-	public UserPrice Add(UserPrice userPrice)
+	public UserPrice Add(UserPrice talent)
 	{
-		context.UserPrices.Add(userPrice);
-		userPrice.ItemOrTag.CurrentUserPrice = userPrice;
+		context.UserPrices.Add(talent);
+		talent.ItemOrTag.CurrentUserPrice = talent;
 
-		return userPrice;
+		return talent;
 	}
 
 	public void Update(UserPrice userPrice)

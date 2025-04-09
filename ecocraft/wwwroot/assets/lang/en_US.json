@@ -44,6 +44,7 @@
     },
     "Name": "Name",
     "Level": "Level",
+    "Talents": "Talents",
     "Upgrade": "Upgrade",
     "Margins": "Margins",
     "NavMenu": {
@@ -69,9 +70,10 @@
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
-        "LaborReductionTooltip": "{initialValue} with {percent}% reduction due to skill level {skillLevel}",
-        "QuantityReductionTooltip": "{percent}% reduction due to upgrade module {skillLevel}",
-        "QuantityReductionLavishTooltip": "and lavish talent",
+        "TotalReductionTooltip": "with total reduction of {percent}% due to: ",
+        "SkillReductionTooltip": "Skill {skill} {skillLevel} -> {percent}%",
+        "TalentReductionTooltip": "Talent {talentName} -> {percent}%",
+        "ModuleReductionTooltip": "Module {moduleName} -> {percent}%",
         "ReintegratedToolTip": {
             "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
             "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
@@ -142,6 +144,7 @@
             "Recipes": "Recipes",
             "Elements": "Recipe Elements",
             "Skills": "Skills",
+            "Talents": "Talents",
             "Upload": "Upload Server Data",
             "Title": "Server Settings",
             "Stats": "Data Statistics",
@@ -152,6 +155,7 @@
             "CantEditYourself": "You can't edit yourself",
             "UploadOk": "Upload Successful",
             "UploadNok": "Upload Error",
+            "UploadWrongVersion": "Incompatible data file version. Supported version: {version}. Please update your EcoGnomeMod.dll on the server to the latest version, then upload the newly generated data file.",
             "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported:",
             "UploadPartiallyNokEnd": "Review your mods and server edits. You can contact Eco Gnome admins for help."
         }

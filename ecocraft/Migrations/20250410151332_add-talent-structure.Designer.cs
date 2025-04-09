@@ -11,8 +11,8 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    [Migration("20241117191141_float-to-decimal")]
-    partial class floatToDecimal
+    [Migration("20250410151332_add-talent-structure")]
+    partial class addTalentStructure
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,15 +65,6 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("ServerId")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("imageFile")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("posX")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("posY")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -134,6 +125,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal?>("DefaultPrice")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsTag")
                         .HasColumnType("INTEGER");
 
@@ -152,15 +146,6 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("ServerId")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("imageFile")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("posX")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("posY")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -371,6 +356,9 @@ namespace ecocraft.Migrations
                     b.Property<DateTime>("CreationDateTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("EcoServerId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
@@ -412,15 +400,6 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("ServerId")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("imageFile")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("posX")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("posY")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -496,11 +475,11 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ElementId")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsReintegrated")
+                    b.Property<bool>("IsMarginPrice")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal?>("MarginPrice")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsReintegrated")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("TEXT");
@@ -567,7 +546,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid?>("PrimaryUserPriceId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UserMarginId")
+                    b.Property<Guid?>("UserMarginId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("UserServerId")
@@ -597,6 +576,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RoundFactor")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("UserServerId")
                         .HasColumnType("TEXT");
 
@@ -615,11 +597,13 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("EcoUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Pseudo")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ServerId")
@@ -643,17 +627,20 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ApplyMarginBetweenSkills")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("CalorieCost")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("DisplayNonSkilledRecipes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("OnlyLevelAccessibleRecipes")
+                    b.Property<int>("MarginType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("TimeFee")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("OnlyLevelAccessibleRecipes")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("UserServerId")
                         .HasColumnType("TEXT");
@@ -942,8 +929,7 @@ namespace ecocraft.Migrations
                     b.HasOne("ecocraft.Models.UserMargin", "UserMargin")
                         .WithMany("UserPrices")
                         .HasForeignKey("UserMarginId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("UserPrices")

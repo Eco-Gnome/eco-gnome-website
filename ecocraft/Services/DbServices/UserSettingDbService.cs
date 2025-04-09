@@ -23,11 +23,11 @@ public class UserSettingDbService(EcoCraftDbContext context) : IGenericDbService
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserSetting Add(UserSetting userSetting)
+	public UserSetting Add(UserSetting talent)
 	{
-		context.UserSettings.Add(userSetting);
+		context.UserSettings.Add(talent);
 
-		return userSetting;
+		return talent;
 	}
 
 	public void Update(UserSetting userSetting)

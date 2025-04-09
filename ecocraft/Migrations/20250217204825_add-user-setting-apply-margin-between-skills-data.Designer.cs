@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20250217204825_add-user-setting-apply-margin-between-skills-data")]
-    partial class addusersettingapplymarginbetweenskillsdata
+    partial class addUserSettingApplyMarginBetweenSkillsData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

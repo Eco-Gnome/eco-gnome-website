@@ -19,8 +19,8 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter]
-    public Skill Skill { get; set; }
+    public required Skill Skill { get; set; }
 }

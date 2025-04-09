@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ecocraft.Extensions;
+using ecocraft.Services;
 
 namespace ecocraft.Models;
 
@@ -15,26 +15,28 @@ public enum MarginType
     GrossMargin,
 }
 
+public interface ISLinkedToModifier;
+
 // Eco Data
 public class Recipe: IHasLocalizedName
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
-    public string FamilyName { get; set; }
-
-    public decimal CraftMinutes { get; set; }
+    public required string FamilyName { get; set; }
+    [ForeignKey("DynamicValue")] public Guid CraftMinutesId { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public long SkillLevel { get; set; }
     public bool IsBlueprint { get; set; }
     public bool IsDefault { get; set; }
-
-    public decimal Labor { get; set; }
+    [ForeignKey("DynamicValue")] public Guid LaborId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
+    public DynamicValue CraftMinutes { get; set; }
     public Skill? Skill { get; set; }
+    public DynamicValue Labor { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
@@ -55,17 +57,13 @@ public class Element
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
     public int Index { get; set; }
-
-    public decimal Quantity { get; set; }
-    public bool IsDynamic { get; set; }
-    [ForeignKey("Skill")] public Guid? SkillId { get; set; }
-    public bool LavishTalent { get; set; }
+    [ForeignKey("DynamicValue")] public Guid QuantityId { get; set; }
     public bool DefaultIsReintegrated { get; set; }
-
     public decimal DefaultShare { get; set; }
 
     public Recipe Recipe { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
+    public DynamicValue Quantity { get; set; }
     public Skill? Skill { get; set; }
     public List<UserElement> UserElements { get; set; } = [];
 
@@ -74,27 +72,189 @@ public class Element
 
     public bool IsIngredient()
     {
-        return Quantity < 0;
+        return Quantity.BaseValue < 0;
     }
 
     public bool IsProduct()
     {
-        return Quantity > 0;
+        return Quantity.BaseValue > 0;
     }
 
     public override string ToString()
     {
         return ItemOrTag.Name;
     }
+
+    public decimal GetDynamicQuantity()
+    {
+        return Quantity.GetDynamicValue();
+    }
+}
+
+public class DynamicValue
+{
+    [Key] public Guid Id { get; set; }
+    public decimal BaseValue { get; set; }
+    [ForeignKey("Server")] public Guid ServerId { get; set; }
+
+    public List<Modifier> Modifiers { get; set; } = [];
+    public List<Recipe> LaborRecipes { get; set; } = [];
+    public List<Recipe> CraftMinutesRecipes { get; set; } = [];
+    public List<Element> QuantityElements { get; set; } = [];
+    public Recipe? Recipe => LaborRecipes.FirstOrDefault() ?? CraftMinutesRecipes.FirstOrDefault();
+    public Element? Element => QuantityElements.FirstOrDefault();
+    public Server Server { get; set; }
+
+    public bool IsDynamic()
+    {
+        return Modifiers.Count > 0;
+    }
+
+    public decimal GetMultiplier()
+    {
+        var multiplier = 1m;
+
+        foreach (var modifier in Modifiers)
+        {
+            switch (modifier.DynamicType)
+            {
+                case "Module":
+                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.PluginModule?.Percent ?? 1m;
+                    // TODO: handle skilled modules
+                    break;
+                case "Talent":
+                    multiplier *= modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
+                    break;
+                case "Skill":
+                    multiplier *= modifier.Skill?.CurrentUserSkill is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.CurrentUserSkill.Level) : 1m;
+                    break;
+                /*case "Layer":
+
+                    break;*/
+            }
+        }
+
+        return multiplier;
+    }
+
+    public decimal GetBaseValue()
+    {
+        return BaseValue;
+    }
+
+    public decimal GetRoundFactorBaseValue()
+    {
+        var roundFactor = (Recipe ?? Element?.Recipe)!.CurrentUserRecipe!.RoundFactor;
+
+        if (roundFactor == 0) return BaseValue;
+
+        return BaseValue < 0
+            ? Math.Floor(BaseValue * roundFactor) / roundFactor
+            : Math.Ceiling(BaseValue * roundFactor) / roundFactor;
+    }
+
+    public decimal GetDynamicValue()
+    {
+        return BaseValue * GetMultiplier();
+    }
+
+    public decimal GetRoundFactorDynamicValue()
+    {
+        var roundFactor = (Recipe ?? Element?.Recipe)!.CurrentUserRecipe!.RoundFactor;
+
+        if (roundFactor == 0) return GetDynamicValue();
+
+        return GetDynamicValue() < 0
+            ? Math.Floor(GetDynamicValue() * roundFactor) / roundFactor
+            : Math.Ceiling(GetDynamicValue() * roundFactor) / roundFactor;
+    }
+
+    public string GetMultiplierTooltip(LocalizationService localizationService, string? baseValue = null)
+    {
+        baseValue ??= Math.Abs(Math.Round(GetBaseValue(), 0, MidpointRounding.AwayFromZero)).ToString();
+        
+        List<string> tooltip = [];
+        decimal totalMultiplier = 1;
+
+        foreach (var modifier in Modifiers)
+        {
+            decimal multiplier = 1m;
+
+            switch (modifier.DynamicType)
+            {
+                case "Module":
+                    multiplier = (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.PluginModule?.Percent ?? 1m;
+                    if (multiplier != 1m)
+                    {
+                        tooltip.Add(localizationService.GetTranslation(
+                            "RecipeDialog.ModuleReductionTooltip",
+                            localizationService.GetTranslation((Recipe ?? Element?.Recipe)!.CraftingTable.CurrentUserCraftingTable!.PluginModule),
+                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                        ));
+                    }
+                    // TODO: handle skilled modules
+                    break;
+                case "Talent":
+                    multiplier = modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
+
+                    if (multiplier != 1m)
+                    {
+                        tooltip.Add(localizationService.GetTranslation(
+                            "RecipeDialog.TalentReductionTooltip",
+                            localizationService.GetTranslation(modifier.Talent),
+                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                        ));
+                    }
+                    break;
+                case "Skill":
+                    multiplier = modifier.Skill?.CurrentUserSkill is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.CurrentUserSkill.Level) : 1m;
+
+                    if (multiplier != 1m)
+                    {
+                        tooltip.Add(localizationService.GetTranslation(
+                            "RecipeDialog.SkillReductionTooltip",
+                            localizationService.GetTranslation(modifier.Skill),
+                            modifier.Skill!.CurrentUserSkill!.Level.ToString(),
+                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                        ));
+                    }
+                    break;
+                /*case "Layer":
+
+                    break;*/
+            }
+
+            totalMultiplier *= multiplier;
+        }
+
+        var beginning = localizationService.GetTranslation(
+            "RecipeDialog.TotalReductionTooltip",
+            Math.Round(100 - totalMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+        );
+
+        return baseValue + " " + beginning + string.Join(", ", tooltip);
+    }
+}
+
+public class Modifier
+{
+    [Key] public Guid Id { get; set; }
+    public required string DynamicType { get; set; }
+    [ForeignKey("DynamicValue")] public Guid DynamicValueId { get; set; }
+    [ForeignKey("Skill")] public Guid? SkillId { get; set; }
+    [ForeignKey("Talent")] public Guid? TalentId { get; set; }
+
+    public DynamicValue DynamicValue { get; set; }
+    public Skill? Skill { get; set; }
+    public Talent? Talent { get; set; }
 }
 
 public class ItemOrTag: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public bool IsTag { get; set; }
-
     public decimal? MinPrice { get; set; }
     public decimal? DefaultPrice { get; set; }
     public decimal? MaxPrice { get; set; }
@@ -116,21 +276,23 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     }
 }
 
-public class Skill: IHasLocalizedName, IHasIconName
+public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string? Profession { get; set; }
+    public int MaxLevel { get; set; }
     public decimal[] LaborReducePercent { get; set; }
 
-    public decimal? LavishTalentValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<Recipe> Recipes { get; set; } = [];
     public List<UserSkill> UserSkills { get; set; } = [];
+    public List<Talent> Talents { get; set; } = [];
+    public List<Modifier> Modifiers { get; set; } = [];
 
     [NotMapped]
     public UserSkill? CurrentUserSkill { get; set; }
@@ -139,12 +301,36 @@ public class Skill: IHasLocalizedName, IHasIconName
     {
         return Name;
     }
+
+    public decimal GetLevelLaborReducePercent(int level)
+    {
+        return level >= LaborReducePercent.Length ? LaborReducePercent.Last() : LaborReducePercent[level];
+    }
+}
+
+public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
+{
+    [Key] public Guid Id { get; set; }
+    public required string Name { get; set; }
+    [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
+    public required string TalentGroupName { get; set; }
+    public decimal Value { get; set; }
+    public int Level { get; set; }
+    [ForeignKey("Skill")] public Guid SkillId { get; set; }
+
+    public LocalizedField LocalizedName { get; set; }
+    public Skill Skill { get; set; }
+    public List<Modifier> Modifiers { get; set; } = [];
+    public List<UserTalent> UserTalents { get; set; } = [];
+
+    [NotMapped]
+    public UserTalent? CurrentUserTalent { get; set; }
 }
 
 public class CraftingTable: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
@@ -166,7 +352,7 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
 public class PluginModule: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
     public decimal Percent { get; set; }
@@ -207,6 +393,7 @@ public class UserServer
     public User User { get; init; }
     public Server Server { get; init; }
     public List<UserSkill> UserSkills { get; init; } = [];
+    public List<UserTalent> UserTalents { get; init; } = [];
     public List<UserElement> UserElements { get; init; } = [];
     public List<UserPrice> UserPrices { get; init; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; init; } = [];
@@ -216,7 +403,7 @@ public class UserServer
 
     public string GetPseudo()
     {
-        return Pseudo is not null ? this.Pseudo : this.User.Pseudo;
+        return Pseudo is not null ? Pseudo : User.Pseudo;
     }
 }
 
@@ -265,10 +452,19 @@ public class UserSkill
     [Key] public Guid Id { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public int Level { get; set; }
-    public bool HasLavishTalent { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
 
     public Skill? Skill { get; set; }
+    public UserServer UserServer { get; set; }
+}
+
+public class UserTalent
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("Talent")] public Guid? TalentId { get; set; }
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+
+    public Talent? Talent { get; set; }
     public UserServer UserServer { get; set; }
 }
 
@@ -283,7 +479,7 @@ public class UserElement: IHasPrice
     [ForeignKey("Element")] public Guid ElementId { get; set; }
 
     public decimal? Price { get; set; }
-    public bool IsMarginPrice { get; set; } = false;
+    public bool IsMarginPrice { get; set; }
 
     public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }
@@ -291,17 +487,6 @@ public class UserElement: IHasPrice
 
     public Element Element { get; set; }
     public UserServer UserServer { get; set; }
-
-    public decimal GetRoundFactorQuantity(decimal factor = 1)
-    {
-        var roundFactor = Element.Recipe.CurrentUserRecipe!.RoundFactor;
-
-        return roundFactor == 0
-            ? Element.Quantity * factor
-            : Element.Quantity < 0
-                ? Math.Floor(Element.Quantity * roundFactor * factor) / roundFactor
-                : Math.Ceiling(Element.Quantity * roundFactor * factor) / roundFactor;
-    }
 }
 
 public class UserPrice: IHasPrice
@@ -384,6 +569,7 @@ public class Server
     public List<Skill> Skills { get; set; } = [];
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
+    public List<DynamicValue> DynamicValues { get; set; } = [];
 }
 
 // Utils
@@ -420,6 +606,7 @@ public class LocalizedField
     public List<Recipe> Recipes { get; set; } = [];
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Skill> Skills { get; set; } = [];
+    public List<Talent> Talents { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
 

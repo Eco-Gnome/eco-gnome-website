@@ -165,7 +165,7 @@
 					throw new Exception("Can't find related tag or item.");
 				}
 
-				link.Labels.Add(new LinkLabelModel(link, element.Quantity.ToString()));
+				link.Labels.Add(new LinkLabelModel(link, element.Quantity.BaseValue.ToString()));
 				Diagram.Links.Add(link);
 			}
 		}
@@ -401,7 +401,7 @@
 	        int order = 0;
 	        foreach (var node in layer)
 	        {
-	            node.Order = order++;
+	            node.EcoOrder = order++;
 	        }
 	    }
 
@@ -411,46 +411,46 @@
 	        // Du haut vers le bas
 	        for (int l = 1; l < layers.Count; l++)
 	        {
-	            var layerNodes = layers[l].OrderBy(n => n.Order).ToList();
+	            var layerNodes = layers[l].OrderBy(n => n.EcoOrder).ToList();
 	            foreach (var node in layerNodes)
 	            {
 	                var incomingNodes = GetIncomingEdges(node, edges).Select(e => e.Source).ToList();
 	                if (incomingNodes.Count > 0)
 	                {
-	                    double barycenter = incomingNodes.Average(n => n.Order);
-	                    node.Order = barycenter;
+	                    double barycenter = incomingNodes.Average(n => n.EcoOrder);
+	                    node.EcoOrder = barycenter;
 	                }
 	            }
 	            // Réordonner les nœuds
-	            layers[l] = layers[l].OrderBy(n => n.Order).ToList();
+	            layers[l] = layers[l].OrderBy(n => n.EcoOrder).ToList();
 	            // Réattribuer les ordres entiers
 	            int order = 0;
 	            foreach (var node in layers[l])
 	            {
-	                node.Order = order++;
+	                node.EcoOrder = order++;
 	            }
 	        }
 
 	        // Du bas vers le haut
 	        for (int l = layers.Count - 2; l >= 0; l--)
 	        {
-	            var layerNodes = layers[l].OrderBy(n => n.Order).ToList();
+	            var layerNodes = layers[l].OrderBy(n => n.EcoOrder).ToList();
 	            foreach (var node in layerNodes)
 	            {
 	                var outgoingNodes = GetOutgoingEdges(node, edges).Select(e => e.Target).ToList();
 	                if (outgoingNodes.Count > 0)
 	                {
-	                    double barycenter = outgoingNodes.Average(n => n.Order);
-	                    node.Order = barycenter;
+	                    double barycenter = outgoingNodes.Average(n => n.EcoOrder);
+	                    node.EcoOrder = barycenter;
 	                }
 	            }
 	            // Réordonner les nœuds
-	            layers[l] = layers[l].OrderBy(n => n.Order).ToList();
+	            layers[l] = layers[l].OrderBy(n => n.EcoOrder).ToList();
 	            // Réattribuer les ordres entiers
 	            int order = 0;
 	            foreach (var node in layers[l])
 	            {
-	                node.Order = order++;
+	                node.EcoOrder = order++;
 	            }
 	        }
 	    }
@@ -464,7 +464,7 @@
 		foreach (var layerGroup in layers)
 		{
 			int layer = layerGroup.Key;
-			var nodesInLayer = layerGroup.OrderBy(n => n.Order).ToList();
+			var nodesInLayer = layerGroup.OrderBy(n => n.EcoOrder).ToList();
 
 			// Calculer la position Y pour cette couche
 			double y = layer * layerSpacing;

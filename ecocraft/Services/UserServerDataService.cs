@@ -11,10 +11,12 @@ public class UserServerDataService(
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
     UserMarginDbService userMarginDbService,
+    UserTalentDbService userTalentDbService,
     ServerDataService serverDataService,
     LocalizationService localizationService)
 {
     public List<UserSkill> UserSkills { get; private set; } = [];
+    public List<UserTalent> UserTalents { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
     public UserSetting? UserSetting { get; private set; }
     public List<UserElement> UserElements { get; private set; } = [];
@@ -27,6 +29,7 @@ public class UserServerDataService(
         if (userServer is null)
         {
             UserSkills = [];
+            UserTalents = [];
             UserCraftingTables = [];
             UserSetting = null;
             UserElements = [];
@@ -38,6 +41,7 @@ public class UserServerDataService(
         }
 
         var userSkillsTask = userSkillDbService.GetByUserServerAsync(userServer);
+        var userTalentsTask = userTalentDbService.GetByUserServerAsync(userServer);
         var userCraftingTablesTask = userCraftingTableDbService.GetByUserServerAsync(userServer);
         var userSettingsTask = userSettingDbService.GetByUserServerAsync(userServer);
         var userElementsTask = userElementDbService.GetByUserServerAsync(userServer);
@@ -45,10 +49,11 @@ public class UserServerDataService(
         var userRecipesTask = userRecipeDbService.GetByUserServerAsync(userServer);
         var userMarginsTask = userMarginDbService.GetByUserServerAsync(userServer);
 
-        await Task.WhenAll(userSkillsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
+        await Task.WhenAll(userSkillsTask, userTalentsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
             userRecipesTask, userMarginsTask);
 
         UserSkills = userSkillsTask.Result;
+        UserTalents = userTalentsTask.Result;
         UserCraftingTables = userCraftingTablesTask.Result;
         UserSetting = userSettingsTask.Result;
         UserElements = userElementsTask.Result;
@@ -59,7 +64,13 @@ public class UserServerDataService(
         foreach (var skill in serverDataService.Skills)
         {
             skill.CurrentUserSkill = UserSkills.FirstOrDefault(x => x.Skill == skill);
+
+            foreach (var talent in skill.Talents)
+            {
+                talent.CurrentUserTalent = UserTalents.FirstOrDefault(x => x.Talent == talent);
+            }
         }
+
 
         foreach (var craftingTable in serverDataService.CraftingTables)
         {
@@ -121,6 +132,24 @@ public class UserServerDataService(
         userSkill.UserServer.UserSkills.Remove(userSkill);
         UserSkills.Remove(userSkill);
         userSkillDbService.Delete(userSkill);
+    }
+
+    public void AddUserTalent(Talent talent, UserServer userServer)
+    {
+        var userTalent = new UserTalent
+        {
+            Talent = talent,
+            UserServer = userServer,
+        };
+
+        userTalentDbService.Add(userTalent);
+        UserTalents.Add(userTalent);
+    }
+
+    public void RemoveUserTalent(UserTalent userTalent)
+    {
+        userTalentDbService.Delete(userTalent);
+        UserTalents.Remove(userTalent);
     }
 
     public void CreateUserMargin(UserServer userServer)

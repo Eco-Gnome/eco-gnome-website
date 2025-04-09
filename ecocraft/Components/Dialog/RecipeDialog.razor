@@ -58,7 +58,7 @@
                                 <EcoIcon Item="@Recipe.Skill" />
                                 <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
-                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.CurrentUserSkill!.Level) -> @(Math.Round(100 - Recipe.Skill.LaborReducePercent[Recipe.Skill.CurrentUserSkill.Level] * 100)) %)</MudText>
+                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.CurrentUserSkill!.Level) -> @(Math.Round(100 - Recipe.Skill.GetLevelLaborReducePercent(Recipe.Skill.CurrentUserSkill.Level) * 100)) %)</MudText>
                             </MudStack>
                         }
                         else
@@ -91,15 +91,15 @@
                             <!-- quantity -->
                             <MudTd Class="px-1 pl-2">
                                 <MudStack Row Spacing="1">
-                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                    @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                                    @if (context.Element.Quantity.GetMultiplier() != 1)
                                     {
-                                        <MudTooltip Text="@(LocalizationService.GetTranslation("RecipeDialog.QuantityReductionTooltip", ((1 - GetModuleAndLavishReducePercent()) * 100).ToString("0.##"), LocalizationService.GetTranslation(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule)) + (Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false ? LocalizationService.GetTranslation("RecipeDialog.QuantityReductionLavishTooltip") : ""))">
+                                        <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(LocalizationService)">
                                             <MudStack Row Spacing="1">
                                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
                                                 <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                                    @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorDynamicValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
                                                 </MudText>
                                             </MudStack>
                                         </MudTooltip>
@@ -149,9 +149,7 @@
                                 <MudStack Row Justify="Justify.FlexEnd">
                                     <MudText Typo="Typo.body2" Color="Color.Primary">
                                         @(context.Price is not null
-                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
-                                                ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
-                                                : context.GetRoundFactorQuantity()), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
+                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
                                             : "")
                                     </MudText>
                                 </MudStack>
@@ -177,20 +175,19 @@
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
                                     <MudStack Row Spacing="1">
-
-                                        @if ((int)GetModuleAndLavishReducePercent(false) != 1)
+                                        @if (Recipe.CraftMinutes.GetMultiplier() != 1m)
                                         {
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.CraftTimeReductionTooltip", GetFormatedCraftTime(Recipe.CraftMinutes), ((1 - GetModuleAndLavishReducePercent(false)) * 100).ToString("0.##"), LocalizationService.GetTranslation(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule))">
+                                            <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
                                                 <MudStack Row Spacing="1">
                                                     <MudText Color="Color.Secondary">
-                                                        @(GetFormatedCraftTime(Recipe.CraftMinutes * GetModuleAndLavishReducePercent(false)))
+                                                        @(GetFormatedCraftTime(Recipe.CraftMinutes.GetDynamicValue()))
                                                     </MudText>
                                                 </MudStack>
                                             </MudTooltip>
                                         }
                                         else
                                         {
-                                            <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes)</MudText>
+                                            <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue())</MudText>
                                         }
                                     </MudStack>
                                 </MudTd>
@@ -220,17 +217,17 @@
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
                                     <MudStack Row Spacing="1">
-                                        @if ((int)GetLaborReducePercent() != 1)
+                                        @if ((int)Recipe.Labor.GetMultiplier() != 1)
                                         {
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.LaborReductionTooltip", Recipe.Labor.ToString("0.##"), Math.Round((1 - GetLaborReducePercent()) * 100, 2, MidpointRounding.AwayFromZero).ToString("0.##"), Recipe.Skill!.CurrentUserSkill!.Level.ToString())">
+                                            <MudTooltip Text="@Recipe.Labor.GetMultiplierTooltip(LocalizationService)">
                                                 <MudText Color="Color.Secondary">
-                                                    @(Math.Round(Recipe.Labor * GetLaborReducePercent(), 2, MidpointRounding.AwayFromZero).ToString("0.##"))
+                                                    @(Math.Round(Recipe.Labor.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##"))
                                                 </MudText>
                                             </MudTooltip>
                                         }
                                         else
                                         {
-                                            <MudText>@(Recipe.Labor.ToString("0.##"))</MudText>
+                                            <MudText>@(Recipe.Labor.GetBaseValue().ToString("0.##"))</MudText>
                                         }
                                     </MudStack>
                                 </MudTd>
@@ -295,15 +292,15 @@
                         <!-- quantity -->
                         <MudTd Style="width: 60px" Class="px-1 pl-2">
                             <MudStack Row Spacing="1">
-                                @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                @(Math.Abs(Math.Round(context.Element.Quantity.GetBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                @if (context.Element.IsDynamic && (int)GetModuleAndLavishReducePercent() != 1)
+                                @if (context.Element.Quantity.GetMultiplier() != 1)
                                 {
-                                    <MudTooltip Text="@(LocalizationService.GetTranslation("RecipeDialog.QuantityReductionTooltip", ((1 - GetModuleAndLavishReducePercent()) * 100).ToString("0.##"), LocalizationService.GetTranslation(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule)) + (Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false ? LocalizationService.GetTranslation("RecipeDialog.QuantityReductionLavishTooltip") : ""))">
+                                    <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(LocalizationService)">
                                         <MudStack Row Spacing="1">
                                             <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
                                             <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                                @(Math.Abs(Math.Round(context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent()), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                                @(Math.Abs(Math.Round(context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
                                             </MudText>
                                         </MudStack>
                                     </MudTooltip>
@@ -347,9 +344,7 @@
                             <MudStack Row Justify="Justify.FlexEnd">
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
                                     @(context.Price is not null
-                                        ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * (context.Element.IsDynamic
-                                            ? context.GetRoundFactorQuantity(GetModuleAndLavishReducePercent())
-                                            : context.GetRoundFactorQuantity()), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
+                                        ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
                                         : "")
                                 </MudText>
                             </MudStack>
@@ -359,23 +354,26 @@
                         <MudTr>
                             <MudTd colspan="4" Class="mud-background"></MudTd>
                             <MudTd Class="pa-0 py-1 mud-background">
-                                <MudStack Row Spacing="0">
-                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.HonestTooltip")">
-                                        <MudIconButton Size="Size.Small"
-                                                       Icon="@MDIIcons.Filled.ChartPie"
-                                                       OnClick="@(() => Honest())"/>
-                                    </MudTooltip>
-                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnlyTooltip")">
-                                        <MudIconButton Size="Size.Small"
-                                                       Icon="@MDIIcons.Filled.Numeric1Box"
-                                                       OnClick="@(() => FirstOnly())"/>
-                                    </MudTooltip>
-                                    <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EqualityTooltip")">
-                                        <MudIconButton Size="Size.Small"
-                                                       Icon="@MDIIcons.Filled.EqualBox"
-                                                       OnClick="@(() => Equality())"/>
-                                    </MudTooltip>
-                                    @{
+
+                                <MudStack Row Spacing="0" Style="min-height: 24px">
+                                    @if (GetProductUserElements().Count > 1)
+                                    {
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.HonestTooltip")">
+                                            <MudIconButton Size="Size.Small"
+                                                           Icon="@MDIIcons.Filled.ChartPie"
+                                                           OnClick="@(() => Honest())"/>
+                                        </MudTooltip>
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnlyTooltip")">
+                                            <MudIconButton Size="Size.Small"
+                                                           Icon="@MDIIcons.Filled.Numeric1Box"
+                                                           OnClick="@(() => FirstOnly())"/>
+                                        </MudTooltip>
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EqualityTooltip")">
+                                            <MudIconButton Size="Size.Small"
+                                                           Icon="@MDIIcons.Filled.EqualBox"
+                                                           OnClick="@(() => Equality())"/>
+                                        </MudTooltip>
+
                                         var firstQuantity = GetProductUserElements().First().Element.Quantity;
 
                                         @if (GetProductUserElements().Any(ue => ue.Element.Quantity != firstQuantity))
@@ -396,7 +394,7 @@
                 </MudItem>
             </MudGrid>
 
-            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity) != e.Quantity || Math.Truncate(GetModuleAndLavishReducePercent() * e.Quantity) != GetModuleAndLavishReducePercent() * e.Quantity))
+            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity.GetBaseValue()) != e.Quantity.GetBaseValue() || Math.Truncate(e.Quantity.GetDynamicValue()) != e.Quantity.GetDynamicValue()))
             {
                 <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
                     <MudText>Crafted by quantity:</MudText>
@@ -451,43 +449,32 @@
 
     private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
     {
-        var ingredientCostSum = userElements.Sum(ue => ue.Price * ue.GetRoundFactorQuantity(ue.Element.IsDynamic && withReduction ? GetModuleAndLavishReducePercent() : 1)
-                                                                * (ue.IsReintegrated && reverseDeduction ? -1 : 1));
+        var ingredientCostSum = userElements.Sum(ue => ue.Price
+                                                       * (withReduction
+                                                           ? ue.Element.Quantity.GetRoundFactorDynamicValue()
+                                                           : ue.Element.Quantity.GetRoundFactorBaseValue())
+                                                       * (ue.IsReintegrated && reverseDeduction ? -1 : 1));
         return ingredientCostSum ?? 0;
     }
 
     private decimal GetLaborPrice()
     {
-        return Recipe.Labor
-            * UserServerDataService.UserSetting!.CalorieCost / 1000
-            * GetLaborReducePercent();
-    }
-
-    private decimal GetLaborReducePercent()
-    {
-        return Recipe.Skill?.LaborReducePercent[Recipe.Skill.CurrentUserSkill!.Level] ?? 1;
-    }
-
-    private decimal GetModuleAndLavishReducePercent(bool withLavish = true)
-    {
-        var pluginModulePercent = Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule?.Percent ?? 1;
-        var lavishTalentValue = withLavish ? Recipe.Skill?.LavishTalentValue ?? 1 : 1;
-
-        return Recipe.Skill?.CurrentUserSkill!.HasLavishTalent ?? false ? pluginModulePercent * lavishTalentValue : pluginModulePercent;
+        return Recipe.Labor.GetDynamicValue() * UserServerDataService.UserSetting!.CalorieCost / 1000;
     }
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes * Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee;
+        return Recipe.CraftMinutes.GetDynamicValue() * Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee;
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
     {
-        int totalSeconds = (int)(craftMinutes * 60);
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-
-        return $"{(minutes > 0 ? $"{minutes}min" : "")}{(seconds > 0 ? $" {seconds}s" : "")}";
+        var totalSeconds = craftMinutes * 60;
+        var minutes = (int)(totalSeconds / 60);
+        var seconds = (int)(totalSeconds % 60);
+        var milliseconds = (int)(totalSeconds * 1000);
+        
+        return $"{(minutes > 0 ? $"{minutes}min" : "")}{(seconds > 0 ? $" {seconds}s" : "")}{(totalSeconds < 1 ? $"{milliseconds}ms" : "")}";
     }
 
     private async Task RoundFactorChange(int value, UserRecipe userRecipe)
@@ -590,11 +577,11 @@
     private async Task Equilibrate()
     {
         var userElements = GetProductUserElements();
-        var totalQuantity = userElements.Sum(p => p.Element.Quantity);
+        var totalQuantity = userElements.Sum(p => p.Element.Quantity.BaseValue);
 
         foreach (var userElement in userElements)
         {
-            userElement.Share = userElement.Element.Quantity / totalQuantity;
+            userElement.Share = userElement.Element.Quantity.BaseValue / totalQuantity;
         }
 
         await PriceCalculatorService.Calculate();

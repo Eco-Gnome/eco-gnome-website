@@ -44,14 +44,19 @@
                                              AnchorOrigin="Origin.BottomLeft"
                                              TransformOrigin="Origin.TopLeft">
                                 <ItemTemplate>
-                                    @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
-                                    {
-                                        <MudText Color="Color.Primary" Typo="Typo.caption">@LocalizationService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
-                                    }
-                                    <MudText>@LocalizationService.GetTranslation(context)</MudText>
-                                    @{
-                                        _previousProfession = context.Profession;
-                                    }
+                                    <MudStack Class="pl-2" Spacing="0">
+                                        @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
+                                        {
+                                            <MudText Color="Color.Primary" Typo="Typo.caption">@LocalizationService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
+                                        }
+                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                            <EcoIcon Item="@context" Size="24"/>
+                                            <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                        </MudStack>
+                                        @{
+                                            _previousProfession = context.Profession;
+                                        }
+                                    </MudStack>
                                 </ItemTemplate>
                             </MudAutocomplete>
 
@@ -60,8 +65,9 @@
                                       Dense="true"
                                       Class="mt-4">
                                 <HeaderContent>
-                                    <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("Level")</MudTh>
+                                    <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
+                                    <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
+                                    <MudTh Class="pl-1">@LocalizationService.GetTranslation("Talents")</MudTh>
                                     <MudTh></MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
@@ -73,25 +79,31 @@
                                             </MudStack>
                                         </MudLink>
                                     </MudTd>
-                                    <MudTd>
-                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="6">
-                                            <MudNumericField T="int"
-                                                             Value="@context.Level"
-                                                             Class="square-input flex-no-grow"
-                                                             Min="1"
-                                                             Max="7"
-                                                             Variant="Variant.Outlined"
-                                                             Immediate="true"
-                                                             ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
-                                            <MudCheckBox Value="context.HasLavishTalent"
-                                                         Class="dense-checkbox"
-                                                         Style="@($"visibility: {(context.Level >= 6 && context.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
-                                                         Label="Lavish talent"
-                                                         Color="Color.Primary"
-                                                         ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(context, newLavishTalent)"/>
+                                    <MudTd Class="px-0">
+                                        <MudNumericField T="int"
+                                                         Value="@context.Level"
+                                                         Class="square-input flex-no-grow"
+                                                         Min="1"
+                                                         Max="@context.Skill!.MaxLevel"
+                                                         Variant="Variant.Outlined"
+                                                         Immediate="true"
+                                                         ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
+                                    </MudTd>
+                                    <MudTd Class="px-0">
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="2">
+                                            @foreach (var talentGroup in context.Skill!.Talents.Where(t => context.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
+                                            {
+                                                var talent = talentGroup.First();
+
+                                                <MudTooltip Text="@LocalizationService.GetTranslation(talent)" RootClass="d-flex">
+                                                    <MudLink OnClick="() => ToggleTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
+                                                        <EcoIcon Item="talent" Size="32" Class="@($"{(talent.CurrentUserTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                    </MudLink>
+                                                </MudTooltip>
+                                            }
                                         </MudStack>
                                     </MudTd>
-                                    <MudTd Style="text-align: right">
+                                    <MudTd Class="px-0" Style="text-align: right">
                                         <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                                        aria-label="delete"
                                                        tabindex="-1"
@@ -116,7 +128,10 @@
                                              AnchorOrigin="Origin.BottomLeft"
                                              TransformOrigin="Origin.TopLeft">
                                 <ItemTemplate>
-                                    <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                    <MudStack Row Spacing="2" Class="pl-2">
+                                        <EcoIcon Item="context" Size="24"></EcoIcon>
+                                        <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                    </MudStack>
                                 </ItemTemplate>
                             </MudAutocomplete>
 
@@ -539,7 +554,10 @@
                                              AnchorOrigin="Origin.BottomLeft"
                                              TransformOrigin="Origin.TopLeft">
                                 <ItemTemplate>
-                                    <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                    <MudStack Row Class="pl-2" Spacing="2">
+                                        <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
+                                        <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                    </MudStack>
                                 </ItemTemplate>
                             </MudAutocomplete>
                         </ToolBarContent>
@@ -939,6 +957,27 @@
         return Task.FromResult(result);
     }
 
+    private async Task ToggleTalent(List<Talent> talents)
+    {
+        var isRemove = talents.All(t => t.CurrentUserTalent is not null);
+
+        foreach (var talent in talents)
+        {
+            if (isRemove)
+            {
+                UserServerDataService.RemoveUserTalent(talent.CurrentUserTalent!);
+            }
+            else
+            {
+                UserServerDataService.AddUserTalent(talent, ContextService.CurrentUserServer!);
+            }
+        }
+
+        await PriceCalculatorService.Calculate();
+
+        StateHasChanged();
+    }
+
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
     {
         IEnumerable<Recipe> result;
@@ -1081,23 +1120,17 @@
         var isIncrease = newLevel - userSkill.Level > 0;
         userSkill.Level = newLevel;
 
-        if (userSkill.Level < 7)
-        {
-            userSkill.HasLavishTalent = false;
-        }
-
         if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
         {
             UserServerDataService.UserSkillLevelChange(userSkill, ContextService.CurrentUserServer!, isIncrease);
         }
 
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
-    }
-
-    private async Task OnLavishTalentChanged(UserSkill userSkill, bool newLavishTalent)
-    {
-        userSkill.HasLavishTalent = newLavishTalent;
+        if (!isIncrease) {
+            foreach (var talent in userSkill.Skill!.Talents.Where(t => t.CurrentUserTalent is not null && newLevel < t.Level))
+            {
+                UserServerDataService.RemoveUserTalent(talent.CurrentUserTalent!);
+            }
+        }
 
         await PriceCalculatorService.Calculate();
         StateHasChanged();

@@ -80,24 +80,24 @@
     }
 
 
-    private void OnKeyDownCreateAsync(KeyboardEventArgs args)
+    private async Task OnKeyDownCreateAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
             case "Enter":
             case "NumpadEnter":
-                OnCreateServer();
+                await OnCreateServer();
                 break;
         }
     }
 
-    private void OnKeyDownJoinAsync(KeyboardEventArgs args)
+    private async Task OnKeyDownJoinAsync(KeyboardEventArgs args)
     {
         switch (args.Key)
         {
             case "Enter":
             case "NumpadEnter":
-                OnJoinServer();
+                await OnJoinServer();
                 break;
         }
     }

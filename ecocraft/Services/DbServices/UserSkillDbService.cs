@@ -1,6 +1,5 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace ecocraft.Services.DbServices;
 
@@ -25,16 +24,16 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserSkill Add(UserSkill userSkill)
+	public UserSkill Add(UserSkill talent)
 	{
-		context.UserSkills.Add(userSkill);
+		context.UserSkills.Add(talent);
 
-		if (userSkill.Skill is not null)
+		if (talent.Skill is not null)
 		{
-			userSkill.Skill.CurrentUserSkill = userSkill;
+			talent.Skill.CurrentUserSkill = talent;
 		}
 
-		return userSkill;
+		return talent;
 	}
 
 	public void Update(UserSkill userSkill)

@@ -48,7 +48,7 @@
                             <MudTh Style="width: 50%; background-color: var(--mud-palette-surface) !important;" Class="border-b-0 pl-2">@LocalizationService.GetTranslation("Products")</MudTh>
                         </HeaderContent>
                         <RowTemplate Context="ctx">
-                            <MudTd Class="pa-0 pl-2 border-0">@(ctx.Item1 is not null ? ctx.Item1.Quantity * -1 : "")</MudTd>
+                            <MudTd Class="pa-0 pl-2 border-0">@(ctx.Item1 is not null ? @Math.Round(ctx.Item1.Quantity.GetBaseValue() * -1, 0, MidpointRounding.AwayFromZero) : "")</MudTd>
                             <MudTd Class="border-0 pl-2">
                                 @if (ctx.Item1 is not null)
                                 {
@@ -58,7 +58,7 @@
                                     </MudStack>
                                 }
                             </MudTd>
-                            <MudTd Class="pa-0 pl-2 border-b-0 border-l-1">@(ctx.Item2 is not null ? ctx.Item2.Quantity : "")</MudTd>
+                            <MudTd Class="pa-0 pl-2 border-b-0 border-l-1">@(ctx.Item2 is not null ? Math.Round(ctx.Item2.Quantity.GetBaseValue(), 0, MidpointRounding.AwayFromZero) : "")</MudTd>
                             <MudTd Class="border-0 pl-2">
                                 @if (ctx.Item2 is not null)
                                 {

@@ -10,6 +10,9 @@ public class ServerDataService(
     RecipeDbService recipeDbService,
     ItemOrTagDbService itemOrTagDbService,
     PluginModuleDbService pluginModuleDbService,
+    TalentDbService talentDbService,
+    DynamicValueDbService dynamicValueDbService,
+    ModifierDbService modifierDbService,
     ElementDbService elementDbService)
 {
     public List<Skill> Skills { get; private set; } = [];
@@ -77,16 +80,16 @@ public class ServerDataService(
         server.EcoServerId = null;
     }
 
-    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)
+    public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, int maxLevel, decimal[] laborReducePercent)
     {
         var skill = new Skill
         {
             Name = name,
+            LocalizedName = localizedName,
             Profession = profession,
+            MaxLevel = maxLevel,
             LaborReducePercent = laborReducePercent,
             Server = server,
-            LocalizedName = localizedName,
-            LavishTalentValue = lavishTalentValue
         };
 
         Skills.Add(skill);
@@ -95,12 +98,12 @@ public class ServerDataService(
         return skill;
     }
 
-    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, decimal[] laborReducePercent, decimal? lavishTalentValue)
+    public void RefreshSkill(Skill skill, LocalizedField localizedName, string? profession, int maxLevel, decimal[] laborReducePercent)
     {
         skill.LocalizedName = localizedName;
         skill.Profession = profession;
+        skill.MaxLevel = maxLevel;
         skill.LaborReducePercent = laborReducePercent;
-        skill.LavishTalentValue = lavishTalentValue;
 
         skillDbService.Update(skill);
     }
@@ -108,6 +111,39 @@ public class ServerDataService(
     public void DeleteSkill(Skill skill)
     {
         skillDbService.Delete(skill);
+    }
+
+    public Talent ImportTalent(Skill skill, string name, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    {
+        var talent = new Talent
+        {
+            Skill = skill,
+            Name = name,
+            LocalizedName = localizedName,
+            TalentGroupName = talentGroupName,
+            Level = level,
+            Value = value,
+        };
+
+        talentDbService.Add(talent);
+
+        return talent;
+    }
+
+    public void RefreshTalent(Talent talent, Skill skill, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    {
+        talent.Skill = skill;
+        talent.LocalizedName = localizedName;
+        talent.TalentGroupName = talentGroupName;
+        talent.Level = level;
+        talent.Value = value;
+
+        talentDbService.Update(talent);
+    }
+
+    public void DeleteTalent(Talent talent)
+    {
+        talentDbService.Delete(talent);
     }
 
     public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, decimal percent)
@@ -197,20 +233,18 @@ public class ServerDataService(
         itemOrTagDbService.Delete(itemOrTag);
     }
 
-    public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, decimal craftMinutes, Skill? skill,
-        int requiredSkillLevel, bool isBlueprint, bool isDefault, decimal labor, CraftingTable craftingTable)
+    public Recipe ImportRecipe(Server server, string name, LocalizedField localizedName, string familyName, Skill? skill,
+        int requiredSkillLevel, bool isBlueprint, bool isDefault, CraftingTable craftingTable)
     {
         var recipe = new Recipe
         {
             Name = name,
             LocalizedName = localizedName,
             FamilyName = familyName,
-            CraftMinutes = craftMinutes,
             Skill = skill,
             SkillLevel = requiredSkillLevel,
             IsBlueprint = isBlueprint,
             IsDefault = isDefault,
-            Labor = labor,
             CraftingTable = craftingTable,
             Server = server,
         };
@@ -221,17 +255,15 @@ public class ServerDataService(
         return recipe;
     }
 
-    public void RefreshRecipe(Recipe recipe, LocalizedField localizedName, string familyName, decimal craftMinutes, Skill? skill, int requiredSkillLevel,
-        bool isBlueprint, bool isDefault, decimal labor, CraftingTable craftingTable)
+    public void RefreshRecipe(Recipe recipe, LocalizedField localizedName, string familyName, Skill? skill, int requiredSkillLevel,
+        bool isBlueprint, bool isDefault, CraftingTable craftingTable)
     {
         recipe.LocalizedName = localizedName;
         recipe.FamilyName = familyName;
-        recipe.CraftMinutes = craftMinutes;
         recipe.Skill = skill;
         recipe.SkillLevel = requiredSkillLevel;
         recipe.IsBlueprint = isBlueprint;
         recipe.IsDefault = isDefault;
-        recipe.Labor = labor;
         recipe.CraftingTable = craftingTable;
 
         recipeDbService.Update(recipe);
@@ -242,17 +274,84 @@ public class ServerDataService(
         recipeDbService.Delete(recipe);
     }
 
-    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, bool shouldReintegrate)
+    public DynamicValue ImportDynamicValue(decimal baseValue, Server server)
+    {
+        var dynamicValue = new DynamicValue
+        {
+            BaseValue = baseValue,
+            Server = server
+        };
+
+        dynamicValueDbService.Add(dynamicValue);
+
+        return dynamicValue;
+    }
+
+    public void RefreshDynamicValue(DynamicValue dynamicValue, decimal baseValue)
+    {
+        dynamicValue.BaseValue = baseValue;
+        dynamicValueDbService.Update(dynamicValue);
+    }
+
+    public void DeleteDynamicValue(DynamicValue dynamicValue)
+    {
+        dynamicValueDbService.Delete(dynamicValue);
+    }
+
+    public Modifier ImportModifier(DynamicValue dynamicValue, string dynamicType, ISLinkedToModifier iSLinkedToModifier)
+    {
+        var modifier = new Modifier
+        {
+            DynamicValue = dynamicValue,
+            DynamicType = dynamicType,
+        };
+
+        switch (iSLinkedToModifier)
+        {
+            case Skill skill:
+                modifier.Skill = skill;
+                break;
+            case Talent talent:
+                modifier.Talent = talent;
+                break;
+        }
+
+        modifierDbService.Add(modifier);
+
+        return modifier;
+    }
+
+    public void RefreshModifier(Modifier modifier, string dynamicType, ISLinkedToModifier iSLinkedToModifier)
+    {
+        modifier.DynamicType = dynamicType;
+
+        switch (iSLinkedToModifier)
+        {
+            case Skill skill:
+                modifier.Talent = null;
+                modifier.Skill = skill;
+                break;
+            case Talent talent:
+                modifier.Talent = talent;
+                modifier.Skill = null;
+                break;
+        }
+
+        modifierDbService.Update(modifier);
+    }
+
+    public void DeleteModifier(Modifier modifier)
+    {
+        modifierDbService.Delete(modifier);
+    }
+
+    public Element ImportElement(Recipe recipe, ItemOrTag itemOrTag, int index, bool shouldReintegrate)
     {
         var element = new Element
         {
             Recipe = recipe,
             ItemOrTag = itemOrTag,
             Index = index,
-            Quantity = quantity,
-            IsDynamic = isDynamic,
-            Skill = skill,
-            LavishTalent = lavishTalent,
             DefaultShare = 0,
             DefaultIsReintegrated = shouldReintegrate
         };
@@ -262,18 +361,19 @@ public class ServerDataService(
         return element;
     }
 
-    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, decimal quantity, bool isDynamic, Skill? skill, bool lavishTalent, bool shouldReintegrate)
+    public void RefreshElement(Element element, Recipe recipe, ItemOrTag itemOrTag, int index, bool shouldReintegrate)
     {
         element.Recipe = recipe;
         element.ItemOrTag = itemOrTag;
         element.Index = index;
-        element.Quantity = quantity;
-        element.IsDynamic = isDynamic;
-        element.Skill = skill;
-        element.LavishTalent = lavishTalent;
         element.DefaultShare = 0;
         element.DefaultIsReintegrated = shouldReintegrate;
 
         elementDbService.Update(element);
+    }
+    
+    public void DeleteElement(Element element)
+    {
+        elementDbService.Delete(element);
     }
 }

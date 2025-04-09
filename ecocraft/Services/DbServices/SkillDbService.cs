@@ -16,6 +16,8 @@ public class SkillDbService(EcoCraftDbContext context)
 	{
 		return context.Skills.Where(s => s.ServerId == server.Id)
 			.Include(s => s.LocalizedName)
+			.Include(s => s.Talents)
+			.ThenInclude(t => t.LocalizedName)
 			.ToListAsync();
 	}
 
@@ -31,11 +33,11 @@ public class SkillDbService(EcoCraftDbContext context)
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
 
-	public Skill Add(Skill skill)
+	public Skill Add(Skill talent)
 	{
-		context.Skills.Add(skill);
+		context.Skills.Add(talent);
 
-		return skill;
+		return talent;
 	}
 
 	public void Update(Skill skill)
