@@ -5,7 +5,7 @@
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class addusersettingapplymarginbetweenskills : Migration
+    public partial class addUserSettingApplyMarginBetweenSkills : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20241122131633_update-user-price-margin-fk")]
-    partial class updateuserpricemarginfk
+    partial class updateUserPriceMarginFk
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

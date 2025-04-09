@@ -35,7 +35,7 @@ builder.Services.AddDbContext<EcoCraftDbContext>(options =>
         {
             bd
                 .AddConsole()
-                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
+                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
         }))
     );
 
@@ -49,6 +49,9 @@ builder.Services.AddScoped<PluginModuleDbService>();
 builder.Services.AddScoped<RecipeDbService>();
 builder.Services.AddScoped<ServerDbService>();
 builder.Services.AddScoped<SkillDbService>();
+builder.Services.AddScoped<TalentDbService>();
+builder.Services.AddScoped<DynamicValueDbService>();
+builder.Services.AddScoped<ModifierDbService>();
 builder.Services.AddScoped<UserCraftingTableDbService>();
 builder.Services.AddScoped<UserDbService>();
 builder.Services.AddScoped<UserElementDbService>();
@@ -56,6 +59,7 @@ builder.Services.AddScoped<UserPriceDbService>();
 builder.Services.AddScoped<UserRecipeDbService>();
 builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
+builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
 
 // Business Services
@@ -90,7 +94,7 @@ builder.Services.AddAuthorization(config =>
 var app = builder.Build();
 
 var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
-app.UseRequestLocalization(locOptions.Value);
+app.UseRequestLocalization(locOptions!.Value);
 
 // Appliquer automatiquement les migrations
 using (var scope = app.Services.CreateScope())

@@ -6,7 +6,7 @@ namespace ecocraft.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userPriceDbService, UserSettingDbService userSettingDbService, ServerDbService serverDbService, UserDbService userDbService) : ControllerBase
+public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userPriceDbService, ServerDbService serverDbService, UserDbService userDbService) : ControllerBase
 {
     /*
      * Registrations:

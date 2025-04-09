@@ -5,7 +5,7 @@
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class addusershowhelp : Migration
+    public partial class addUserShowHelp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

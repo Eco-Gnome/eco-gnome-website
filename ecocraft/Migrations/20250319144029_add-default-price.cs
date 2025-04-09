@@ -5,7 +5,7 @@
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class adddefaultprice : Migration
+    public partial class addDefaultPrice : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

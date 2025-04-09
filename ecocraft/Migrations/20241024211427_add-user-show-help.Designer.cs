@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20241024211427_add-user-show-help")]
-    partial class addusershowhelp
+    partial class addUserShowHelp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

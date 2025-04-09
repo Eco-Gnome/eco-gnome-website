@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Blazor.Diagrams.Core.Anchors;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Models;
 
@@ -13,6 +14,9 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<Element> Elements { get; set; }
 	public DbSet<ItemOrTag> ItemOrTags { get; set; }
 	public DbSet<Skill> Skills { get; set; }
+	public DbSet<Talent> Talents { get; set; }
+	public DbSet<DynamicValue> DynamicValues { get; set; }
+	public DbSet<Modifier> Modifiers { get; set; }
 	public DbSet<CraftingTable> CraftingTables { get; set; }
 	public DbSet<PluginModule> PluginModules { get; set; }
 	public DbSet<User> Users { get; set; }
@@ -20,6 +24,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserSetting> UserSettings { get; set; }
 	public DbSet<UserCraftingTable> UserCraftingTables { get; set; }
 	public DbSet<UserSkill> UserSkills { get; set; }
+	public DbSet<UserTalent> UserTalents { get; set; }
 	public DbSet<UserElement> UserElements { get; set; }
 	public DbSet<UserPrice> UserPrices { get; set; }
 	public DbSet<UserRecipe> UserRecipes { get; set; }
@@ -56,7 +61,19 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<Recipe>()
 			.HasOne(r => r.LocalizedName)
 			.WithMany(lt => lt.Recipes)
-			.HasForeignKey(lt => lt.Id)
+			.HasForeignKey(r => r.LocalizedNameId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Recipe>()
+			.HasOne(r => r.CraftMinutes)
+			.WithMany(lt => lt.CraftMinutesRecipes)
+			.HasForeignKey(lt => lt.CraftMinutesId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Recipe>()
+			.HasOne(r => r.Labor)
+			.WithMany(lt => lt.LaborRecipes)
+			.HasForeignKey(lt => lt.LaborId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// Element
@@ -76,11 +93,42 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<Element>()
-			.HasOne(p => p.Skill)
-			.WithMany()
-			.HasForeignKey(p => p.SkillId)
-			.OnDelete(DeleteBehavior.Cascade)
-			.IsRequired(false);
+			.HasOne(e => e.Quantity)
+			.WithMany(i => i.QuantityElements)
+			.HasForeignKey(e => e.QuantityId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		//DynamicValue
+		modelBuilder.Entity<DynamicValue>()
+			.ToTable("DynamicValue");
+
+		modelBuilder.Entity<DynamicValue>()
+			.HasOne(dv => dv.Server)
+			.WithMany(s => s.DynamicValues)
+			.HasForeignKey(dv => dv.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		//Modifier
+		modelBuilder.Entity<Modifier>()
+			.ToTable("Modifier");
+
+		modelBuilder.Entity<Modifier>()
+			.HasOne(m => m.DynamicValue)
+			.WithMany(dv => dv.Modifiers)
+			.HasForeignKey(m => m.DynamicValueId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Modifier>()
+			.HasOne(m => m.Skill)
+			.WithMany(dv => dv.Modifiers)
+			.HasForeignKey(m => m.SkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Modifier>()
+			.HasOne(m => m.Talent)
+			.WithMany(dv => dv.Modifiers)
+			.HasForeignKey(m => m.TalentId)
+			.OnDelete(DeleteBehavior.Cascade);
 
 		// ItemOrTag
 		modelBuilder.Entity<ItemOrTag>()
@@ -129,6 +177,22 @@ public class EcoCraftDbContext : DbContext
 			.HasOne(s => s.LocalizedName)
 			.WithMany(lt => lt.Skills)
 			.HasForeignKey(s => s.LocalizedNameId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// Talent
+		modelBuilder.Entity<Talent>()
+			.ToTable("Talent");
+
+		modelBuilder.Entity<Talent>()
+			.HasOne(s => s.LocalizedName)
+			.WithMany(lt => lt.Talents)
+			.HasForeignKey(s => s.LocalizedNameId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Talent>()
+			.HasOne(s => s.Skill)
+			.WithMany(lt => lt.Talents)
+			.HasForeignKey(s => s.SkillId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// CraftingTable
@@ -242,6 +306,22 @@ public class EcoCraftDbContext : DbContext
 			.HasOne(us => us.UserServer)
 			.WithMany(use => use.UserSkills)
 			.HasForeignKey(us => us.UserServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// UserTalent
+		modelBuilder.Entity<UserTalent>()
+			.ToTable("UserTalent");
+
+		modelBuilder.Entity<UserTalent>()
+			.HasOne(ut => ut.Talent)
+			.WithMany(t => t.UserTalents)
+			.HasForeignKey(ut => ut.TalentId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<UserTalent>()
+			.HasOne(ut => ut.UserServer)
+			.WithMany(use => use.UserTalents)
+			.HasForeignKey(ut => ut.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserElement

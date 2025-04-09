@@ -1,6 +1,5 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor;
 
 namespace ecocraft.Services.DbServices;
 
@@ -41,11 +40,11 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 		return context.Users.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
 	}
 
-	public User Add(User user)
+	public User Add(User talent)
 	{
-		context.Users.Add(user);
+		context.Users.Add(talent);
 
-		return user;
+		return talent;
 	}
 
 	public void Update(User user)

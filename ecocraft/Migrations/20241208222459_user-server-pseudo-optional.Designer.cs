@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20241208222459_user-server-pseudo-optional")]
-    partial class userserverpseudooptional
+    partial class userServerPseudoOptional
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

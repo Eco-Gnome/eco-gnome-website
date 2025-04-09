@@ -403,6 +403,7 @@
 		_stats.Clear();
 
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills"), ServerDataService.Skills.Count(s => s.Profession is not null)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Talents"), ServerDataService.Skills.SelectMany(s => s.Talents).Count()));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting"), ServerDataService.CraftingTables.Count));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules"), ServerDataService.PluginModules.Count));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes"), ServerDataService.Recipes.Count));
@@ -523,11 +524,17 @@
 
 			RecalculateStats();
 		}
-		catch (ImportException)
+		catch (ImportException ex)
 		{
 			_showUploadServerDataLoader = false;
 
-			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok"), Severity.Error);
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok") + ": " + ex.Message, Severity.Error);
+		}
+		catch (Exception ex)
+		{
+			_showUploadServerDataLoader = false;
+
+			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
 		}
 
 		StateHasChanged();

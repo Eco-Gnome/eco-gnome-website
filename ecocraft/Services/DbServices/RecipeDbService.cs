@@ -16,7 +16,13 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 	{
 		return context.Recipes
 			.Include(c => c.Elements)
+			.ThenInclude(e => e.Quantity)
+			.ThenInclude(dv => dv.Modifiers)
 			.Include(s => s.LocalizedName)
+			.Include(s => s.CraftMinutes)
+			.ThenInclude(dv => dv.Modifiers)
+			.Include(s => s.Labor)
+			.ThenInclude(dv => dv.Modifiers)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}
@@ -35,11 +41,11 @@ public class RecipeDbService(EcoCraftDbContext context) : IGenericNamedDbService
 			.FirstOrDefaultAsync(r => r.Id == id);
 	}
 
-	public Recipe Add(Recipe recipe)
+	public Recipe Add(Recipe talent)
 	{
-		context.Recipes.Add(recipe);
+		context.Recipes.Add(talent);
 
-		return recipe;
+		return talent;
 	}
 
 	public void Update(Recipe recipe)

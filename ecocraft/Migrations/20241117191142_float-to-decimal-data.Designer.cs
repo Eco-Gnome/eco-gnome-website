@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20241118230407_float-to-decimal-data")]
-    partial class floattodecimaldata
+    partial class floatToDecimalData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

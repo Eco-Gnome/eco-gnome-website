@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class updateuserpricemarginfk : Migration
+    public partial class updateUserPriceMarginFk : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

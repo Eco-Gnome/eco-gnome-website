@@ -5,7 +5,7 @@
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class floattodecimal : Migration
+    public partial class floatToDecimal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

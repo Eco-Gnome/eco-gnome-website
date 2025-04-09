@@ -1,6 +1,4 @@
-﻿using Blazor.Diagrams.Core.Geometry;
-
-namespace ecocraft.Diagram;
+﻿namespace ecocraft.Diagram;
 
 public class EcoEdge
 {

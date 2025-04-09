@@ -114,25 +114,10 @@ LANGUAGES = {
     "es": "Spanish",
     "de": "German",
     "ko": "Korean",
-    "pt_BR": "Brazilian Portuguese",
-    "zh_Hans": "Simplified Chinese",
     "ru": "Russian",
     "it": "Italian",
     "pt_PT": "Portuguese",
-    "hu": "Hungarian",
-    "ja": "Japanese",
-    "nn": "Norwegian",
-    "pl": "Polish",
-    "nl": "Dutch",
-    "ro": "Romanian",
-    "da": "Danish",
-    "cs": "Czech",
-    "sv": "Swedish",
     "uk": "Ukrainian",
-    "el": "Greek",
-    "ar_sa": "Arabic",
-    "vi": "Vietnamese",
-    "tr": "Turkish"
 }
 
 convert_json_to_txt("ecocraft/wwwroot/assets/lang/en_US.json", "ecocraft/wwwroot/assets/lang/en_US.txt")

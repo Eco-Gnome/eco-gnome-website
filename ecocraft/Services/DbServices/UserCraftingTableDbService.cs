@@ -27,12 +27,12 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 			.FirstOrDefaultAsync(uct => uct.Id == id);
 	}
 
-	public UserCraftingTable Add(UserCraftingTable userCraftingTable)
+	public UserCraftingTable Add(UserCraftingTable talent)
 	{
-		context.UserCraftingTables.Add(userCraftingTable);
-		userCraftingTable.CraftingTable.CurrentUserCraftingTable = userCraftingTable;
+		context.UserCraftingTables.Add(talent);
+		talent.CraftingTable.CurrentUserCraftingTable = talent;
 
-		return userCraftingTable;
+		return talent;
 	}
 
 	public void Update(UserCraftingTable userCraftingTable)

@@ -1,25 +1,38 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using ecocraft.Extensions;
 using ecocraft.Models;
 
 namespace ecocraft.Services.ImportData;
 
-public class ImportException : Exception;
+public class ImportException(string? message) : Exception(message);
 
 public class ImportDataService(
     EcoCraftDbContext dbContext,
+    LocalizationService localizationService,
     ServerDataService serverDataService)
 {
+    private const int SupportedVersion = 1;
+
     public async Task<(int, string[])> ImportServerData(string jsonContent, Server server)
     {
         var options = new JsonSerializerOptions();
         options.Converters.Add(new LanguageCodeDictionaryConverter());
 
-        var importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent, options);
+        ImportDataDto? importedData;
         var errorCount = 0;
 
-        if (importedData is null) throw new ImportException();
+        try
+        {
+            importedData = JsonSerializer.Deserialize<ImportDataDto>(jsonContent, options);
+        }
+        catch (Exception e)
+        {
+            throw new ImportException("No data / Wrong file format: " + e.Message);
+        }
+
+        if (importedData is null) throw new ImportException("No data / Wrong file format");
+
+        if (importedData.Version != SupportedVersion) throw new ImportException(localizationService.GetTranslation("ServerManagement.Snackbar.UploadWrongVersion", SupportedVersion.ToString()));
 
         ImportSkills(server, importedData.Skills);
         errorCount += ImportItems(server, importedData.Items, out var itemErrorNames);
@@ -49,6 +62,7 @@ public class ImportDataService(
 
         return new ImportDataDto()
         {
+            Version = SupportedVersion,
             Skills = serverData.skills.Select(SkillToDto).ToList(),
             Items = serverData.itemOrTags.Where(iot => !iot.IsTag).Select(s => ItemToDto(s, serverData.craftingTables, serverData.pluginModules)).ToList(),
             Tags = serverData.itemOrTags.Where(iot => iot.IsTag).Select(TagToDto).ToList(),
@@ -68,21 +82,45 @@ public class ImportDataService(
 
             if (dbSkill is null)
             {
-                serverDataService.ImportSkill(server, newSkill.Name,
-                    TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession,
-                    newSkill.LaborReducePercent, newSkill.LavishTalentValue);
+                dbSkill = serverDataService.ImportSkill(server, newSkill.Name, TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
             }
             else
             {
-                serverDataService.RefreshSkill(dbSkill,
-                    TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName),
-                    newSkill.Profession, newSkill.LaborReducePercent, newSkill.LavishTalentValue);
+                serverDataService.RefreshSkill(dbSkill, TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
             }
+
+            ImportTalents(dbSkill, newSkill.Talents);
         }
 
         foreach (var dbSkill in serverDataService.Skills.Where(dbSkill => !nameOccurence.TryGetValue(dbSkill.Name, out _)))
         {
             serverDataService.DeleteSkill(dbSkill);
+        }
+    }
+
+    private void ImportTalents(Skill skill, List<TalentDto> newTalents)
+    {
+        var nameOccurence = new Dictionary<string, int>();
+
+        foreach (var newTalent in newTalents)
+        {
+            nameOccurence.Add(newTalent.Name, 1);
+
+            var dbTalent = skill.Talents.FirstOrDefault(s => s.Name == newTalent.Name);
+
+            if (dbTalent is null)
+            {
+                serverDataService.ImportTalent(skill, newTalent.Name, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+            }
+            else
+            {
+                serverDataService.RefreshTalent(dbTalent, skill, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+            }
+        }
+
+        foreach (var dbTalent in skill.Talents.Where(dbTalent => !nameOccurence.TryGetValue(dbTalent.Name, out _)))
+        {
+            serverDataService.DeleteTalent(dbTalent);
         }
     }
 
@@ -269,7 +307,6 @@ public class ImportDataService(
                 try
                 {
                     dbCraftingTable = serverDataService.CraftingTables.First(c => c.Name == recipe.CraftingTable);
-
                 }
                 catch (Exception e)
                 {
@@ -283,12 +320,10 @@ public class ImportDataService(
                         recipe.Name,
                         TranslationsToLocalizedField(server, recipe.LocalizedName),
                         recipe.FamilyName,
-                        recipe.CraftMinutes,
                         dbSkill,
                         recipe.RequiredSkillLevel,
                         recipe.IsBlueprint,
                         recipe.IsDefault,
-                        recipe.Labor,
                         dbCraftingTable
                     );
                 }
@@ -298,19 +333,20 @@ public class ImportDataService(
                         dbRecipe,
                         TranslationsToLocalizedField(server, recipe.LocalizedName, dbRecipe.LocalizedName),
                         recipe.FamilyName,
-                        recipe.CraftMinutes,
                         dbSkill,
                         recipe.RequiredSkillLevel,
                         recipe.IsBlueprint,
                         recipe.IsDefault,
-                        recipe.Labor,
                         dbCraftingTable
                     );
                 }
 
+                dbRecipe.Labor = ImportDynamicValue(server, dbRecipe.Labor, recipe.Labor);
+                dbRecipe.CraftMinutes = ImportDynamicValue(server, dbRecipe.CraftMinutes, recipe.CraftMinutes);
+
                 for (var i = 0; i < recipe.Ingredients.Count; i++)
                 {
-                    recipe.Ingredients[i].Quantity *= -1;
+                    recipe.Ingredients[i].Quantity.BaseValue *= -1;
                     recipe.Ingredients[i].Index = i;
                 }
 
@@ -324,7 +360,6 @@ public class ImportDataService(
 
                 foreach (var element in recipe.Ingredients.Concat(recipe.Products))
                 {
-                    var skill = serverDataService.Skills.FirstOrDefault(s => s.Name == element.Skill);
                     ItemOrTag dbItemOrTag;
 
                     try
@@ -339,22 +374,18 @@ public class ImportDataService(
                     // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
                     // so we need to be sure dbElement is the correct-retrieved element)
                     var dbElement = dbElements.FirstOrDefault(e =>
-                        e.ItemOrTag.Name == element.ItemOrTag && element.Quantity * e.Quantity > 0);
+                        e.ItemOrTag.Name == element.ItemOrTag && element.Quantity.BaseValue * e.Quantity.BaseValue > 0);
 
                     // Specific for BarrelItem, still need to figure a way to auto calculate this
-                    var specificBarrel = element is { ItemOrTag: "BarrelItem", Quantity: > 0, Index: > 0 };
+                    var specificBarrel = element is { ItemOrTag: "BarrelItem", Quantity.BaseValue: > 0, Index: > 0 };
 
                     if (dbElement is null)
                     {
-                        serverDataService.ImportElement(
+                        dbElement = serverDataService.ImportElement(
                             dbRecipe,
                             dbItemOrTag,
                             element.Index,
-                            element.Quantity,
-                            element.IsDynamic,
-                            skill,
-                            element.LavishTalent,
-                            specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
+                            specificBarrel || (element.Quantity.BaseValue > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
                     }
                     else
@@ -364,15 +395,13 @@ public class ImportDataService(
                             dbRecipe,
                             dbItemOrTag,
                             element.Index,
-                            element.Quantity,
-                            element.IsDynamic,
-                            skill,
-                            element.LavishTalent,
-                            specificBarrel || (element.Quantity > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
+                            specificBarrel || (element.Quantity.BaseValue > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
 
                         dbRecipe.Elements.Add(dbElement);
                     }
+
+                    dbElement.Quantity = ImportDynamicValue(server, dbElement.Quantity, element.Quantity);
                 }
 
                 var productsToEdit = dbRecipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index).ToList();
@@ -396,6 +425,66 @@ public class ImportDataService(
 
         recipeErrorNames = errorNames.ToArray();
         return errorCount;
+    }
+
+    private DynamicValue ImportDynamicValue(Server server, DynamicValue? dbDynamicValue, DynamicValueDto newDynamicValue)
+    {
+        if (dbDynamicValue is null)
+        {
+            dbDynamicValue = serverDataService.ImportDynamicValue(newDynamicValue.BaseValue, server);
+        }
+        else
+        {
+            serverDataService.RefreshDynamicValue(dbDynamicValue, newDynamicValue.BaseValue);
+        }
+
+        ImportModifiers(dbDynamicValue, newDynamicValue.Modifiers);
+
+        return dbDynamicValue;
+    }
+
+    private string GetModifierName(Modifier modifier) => $"{modifier.DynamicType}:{modifier.Skill?.Name ?? modifier.Talent?.Name}";
+    private string GetModifierName(ModifierDto modifier) => $"{modifier.DynamicType}:{modifier.Item}";
+
+    private void ImportModifiers(DynamicValue dynamicValue, List<ModifierDto> modifiers)
+    {
+        var nameOccurence = new Dictionary<string, int>();
+
+        foreach (var modifier in modifiers)
+        {
+            nameOccurence.Add(GetModifierName(modifier), 1);
+
+            var dbModifier = dynamicValue.Modifiers.FirstOrDefault(m => GetModifierName(m) == GetModifierName(modifier));
+            ISLinkedToModifier? iSLinkedToModifier = null;
+
+            switch (modifier.DynamicType)
+            {
+                case "Talent":
+                    iSLinkedToModifier = serverDataService.Skills.SelectMany(s => s.Talents).FirstOrDefault(t => t.Name == modifier.Item);
+                    break;
+                case "Skill":
+                case "Module":
+                    iSLinkedToModifier = serverDataService.Skills.FirstOrDefault(t => t.Name == modifier.Item);
+                    break;
+            }
+
+            if (iSLinkedToModifier is null)
+                return;
+
+            if (dbModifier is null)
+            {
+                serverDataService.ImportModifier(dynamicValue, modifier.DynamicType, iSLinkedToModifier);
+            }
+            else
+            {
+                serverDataService.RefreshModifier(dbModifier, modifier.DynamicType, iSLinkedToModifier);
+            }
+        }
+
+        foreach (var dbModifier in dynamicValue.Modifiers.Where(dbModifier => !nameOccurence.TryGetValue(GetModifierName(dbModifier), out _)))
+        {
+            serverDataService.DeleteModifier(dbModifier);
+        }
     }
 
     private static LocalizedField TranslationsToLocalizedField(Server server,
@@ -490,94 +579,35 @@ public class ImportDataService(
         return localizedField;
     }
 
-    private class ImportDataDto()
-    {
-        public List<SkillDto> Skills { get; init; } = [];
-        public List<ItemDto> Items { get; init; } = [];
-        public List<TagDto> Tags { get; init; } = [];
-        public List<RecipeDto> Recipes { get; init; } = [];
-    }
-
-    private class EcoItemDto
-    {
-        public string Name { get; set; }
-        public Dictionary<LanguageCode, string> LocalizedName { get; set; }
-    }
-
-    private class SkillDto : EcoItemDto
-    {
-        public string? Profession { get; set; }
-        public decimal[] LaborReducePercent { get; set; }
-        public decimal? LavishTalentValue { get; set; }
-    }
-
-    private class ItemDto : EcoItemDto
-    {
-        public bool? IsPluginModule { get; set; }
-        public decimal? PluginModulePercent { get; set; }
-        public bool? IsCraftingTable { get; set; }
-        public List<string>? CraftingTablePluginModules { get; set; }
-    }
-
-    private class TagDto : EcoItemDto
-    {
-        public List<string> AssociatedItems { get; set; }
-    }
-
-    private class RecipeDto : EcoItemDto
-    {
-        public string FamilyName { get; set; }
-        public decimal CraftMinutes { get; set; }
-        public string RequiredSkill { get; set; }
-        public int RequiredSkillLevel { get; set; }
-        public bool IsBlueprint { get; set; }
-        public bool IsDefault { get; set; }
-        public decimal Labor { get; set; }
-        public string CraftingTable { get; set; }
-        public List<ElementDto> Ingredients { get; set; }
-        public List<ElementDto> Products { get; set; }
-    }
-
-    private class ElementDto
-    {
-        public string ItemOrTag { get; set; }
-        public decimal Quantity { get; set; }
-        public bool IsDynamic { get; set; }
-        public string Skill { get; set; }
-        public bool LavishTalent { get; set; }
-
-        // ! This is not in the json file, it's calculated after
-        public int Index { get; set; }
-    }
-
     private static Dictionary<LanguageCode, string> LocalizedFieldToDto(LocalizedField localizedField)
     {
-        var result = new Dictionary<LanguageCode, string>();
-
-        result.Add(LanguageCode.en_US, localizedField.en_US);
-        result.Add(LanguageCode.fr, localizedField.fr);
-        result.Add(LanguageCode.es, localizedField.es);
-        result.Add(LanguageCode.de, localizedField.de);
-        result.Add(LanguageCode.ko, localizedField.ko);
-        result.Add(LanguageCode.pt_BR, localizedField.pt_BR);
-        result.Add(LanguageCode.zh_Hans, localizedField.zh_Hans);
-        result.Add(LanguageCode.ru, localizedField.ru);
-        result.Add(LanguageCode.it, localizedField.it);
-        result.Add(LanguageCode.pt_PT, localizedField.pt_PT);
-        result.Add(LanguageCode.hu, localizedField.hu);
-        result.Add(LanguageCode.ja, localizedField.ja);
-        result.Add(LanguageCode.nn, localizedField.nn);
-        result.Add(LanguageCode.pl, localizedField.pl);
-        result.Add(LanguageCode.nl, localizedField.nl);
-        result.Add(LanguageCode.ro, localizedField.ro);
-        result.Add(LanguageCode.da, localizedField.da);
-        result.Add(LanguageCode.cs, localizedField.cs);
-        result.Add(LanguageCode.sv, localizedField.sv);
-        result.Add(LanguageCode.uk, localizedField.uk);
-        result.Add(LanguageCode.el, localizedField.el);
-        result.Add(LanguageCode.ar_sa, localizedField.ar_sa);
-        result.Add(LanguageCode.vi, localizedField.vi);
-        result.Add(LanguageCode.tr, localizedField.tr);
+        var result = new Dictionary<LanguageCode, string>
+        {
+            { LanguageCode.en_US, localizedField.en_US },
+            { LanguageCode.fr, localizedField.fr },
+            { LanguageCode.es, localizedField.es },
+            { LanguageCode.de, localizedField.de },
+            { LanguageCode.ko, localizedField.ko },
+            { LanguageCode.pt_BR, localizedField.pt_BR },
+            { LanguageCode.zh_Hans, localizedField.zh_Hans },
+            { LanguageCode.ru, localizedField.ru },
+            { LanguageCode.it, localizedField.it },
+            { LanguageCode.pt_PT, localizedField.pt_PT },
+            { LanguageCode.hu, localizedField.hu },
+            { LanguageCode.ja, localizedField.ja },
+            { LanguageCode.nn, localizedField.nn },
+            { LanguageCode.pl, localizedField.pl },
+            { LanguageCode.nl, localizedField.nl },
+            { LanguageCode.ro, localizedField.ro },
+            { LanguageCode.da, localizedField.da },
+            { LanguageCode.cs, localizedField.cs },
+            { LanguageCode.sv, localizedField.sv },
+            { LanguageCode.uk, localizedField.uk },
+            { LanguageCode.el, localizedField.el },
+            { LanguageCode.ar_sa, localizedField.ar_sa },
+            { LanguageCode.vi, localizedField.vi },
+            { LanguageCode.tr, localizedField.tr }
+        };
 
         return result;
     }
@@ -590,7 +620,20 @@ public class ImportDataService(
             LocalizedName = LocalizedFieldToDto(skill.LocalizedName),
             Profession = skill.Profession,
             LaborReducePercent = skill.LaborReducePercent,
-            LavishTalentValue = skill.LavishTalentValue,
+            MaxLevel = skill.MaxLevel,
+            Talents = skill.Talents.Select(TalentToDto).ToList(),
+        };
+    }
+
+    private static TalentDto TalentToDto(Talent talent)
+    {
+        return new TalentDto
+        {
+            Name = talent.Name,
+            LocalizedName = LocalizedFieldToDto(talent.LocalizedName),
+            TalentGroupName = talent.TalentGroupName,
+            Level = talent.Level,
+            Value = talent.Value,
         };
     }
 
@@ -641,9 +684,9 @@ public class ImportDataService(
             LocalizedName = LocalizedFieldToDto(recipe.LocalizedName),
             Ingredients = recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index).Select(ElementToDto).ToList(),
             Products = recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).Select(ElementToDto).ToList(),
-            Labor = recipe.Labor,
+            Labor = DynamicValueToDto(recipe.Labor),
             CraftingTable = recipe.CraftingTable.Name,
-            CraftMinutes = recipe.CraftMinutes,
+            CraftMinutes = DynamicValueToDto(recipe.CraftMinutes),
             FamilyName = recipe.FamilyName,
             IsBlueprint = recipe.IsBlueprint,
             IsDefault = recipe.IsDefault,
@@ -652,16 +695,109 @@ public class ImportDataService(
         };
     }
 
+    private static DynamicValueDto DynamicValueToDto(DynamicValue dynamicValue)
+    {
+        return new DynamicValueDto
+        {
+            BaseValue = dynamicValue.BaseValue,
+            Modifiers = dynamicValue.Modifiers.Select(ModifierToDto).ToList(),
+        };
+    }
+
+    private static ModifierDto ModifierToDto(Modifier modifier)
+    {
+        return new ModifierDto
+        {
+            Item = modifier.Skill?.Name ?? modifier.Talent?.Name ?? "",
+            DynamicType = modifier.DynamicType,
+        };
+    }
+
     private static ElementDto ElementToDto(Element element)
     {
         return new ElementDto
         {
             ItemOrTag = element.ItemOrTag.Name,
-            Quantity = Math.Abs(element.Quantity),
-            IsDynamic = element.IsDynamic,
-            Skill = element.Skill?.Name ?? "",
-            LavishTalent = element.LavishTalent,
+            Quantity = DynamicValueToDto(element.Quantity),
         };
+    }
+
+    private class ImportDataDto
+    {
+        public required int Version { get; init; }
+        public required List<SkillDto> Skills { get; init; } = [];
+        public required List<ItemDto> Items { get; init; } = [];
+        public required List<TagDto> Tags { get; init; } = [];
+        public required List<RecipeDto> Recipes { get; init; } = [];
+    }
+
+    private class EcoItemDto
+    {
+        public required string Name { get; set; }
+        public required Dictionary<LanguageCode, string> LocalizedName { get; init; }
+    }
+
+    private class SkillDto : EcoItemDto
+    {
+        public string? Profession { get; init; }
+        public required int MaxLevel { get; init; }
+        public required decimal[] LaborReducePercent { get; init; }
+        public required List<TalentDto> Talents { get; init; }
+    }
+
+    private class TalentDto : EcoItemDto
+    {
+        public required string TalentGroupName { get; init; }
+        public required decimal Value { get; init; }
+        public required int Level { get; init; }
+    }
+
+    private class ItemDto : EcoItemDto
+    {
+        public bool? IsPluginModule { get; set; }
+        public decimal? PluginModulePercent { get; set; }
+        public bool? IsCraftingTable { get; set; }
+        public List<string>? CraftingTablePluginModules { get; set; }
+    }
+
+    private class TagDto : EcoItemDto
+    {
+        public required List<string> AssociatedItems { get; init; }
+    }
+
+    private class RecipeDto : EcoItemDto
+    {
+        public required string FamilyName { get; init; }
+        public required DynamicValueDto CraftMinutes { get; init; }
+        public required string RequiredSkill { get; init; }
+        public required int RequiredSkillLevel { get; init; }
+        public required bool IsBlueprint { get; init; }
+        public required bool IsDefault { get; init; }
+        public required DynamicValueDto Labor { get; init; }
+        public required string CraftingTable { get; init; }
+        public required List<ElementDto> Ingredients { get; init; }
+        public required List<ElementDto> Products { get; init; }
+    }
+
+    private class DynamicValueDto
+    {
+        public required decimal BaseValue { get; set; }
+        public required List<ModifierDto> Modifiers { get; init; }
+    }
+
+    private class ModifierDto
+    {
+        public required string DynamicType { get; init; }
+        public required string Item { get; init; }
+    }
+
+    private class ElementDto
+    {
+        public required string ItemOrTag { get; init; }
+        public required DynamicValueDto Quantity { get; init; }
+
+        // ! This is not in the json file, it's calculated after
+        public int Index { get; set; }
     }
 }
 
@@ -687,7 +823,7 @@ public class LanguageCodeDictionaryConverter : JsonConverter<Dictionary<Language
                 throw new JsonException("Property expected.");
             }
 
-            string propertyName = reader.GetString();
+            string propertyName = reader.GetString()!;
 
             string enumKey = propertyName.Replace("-", "_");
 
@@ -698,7 +834,7 @@ public class LanguageCodeDictionaryConverter : JsonConverter<Dictionary<Language
 
             reader.Read();
 
-            string value = reader.GetString();
+            string value = reader.GetString()!;
 
             dictionary.Add(languageCode, value);
         }
