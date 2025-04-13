@@ -74,12 +74,6 @@
                                                          Variant="Variant.Outlined"
                                                          Immediate="true"
                                                          ValueChanged="(int newValue) => OnLevelChanged(shoppingListSkill, newValue)"/>
-                                        <MudCheckBox Value="shoppingListSkill.HasLavishTalent"
-                                                     Class="dense-checkbox"
-                                                     Style="@($"visibility: {(shoppingListSkill.Level >= 6 && shoppingListSkill.Skill.LavishTalentValue is not null ? "visible" : "hidden")}")"
-                                                     Label="Lavish talent"
-                                                     Color="Color.Primary"
-                                                     ValueChanged="(bool newLavishTalent) => OnLavishTalentChanged(shoppingListSkill, newLavishTalent)"/>
                                     </MudStack>
                                 }
                             </MudStack>
@@ -280,12 +274,6 @@
     public async Task OnLevelChanged(ShoppingListSkill shoppingListSkill, int level)
     {
         shoppingListSkill.Level = level;
-        await Calculate();
-    }
-
-    public async Task OnLavishTalentChanged(ShoppingListSkill shoppingListSkill, bool value)
-    {
-        shoppingListSkill.HasLavishTalent = value;
         await Calculate();
     }
 

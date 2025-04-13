@@ -29,7 +29,7 @@ public class ShoppingListService(EcoCraftDbContext dbContext)
 
                 if (element.IsProduct())
                 {
-                    relatedShoppingListItemOrTag.Quantity = element.Quantity * shoppingListRecipe.QuantityToCraft;
+                    relatedShoppingListItemOrTag.Quantity = element.Quantity.GetBaseValue() * shoppingListRecipe.QuantityToCraft;
                     relatedShoppingListItemOrTag.RemainingQuantity = 0;
 
                     var parentIngredient = shoppingListRecipe.ParentShoppingListRecipe?.ShoppingListItemOrTags.Find(s => s.ItemOrTag == element.ItemOrTag && s.IsIngredient);
@@ -41,7 +41,7 @@ public class ShoppingListService(EcoCraftDbContext dbContext)
                 }
                 else
                 {
-                    relatedShoppingListItemOrTag.Quantity = Math.Round(-1 * element.Quantity * shoppingListRecipe.QuantityToCraft * (shoppingListRecipe.ShoppingListCraftingTable?.PluginModule?.Percent ?? 1), MidpointRounding.ToPositiveInfinity) ;
+                    relatedShoppingListItemOrTag.Quantity = Math.Round(-1 * element.Quantity.GetBaseValue() * shoppingListRecipe.QuantityToCraft * (shoppingListRecipe.ShoppingListCraftingTable?.PluginModule?.Percent ?? 1), MidpointRounding.ToPositiveInfinity) ;
                     relatedShoppingListItemOrTag.RemainingQuantity = relatedShoppingListItemOrTag.Quantity;
                 }
             }

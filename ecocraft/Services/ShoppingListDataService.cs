@@ -102,7 +102,6 @@ namespace ecocraft.Services
             {
                 Skill = skill,
                 Level = skill.CurrentUserSkill?.Level ?? 0,
-                HasLavishTalent = skill.CurrentUserSkill?.HasLavishTalent ?? false,
                 ShoppingList = shoppingList,
             };
         }

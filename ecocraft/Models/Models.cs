@@ -641,7 +641,6 @@ public class ShoppingListSkill
     [ForeignKey("Skill")] public Guid SkillId { get; set; }
     [ForeignKey("ShoppingList")] public Guid ShoppingListId { get; set; }
     public int Level { get; set; }
-    public bool HasLavishTalent { get; set; }
 
     public Skill Skill { get; set; }
     public ShoppingList ShoppingList { get; set; }

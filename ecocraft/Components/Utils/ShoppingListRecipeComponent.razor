@@ -90,7 +90,7 @@
 
         if (recipe is not null)
         {
-            var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag == shoppingListItemOrTag.ItemOrTag && e.IsProduct() && e.Index == 0).Quantity);
+            var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag == shoppingListItemOrTag.ItemOrTag && e.IsProduct() && e.Index == 0).Quantity.GetBaseValue());
 
             ShoppingListDataService.AddShoppingListRecipe(SelectedShoppingList, recipe, ShoppingListRecipe, quantityToCraft);
             await Calculate.InvokeAsync();
