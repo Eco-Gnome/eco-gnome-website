@@ -223,10 +223,13 @@ public class PriceCalculatorService(
                 ? ingredient.Element.ItemOrTag.AssociatedItems.Contains(ue.Element.ItemOrTag)
                 : ue.Element.ItemOrTag == ingredient.Element.ItemOrTag))
             .Select(ue => ue.Element.Recipe)
-            .Where(r => r.Skill is not null)
+            .Where(r => r.Skill is not null && r.CurrentUserRecipe is not null)
             .ToList();
 
-        if (userServerDataService.UserSetting!.ApplyMarginBetweenSkills && recipesThatProduceMyIngredient.Count > 0 && recipesThatProduceMyIngredient.Any(r => r.Skill != userRecipe.Recipe.Skill))
+        if (userServerDataService.UserSetting!.ApplyMarginBetweenSkills
+            && userPrice is { OverrideIsBought: false, MarginPrice: not null }
+            && recipesThatProduceMyIngredient.Count > 0
+            && recipesThatProduceMyIngredient.Any(r => r.Skill != userRecipe.Recipe.Skill))
         {
             ingredient.Price = userPrice.MarginPrice;
             ingredient.IsMarginPrice = true;
