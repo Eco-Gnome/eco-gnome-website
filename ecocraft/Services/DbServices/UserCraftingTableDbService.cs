@@ -8,17 +8,17 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 {
 	public Task<List<UserCraftingTable>> GetAllAsync()
 	{
-		return context.UserCraftingTables.Include(uct => uct.UserServer)
+		return context.UserCraftingTables
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
 			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
 
-	public Task<List<UserCraftingTable>> GetByUserServerAsync(UserServer userServer)
+	public Task<List<UserCraftingTable>> GetByDataContextAsync(DataContext dataContext)
 	{
 		return context.UserCraftingTables
-			.Where(s => s.UserServerId == userServer.Id)
+			.Where(s => s.DataContextId == dataContext.Id)
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
 			.Include(uct => uct.SkilledPluginModules)
@@ -31,12 +31,11 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 			.FirstOrDefaultAsync(uct => uct.Id == id);
 	}
 
-	public UserCraftingTable Add(UserCraftingTable talent)
+	public UserCraftingTable Add(UserCraftingTable userCraftingTable)
 	{
-		context.UserCraftingTables.Add(talent);
-		talent.CraftingTable.CurrentUserCraftingTable = talent;
-
-		return talent;
+		context.UserCraftingTables.Add(userCraftingTable);
+		userCraftingTable.CraftingTable.CurrentUserCraftingTable = userCraftingTable;
+		return userCraftingTable;
 	}
 
 	public void Update(UserCraftingTable userCraftingTable)
@@ -47,7 +46,6 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 	public void Delete(UserCraftingTable userCraftingTable)
 	{
 		userCraftingTable.CraftingTable.CurrentUserCraftingTable = null;
-
 		context.UserCraftingTables.Remove(userCraftingTable);
 	}
 }

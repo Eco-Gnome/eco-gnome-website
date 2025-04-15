@@ -11,17 +11,16 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
             .ToListAsync();
     }
 
-    public Task<List<UserRecipe>> GetByUserServerAsync(UserServer userServer)
+    public Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext)
     {
         return context.UserRecipes
-            .Where(s => s.UserServerId == userServer.Id)
+            .Where(s => s.DataContextId == dataContext.Id)
             .ToListAsync();
     }
 
     public Task<UserRecipe?> GetByIdAsync(Guid id)
     {
         return context.UserRecipes
-            .Include(up => up.UserServer)
             .FirstOrDefaultAsync(up => up.Id == id);
     }
 

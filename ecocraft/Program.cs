@@ -62,6 +62,7 @@ builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
+builder.Services.AddScoped<DataContextDbService>();
 
 // Business Services
 builder.Services.AddScoped<ContextService>();

@@ -27,7 +27,7 @@
         }
     </MudLink>
 
-    @if (!IsLoading)
+    @if (!IsLoadingServer)
     {
         <MudSelect T="Server"
                    Class="select-dense server-select"
@@ -58,7 +58,7 @@
 <MudSpacer/>
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
-    @if (!IsLoading)
+    @if (!IsLoadingUser)
     {
         <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
                    Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
@@ -81,7 +81,10 @@
 
 @code {
     [Parameter]
-    public bool IsLoading { get; set; }
+    public bool IsLoadingUser { get; set; }
+
+    [Parameter]
+    public bool IsLoadingServer { get; set; }
 
     [Parameter]
     public bool IsDarkMode { get; set; }
@@ -119,6 +122,7 @@
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
     {
+        StateHasChanged();
         await ContextService.ChangeServer(servers.First());
         Navigation.NavigateTo("/");
     }

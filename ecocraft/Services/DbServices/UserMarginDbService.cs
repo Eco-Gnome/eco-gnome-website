@@ -11,10 +11,10 @@ public class UserMarginDbService(EcoCraftDbContext context) : IGenericDbService<
 			.ToListAsync();
 	}
 
-	public Task<List<UserMargin>> GetByUserServerAsync(UserServer userServer)
+	public Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext)
 	{
         return context.UserMargins
-            .Where(s => s.UserServerId == userServer.Id)
+            .Where(s => s.DataContextId == dataContext.Id)
             .ToListAsync();
     }
 

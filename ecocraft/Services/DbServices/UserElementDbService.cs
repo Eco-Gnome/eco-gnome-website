@@ -11,10 +11,10 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 			.ToListAsync();
 	}
 
-	public Task<List<UserElement>> GetByUserServerAsync(UserServer userServer)
+	public Task<List<UserElement>> GetByDataContextAsync(DataContext dataContext)
 	{
 		return context.UserElements
-			.Where(s => s.UserServerId == userServer.Id)
+			.Where(s => s.DataContextId == dataContext.Id)
 			.ToListAsync();
 	}
 
@@ -24,12 +24,12 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 			.FirstOrDefaultAsync(ue => ue.Id == id);
 	}
 
-	public UserElement Add(UserElement talent)
+	public UserElement Add(UserElement userElement)
 	{
-		context.UserElements.Add(talent);
-		talent.Element.CurrentUserElement = talent;
+		context.UserElements.Add(userElement);
+		userElement.Element.CurrentUserElement = userElement;
 
-		return talent;
+		return userElement;
 	}
 
 	public void Update(UserElement userElement)

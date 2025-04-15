@@ -229,7 +229,13 @@
         "UserSettings": "User settings"
     },
     "Versions": "Versions",
+    "DataContext": {
+        "DefaultContext": "Default Context",
+        "NewContext": "New Context",
+        "DeletionConfirmation": "Are you sure you want to delete the context “{contextName}”? This action cannot be undone."
+    },
     "PriceCalculator": {
+        "AddDataContext": "Add new context",
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
         "Reset": "Reset",
         "Skills": "Skills",

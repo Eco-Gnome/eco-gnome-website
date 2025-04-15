@@ -26,13 +26,13 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 		return context.ItemOrTags
 			.FirstOrDefaultAsync(i => i.Id == id);
 	}
-		
+
 	public Task<ItemOrTag?> GetByNameAsync(string name)
 	{
 		return context.ItemOrTags
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
-		
+
 	public ItemOrTag Add(ItemOrTag talent)
 	{
 		context.ItemOrTags.Add(talent);

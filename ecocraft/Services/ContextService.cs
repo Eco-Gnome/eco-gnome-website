@@ -11,6 +11,7 @@ public class ContextService(
     ServerDbService serverDbService,
     ServerDataService serverDataService,
     UserServerDataService userServerDataService,
+    DataContextDbService dataContextDbService,
     UserDbService userDbService)
 {
     public event Action? OnContextChanged;
@@ -20,6 +21,7 @@ public class ContextService(
     public Server? CurrentServer { get; private set; }
     public UserServer? CurrentUserServer { get; private set; }
     public User? CurrentUser { get; private set; }
+    public DataContext? CurrentDataContext { get; private set; }
 
     public List<Server> AvailableServers
     {
@@ -33,26 +35,34 @@ public class ContextService(
 
     public async Task ChangeServer(Server server)
     {
-        var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server?.Id);
+        var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
 
         if (userServer == null)
         {
-            await JoinServer(server!);
-            userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server?.Id);
+            await JoinServer(server);
+            userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
         }
 
-        CurrentUserServer = userServer;
         CurrentServer = server;
+        CurrentUserServer = userServer;
 
         await serverDataService.RetrieveServerData(CurrentServer);
-        await userServerDataService.RetrieveUserData(CurrentUserServer);
+        await UpdateCurrentDataContext();
 
         await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
         OnContextChanged?.Invoke();
     }
 
-    public async Task InitializeContext()
+    public async Task UpdateCurrentDataContext(DataContext? dataContext = null)
+    {
+        dataContext ??= CurrentUserServer!.DataContexts.First(d => d.IsDefault);
+        CurrentDataContext = dataContext;
+        await localStorageService.AddItem("DataContextId", CurrentDataContext!.Id.ToString());
+        await userServerDataService.RetrieveUserData(CurrentUserServer, CurrentDataContext);
+    }
+
+    public async Task InitializeUserContext()
     {
         var localUserId = await localStorageService.GetItem("UserId");
         var secretUserId = await localStorageService.GetItem("SecretUserId");
@@ -90,6 +100,22 @@ public class ContextService(
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         await localStorageService.AddItem("SecretUserId", CurrentUser.SecretId.ToString());
+
+        var languageCode = await localStorageService.GetItem("LanguageCode");
+
+        if (!string.IsNullOrEmpty(languageCode))
+        {
+            Enum.TryParse(languageCode, out LanguageCode myStatus);
+            await localizationService.SetLanguageAsync(myStatus);
+        }
+        else
+        {
+            await localizationService.SetLanguageAsync(LanguageCode.en_US);
+        }
+    }
+
+    public async Task InitializeServerContext()
+    {
         _defaultServers.AddRange(await serverDbService.GetAllDefaultAsync());
 
         var lastServerId = await localStorageService.GetItem("ServerId");
@@ -100,7 +126,7 @@ public class ContextService(
             searchedServer = await serverDbService.GetByIdAsync(new Guid(lastServerId));
             if (searchedServer is not null)
             {
-                if (CurrentUser.UserServers.All(ue => ue.ServerId != searchedServer.Id))
+                if (CurrentUser!.UserServers.All(ue => ue.ServerId != searchedServer.Id))
                 {
                     searchedServer = null;
                 }
@@ -109,7 +135,7 @@ public class ContextService(
 
         if (searchedServer is null)
         {
-            if (CurrentUser.UserServers.Count != 0)
+            if (CurrentUser!.UserServers.Count != 0)
             {
                 searchedServer = CurrentUser.UserServers.First().Server;
             }
@@ -123,27 +149,15 @@ public class ContextService(
         if (searchedServer is not null)
         {
             CurrentServer = searchedServer;
-            CurrentUserServer = CurrentUser.UserServers.First(us => us.Server == searchedServer);
-			await serverDataService.RetrieveServerData(CurrentServer);
-			await userServerDataService.RetrieveUserData(CurrentUserServer);
-		}
+            CurrentUserServer = CurrentUser!.UserServers.First(us => us.Server == searchedServer);
+            await serverDataService.RetrieveServerData(CurrentServer);
 
-        var languageCode = await localStorageService.GetItem("LanguageCode");
-
-        if (!string.IsNullOrEmpty(languageCode))
-        {
-            Enum.TryParse(languageCode, out LanguageCode myStatus);
-            await localizationService.SetLanguageAsync(myStatus);
+            var lastDataContextId = await localStorageService.GetItem("DataContextId");
+            await UpdateCurrentDataContext(string.IsNullOrEmpty(lastDataContextId)
+                ? null
+                : CurrentUserServer.DataContexts.FirstOrDefault(dc => dc.Id == new Guid(lastDataContextId)));
         }
-        else
-        {
-            await localizationService.SetLanguageAsync(LanguageCode.en_US);
-        }
-
-        InvokeContextChanged();
-        // Don't know why, but the second one allows the MudSelect of servers to correctly display the selected server
-        InvokeContextChanged();
-	}
+    }
 
     public void InvokeContextChanged()
     {
@@ -152,27 +166,46 @@ public class ContextService(
 
     public async Task JoinServer(Server server, bool isAdmin = false)
     {
-        UserServer userServer = new UserServer
+        var userServer = new UserServer
         {
-            UserId = CurrentUser!.Id,
-            ServerId = server.Id,
+            User = CurrentUser!,
+            Server = server,
             IsAdmin = isAdmin,
         };
 
-        userServer.UserSettings.Add(new UserSetting
+        CurrentUser!.UserServers.Add(userServer);
+
+        await AddDataContext(userServer, true);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<DataContext> AddDataContext(UserServer userServer, bool isDefault = false)
+    {
+        var dataContext = new DataContext
         {
+            Name = isDefault
+                ? localizationService.GetTranslation("DataContext.DefaultContext")
+                : localizationService.GetTranslation("DataContext.NewContext"),
             UserServer = userServer,
+            IsDefault = isDefault,
+        };
+
+        dataContext.UserSettings.Add(new UserSetting
+        {
+            DataContext = dataContext,
         });
 
-        userServer.UserMargins.Add(new UserMargin
+        dataContext.UserMargins.Add(new UserMargin
         {
-            UserServer = userServer,
+            DataContext = dataContext,
             Name = localizationService.GetTranslation("ContextService.DefaultMargin"),
             Margin = 20,
         });
 
-        CurrentUser.UserServers.Add(userServer);
+        dataContextDbService.Add(dataContext);
         await dbContext.SaveChangesAsync();
+
+        return dataContext;
     }
 
 	public async Task LeaveServer(UserServer userServerToLeave)

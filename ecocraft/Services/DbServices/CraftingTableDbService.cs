@@ -25,7 +25,7 @@ public class CraftingTableDbService(EcoCraftDbContext context) : IGenericNamedDb
 		return context.CraftingTables
 			.FirstOrDefaultAsync(ct => ct.Id == id);
 	}
-	
+
 	public Task<CraftingTable?> GetByNameAsync(string name)
 	{
 		return context.CraftingTables

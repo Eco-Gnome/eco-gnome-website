@@ -2,7 +2,7 @@
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
 @inject ContextService ContextService
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject UserDbService UserDbService
@@ -183,7 +183,7 @@
 
 	private async Task CopyToClipboard(string text)
 	{
-		await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+		await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
 		Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarCopy"), Severity.Info);
 	}
 
@@ -204,12 +204,12 @@
 		var fileName = "eco_gnome_user_backup.txt";
 
 		// Appel de JavaScript pour déclencher le téléchargement
-		await JSRuntime.InvokeVoidAsync("triggerFileDownload", fileName, base64);
+		await JsRuntime.InvokeVoidAsync("triggerFileDownload", fileName, base64);
 	}
 
 	private async Task ResetRegistration(UserServer userServer)
 	{
-		var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("UserConfigurationDialog.ResetRegistration"));
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("UserConfigurationDialog.ResetRegistration"));
 
 		if (!confirmed) return;
 
@@ -240,7 +240,7 @@
 
 				if (foundUser is not null)
 				{
-					var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportBegin")} {foundUser.Pseudo} {LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportEnd")}");
+					var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"{LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportBegin")} {foundUser.Pseudo} {LocalizationService.GetTranslation("UserConfigurationDialog.PopupConfirmImportEnd")}");
 
 					if (confirmed)
 					{

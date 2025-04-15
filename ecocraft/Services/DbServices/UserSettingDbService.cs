@@ -11,10 +11,10 @@ public class UserSettingDbService(EcoCraftDbContext context) : IGenericDbService
 			.ToListAsync();
 	}
 
-	public Task<UserSetting?> GetByUserServerAsync(UserServer userServer)
+	public Task<UserSetting?> GetByDataContextAsync(DataContext dataContext)
 	{
 		return context.UserSettings
-			.FirstOrDefaultAsync(us => us.UserServerId == userServer.Id);
+			.FirstOrDefaultAsync(us => us.DataContextId == dataContext.Id);
 	}
 
 	public Task<UserSetting?> GetByIdAsync(Guid id)

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ecocraft.Services;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace ecocraft.Models;
 
@@ -425,6 +426,22 @@ public class UserServer
 
     public User User { get; init; }
     public Server Server { get; init; }
+    public List<DataContext> DataContexts { get; init; } = [];
+
+    public string GetPseudo()
+    {
+        return Pseudo is not null ? Pseudo : User.Pseudo;
+    }
+}
+
+public class DataContext
+{
+    [Key] public Guid Id { get; set; }
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public string Name { get; set; }
+    public bool IsDefault { get; set; }
+
+    public UserServer UserServer { get; set; }
     public List<UserSkill> UserSkills { get; init; } = [];
     public List<UserTalent> UserTalents { get; init; } = [];
     public List<UserElement> UserElements { get; init; } = [];
@@ -433,17 +450,12 @@ public class UserServer
     public List<UserSetting> UserSettings { get; init; } = [];
     public List<UserRecipe> UserRecipes { get; init; } = [];
     public List<UserMargin> UserMargins { get; init; } = [];
-
-    public string GetPseudo()
-    {
-        return Pseudo is not null ? Pseudo : User.Pseudo;
-    }
 }
 
 public class UserSetting
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public MarginType MarginType { get; set; } = MarginType.MarkUp;
     public decimal CalorieCost { get; set; } = 0;
@@ -451,31 +463,31 @@ public class UserSetting
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
     public bool ApplyMarginBetweenSkills { get; set; } = true;
 
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
 }
 
 public class UserMargin
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public string Name { get; set; } = "";
 
     public decimal Margin { get; set; } = 0;
 
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
     public List<UserPrice> UserPrices { get; set; } = [];
 }
 
 public class UserCraftingTable
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
 
     public decimal CraftMinuteFee { get; set; } = 0;
 
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public PluginModule? PluginModule { get; set; }
     public List<PluginModule> SkilledPluginModules { get; set; } = [];
@@ -494,20 +506,20 @@ public class UserSkill
     [Key] public Guid Id { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public int Level { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public Skill? Skill { get; set; }
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
 }
 
 public class UserTalent
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Talent")] public Guid TalentId { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public Talent Talent { get; set; }
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
 }
 
 internal interface IHasPrice
@@ -525,10 +537,10 @@ public class UserElement: IHasPrice
 
     public decimal Share { get; set; }
     public bool IsReintegrated { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public Element Element { get; set; }
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
 }
 
 public class UserPrice: IHasPrice
@@ -541,13 +553,13 @@ public class UserPrice: IHasPrice
 
     [ForeignKey("UserElement")] public Guid? PrimaryUserElementId { get; set; }
     [ForeignKey("UserPrice")] public Guid? PrimaryUserPriceId { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public bool OverrideIsBought { get; set; }
 
     [ForeignKey("UserMargin")] public Guid? UserMarginId { get; set; }
     public UserMargin? UserMargin { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
     public UserElement? PrimaryUserElement { get; set; }
     public UserPrice? PrimaryUserPrice { get; set; }
 
@@ -585,11 +597,11 @@ public class UserRecipe
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
-    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public int RoundFactor { get; set; }
 
     public Recipe Recipe { get; set; }
-    public UserServer UserServer { get; set; }
+    public DataContext DataContext { get; set; }
 }
 
 // Server Data

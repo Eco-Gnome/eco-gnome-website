@@ -491,8 +491,8 @@
 			StateHasChanged();
 			var (errorCount, recipeErrorNames) = await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
 
-			await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
-			await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
+			// await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
+			// await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
 
 			_showUploadServerDataLoader = false;
 			StateHasChanged();

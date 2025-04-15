@@ -14,8 +14,11 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 
 	public Task<User?> GetByIdAsync(Guid id)
 	{
-		return context.Users.Include(u => u.UserServers)
+		return context.Users
+			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
+			.Include(u => u.UserServers)
+			.ThenInclude(us => us.DataContexts)
 			.FirstOrDefaultAsync(u => u.Id == id);
 	}
 
@@ -31,6 +34,7 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 	{
 		return context.UserServers
 			.Include(us => us.Server)
+			.Include(us => us.DataContexts)
 			.Where(us => us.Server.EcoServerId == ecoServerId)
 			.FirstOrDefaultAsync(us => us.EcoUserId == ecoUserId);
 	}

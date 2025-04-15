@@ -15,15 +15,15 @@
     <MudAppBar Elevation="2" Class="app-bar">
         <MudIconButton Icon="@MDIIcons.Filled.Menu" Size="Size.Medium" OnClick="() => ToggleMenu()" />
 
-        <Header IsLoading="@_isLoading" @bind-isDarkMode="_isDarkMode"></Header>
+        <Header IsLoadingUser="_isLoadingUser" IsLoadingServer="_isLoadingServer" @bind-isDarkMode="_isDarkMode"></Header>
     </MudAppBar>
 
     <MudDrawer @bind-Open="@_menuOpened" Variant="@DrawerVariant.Mini" OpenMiniOnHover="false" ClipMode="DrawerClipMode.Docked" Elevation="4">
-        <NavMenu Opened="_menuOpened"/>
+        <NavMenu IsLoadingUser="_isLoadingUser" IsLoadingServer="_isLoadingServer" Opened="_menuOpened"/>
     </MudDrawer>
 
     <MudMainContent Class="mt-16 pa-6">
-        @if (!_isLoading)
+        @if (!_isLoadingUser && !_isLoadingServer)
         {
             if (ContextService.CurrentUserServer is not null)
             {
@@ -41,12 +41,12 @@
             </MudItem>
         }
     </MudMainContent>
-
 </MudLayout>
 
 @code {
     // private bool _drawerOpen = true;
-    private bool _isLoading = true;
+    private bool _isLoadingUser = true;
+    private bool _isLoadingServer = true;
     private bool _menuOpened = false;
 
     //private MudTheme _theme = new();
@@ -108,9 +108,13 @@
             return;
         }
 
-        await ContextService.InitializeContext();
+        await ContextService.InitializeUserContext();
+        _isLoadingUser = false;
+        StateHasChanged();
+        // await Task.Yield();
 
-        this._isLoading = false;
+        await ContextService.InitializeServerContext();
+        _isLoadingServer = false;
         StateHasChanged();
     }
 }

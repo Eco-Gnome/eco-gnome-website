@@ -24,7 +24,7 @@ public class UserServerDataService(
     public List<UserRecipe> UserRecipes { get; private set; } = [];
     public List<UserMargin> UserMargins { get; private set; } = [];
 
-    public async Task RetrieveUserData(UserServer? userServer)
+    public async Task RetrieveUserData(UserServer? userServer, DataContext? dataContext)
     {
         if (userServer is null)
         {
@@ -40,14 +40,16 @@ public class UserServerDataService(
             return;
         }
 
-        var userSkillsTask = userSkillDbService.GetByUserServerAsync(userServer);
-        var userTalentsTask = userTalentDbService.GetByUserServerAsync(userServer);
-        var userCraftingTablesTask = userCraftingTableDbService.GetByUserServerAsync(userServer);
-        var userSettingsTask = userSettingDbService.GetByUserServerAsync(userServer);
-        var userElementsTask = userElementDbService.GetByUserServerAsync(userServer);
-        var userPricesTask = userPriceDbService.GetByUserServerAsync(userServer);
-        var userRecipesTask = userRecipeDbService.GetByUserServerAsync(userServer);
-        var userMarginsTask = userMarginDbService.GetByUserServerAsync(userServer);
+        dataContext ??= userServer.DataContexts.First(d => d.IsDefault);
+
+        var userSkillsTask = userSkillDbService.GetByDataContextAsync(dataContext);
+        var userTalentsTask = userTalentDbService.GetByDataContextAsync(dataContext);
+        var userCraftingTablesTask = userCraftingTableDbService.GetByDataContextAsync(dataContext);
+        var userSettingsTask = userSettingDbService.GetByDataContextAsync(dataContext);
+        var userElementsTask = userElementDbService.GetByDataContextAsync(dataContext);
+        var userPricesTask = userPriceDbService.GetByDataContextAsync(dataContext);
+        var userRecipesTask = userRecipeDbService.GetByDataContextAsync(dataContext);
+        var userMarginsTask = userMarginDbService.GetByDataContextAsync(dataContext);
 
         await Task.WhenAll(userSkillsTask, userTalentsTask, userCraftingTablesTask, userSettingsTask, userElementsTask, userPricesTask,
             userRecipesTask, userMarginsTask);
@@ -93,12 +95,12 @@ public class UserServerDataService(
         }
     }
 
-    public void AddUserSkill(Skill? skill, UserServer userServer, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
+    public void AddUserSkill(Skill? skill, DataContext dataContext, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
     {
         var userSkill = new UserSkill
         {
             Skill = skill,
-            UserServer = userServer,
+            DataContext = dataContext,
             Level = 1,
         };
 
@@ -117,7 +119,7 @@ public class UserServerDataService(
 
         foreach (var recipe in recipes)
         {
-            AddUserRecipe(recipe, userServer);
+            AddUserRecipe(recipe, dataContext);
         }
     }
 
@@ -129,17 +131,17 @@ public class UserServerDataService(
             RemoveUserRecipe(userRecipe);
         }
 
-        userSkill.UserServer.UserSkills.Remove(userSkill);
+        userSkill.DataContext.UserSkills.Remove(userSkill);
         UserSkills.Remove(userSkill);
         userSkillDbService.Delete(userSkill);
     }
 
-    public void AddUserTalent(Talent talent, UserServer userServer)
+    public void AddUserTalent(Talent talent, DataContext dataContext)
     {
         var userTalent = new UserTalent
         {
             Talent = talent,
-            UserServer = userServer,
+            DataContext = dataContext,
         };
 
         userTalentDbService.Add(userTalent);
@@ -152,12 +154,12 @@ public class UserServerDataService(
         UserTalents.Remove(userTalent);
     }
 
-    public void CreateUserMargin(UserServer userServer)
+    public void CreateUserMargin(DataContext dataContext)
     {
         var userMargin = new UserMargin
         {
             Name = localizationService.GetTranslation("UserServerDataService.NewMargin"),
-            UserServer = userServer,
+            DataContext = dataContext,
             Margin = 0,
         };
 
@@ -175,7 +177,7 @@ public class UserServerDataService(
         userMarginDbService.Delete(userMargin);
     }
 
-    public void UserSkillLevelChange(UserSkill userSkill, UserServer userServer, bool isIncrease)
+    public void UserSkillLevelChange(UserSkill userSkill, DataContext dataContext, bool isIncrease)
     {
         if (isIncrease)
         {
@@ -184,7 +186,7 @@ public class UserServerDataService(
                          r.Skill == userSkill.Skill && r.SkillLevel <= userSkill.Level &&
                          !UserRecipes.Select(ur => ur.Recipe).Contains(r)).ToList())
             {
-                AddUserRecipe(recipe, userServer);
+                AddUserRecipe(recipe, dataContext);
             }
         }
         else
@@ -199,7 +201,7 @@ public class UserServerDataService(
         }
     }
 
-    public void RecalculateUserRecipes(UserServer userServer)
+    public void RecalculateUserRecipes(DataContext dataContext)
     {
         // We remove all recipes that does not meet the requirements
         foreach (var userRecipe in UserRecipes.ToList())
@@ -228,12 +230,12 @@ public class UserServerDataService(
 
             foreach (var recipe in recipesToAdd)
             {
-                AddUserRecipe(recipe, userServer);
+                AddUserRecipe(recipe, dataContext);
             }
         }
     }
 
-    public void ToggleEmptyUserSkill(UserServer userServer, bool displayNonSkilledRecipes)
+    public void ToggleEmptyUserSkill(DataContext dataContext, bool displayNonSkilledRecipes)
     {
         var nullUserSkill = UserSkills.FirstOrDefault(us => us.Skill is null);
 
@@ -242,7 +244,7 @@ public class UserServerDataService(
             if (nullUserSkill is null)
             {
                 // Add a fake UserSkill without skill, so we can retrieve recipes that doesn't require skill easily
-                AddUserSkill(null, userServer, false, false);
+                AddUserSkill(null, dataContext, false, false);
             }
         }
         else
@@ -254,12 +256,12 @@ public class UserServerDataService(
         }
     }
 
-    public void AddUserCraftingTable(CraftingTable craftingTable, UserServer userServer, bool addedByUser = false)
+    public void AddUserCraftingTable(CraftingTable craftingTable, DataContext dataContext, bool addedByUser = false)
     {
         var userCraftingTable = new UserCraftingTable
         {
             CraftingTable = craftingTable,
-            UserServer = userServer,
+            DataContext = dataContext,
             PluginModule = null
         };
 
@@ -273,14 +275,14 @@ public class UserServerDataService(
                              UserSkills.Select(us => us.Skill).Contains(r.Skill) && r.CraftingTable == craftingTable)
                          .ToList())
             {
-                AddUserRecipe(recipe, userServer);
+                AddUserRecipe(recipe, dataContext);
             }
         }
     }
 
     public void RemoveUserCraftingTable(UserCraftingTable userCraftingTable)
     {
-        userCraftingTable.UserServer.UserCraftingTables.Remove(userCraftingTable);
+        userCraftingTable.DataContext.UserCraftingTables.Remove(userCraftingTable);
         UserCraftingTables.Remove(userCraftingTable);
         userCraftingTableDbService.Delete(userCraftingTable);
 
@@ -296,12 +298,12 @@ public class UserServerDataService(
         userSettingDbService.Update(userSetting);
     }
 
-    public void AddUserRecipe(Recipe recipe, UserServer userServer)
+    public void AddUserRecipe(Recipe recipe, DataContext dataContext)
     {
         var userRecipe = new UserRecipe
         {
             Recipe = recipe,
-            UserServer = userServer,
+            DataContext = dataContext,
         };
 
         UserRecipes.Add(userRecipe);
@@ -309,12 +311,12 @@ public class UserServerDataService(
 
         foreach (var element in recipe.Elements)
         {
-            AddUserElement(element, userServer);
+            AddUserElement(element, dataContext);
         }
 
         if (!UserCraftingTables.Select(uct => uct.CraftingTable).Contains(recipe.CraftingTable))
         {
-            AddUserCraftingTable(recipe.CraftingTable, userServer);
+            AddUserCraftingTable(recipe.CraftingTable, dataContext);
         }
     }
 
@@ -325,7 +327,7 @@ public class UserServerDataService(
             RemoveUserElement(userElement);
         }
 
-        userRecipe.UserServer.UserRecipes.Remove(userRecipe);
+        userRecipe.DataContext.UserRecipes.Remove(userRecipe);
         UserRecipes.Remove(userRecipe);
         userRecipeDbService.Delete(userRecipe);
 
@@ -336,12 +338,12 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserElement(Element element, UserServer userServer)
+    private void AddUserElement(Element element, DataContext dataContext)
     {
         var userElement = new UserElement
         {
             Element = element,
-            UserServer = userServer,
+            DataContext = dataContext,
             Share = element.DefaultShare,
             IsReintegrated = element.DefaultIsReintegrated
         };
@@ -352,7 +354,7 @@ public class UserServerDataService(
         // If the related ItemOrTag has no UserPrice, create it
         if (UserPrices.FirstOrDefault(up => up.ItemOrTag == userElement.Element.ItemOrTag) is null)
         {
-            AddUserPrice(element.ItemOrTag, userServer);
+            AddUserPrice(element.ItemOrTag, dataContext);
 
             if (element.ItemOrTag.IsTag)
             {
@@ -360,7 +362,7 @@ public class UserServerDataService(
                 {
                     if (UserPrices.FirstOrDefault(up => up.ItemOrTag == item) is null)
                     {
-                        AddUserPrice(item, userServer);
+                        AddUserPrice(item, dataContext);
                     }
                 }
             }
@@ -375,7 +377,7 @@ public class UserServerDataService(
             userPrice.PrimaryUserElement = null;
         }
 
-        userElement.UserServer.UserElements.Remove(userElement);
+        userElement.DataContext.UserElements.Remove(userElement);
         UserElements.Remove(userElement);
         userElementDbService.Delete(userElement);
 
@@ -413,12 +415,12 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserPrice(ItemOrTag itemOrTag, UserServer userServer)
+    private void AddUserPrice(ItemOrTag itemOrTag, DataContext dataContext)
     {
         var userPrice = new UserPrice
         {
             ItemOrTag = itemOrTag,
-            UserServer = userServer,
+            DataContext = dataContext,
             UserMargin = UserMargins.First(),
             OverrideIsBought = false,
             Price = itemOrTag.DefaultPrice ?? itemOrTag.MinPrice,
@@ -430,7 +432,7 @@ public class UserServerDataService(
 
     private void RemoveUserPrice(UserPrice userPrice)
     {
-        userPrice.UserServer.UserPrices.Remove(userPrice);
+        userPrice.DataContext.UserPrices.Remove(userPrice);
         UserPrices.Remove(userPrice);
         userPriceDbService.Delete(userPrice);
     }

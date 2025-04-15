@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250416033306_add-data-context")]
+    partial class adddatacontext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -818,7 +821,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("TalentId")
+                    b.Property<Guid?>("TalentId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -1286,8 +1289,7 @@ namespace ecocraft.Migrations
                     b.HasOne("ecocraft.Models.Talent", "Talent")
                         .WithMany("UserTalents")
                         .HasForeignKey("TalentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("DataContext");
 

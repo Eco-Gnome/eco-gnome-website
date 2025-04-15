@@ -21,6 +21,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<PluginModule> PluginModules { get; set; }
 	public DbSet<User> Users { get; set; }
 	public DbSet<UserServer> UserServers { get; set; }
+	public DbSet<DataContext> DataContexts { get; set; }
 	public DbSet<UserSetting> UserSettings { get; set; }
 	public DbSet<UserCraftingTable> UserCraftingTables { get; set; }
 	public DbSet<UserSkill> UserSkills { get; set; }
@@ -255,14 +256,24 @@ public class EcoCraftDbContext : DbContext
 		modelBuilder.Entity<User>()
 			.ToTable("User");
 
+		// DataContext
+		modelBuilder.Entity<DataContext>()
+			.ToTable("DataContext");
+
+		modelBuilder.Entity<DataContext>()
+			.HasOne(us => us.UserServer)
+			.WithMany(us => us.DataContexts)
+			.HasForeignKey(us => us.UserServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
 		// UserSetting
 		modelBuilder.Entity<UserSetting>()
 			.ToTable("UserSetting");
 
 		modelBuilder.Entity<UserSetting>()
-			.HasOne(us => us.UserServer)
+			.HasOne(us => us.DataContext)
 			.WithMany(us => us.UserSettings)
-			.HasForeignKey(us => us.UserServerId)
+			.HasForeignKey(us => us.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
         // UserMargin
@@ -270,9 +281,9 @@ public class EcoCraftDbContext : DbContext
             .ToTable("UserMargin");
 
         modelBuilder.Entity<UserMargin>()
-            .HasOne(us => us.UserServer)
+            .HasOne(us => us.DataContext)
             .WithMany(us => us.UserMargins)
-            .HasForeignKey(us => us.UserServerId)
+            .HasForeignKey(us => us.DataContextId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // UserCraftingTable
@@ -280,9 +291,9 @@ public class EcoCraftDbContext : DbContext
 			.ToTable("UserCraftingTable");
 
 		modelBuilder.Entity<UserCraftingTable>()
-			.HasOne(uct => uct.UserServer)
+			.HasOne(uct => uct.DataContext)
 			.WithMany(us => us.UserCraftingTables)
-			.HasForeignKey(uct => uct.UserServerId)
+			.HasForeignKey(uct => uct.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserCraftingTable>()
@@ -326,9 +337,9 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserSkill>()
-			.HasOne(us => us.UserServer)
+			.HasOne(us => us.DataContext)
 			.WithMany(use => use.UserSkills)
-			.HasForeignKey(us => us.UserServerId)
+			.HasForeignKey(us => us.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserTalent
@@ -342,9 +353,9 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserTalent>()
-			.HasOne(ut => ut.UserServer)
+			.HasOne(ut => ut.DataContext)
 			.WithMany(use => use.UserTalents)
-			.HasForeignKey(ut => ut.UserServerId)
+			.HasForeignKey(ut => ut.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserElement
@@ -358,9 +369,9 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserElement>()
-			.HasOne(ue => ue.UserServer)
+			.HasOne(ue => ue.DataContext)
 			.WithMany(us => us.UserElements)
-			.HasForeignKey(ue => ue.UserServerId)
+			.HasForeignKey(ue => ue.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserPrice
@@ -380,9 +391,9 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserPrice>()
-			.HasOne(up => up.UserServer)
+			.HasOne(up => up.DataContext)
 			.WithMany(us => us.UserPrices)
-			.HasForeignKey(up => up.UserServerId)
+			.HasForeignKey(up => up.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserPrice>()
@@ -408,9 +419,9 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserRecipe>()
-			.HasOne(ur => ur.UserServer)
+			.HasOne(ur => ur.DataContext)
 			.WithMany(us => us.UserRecipes)
-			.HasForeignKey(ur => ur.UserServerId)
+			.HasForeignKey(ur => ur.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// UserServer
