@@ -23,13 +23,24 @@
                             <EcoIcon Item="@Recipe.CraftingTable" />
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
 
-                            @if (Recipe.CraftingTable.PluginModules.Count > 0)
-                            {
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudTooltip Text="@(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule is not null ? LocalizationService.GetTranslation(Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule) + $" [{((1 - Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule.GetPercent(Recipe.Skill)) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                        <EcoIcon Item="@Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
-                                    </MudTooltip>
-                                </MudStack>
+                            @{
+                                var pluginModule = Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule;
+
+                                @if (pluginModule is not null)
+                                {
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudTooltip Text="@pluginModule.GetTooltip(LocalizationService)">
+                                            <EcoIcon Item="@pluginModule" Size="32" Class="mt-1"/>
+                                        </MudTooltip>
+
+                                        @foreach (var skilledPluginModule in Recipe.CraftingTable.CurrentUserCraftingTable!.SkilledPluginModules)
+                                        {
+                                            <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
+                                                <EcoIcon Item="@skilledPluginModule" Size="24" Class="mt-1"/>
+                                            </MudTooltip>
+                                        }
+                                    </MudStack>
+                                }
                             }
                         </MudStack>
                     </MudStack>

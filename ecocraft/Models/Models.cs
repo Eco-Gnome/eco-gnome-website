@@ -386,6 +386,15 @@ public class PluginModule: IHasLocalizedName, IHasIconName
         return Percent;
     }
 
+    public string GetTooltip(LocalizationService localizationService)
+    {
+        return localizationService.GetTranslation(this)
+               + $" [{((1 - Percent) * 100).ToString("0.##")}%]"
+               + (Skill is not null
+                   ? $" - {localizationService.GetTranslation(Skill)}: [{((1 - (decimal)SkillPercent!) * 100).ToString("0.##")}%]"
+                   : "");
+    }
+
     public override string ToString()
     {
         return Name;
@@ -494,10 +503,10 @@ public class UserSkill
 public class UserTalent
 {
     [Key] public Guid Id { get; set; }
-    [ForeignKey("Talent")] public Guid? TalentId { get; set; }
+    [ForeignKey("Talent")] public Guid TalentId { get; set; }
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
 
-    public Talent? Talent { get; set; }
+    public Talent Talent { get; set; }
     public UserServer UserServer { get; set; }
 }
 

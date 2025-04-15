@@ -181,10 +181,7 @@
                                                                Size="Size.Small"
                                                                Disabled="@(genericPluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
                                                                OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
-                                                <MudTooltip Text="@(context.PluginModule is not null
-                                                                      ? LocalizationService.GetTranslation(context.PluginModule)
-                                                                        + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]"
-                                                                      : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                <MudTooltip Text="@(context.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
                                                     <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
                                                 </MudTooltip>
                                                 @if (!shouldDisableIncrease)
@@ -200,11 +197,7 @@
                                                     @foreach (var skilledPluginModule in skilledPluginModules)
                                                     {
                                                         <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
-                                                            <MudTooltip Text="@(LocalizationService.GetTranslation(skilledPluginModule)
-                                                                                + $" [{((1 - skilledPluginModule.Percent) * 100).ToString("0.##")}%]"
-                                                                                + (skilledPluginModule.Skill is not null
-                                                                                    ? $" - {LocalizationService.GetTranslation(skilledPluginModule.Skill)}: [{((1 - (decimal)skilledPluginModule.SkillPercent!) * 100).ToString("0.##")}%]"
-                                                                                    : ""))">
+                                                            <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
                                                                 <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(context.SkilledPluginModules.Contains(skilledPluginModule) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
                                                             </MudTooltip>
                                                         </MudLink>
@@ -991,18 +984,28 @@
         return Task.FromResult(result);
     }
 
-    private async Task ToggleTalent(List<Talent> talents)
+    private async Task ToggleTalent(List<Talent> talents, bool forceRemove = false)
     {
         var isRemove = talents.All(t => t.CurrentUserTalent is not null);
 
         foreach (var talent in talents)
         {
-            if (isRemove)
+            if (isRemove || forceRemove)
             {
                 UserServerDataService.RemoveUserTalent(talent.CurrentUserTalent!);
             }
             else
             {
+                var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
+                    .Where(ut => ut.Talent.Skill == talents.First().Skill && ut.Talent.Level == talents.First().Level && !talents.Contains(ut.Talent))
+                    .Select(ut => ut.Talent)
+                    .ToList();
+
+                if (selectedTalentsWithSameLevel.Count > 0)
+                {
+                    await ToggleTalent(selectedTalentsWithSameLevel, true);
+                }
+
                 UserServerDataService.AddUserTalent(talent, ContextService.CurrentUserServer!);
             }
         }
