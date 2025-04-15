@@ -244,6 +244,12 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(pm => pm.LocalizedNameId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<PluginModule>()
+			.HasOne(pm => pm.Skill)
+			.WithMany(s => s.PluginModules)
+			.HasForeignKey(pm => pm.SkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
 		// * User Data
 		// User
 		modelBuilder.Entity<User>()
@@ -286,11 +292,28 @@ public class EcoCraftDbContext : DbContext
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserCraftingTable>()
-			.HasOne(s => s.PluginModule)
+			.HasOne(uct => uct.PluginModule)
 			.WithMany()
 			.HasForeignKey(s => s.PluginModuleId)
 			.OnDelete(DeleteBehavior.Cascade)
 			.IsRequired(false);
+
+		modelBuilder.Entity<UserCraftingTable>()
+			.HasMany(uct => uct.SkilledPluginModules)
+			.WithMany(pm => pm.UserCraftingTables)
+			.UsingEntity(
+				"UserCraftingTablePluginModule",
+				r => r.HasOne(typeof(PluginModule))
+					.WithMany()
+					.HasForeignKey("PluginModuleId")
+					.OnDelete(DeleteBehavior.Cascade)
+					.HasPrincipalKey(nameof(PluginModule.Id)),
+				l => l.HasOne(typeof(UserCraftingTable))
+					.WithMany()
+					.HasForeignKey("UserCraftingTableId")
+					.OnDelete(DeleteBehavior.Cascade)
+					.HasPrincipalKey(nameof(UserCraftingTable.Id)),
+				j => j.HasKey("UserCraftingTableId", "PluginModuleId"));
 
 		// UserSkill
 		modelBuilder.Entity<UserSkill>()

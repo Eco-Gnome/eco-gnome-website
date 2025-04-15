@@ -8,6 +8,8 @@ public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbS
     public Task<List<PluginModule>> GetAllAsync()
     {
         return context.PluginModules
+            .Include(s => s.LocalizedName)
+            .Include(s => s.Skill)
             .ToListAsync();
     }
 
@@ -16,6 +18,7 @@ public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbS
         return context.PluginModules
             .Where(s => s.ServerId == server.Id)
             .Include(s => s.LocalizedName)
+            .Include(s => s.Skill)
             .ToListAsync();
     }
 

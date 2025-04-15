@@ -246,10 +246,21 @@
 }
 
 .no-talent:hover, .has-talent:hover {
-    filter: grayscale(80%);
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.55)!important;
 }
 
 .has-talent {
     box-shadow: 0 0 6px rgba(255, 255, 0, 0.75) !important;
+}
+
+.no-pluginmodule {
+    filter: grayscale(100%);
+}
+
+.no-pluginmodule:hover, .has-pluginmodule:hover {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.55)!important;
+}
+
+.has-pluginmodule {
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.75) !important;
 }

@@ -146,13 +146,16 @@ public class ServerDataService(
         talentDbService.Delete(talent);
     }
 
-    public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, decimal percent)
+    public PluginModule ImportPluginModule(Server server, string name, LocalizedField localizedName, PluginType pluginType, decimal percent, Skill? skill, decimal? skillPercent)
     {
         var pluginModule = new PluginModule
         {
             Name = name,
-            Percent = percent,
             LocalizedName = localizedName,
+            PluginType = pluginType,
+            Percent = percent,
+            Skill = skill,
+            SkillPercent = skillPercent,
             Server = server,
         };
 
@@ -162,10 +165,13 @@ public class ServerDataService(
         return pluginModule;
     }
 
-    public void RefreshPluginModule(PluginModule pluginModule, LocalizedField localizedName, decimal percent)
+    public void RefreshPluginModule(PluginModule pluginModule, LocalizedField localizedName, PluginType pluginType, decimal percent, Skill? skill, decimal? skillPercent)
     {
         pluginModule.LocalizedName = localizedName;
+        pluginModule.PluginType = pluginType;
         pluginModule.Percent = percent;
+        pluginModule.Skill = skill;
+        pluginModule.SkillPercent = skillPercent;
 
         pluginModuleDbService.Update(pluginModule);
     }
@@ -371,7 +377,7 @@ public class ServerDataService(
 
         elementDbService.Update(element);
     }
-    
+
     public void DeleteElement(Element element)
     {
         elementDbService.Delete(element);

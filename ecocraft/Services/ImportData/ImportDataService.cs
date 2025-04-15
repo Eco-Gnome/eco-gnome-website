@@ -193,14 +193,22 @@ public class ImportDataService(
     {
         var dbPluginModule =
             serverDataService.PluginModules.FirstOrDefault(p => p.Name == pluginModule.Name);
+        var dbSkill = serverDataService.Skills.FirstOrDefault(s => s.Name == pluginModule.PluginModuleSkill);
+        var pluginType = pluginModule.PluginType switch
+        {
+            "Resource" => PluginType.Resource,
+            "Speed" => PluginType.Speed,
+            "Resource&Speed" => PluginType.ResourceAndSpeed,
+            _ => PluginType.None
+        } ;
 
         if (dbPluginModule is null)
         {
-            serverDataService.ImportPluginModule(server, pluginModule.Name, TranslationsToLocalizedField(server, pluginModule.LocalizedName), (decimal)pluginModule.PluginModulePercent!);
+            serverDataService.ImportPluginModule(server, pluginModule.Name, TranslationsToLocalizedField(server, pluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
         }
         else
         {
-            serverDataService.RefreshPluginModule(dbPluginModule, TranslationsToLocalizedField(server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), (decimal)pluginModule.PluginModulePercent!);
+            serverDataService.RefreshPluginModule(dbPluginModule, TranslationsToLocalizedField(server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
         }
     }
 
@@ -660,7 +668,16 @@ public class ImportDataService(
         if (associatedPluginModule is not null)
         {
             itemDto.IsPluginModule = true;
+            itemDto.PluginType = associatedPluginModule.PluginType switch
+            {
+                PluginType.Resource => "Resource",
+                PluginType.Speed => "Speed",
+                PluginType.ResourceAndSpeed => "Resource&Speed",
+                _ => null
+            };
             itemDto.PluginModulePercent = associatedPluginModule.Percent;
+            itemDto.PluginModuleSkill = associatedPluginModule.Skill?.Name;
+            itemDto.PluginModuleSkillPercent = associatedPluginModule.SkillPercent;
         }
 
         return itemDto;
@@ -755,7 +772,10 @@ public class ImportDataService(
     private class ItemDto : EcoItemDto
     {
         public bool? IsPluginModule { get; set; }
+        public string? PluginType { get; set; }
         public decimal? PluginModulePercent { get; set; }
+        public string? PluginModuleSkill { get; set; }
+        public decimal? PluginModuleSkillPercent { get; set; }
         public bool? IsCraftingTable { get; set; }
         public List<string>? CraftingTablePluginModules { get; set; }
     }

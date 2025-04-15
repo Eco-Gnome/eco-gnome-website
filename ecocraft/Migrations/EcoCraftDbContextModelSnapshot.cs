@@ -47,6 +47,21 @@ namespace ecocraft.Migrations
                     b.ToTable("ItemTagAssoc");
                 });
 
+            modelBuilder.Entity("UserCraftingTablePluginModule", b =>
+                {
+                    b.Property<Guid>("UserCraftingTableId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PluginModuleId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UserCraftingTableId", "PluginModuleId");
+
+                    b.HasIndex("PluginModuleId");
+
+                    b.ToTable("UserCraftingTablePluginModule");
+                });
+
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -326,7 +341,16 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("Percent")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("PluginType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("ServerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SkillId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("SkillPercent")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -334,6 +358,8 @@ namespace ecocraft.Migrations
                     b.HasIndex("LocalizedNameId");
 
                     b.HasIndex("ServerId");
+
+                    b.HasIndex("SkillId");
 
                     b.ToTable("PluginModule", (string)null);
                 });
@@ -811,6 +837,21 @@ namespace ecocraft.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("UserCraftingTablePluginModule", b =>
+                {
+                    b.HasOne("ecocraft.Models.PluginModule", null)
+                        .WithMany()
+                        .HasForeignKey("PluginModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.UserCraftingTable", null)
+                        .WithMany()
+                        .HasForeignKey("UserCraftingTableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
                 {
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
@@ -940,9 +981,16 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecocraft.Models.Skill", "Skill")
+                        .WithMany("PluginModules")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("LocalizedName");
 
                     b.Navigation("Server");
+
+                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("ecocraft.Models.Recipe", b =>
@@ -1283,6 +1331,8 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.Skill", b =>
                 {
                     b.Navigation("Modifiers");
+
+                    b.Navigation("PluginModules");
 
                     b.Navigation("Recipes");
 

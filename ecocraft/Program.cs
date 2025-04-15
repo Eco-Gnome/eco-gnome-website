@@ -36,7 +36,7 @@ builder.Services.AddDbContext<EcoCraftDbContext>(options =>
         {
             bd
                 .AddConsole()
-                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
         }))
     );
 

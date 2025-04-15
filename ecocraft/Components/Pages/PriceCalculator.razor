@@ -142,7 +142,7 @@
                                       Dense="true">
                                 <HeaderContent>
                                     <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
+                                    <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
                                     <MudTh Class="p-0 pl-1">
                                         <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CostMin.Tooltip")">
                                             <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudText>
@@ -159,23 +159,57 @@
                                             </MudStack>
                                         </MudLink>
                                     </MudTd>
-                                    <MudTd>
+                                    <MudTd Class="pa-1">
                                         @if (context.CraftingTable.PluginModules.Count > 0)
                                         {
-                                            var pluginModules = context.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm)).ToList();
+                                            var genericPluginModules = context.CraftingTable.PluginModules
+                                                .Where(p => p.Skill is null)
+                                                .OrderByDescending(pm => pm.Percent)
+                                                .ThenBy(pm => LocalizationService.GetTranslation(pm))
+                                                .ToList();
+
+                                            var skilledPluginModules = context.CraftingTable.PluginModules
+                                                .Where(p => p.Skill is not null)
+                                                .OrderByDescending(pm => pm.SkillPercent)
+                                                .ThenBy(pm => LocalizationService.GetTranslation(pm))
+                                                .ToList();
+
+                                            var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm == context.PluginModule) == genericPluginModules.Count - 1;
 
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                                 <MudIconButton Icon="@MDIIcons.Filled.Minus"
                                                                Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
-                                                               OnClick="@(() => DecreasePluginModule(context, pluginModules))"/>
-                                                <MudTooltip Text="@(context.PluginModule is not null ? LocalizationService.GetTranslation(context.PluginModule) + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                               Disabled="@(genericPluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
+                                                               OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
+                                                <MudTooltip Text="@(context.PluginModule is not null
+                                                                      ? LocalizationService.GetTranslation(context.PluginModule)
+                                                                        + $" [{((1 - context.PluginModule.Percent) * 100).ToString("0.##")}%]"
+                                                                      : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
                                                     <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
                                                 </MudTooltip>
-                                                <MudIconButton Icon="@MDIIcons.Filled.Plus"
-                                                               Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm == context.PluginModule) == pluginModules.Count - 1)"
-                                                               OnClick="@(() => IncreasePluginModule(context, pluginModules))"/>
+                                                @if (!shouldDisableIncrease)
+                                                {
+                                                    <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                                                                   Size="Size.Small"
+                                                                   Disabled="shouldDisableIncrease"
+                                                                   OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
+                                                }
+
+                                                @if (genericPluginModules.Last() == context.PluginModule)
+                                                {
+                                                    @foreach (var skilledPluginModule in skilledPluginModules)
+                                                    {
+                                                        <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
+                                                            <MudTooltip Text="@(LocalizationService.GetTranslation(skilledPluginModule)
+                                                                                + $" [{((1 - skilledPluginModule.Percent) * 100).ToString("0.##")}%]"
+                                                                                + (skilledPluginModule.Skill is not null
+                                                                                    ? $" - {LocalizationService.GetTranslation(skilledPluginModule.Skill)}: [{((1 - (decimal)skilledPluginModule.SkillPercent!) * 100).ToString("0.##")}%]"
+                                                                                    : ""))">
+                                                                <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(context.SkilledPluginModules.Contains(skilledPluginModule) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                                                            </MudTooltip>
+                                                        </MudLink>
+                                                    }
+                                                }
                                             </MudStack>
                                         }
                                     </MudTd>
@@ -1325,18 +1359,32 @@
     {
         var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
 
-        if (currentIndex == -1)
+        switch (currentIndex)
         {
-            return;
+            case -1:
+                return;
+            case 0:
+                userCraftingTable.PluginModule = null;
+                break;
+            default:
+                userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+                break;
         }
 
-        if (currentIndex == 0)
+        userCraftingTable.SkilledPluginModules.Clear();
+        await PriceCalculatorService.Calculate();
+        StateHasChanged();
+    }
+
+    private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
+    {
+        if (userCraftingTable.SkilledPluginModules.Contains(pluginModule))
         {
-            userCraftingTable.PluginModule = null;
+            userCraftingTable.SkilledPluginModules.Remove(pluginModule);
         }
         else
         {
-            userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+            userCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
 
         await PriceCalculatorService.Calculate();

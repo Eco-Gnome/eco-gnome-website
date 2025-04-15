@@ -11,6 +11,7 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 		return context.UserCraftingTables.Include(uct => uct.UserServer)
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
 
@@ -18,6 +19,9 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 	{
 		return context.UserCraftingTables
 			.Where(s => s.UserServerId == userServer.Id)
+			.Include(uct => uct.CraftingTable)
+			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
 

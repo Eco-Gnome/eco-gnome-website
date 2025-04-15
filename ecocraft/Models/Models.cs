@@ -119,8 +119,7 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.PluginModule?.Percent ?? 1m;
-                    // TODO: handle skilled modules
+                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.GetBestPluginModule(modifier.Skill)?.GetPercent(modifier.Skill) ?? 1m;
                     break;
                 case "Talent":
                     multiplier *= modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
@@ -172,7 +171,7 @@ public class DynamicValue
     public string GetMultiplierTooltip(LocalizationService localizationService, string? baseValue = null)
     {
         baseValue ??= Math.Abs(Math.Round(GetBaseValue(), 0, MidpointRounding.AwayFromZero)).ToString();
-        
+
         List<string> tooltip = [];
         decimal totalMultiplier = 1;
 
@@ -183,16 +182,17 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    multiplier = (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.PluginModule?.Percent ?? 1m;
+                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.GetBestPluginModule(modifier.Skill);
+                    multiplier *= bestPluginModule?.GetPercent(modifier.Skill) ?? 1m;
+
                     if (multiplier != 1m)
                     {
                         tooltip.Add(localizationService.GetTranslation(
                             "RecipeDialog.ModuleReductionTooltip",
-                            localizationService.GetTranslation((Recipe ?? Element?.Recipe)!.CraftingTable.CurrentUserCraftingTable!.PluginModule),
+                            localizationService.GetTranslation(bestPluginModule),
                             Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
                         ));
                     }
-                    // TODO: handle skilled modules
                     break;
                 case "Talent":
                     multiplier = modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
@@ -293,6 +293,7 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
     public List<UserSkill> UserSkills { get; set; } = [];
     public List<Talent> Talents { get; set; } = [];
     public List<Modifier> Modifiers { get; set; } = [];
+    public List<PluginModule> PluginModules { get; set; } = [];
 
     [NotMapped]
     public UserSkill? CurrentUserSkill { get; set; }
@@ -349,18 +350,41 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
     }
 }
 
+public enum PluginType
+{
+    None = 0,
+    Resource = 1,
+    Speed = 2,
+    ResourceAndSpeed = 3,
+}
+
 public class PluginModule: IHasLocalizedName, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public required string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
+    public PluginType PluginType { get; set; }
     public decimal Percent { get; set; }
+    public decimal? SkillPercent { get; set; }
+    [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
+    public Skill? Skill { get; set; }
     public Server Server { get; set; }
     public List<CraftingTable> CraftingTables { get; set; } = [];
+    public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
+
+    public decimal GetPercent(Skill? recipeSkill)
+    {
+        if (recipeSkill is not null && recipeSkill == Skill && SkillPercent is not null)
+        {
+            return (decimal)SkillPercent;
+        }
+
+        return Percent;
+    }
 
     public override string ToString()
     {
@@ -445,6 +469,15 @@ public class UserCraftingTable
     public UserServer UserServer { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public PluginModule? PluginModule { get; set; }
+    public List<PluginModule> SkilledPluginModules { get; set; } = [];
+
+    public PluginModule? GetBestPluginModule(Skill? skill)
+    {
+        return SkilledPluginModules
+            .Concat([PluginModule])
+            .Where(pm => pm is not null)
+            .MinBy(pm => pm!.GetPercent(skill));
+    }
 }
 
 public class UserSkill

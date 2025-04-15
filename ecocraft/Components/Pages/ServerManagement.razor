@@ -527,13 +527,13 @@
 		catch (ImportException ex)
 		{
 			_showUploadServerDataLoader = false;
-
+			Console.WriteLine(ex);
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok") + ": " + ex.Message, Severity.Error);
 		}
 		catch (Exception ex)
 		{
 			_showUploadServerDataLoader = false;
-
+			Console.WriteLine(ex);
 			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
 		}
 
