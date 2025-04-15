@@ -13,6 +13,17 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.0.0",
+            "2025-04-15",
+            "1.0.0",
+            """
+            - Talents: EcoGnome now retrieves talents from your server. You can select them once the required level is reached.
+            - Modules: When using the level 4 plugin, you can now select multiple specialized modules.
+            - Warning: These two changes require updating EcoGnomeMod and re-uploading your server data using the newly generated file.
+            - Minor Enhancements: Icons are now displayed in search results.
+            """
+        ),
+        new ReleaseVersion(
             "1.0.0-rc1",
             "2025-04-02",
             "1.0.0 Release Candidate 1",
