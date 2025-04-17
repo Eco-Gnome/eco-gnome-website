@@ -467,9 +467,6 @@
 
 	private async Task UploadFiles(IBrowserFile? file)
 	{
-		Snackbar.Clear();
-		Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-
 		if (file is not { ContentType: "application/json" })
 		{
 			Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok")}: not a JSON file", Severity.Error);

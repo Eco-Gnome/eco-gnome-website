@@ -4,9 +4,7 @@
 {
     <MudImage @key="GetIconName(Item)"
               Src=@($"/assets/eco-icons/{GetIconName(Item)}.png")
-              UserAttributes="@(new Dictionary<string, object> {
-                                  { "onerror", $"this.onerror=null;this.src='/assets/eco-icons/EmptyIcon.png';" }
-                              })"
+              FallbackSrc="/assets/eco-icons/EmptyIcon.png"
               Width=@Size
               Height=@Size
               Elevation="25"

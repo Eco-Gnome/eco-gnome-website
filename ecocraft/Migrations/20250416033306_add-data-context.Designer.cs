@@ -12,7 +12,7 @@ namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
     [Migration("20250416033306_add-data-context")]
-    partial class adddatacontext
+    partial class addDataContext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

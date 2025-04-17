@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ecocraft.Migrations
 {
     /// <inheritdoc />
-    public partial class adddatacontext : Migration
+    public partial class addDataContext : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

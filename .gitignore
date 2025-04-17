@@ -372,3 +372,8 @@ FodyWeavers.xsd
 /ecocraft/ecocraft.db-wal
 /ecocraft/ecocraft.db
 /ecocraft/ecocraft.bk.db
+
+# Icons
+/ecocraft/tmp
+/ecocraft/Exports
+/ecocraft/wwwroot/assets/mod-icons

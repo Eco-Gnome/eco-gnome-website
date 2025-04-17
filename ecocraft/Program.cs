@@ -111,6 +111,22 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
 
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value;
+
+    if (path != null && path.StartsWith("/assets/eco-icons/"))
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", path.TrimStart('/'));
+        if (!File.Exists(filePath))
+        {
+            context.Request.Path = path.Replace("eco-icons", "mod-icons");
+        }
+    }
+
+    await next();
+});
+
 app.UseStaticFiles();
 app.MapControllers();
 app.UseAntiforgery();

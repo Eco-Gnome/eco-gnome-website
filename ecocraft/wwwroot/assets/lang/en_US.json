@@ -170,6 +170,7 @@
     "Skill": "Skill",
     "NoSkill": "No Skill",
     "SuperAdmin": {
+        "ModUpload": "Upload mod file",
         "ActionCol": "Action",
         "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
         "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
