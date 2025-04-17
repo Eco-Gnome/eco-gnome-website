@@ -11,6 +11,7 @@
 @inject ServerDbService ServerDbService
 @inject ISnackbar Snackbar
 @inject LocalizationService LocalizationService
+@inject AssetRipperService AssetRipperService
 
 <PageTitle>@LocalizationService.GetTranslation("SuperAdmin.Title") - Eco Gnome</PageTitle>
 
@@ -181,6 +182,24 @@
                 </PagerContent>
             </MudTable>
         </MudItem>
+        <MudItem lg="6" md="12">
+            <MudPaper>
+                <MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
+                    <ActivatorContent>
+                        <MudButton Disabled="_showUploadModLoader"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload">
+                            @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
+                            @if (_showUploadModLoader)
+                            {
+                                <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+                            }
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+            </MudPaper>
+        </MudItem>
     </MudGrid>
 </MudContainer>
 
@@ -190,6 +209,7 @@
     private protected List<Server> _servers = [];
     private string searchUser = "";
     private string searchServer = "";
+    private bool _showUploadModLoader = false;
 
     protected override void OnInitialized()
     {
@@ -324,4 +344,33 @@
             StateHasChanged();
         }
     }
+
+    private async Task UploadModFiles(IBrowserFile? file)
+    {
+        if (file is null) return;
+
+		try
+        {
+            _showUploadModLoader = true;
+            StateHasChanged();
+
+            var tmpDir = Path.Combine("tmp");
+            Directory.CreateDirectory(tmpDir);
+
+            var filePath = Path.Combine(tmpDir, file.Name);
+
+            await using var stream = File.Create(filePath);
+            await file.OpenReadStream().CopyToAsync(stream);
+
+            AssetRipperService.ImportModIcons([filePath]);
+        }
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
+		}
+
+        _showUploadModLoader = false;
+		StateHasChanged();
+	}
 }

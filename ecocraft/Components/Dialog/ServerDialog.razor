@@ -131,16 +131,12 @@
 
         if (server is null)
         {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
             Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.ServerNotFound"), Severity.Error);
             return;
         }
 
         if (ContextService.AvailableServers.Contains(server))
         {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
             Snackbar.Add(LocalizationService.GetTranslation("Header.ServerDialog.Snackbar.AlreadyInServer"), Severity.Warning);
             return;
         }

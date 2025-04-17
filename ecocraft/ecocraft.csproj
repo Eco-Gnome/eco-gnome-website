@@ -37,4 +37,28 @@
     <_ContentIncludedByDefault Remove="Ressources\skills_icons.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="AssetRipper.Export">
+      <HintPath>Libs/AssetRipper.Export.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.Export.PrimaryContent">
+      <HintPath>Libs/AssetRipper.Export.PrimaryContent.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.Export.UnityProjects">
+      <HintPath>Libs/AssetRipper.Export.UnityProjects.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.Processing">
+      <HintPath>Libs/AssetRipper.Processing.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.Import">
+      <HintPath>Libs/AssetRipper.Import.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.Assets">
+      <HintPath>Libs/AssetRipper.Assets.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetRipper.IO.Files">
+      <HintPath>Libs/AssetRipper.IO.Files.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
