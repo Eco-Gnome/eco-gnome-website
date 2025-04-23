@@ -14,7 +14,15 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	public Task<List<UserPrice>> GetByDataContextAsync(DataContext dataContext)
 	{
 		return context.UserPrices
-			.Where(s => s.DataContextId == dataContext.Id)
+			.Where(up => up.DataContextId == dataContext.Id)
+			.ToListAsync();
+	}
+
+	public Task<List<UserPrice>> GetByDataContextForEcoApiAsync(DataContext dataContext)
+	{
+		return context.UserPrices
+			.Where(up => up.DataContextId == dataContext.Id && up.Price != null)
+			.Include(up => up.ItemOrTag)
 			.ToListAsync();
 	}
 

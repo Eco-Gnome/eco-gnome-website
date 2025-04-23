@@ -106,7 +106,7 @@ public class EcoController(EcoCraftDbContext dbContext, UserPriceDbService userP
 
         var defaultDataContext = userServer.DataContexts.First(d => d.IsDefault);
 
-        var userPrices = await userPriceDbService.GetByDataContextAsync(defaultDataContext);
+        var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(defaultDataContext);
 
         return Ok(userPrices.Select(up => new EcoGnomePrice(up.ItemOrTag.Name, Math.Round(up.MarginPrice ?? (decimal)up.Price!, 2, MidpointRounding.AwayFromZero))));
     }
