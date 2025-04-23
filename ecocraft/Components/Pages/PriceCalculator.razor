@@ -313,7 +313,7 @@
                             <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
                                 <MudStack Spacing="1" Class="pa-2">
                                     <MudTextField T="string"
-                                                  Label="Context Name"
+                                                  Label="@LocalizationService.GetTranslation("PriceCalculator.ContextName")"
                                                   Variant="Variant.Filled"
                                                   Immediate
                                                   Value="@ContextService.CurrentDataContext!.Name"

@@ -13,6 +13,17 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.1.0",
+            "2025-04-23",
+            "Tabs & Modded Icons",
+            """
+            - Price Calculator Tabs: You can now create multiple Price Calculator configurations using tabs. Only the default tab can be synced with the game. Let us know how you use them and how we could make this feature even better!
+            - Modded Icons: Super Admins and selected key community members can now upload custom modded icons. These icons are shared across all servers. Want to contribute? Reach out to us!
+            - Navigation: Username and language now load faster when opening pages. We’re also working on improving overall server loading speed.
+            - Technical: Upgraded to MudBlazor 8.x and .NET 9.x. EcoGnome now handles reconnections much more smoothly if the connection drops.
+            """
+        ),
+        new ReleaseVersion(
             "1.0.0",
             "2025-04-15",
             "1.0.0",
