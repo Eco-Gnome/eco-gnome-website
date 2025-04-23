@@ -58,7 +58,6 @@
     <AdditionalFiles Include="Components\Dialog\SkillDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\ItemOrTagDialog.razor" />
     <AdditionalFiles Include="Components\Dialog\ServerPricesDialog.razor" />
-    <AdditionalFiles Include="Components\Utils\RecipeList.razor" />
   </ItemGroup>
 
   <ItemGroup>

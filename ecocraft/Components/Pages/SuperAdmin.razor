@@ -4,11 +4,13 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject EcoCraftDbContext DbContext
 @inject NavigationManager Navigation
 @inject UserDbService UserDbService
 @inject ServerDbService ServerDbService
+@inject ModUploadHistoryDbService ModUploadHistoryDbService
 @inject ISnackbar Snackbar
 @inject LocalizationService LocalizationService
 
@@ -26,7 +28,7 @@
                       Filter="new Func<User, bool>(SearchUser)"
                       Virtualize="false"
                       FixedHeader="true"
-                      Height="400px"
+                      Height="430px"
                       Dense="true"
                       Hover="true">
                 <HeaderContent>
@@ -34,13 +36,15 @@
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ServersCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.CanUploadModCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.SuperAdminCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ActionCol")</MudTh>
                 </HeaderContent>
                 <ToolBarContent>
                     <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
                         <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title")</MudText>
                         <MudStack Style="width: 200px">
-                            <MudTextField @bind-Value="searchUser"
+                            <MudTextField @bind-Value="_searchUser"
                                           Immediate
                                           Placeholder="Search"
                                           Adornment="Adornment.Start"
@@ -56,7 +60,9 @@
                             <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
                         </MudTooltip>
                     </MudTd>
-                    <MudTd>@context.Pseudo</MudTd>
+                    <MudTd>
+                        @context.Pseudo
+                    </MudTd>
                     <MudTd>
                         <MudTooltip Text="@context.CreationDateTime.ToString()">
                             <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
@@ -75,22 +81,28 @@
                         </MudStack>
                     </MudTd>
                     <MudTd>
-                        @if (context != ContextService.CurrentUser)
-                        {
-                            <MudStack Row AlignItems="AlignItems.Center">
-                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.DeleteUser")>
-                                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
-                                                   Size="Size.Small"
-                                                   OnClick="@(() => DeleteUser(context))"/>
-                                </MudTooltip>
-                                <MudTooltip Text="@(context.SuperAdmin ? @LocalizationService.GetTranslation("SuperAdmin.UserTable.DemoteUser") : @LocalizationService.GetTranslation("SuperAdmin.UserTable.PromoteUser"))">
-                                    <MudIconButton Color="@(context.SuperAdmin ? Color.Warning : Color.Error)"
-                                                   Icon="@(context.SuperAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
-                                                   Size="Size.Small"
-                                                   OnClick="@(() => ToggleSuperAdmin(context))"/>
-                                </MudTooltip>
-                            </MudStack>
-                        }
+                        <MudIconButton Size="Size.Small"
+                                       Icon="@(context.CanUploadMod ? MDIIcons.Filled.Upload : MDIIcons.Filled.UploadOff)"
+                                       Color="@(context.CanUploadMod ? Color.Primary : Color.Default)"
+                                       OnClick="() => ToggleCanUploadMod(context)"/>
+                    </MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@(context.SuperAdmin ? @LocalizationService.GetTranslation("SuperAdmin.UserTable.DemoteUser") : @LocalizationService.GetTranslation("SuperAdmin.UserTable.PromoteUser"))">
+                            <MudIconButton Color="@(context.SuperAdmin ? Color.Tertiary : Color.Default)"
+                                           Icon="@(context.SuperAdmin ? MDIIcons.Filled.Bank : MDIIcons.Filled.BankOff)"
+                                           Size="Size.Small"
+                                           OnClick="@(() => ToggleSuperAdmin(context))"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.DeleteUser")>
+                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => DeleteUser(context))"/>
+                            </MudTooltip>
+                        </MudStack>
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -103,7 +115,7 @@
                       Filter="new Func<Server, bool>(SearchServer)"
                       Virtualize="false"
                       FixedHeader="true"
-                      Height="400px"
+                      Height="430px"
                       Dense="true"
                       Hover="true">
                 <HeaderContent>
@@ -120,7 +132,7 @@
                     <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
                         <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.Title")</MudText>
                         <MudStack Style="width: 200px">
-                            <MudTextField @bind-Value="searchServer"
+                            <MudTextField @bind-Value="_searchServer"
                                           Immediate
                                           Placeholder="Search"
                                           Adornment="Adornment.Start"
@@ -156,23 +168,27 @@
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center">
-                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.ServerTable.DeleteServer")>
-                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
+                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? MDIIcons.Filled.Shield : MDIIcons.Filled.ShieldOff)"
                                                Size="Size.Small"
-                                               OnClick="@(() => DeleteServer(context))"/>
+                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
+                                               OnClick="@(() => ToggleSelfAdmin(context))"/>
                             </MudTooltip>
                             <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
-                                <MudIconButton Icon="@(context.IsDefault ? Icons.Material.Outlined.CreditCardOff : Icons.Material.Outlined.CreditCard)"
-                                               Color="@(context.IsDefault ? Color.Warning : Color.Error)"
+                                <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
+                                               Color="@(context.IsDefault ? Color.Warning : Color.Default)"
                                                Size="Size.Small"
                                                OnClick="@(() => ToggleDefault(context))"/>
                             </MudTooltip>
-                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
-                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Icons.Material.Filled.ArrowDownward : Icons.Material.Filled.ArrowUpward)"
-                                               Size="Size.Small"
-                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Warning : Color.Primary)"
-                                               OnClick="@(() => ToggleSelfAdmin(context))"/>
-                            </MudTooltip>
+                            @if (!context.IsDefault)
+                            {
+                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.ServerTable.DeleteServer")>
+                                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                                   Color="Color.Error"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => DeleteServer(context))"/>
+                                </MudTooltip>
+                            }
                         </MudStack>
                     </MudTd>
                 </RowTemplate>
@@ -182,33 +198,63 @@
             </MudTable>
         </MudItem>
         <MudItem lg="6" md="12">
-            <MudPaper>
-                <MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
-                    <ActivatorContent>
-                        <MudButton Disabled="_showUploadModLoader"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CloudUpload">
-                            @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
-                            @if (_showUploadModLoader)
-                            {
-                                <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
-                            }
-                        </MudButton>
-                    </ActivatorContent>
-                </MudFileUpload>
-            </MudPaper>
+            <MudTable Items="@_modUploadHistories"
+                      Virtualize="false"
+                      FixedHeader="true"
+                      Height="430px"
+                      Dense="true"
+                      Hover="true">
+                <HeaderContent>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileNameCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileSha1Col")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.IconsCountCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.UserCol")</MudTh>
+                </HeaderContent>
+                <ToolBarContent>
+                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                        <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.Title")</MudText>
+                        <MudStack Style="width: 200px">
+                            <ModUploader OnSuccessModUpload="RetrieveModUploadHistories" />
+                        </MudStack>
+                    </MudStack>
+                </ToolBarContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudTooltip Text="@context.Id.ToString()">
+                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>@context.FileName</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@context.FileHash">
+                            @context.FileHash.Substring(0, Math.Min(context.FileHash.Length, 8))...
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>@context.IconsCount</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="@context.UploadDateTime.ToString()">
+                            <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
+                        </MudTooltip>
+                    </MudTd>
+                    <MudTd>@context.User.Pseudo</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
+                </PagerContent>
+            </MudTable>
         </MudItem>
     </MudGrid>
 </MudContainer>
 
 @code {
-    private bool _isLoading = false;
-    private protected List<User> _users = [];
-    private protected List<Server> _servers = [];
-    private string searchUser = "";
-    private string searchServer = "";
-    private bool _showUploadModLoader = false;
+    private bool _isLoading;
+    private List<User> _users = [];
+    private List<Server> _servers = [];
+    private List<ModUploadHistory> _modUploadHistories = [];
+    private string _searchUser = "";
+    private string _searchServer = "";
 
     protected override void OnInitialized()
     {
@@ -224,6 +270,17 @@
 
         _users = await UserDbService.GetAllAsync();
         _servers = await ServerDbService.GetAllAsync();
+        await RetrieveModUploadHistories();
+    }
+
+    public async Task ToggleCanUploadMod(User user)
+    {
+        user.CanUploadMod = !user.CanUploadMod;
+        await DbContext.SaveChangesAsync();
+    }
+
+    public async Task RetrieveModUploadHistories() {
+        _modUploadHistories = await ModUploadHistoryDbService.GetAllAsync();
     }
 
     public void Dispose()
@@ -264,26 +321,28 @@
     {
         server.IsDefault = !server.IsDefault;
         await DbContext.SaveChangesAsync();
+        _users = await UserDbService.GetAllAsync();
+        StateHasChanged();
     }
 
     private bool SearchUser(User user)
     {
-        if (string.IsNullOrWhiteSpace(searchUser))
+        if (string.IsNullOrWhiteSpace(_searchUser))
             return true;
-        if (user.Pseudo.Contains(searchUser, StringComparison.OrdinalIgnoreCase))
+        if (user.Pseudo.Contains(_searchUser, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (user.Id.ToString().Contains(searchUser, StringComparison.OrdinalIgnoreCase))
+        if (user.Id.ToString().Contains(_searchUser, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
 
     private bool SearchServer(Server server)
     {
-        if (string.IsNullOrWhiteSpace(searchServer))
+        if (string.IsNullOrWhiteSpace(_searchServer))
             return true;
-        if (server.Name.Contains(searchServer, StringComparison.OrdinalIgnoreCase))
+        if (server.Name.Contains(_searchServer, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (server.Id.ToString().Contains(searchServer, StringComparison.OrdinalIgnoreCase))
+        if (server.Id.ToString().Contains(_searchServer, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
@@ -292,7 +351,7 @@
     {
         if (user == ContextService.CurrentUser)
         {
-            this.Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.SnackBar.CantDeleteYourself"), Severity.Error);
+            Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.SnackBar.CantDeleteYourself"), Severity.Error);
             return;
         }
 
@@ -343,37 +402,4 @@
             StateHasChanged();
         }
     }
-
-    private async Task UploadModFiles(IBrowserFile? file)
-    {
-        if (file is null) return;
-
-		try
-        {
-            _showUploadModLoader = true;
-            StateHasChanged();
-
-            var tmpDir = Path.Combine("tmp");
-            Directory.CreateDirectory(tmpDir);
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), tmpDir, file.Name);
-
-            await using (var dst = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-            {
-                await file.OpenReadStream(long.MaxValue).CopyToAsync(dst);
-            }
-
-            var exportPath = AssetRipperService.ExtractUnityFilesViaLib(filePath);
-            await AssetRipperService.LoadModIcons(exportPath);
-        }
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex);
-			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
-		}
-
-        _showUploadModLoader = false;
-        Snackbar.Add("No Error", Severity.Success);
-		StateHasChanged();
-	}
 }

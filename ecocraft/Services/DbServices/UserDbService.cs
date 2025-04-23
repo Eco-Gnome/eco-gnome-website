@@ -9,6 +9,7 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 	{
 		return context.Users.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
+			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
 	}
 

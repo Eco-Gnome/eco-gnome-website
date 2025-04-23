@@ -244,6 +244,11 @@ public static class UnityStructureParser
     {
         var assoc = new Dictionary<string, string>();
 
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+
         var files = Directory.GetFiles(path);
         var metaFiles = files.Where(f => f.EndsWith(".meta")).ToList();
 

@@ -63,6 +63,7 @@ builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
 builder.Services.AddScoped<DataContextDbService>();
+builder.Services.AddScoped<ModUploadHistoryDbService>();
 
 // Business Services
 builder.Services.AddScoped<ContextService>();

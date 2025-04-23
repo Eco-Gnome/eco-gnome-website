@@ -1,0 +1,115 @@
+﻿@using System.Security.Cryptography
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@using StableNameDotNet
+@inject LocalizationService LocalizationService
+@inject ISnackbar Snackbar
+@inject ContextService ContextService
+@inject EcoCraftDbContext DbContext
+@inject ModUploadHistoryDbService ModUploadHistoryDbService
+
+<MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
+    <ActivatorContent>
+        <MudButton Disabled="_showUploadModLoader"
+                   Variant="Variant.Filled"
+                   Color="Color"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+            @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
+            @if (_showUploadModLoader)
+            {
+                <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+            }
+        </MudButton>
+    </ActivatorContent>
+</MudFileUpload>
+
+@code {
+    private bool _showUploadModLoader;
+
+    [Parameter]
+    public EventCallback OnSuccessModUpload { get; set; }
+
+    [Parameter] public Color Color { get; set; } = Color.Primary;
+
+    private async Task UploadModFiles(IBrowserFile? file)
+    {
+        if (file is null) return;
+
+        string? filePath = null;
+        try
+        {
+            _showUploadModLoader = true;
+            StateHasChanged();
+
+            var tmpDir = Path.Combine("tmp");
+            Directory.CreateDirectory(tmpDir);
+
+            var fileName = file.Name;
+
+            if (!fileName.EndsWith(".unity3d"))
+            {
+                throw new Exception(LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.WrongFileTypeError"));
+            }
+
+            filePath = Path.Combine(Directory.GetCurrentDirectory(), tmpDir, DateTime.Now.ToFileTimeUtc().ToString());
+            string fileHash;
+
+            using (var sha256 = SHA256.Create())
+            await using (var dst = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+            await using (var cryptoStream = new CryptoStream(dst, sha256, CryptoStreamMode.Write))
+            {
+                await file.OpenReadStream(long.MaxValue).CopyToAsync(cryptoStream);
+                cryptoStream.FlushFinalBlock();
+                fileHash = BitConverter.ToString(sha256.Hash!).Replace("-", "").ToLowerInvariant();
+            }
+
+            var icons = AssetRipperService.ExtractModIcons(filePath);
+
+            if (icons.Count > 0)
+            {
+                Snackbar.Add($"{LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.Success")} {icons.Join(",")}", Severity.Success, options =>
+                {
+                    options.RequireInteraction = true;
+                });
+            }
+            else
+            {
+                Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.NoIconsError"), Severity.Error);
+            }
+
+            ModUploadHistoryDbService.Add(new ModUploadHistory
+            {
+                FileName = fileName,
+                FileHash = fileHash,
+                IconsCount = icons.Count,
+                UploadDateTime = DateTime.Now,
+                User = ContextService.CurrentUser!
+            });
+
+            await DbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
+        }
+        finally
+        {
+            if (filePath is not null && File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+
+        if (OnSuccessModUpload.HasDelegate)
+        {
+            await OnSuccessModUpload.InvokeAsync();
+        }
+
+        _showUploadModLoader = false;
+		StateHasChanged();
+	}
+
+
+}

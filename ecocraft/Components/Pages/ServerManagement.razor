@@ -6,6 +6,7 @@
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
 @using ecocraft.Services.DbServices
+@using ecocraft.Components.Utils
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
@@ -143,6 +144,16 @@
 							</MudStack>
 						</MudPaper>
 					</MudStack>
+					@if (ContextService.CurrentUser!.CanUploadMod || ContextService.CurrentUser.SuperAdmin)
+					{
+						<MudStack Class="pa-3 mud-background" Spacing="1">
+							<MudText>
+								<MudIcon Icon="@MDIIcons.Filled.CloudAlert" Color="Color.Warning" Size="Size.Small" Style="position: relative; top:  3px"/>
+								@LocalizationService.GetTranslation("ServerManagement.ModUpload.Description")
+							</MudText>
+							<ModUploader Color="Color.Warning" />
+						</MudStack>
+					}
 					<MudStack Row Justify="Justify.FlexEnd">
 						<MudButton HtmlTag="label"
 						           Disabled="_showDeleteServerLoader"
@@ -373,7 +384,7 @@
 	private string _searchPseudo = "";
 	private string _searchTag = "";
 	private string _searchItem = "";
-	private Server? _copyServer = null;
+	private Server? _copyServer;
 	private ItemOrTag? _selectedTag;
 	private List<(string, decimal)> _stats = [];
 

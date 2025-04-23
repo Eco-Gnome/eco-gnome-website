@@ -31,6 +31,7 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
+    public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -444,6 +445,18 @@ public class EcoCraftDbContext : DbContext
 		// Server
 		modelBuilder.Entity<Server>()
 			.ToTable("Server");
+
+		// * History
+		// ModUploadHistory
+
+		modelBuilder.Entity<ModUploadHistory>()
+			.ToTable("ModUploadHistory");
+
+		modelBuilder.Entity<ModUploadHistory>()
+			.HasOne(muh => muh.User)
+			.WithMany(u => u.ModUploadHistories)
+			.HasForeignKey(muh => muh.UserId)
+			.OnDelete(DeleteBehavior.Cascade);
 
 		// * Utils
 		// LocalizedField

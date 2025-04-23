@@ -410,9 +410,11 @@ public class User
     public DateTime CreationDateTime { get; init; }
     public Guid SecretId { get; set; }
     public bool SuperAdmin { get; set; }
+    public bool CanUploadMod { get; set; }
     public bool ShowHelp { get; set; }
 
     public List<UserServer> UserServers { get; set; } = [];
+    public List<ModUploadHistory> ModUploadHistories { get; set; } = [];
 }
 
 public class UserServer
@@ -624,6 +626,19 @@ public class Server
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<DynamicValue> DynamicValues { get; set; } = [];
+}
+
+// History
+public class ModUploadHistory
+{
+    [Key] public Guid Id { get; init; }
+    public required string FileName { get; set; }
+    public required string FileHash { get; set; }
+    public required int IconsCount { get; set; }
+    public required DateTime UploadDateTime { get; init; }
+    [ForeignKey("User")] public Guid UserId { get; set; }
+
+    public User User { get; init; }
 }
 
 // Utils
