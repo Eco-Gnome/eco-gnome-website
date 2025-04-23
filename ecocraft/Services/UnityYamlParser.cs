@@ -40,7 +40,6 @@ public class Component(string typeId, string id)
     public string Id = id;
     public string? SpriteGuid;
     public readonly List<string> ChildrenIDs = [];
-    public string? ParentId;
     public GameObject? GameObject;
 
     public override string ToString()
@@ -49,10 +48,9 @@ public class Component(string typeId, string id)
     }
 }
 
-public class Sprite(string name, string id, int posX, int posY, int width, int height, string textureId)
+public class Sprite(string name, int posX, int posY, int width, int height, string textureId)
 {
     public string Name = name;
-    public string Id = id;
     public int PosX = posX;
     public int PosY = posY;
     public int Width = width;
@@ -195,20 +193,17 @@ public static class UnityStructureParser
 
         foreach (var go in gameObjects)
         {
-            if (go.Name!.EndsWith("Item"))
+            if (go.Children.Any(c => c.Name!.ToLower() == "icon"))
             {
                 items.Add(go);
             }
             else
             {
-                if (go.Name!.EndsWith("Object")) continue;
-
                 if (go.Children.Count > 0)
                 {
                     items.AddRange(RetrieveEcoItems(go.Children));
                 }
             }
-
         }
 
         return items;
@@ -287,7 +282,6 @@ public static class UnityStructureParser
             {
                 list.Add(new Sprite(
                     assoc.Key,
-                    assoc.Value,
                     int.Parse(match1.Groups[1].Value),
                     int.Parse(match1.Groups[2].Value),
                     int.Parse(match1.Groups[3].Value),
