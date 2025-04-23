@@ -234,7 +234,13 @@ public static class UnityStructureParser
                 continue;
             }
 
-            assoc.Add(item.Name!, fullImageGuid ?? foregroundGuid ?? "null");
+            if (!assoc.ContainsKey(item.Name!)) {
+                assoc.Add(item.Name!, fullImageGuid ?? foregroundGuid ?? "null");
+            }
+            else
+            {
+                Console.WriteLine($"Duplicated item {item.Name!}");
+            }
         }
 
         return assoc;
