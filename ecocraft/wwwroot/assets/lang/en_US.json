@@ -2,6 +2,7 @@
     "Cancel": "Cancel",
     "CopyToClipboard": "Copy to clipboard",
     "CraftingTable": "Crafting Table",
+    "DevVersion": "YOU ARE ON A DEVELOPMENT VERSION OF ECO GNOME ",
     "GraphView": {
         "ResetButton": "Reset Graph",
         "Title": "Graph View"

@@ -14,6 +14,7 @@
 @inject NavigationManager Navigation
 @inject LocalStorageService LocalStorageService
 @inject LocalizationService LocalizationService
+@inject NavigationManager NavManager
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="pl-3">
     <MudImage Src="/assets/avatar.png" Width="52"/>
@@ -55,6 +56,25 @@
     }
 </MudStack>
 
+@if (EnvironmentLabel == "LOCAL" || EnvironmentLabel == "DEV")
+{
+    <MudSpacer/>
+
+    <MudStack Spacing="0" AlignItems="AlignItems.Center">
+        <MudStack Row Spacing="2">
+            <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Alert" Color="Color.Warning"/>
+            <MudText Color="Color.Warning">
+                @LocalizationService.GetTranslation("DevVersion")
+            </MudText>
+            <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Alert" Color="Color.Warning"/>
+        </MudStack>
+        <MudStack Row Spacing="2">
+            <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowRight" Color="Color.Primary"/>
+            <MudLink Href="https://eco-gnome.com" Target="_blank">https://eco-gnome.com</MudLink>
+        </MudStack>
+    </MudStack>
+}
+
 <MudSpacer/>
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
@@ -94,6 +114,25 @@
 
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     private string? _lastAcknowledgeVersion;
+    private string EnvironmentLabel;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavManager.Uri;
+
+        if (uri.Contains("localhost"))
+        {
+            EnvironmentLabel = "LOCAL";
+        }
+        else if (uri.Contains("dev.eco-gnome.com"))
+        {
+            EnvironmentLabel = "DEV";
+        }
+        else
+        {
+            EnvironmentLabel = "PROD";
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
