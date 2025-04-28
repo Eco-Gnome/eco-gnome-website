@@ -626,6 +626,7 @@ public class Server
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<DynamicValue> DynamicValues { get; set; } = [];
+    public List<ModUploadHistory> ModUploadHistories { get; set; } = [];
 }
 
 // History
@@ -637,8 +638,10 @@ public class ModUploadHistory
     public required int IconsCount { get; set; }
     public required DateTime UploadDateTime { get; init; }
     [ForeignKey("User")] public Guid UserId { get; set; }
+    [ForeignKey("Server")] public Guid? ServerId { get; set; }
 
     public User User { get; init; }
+    public Server? Server { get; init; }
 }
 
 // Utils

@@ -9,23 +9,28 @@
 @inject EcoCraftDbContext DbContext
 @inject ModUploadHistoryDbService ModUploadHistoryDbService
 
-<MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
-    <ActivatorContent>
-        <MudButton Disabled="_showUploadModLoader"
-                   Variant="Variant.Filled"
-                   Color="Color"
-                   StartIcon="@Icons.Material.Filled.CloudUpload">
-            @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
-            @if (_showUploadModLoader)
-            {
-                <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
-            }
-        </MudButton>
-    </ActivatorContent>
-</MudFileUpload>
+<MudStack Row Spacing="2" AlignItems="AlignItems.Center">
+    <MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
+        <ActivatorContent>
+            <MudButton Disabled="_showUploadModLoader"
+                       Variant="Variant.Filled"
+                       Color="Color"
+                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
+                @if (_showUploadModLoader)
+                {
+                    <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+                }
+            </MudButton>
+        </ActivatorContent>
+    </MudFileUpload>
+
+    <MudCheckBox T="bool" @bind-Value="_limitToMyServer" Label="@LocalizationService.GetTranslation("ServerManagement.ModUploadLimitToServer")" />
+</MudStack>
 
 @code {
     private bool _showUploadModLoader;
+    private bool _limitToMyServer = false;
 
     [Parameter]
     public EventCallback OnSuccessModUpload { get; set; }
@@ -64,7 +69,8 @@
                 fileHash = BitConverter.ToString(sha256.Hash!).Replace("-", "").ToLowerInvariant();
             }
 
-            var icons = AssetRipperService.ExtractModIcons(filePath);
+            var specificServer = _limitToMyServer ? ContextService.CurrentServer! : null;
+            var icons = AssetRipperService.ExtractModIcons(filePath, specificServer);
 
             if (icons.Count > 0)
             {
@@ -84,7 +90,8 @@
                 FileHash = fileHash,
                 IconsCount = icons.Count,
                 UploadDateTime = DateTime.Now,
-                User = ContextService.CurrentUser!
+                User = ContextService.CurrentUser!,
+                Server = specificServer,
             });
 
             await DbContext.SaveChangesAsync();

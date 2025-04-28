@@ -377,3 +377,5 @@ FodyWeavers.xsd
 /ecocraft/tmp
 /ecocraft/Exports
 /ecocraft/wwwroot/assets/mod-icons
+/ecocraft/wwwroot/assets/
+/ecocraft/wwwroot/assets/[0-9a-fA-F]\{8\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{4\}-[0-9a-fA-F]\{12\}/

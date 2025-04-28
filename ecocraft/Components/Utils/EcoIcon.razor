@@ -1,9 +1,11 @@
 ﻿@using ecocraft.Models
+@using ecocraft.Services
+@inject ContextService ContextService
 
 @if (Item is not null)
 {
     <MudImage @key="GetIconName(Item)"
-              Src=@($"/assets/eco-icons/{GetIconName(Item)}.png")
+              Src=@($"/assets/eco-icons/{GetIconName(Item)}.png?serverId={ContextService.CurrentServer?.Id}")
               FallbackSrc="/assets/eco-icons/EmptyIcon.png"
               Width=@Size
               Height=@Size

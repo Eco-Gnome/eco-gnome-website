@@ -458,6 +458,12 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(muh => muh.UserId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<ModUploadHistory>()
+			.HasOne(muh => muh.Server)
+			.WithMany(u => u.ModUploadHistories)
+			.HasForeignKey(muh => muh.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
 		// * Utils
 		// LocalizedField
 		modelBuilder.Entity<LocalizedField>()

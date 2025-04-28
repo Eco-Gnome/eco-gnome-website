@@ -9,6 +9,7 @@ public class ModUploadHistoryDbService(EcoCraftDbContext context) : IGenericDbSe
 	{
 		return context.ModUploadHistories
 			.Include(muh => muh.User)
+			.Include(muh => muh.Server)
 			.OrderByDescending(muh => muh.UploadDateTime)
 			.ToListAsync();
 	}

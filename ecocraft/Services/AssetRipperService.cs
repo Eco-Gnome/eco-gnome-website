@@ -1,6 +1,7 @@
 ﻿using AssetRipper.Export.UnityProjects;
 using AssetRipper.Export.UnityProjects.Configuration;
 using Cpp2IL.Core.Extensions;
+using ecocraft.Models;
 
 namespace ecocraft.Services;
 
@@ -11,15 +12,16 @@ public static class AssetRipperService
     private const string ExportPath = "Exports/ModIcons";
     private const string TexturesPath = "ExportedProject/Assets/Texture2D";
     private const string SpritePath = "ExportedProject/Assets/Sprite";
-    private const string IconPath = "wwwroot/assets/mod-icons";
+    private const string IconPath = "wwwroot/assets";
+    private const string CommunityIconPath = "mod-icons";
 
-    public static List<string> ExtractModIcons(string filePath)
+    public static List<string> ExtractModIcons(string filePath, Server? server = null)
     {
         TryLock();
         try
         {
             var exportPath = ExtractUnityFiles(filePath);
-            return LoadModIcons(exportPath);
+            return LoadModIcons(exportPath, server);
         }
         finally
         {
@@ -58,22 +60,22 @@ public static class AssetRipperService
         return ExportPath;
     }
 
-    private static List<string> LoadModIcons(string folderPath)
+    private static List<string> LoadModIcons(string folderPath, Server? server = null)
     {
         var scene = Directory.EnumerateFiles(folderPath, "*.unity", SearchOption.AllDirectories).FirstOrDefault()
-                    ?? throw new FileNotFoundException($"Aucun fichier .unity trouvé dans «{folderPath}».");
+                    ?? throw new FileNotFoundException($"No .unity file found in «{folderPath}».");
 
         Console.WriteLine($"Found scene file {scene}!");
 
         var gameObjects = UnityStructureParser.ParseFile(scene);
 
-        gameObjects.ForEach(go => DebugUnityScene(go));
+        // gameObjects.ForEach(go => DebugUnityScene(go));
 
         var itemNameSpriteGuidAssociation = UnityStructureParser.FindItemNameSpriteGuidAssociation(gameObjects);
         var texturePathGuidAssociation = UnityStructureParser.FindMetaPathGuidAssociation(Path.Combine(ExportPath, TexturesPath));
         var sprites = UnityStructureParser.RetrieveSprites(itemNameSpriteGuidAssociation, UnityStructureParser.FindMetaPathGuidAssociation(Path.Combine(ExportPath, SpritePath)));
 
-        Directory.CreateDirectory(IconPath);
+        Directory.CreateDirectory(Path.Combine(IconPath, server is not null ? server.Id.ToString() : CommunityIconPath));
 
         List<string> successList = [];
 
@@ -85,7 +87,7 @@ public static class AssetRipperService
                 continue;
             }
 
-            var outputPath = Path.Combine(IconPath, $"{sprite.Name}.png");
+            var outputPath = Path.Combine(IconPath, server is not null ? server.Id.ToString() : CommunityIconPath, $"{sprite.Name}.png");
             UnityStructureParser.ResizeImageTo64(inputPath, outputPath, sprite);
             successList.Add(sprite.Name);
         }

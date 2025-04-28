@@ -108,6 +108,7 @@
         "ModUpload": {
             "Description": "You are part of a small group of server admins allowed to upload mod icons on Eco Gnome. Simply upload a .unity3d file to import its icons into the site. These icons will be available for all users and all servers. Icons are identified by their item class name (e.g., WorkbenchItem). This feature is resource-intensive, so please use it carefully and avoid spamming. Contact Zangdar on discord if you have any issues or questions."
         },
+        "ModUploadLimitToServer": "Limit to my server",
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
             "ClearAllMin": "Are you sure you want to clear all min prices?",
@@ -206,6 +207,7 @@
             "UserCol": "User",
             "FileNameCol": "File Name",
             "FileSha1Col": "File Hash",
+            "ServerCol": "Server",
             "IconsCountCol": "Icons",
             "Success": "Following icons have been successfully added: ",
             "NoIconsError": "No icons have been found in this mod.",

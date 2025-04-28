@@ -118,10 +118,21 @@ app.Use(async (context, next) =>
 
     if (path != null && path.StartsWith("/assets/eco-icons/"))
     {
+
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", path.TrimStart('/'));
         if (!File.Exists(filePath))
         {
-            context.Request.Path = path.Replace("eco-icons", "mod-icons");
+            var serverId = context.Request.Query.TryGetValue("serverId", out var sid) ? sid.ToString() : null;
+            var filePathWithServer = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", serverId ?? "no_found", path.Substring("/assets/eco-icons/".Length));
+
+            if (serverId is not null && File.Exists(filePathWithServer))
+            {
+                context.Request.Path = path.Replace("eco-icons", serverId);
+            }
+            else
+            {
+                context.Request.Path = path.Replace("eco-icons", "mod-icons");
+            }
         }
     }
 

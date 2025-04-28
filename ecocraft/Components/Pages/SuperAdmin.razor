@@ -208,6 +208,7 @@
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileNameCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileSha1Col")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.ServerCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.IconsCountCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.UserCol")</MudTh>
@@ -215,9 +216,7 @@
                 <ToolBarContent>
                     <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
                         <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.Title")</MudText>
-                        <MudStack Style="width: 200px">
-                            <ModUploader OnSuccessModUpload="RetrieveModUploadHistories" />
-                        </MudStack>
+                        <ModUploader OnSuccessModUpload="RetrieveModUploadHistories" />
                     </MudStack>
                 </ToolBarContent>
                 <RowTemplate>
@@ -232,6 +231,7 @@
                             @context.FileHash.Substring(0, Math.Min(context.FileHash.Length, 8))...
                         </MudTooltip>
                     </MudTd>
+                    <MudTd>@(context.Server?.Name ?? "-")</MudTd>
                     <MudTd>@context.IconsCount</MudTd>
                     <MudTd>
                         <MudTooltip Text="@context.UploadDateTime.ToString()">
