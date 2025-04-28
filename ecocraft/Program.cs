@@ -127,7 +127,7 @@ app.Use(async (context, next) =>
         }
         else
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", path.Substring("/assets/eco-icons/".Length));
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "eco-icons", path.Substring("/assets/eco-icons/".Length));
             if (!File.Exists(filePath))
             {
                 context.Request.Path = path.Replace("eco-icons", "mod-icons");
