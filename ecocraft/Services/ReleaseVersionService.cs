@@ -13,6 +13,14 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.1.1",
+            "2025-04-28",
+            "Private modded icons",
+            """
+            - Modded Icons: Add the ability to upload private mod icons, so only your server can use them. You can also overwrite official icons if needed. Note: you still need to be a mod upload user. If you’d like to become one, feel free to contact us!
+            """
+        ),
+        new ReleaseVersion(
             "1.1.0",
             "2025-04-23",
             "Tabs & Modded Icons",
