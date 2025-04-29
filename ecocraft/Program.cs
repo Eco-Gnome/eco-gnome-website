@@ -118,19 +118,33 @@ app.Use(async (context, next) =>
 
     if (path != null && path.StartsWith("/assets/eco-icons/"))
     {
+
         var serverId = context.Request.Query.TryGetValue("serverId", out var sid) ? sid.ToString() : null;
         var filePathWithServer = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", serverId ?? "no_found", path.Substring("/assets/eco-icons/".Length));
+        var filePathWithServerAndFixupForTags = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", serverId ?? "no_found", path.Substring("/assets/eco-icons/".Length).Replace(".png", "Item.png"));
 
         if (serverId is not null && File.Exists(filePathWithServer))
         {
             context.Request.Path = path.Replace("eco-icons", serverId);
+        }
+        else if (serverId is not null && File.Exists(filePathWithServerAndFixupForTags))
+        {
+            context.Request.Path = path.Replace("eco-icons", serverId).Replace(".png", "Item.png");
         }
         else
         {
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "eco-icons", path.Substring("/assets/eco-icons/".Length));
             if (!File.Exists(filePath))
             {
-                context.Request.Path = path.Replace("eco-icons", "mod-icons");
+                var filePathWithFixupTags = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "eco-icons", path.Substring("/assets/eco-icons/".Length).Replace(".png", "Item.png"));
+                if (File.Exists(filePathWithFixupTags))
+                {
+                    context.Request.Path = path.Replace("eco-icons", "mod-icons").Replace(".png", "Item.png");
+                }
+                else
+                {
+                    context.Request.Path = path.Replace("eco-icons", "mod-icons");
+                }
             }
         }
     }
