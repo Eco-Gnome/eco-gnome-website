@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using ecocraft.Components.Diagram;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
@@ -69,7 +69,7 @@ public static class UnityStructureParser
 
     private static readonly Regex GuidRegexp = new Regex(@"guid: ([0-9a-z]+)\n");
 
-    private static readonly Regex SpriteDataOffsetRegexp = new Regex(@"  m_Rect:\n    serializedVersion: \d+\n    x: (\d+)\n    y: (\d+)\n    width: (\d+)\n    height: (\d+)\n");
+    private static readonly Regex SpriteDataOffsetRegexp = new Regex(@"  m_Rect:\n    serializedVersion: \d+\n    x: ([\d.]+)\n    y: ([\d.]+)\n    width: ([\d.]+)\n    height: ([\d.]+)\n");
     private static readonly Regex SpriteDataTextureRegexp = new Regex(@"  m_RD:\n    serializedVersion: \d+\n    texture: \{fileID: \d+, guid: ([0-9a-z]+), type: \d+\}\n");
 
     public static List<GameObject> ParseFile(string filePath)
@@ -282,10 +282,10 @@ public static class UnityStructureParser
             {
                 list.Add(new Sprite(
                     assoc.Key,
-                    int.Parse(match1.Groups[1].Value),
-                    int.Parse(match1.Groups[2].Value),
-                    int.Parse(match1.Groups[3].Value),
-                    int.Parse(match1.Groups[4].Value),
+                    (int)MathF.Truncate(float.Parse(match1.Groups[1].Value, CultureInfo.InvariantCulture)),
+                    (int)MathF.Truncate(float.Parse(match1.Groups[2].Value, CultureInfo.InvariantCulture)),
+                    (int)MathF.Truncate(float.Parse(match1.Groups[3].Value, CultureInfo.InvariantCulture)),
+                    (int)MathF.Truncate(float.Parse(match1.Groups[4].Value, CultureInfo.InvariantCulture)),
                     match2.Groups[1].Value
                 ));
             }
