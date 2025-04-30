@@ -262,15 +262,21 @@
         {
             Navigation.NavigateTo("/");
         }
+
+        ContextService.OnContextChanged += StateHasChanged;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ContextService.OnContextChanged += StateHasChanged;
-
-        _users = await UserDbService.GetAllAsync();
-        _servers = await ServerDbService.GetAllAsync();
-        await RetrieveModUploadHistories();
+        if (firstRender)
+        {
+            await Task.WhenAll(
+                RetrieveUsers(),
+                RetrieveServers(),
+                RetrieveModUploadHistories()
+            );
+            StateHasChanged();
+        }
     }
 
     public async Task ToggleCanUploadMod(User user)
@@ -281,6 +287,14 @@
 
     public async Task RetrieveModUploadHistories() {
         _modUploadHistories = await ModUploadHistoryDbService.GetAllAsync();
+    }
+
+    private async Task RetrieveUsers() {
+        _users = await UserDbService.GetAllAsync();
+    }
+
+    private async Task RetrieveServers() {
+        _servers = await ServerDbService.GetAllAsync();
     }
 
     public void Dispose()
@@ -321,7 +335,7 @@
     {
         server.IsDefault = !server.IsDefault;
         await DbContext.SaveChangesAsync();
-        _users = await UserDbService.GetAllAsync();
+        await RetrieveUsers();
         StateHasChanged();
     }
 
@@ -363,7 +377,7 @@
             StateHasChanged();
             UserDbService.Delete(user);
             await DbContext.SaveChangesAsync();
-            _users = await UserDbService.GetAllAsync();
+            await RetrieveUsers();
             _isLoading = false;
             StateHasChanged();
         }
@@ -384,7 +398,7 @@
             await ContextService.JoinServer(server, true);
         }
 
-        _servers = await ServerDbService.GetAllAsync();
+        await RetrieveServers();
     }
 
     private async Task DeleteServer(Server server)
@@ -397,7 +411,7 @@
             StateHasChanged();
             ServerDbService.Delete(server);
             await DbContext.SaveChangesAsync();
-            _servers = await ServerDbService.GetAllAsync();
+            await RetrieveServers();
             _isLoading = false;
             StateHasChanged();
         }

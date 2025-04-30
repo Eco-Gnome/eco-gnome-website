@@ -1141,10 +1141,10 @@
         return Task.FromResult(result);
     }
 
-    private void SelectDataContext(DataContext dataContext)
+    private async Task SelectDataContext(DataContext dataContext)
     {
-        _selectedDataContext = dataContext;
-        UserServerDataService.RetrieveUserData(_selectedDataContext);
+        await UserServerDataService.RetrieveUserData(null);
+        await RetrieveData(dataContext);
     }
 
     private async Task DeleteDataContext(DataContext dataContext)
@@ -1162,14 +1162,16 @@
 
         DataContextDbService.Delete(dataContext);
         await EcoCraftDbContext.SaveChangesAsync();
-        UserServerDataService.RetrieveUserData(_selectedDataContext!);
+        await UserServerDataService.RetrieveUserData(null);
+        await RetrieveData(dataContext);
     }
 
     private async Task AddDataContext()
     {
         var dataContext = await ContextService.AddDataContext(ContextService.CurrentUserServer!);
-        _selectedDataContext = dataContext;
-        UserServerDataService.RetrieveUserData(_selectedDataContext!);
+        await EcoCraftDbContext.SaveChangesAsync();
+        await UserServerDataService.RetrieveUserData(null);
+        await RetrieveData(dataContext);
     }
 
     private async Task AddUserSkill(Skill? skill)
