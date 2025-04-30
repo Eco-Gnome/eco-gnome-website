@@ -30,7 +30,8 @@ builder.Services.AddMudServices();
 
 builder.Services.AddDbContext<EcoCraftDbContext>(options =>
     options
-        .UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"),
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
         .EnableSensitiveDataLogging()
         .UseLoggerFactory(LoggerFactory.Create(bd =>
         {
