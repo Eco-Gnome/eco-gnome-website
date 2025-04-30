@@ -13,6 +13,14 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.1.2",
+            "2025-04-30",
+            "Performance improvement",
+            """
+            - UX: Greatly reduced loading time of server & user data. Added smarter loader when switching between servers.
+            """
+        ),
+        new ReleaseVersion(
             "1.1.1",
             "2025-04-28",
             "Private modded icons",
