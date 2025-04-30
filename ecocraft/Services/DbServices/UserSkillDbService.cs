@@ -27,12 +27,6 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	public UserSkill Add(UserSkill talent)
 	{
 		context.UserSkills.Add(talent);
-
-		if (talent.Skill is not null)
-		{
-			talent.Skill.CurrentUserSkill = talent;
-		}
-
 		return talent;
 	}
 
@@ -43,11 +37,6 @@ public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbServi
 
 	public void Delete(UserSkill userSkill)
 	{
-		if (userSkill.Skill is not null)
-		{
-			userSkill.Skill.CurrentUserSkill = null;
-		}
-
 		context.UserSkills.Remove(userSkill);
 	}
 }

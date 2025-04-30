@@ -44,7 +44,7 @@ public class Recipe: IHasLocalizedName
     public List<UserRecipe> UserRecipes { get; set; } = [];
 
     [NotMapped]
-    public UserRecipe? CurrentUserRecipe { get; set; }
+    public UserRecipe? CurrentUserRecipe => UserRecipes.FirstOrDefault();
 
     public override string ToString()
     {
@@ -69,7 +69,7 @@ public class Element
     public List<UserElement> UserElements { get; set; } = [];
 
     [NotMapped]
-    public UserElement? CurrentUserElement { get; set; }
+    public UserElement? CurrentUserElement => UserElements.FirstOrDefault();
 
     public bool IsIngredient()
     {
@@ -269,7 +269,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
 
     [NotMapped]
-    public UserPrice? CurrentUserPrice { get; set; }
+    public UserPrice? CurrentUserPrice => UserPrices.FirstOrDefault();
 
     public override string ToString()
     {
@@ -297,7 +297,7 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
     public List<PluginModule> PluginModules { get; set; } = [];
 
     [NotMapped]
-    public UserSkill? CurrentUserSkill { get; set; }
+    public UserSkill? CurrentUserSkill => UserSkills.FirstOrDefault();
 
     public override string ToString()
     {
@@ -326,7 +326,7 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     public List<UserTalent> UserTalents { get; set; } = [];
 
     [NotMapped]
-    public UserTalent? CurrentUserTalent { get; set; }
+    public UserTalent? CurrentUserTalent => UserTalents.FirstOrDefault();
 }
 
 public class CraftingTable: IHasLocalizedName, IHasIconName
@@ -342,8 +342,7 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
     public List<Recipe> Recipes { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
 
-    [NotMapped]
-    public UserCraftingTable? CurrentUserCraftingTable { get; set; }
+    [NotMapped] public UserCraftingTable? CurrentUserCraftingTable => UserCraftingTables.FirstOrDefault();
 
     public override string ToString()
     {

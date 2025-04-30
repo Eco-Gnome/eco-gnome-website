@@ -28,7 +28,7 @@
         }
     </MudLink>
 
-    @if (!IsLoadingServer)
+    @if (!IsLoadingUserAndServer)
     {
         <MudSelect T="Server"
                    Class="select-dense server-select"
@@ -39,6 +39,7 @@
                    Underline="false"
                    Variant="Variant.Outlined"
                    SelectedValuesChanged="OnSelectedServerChanged"
+                   ToStringFunc="server => server?.Name"
                    AnchorOrigin="Origin.BottomLeft"
                    TransformOrigin="Origin.TopLeft">
             @foreach (var server in ContextService.AvailableServers)
@@ -78,7 +79,7 @@
 <MudSpacer/>
 
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
-    @if (!IsLoadingUser)
+    @if (!IsLoadingUserAndServer)
     {
         <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
                    Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
@@ -101,10 +102,7 @@
 
 @code {
     [Parameter]
-    public bool IsLoadingUser { get; set; }
-
-    [Parameter]
-    public bool IsLoadingServer { get; set; }
+    public bool IsLoadingUserAndServer { get; set; }
 
     [Parameter]
     public bool IsDarkMode { get; set; }
@@ -132,13 +130,16 @@
         {
             EnvironmentLabel = "PROD";
         }
+
+        ContextService.OnContextChanged += StateHasChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _lastAcknowledgeVersion = await LocalStorageService.GetItem("LastAcknowledgedVersion") ?? "";
-
-        ContextService.OnContextChanged += StateHasChanged;
+        if (firstRender)
+        {
+            _lastAcknowledgeVersion = await LocalStorageService.GetItem("LastAcknowledgedVersion") ?? "";
+        }
     }
 
     public void Dispose()
@@ -149,7 +150,7 @@
     private async Task OnDarkModeChanged(bool newValue)
     {
         IsDarkMode = newValue;
-        await IsDarkModeChanged.InvokeAsync(newValue); // Notifie le parent
+        await IsDarkModeChanged.InvokeAsync(newValue);
     }
 
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
@@ -161,9 +162,7 @@
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
     {
-        StateHasChanged();
         await ContextService.ChangeServer(servers.First());
-        Navigation.NavigateTo("/");
     }
 
     private async Task Save()

@@ -11,13 +11,13 @@
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>-->
 
-    @if (!IsLoadingUser && !IsLoadingServer && (ContextService.CurrentUserServer?.IsAdmin ?? false))
+    @if (!IsLoadingUserAndServer && (ContextService.CurrentUserServer?.IsAdmin ?? false))
     {
         <MudTooltip RootClass="mud-nav-item" Color="Color.Warning" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavAdmin")">
             <MudNavLink IconColor="Color.Warning" Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
         </MudTooltip>
     }
-    @if (!IsLoadingUser && (ContextService.CurrentUser?.SuperAdmin ?? false))
+    @if (!IsLoadingUserAndServer && (ContextService.CurrentUser?.SuperAdmin ?? false))
     {
         <MudTooltip RootClass="mud-nav-item" Color="Color.Error" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")">
             <MudNavLink IconColor="Color.Error" Href="super-admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Superscript">@LocalizationService.GetTranslation("NavMenu.NavSuperAdmin")</MudNavLink>
@@ -34,10 +34,7 @@
 
 @code {
     [Parameter]
-    public bool IsLoadingUser { get; set; }
-
-    [Parameter]
-    public bool IsLoadingServer { get; set; }
+    public bool IsLoadingUserAndServer { get; set; }
 
     [Parameter] public bool Opened { get; set; }
 

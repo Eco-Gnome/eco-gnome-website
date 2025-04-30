@@ -4,7 +4,7 @@
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 
-<MudThemeProvider Theme="myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
+<MudThemeProvider Theme="_myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -15,15 +15,15 @@
     <MudAppBar Elevation="2" Class="app-bar">
         <MudIconButton Icon="@MDIIcons.Filled.Menu" Size="Size.Medium" OnClick="() => ToggleMenu()" />
 
-        <Header IsLoadingUser="_isLoadingUser" IsLoadingServer="_isLoadingServer" @bind-isDarkMode="_isDarkMode"></Header>
+        <Header IsLoadingUserAndServer="_isLoadingUserAndServer" @bind-isDarkMode="_isDarkMode"></Header>
     </MudAppBar>
 
     <MudDrawer @bind-Open="@_menuOpened" Variant="@DrawerVariant.Mini" OpenMiniOnHover="false" ClipMode="DrawerClipMode.Docked" Elevation="4">
-        <NavMenu IsLoadingUser="_isLoadingUser" IsLoadingServer="_isLoadingServer" Opened="_menuOpened"/>
+        <NavMenu IsLoadingUserAndServer="_isLoadingUserAndServer" Opened="_menuOpened"/>
     </MudDrawer>
 
     <MudMainContent Class="mt-16 pa-6">
-        @if (!_isLoadingUser && !_isLoadingServer)
+        @if (!_isLoadingUserAndServer)
         {
             if (ContextService.CurrentUserServer is not null)
             {
@@ -44,12 +44,8 @@
 </MudLayout>
 
 @code {
-    // private bool _drawerOpen = true;
-    private bool _isLoadingUser = true;
-    private bool _isLoadingServer = true;
-    private bool _menuOpened = false;
-
-    //private MudTheme _theme = new();
+    private bool _isLoadingUserAndServer = true;
+    private bool _menuOpened;
     private bool _isDarkMode = true;
 
     private void ToggleMenu()
@@ -57,7 +53,7 @@
         _menuOpened = !_menuOpened;
     }
 
-    private MudTheme myDarkTheme = new MudTheme()
+    private readonly MudTheme _myDarkTheme = new()
         {
             // Dark theme, celui utilisé actuellement
             PaletteDark = new PaletteDark()
@@ -89,11 +85,9 @@
             },
         };
 
-    protected override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         ContextService.OnContextChanged += StateHasChanged;
-
-        return Task.CompletedTask;
     }
 
     public void Dispose()
@@ -103,18 +97,14 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-        {
-            return;
-        }
+        if (!firstRender) return;
 
         await ContextService.InitializeUserContext();
-        _isLoadingUser = false;
-        StateHasChanged();
-        // await Task.Yield();
-
         await ContextService.InitializeServerContext();
-        _isLoadingServer = false;
+        _isLoadingUserAndServer = false;
+        StateHasChanged();
+        // No idea why, very strange, but without this double StateHasChanged, PriceCalculator load fast, but Server-Management page does not, and requires a new StateHasChanged to update the header
+        // Definitively linked to MudSelect not updating directly
         StateHasChanged();
     }
 }

@@ -15,6 +15,9 @@ public class UserServerDataService(
     ServerDataService serverDataService,
     LocalizationService localizationService)
 {
+    private DataContext? _dataContext;
+    public bool IsDataRetrieved { get; private set; }
+
     public List<UserSkill> UserSkills { get; private set; } = [];
     public List<UserTalent> UserTalents { get; private set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
@@ -24,9 +27,9 @@ public class UserServerDataService(
     public List<UserRecipe> UserRecipes { get; private set; } = [];
     public List<UserMargin> UserMargins { get; private set; } = [];
 
-    public async Task RetrieveUserData(UserServer? userServer, DataContext? dataContext)
+    public async Task RetrieveUserData(DataContext? dataContext, bool force = false)
     {
-        if (userServer is null)
+        if (dataContext is null)
         {
             UserSkills = [];
             UserTalents = [];
@@ -37,10 +40,15 @@ public class UserServerDataService(
             UserRecipes = [];
             UserMargins = [];
 
+            IsDataRetrieved = false;
+            _dataContext = null;
+
             return;
         }
 
-        dataContext ??= userServer.DataContexts.First(d => d.IsDefault);
+        if (IsDataRetrieved && _dataContext == dataContext && !force) return;
+
+        _dataContext = dataContext;
 
         var userSkillsTask = userSkillDbService.GetByDataContextAsync(dataContext);
         var userTalentsTask = userTalentDbService.GetByDataContextAsync(dataContext);
@@ -63,36 +71,7 @@ public class UserServerDataService(
         UserRecipes = userRecipesTask.Result;
         UserMargins = userMarginsTask.Result;
 
-        foreach (var skill in serverDataService.Skills)
-        {
-            skill.CurrentUserSkill = UserSkills.FirstOrDefault(x => x.Skill == skill);
-
-            foreach (var talent in skill.Talents)
-            {
-                talent.CurrentUserTalent = UserTalents.FirstOrDefault(x => x.Talent == talent);
-            }
-        }
-
-
-        foreach (var craftingTable in serverDataService.CraftingTables)
-        {
-            craftingTable.CurrentUserCraftingTable = UserCraftingTables.FirstOrDefault(x => x.CraftingTable == craftingTable);
-        }
-
-        foreach (var recipe in serverDataService.Recipes)
-        {
-            recipe.CurrentUserRecipe = UserRecipes.FirstOrDefault(x => x.Recipe == recipe);
-
-            foreach (var element in recipe.Elements)
-            {
-                element.CurrentUserElement = UserElements.FirstOrDefault(x => x.Element == element);
-            }
-        }
-
-        foreach (var itemOrTag in serverDataService.ItemOrTags)
-        {
-            itemOrTag.CurrentUserPrice = UserPrices.FirstOrDefault(x => x.ItemOrTag == itemOrTag);
-        }
+        IsDataRetrieved = true;
     }
 
     public void AddUserSkill(Skill? skill, DataContext dataContext, bool onlyLevelAccessibleRecipes, bool addRecipes = true)

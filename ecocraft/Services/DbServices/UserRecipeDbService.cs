@@ -27,8 +27,6 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
     public UserRecipe Add(UserRecipe talent)
     {
         context.UserRecipes.Add(talent);
-        talent.Recipe.CurrentUserRecipe = talent;
-
         return talent;
     }
 
@@ -39,8 +37,6 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
 
     public void Delete(UserRecipe userRecipe)
     {
-        userRecipe.Recipe.CurrentUserRecipe = null;
-
         context.UserRecipes.Remove(userRecipe);
     }
 }

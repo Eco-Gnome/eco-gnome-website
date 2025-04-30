@@ -1,5 +1,4 @@
 ﻿@page "/server-management"
-<!-- attribute [Authorize(Policy = "IsServerAdmin")]  Don't use this attribute until we setup authentication in the backend, based on cookie and not local storage -->
 @implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Extensions
@@ -63,15 +62,22 @@
 					</MudStack>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Start" Spacing="6">
 						<MudStack Spacing="0" Style="min-width: 220px">
-							<MudTable Items="_stats" Dense Hover>
-								<HeaderContent>
-									<MudTh colspan="2">@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Stats")</MudTh>
-								</HeaderContent>
-								<RowTemplate>
-									<MudTd>@context.Item1</MudTd>
-									<MudTd>@context.Item2</MudTd>
-								</RowTemplate>
-							</MudTable>
+							@if (!_isLoadingData)
+							{
+								<MudTable Items="_stats" Dense Hover>
+									<HeaderContent>
+										<MudTh colspan="2">@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Stats")</MudTh>
+									</HeaderContent>
+									<RowTemplate>
+										<MudTd>@context.Item1</MudTd>
+										<MudTd>@context.Item2</MudTd>
+									</RowTemplate>
+								</MudTable>
+							}
+							else
+							{
+								<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+							}
 						</MudStack>
 						<MudPaper Class="mud-background pa-3">
 							<MudStack AlignItems="AlignItems.Center" Style="text-indent: 8px">
@@ -243,134 +249,145 @@
 				</PagerContent>
 			</MudTable>
 		</MudItem>
-		<MudItem lg="4" md="12">
-			<MudTable Items="@GetTags()"
-			          Filter="new Func<ItemOrTag,bool>(FilterTag)"
-			          Virtualize="false"
-			          FixedHeader="true"
-			          Height="700px"
-			          Dense="true"
-			          Hover="true">
-				<HeaderContent>
-					<MudTh>
-						<MudStack Row AlignItems="AlignItems.Center">
-							<MudText>@LocalizationService.GetTranslation("TagName")</MudText>
-							<MudTextField @bind-Value="_searchTag" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-						</MudStack>
-					</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd>
-						<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-							<MudLink OnClick="@(() => ToggleTag(context))">
-								<MudText Typo="Typo.body2">
-									@LocalizationService.GetTranslation(context) (@context.AssociatedItems.Count)
-								</MudText>
-							</MudLink>
-							@if (_selectedTag == context)
-							{
-								<MudIconButton Class="pa-0"
-								               Color="Color.Primary"
-								               Icon="@Icons.Material.Filled.Clear"
-								               Size="Size.Small"
-								               OnClick="@(() => ToggleTag(context))" />
-							}
-						</MudStack>
-					</MudTd>
-				</RowTemplate>
-				<PagerContent>
-					<MudTablePager PageSizeOptions="new []{25, 50, 100, 200}" />
-				</PagerContent>
-			</MudTable>
-		</MudItem>
-		<MudItem lg="8" md="12">
-			<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag,bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
-				<HeaderContent>
-					<MudTh>
-						<MudStack Row AlignItems="AlignItems.Center">
-							<MudText>@LocalizationService.GetTranslation("Name")</MudText>
-							<MudTextField @bind-Value="_searchItem" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-						</MudStack>
-					</MudTh>
-					<MudTh>
-						<MudStack Row>
-							<MudText>
-								@LocalizationService.GetTranslation("ServerManagement.Items.Min")</MudText>
-							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Min.Tooltip")">
-								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
-								               OnClick="@(() => OnClearMinPrices(GetItems()))"
-								               Color="Color.Primary"
-								               Size="Size.Small"/>
-							</MudTooltip>
-						</MudStack>
-					</MudTh>
-					<MudTh>
-						<MudStack Row>
-							<MudText>
-								@LocalizationService.GetTranslation("ServerManagement.Items.Default")</MudText>
-							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Default.Tooltip")">
-								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
-								               OnClick="@(() => OnClearDefaultPrices(GetItems()))"
-								               Color="Color.Primary"
-								               Size="Size.Small"/>
-							</MudTooltip>
-						</MudStack>
-					</MudTh>
-					<MudTh>
-						<MudStack Row>
-							<MudText>@LocalizationService.GetTranslation("ServerManagement.Items.Max")</MudText>
-							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Max.Tooltip")">
-								<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
-											   OnClick="@(() => OnClearMaxPrices(GetItems()))"
-											   Color="Color.Primary"
-											   Size="Size.Small" />
-							</MudTooltip>
-						</MudStack>
-					</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd>
-						<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
-					</MudTd>
-					<MudTd>
-						<MudNumericField T="decimal?"
-						                 Class="rectangle-input"
-						                 Disabled="@(context.IsTag)"
-						                 HideSpinButtons="@(context.IsTag)"
-						                 Value="context.MinPrice"
-						                 Format="F2"
-						                 Variant="Variant.Outlined"
-						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-						                 ValueChanged="@(value => OnMinValueChange(context,value))" />
-					</MudTd>
-					<MudTd>
-						<MudNumericField T="decimal?"
-						                 Class="rectangle-input"
-						                 Disabled="@(context.IsTag)"
-						                 HideSpinButtons="@(context.IsTag)"
-						                 Value="context.DefaultPrice"
-						                 Format="F2"
-						                 Variant="Variant.Outlined"
-						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-						                 ValueChanged="@(value => OnDefaultValueChange(context,value))" />
-					</MudTd>
-					<MudTd>
-						<MudNumericField T="decimal?"
-						                 Class="rectangle-input"
-						                 Disabled="@(context.IsTag)"
-						                 HideSpinButtons="@(context.IsTag)"
-						                 Value="context.MaxPrice"
-						                 Format="F2"
-						                 Variant="Variant.Outlined"
-						                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-						                 ValueChanged="@(value => OnMaxValueChange(context,value))" />
-					</MudTd>
-				</RowTemplate>
-				<PagerContent>
-					<MudTablePager PageSizeOptions="new []{25, 50, 100, 200}" />
-				</PagerContent>
-			</MudTable>
-		</MudItem>
+		@if (_isLoadingData)
+		{
+			<MudItem xs="12" Class="px-4 pt-4">
+				<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+					<MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
+				</MudStack>
+			</MudItem>
+		}
+		else if (ServerDataService.IsDataRetrieved)
+		{
+			<MudItem lg="4" md="12">
+				<MudTable Items="@GetTags()"
+				          Filter="new Func<ItemOrTag, bool>(FilterTag)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="700px"
+				          Dense="true"
+				          Hover="true">
+					<HeaderContent>
+						<MudTh>
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudText>@LocalizationService.GetTranslation("TagName")</MudText>
+								<MudTextField @bind-Value="_searchTag" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							</MudStack>
+						</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+								<MudLink OnClick="@(() => ToggleTag(context))">
+									<MudText Typo="Typo.body2">
+										@LocalizationService.GetTranslation(context) (@context.AssociatedItems.Count)
+									</MudText>
+								</MudLink>
+								@if (_selectedTag == context)
+								{
+									<MudIconButton Class="pa-0"
+									               Color="Color.Primary"
+									               Icon="@Icons.Material.Filled.Clear"
+									               Size="Size.Small"
+									               OnClick="@(() => ToggleTag(context))"/>
+								}
+							</MudStack>
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudItem>
+			<MudItem lg="8" md="12">
+				<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag, bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
+					<HeaderContent>
+						<MudTh>
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudText>@LocalizationService.GetTranslation("Name")</MudText>
+								<MudTextField @bind-Value="_searchItem" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							</MudStack>
+						</MudTh>
+						<MudTh>
+							<MudStack Row>
+								<MudText>
+									@LocalizationService.GetTranslation("ServerManagement.Items.Min")</MudText>
+								<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Min.Tooltip")">
+									<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
+									               OnClick="@(() => OnClearMinPrices(GetItems()))"
+									               Color="Color.Primary"
+									               Size="Size.Small"/>
+								</MudTooltip>
+							</MudStack>
+						</MudTh>
+						<MudTh>
+							<MudStack Row>
+								<MudText>
+									@LocalizationService.GetTranslation("ServerManagement.Items.Default")</MudText>
+								<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Default.Tooltip")">
+									<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
+									               OnClick="@(() => OnClearDefaultPrices(GetItems()))"
+									               Color="Color.Primary"
+									               Size="Size.Small"/>
+								</MudTooltip>
+							</MudStack>
+						</MudTh>
+						<MudTh>
+							<MudStack Row>
+								<MudText>@LocalizationService.GetTranslation("ServerManagement.Items.Max")</MudText>
+								<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.Max.Tooltip")">
+									<MudIconButton Icon="@Icons.Material.Filled.ClearAll"
+									               OnClick="@(() => OnClearMaxPrices(GetItems()))"
+									               Color="Color.Primary"
+									               Size="Size.Small"/>
+								</MudTooltip>
+							</MudStack>
+						</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+						</MudTd>
+						<MudTd>
+							<MudNumericField T="decimal?"
+							                 Class="rectangle-input"
+							                 Disabled="@(context.IsTag)"
+							                 HideSpinButtons="@(context.IsTag)"
+							                 Value="context.MinPrice"
+							                 Format="F2"
+							                 Variant="Variant.Outlined"
+							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+							                 ValueChanged="@(value => OnMinValueChange(context, value))"/>
+						</MudTd>
+						<MudTd>
+							<MudNumericField T="decimal?"
+							                 Class="rectangle-input"
+							                 Disabled="@(context.IsTag)"
+							                 HideSpinButtons="@(context.IsTag)"
+							                 Value="context.DefaultPrice"
+							                 Format="F2"
+							                 Variant="Variant.Outlined"
+							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+							                 ValueChanged="@(value => OnDefaultValueChange(context, value))"/>
+						</MudTd>
+						<MudTd>
+							<MudNumericField T="decimal?"
+							                 Class="rectangle-input"
+							                 Disabled="@(context.IsTag)"
+							                 HideSpinButtons="@(context.IsTag)"
+							                 Value="context.MaxPrice"
+							                 Format="F2"
+							                 Variant="Variant.Outlined"
+							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+							                 ValueChanged="@(value => OnMaxValueChange(context, value))"/>
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudItem>
+		}
 	</MudGrid>
 </MudContainer>
 
@@ -380,6 +397,7 @@
 	private bool _copyExistingServerClicked;
 	private bool _showCopyExistingServerLoader;
 	private bool _showDeleteServerLoader;
+	private bool _isLoadingData;
 	private readonly Dictionary<UserServer, bool> _askKickConfirmations = new ();
 	private string _searchPseudo = "";
 	private string _searchTag = "";
@@ -394,19 +412,44 @@
 		{
 			Navigation.NavigateTo("/");
 		}
+
+		ContextService.OnContextChanged += OnContextChanged;
 	}
 
-	protected override Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		ContextService.OnContextChanged += () =>
+		if (firstRender)
 		{
-			RecalculateStats();
+			await RetrieveData();
+		}
+	}
+
+	private void OnContextChanged()
+	{
+		_ = RetrieveData();
+	}
+
+	private async Task RetrieveData()
+	{
+		if (!ServerDataService.IsDataRetrieved)
+		{
+			_stats.Clear();
+			_isLoadingData = true;
 			StateHasChanged();
-		};
+
+			await ServerDataService.RetrieveServerData(ContextService.CurrentServer!);
+
+			_isLoadingData = false;
+		}
 
 		RecalculateStats();
 
-		return Task.CompletedTask;
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		ContextService.OnContextChanged -= OnContextChanged;
 	}
 
 	private void RecalculateStats()
@@ -421,11 +464,6 @@
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ServerDataService.Recipes.SelectMany(r => r.Elements).Count()));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ServerDataService.ItemOrTags.Count(i => !i.IsTag)));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ServerDataService.ItemOrTags.Count(i => i.IsTag)));
-	}
-
-	public void Dispose()
-	{
-		ContextService.OnContextChanged -= StateHasChanged;
 	}
 
 	private async Task CopyExistingServer()
@@ -499,11 +537,10 @@
 			StateHasChanged();
 			var (errorCount, recipeErrorNames) = await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
 
-			// await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
-			// await UserServerDataService.RetrieveUserData(ContextService.CurrentUserServer);
+			await ServerDataService.RetrieveServerData(ContextService.CurrentServer, true);
+			await UserServerDataService.RetrieveUserData(null);
 
 			_showUploadServerDataLoader = false;
-			StateHasChanged();
 
 			if (errorCount == 0)
 			{

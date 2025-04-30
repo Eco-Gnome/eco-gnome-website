@@ -9,9 +9,9 @@ public class ContextService(
     EcoCraftDbContext dbContext,
     LocalStorageService localStorageService,
     ServerDbService serverDbService,
+    DataContextDbService dataContextDbService,
     ServerDataService serverDataService,
     UserServerDataService userServerDataService,
-    DataContextDbService dataContextDbService,
     UserDbService userDbService)
 {
     public event Action? OnContextChanged;
@@ -21,7 +21,6 @@ public class ContextService(
     public Server? CurrentServer { get; private set; }
     public UserServer? CurrentUserServer { get; private set; }
     public User? CurrentUser { get; private set; }
-    public DataContext? CurrentDataContext { get; private set; }
 
     public List<Server> AvailableServers
     {
@@ -46,20 +45,12 @@ public class ContextService(
         CurrentServer = server;
         CurrentUserServer = userServer;
 
-        await serverDataService.RetrieveServerData(CurrentServer);
-        await UpdateCurrentDataContext();
-
         await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
-        OnContextChanged?.Invoke();
-    }
+        await serverDataService.RetrieveServerData(null);
+        await userServerDataService.RetrieveUserData(null);
 
-    public async Task UpdateCurrentDataContext(DataContext? dataContext = null)
-    {
-        dataContext ??= CurrentUserServer!.DataContexts.First(d => d.IsDefault);
-        CurrentDataContext = dataContext;
-        await localStorageService.AddItem("DataContextId", CurrentDataContext!.Id.ToString());
-        await userServerDataService.RetrieveUserData(CurrentUserServer, CurrentDataContext);
+        OnContextChanged?.Invoke();
     }
 
     public async Task InitializeUserContext()
@@ -150,12 +141,6 @@ public class ContextService(
         {
             CurrentServer = searchedServer;
             CurrentUserServer = CurrentUser!.UserServers.First(us => us.Server == searchedServer);
-            await serverDataService.RetrieveServerData(CurrentServer);
-
-            var lastDataContextId = await localStorageService.GetItem("DataContextId");
-            await UpdateCurrentDataContext(string.IsNullOrEmpty(lastDataContextId)
-                ? null
-                : CurrentUserServer.DataContexts.FirstOrDefault(dc => dc.Id == new Guid(lastDataContextId)));
         }
     }
 

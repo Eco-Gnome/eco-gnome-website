@@ -27,7 +27,6 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 	public UserElement Add(UserElement userElement)
 	{
 		context.UserElements.Add(userElement);
-		userElement.Element.CurrentUserElement = userElement;
 
 		return userElement;
 	}
@@ -39,8 +38,6 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 
 	public void Delete(UserElement userElement)
 	{
-		userElement.Element.CurrentUserElement = null;
-
 		context.UserElements.Remove(userElement);
 	}
 }

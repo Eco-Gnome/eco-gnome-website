@@ -15,13 +15,15 @@ public class ServerDataService(
     ModifierDbService modifierDbService,
     ElementDbService elementDbService)
 {
+    public bool IsDataRetrieved  { get; private set; }
+
     public List<Skill> Skills { get; private set; } = [];
     public List<PluginModule> PluginModules { get; private set; } = [];
     public List<CraftingTable> CraftingTables { get; private set; } = [];
     public List<Recipe> Recipes { get; private set; } = [];
     public List<ItemOrTag> ItemOrTags { get; private set; } = [];
 
-    public async Task RetrieveServerData(Server? server)
+    public async Task RetrieveServerData(Server? server, bool force = false)
     {
         if (server is null)
         {
@@ -31,8 +33,12 @@ public class ServerDataService(
             Recipes = [];
             ItemOrTags = [];
 
+            IsDataRetrieved = false;
+
             return;
         }
+
+        if (IsDataRetrieved && !force) return;
 
         var data = await GetServerData(server);
 
@@ -41,6 +47,8 @@ public class ServerDataService(
         PluginModules = data.pluginModules;
         Recipes = data.recipes;
         ItemOrTags = data.itemOrTags;
+
+        IsDataRetrieved = true;
     }
 
     public async Task<(List<Skill> skills, List<CraftingTable> craftingTables, List<PluginModule> pluginModules, List<Recipe> recipes, List<ItemOrTag> itemOrTags)> GetServerData(Server server)

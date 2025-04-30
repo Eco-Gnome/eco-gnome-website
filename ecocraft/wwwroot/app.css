@@ -264,3 +264,16 @@
 .has-pluginmodule {
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.75) !important;
 }
+
+#custom-reconnect {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: #222;
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+}

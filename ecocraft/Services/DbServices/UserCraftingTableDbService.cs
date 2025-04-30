@@ -34,7 +34,6 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 	public UserCraftingTable Add(UserCraftingTable userCraftingTable)
 	{
 		context.UserCraftingTables.Add(userCraftingTable);
-		userCraftingTable.CraftingTable.CurrentUserCraftingTable = userCraftingTable;
 		return userCraftingTable;
 	}
 
@@ -45,7 +44,6 @@ public class UserCraftingTableDbService(EcoCraftDbContext context)
 
 	public void Delete(UserCraftingTable userCraftingTable)
 	{
-		userCraftingTable.CraftingTable.CurrentUserCraftingTable = null;
 		context.UserCraftingTables.Remove(userCraftingTable);
 	}
 }
