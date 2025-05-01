@@ -96,6 +96,9 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsShoppingList")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -658,6 +661,12 @@ namespace ecocraft.Migrations
                     b.Property<decimal?>("Price")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("SLQuantity")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SLRemainingQuantity")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Share")
                         .HasColumnType("TEXT");
 
@@ -747,6 +756,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("ParentUserRecipeId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("TEXT");
 
@@ -756,6 +768,8 @@ namespace ecocraft.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DataContextId");
+
+                    b.HasIndex("ParentUserRecipeId");
 
                     b.HasIndex("RecipeId");
 
@@ -1272,6 +1286,11 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecocraft.Models.UserRecipe", "ParentUserRecipe")
+                        .WithMany("ChildrenUserRecipes")
+                        .HasForeignKey("ParentUserRecipeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ecocraft.Models.Recipe", "Recipe")
                         .WithMany("UserRecipes")
                         .HasForeignKey("RecipeId")
@@ -1279,6 +1298,8 @@ namespace ecocraft.Migrations
                         .IsRequired();
 
                     b.Navigation("DataContext");
+
+                    b.Navigation("ParentUserRecipe");
 
                     b.Navigation("Recipe");
                 });
@@ -1470,6 +1491,11 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
                 {
                     b.Navigation("UserPrices");
+                });
+
+            modelBuilder.Entity("ecocraft.Models.UserRecipe", b =>
+                {
+                    b.Navigation("ChildrenUserRecipes");
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>

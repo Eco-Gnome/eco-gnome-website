@@ -452,6 +452,11 @@ public class DataContext
     public List<UserSetting> UserSettings { get; init; } = [];
     public List<UserRecipe> UserRecipes { get; init; } = [];
     public List<UserMargin> UserMargins { get; init; } = [];
+
+    public List<UserRecipe> GetRootShoppingListRecipes()
+    {
+        return UserRecipes.Where(ur => ur.ParentUserRecipe is null).ToList();
+    }
 }
 
 public class UserSetting
@@ -543,6 +548,10 @@ public class UserElement: IHasPrice
 
     public Element Element { get; set; }
     public DataContext DataContext { get; set; }
+
+    // For Shopping List Only
+    public decimal SLQuantity { get; set; }
+    public decimal SLRemainingQuantity { get; set; }
 }
 
 public class UserPrice: IHasPrice
@@ -604,6 +613,11 @@ public class UserRecipe
 
     public Recipe Recipe { get; set; }
     public DataContext DataContext { get; set; }
+
+    // For Shopping List only
+    [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }
+    public UserRecipe? ParentUserRecipe { get; set; }
+    public List<UserRecipe> ChildrenUserRecipes { get; set; } = [];
 }
 
 // Server Data

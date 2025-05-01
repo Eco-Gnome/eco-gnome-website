@@ -27,7 +27,7 @@
     <MudGrid Style="height: auto">
         <MudItem xs="12" Class="px-4 pt-4">
             <MudStack Row Spacing="3">
-                @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts)
+                @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
                 {
                     <MudButton Color="_selectedDataContext == dataContext ? Color.Primary : Color.Default"
                                Variant="Variant.Filled"
@@ -1023,21 +1023,10 @@
         _selectedDataContext = dataContext ?? ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
         await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
 
-        if (UserServerDataService.IsDataRetrieved && ServerDataService.IsDataRetrieved)
-        {
-            StateHasChanged();
-            return;
-        }
-
         _isLoadingData = true;
         StateHasChanged();
-
-        if (!ServerDataService.IsDataRetrieved)
-            await ServerDataService.RetrieveServerData(ContextService.CurrentServer!);
-
-        if (!UserServerDataService.IsDataRetrieved)
-            await UserServerDataService.RetrieveUserData(_selectedDataContext);
-
+        await ServerDataService.RetrieveServerData(ContextService.CurrentServer!);
+        await UserServerDataService.RetrieveUserData(_selectedDataContext);
         _isLoadingData = false;
         StateHasChanged();
     }

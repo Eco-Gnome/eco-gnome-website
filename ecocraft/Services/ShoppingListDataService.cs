@@ -4,106 +4,131 @@ using ecocraft.Services.DbServices;
 namespace ecocraft.Services
 {
     public class ShoppingListDataService(
-    ShoppingListDbService shoppingListDbService,
-    ShoppingListRecipeDbService shoppingListRecipeDbService,
-    ShoppingListItemOrTagDbService shoppingListItemOrTagDbService,
-    ShoppingListCraftingTableDbService shoppingListCraftingTableDbService,
-    ShoppingListSkillDbService shoppingListSkillDbService,
-    UserServerDataService userServerDataService,
-    LocalizationService localizationService)
+        ContextService contextService,
+        DataContextDbService dataContextDbService,
+        UserRecipeDbService userRecipeDbService,
+        UserCraftingTableDbService userCraftingTableDbService,
+        UserSkillDbService userSkillDbService,
+        LocalizationService localizationService)
     {
-        public List<ShoppingList> ShoppingLists { get; private set; } = [];
-
-        public async Task RetrieveShoppingLists(UserServer? userServer)
+        public DataContext CreateShoppingList(UserServer userServer)
         {
-            if (userServer is null)
-            {
-                ShoppingLists = [];
-
-                return;
-            }
-
-            var userShoppingListsTask = shoppingListDbService.GetByUserServerAsync(userServer);
-
-            await Task.WhenAll(userShoppingListsTask);
-
-            ShoppingLists = userShoppingListsTask.Result;
-        }
-
-        public ShoppingList CreateShoppingList(UserServer userServer)
-        {
-            var shoppingList = new ShoppingList
+            var shoppingList = new DataContext()
             {
                 Name = localizationService.GetTranslation("ShoppingList.NewShoppingList"),
                 UserServer = userServer,
+                IsShoppingList = true,
             };
 
-            ShoppingLists.Add(shoppingList);
-            shoppingListDbService.Add(shoppingList);
+            contextService.CurrentUserServer!.DataContexts.Add(shoppingList);
+            dataContextDbService.Add(shoppingList);
 
             return shoppingList;
         }
 
-        public void RemoveUserShoppingList(ShoppingList shoppingList)
+        public void RemoveShoppingList(DataContext shoppingList)
         {
-            ShoppingLists.Remove(shoppingList);
-            shoppingListDbService.Delete(shoppingList);
+            contextService.CurrentUserServer!.DataContexts.Remove(shoppingList);
+            dataContextDbService.Delete(shoppingList);
         }
 
-        public void AddShoppingListRecipe(ShoppingList shoppingList, Recipe recipe, ShoppingListRecipe? parent = null, decimal quantityToCraft = 1)
+        public void AddUserRecipe(DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1)
         {
-            var userShoppingListRecipe = new ShoppingListRecipe
+            var userRecipe = new UserRecipe
             {
                 Recipe = recipe,
-                ShoppingList = shoppingList,
-                ShoppingListCraftingTable = GetOrCreateShoppingListCraftingTable(shoppingList, recipe.CraftingTable),
-                ShoppingListSkill = recipe.Skill is not null ? GetOrCreateShoppingListSkill(shoppingList, recipe.Skill) : null,
-                QuantityToCraft = quantityToCraft,
-                ParentShoppingListRecipe = parent,
+                DataContext = shoppingList,
+                RoundFactor = quantityToCraft,
+                ParentUserRecipe = parent,
             };
 
-            shoppingList.ShoppingListRecipes.Add(userShoppingListRecipe);
-            shoppingListRecipeDbService.Add(userShoppingListRecipe);
+            shoppingList.UserRecipes.Add(userRecipe);
+            userRecipeDbService.Add(userRecipe);
+
+            if (recipe.CraftingTable.CurrentUserCraftingTable is null)
+            {
+                GetOrCreateUserCraftingTable(shoppingList, recipe.CraftingTable);
+            }
+
+            if (recipe.Skill is not null && recipe.Skill.CurrentUserSkill is null)
+            {
+                GetOrCreateUserSkill(shoppingList, recipe.Skill);
+            }
         }
 
-        public void RemoveUserShoppingListRecipe(ShoppingList shoppingList, ShoppingListRecipe shoppingListRecipe)
+        public void RemoveUserRecipe(DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
-            shoppingList.ShoppingListRecipes.Remove(shoppingListRecipe);
-            shoppingListRecipeDbService.Delete(shoppingListRecipe);
+            var currentUserCraftingTable = shoppingListRecipe.Recipe.CraftingTable.CurrentUserCraftingTable;
+            var currentUserSkill = shoppingListRecipe.Recipe.Skill?.CurrentUserSkill;
+
+            shoppingList.UserRecipes.Remove(shoppingListRecipe);
+            userRecipeDbService.Delete(shoppingListRecipe);
+
+            if (currentUserCraftingTable is not null && currentUserCraftingTable.CraftingTable.Recipes.All(r => r.CurrentUserRecipe is null))
+            {
+                RemoveUserCraftingTable(shoppingList, currentUserCraftingTable);
+            }
+
+            if (currentUserSkill is not null && currentUserSkill.Skill!.Recipes.All(r => r.CurrentUserRecipe is null))
+            {
+                RemoveUserSkill(shoppingList, currentUserSkill);
+            }
         }
 
-        private ShoppingListCraftingTable GetOrCreateShoppingListCraftingTable(ShoppingList shoppingList, CraftingTable craftingTable)
+        private UserCraftingTable GetOrCreateUserCraftingTable(DataContext shoppingList, CraftingTable craftingTable)
         {
-            var shoppingListCraftingTable = shoppingList.ShoppingListCraftingTables.Find(slct => slct.CraftingTable == craftingTable);
+            var shoppingListCraftingTable = shoppingList.UserCraftingTables.Find(slct => slct.CraftingTable == craftingTable);
 
             if (shoppingListCraftingTable is not null)
             {
                 return shoppingListCraftingTable;
             }
 
-            return new ShoppingListCraftingTable
+            var userCraftingTable = new UserCraftingTable
             {
                 CraftingTable = craftingTable,
                 PluginModule = craftingTable.CurrentUserCraftingTable?.PluginModule,
-                ShoppingList = shoppingList,
+                DataContext = shoppingList,
             };
+
+            craftingTable.UserCraftingTables.Add(userCraftingTable);
+            userCraftingTableDbService.Add(userCraftingTable);
+
+            return userCraftingTable;
         }
 
-        private ShoppingListSkill GetOrCreateShoppingListSkill(ShoppingList shoppingList, Skill skill)
+        private void RemoveUserCraftingTable(DataContext shoppingList, UserCraftingTable userCraftingTable)
         {
-            var shoppingListSkill = shoppingList.ShoppingListSkills.Find(sls => sls.Skill == skill);
+            shoppingList.UserCraftingTables.Remove(userCraftingTable);
+            userCraftingTableDbService.Delete(userCraftingTable);
+        }
+
+        private UserSkill GetOrCreateUserSkill(DataContext shoppingList, Skill skill)
+        {
+            var shoppingListSkill = shoppingList.UserSkills.Find(sls => sls.Skill == skill);
 
             if (shoppingListSkill is not null)
             {
                 return shoppingListSkill;
             }
 
-            return new ShoppingListSkill
+            var userSkill = new UserSkill
             {
                 Skill = skill,
                 Level = skill.CurrentUserSkill?.Level ?? 0,
-                ShoppingList = shoppingList,
+                DataContext = shoppingList,
             };
+
+            skill.UserSkills.Add(userSkill);
+            userSkillDbService.Add(userSkill);
+
+            return userSkill;
+        }
+
+        private void RemoveUserSkill(DataContext shoppingList, UserSkill userSkill)
+        {
+            shoppingList.UserSkills.Remove(userSkill);
+            userSkillDbService.Delete(userSkill);
         }
     }
 }
