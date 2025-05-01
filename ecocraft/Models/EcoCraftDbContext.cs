@@ -31,7 +31,6 @@ public class EcoCraftDbContext : DbContext
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
     public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
-    public DbSet<ShoppingList> ShoppingLists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -425,6 +424,12 @@ public class EcoCraftDbContext : DbContext
 			.HasForeignKey(ur => ur.DataContextId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<UserRecipe>()
+			.HasOne(ur => ur.ParentUserRecipe)
+			.WithMany(us => us.ChildrenUserRecipes)
+			.HasForeignKey(ur => ur.ParentUserRecipeId)
+			.OnDelete(DeleteBehavior.Cascade);
+
 		// UserServer
 		modelBuilder.Entity<UserServer>()
 			.ToTable("UserServer");
@@ -474,11 +479,6 @@ public class EcoCraftDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(lf => lf.ServerId)
 			.OnDelete(DeleteBehavior.Cascade);
-
-		// * Shopping List Data
-		// Shopping List
-		modelBuilder.Entity<ShoppingList>()
-			.ToTable("ShoppingList");
 
 	}
 }

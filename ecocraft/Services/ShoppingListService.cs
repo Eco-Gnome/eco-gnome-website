@@ -1,88 +1,93 @@
 ﻿using ecocraft.Models;
+using ecocraft.Services.DbServices;
 
 namespace ecocraft.Services;
 
-public class ShoppingListService(EcoCraftDbContext dbContext)
+public class ShoppingListService(
+    EcoCraftDbContext dbContext,
+    UserElementDbService userElementDbService)
 {
-    public async Task Calculate(List<ShoppingListRecipe> shoppingListRecipes, bool save = true)
+    public async Task Calculate(List<UserRecipe> shoppingListRecipes, bool save = true)
     {
         if (save) await dbContext.SaveChangesAsync();
 
         foreach (var shoppingListRecipe in shoppingListRecipes)
         {
-            // Ensures all element have a related ShoppingListItemOrTag
             foreach (var element in shoppingListRecipe.Recipe.Elements)
             {
-                var relatedShoppingListItemOrTag = shoppingListRecipe.ShoppingListItemOrTags.Find(s => s.ItemOrTag == element.ItemOrTag);
+                var userElement = shoppingListRecipe.DataContext.UserElements.Find(s => s.Element == element);
 
-                if (relatedShoppingListItemOrTag is null)
+                // Ensures all element have a related UserElement
+                if (userElement is null)
                 {
-                    relatedShoppingListItemOrTag = new ShoppingListItemOrTag
+                    userElement = new UserElement
                     {
-                        ItemOrTag = element.ItemOrTag,
-                        IsIngredient = element.IsIngredient(),
-                        ShoppingListRecipe = shoppingListRecipe,
+                        Element = element,
                     };
 
-                    shoppingListRecipe.ShoppingListItemOrTags.Add(relatedShoppingListItemOrTag);
+                    shoppingListRecipe.DataContext.UserElements.Add(userElement);
+                    userElementDbService.Add(userElement);
                 }
 
                 if (element.IsProduct())
                 {
-                    relatedShoppingListItemOrTag.Quantity = element.Quantity.GetBaseValue() * shoppingListRecipe.QuantityToCraft;
-                    relatedShoppingListItemOrTag.RemainingQuantity = 0;
+                    userElement.SLQuantity = element.Quantity.GetBaseValue() * shoppingListRecipe.RoundFactor;
+                    userElement.SLRemainingQuantity = 0;
 
-                    var parentIngredient = shoppingListRecipe.ParentShoppingListRecipe?.ShoppingListItemOrTags.Find(s => s.ItemOrTag == element.ItemOrTag && s.IsIngredient);
+                    var parentIngredient = shoppingListRecipe.ParentUserRecipe?.Recipe.Elements.First(s => s.ItemOrTag == element.ItemOrTag && s.IsIngredient()).CurrentUserElement;
 
                     if (parentIngredient is not null)
                     {
-                        parentIngredient.RemainingQuantity -= relatedShoppingListItemOrTag.Quantity;
+                        parentIngredient.SLRemainingQuantity -= userElement.SLQuantity;
                     }
                 }
                 else
                 {
-                    relatedShoppingListItemOrTag.Quantity = Math.Round(-1 * element.Quantity.GetBaseValue() * shoppingListRecipe.QuantityToCraft * (shoppingListRecipe.ShoppingListCraftingTable?.PluginModule?.Percent ?? 1), MidpointRounding.ToPositiveInfinity) ;
-                    relatedShoppingListItemOrTag.RemainingQuantity = relatedShoppingListItemOrTag.Quantity;
+                    userElement.SLQuantity = Math.Round(-1
+                                                        * element.Quantity.GetBaseValue()
+                                                        * shoppingListRecipe.RoundFactor
+                                                        * (shoppingListRecipe.Recipe.CraftingTable.CurrentUserCraftingTable?.PluginModule?.GetPercent(shoppingListRecipe.Recipe.Skill) ?? 1),
+                        MidpointRounding.ToPositiveInfinity) ;
+                    userElement.SLRemainingQuantity = userElement.SLQuantity;
                 }
             }
 
-            await Calculate(shoppingListRecipe.ChildrenShoppingListRecipes, false);
+            await Calculate(shoppingListRecipe.ChildrenUserRecipes, false);
         }
 
         if (save) await dbContext.SaveChangesAsync();
     }
 
-    public List<ShoppingListItemOrTag> GetAllIngredients(List<ShoppingListRecipe> shoppingListRecipes)
+    public List<UserElement> GetAllIngredients(List<UserRecipe> shoppingListRecipes)
     {
-        var shoppingListItemOrTags = new List<ShoppingListItemOrTag>();
+        var userElements = new List<UserElement>();
 
         foreach (var shoppingListRecipe in shoppingListRecipes)
         {
-            var ingredients = shoppingListRecipe.ShoppingListItemOrTags.Where(sliot => sliot.IsIngredient && sliot.RemainingQuantity > 0);
+            var ingredients = shoppingListRecipe.Recipe.Elements.Where(e => e.IsIngredient() && e.CurrentUserElement!.SLRemainingQuantity > 0).Select(e => e.CurrentUserElement!);
 
             foreach (var ingredient in ingredients)
             {
-                shoppingListItemOrTags.Add(ingredient);
+                userElements.Add(ingredient);
             }
 
-            var products = shoppingListRecipe.ShoppingListItemOrTags.Where(sliot => !sliot.IsIngredient && sliot.RemainingQuantity > 0);
+            var products = shoppingListRecipe.Recipe.Elements.Where(e => !e.IsIngredient() && e.CurrentUserElement!.SLRemainingQuantity > 0);
 
             foreach (var product in products)
             {
-                shoppingListItemOrTags.Add(new ShoppingListItemOrTag
+                userElements.Add(new UserElement
                 {
-                    ItemOrTag = product.ItemOrTag,
-                    IsIngredient = product.IsIngredient,
-                    RemainingQuantity = -product.RemainingQuantity,
+                    Element = product,
+                    SLRemainingQuantity = -product.CurrentUserElement!.SLRemainingQuantity,
                 });
             }
 
-            if (shoppingListRecipe.ChildrenShoppingListRecipes.Count > 0)
+            if (shoppingListRecipe.ChildrenUserRecipes.Count > 0)
             {
-                shoppingListItemOrTags.AddRange(GetAllIngredients(shoppingListRecipe.ChildrenShoppingListRecipes));
+                userElements.AddRange(GetAllIngredients(shoppingListRecipe.ChildrenUserRecipes));
             }
         }
 
-        return shoppingListItemOrTags;
+        return userElements;
     }
 }
