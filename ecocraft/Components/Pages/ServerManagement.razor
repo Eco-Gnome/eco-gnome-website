@@ -537,11 +537,6 @@
 			StateHasChanged();
 			var (errorCount, recipeErrorNames) = await ImportDataService.ImportServerData(jsonContent, ContextService.CurrentServer!);
 
-			await ServerDataService.RetrieveServerData(ContextService.CurrentServer, true);
-			await UserServerDataService.RetrieveUserData(null);
-
-			_showUploadServerDataLoader = false;
-
 			if (errorCount == 0)
 			{
 				Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadOk"), Severity.Success);
@@ -560,10 +555,7 @@
 						@LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadPartiallyNokEnd")
 					</div>,
 					Severity.Warning,
-					config =>
-					{
-						config.RequireInteraction = true;
-					});
+					config => { config.RequireInteraction = true; });
 
 			}
 
@@ -571,17 +563,18 @@
 		}
 		catch (ImportException ex)
 		{
-			_showUploadServerDataLoader = false;
 			Console.WriteLine(ex);
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.UploadNok") + ": " + ex.Message, Severity.Error);
 		}
 		catch (Exception ex)
 		{
-			_showUploadServerDataLoader = false;
 			Console.WriteLine(ex);
 			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
 		}
 
+		await ServerDataService.RetrieveServerData(ContextService.CurrentServer, true);
+		await UserServerDataService.RetrieveUserData(null);
+		_showUploadServerDataLoader = false;
 		StateHasChanged();
 	}
 

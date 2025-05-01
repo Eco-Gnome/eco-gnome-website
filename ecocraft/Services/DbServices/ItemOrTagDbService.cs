@@ -42,6 +42,14 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 
 	public void Update(ItemOrTag itemOrTag)
 	{
+		var entry = context.ItemOrTags.Entry(itemOrTag);
+
+		if (entry.State == EntityState.Added)
+		{
+			Console.WriteLine($"Warning ! {itemOrTag.Name} is marked as updated but was added.");
+			return;
+		}
+
 		context.ItemOrTags.Update(itemOrTag);
 	}
 
