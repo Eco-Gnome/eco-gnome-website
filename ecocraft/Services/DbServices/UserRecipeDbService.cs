@@ -18,6 +18,18 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
             .ToListAsync();
     }
 
+    public Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext)
+    {
+        return context.UserRecipes
+            .Where(ur => ur.DataContextId == dataContext.Id)
+            .Include(ur => ur.Recipe)
+            .ThenInclude(r => r.Elements)
+            .ThenInclude(e => e.ItemOrTag)
+            .Include(ur => ur.Recipe)
+            .ThenInclude(r => r.Skill)
+            .ToListAsync();
+    }
+
     public Task<UserRecipe?> GetByIdAsync(Guid id)
     {
         return context.UserRecipes

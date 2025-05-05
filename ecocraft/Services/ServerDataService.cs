@@ -86,6 +86,11 @@ public class ServerDataService(
     public void Dissociate(Server server)
     {
         server.EcoServerId = null;
+
+        foreach (var userServer in server.UserServers)
+        {
+            userServer.EcoUserId = null;
+        }
     }
 
     public Skill ImportSkill(Server server, string name, LocalizedField localizedName, string? profession, int maxLevel, decimal[] laborReducePercent)
