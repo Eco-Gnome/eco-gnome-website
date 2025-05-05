@@ -24,7 +24,7 @@
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
 
                             @{
-                                var pluginModule = Recipe.CraftingTable.CurrentUserCraftingTable!.PluginModule;
+                                var pluginModule = Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.PluginModule;
 
                                 @if (pluginModule is not null)
                                 {
@@ -33,7 +33,7 @@
                                             <EcoIcon Item="@pluginModule" Size="32" Class="mt-1"/>
                                         </MudTooltip>
 
-                                        @foreach (var skilledPluginModule in Recipe.CraftingTable.CurrentUserCraftingTable!.SkilledPluginModules)
+                                        @foreach (var skilledPluginModule in Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.SkilledPluginModules)
                                         {
                                             <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
                                                 <EcoIcon Item="@skilledPluginModule" Size="24" Class="mt-1"/>
@@ -55,7 +55,7 @@
                                 <EcoIcon Item="@Recipe.Skill" />
                                 <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
-                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.CurrentUserSkill!.Level) -> @(Math.Round(100 - Recipe.Skill.GetLevelLaborReducePercent(Recipe.Skill.CurrentUserSkill.Level) * 100)) %)</MudText>
+                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.GetCurrentUserSkill(DataContext)!.Level) -> @(Math.Round(100 - Recipe.Skill.GetLevelLaborReducePercent(Recipe.Skill.GetCurrentUserSkill(DataContext).Level) * 100)) %)</MudText>
                             </MudStack>
                         }
                         else
@@ -88,15 +88,15 @@
                             <!-- quantity -->
                             <MudTd Class="px-1 pl-2">
                                 <MudStack Row Spacing="1">
-                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorBaseValue(DataContext), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                    @if (context.Element.Quantity.GetMultiplier() != 1)
+                                    @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
                                     {
-                                        <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(LocalizationService)">
+                                        <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                             <MudStack Row Spacing="1">
                                                 <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
                                                 <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorDynamicValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                                    @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
                                                 </MudText>
                                             </MudStack>
                                         </MudTooltip>
@@ -113,9 +113,9 @@
                             <!-- unit price -->
                             <MudTd Class="px-1">
                                 @{
-                                    var canContributePrice = !context.Element.ItemOrTag.IsTag && PriceCalculatorService.GetCategorizedItemOrTags().ToBuy.Contains(context.Element.ItemOrTag) && !context.IsReintegrated;
+                                    var canContributePrice = !context.Element.ItemOrTag.IsTag && PriceCalculatorService.GetCategorizedItemOrTags(DataContext).ToBuy.Contains(context.Element.ItemOrTag) && !context.IsReintegrated;
 
-                                    <MudTooltip Disabled="@(context.Element.ItemOrTag.CurrentUserPrice!.Price is not null && canContributePrice)"
+                                    <MudTooltip Disabled="@(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.Price is not null && canContributePrice)"
                                                 Text="@(LocalizationService.GetTranslation(canContributePrice
                                                         ? "PriceCalculator.PriceTooltip.isItemEmptyPrice"
                                                         : "PriceCalculator.PriceTooltip.isAutoCalculatedPrice") + (context.IsMarginPrice ? " " + LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.IsMarginPrice") : ""))">
@@ -132,10 +132,10 @@
                                                              Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                              Min="context.Element.ItemOrTag.MinPrice"
                                                              Max="context.Element.ItemOrTag.MaxPrice"
-                                                             Adornment="@(context.Element.ItemOrTag.CurrentUserPrice!.Price is not null && canContributePrice ? Adornment.None : Adornment.End)"
+                                                             Adornment="@(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.Price is not null && canContributePrice ? Adornment.None : Adornment.End)"
                                                              AdornmentIcon="@(!canContributePrice ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
                                                              AdornmentColor="@(!canContributePrice ? Color.Default : Color.Warning)"
-                                                             ValueChanged="@(value => UpdatePrice(context.Element.ItemOrTag.CurrentUserPrice, value))"/>
+                                                             ValueChanged="@(value => UpdatePrice(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!, value))"/>
                                             <MudText Color="Color.Primary">$/u</MudText>
                                         </MudStack>
                                     </MudTooltip>
@@ -146,7 +146,7 @@
                                 <MudStack Row Justify="Justify.FlexEnd">
                                     <MudText Typo="Typo.body2" Color="Color.Primary">
                                         @(context.Price is not null
-                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
+                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
                                             : "")
                                     </MudText>
                                 </MudStack>
@@ -172,12 +172,12 @@
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
                                     <MudStack Row Spacing="1">
-                                        @if (Recipe.CraftMinutes.GetMultiplier() != 1m)
+                                        @if (Recipe.CraftMinutes.GetMultiplier(DataContext) != 1m)
                                         {
-                                            <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
+                                            <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(DataContext, LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
                                                 <MudStack Row Spacing="1">
                                                     <MudText Color="Color.Secondary">
-                                                        @(GetFormatedCraftTime(Recipe.CraftMinutes.GetDynamicValue()))
+                                                        @(GetFormatedCraftTime(Recipe.CraftMinutes.GetDynamicValue(DataContext)))
                                                     </MudText>
                                                 </MudStack>
                                             </MudTooltip>
@@ -195,7 +195,7 @@
                                 <MudTd Class="px-1">
                                     <MudStack Row Spacing="1">
                                         <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
-                                            @Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee
+                                            @Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.CraftMinuteFee
                                         </MudText>
                                         <MudText Color="Color.Primary">
                                             $/min
@@ -214,11 +214,11 @@
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
                                     <MudStack Row Spacing="1">
-                                        @if ((int)Recipe.Labor.GetMultiplier() != 1)
+                                        @if ((int)Recipe.Labor.GetMultiplier(DataContext) != 1)
                                         {
-                                            <MudTooltip Text="@Recipe.Labor.GetMultiplierTooltip(LocalizationService)">
+                                            <MudTooltip Text="@Recipe.Labor.GetMultiplierTooltip(DataContext, LocalizationService)">
                                                 <MudText Color="Color.Secondary">
-                                                    @(Math.Round(Recipe.Labor.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##"))
+                                                    @(Math.Round(Recipe.Labor.GetDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero).ToString("0.##"))
                                                 </MudText>
                                             </MudTooltip>
                                         }
@@ -291,13 +291,13 @@
                             <MudStack Row Spacing="1">
                                 @(Math.Abs(Math.Round(context.Element.Quantity.GetBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                @if (context.Element.Quantity.GetMultiplier() != 1)
+                                @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
                                 {
-                                    <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(LocalizationService)">
+                                    <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                         <MudStack Row Spacing="1">
                                             <MudIcon Icon="@Icons.Material.Filled.ArrowRight" Size="Size.Small" Color="Color.Secondary"/>
                                             <MudText Color="Color.Secondary" Typo="Typo.body2">
-                                                @(Math.Abs(Math.Round(context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
+                                                @(Math.Abs(Math.Round(context.Element.Quantity.GetDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
                                             </MudText>
                                         </MudStack>
                                     </MudTooltip>
@@ -341,7 +341,7 @@
                             <MudStack Row Justify="Justify.FlexEnd">
                                 <MudText Typo="Typo.body2" Color="Color.Primary">
                                     @(context.Price is not null
-                                        ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
+                                        ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
                                         : "")
                                 </MudText>
                             </MudStack>
@@ -391,14 +391,14 @@
                 </MudItem>
             </MudGrid>
 
-            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity.GetBaseValue()) != e.Quantity.GetBaseValue() || Math.Truncate(e.Quantity.GetDynamicValue()) != e.Quantity.GetDynamicValue()))
+            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity.GetBaseValue()) != e.Quantity.GetBaseValue() || Math.Truncate(e.Quantity.GetDynamicValue(DataContext)) != e.Quantity.GetDynamicValue(DataContext)))
             {
                 <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
                     <MudText>Crafted by quantity:</MudText>
                     <MudTooltip Text="If you create only 1 unit of a recipe, the game still consumes a whole number of ingredients. Choose the quantity of products you will usually craft to obtain a more precise output price.">
                         <MudToggleGroup T="int"
-                                        Value="@Recipe.CurrentUserRecipe!.RoundFactor"
-                                        ValueChanged="@(v => RoundFactorChange(v, Recipe.CurrentUserRecipe))">
+                                        Value="@Recipe.GetCurrentUserRecipe(DataContext)!.RoundFactor"
+                                        ValueChanged="@(v => RoundFactorChange(v, Recipe.GetCurrentUserRecipe(DataContext)))">
                             <MudToggleItem Value="0"><MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Infinity"/></MudToggleItem>
                             <MudToggleItem Value="100">100</MudToggleItem>
                             <MudToggleItem Value="10">10</MudToggleItem>
@@ -415,19 +415,22 @@
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
+    public required DataContext DataContext { get; set; }
+
+    [Parameter]
     public required Recipe Recipe { get; set; }
 
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
 
-        if (userElement.Element.ItemOrTag.CurrentUserPrice!.PrimaryUserElement == userElement)
+        if (userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.PrimaryUserElement == userElement)
         {
-            userElement.Element.ItemOrTag.CurrentUserPrice.PrimaryUserElement = null;
+            userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.PrimaryUserElement = null;
         }
 
         await FirstOnly();
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -435,7 +438,7 @@
     {
         userPrice.Price = value;
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -443,20 +446,20 @@
     {
         var ingredientCostSum = userElements.Sum(ue => ue.Price
                                                        * (withReduction
-                                                           ? ue.Element.Quantity.GetRoundFactorDynamicValue()
-                                                           : ue.Element.Quantity.GetRoundFactorBaseValue())
+                                                           ? ue.Element.Quantity.GetRoundFactorDynamicValue(DataContext)
+                                                           : ue.Element.Quantity.GetRoundFactorBaseValue(DataContext))
                                                        * (ue.IsReintegrated && reverseDeduction ? -1 : 1));
         return ingredientCostSum ?? 0;
     }
 
     private decimal GetLaborPrice()
     {
-        return Recipe.Labor.GetDynamicValue() * UserServerDataService.UserSetting!.CalorieCost / 1000;
+        return Recipe.Labor.GetDynamicValue(DataContext) * UserServerDataService.UserSetting!.CalorieCost / 1000;
     }
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes.GetDynamicValue() * Recipe.CraftingTable.CurrentUserCraftingTable!.CraftMinuteFee;
+        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.CraftMinuteFee;
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
@@ -472,24 +475,24 @@
     private async Task RoundFactorChange(int value, UserRecipe userRecipe)
     {
         userRecipe.RoundFactor = value;
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
     private List<UserElement> GetIngredientUserElements()
     {
-        return Recipe.Elements.Where(e => e.IsIngredient() || (e.IsProduct() && e.CurrentUserElement!.IsReintegrated))
+        return Recipe.Elements.Where(e => e.IsIngredient() || (e.IsProduct() && e.GetCurrentUserElement(DataContext)!.IsReintegrated))
                               .OrderBy(e => !e.IsIngredient())
                               .ThenBy(e => e.Index)
-                              .Select(e => e.CurrentUserElement!)
+                              .Select(e => e.GetCurrentUserElement(DataContext)!)
                               .ToList();
     }
 
     private List<UserElement> GetProductUserElements()
     {
-        return Recipe.Elements.Where(e => e.IsProduct() && !e.CurrentUserElement!.IsReintegrated)
+        return Recipe.Elements.Where(e => e.IsProduct() && !e.GetCurrentUserElement(DataContext)!.IsReintegrated)
                               .OrderBy(e => e.Index)
-                              .Select(e => e.CurrentUserElement!)
+                              .Select(e => e.GetCurrentUserElement(DataContext)!)
                               .ToList();
     }
 
@@ -512,7 +515,7 @@
             others.First().Share += remainingF;
         }
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -525,7 +528,7 @@
             userElement.Share = 1m / userElements.Count;
         }
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -539,7 +542,7 @@
             userElement.Share = userElement.Element.Quantity.BaseValue / totalQuantity;
         }
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -552,7 +555,7 @@
             userElement.Share = userElement.Element.Index == 0 ? 1 : 0;
         }
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
@@ -565,7 +568,7 @@
             userElement.Share = userElement.Element.Index == 0 ? 0.8m : 0.2m / (userElements.Count - 1);
         }
 
-        await PriceCalculatorService.Calculate();
+        await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 }

@@ -134,7 +134,7 @@
 
                                                         <MudTooltip Text="@LocalizationService.GetTranslation(talent)" RootClass="d-flex">
                                                             <MudLink OnClick="() => ToggleTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
-                                                                <EcoIcon Item="talent" Size="32" Class="@($"{(talent.CurrentUserTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                                <EcoIcon Item="talent" Size="32" Class="@($"{(talent.GetCurrentUserTalent(_selectedDataContext) is null ? "no-talent" : "has-talent")}")"/>
                                                             </MudLink>
                                                         </MudTooltip>
                                                     }
@@ -390,7 +390,7 @@
 
                     <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                            <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToBuy)"
+                            <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext).ToBuy)"
                                       Filter="new Func<ItemOrTag, bool>(FilterTagToBuy)"
                                       Dense="true"
                                       Hover="true"
@@ -442,12 +442,12 @@
                                                 }
                                             </MudStack>
                                         </MudLink>
-                                        @if (!_showDetailedTags && context.CurrentUserPrice!.PrimaryUserPrice is not null)
+                                        @if (!_showDetailedTags && context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserPrice is not null)
                                         {
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
                                                 <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                                 <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
-                                                    @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserPrice.ItemOrTag)
+                                                    @LocalizationService.GetTranslation(context.GetCurrentUserPrice(_selectedDataContext).PrimaryUserPrice.ItemOrTag)
                                                 </MudText>
                                             </MudStack>
                                         }
@@ -455,10 +455,10 @@
                                     <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                             @{
-                                                var isTagEmptyPrice = context.IsTag && context.CurrentUserPrice!.Price is null;
-                                                var isItemEmptyPrice = !context.IsTag && context.CurrentUserPrice!.Price is null;
-                                                var isMinPrice = context.CurrentUserPrice!.Price == context.MinPrice && context.CurrentUserPrice!.Price is not null;
-                                                var isMaxPrice = context.CurrentUserPrice.Price == context.MaxPrice && !context.IsTag && context.CurrentUserPrice!.Price is not null;
+                                                var isTagEmptyPrice = context.IsTag && context.GetCurrentUserPrice(_selectedDataContext)!.Price is null;
+                                                var isItemEmptyPrice = !context.IsTag && context.GetCurrentUserPrice(_selectedDataContext)!.Price is null;
+                                                var isMinPrice = context.GetCurrentUserPrice(_selectedDataContext)!.Price == context.MinPrice && context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null;
+                                                var isMaxPrice = context.GetCurrentUserPrice(_selectedDataContext).Price == context.MaxPrice && !context.IsTag && context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null;
 
                                                 <MudTooltip Disabled="@(!(isTagEmptyPrice || isItemEmptyPrice || isMinPrice || isMaxPrice))"
                                                             Text="@(isTagEmptyPrice
@@ -474,23 +474,23 @@
                                                                      Style="width: 111px;"
                                                                      Disabled="@(context.IsTag)"
                                                                      HideSpinButtons="@(context.IsTag)"
-                                                                     Value="context.CurrentUserPrice.Price"
+                                                                     Value="context.GetCurrentUserPrice(_selectedDataContext).Price"
                                                                      Immediate="true"
                                                                      Format="0.##"
                                                                      Variant="Variant.Outlined"
                                                                      Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                                      Min="context.MinPrice"
                                                                      Max="context.MaxPrice"
-                                                                     Adornment="@(context.CurrentUserPrice.Price is null ? Adornment.End : Adornment.None)"
+                                                                     Adornment="@(context.GetCurrentUserPrice(_selectedDataContext).Price is null ? Adornment.End : Adornment.None)"
                                                                      AdornmentIcon="@(context.IsTag ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
                                                                      AdornmentColor="@(context.IsTag ? Color.Default : Color.Warning)"
-                                                                     ValueChanged="@(value => UpdatePriceCalculation(context.CurrentUserPrice, value))"/>
+                                                                     ValueChanged="@(value => UpdatePriceCalculation(context.GetCurrentUserPrice(_selectedDataContext), value))"/>
                                                 </MudTooltip>
-                                                @if (!context.IsTag && context.CurrentUserPrice!.Price is not null)
+                                                @if (!context.IsTag && context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    tabindex="-1"
-                                                                   OnClick="() => CopyToClipboard(context.CurrentUserPrice!.Price)"
+                                                                   OnClick="() => CopyToClipboard(context.GetCurrentUserPrice(_selectedDataContext)!.Price)"
                                                                    Size="Size.Small"/>
                                                 }
                                             }
@@ -498,13 +498,13 @@
                                     </MudTd>
 
                                     <MudTd Style="width: 0; padding: 0;"
-                                           Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(context.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")}")">
-                                        @if (context.CurrentUserPrice.OverrideIsBought)
+                                           Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(context.GetCurrentUserPrice(_selectedDataContext)!.OverrideIsBought ? "border-l-1" : "")}")">
+                                        @if (context.GetCurrentUserPrice(_selectedDataContext).OverrideIsBought)
                                         {
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                                 <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                tabindex="-1"
-                                                               OnClick="() => OverridePrice(false, context.CurrentUserPrice)"
+                                                               OnClick="() => OverridePrice(false, context.GetCurrentUserPrice(_selectedDataContext))"
                                                                Size="Size.Small"/>
                                             </MudTooltip>
                                         }
@@ -530,17 +530,17 @@
                                                 <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     <MudStack Row Style="position: relative;" Spacing="0">
                                                         @{
-                                                            var isAutoCalculatedPrice = PriceCalculatorService.GetCategorizedItemOrTags().ToSell.Contains(item) && !item.CurrentUserPrice!.OverrideIsBought;
-                                                            var isEmptyPrice = !isAutoCalculatedPrice && item.CurrentUserPrice!.Price is null;
-                                                            var isMinPrice = item.CurrentUserPrice!.Price == item.MinPrice && item.CurrentUserPrice!.Price is not null;
-                                                            var isMaxPrice = item.CurrentUserPrice!.Price == item.MaxPrice && item.CurrentUserPrice!.Price is not null;
+                                                            var isAutoCalculatedPrice = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext).ToSell.Contains(item) && !item.GetCurrentUserPrice(_selectedDataContext)!.OverrideIsBought;
+                                                            var isEmptyPrice = !isAutoCalculatedPrice && item.GetCurrentUserPrice(_selectedDataContext)!.Price is null;
+                                                            var isMinPrice = item.GetCurrentUserPrice(_selectedDataContext)!.Price == item.MinPrice && item.GetCurrentUserPrice(_selectedDataContext)!.Price is not null;
+                                                            var isMaxPrice = item.GetCurrentUserPrice(_selectedDataContext)!.Price == item.MaxPrice && item.GetCurrentUserPrice(_selectedDataContext)!.Price is not null;
 
-                                                            <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteItem") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteItem"))">
+                                                            <MudTooltip Text="@(context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserPrice == item.GetCurrentUserPrice(_selectedDataContext) ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteItem") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteItem"))">
                                                                 <MudIconButton tabindex="-1"
                                                                                Color="Color.Primary"
-                                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserPrice == item.CurrentUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                               Icon="@(context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserPrice == item.GetCurrentUserPrice(_selectedDataContext) ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                                                Size="Size.Small"
-                                                                               OnClick="@(() => SetPrimaryUserPrice(context.CurrentUserPrice, item.CurrentUserPrice!))"/>
+                                                                               OnClick="@(() => SetPrimaryUserPrice(context.GetCurrentUserPrice(_selectedDataContext), item.GetCurrentUserPrice(_selectedDataContext)!))"/>
                                                             </MudTooltip>
                                                             <MudTooltip Disabled="@(!(isAutoCalculatedPrice || isEmptyPrice || isMinPrice || isMaxPrice))"
                                                                         Text="@(isAutoCalculatedPrice
@@ -556,35 +556,35 @@
                                                                                  HideSpinButtons="@isAutoCalculatedPrice"
                                                                                  Format="0.##"
                                                                                  Disabled="@isAutoCalculatedPrice"
-                                                                                 Value="item.CurrentUserPrice.Price"
+                                                                                 Value="item.GetCurrentUserPrice(_selectedDataContext).Price"
                                                                                  Immediate="true"
                                                                                  Min="item.MinPrice"
                                                                                  Max="item.MaxPrice"
                                                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-                                                                                 ValueChanged="@(value => UpdatePriceCalculation(item.CurrentUserPrice, value))"
-                                                                                 Adornment="@(isAutoCalculatedPrice || item.CurrentUserPrice!.Price is null ? Adornment.End : Adornment.None)"
+                                                                                 ValueChanged="@(value => UpdatePriceCalculation(item.GetCurrentUserPrice(_selectedDataContext), value))"
+                                                                                 Adornment="@(isAutoCalculatedPrice || item.GetCurrentUserPrice(_selectedDataContext)!.Price is null ? Adornment.End : Adornment.None)"
                                                                                  AdornmentIcon="@(isAutoCalculatedPrice ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
                                                                                  AdornmentColor="@(isAutoCalculatedPrice ? Color.Default : Color.Warning)"
                                                                                  Variant="Variant.Outlined"/>
                                                             </MudTooltip>
-                                                            @if (!isAutoCalculatedPrice && item.CurrentUserPrice.Price is not null)
+                                                            @if (!isAutoCalculatedPrice && item.GetCurrentUserPrice(_selectedDataContext).Price is not null)
                                                             {
                                                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                                tabindex="-1"
-                                                                               OnClick="() => CopyToClipboard(item.CurrentUserPrice!.Price)"
+                                                                               OnClick="() => CopyToClipboard(item.GetCurrentUserPrice(_selectedDataContext)!.Price)"
                                                                                Size="Size.Small"/>
                                                             }
                                                         }
                                                     </MudStack>
                                                 </MudTd>
 
-                                                <MudTd Class="@($"pa-0 {(item.CurrentUserPrice!.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
-                                                    @if (item.CurrentUserPrice.OverrideIsBought)
+                                                <MudTd Class="@($"pa-0 {(item.GetCurrentUserPrice(_selectedDataContext)!.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                    @if (item.GetCurrentUserPrice(_selectedDataContext).OverrideIsBought)
                                                     {
                                                         <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                                             <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                            tabindex="-1"
-                                                                           OnClick="() => OverridePrice(false, item.CurrentUserPrice)"
+                                                                           OnClick="() => OverridePrice(false, item.GetCurrentUserPrice(_selectedDataContext))"
                                                                            Size="Size.Small"/>
                                                         </MudTooltip>
                                                     }
@@ -598,7 +598,7 @@
                     </MudItem>
                     <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                            <MudTable Items="PriceCalculatorService.GetCategorizedItemOrTagsForDisplay().ToSell"
+                            <MudTable Items="@PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext).ToSell"
                                       Filter="new Func<ItemOrTag, bool>(FilterItemToSell)"
                                       Class="mud-table-container-no-overflow-y recipe-table"
                                       Dense="true"
@@ -679,7 +679,7 @@
                                                 <MudIconButton Size="Size.Small"
                                                                tabindex="-1"
                                                                Icon="@MDIIcons.Filled.ChevronDoubleLeft"
-                                                               OnClick="@(() => OverridePrice(true, context.CurrentUserPrice!))"/>
+                                                               OnClick="@(() => OverridePrice(true, context.GetCurrentUserPrice(_selectedDataContext)!))"/>
                                             </MudTooltip>
                                         </MudTd>
 
@@ -718,13 +718,13 @@
                                                     </MudTooltip>
                                                 }
                                             </MudStack>
-                                            @if (!_showDetailedRecipes && context.CurrentUserPrice!.PrimaryUserElement is not null)
+                                            @if (!_showDetailedRecipes && context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserElement is not null)
                                             {
                                                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="pl-6">
                                                     <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
-                                                    <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe))">
+                                                    <MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(context.GetCurrentUserPrice(_selectedDataContext).PrimaryUserElement.Element.Recipe))">
                                                         <MudText Class="pt-1 " Typo="Typo.body2">
-                                                            @LocalizationService.GetTranslation(context.CurrentUserPrice.PrimaryUserElement.Element.Recipe) @LocalizationService.GetTranslation("Recipe")
+                                                            @LocalizationService.GetTranslation(context.GetCurrentUserPrice(_selectedDataContext).PrimaryUserElement.Element.Recipe) @LocalizationService.GetTranslation("Recipe")
                                                         </MudText>
                                                     </MudLink>
                                                 </MudStack>
@@ -733,7 +733,7 @@
 
                                         <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
-                                                <MudTooltip Disabled="@(context.CurrentUserPrice!.Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
+                                                <MudTooltip Disabled="@(context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
                                                     <MudNumericField T="decimal?"
                                                                      FullWidth="false"
                                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
@@ -741,9 +741,9 @@
                                                                      HideSpinButtons="true"
                                                                      Format="0.##"
                                                                      Disabled="true"
-                                                                     Value="@context.CurrentUserPrice!.Price"
+                                                                     Value="@context.GetCurrentUserPrice(_selectedDataContext)!.Price"
                                                                      Culture="CultureInfo.CurrentUICulture"
-                                                                     Adornment="@(context.CurrentUserPrice!.Price is not null ? Adornment.None : Adornment.End)"
+                                                                     Adornment="@(context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null ? Adornment.None : Adornment.End)"
                                                                      AdornmentIcon="@MDIIcons.Outline.Information"
                                                                      AdornmentColor="Color.Warning"
                                                                      Variant="Variant.Outlined"/>
@@ -752,8 +752,8 @@
                                                 <div class="margin-select-container">
                                                     <MudSelect T="UserMargin"
                                                                Adornment="Adornment.None"
-                                                               Value="context.CurrentUserPrice!.UserMargin"
-                                                               ValueChanged="@(value => ChangeUserPriceMargin(context.CurrentUserPrice, value))"
+                                                               Value="context.GetCurrentUserPrice(_selectedDataContext)!.UserMargin"
+                                                               ValueChanged="@(value => ChangeUserPriceMargin(context.GetCurrentUserPrice(_selectedDataContext), value))"
                                                                ToStringFunc="@(um => ShowMarginNames ? "None" : ((um?.Margin ?? 0).ToString("0.##") + " %"))"
                                                                Class="margin-select"
                                                                Dense="true"
@@ -770,7 +770,7 @@
                                                     </MudSelect>
                                                 </div>
                                                 @{
-                                                    var hasMarginPriceError = context.CurrentUserPrice!.Price is not null && context.CurrentUserPrice!.MarginPrice is null;
+                                                    var hasMarginPriceError = context.GetCurrentUserPrice(_selectedDataContext)!.Price is not null && context.GetCurrentUserPrice(_selectedDataContext)!.MarginPrice is null;
 
                                                     <MudTooltip Disabled="@(!hasMarginPriceError)"
                                                                 Text="@LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")">
@@ -784,16 +784,16 @@
                                                                          Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
                                                                          AdornmentIcon="@MDIIcons.Outline.Information"
                                                                          AdornmentColor="Color.Warning"
-                                                                         Value="@context.CurrentUserPrice!.MarginPrice"
+                                                                         Value="@context.GetCurrentUserPrice(_selectedDataContext)!.MarginPrice"
                                                                          Variant="Variant.Outlined"/>
                                                     </MudTooltip>
                                                 }
 
-                                                @if (context.CurrentUserPrice.Price is not null)
+                                                @if (context.GetCurrentUserPrice(_selectedDataContext).Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    Size="Size.Small"
-                                                                   OnClick="@(() => CopyToClipboard(context.CurrentUserPrice!.MarginPrice))"/>
+                                                                   OnClick="@(() => CopyToClipboard(context.GetCurrentUserPrice(_selectedDataContext)!.MarginPrice))"/>
                                                 }
                                             </MudStack>
                                         </MudTd>
@@ -838,13 +838,13 @@
                                                     </MudTd>
                                                     <MudTd Class="@($"{borderClass} pt-0 pb-1")">
                                                         <MudStack Row>
-                                                            <MudTooltip Text="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteRecipe") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteRecipe"))">
+                                                            <MudTooltip Text="@(context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserElement == userElement ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteRecipe") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteRecipe"))">
                                                                 <MudIconButton tabindex="-1"
                                                                                Style="margin-right: -12px"
                                                                                Color="Color.Primary"
-                                                                               Icon="@(context.CurrentUserPrice!.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                               Icon="@(context.GetCurrentUserPrice(_selectedDataContext)!.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                                                Size="Size.Small"
-                                                                               OnClick="@(() => SetPrimaryElement(context.CurrentUserPrice, userElement))"/>
+                                                                               OnClick="@(() => SetPrimaryElement(context.GetCurrentUserPrice(_selectedDataContext), userElement))"/>
                                                             </MudTooltip>
                                                             <MudNumericField T="decimal?"
                                                                              Style="width: 75px"
@@ -862,7 +862,7 @@
                                                                        aria-label="delete"
                                                                        tabindex="-1"
                                                                        Size="Size.Small"
-                                                                       OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.CurrentUserRecipe!))"/>
+                                                                       OnClick="@(() => RemoveUserRecipe(userElement.Element.Recipe.GetCurrentUserRecipe(_selectedDataContext)!))"/>
                                                     </MudTd>
                                                 </MudTr>
                                             }
@@ -975,24 +975,26 @@
     private ItemOrTag? _selectedItemToSell;
     private string _searchItemToSell = "";
 
-    private readonly TableGroupDefinition<ItemOrTag> _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
-    {
-        GroupName = "Temporary",
-        Indentation = true,
-        Expandable = true,
-        IsInitiallyExpanded = true,
-        Selector = itemOrTag =>
-        {
-            var relatedElements = itemOrTag.Elements.Where(element => element.CurrentUserElement is not null && element.IsProduct() && !element.CurrentUserElement!.IsReintegrated).ToList();
-            var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
-
-            return bestRelatedElement?.Recipe.Skill;
-        }
-    };
+    private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
 
     protected override void OnInitialized()
     {
         ContextService.OnContextChanged += OnContextChanged;
+
+        _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
+        {
+            GroupName = "Temporary",
+            Indentation = true,
+            Expandable = true,
+            IsInitiallyExpanded = true,
+            Selector = itemOrTag =>
+            {
+                var relatedElements = itemOrTag.Elements.Where(element => element.GetCurrentUserElement(_selectedDataContext) is not null && element.IsProduct() && !element.GetCurrentUserElement(_selectedDataContext)!.IsReintegrated).ToList();
+                var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
+
+                return bestRelatedElement?.Recipe.Skill;
+            }
+        };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -1074,13 +1076,13 @@
 
     private async Task ToggleTalent(List<Talent> talents, bool forceRemove = false)
     {
-        var isRemove = talents.All(t => t.CurrentUserTalent is not null);
+        var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedDataContext) is not null);
 
         foreach (var talent in talents)
         {
             if (isRemove || forceRemove)
             {
-                UserServerDataService.RemoveUserTalent(talent.CurrentUserTalent!);
+                UserServerDataService.RemoveUserTalent(talent.GetCurrentUserTalent(_selectedDataContext)!);
             }
             else
             {
@@ -1099,9 +1101,7 @@
         }
 
         await EcoCraftDbContext.SaveChangesAsync();
-        await PriceCalculatorService.Calculate();
-
-        StateHasChanged();
+        await Calculate();
     }
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
@@ -1193,18 +1193,18 @@
         }
 
         UserServerDataService.AddUserSkill(skill, _selectedDataContext!, UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes);
-
         _emptySkill = null;
 
-        await PriceCalculatorService.Calculate();
-
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task RemoveUserSkill(UserSkill skill)
     {
         UserServerDataService.RemoveUserSkill(skill);
-        await PriceCalculatorService.Calculate();
+
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task AddUserCraftingTable(CraftingTable? craftingTable)
@@ -1215,18 +1215,17 @@
         }
 
         UserServerDataService.AddUserCraftingTable(craftingTable, _selectedDataContext!, true);
-
         _emptyCraftingTable = null;
 
-        await PriceCalculatorService.Calculate();
-
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
     {
         UserServerDataService.RemoveUserCraftingTable(craftingTable);
-        await PriceCalculatorService.Calculate();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task AddUserRecipe(Recipe? recipe)
@@ -1237,26 +1236,24 @@
         }
 
         UserServerDataService.AddUserRecipe(recipe, _selectedDataContext!);
-
         _emptyRecipe = null;
 
-        await PriceCalculatorService.Calculate();
-
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task RemoveUserRecipe(UserRecipe recipe)
     {
         UserServerDataService.RemoveUserRecipe(recipe);
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
     {
         userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
-        await PriceCalculatorService.Calculate();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task RemoveUserRecipes(List<UserRecipe> recipes)
@@ -1265,9 +1262,8 @@
         {
             UserServerDataService.RemoveUserRecipe(recipe);
         }
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
@@ -1283,14 +1279,13 @@
         }
 
         if (!isIncrease) {
-            foreach (var talent in userSkill.Skill!.Talents.Where(t => t.CurrentUserTalent is not null && newLevel < t.Level))
+            foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext) is not null && newLevel < t.Level))
             {
-                UserServerDataService.RemoveUserTalent(talent.CurrentUserTalent!);
+                UserServerDataService.RemoveUserTalent(talent.GetCurrentUserTalent(_selectedDataContext)!);
             }
         }
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task OnOptionDisplayChanged()
@@ -1304,39 +1299,35 @@
     {
         UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
         UserServerDataService.RecalculateUserRecipes(_selectedDataContext!);
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task OnOptionApplyMarginBetweenSkillsChanged()
     {
         UserServerDataService.UserSetting!.ApplyMarginBetweenSkills = !UserServerDataService.UserSetting.ApplyMarginBetweenSkills;
-
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task OnOptionMarginTypeChanged(MarginType marginType)
     {
         UserServerDataService.UserSetting!.MarginType = marginType;
         await EcoCraftDbContext.SaveChangesAsync();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task UpdateCalorieCost(decimal calorieCost)
     {
         UserServerDataService.UserSetting!.CalorieCost = calorieCost;
         UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
     {
         userMargin.Margin = margin;
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
     }
 
     private async Task UpdateMarginName(UserMargin userMargin, string name)
@@ -1360,29 +1351,28 @@
         }
         UserServerDataService.RemoveUserMargin(userMargin);
         await EcoCraftDbContext.SaveChangesAsync();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin userMargin)
     {
         userPrice.UserMargin = userMargin;
         UserPriceDbService.Update(userPrice);
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)
     {
         userPrice.Price = value;
         UserPriceDbService.Update(userPrice);
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task ShowRecipeDialog(Recipe recipe)
     {
         var parameters = new DialogParameters
         {
+            ["DataContext"] = _selectedDataContext,
             ["Recipe"] = recipe,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
@@ -1435,21 +1425,19 @@
     private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)
     {
         userPrice.PrimaryUserPrice = userPrice.PrimaryUserPrice == target ? null : target;
-
-        await PriceCalculatorService.Calculate();
+        await Calculate();
     }
 
     private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, decimal value)
     {
         userCraftingTable.CraftMinuteFee = value;
-        await PriceCalculatorService.Calculate();
+        await Calculate();
     }
 
     private async Task OverridePrice(bool value, UserPrice userPrice)
     {
         userPrice.OverrideIsBought = value;
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task CopyToClipboard(decimal? price)
@@ -1476,8 +1464,7 @@
 
         userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
 
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
@@ -1497,8 +1484,7 @@
         }
 
         userCraftingTable.SkilledPluginModules.Clear();
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
@@ -1512,8 +1498,7 @@
             userCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
 
-        await PriceCalculatorService.Calculate();
-        StateHasChanged();
+        await Calculate();
     }
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)
@@ -1543,5 +1528,11 @@
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<ServerPricesDialog>("", options);
+    }
+
+    private async Task Calculate()
+    {
+        await PriceCalculatorService.Calculate(_selectedDataContext!);
+        StateHasChanged();
     }
 }

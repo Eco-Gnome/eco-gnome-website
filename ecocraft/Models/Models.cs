@@ -43,8 +43,10 @@ public class Recipe: IHasLocalizedName
     public List<Element> Elements { get; set; } = [];
     public List<UserRecipe> UserRecipes { get; set; } = [];
 
-    [NotMapped]
-    public UserRecipe? CurrentUserRecipe => UserRecipes.FirstOrDefault();
+    public UserRecipe? GetCurrentUserRecipe(DataContext dataContext)
+    {
+        return UserRecipes.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 
     public override string ToString()
     {
@@ -68,8 +70,10 @@ public class Element
     public Skill? Skill { get; set; }
     public List<UserElement> UserElements { get; set; } = [];
 
-    [NotMapped]
-    public UserElement? CurrentUserElement => UserElements.FirstOrDefault();
+    public UserElement? GetCurrentUserElement(DataContext dataContext)
+    {
+        return UserElements.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 
     public bool IsIngredient()
     {
@@ -86,9 +90,9 @@ public class Element
         return ItemOrTag.Name;
     }
 
-    public decimal GetDynamicQuantity()
+    public decimal GetDynamicQuantity(DataContext dataContext)
     {
-        return Quantity.GetDynamicValue();
+        return Quantity.GetDynamicValue(dataContext);
     }
 }
 
@@ -111,7 +115,7 @@ public class DynamicValue
         return Modifiers.Count > 0;
     }
 
-    public decimal GetMultiplier()
+    public decimal GetMultiplier(DataContext dataContext)
     {
         var multiplier = 1m;
 
@@ -120,13 +124,13 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.GetBestPluginModule(modifier.Skill)?.GetPercent(modifier.Skill) ?? 1m;
+                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill)?.GetPercent(modifier.Skill) ?? 1m;
                     break;
                 case "Talent":
-                    multiplier *= modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
+                    multiplier *= modifier.Talent?.GetCurrentUserTalent(dataContext) is not null ? modifier.Talent.Value : 1m;
                     break;
                 case "Skill":
-                    multiplier *= modifier.Skill?.CurrentUserSkill is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.CurrentUserSkill.Level) : 1m;
+                    multiplier *= modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
                     break;
                 /*case "Layer":
 
@@ -142,9 +146,9 @@ public class DynamicValue
         return BaseValue;
     }
 
-    public decimal GetRoundFactorBaseValue()
+    public decimal GetRoundFactorBaseValue(DataContext dataContext)
     {
-        var roundFactor = (Recipe ?? Element?.Recipe)!.CurrentUserRecipe!.RoundFactor;
+        var roundFactor = (Recipe ?? Element?.Recipe)!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
 
         if (roundFactor == 0) return BaseValue;
 
@@ -153,23 +157,23 @@ public class DynamicValue
             : Math.Ceiling(BaseValue * roundFactor) / roundFactor;
     }
 
-    public decimal GetDynamicValue()
+    public decimal GetDynamicValue(DataContext dataContext)
     {
-        return BaseValue * GetMultiplier();
+        return BaseValue * GetMultiplier(dataContext);
     }
 
-    public decimal GetRoundFactorDynamicValue()
+    public decimal GetRoundFactorDynamicValue(DataContext dataContext)
     {
-        var roundFactor = (Recipe ?? Element?.Recipe)!.CurrentUserRecipe!.RoundFactor;
+        var roundFactor = (Recipe ?? Element?.Recipe)!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
 
-        if (roundFactor == 0) return GetDynamicValue();
+        if (roundFactor == 0) return GetDynamicValue(dataContext);
 
-        return GetDynamicValue() < 0
-            ? Math.Floor(GetDynamicValue() * roundFactor) / roundFactor
-            : Math.Ceiling(GetDynamicValue() * roundFactor) / roundFactor;
+        return GetDynamicValue(dataContext) < 0
+            ? Math.Floor(GetDynamicValue(dataContext) * roundFactor) / roundFactor
+            : Math.Ceiling(GetDynamicValue(dataContext) * roundFactor) / roundFactor;
     }
 
-    public string GetMultiplierTooltip(LocalizationService localizationService, string? baseValue = null)
+    public string GetMultiplierTooltip(DataContext dataContext, LocalizationService localizationService, string? baseValue = null)
     {
         baseValue ??= Math.Abs(Math.Round(GetBaseValue(), 0, MidpointRounding.AwayFromZero)).ToString();
 
@@ -183,7 +187,7 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.CurrentUserCraftingTable?.GetBestPluginModule(modifier.Skill);
+                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill);
                     multiplier *= bestPluginModule?.GetPercent(modifier.Skill) ?? 1m;
 
                     if (multiplier != 1m)
@@ -196,7 +200,7 @@ public class DynamicValue
                     }
                     break;
                 case "Talent":
-                    multiplier = modifier.Talent?.CurrentUserTalent is not null ? modifier.Talent.Value : 1m;
+                    multiplier = modifier.Talent?.GetCurrentUserTalent(dataContext) is not null ? modifier.Talent.Value : 1m;
 
                     if (multiplier != 1m)
                     {
@@ -208,14 +212,14 @@ public class DynamicValue
                     }
                     break;
                 case "Skill":
-                    multiplier = modifier.Skill?.CurrentUserSkill is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.CurrentUserSkill.Level) : 1m;
+                    multiplier = modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
 
                     if (multiplier != 1m)
                     {
                         tooltip.Add(localizationService.GetTranslation(
                             "RecipeDialog.SkillReductionTooltip",
                             localizationService.GetTranslation(modifier.Skill),
-                            modifier.Skill!.CurrentUserSkill!.Level.ToString(),
+                            modifier.Skill!.GetCurrentUserSkill(dataContext)!.Level.ToString(),
                             Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
                         ));
                     }
@@ -268,8 +272,10 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
 
-    [NotMapped]
-    public UserPrice? CurrentUserPrice => UserPrices.FirstOrDefault();
+    public UserPrice? GetCurrentUserPrice(DataContext dataContext)
+    {
+        return UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 
     public override string ToString()
     {
@@ -296,8 +302,10 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
     public List<Modifier> Modifiers { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
 
-    [NotMapped]
-    public UserSkill? CurrentUserSkill => UserSkills.FirstOrDefault();
+    public UserSkill? GetCurrentUserSkill(DataContext dataContext)
+    {
+        return UserSkills.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 
     public override string ToString()
     {
@@ -325,8 +333,10 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     public List<Modifier> Modifiers { get; set; } = [];
     public List<UserTalent> UserTalents { get; set; } = [];
 
-    [NotMapped]
-    public UserTalent? CurrentUserTalent => UserTalents.FirstOrDefault();
+    public UserTalent? GetCurrentUserTalent(DataContext dataContext)
+    {
+        return UserTalents.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 }
 
 public class CraftingTable: IHasLocalizedName, IHasIconName
@@ -342,7 +352,10 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
     public List<Recipe> Recipes { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
 
-    [NotMapped] public UserCraftingTable? CurrentUserCraftingTable => UserCraftingTables.FirstOrDefault();
+    public UserCraftingTable? GetCurrentUserCraftingTable(DataContext dataContext)
+    {
+        return UserCraftingTables.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
 
     public override string ToString()
     {
