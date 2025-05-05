@@ -1163,7 +1163,7 @@
         DataContextDbService.Delete(dataContext);
         await EcoCraftDbContext.SaveChangesAsync();
         await UserServerDataService.RetrieveUserData(null);
-        await RetrieveData(dataContext);
+        await RetrieveData(_selectedDataContext);
     }
 
     private async Task AddDataContext()
