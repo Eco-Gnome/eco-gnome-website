@@ -1098,6 +1098,7 @@
             }
         }
 
+        await EcoCraftDbContext.SaveChangesAsync();
         await PriceCalculatorService.Calculate();
 
         StateHasChanged();

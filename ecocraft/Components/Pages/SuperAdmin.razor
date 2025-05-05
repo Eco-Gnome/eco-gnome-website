@@ -358,6 +358,8 @@
             return true;
         if (server.Id.ToString().Contains(_searchServer, StringComparison.OrdinalIgnoreCase))
             return true;
+        if (server.UserServers.Where(us => us.IsAdmin).Select(us => us.User.Pseudo).Any(p => p.Contains(_searchServer, StringComparison.OrdinalIgnoreCase)))
+            return true;
         return false;
     }
 

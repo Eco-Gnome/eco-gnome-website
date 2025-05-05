@@ -77,4 +77,12 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 	{
 		context.Servers.Remove(server);
 	}
+
+	public async Task DeleteAsync(Server server, User user)
+	{
+		context.Entry(server).State = EntityState.Detached;
+		context.Set<Server>().Local.Remove(server);
+		await context.Entry(user).Collection(u => u.UserServers).LoadAsync();
+		await context.Servers.Where(s => s.Id == server.Id).ExecuteDeleteAsync();
+	}
 }

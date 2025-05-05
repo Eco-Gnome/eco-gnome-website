@@ -14,10 +14,9 @@ public class ContextService(
     UserServerDataService userServerDataService,
     UserDbService userDbService)
 {
-    public event Action? OnContextChanged;
-
     private readonly List<Server> _defaultServers = [];
 
+    public event Action? OnContextChanged;
     public Server? CurrentServer { get; private set; }
     public UserServer? CurrentUserServer { get; private set; }
     public User? CurrentUser { get; private set; }
@@ -212,7 +211,7 @@ public class ContextService(
             return;
         }
 
-        serverDbService.Delete(CurrentServer!);
+        await serverDbService.DeleteAsync(CurrentServer!, CurrentUser!);
         await dbContext.SaveChangesAsync();
 
         var server = CurrentUser!.UserServers.FirstOrDefault()?.Server;
