@@ -1166,15 +1166,15 @@
         var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("DataContext.DeletionConfirmation", dataContext.Name));
         if (!confirmed) return;
 
+        DataContextDbService.Delete(dataContext);
+        await EcoCraftDbContext.SaveChangesAsync();
+
         if (_selectedDataContext == dataContext)
         {
             _selectedDataContext = ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
+            await UserServerDataService.RetrieveUserData(null);
+            await RetrieveData(_selectedDataContext);
         }
-
-        DataContextDbService.Delete(dataContext);
-        await EcoCraftDbContext.SaveChangesAsync();
-        await UserServerDataService.RetrieveUserData(null);
-        await RetrieveData(_selectedDataContext);
     }
 
     private async Task AddDataContext()
