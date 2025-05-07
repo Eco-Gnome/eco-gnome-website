@@ -18,6 +18,15 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 			.ToListAsync();
 	}
 
+	public Task<List<UserElement>> GetByDataContextForEcoApiAsync(DataContext dataContext)
+	{
+		return context.UserElements
+			.Where(up => up.DataContextId == dataContext.Id)
+			.Include(ue => ue.Element)
+			.ThenInclude(e => e.Quantity)
+			.ToListAsync();
+	}
+
 	public Task<UserElement?> GetByIdAsync(Guid id)
 	{
 		return context.UserElements

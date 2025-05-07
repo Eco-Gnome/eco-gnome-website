@@ -10,17 +10,17 @@ public class PriceCalculatorService(
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags(DataContext dataContext)
     {
         // Get all UserPrices where their ItemOrTag are not produced by any existing UserElement
-        var listOfProducts = userServerDataService.UserElements
-            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated && !ue.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.OverrideIsBought)
+        var listOfProducts = dataContext.UserElements
+            .Where(ue => ue.Element.IsProduct() && !ue.IsReintegrated && !(ue.Element.ItemOrTag.GetCurrentUserPrice(dataContext)?.OverrideIsBought ?? false))
             .Select(ue => ue.Element.ItemOrTag)
             .Distinct()
             .ToList();
 
-        var listOfIngredients = userServerDataService.UserElements
+        var listOfIngredients = dataContext.UserElements
             .Where(ue => !listOfProducts.Contains(ue.Element.ItemOrTag))
             .Select(ue => ue.Element.ItemOrTag)
             .Concat(
-                userServerDataService.UserPrices
+                dataContext.UserPrices
                     .Where(up => up.OverrideIsBought)
                     .Select(up => up.ItemOrTag)
             )
