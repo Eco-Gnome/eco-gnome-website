@@ -328,8 +328,8 @@
                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                  Adornment="Adornment.End"
                                                  AdornmentText="% "
-                                                 Min="0"
-                                                 Max="100"
+                                                 Min="@(_isLocked ? 0 : Decimal.MinValue)"
+                                                 Max="@(_isLocked ? 100 : Decimal.MaxValue)"
                                                  Variant="Variant.Outlined"
                                                  Step="@(0.1m)"
                                                  Value="@(context.Share * 100)"
@@ -381,6 +381,13 @@
                                                                OnClick="@(() => Equilibrate())"/>
                                             </MudTooltip>
                                         }
+                                        
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.UnlockTooltip")">
+                                            <MudIconButton Size="Size.Small"
+                                                           Class="ml-3"
+                                                           Icon="@(_isLocked ? MDIIcons.Filled.Lock : MDIIcons.Filled.LockOff)"
+                                                           OnClick="@(() => ToggleLock())"/>
+                                        </MudTooltip>
                                     }
                                 </MudStack>
                             </MudTd>
@@ -420,6 +427,8 @@
     [Parameter]
     public required Recipe Recipe { get; set; }
 
+    private bool _isLocked { get; set; } = true;
+
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
@@ -440,6 +449,11 @@
 
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
+    }
+
+    private void ToggleLock()
+    {
+        _isLocked = !_isLocked;
     }
 
     private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
@@ -498,21 +512,24 @@
 
     private async Task UpdateShare(UserElement ue, decimal value)
     {
-        ue.Share = Math.Clamp(value, 0, 1);
+        ue.Share = _isLocked ? Math.Clamp(value, 0, 1) : value;
 
-        var others = GetProductUserElements().Where(e => e != ue).ToList();
-        var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
-
-        foreach (var other in others)
+        if (_isLocked)
         {
-            other.Share += Math.Round(remaining / others.Count, 4);
-        }
+            var others = GetProductUserElements().Where(e => e != ue).ToList();
+            var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
 
-        var remainingF = 1 - GetProductUserElements().Sum(e => e.Share);
+            foreach (var other in others)
+            {
+                other.Share += Math.Round(remaining / others.Count, 4);
+            }
 
-        if (remainingF != 0)
-        {
-            others.First().Share += remainingF;
+            var remainingF = 1 - GetProductUserElements().Sum(e => e.Share);
+
+            if (remainingF != 0)
+            {
+                others.First().Share += remainingF;
+            }
         }
 
         await PriceCalculatorService.Calculate(DataContext);

@@ -83,7 +83,8 @@
             "EqualityTooltip": "Split equally between products.",
             "EquilibrateTooltip": "Split by quantity between products.",
             "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
-            "HonestTooltip": "Grant 80% to first product and split the rest equally."
+            "HonestTooltip": "Grant 80% to first product and split the rest equally.",
+            "UnlockTooltip": "Disables automatic balancing, allowing manual editing of all values, including going above or below a total of 100%."
         },
         "Static": "static",
         "TotalCost": "Total cost:",
