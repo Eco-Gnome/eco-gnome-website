@@ -695,7 +695,7 @@ public class ImportDataService(
 
     private static RecipeDto RecipeToDto(Recipe recipe)
     {
-        return new RecipeDto
+        var recipes = new RecipeDto
         {
             Name = recipe.Name,
             LocalizedName = LocalizedFieldToDto(recipe.LocalizedName),
@@ -710,6 +710,10 @@ public class ImportDataService(
             RequiredSkill = recipe.Skill?.Name ?? "",
             RequiredSkillLevel = (int)recipe.SkillLevel,
         };
+        
+        recipes.Ingredients.ForEach(i => i.Quantity.BaseValue *= -1);
+
+        return recipes;
     }
 
     private static DynamicValueDto DynamicValueToDto(DynamicValue dynamicValue)
