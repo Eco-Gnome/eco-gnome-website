@@ -31,13 +31,13 @@ public class ContextService(
         await userDbService.UpdateAndSave(CurrentUser!);
     }
 
-    public async Task ChangeServer(Server server)
+    public async Task ChangeServer(Server server, bool isAdmin = false)
     {
         var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
 
         if (userServer == null)
         {
-            await JoinServer(server);
+            await JoinServer(server, isAdmin);
             userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
         }
 

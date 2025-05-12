@@ -1102,8 +1102,10 @@
 
     private async Task RemoveAllUserData()
     {
+        var isAdmin = ContextService.CurrentUserServer!.IsAdmin;
+        
         await ContextService.LeaveServer(ContextService.CurrentUserServer!);
-        await ContextService.ChangeServer(ContextService.CurrentServer!);
+        await ContextService.ChangeServer(ContextService.CurrentServer!, isAdmin);
 
         Navigation.NavigateTo("/", forceLoad: true);
     }
