@@ -13,6 +13,18 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.2.0",
+            "2025-05-13",
+            "Usability Improvements & Bug Fixes",
+            """
+            - Sharing improvements: Auto-balancing can now be disabled, giving you full control over shared percentages.
+            - Eco API integration: Added support for shop category/item creation and precise data context targeting in EcoGnomeMod.
+            - Data context fix: Resolved data leakage between contexts, which caused incorrect price calculations after skill removal.
+            - Server copy fix: Ingredient data now correctly copied, ensuring proper price calculations.
+            - Various minor fixes enhancing overall usability.
+            """
+        ),
+        new ReleaseVersion(
             "1.1.2",
             "2025-04-30",
             "Performance improvement",
