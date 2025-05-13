@@ -23,6 +23,8 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 		return context.UserElements
 			.Where(up => up.DataContextId == dataContext.Id)
 			.Include(ue => ue.Element)
+			.ThenInclude(e => e.Recipe)
+			.Include(ue => ue.Element)
 			.ThenInclude(e => e.Quantity)
 			.ToListAsync();
 	}

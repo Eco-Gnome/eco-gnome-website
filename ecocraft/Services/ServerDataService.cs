@@ -90,6 +90,7 @@ public class ServerDataService(
         foreach (var userServer in server.UserServers)
         {
             userServer.EcoUserId = null;
+            userServer.Pseudo = null;
         }
     }
 

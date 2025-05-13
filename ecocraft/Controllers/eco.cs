@@ -43,14 +43,21 @@ public class EcoController(
     {
         var server = await serverDbService.GetByJoinCodeAsync(joinCode);
 
-        if (server == null)
+        if (server is null)
         {
             return BadRequest("Eco-Gnome server not found. Please create your server in Eco-Gnome and retrieve the correct server id from server-management page.");
         }
 
+        var alreadyRegisterServer = await serverDbService.GetByEcoServerIdAsync(ecoServerId);
+
+        if (alreadyRegisterServer is not null && server != alreadyRegisterServer)
+        {
+            return BadRequest($"Eco Server is already registered with an other Eco Gnome server: {alreadyRegisterServer.Name}.");
+        }
+
         if (server.EcoServerId is not null && server.EcoServerId != ecoServerId)
         {
-            return BadRequest("Server is already registered.");
+            return BadRequest("Eco Gnome Server is already registered with an other Eco Server.");
         }
 
         server.EcoServerId = ecoServerId;
@@ -115,7 +122,7 @@ public class EcoController(
         var dataContext = result.Value!;
 
         var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext, true);
-        
+
         Console.WriteLine(userPrices);
 
         return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
@@ -125,7 +132,7 @@ public class EcoController(
     public async Task<IActionResult> GetCategoriesAndItems([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? context)
     {
         var result = await TryGetDataContext(ecoServerId, ecoUserId, context);
-        
+
         if (result.Result is not null) return result.Result;
         var dataContext = result.Value!;
 
@@ -144,9 +151,9 @@ public class EcoController(
         );
 
         var categoriesToSell = items.ToSell
-            .GroupBy(i => i.GetCurrentUserPrice(dataContext)!.UserMargin)
+            .GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.SkillId ?? null)
             .Select(m => new EcoGnomeCategory(
-                m.Key?.Name ?? "No Margin",
+                "Some Skill", // Not used in EcoGnomeMod for now
                 OfferType.Sell,
                 m.Select(i => new EcoGnomeItem(
                     i.Name,
