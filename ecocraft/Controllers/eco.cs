@@ -108,48 +108,49 @@ public class EcoController(
     }
 
     [HttpGet("user-prices")]
-    public async Task<IActionResult> GetUserPrices([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? dataContext)
+    public async Task<IActionResult> GetUserPrices([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? context)
     {
-        var result = await TryGetDataContext(ecoServerId, ecoUserId, dataContext);
+        var result = await TryGetDataContext(ecoServerId, ecoUserId, context);
         if (result.Result is not null) return result.Result;
-        var dbDataContext = result.Value!;
+        var dataContext = result.Value!;
 
-        var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(dbDataContext, true);
+        var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext, true);
         
         Console.WriteLine(userPrices);
 
-        return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round(up.MarginPrice ?? (decimal)up.Price!, 2, MidpointRounding.AwayFromZero))));
+        return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
     }
 
     [HttpGet("categories-items")]
-    public async Task<IActionResult> GetCategoriesAndItems([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? dataContext)
+    public async Task<IActionResult> GetCategoriesAndItems([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? context)
     {
-        var result = await TryGetDataContext(ecoServerId, ecoUserId, dataContext);
+        var result = await TryGetDataContext(ecoServerId, ecoUserId, context);
+        
         if (result.Result is not null) return result.Result;
-        var dbDataContext = result.Value!;
+        var dataContext = result.Value!;
 
-        await userPriceDbService.GetByDataContextForEcoApiAsync(dbDataContext);
-        await userElementDbService.GetByDataContextForEcoApiAsync(dbDataContext);
+        await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext);
+        await userElementDbService.GetByDataContextForEcoApiAsync(dataContext);
 
-        var items = priceCalculatorService.GetCategorizedItemOrTags(dbDataContext);
+        var items = priceCalculatorService.GetCategorizedItemOrTags(dataContext);
 
         var categoryToBuy = new EcoGnomeCategory(
             "Buy",
             OfferType.Buy,
             items.ToBuy.Select(t => new EcoGnomeItem(
                 t.Name,
-                Math.Round(t.GetCurrentUserPrice(dbDataContext)?.Price ?? 0, 2, MidpointRounding.AwayFromZero)
+                Math.Round(t.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 0, 2, MidpointRounding.AwayFromZero)
             )).ToList()
         );
 
         var categoriesToSell = items.ToSell
-            .GroupBy(i => i.GetCurrentUserPrice(dbDataContext)!.UserMargin)
+            .GroupBy(i => i.GetCurrentUserPrice(dataContext)!.UserMargin)
             .Select(m => new EcoGnomeCategory(
                 m.Key?.Name ?? "No Margin",
                 OfferType.Sell,
                 m.Select(i => new EcoGnomeItem(
                     i.Name,
-                    Math.Round(i.GetCurrentUserPrice(dbDataContext)?.Price ?? 999999, 2, MidpointRounding.AwayFromZero)
+                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
                 )).ToList()
             ));
 

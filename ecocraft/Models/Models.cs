@@ -577,6 +577,11 @@ public class UserPrice: IHasPrice
     public UserElement? PrimaryUserElement { get; set; }
     public UserPrice? PrimaryUserPrice { get; set; }
 
+    public decimal? GetMarginPriceOrPrice()
+    {
+        return MarginPrice ?? Price;
+    }
+
     public void SetPrices(decimal? price, MarginType? marginType)
     {
         Price = price;
