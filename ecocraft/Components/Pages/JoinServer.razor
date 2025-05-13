@@ -1,0 +1,65 @@
+﻿@page "/join-server"
+@page "/open"
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@using Microsoft.AspNetCore.WebUtilities
+@inject LocalizationService LocalizationService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ServerDbService ServerDbService
+@inject ContextService ContextService
+
+<PageTitle>@LocalizationService.GetTranslation("NavMenu.JoinServer") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                @LocalizationService.GetTranslation("JoinPage.JoiningServer")
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        var isOpen = uri.AbsolutePath.Contains("/open", StringComparison.OrdinalIgnoreCase);
+
+        if (!query.TryGetValue("ecoServerId", out var ecoServerId))
+        {
+            if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.MissingParameter", "ecoServerId"), Severity.Error);
+            Navigation.NavigateTo("/");
+            return;
+        }
+        
+        var server = await ServerDbService.GetByEcoServerIdAsync(ecoServerId!);
+
+        if (server is null)
+        {
+            if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.ServerNotFound", ecoServerId!), Severity.Error);
+            Navigation.NavigateTo("/");
+            return;
+        }
+        
+        if (ContextService.CurrentUser!.UserServers.Find(us => us.Server.Id == server.Id) is null)
+        {
+            if (isOpen)
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
+
+            Snackbar.Add(LocalizationService.GetTranslation("JoinPage.Success", server.Name), Severity.Success);
+        }
+        else
+        {
+            if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.AlreadyJoined", server.Name), Severity.Warning);
+        }
+
+        await ContextService.ChangeServer(server);
+        Navigation.NavigateTo("/");
+    }
+}

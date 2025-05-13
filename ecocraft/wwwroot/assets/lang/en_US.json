@@ -54,7 +54,8 @@
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Source Code",
-        "Contact": "Contact"
+        "Contact": "Contact",
+        "JoinServer": "Join Server"
     },
     "Contact": {
         "ContactInfo": "Contact us on Discord",
@@ -95,6 +96,13 @@
     },
     "RelatedRecipes": "Related recipes",
     "Search": "Search",
+    "JoinPage": {
+        "MissingParameter": "Missing {param} parameter",
+        "JoiningServer": "Joining server...",
+        "ServerNotFound": "Unable to find server with ecoServerId={ecoServerId}. Did you registered your server ?",
+        "AlreadyJoined": "You have already joined this server. Use /egopen command to simply open Eco Gnome from Eco.",
+        "Success": "You have successfully joined server {name}."
+    },
     "ServerDialog": {
         "Create": "Create",
         "CreateServer": "Create your server",

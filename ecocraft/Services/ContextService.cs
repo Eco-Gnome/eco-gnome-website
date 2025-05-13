@@ -1,6 +1,7 @@
 ﻿using ecocraft.Extensions;
 using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using MudBlazor;
 
 namespace ecocraft.Services;
 
@@ -33,6 +34,11 @@ public class ContextService(
 
     public async Task ChangeServer(Server server, bool isAdmin = false)
     {
+        if (CurrentServer == server)
+        {
+            return;
+        }
+        
         var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
 
         if (userServer == null)
