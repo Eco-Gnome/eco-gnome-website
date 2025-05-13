@@ -1103,7 +1103,7 @@
     private async Task RemoveAllUserData()
     {
         var isAdmin = ContextService.CurrentUserServer!.IsAdmin;
-        
+
         await ContextService.LeaveServer(ContextService.CurrentUserServer!);
         await ContextService.ChangeServer(ContextService.CurrentServer!, isAdmin);
 
@@ -1348,7 +1348,7 @@
 
     private Recipe ExtractBestRecipe(ItemOrTag itemOrTag, List<UserElement> userElements)
     {
-        
+
         if (itemOrTag.GetCurrentUserPrice(_selectedDataContext!)?.PrimaryUserElement is not null)
         {
             return itemOrTag.GetCurrentUserPrice(_selectedDataContext!)!.PrimaryUserElement!.Element.Recipe;
@@ -1367,7 +1367,9 @@
             ["Recipe"] = recipe,
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
-        await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
+
+        var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
+        var result = await dialog.Result;
 
         StateHasChanged();
     }
@@ -1397,8 +1399,6 @@
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
-
-        StateHasChanged();
     }
 
     private async Task ShowItemOrTagDialog(ItemOrTag itemOrTag)
@@ -1409,8 +1409,6 @@
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
-
-        StateHasChanged();
     }
 
     private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)

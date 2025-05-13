@@ -22,7 +22,6 @@ public class UserPriceDbService(EcoCraftDbContext context) : IGenericUserDbServi
 	{
 		return context.UserPrices
 			.Where(up => up.DataContextId == dataContext.Id && (!excludeNullPrices || up.Price != null))
-			.Include(up => up.UserMargin)
 			.Include(up => up.ItemOrTag)
 			.ToListAsync();
 	}

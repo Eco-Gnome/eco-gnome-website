@@ -618,6 +618,7 @@ public class UserRecipe
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public int RoundFactor { get; set; }
+    public bool LockShare { get; set; } = false;
 
     public Recipe Recipe { get; set; }
     public DataContext DataContext { get; set; }

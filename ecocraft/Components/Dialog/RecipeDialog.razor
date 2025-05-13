@@ -328,8 +328,8 @@
                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                  Adornment="Adornment.End"
                                                  AdornmentText="% "
-                                                 Min="@(_isLocked ? 0 : Decimal.MinValue)"
-                                                 Max="@(_isLocked ? 100 : Decimal.MaxValue)"
+                                                 Min="@(Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? Decimal.MinValue : 0)"
+                                                 Max="@(Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? Decimal.MaxValue : 100)"
                                                  Variant="Variant.Outlined"
                                                  Step="@(0.1m)"
                                                  Value="@(context.Share * 100)"
@@ -381,11 +381,11 @@
                                                                OnClick="@(() => Equilibrate())"/>
                                             </MudTooltip>
                                         }
-                                        
+
                                         <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.UnlockTooltip")">
                                             <MudIconButton Size="Size.Small"
                                                            Class="ml-3"
-                                                           Icon="@(_isLocked ? MDIIcons.Filled.Lock : MDIIcons.Filled.LockOff)"
+                                                           Icon="@(Recipe.GetCurrentUserRecipe(DataContext).LockShare ? MDIIcons.Filled.LockOff : MDIIcons.Filled.Lock)"
                                                            OnClick="@(() => ToggleLock())"/>
                                         </MudTooltip>
                                     }
@@ -427,8 +427,6 @@
     [Parameter]
     public required Recipe Recipe { get; set; }
 
-    private bool _isLocked { get; set; } = true;
-
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         userElement.IsReintegrated = value;
@@ -453,7 +451,8 @@
 
     private void ToggleLock()
     {
-        _isLocked = !_isLocked;
+        Recipe.GetCurrentUserRecipe(DataContext)!.LockShare = !Recipe.GetCurrentUserRecipe(DataContext)!.LockShare;
+        StateHasChanged();
     }
 
     private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
@@ -512,9 +511,9 @@
 
     private async Task UpdateShare(UserElement ue, decimal value)
     {
-        ue.Share = _isLocked ? Math.Clamp(value, 0, 1) : value;
+        ue.Share = Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? value : Math.Clamp(value, 0, 1);
 
-        if (_isLocked)
+        if (!Recipe.GetCurrentUserRecipe(DataContext)!.LockShare)
         {
             var others = GetProductUserElements().Where(e => e != ue).ToList();
             var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
