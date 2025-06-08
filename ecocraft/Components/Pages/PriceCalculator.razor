@@ -1104,8 +1104,9 @@
     {
         var isAdmin = ContextService.CurrentUserServer!.IsAdmin;
 
+        var currentServer = ContextService.CurrentServer!;
         await ContextService.LeaveServer(ContextService.CurrentUserServer!);
-        await ContextService.ChangeServer(ContextService.CurrentServer!, isAdmin);
+        await ContextService.ChangeServer(currentServer, isAdmin);
 
         Navigation.NavigateTo("/", forceLoad: true);
     }

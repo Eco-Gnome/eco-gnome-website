@@ -200,8 +200,9 @@ public class ContextService(
 
 	public async Task LeaveServer(UserServer userServerToLeave)
 	{
-		CurrentUser?.UserServers.Remove(userServerToLeave);
-		await dbContext.SaveChangesAsync();
+        CurrentUser?.UserServers.Remove(userServerToLeave);
+        await dbContext.SaveChangesAsync();
+        CurrentServer = null;
 	}
 
 	public async Task KickFromServer(UserServer userServerToKick)

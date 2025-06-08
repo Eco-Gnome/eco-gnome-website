@@ -401,6 +401,7 @@
         }
 
         await RetrieveServers();
+        ContextService.InvokeContextChanged();
     }
 
     private async Task DeleteServer(Server server)
