@@ -144,7 +144,7 @@ public class EcoController(
         var categoryToBuy = new EcoGnomeCategory(
             "Buy",
             OfferType.Buy,
-            items.ToBuy.Select(t => new EcoGnomeItem(
+            items.ToBuy.SelectMany(t => t.IsTag ? t.AssociatedItems : [t]).Distinct().Select(t => new EcoGnomeItem(
                 t.Name,
                 Math.Round(t.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 0, 2, MidpointRounding.AwayFromZero)
             )).ToList()
