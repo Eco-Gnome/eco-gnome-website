@@ -313,7 +313,7 @@
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
-            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'",
+            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy. If there are multiple recipes that create this item, you can select the one you want by clicking a star.'",
             "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
             "isMinPrice": "This value is set at the minimum price of the server",
             "isMaxPrice": "This value is set at the maximum price of the server",
