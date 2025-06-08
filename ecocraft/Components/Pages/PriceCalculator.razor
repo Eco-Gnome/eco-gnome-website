@@ -228,7 +228,7 @@
                                                                            OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
                                                         }
 
-                                                        @if (genericPluginModules.Last() == context.PluginModule)
+                                                        @if (genericPluginModules.LastOrDefault() == context.PluginModule)
                                                         {
                                                             @foreach (var skilledPluginModule in skilledPluginModules)
                                                             {
