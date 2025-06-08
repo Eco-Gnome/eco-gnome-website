@@ -2,6 +2,7 @@
     "Cancel": "Cancel",
     "CopyToClipboard": "Copy to clipboard",
     "CraftingTable": "Crafting Table",
+    "DevVersion": "YOU ARE ON A DEVELOPMENT VERSION OF ECO GNOME ",
     "GraphView": {
         "ResetButton": "Reset Graph",
         "Title": "Graph View"
@@ -30,7 +31,11 @@
     "Ingredients": "Ingredients",
     "ItemOrTagDialog": {
         "ProducedBy": "Produced by",
-        "UsedIn": "Used in"
+        "UsedIn": "Used in",
+        "ServerPrices": "Server prices",
+        "MinPrice": "Minimum",
+        "DefaultPrice": "Default",
+        "MaxPrice": "Maximum"
     },
     "JoinCode": "Join code",
     "Language": "Language",
@@ -40,26 +45,37 @@
     },
     "Name": "Name",
     "Level": "Level",
+    "Talents": "Talents",
     "Upgrade": "Upgrade",
     "Margins": "Margins",
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
         "NavGraph": "Graph View [WIP]",
-        "NavSuperAdmin": "Super Admin"
+        "NavSuperAdmin": "Super Admin",
+        "SourceCode": "Source Code",
+        "Contact": "Contact",
+        "JoinServer": "Join Server"
+    },
+    "Contact": {
+        "ContactInfo": "Contact us on Discord",
+        "JoinEcoDiscord": "If needed, join official ECO Discord"
     },
     "None": "None",
     "Options": "Options",
     "Products": "Products",
     "RecipeDialog": {
+        "Level": "Level",
+        "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
-        "LaborReductionTooltip": "{initialValue} with {percent}% reduction due to skill level {skillLevel}",
-        "QuantityReductionTooltip": "{percent}% reduction due to upgrade module {skillLevel}",
-        "QuantityReductionLavishTooltip": "and lavish talent",
+        "TotalReductionTooltip": "with total reduction of {percent}% due to: ",
+        "SkillReductionTooltip": "Skill {skill} {skillLevel} -> {percent}%",
+        "TalentReductionTooltip": "Talent {talentName} -> {percent}%",
+        "ModuleReductionTooltip": "Module {moduleName} -> {percent}%",
         "ReintegratedToolTip": {
             "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
             "True": "Deduct this item from the cost price, to be used when you can reuse this product in the same recipe or in a previous one (Molds, Barrels, ...). This will mathematically decrease the price of other products."
@@ -68,7 +84,8 @@
             "EqualityTooltip": "Split equally between products.",
             "EquilibrateTooltip": "Split by quantity between products.",
             "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
-            "HonestTooltip": "Grant 80% to first product and split the rest equally."
+            "HonestTooltip": "Grant 80% to first product and split the rest equally.",
+            "UnlockTooltip": "Disables automatic balancing, allowing manual editing of all values, including going above or below a total of 100%."
         },
         "Static": "static",
         "TotalCost": "Total cost:",
@@ -79,22 +96,37 @@
     },
     "RelatedRecipes": "Related recipes",
     "Search": "Search",
+    "JoinPage": {
+        "MissingParameter": "Missing {param} parameter",
+        "JoiningServer": "Joining server...",
+        "ServerNotFound": "Unable to find server with ecoServerId={ecoServerId}. Did you registered your server ?",
+        "AlreadyJoined": "You have already joined this server. Use /egopen command to simply open Eco Gnome from Eco.",
+        "Success": "You have successfully joined server {name}."
+    },
     "ServerDialog": {
         "Create": "Create",
         "CreateServer": "Create your server",
+        "JoinServer": "Join a server",
         "HaveAnInvitation": "Do you already have a server join code?",
         "Join": "Join",
         "MaxChar": "Max 25 characters",
-        "MinChar": "Min 3 characters"
+        "MinChar": "Min 3 characters",
+        "JoinCodeLength": "Join code should be 8 characters"
     },
     "ServerManagement": {
+        "ModUpload": {
+            "Description": "You are part of a small group of server admins allowed to upload mod icons on Eco Gnome. Simply upload a .unity3d file to import its icons into the site. These icons will be available for all users and all servers. Icons are identified by their item class name (e.g., WorkbenchItem). This feature is resource-intensive, so please use it carefully and avoid spamming. Contact Zangdar on discord if you have any issues or questions."
+        },
+        "ModUploadLimitToServer": "Limit to my server",
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
             "ClearAllMin": "Are you sure you want to clear all min prices?",
+            "ClearAllDefault": "Are you sure you want to clear all default prices?",
             "ServerDeletion": "Are you sure you want to delete your server? There won't be no rollback!",
             "ServerDissociate": "Are you sure you want to dissociate your Eco-Gnome server from your Eco server? There won't be no rollback!",
             "UpdateJoinCode": "Are you sure you want to refresh your JoinCode? This will disabled any previously generated codes!"
         },
+        "RefreshJoinCodeTooltip": "Refresh Join Code",
         "EcoServerId": "Eco Server Id",
         "EcoServerIdTooltip": "This field will be filled once this server is registered in-game thanks to the EcoGnomeMod.",
         "JoinCodeTooltip": "Give this code to your players so they can join your server.",
@@ -102,7 +134,9 @@
             "Max": "Max price",
             "Max.Tooltip": "Clear max prices",
             "Min": "Min price",
-            "Min.Tooltip": "Clear min prices"
+            "Min.Tooltip": "Clear min prices",
+            "Default": "Default price",
+            "Default.Tooltip": "Clear default prices"
         },
         "Members": {
             "DemoteAdmin": "Demote Admin",
@@ -114,6 +148,9 @@
         "ServerSettings": {
             "ServerName": "Server name",
             "Crafting": "Crafting Tables",
+            "CopyExistingServer": "Copy existing server",
+            "ChooseServer": "Choose a server to copy",
+            "CopyThisServer": "Copy this server",
             "Delete": "Delete Server",
             "Items": "Items",
             "Tags": "Tags",
@@ -121,6 +158,7 @@
             "Recipes": "Recipes",
             "Elements": "Recipe Elements",
             "Skills": "Skills",
+            "Talents": "Talents",
             "Upload": "Upload Server Data",
             "Title": "Server Settings",
             "Stats": "Data Statistics",
@@ -130,12 +168,23 @@
         "Snackbar": {
             "CantEditYourself": "You can't edit yourself",
             "UploadOk": "Upload Successful",
-            "UploadNok": "Upload Error"
+            "UploadNok": "Upload Error",
+            "UploadWrongVersion": "Incompatible data file version. Supported version: {version}. Please update your EcoGnomeMod.dll on the server to the latest version, then upload the newly generated data file.",
+            "UploadPartiallyNok": "Warning: {errorCount} elements have not been imported:",
+            "UploadPartiallyNokEnd": "Review your mods and server edits. You can contact Eco Gnome admins for help."
         }
+    },
+    "ServerPricesDialog": {
+        "Title": "Server Prices",
+        "OpenTooltip": "Show server prices dialog",
+        "Min": "Min",
+        "Default": "Default",
+        "Max": "Max"
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
     "SuperAdmin": {
+        "ModUpload": "Upload mod file",
         "ActionCol": "Action",
         "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
         "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
@@ -143,6 +192,7 @@
         "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
+        "DataCol": "Data",
         "IdCol": "Id",
         "ServerTable": {
             "AdminsCol": "Admins",
@@ -161,6 +211,17 @@
             "SnackbarCopy": "Id copied to clipboard"
         },
         "Title": "Super Admin",
+        "ModHistoryTable": {
+            "Title": "Mod Upload Histories",
+            "UserCol": "User",
+            "FileNameCol": "File Name",
+            "FileSha1Col": "File Hash",
+            "ServerCol": "Server",
+            "IconsCountCol": "Icons",
+            "Success": "Following icons have been successfully added: ",
+            "NoIconsError": "No icons have been found in this mod.",
+            "WrongFileTypeError": "File must have .unity3d extension."
+        },
         "UserTable": {
             "DeleteUser": "Delete user",
             "DemoteUser": "Demote user from Super Admin",
@@ -168,8 +229,10 @@
             "JoinedServers": "Joined Servers",
             "PromoteUser": "Promote user to Super Admin",
             "PseudoCol": "Pseudo",
+            "SuperAdminCol": "Super Admin",
             "ServersCol": "Servers",
             "Title": "Users",
+            "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Action"
         }
     },
@@ -194,7 +257,14 @@
         "UserSettings": "User settings"
     },
     "Versions": "Versions",
+    "DataContext": {
+        "DefaultContext": "Default Context",
+        "NewContext": "New Context",
+        "DeletionConfirmation": "Are you sure you want to delete the context “{contextName}”? This action cannot be undone."
+    },
     "PriceCalculator": {
+        "ContextName": "Context Name",
+        "AddDataContext": "Add new context",
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
         "Reset": "Reset",
         "Skills": "Skills",
@@ -243,7 +313,7 @@
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
-            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy.'",
+            "isAutoCalculatedPrice": "This value is automatically calculated by the system. If it's empty, make sure you set the price of all 'Items to buy. If there are multiple recipes that create this item, you can select the one you want by clicking a star.'",
             "isItemEmptyPrice": "Set this price to allow calculation of related recipes",
             "isMinPrice": "This value is set at the minimum price of the server",
             "isMaxPrice": "This value is set at the maximum price of the server",

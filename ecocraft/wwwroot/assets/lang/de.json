@@ -1,14 +1,15 @@
 {
     "Cancel": "Abbrechen",
     "CopyToClipboard": "In die Zwischenablage kopieren",
-    "CraftingTable": "Tabelle zum Basteln",
+    "CraftingTable": "Basteltisch",
+    "DevVersion": "SIE BEFINDEN SICH AUF EINER ENTWICKLUNGSVERSION VON ECO GNOME",
     "GraphView": {
         "ResetButton": "Graph zurücksetzen",
         "Title": "Graph-Ansicht"
     },
     "Header": {
         "CreateServer": "Server erstellen",
-        "EcoGnome": "Eco Gnome",
+        "EcoGnome": "Öko-Gnom",
         "MyServers": "Meine Server",
         "AddServer": "Treten Sie einem bestehenden Server bei, oder erstellen Sie einen neuen Server.",
         "New": "Neu!",
@@ -30,7 +31,11 @@
     "Ingredients": "Zutaten",
     "ItemOrTagDialog": {
         "ProducedBy": "Produziert von",
-        "UsedIn": "Verwendet in"
+        "UsedIn": "Verwendet in",
+        "ServerPrices": "Server-Preise",
+        "MinPrice": "Minimum",
+        "DefaultPrice": "Standard",
+        "MaxPrice": "Maximum"
     },
     "JoinCode": "Code verbinden",
     "Language": "Sprache",
@@ -40,35 +45,47 @@
     },
     "Name": "Name",
     "Level": "Stufe",
+    "Talents": "Talente",
     "Upgrade": "Upgrade",
     "Margins": "Margen",
     "NavMenu": {
         "NavAdmin": "Server-Verwaltung",
         "NavCalculator": "Preiskalkulator",
         "NavGraph": "Grafik-Ansicht [WIP]",
-        "NavSuperAdmin": "Superverwalter"
+        "NavSuperAdmin": "Superverwalter",
+        "SourceCode": "Quellcode",
+        "Contact": "Kontakt",
+        "JoinServer": "Server beitreten"
+    },
+    "Contact": {
+        "ContactInfo": "Kontaktieren Sie uns auf Discord",
+        "JoinEcoDiscord": "Bei Bedarf dem offiziellen ECO-Discord beitreten"
     },
     "None": "Keine",
     "Options": "Optionen",
     "Products": "Produkte",
     "RecipeDialog": {
+        "Level": "Level",
+        "ReductionOf": "Ermäßigung von",
         "AdditionalCosts": "Zusätzliche Kosten",
         "CraftTime": "Handwerkszeit",
         "CraftTimeReductionTooltip": "{initialValue} mit {Prozent}% Reduktion durch das Upgrade-Modul {upgradeModuleName}",
         "Dynamic": "dynamisch",
         "Labor": "Arbeit",
-        "LaborReductionTooltip": "{initialValue} mit {Prozent}% Ermäßigung aufgrund der Fertigkeitsstufe {skillLevel}",
-        "QuantityReductionTooltip": "{Prozent}% Ermäßigung durch das Upgrade-Modul {skillLevel}",
-        "QuantityReductionLavishTooltip": "und verschwenderischem Talent",
+        "TotalReductionTooltip": "mit einer Gesamtreduktion von {Prozent}% aufgrund von:",
+        "SkillReductionTooltip": "Fertigkeit {skill} {skillLevel} -> {Prozent}%",
+        "TalentReductionTooltip": "Talent {talentName} -> {Prozent}%",
+        "ModuleReductionTooltip": "Modul {ModulName} -> {Prozent}%",
         "ReintegratedToolTip": {
-            "False": "Ziehen Sie diesen Gegenstand nicht mehr vom Anschaffungspreis ab. Dadurch wird der Preis anderer Produkte mathematisch erhöht.",
-            "True": "Ziehen Sie diesen Gegenstand vom Selbstkostenpreis ab, wenn Sie dieses Produkt in demselben oder einem früheren Rezept wiederverwenden können (Formen, Fässer, ...). Dadurch wird der Preis der anderen Produkte mathematisch verringert."
+            "False": "Beenden Sie den Abzug dieses Elements vom Selbstkostenpreis. Dadurch wird der Preis anderer Produkte mathematisch erhöht.",
+            "True": "Ziehen Sie diesen Artikel vom Selbstkostenpreis ab, wenn Sie dieses Produkt in demselben oder einem früheren Rezept wiederverwenden können (Formen, Fässer, ...). Dadurch wird der Preis der anderen Produkte mathematisch verringert."
         },
         "Share": {
             "EqualityTooltip": "Gleichmäßig auf die Produkte aufteilen.",
             "EquilibrateTooltip": "Nach Menge zwischen den Produkten aufteilen.",
             "FirstOnlyTooltip": "Gewähren Sie dem ersten Produkt 100% und den übrigen Produkten Null. Wählen Sie diese Option, wenn Sie die anderen Produkte für Müll halten.",
-            "HonestTooltip": "Gewähren Sie 80% für das erste Produkt und teilen Sie den Rest gleichmäßig auf."
+            "HonestTooltip": "Gewähren Sie dem ersten Produkt 80% und teilen Sie den Rest gleichmäßig auf.",
+            "UnlockTooltip": "Deaktiviert den automatischen Ausgleich und ermöglicht die manuelle Bearbeitung aller Werte, einschließlich des Über- oder Unterschreitens einer Gesamtsumme von 100%."
         },
         "Static": "statisch",
         "TotalCost": "Gesamtkosten:",
@@ -79,33 +96,50 @@
     },
     "RelatedRecipes": "Verwandte Rezepte",
     "Search": "Suche",
+    "JoinPage": {
+        "MissingParameter": "Fehlender Parameter {param}",
+        "JoiningServer": "Server beitreten...",
+        "ServerNotFound": "Es konnte kein Server mit ecoServerId={ecoServerId} gefunden werden. Haben Sie Ihren Server registriert?",
+        "AlreadyJoined": "Sie sind diesem Server bereits beigetreten. Verwenden Sie den Befehl /egopen, um Eco Gnome einfach von Eco aus zu öffnen.",
+        "Success": "Sie sind erfolgreich dem Server {Name} beigetreten."
+    },
     "ServerDialog": {
         "Create": "Erstellen",
         "CreateServer": "Erstellen Sie Ihren Server",
+        "JoinServer": "Einem Server beitreten",
         "HaveAnInvitation": "Haben Sie bereits einen Beitrittscode für einen Server?",
         "Join": "Beitreten",
         "MaxChar": "Maximal 25 Zeichen",
-        "MinChar": "Mindestens 3 Zeichen"
+        "MinChar": "Mindestens 3 Zeichen",
+        "JoinCodeLength": "Der Beitrittscode sollte 8 Zeichen lang sein"
     },
     "ServerManagement": {
+        "ModUpload": {
+            "Description": "Sie gehören zu einer kleinen Gruppe von Server-Administratoren, die Mod-Symbole auf Eco Gnome hochladen dürfen. Laden Sie einfach eine .unity3d-Datei hoch, um ihre Icons in die Website zu importieren. Diese Icons werden für alle Benutzer und alle Server verfügbar sein. Die Icons werden durch den Namen ihrer Objektklasse identifiziert (z.B. WorkbenchItem). Diese Funktion ist sehr ressourcenintensiv, also gehen Sie bitte vorsichtig damit um und vermeiden Sie Spamming. Kontaktieren Sie Zangdar auf Discord, wenn Sie irgendwelche Probleme oder Fragen haben."
+        },
+        "ModUploadLimitToServer": "Beschränkung auf meinen Server",
         "Confirm": {
-            "ClearAllMax": "Sind Sie sicher, dass Sie alle Höchstpreise löschen möchten?",
-            "ClearAllMin": "Sind Sie sicher, dass Sie alle Mindestpreise löschen möchten?",
-            "ServerDeletion": "Sind Sie sicher, dass Sie Ihren Server löschen wollen? Es wird kein Rollback geben!",
+            "ClearAllMax": "Sind Sie sicher, dass Sie alle Höchstpreise löschen wollen?",
+            "ClearAllMin": "Sind Sie sicher, dass Sie alle Min-Preise löschen wollen?",
+            "ClearAllDefault": "Sind Sie sicher, dass Sie alle Standardpreise löschen wollen?",
+            "ServerDeletion": "Sind Sie sicher, dass Sie Ihren Server löschen möchten? Es wird kein Rollback geben!",
             "ServerDissociate": "Sind Sie sicher, dass Sie Ihren Eco-Gnome Server von Ihrem Eco Server trennen wollen? Es wird kein Rollback geben!",
             "UpdateJoinCode": "Sind Sie sicher, dass Sie Ihren JoinCode aktualisieren wollen? Dadurch werden alle zuvor generierten Codes deaktiviert!"
         },
+        "RefreshJoinCodeTooltip": "Beitrittscode aktualisieren",
         "EcoServerId": "Eco-Server-Kennung",
-        "EcoServerIdTooltip": "Dieses Feld wird ausgefüllt, sobald dieser Server dank der EcoGnomeMod im Spiel registriert ist.",
+        "EcoServerIdTooltip": "Dieses Feld wird ausgefüllt, sobald dieser Server dank des EcoGnomeMods im Spiel registriert ist.",
         "JoinCodeTooltip": "Geben Sie diesen Code an Ihre Spieler weiter, damit sie Ihrem Server beitreten können.",
         "Items": {
             "Max": "Maximaler Preis",
             "Max.Tooltip": "Maximalpreise löschen",
             "Min": "Min-Preis",
-            "Min.Tooltip": "Minimalpreise löschen"
+            "Min.Tooltip": "Min-Preise löschen",
+            "Default": "Standardpreis",
+            "Default.Tooltip": "Standardpreise löschen"
         },
         "Members": {
-            "DemoteAdmin": "Admin degradieren",
+            "DemoteAdmin": "Admin zurückstufen",
             "KickUser": "Benutzer kicken",
             "PromoteAdmin": "Admin befördern",
             "Tooltip.Admin": "Admin",
@@ -114,13 +148,17 @@
         "ServerSettings": {
             "ServerName": "Server-Name",
             "Crafting": "Crafting-Tabellen",
+            "CopyExistingServer": "Vorhandenen Server kopieren",
+            "ChooseServer": "Wählen Sie einen Server zum Kopieren",
+            "CopyThisServer": "Diesen Server kopieren",
             "Delete": "Server löschen",
             "Items": "Gegenstände",
             "Tags": "Tags",
-            "Modules": "Module aufrüsten",
+            "Modules": "Module aktualisieren",
             "Recipes": "Rezepte",
             "Elements": "Rezept-Elemente",
             "Skills": "Fertigkeiten",
+            "Talents": "Talente",
             "Upload": "Serverdaten hochladen",
             "Title": "Server-Einstellungen",
             "Stats": "Daten-Statistik",
@@ -130,24 +168,36 @@
         "Snackbar": {
             "CantEditYourself": "Sie können sie nicht selbst bearbeiten",
             "UploadOk": "Upload erfolgreich",
-            "UploadNok": "Fehler beim Hochladen"
+            "UploadNok": "Upload-Fehler",
+            "UploadWrongVersion": "Inkompatible Version der Datendatei. Unterstützte Version: {Version}. Bitte aktualisieren Sie Ihre EcoGnomeMod.dll auf dem Server auf die neueste Version und laden Sie dann die neu generierte Datendatei hoch.",
+            "UploadPartiallyNok": "Warnung: {errorCount} Elemente wurden nicht importiert:",
+            "UploadPartiallyNokEnd": "Überprüfen Sie Ihre Mods und Server-Edits. Sie können die Eco Gnome-Administratoren um Hilfe bitten."
         }
     },
+    "ServerPricesDialog": {
+        "Title": "Server-Preise",
+        "OpenTooltip": "Dialog Serverpreise anzeigen",
+        "Min": "Min",
+        "Default": "Standard",
+        "Max": "Max"
+    },
     "Skill": "Geschicklichkeit",
-    "NoSkill": "Keine Fertigkeit",
+    "NoSkill": "Kein Skill",
     "SuperAdmin": {
+        "ModUpload": "Mod-Datei hochladen",
         "ActionCol": "Aktion",
-        "ConfirmServerDeletion": "Sind Sie sicher, dass Sie Server {Server} löschen möchten?",
-        "ConfirmSuperAdminPromote": "Sind Sie sicher, dass Sie diesen Benutzer zum Superadmin befördern wollen?",
-        "ConfirmSuperAdminDemote": "Sind Sie sicher, dass Sie diesen Benutzer von Super Admin degradieren wollen?",
+        "ConfirmServerDeletion": "Sind Sie sicher, dass Sie Server {server} löschen möchten?",
+        "ConfirmSuperAdminPromote": "Sind Sie sicher, dass Sie diesen Benutzer zum Super Admin befördern wollen?",
+        "ConfirmSuperAdminDemote": "Sind Sie sicher, dass Sie diesen Benutzer zum Superadmin degradieren wollen?",
         "ConfirmTwiceSuperAdmin": "Diese Änderung hat große Auswirkungen und könnte die gesamte Website beschädigen! Bitte bestätigen Sie dies noch einmal.",
         "ConfirmUserDeletion": "Sind Sie sicher, dass Sie den Benutzer {user} löschen möchten?",
         "CreationDateCol": "Erstellungsdatum",
+        "DataCol": "Daten",
         "IdCol": "Id",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Server löschen",
-            "DemoteAdmin": "Entfernen Sie sich selbst von den Admins",
+            "DemoteAdmin": "Entfernen Sie sich von den Admins",
             "PlayersCol": "Spieler",
             "PromoteAdmin": "Fügen Sie sich als Admin hinzu",
             "ServerNameCol": "Name",
@@ -161,15 +211,28 @@
             "SnackbarCopy": "Id in die Zwischenablage kopiert"
         },
         "Title": "Super-Verwalter",
+        "ModHistoryTable": {
+            "Title": "Mod Upload-Historien",
+            "UserCol": "Benutzer",
+            "FileNameCol": "Datei Name",
+            "FileSha1Col": "Datei-Hash",
+            "ServerCol": "Server",
+            "IconsCountCol": "Icons",
+            "Success": "Die folgenden Icons wurden erfolgreich hinzugefügt:",
+            "NoIconsError": "Es wurden keine Icons in dieser Mod gefunden.",
+            "WrongFileTypeError": "Die Datei muss die Erweiterung .unity3d haben."
+        },
         "UserTable": {
             "DeleteUser": "Benutzer löschen",
-            "DemoteUser": "Benutzer von Super Admin degradieren",
-            "HowMuchIsAdmin": "Anzahl der Server, auf denen der Benutzer Administrator ist",
+            "DemoteUser": "Benutzer vom Super Admin degradieren",
+            "HowMuchIsAdmin": "Anzahl der Server, auf denen der Benutzer Admin ist",
             "JoinedServers": "Verbundene Server",
-            "PromoteUser": "Benutzer zum Super Admin befördern",
+            "PromoteUser": "Benutzer zum Super-Admin befördern",
             "PseudoCol": "Pseudo",
+            "SuperAdminCol": "Superverwalter",
             "ServersCol": "Server",
             "Title": "Benutzer",
+            "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Aktion"
         }
     },
@@ -178,7 +241,7 @@
         "ExportBackup": "Meinen Benutzer exportieren/sichern",
         "ImportReplace": "Meinen Benutzer importieren/ersetzen",
         "InGamePseudo": "In-Game Pseudo",
-        "InGamePseudoTooltip": "Wird dank des EcoGnomeMods automatisch ausgefüllt, wenn die Benutzerregistrierung in Eco abgeschlossen ist.",
+        "InGamePseudoTooltip": "Wird dank der EcoGnomeMod automatisch ausgefüllt, wenn die Benutzerregistrierung in Eco abgeschlossen ist.",
         "InGameId": "Spiel-interne Kennung",
         "InGameIdTooltip": "Wird dank des EcoGnomeMods automatisch ausgefüllt, wenn Sie die Benutzerregistrierung in Eco abschließen.",
         "MyServers": "Meine Server",
@@ -194,8 +257,15 @@
         "UserSettings": "Benutzer-Einstellungen"
     },
     "Versions": "Versionen",
+    "DataContext": {
+        "DefaultContext": "Standard-Kontext",
+        "NewContext": "Neuer Kontext",
+        "DeletionConfirmation": "Sind Sie sicher, dass Sie den Kontext \"{KontextName}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
     "PriceCalculator": {
-        "LoadError": "Während des Ladens ist ein Fehler aufgetreten. Sie können versuchen, alle Ihre Daten zurückzusetzen, um den Fehler zu beheben.",
+        "ContextName": "Kontext-Name",
+        "AddDataContext": "Neuen Kontext hinzufügen",
+        "LoadError": "Beim Laden ist ein Fehler aufgetreten. Sie können versuchen, alle Ihre Daten zurückzusetzen, um den Fehler zu beheben.",
         "Reset": "Zurücksetzen",
         "Skills": "Fertigkeiten",
         "AddSkill": "Fertigkeit hinzufügen",
@@ -243,7 +313,7 @@
         "BuyPrice": "Preis kaufen",
         "PriceTooltip": {
             "isTagEmptyPrice": "Dieser Wert ist der Mindestpreis der zugehörigen Artikel (wenn alle Werte definiert sind!), es sei denn, Sie wählen einen bestimmten Artikel aus, indem Sie auf einen Stern klicken.",
-            "isAutoCalculatedPrice": "Dieser Wert wird automatisch vom System berechnet. Wenn er leer ist, stellen Sie sicher, dass Sie den Preis für alle 'Zu kaufenden Artikel' festlegen",
+            "isAutoCalculatedPrice": "Dieser Wert wird automatisch vom System berechnet. Wenn er leer ist, stellen Sie sicher, dass Sie den Preis für alle 'Zu kaufenden Artikel' festlegen. Wenn es mehrere Rezepte gibt, die diesen Artikel erzeugen, können Sie den gewünschten Artikel auswählen, indem Sie auf einen Stern klicken.'",
             "isItemEmptyPrice": "Legen Sie diesen Preis fest, um die Berechnung von verwandten Rezepten zu ermöglichen",
             "isMinPrice": "Dieser Wert ist auf den Mindestpreis des Servers eingestellt",
             "isMaxPrice": "Dieser Wert wird auf den Höchstpreis des Servers gesetzt",
