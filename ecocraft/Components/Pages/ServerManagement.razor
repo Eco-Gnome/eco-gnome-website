@@ -150,6 +150,14 @@
 							</MudStack>
 						</MudPaper>
 					</MudStack>
+
+					<MudStack Row>
+						<MudNumericField T="decimal?" Variant="Variant.Filled" Label="MinCalories" Value="@ContextService.CurrentServer!.MinCalories" ValueChanged="@(v => UpdateMinCalories(v))" />
+						<MudNumericField T="decimal?" Variant="Variant.Filled" Label="MaxCalories" Value="@ContextService.CurrentServer!.MaxCalories" ValueChanged="@(v => UpdateMaxCalories(v))" />
+						<MudNumericField T="decimal?" Variant="Variant.Filled" Label="MinMargin" Value="@ContextService.CurrentServer!.MinMargin" ValueChanged="@(v => UpdateMinMargin(v))" />
+						<MudNumericField T="decimal?" Variant="Variant.Filled" Label="MaxMargin" value="@ContextService.CurrentServer!.MaxMargin" ValueChanged="@(v => UpdateMaxMargin(v))" />
+					</MudStack>
+
 					@if (ContextService.CurrentUser!.CanUploadMod || ContextService.CurrentUser.SuperAdmin)
 					{
 						<MudStack Class="pa-3 mud-background" Spacing="1">
@@ -588,6 +596,31 @@
 
 		userServer.IsAdmin = !userServer.IsAdmin;
 		EcoCraftDbContext.SaveChanges();
+	}
+
+	private async Task UpdateMinCalories(decimal? v)
+	{
+		ContextService.CurrentServer!.MinCalories = v;
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task UpdateMaxCalories(decimal? v)
+	{
+		ContextService.CurrentServer!.MaxCalories = v;
+		await EcoCraftDbContext.SaveChangesAsync();
+	}
+
+	private async Task UpdateMinMargin(decimal? v)
+	{
+		ContextService.CurrentServer!.MinMargin = v;
+		await EcoCraftDbContext.SaveChangesAsync();
+
+	}
+
+	private async Task UpdateMaxMargin(decimal? v)
+	{
+		ContextService.CurrentServer!.MaxMargin = v;
+		await EcoCraftDbContext.SaveChangesAsync();
 	}
 
 	private async Task OnMinValueChange(ItemOrTag context, decimal? minPrice)
