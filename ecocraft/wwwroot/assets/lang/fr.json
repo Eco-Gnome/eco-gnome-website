@@ -51,6 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
+        "ShoppingList": "Liste de course",
         "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Code source",
