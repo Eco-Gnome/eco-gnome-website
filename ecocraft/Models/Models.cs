@@ -658,6 +658,10 @@ public class Server
     public bool IsDefault { get; set; }
     public DateTime CreationDateTime { get; set; }
 	public string JoinCode { get; set; }
+	public decimal? MinCalories { get; set; }
+	public decimal? MaxCalories { get; set; }
+	public decimal? MinMargin { get; set; }
+	public decimal? MaxMargin { get; set; }
 
     [NotMapped]
     public bool IsEmpty { get; set; }

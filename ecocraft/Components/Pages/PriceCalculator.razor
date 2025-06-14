@@ -291,6 +291,8 @@
                                                 <MudTd Class="py-1">
                                                     <MudNumericField T="decimal"
                                                                      Immediate
+                                                                     Min="@(ContextService.CurrentServer!.MinMargin ?? decimal.MinValue)"
+                                                                     Max="@(ContextService.CurrentServer!.MaxMargin ?? decimal.MaxValue)"
                                                                      Class="rectangle-input"
                                                                      Style="width: 93px"
                                                                      Value="context.Margin"
@@ -375,6 +377,8 @@
                                             </MudTooltip>
                                             <div>
                                                 <MudNumericField T="decimal"
+                                                                 Min="@(ContextService.CurrentServer!.MinCalories ?? decimal.MinValue)"
+                                                                 Max="@(ContextService.CurrentServer!.MaxCalories ?? decimal.MaxValue)"
                                                                  ValueChanged="UpdateCalorieCost"
                                                                  Style="height: 35px; width: 100px"
                                                                  Value="UserServerDataService.UserSetting!.CalorieCost"

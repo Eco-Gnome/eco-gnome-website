@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ecocraft.Models;
 
@@ -10,9 +11,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250606154821_add-min-and-max-caloriescost-and-margin")]
+    partial class addMinAndMaxCaloriesCostAndMargin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
@@ -94,9 +97,6 @@ namespace ecocraft.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsShoppingList")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -676,16 +676,11 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("Share")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UserRecipeId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DataContextId");
 
                     b.HasIndex("ElementId");
-
-                    b.HasIndex("UserRecipeId");
 
                     b.ToTable("UserElement", (string)null);
                 });
@@ -770,9 +765,6 @@ namespace ecocraft.Migrations
                     b.Property<bool>("LockShare")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("ParentUserRecipeId")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("TEXT");
 
@@ -782,8 +774,6 @@ namespace ecocraft.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DataContextId");
-
-                    b.HasIndex("ParentUserRecipeId");
 
                     b.HasIndex("RecipeId");
 
@@ -1236,17 +1226,9 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ecocraft.Models.UserRecipe", "UserRecipe")
-                        .WithMany("UserElements")
-                        .HasForeignKey("UserRecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("DataContext");
 
                     b.Navigation("Element");
-
-                    b.Navigation("UserRecipe");
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
@@ -1308,11 +1290,6 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ecocraft.Models.UserRecipe", "ParentUserRecipe")
-                        .WithMany("ChildrenUserRecipes")
-                        .HasForeignKey("ParentUserRecipeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("ecocraft.Models.Recipe", "Recipe")
                         .WithMany("UserRecipes")
                         .HasForeignKey("RecipeId")
@@ -1320,8 +1297,6 @@ namespace ecocraft.Migrations
                         .IsRequired();
 
                     b.Navigation("DataContext");
-
-                    b.Navigation("ParentUserRecipe");
 
                     b.Navigation("Recipe");
                 });
@@ -1513,13 +1488,6 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.UserMargin", b =>
                 {
                     b.Navigation("UserPrices");
-                });
-
-            modelBuilder.Entity("ecocraft.Models.UserRecipe", b =>
-                {
-                    b.Navigation("ChildrenUserRecipes");
-
-                    b.Navigation("UserElements");
                 });
 
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>
