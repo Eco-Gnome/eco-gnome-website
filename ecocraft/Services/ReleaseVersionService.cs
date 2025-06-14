@@ -13,6 +13,14 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.2.1",
+            "2025-06-14",
+            "Pre release of Shopping List",
+            """
+            - Shopping List: Add a new feature in development, the Shopping List. Give us your feedback so we can improve it!
+            """
+        ),
+        new ReleaseVersion(
             "1.2.0",
             "2025-05-13",
             "Usability Improvements & Bug Fixes",
