@@ -31,13 +31,15 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 			.FirstOrDefaultAsync(u => u.SecretId == secretId);
 	}
 
-	public Task<UserServer?> GetUserServerByEcoIdsAsync(string ecoUserId, string ecoServerId)
+	public Task<List<UserServer>> GetUserServerByEcoIdsAsync(string ecoUserId, string ecoServerId)
 	{
 		return context.UserServers
 			.Include(us => us.Server)
 			.Include(us => us.DataContexts)
-			.Where(us => us.Server.EcoServerId == ecoServerId)
-			.FirstOrDefaultAsync(us => us.EcoUserId == ecoUserId);
+			.Include(us => us.User)
+			.Where(us => us.EcoUserId == ecoUserId && us.Server.EcoServerId == ecoServerId)
+			.OrderByDescending(us => us.User.CreationDateTime)
+			.ToListAsync();
 	}
 
 	public Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId)

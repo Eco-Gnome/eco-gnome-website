@@ -169,7 +169,7 @@ public class EcoController(
         if (string.IsNullOrWhiteSpace(ecoServerId) || string.IsNullOrWhiteSpace(ecoUserId))
             return BadRequest("ecoServerId and ecoUserId are required and cannot be empty.");
 
-        var userServer = await userDbService.GetUserServerByEcoIdsAsync(ecoUserId, ecoServerId);
+        var userServer = (await userDbService.GetUserServerByEcoIdsAsync(ecoUserId, ecoServerId)).FirstOrDefault();
         if (userServer is null)
             return BadRequest("Can't find user or server.");
 
