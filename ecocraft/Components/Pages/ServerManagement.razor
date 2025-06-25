@@ -426,6 +426,13 @@
 
 	private void OnContextChanged()
 	{
+		// Make sure you don't have access to this page if you're not admin on this server
+		if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentUserServer.IsAdmin)
+		{
+			Navigation.NavigateTo("/");
+			return;
+		}
+		
 		_ = RetrieveData();
 	}
 
