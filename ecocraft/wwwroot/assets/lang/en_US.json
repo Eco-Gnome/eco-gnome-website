@@ -115,6 +115,10 @@
         "JoinCodeLength": "Join code should be 8 characters"
     },
     "ServerManagement": {
+        "MinCalories": "Min cost per 1000 calories",
+        "MaxCalories": "Max cost per 1000 calories",
+        "MinMargin": "Min margin percent",
+        "MaxMargin": "Max margin percent",
         "ModUpload": {
             "Description": "You are part of a small group of server admins allowed to upload mod icons on Eco Gnome. Simply upload a .unity3d file to import its icons into the site. These icons will be available for all users and all servers. Icons are identified by their item class name (e.g., WorkbenchItem). This feature is resource-intensive, so please use it carefully and avoid spamming. Contact Zangdar on discord if you have any issues or questions."
         },
@@ -282,6 +286,7 @@
     },
     "PriceCalculator": {
         "PageTitle": "Price Calculator",
+        "ServerMinMax": "Server limit activated: Min {min} and Max {max}.",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
