@@ -219,7 +219,8 @@ public class ImportDataService(
             var dbCraftingTable = serverDataService.CraftingTables.FirstOrDefault(p => p.Name == craftingTable.Name);
 
             var pluginModules = craftingTable.CraftingTablePluginModules?
-                .Select(ctpm => serverDataService.PluginModules.First(pm => pm.Name == ctpm))
+                .Select(ctpm => serverDataService.PluginModules.FirstOrDefault(pm => pm.Name == ctpm))
+                .Where(pm => pm is not null)
                 .ToList() ?? [];
 
             if (dbCraftingTable is null)
@@ -710,7 +711,7 @@ public class ImportDataService(
             RequiredSkill = recipe.Skill?.Name ?? "",
             RequiredSkillLevel = (int)recipe.SkillLevel,
         };
-        
+
         recipes.Ingredients.ForEach(i => i.Quantity.BaseValue *= -1);
 
         return recipes;
