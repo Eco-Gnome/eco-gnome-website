@@ -233,8 +233,8 @@
 
 			try
 			{
-				var publicUserId = content.Split(':')[0];
-				var secretUserId = content.Split(':')[1];
+				var publicUserId = content.Split(':')[0].ToLower();
+				var secretUserId = content.Split(':')[1].ToLower();
 
 				var foundUser = await UserDbService.GetByIdAndSecretAsync(new Guid(publicUserId), new Guid(secretUserId));
 
