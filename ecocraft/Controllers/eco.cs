@@ -13,7 +13,8 @@ public class EcoController(
     ServerDbService serverDbService,
     UserDbService userDbService,
     UserElementDbService userElementDbService,
-    PriceCalculatorService priceCalculatorService
+    PriceCalculatorService priceCalculatorService,
+    ItemOrTagDbService itemOrTagDbService
 ) : ControllerBase
 {
     /*
@@ -123,8 +124,6 @@ public class EcoController(
 
         var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext, true);
 
-        Console.WriteLine(userPrices);
-
         return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
     }
 
@@ -162,6 +161,35 @@ public class EcoController(
             ));
 
         return Ok(categoriesToSell.Concat([categoryToBuy]));
+    }
+
+    [HttpGet("server-prices")]
+    public async Task<IActionResult> GetServerPrices([FromQuery] string ecoServerId)
+    {
+        var result = await TryGetServer(ecoServerId);
+        if (result.Result is not null) return result.Result;
+        var server = result.Value!;
+
+        var itemOrTags = await itemOrTagDbService.GetWithPriceSetByServerAsync(server);
+
+        return Ok(itemOrTags.Select(iot => new EcoGnomeServerPrice(
+            iot.Name,
+            iot.MinPrice is not null ? Math.Round((decimal)iot.MinPrice, 2, MidpointRounding.AwayFromZero) : null,
+            iot.DefaultPrice is not null ? Math.Round((decimal)iot.DefaultPrice, 2, MidpointRounding.AwayFromZero): null,
+            iot.MaxPrice is not null ? Math.Round((decimal)iot.MaxPrice, 2, MidpointRounding.AwayFromZero): null
+        )));
+    }
+
+    private async Task<ActionResult<Server>> TryGetServer(string ecoServerId)
+    {
+        if (string.IsNullOrWhiteSpace(ecoServerId))
+            return BadRequest("ecoServerId and required and cannot be empty.");
+
+        var server = await serverDbService.GetByEcoServerIdAsync(ecoServerId);
+        if (server is null)
+            return BadRequest("Can't find server.");
+
+        return server;
     }
 
     private async Task<ActionResult<DataContext>> TryGetDataContext(string ecoServerId, string ecoUserId, string? dataContext)
@@ -202,6 +230,14 @@ public class EcoGnomeCategory(string name, OfferType offerType, List<EcoGnomeIte
     public string Name { get; set; } = name;
     public OfferType OfferType { get; set; } = offerType;
     public List<EcoGnomeItem> Items { get; set; } = items;
+}
+
+public class EcoGnomeServerPrice(string name, decimal? minPrice, decimal? defaultPrice, decimal? maxPrice)
+{
+    public string Name { get; set; } = name;
+    public decimal? MinPrice { get; set; } = minPrice;
+    public decimal? DefaultPrice { get; set; } = defaultPrice;
+    public decimal? MaxPrice { get; set; } = maxPrice;
 }
 
 public class EcoGnomeItem(string name, decimal price, int minDurability = -1, int maxDurability = -1, int minIntegrity = -1, int maxIntegrity = -1)

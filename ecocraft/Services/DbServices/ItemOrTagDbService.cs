@@ -21,6 +21,14 @@ public class ItemOrTagDbService(EcoCraftDbContext context) : IGenericNamedDbServ
 			.ToListAsync();
 	}
 
+	public Task<List<ItemOrTag>> GetWithPriceSetByServerAsync(Server server)
+	{
+		return context.ItemOrTags
+			.Where(s => s.MaxPrice != null || s.MinPrice != null || s.DefaultPrice != null)
+			.Where(s => s.ServerId == server.Id)
+			.ToListAsync();
+	}
+
 	public Task<ItemOrTag?> GetByIdAsync(Guid id)
 	{
 		return context.ItemOrTags
