@@ -658,6 +658,7 @@ public class Server
     public bool IsDefault { get; set; }
     public DateTime CreationDateTime { get; set; }
 	public string JoinCode { get; set; }
+	public Guid ApiKey { get; set; } = Guid.NewGuid();
 
     [NotMapped]
     public bool IsEmpty { get; set; }

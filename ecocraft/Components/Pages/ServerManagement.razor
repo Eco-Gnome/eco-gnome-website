@@ -60,6 +60,22 @@
 							              OnAdornmentClick="@(() => DissociateServer())"/>
 						</MudTooltip>
 					</MudStack>
+					<MudStack Row>
+						<MudTooltip RootClass="flex-1" Text="@LocalizationService.GetTranslation("ServerManagement.ApiKey.Tooltip")">
+							<MudTextField Value="@ContextService.CurrentServer!.ApiKey"
+							              ReadOnly
+							              Label="@LocalizationService.GetTranslation("ServerManagement.ApiKey.Label")"
+							              ShrinkLabel
+							              InputType="InputType.Password"
+							              Variant="Variant.Outlined"
+							              Adornment="Adornment.End"
+							              AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
+							              OnAdornmentClick="@(() => CopyToClipboard(ContextService.CurrentServer!.ApiKey.ToString()))"/>
+						</MudTooltip>
+						<MudTooltip RootStyle="display: flex; flex: 0 0 auto; align-items: center" Text="@LocalizationService.GetTranslation("ServerManagement.ApiKey.Refresh")">
+							<MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => RefreshApiKey())"/>
+						</MudTooltip>
+					</MudStack>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Start" Spacing="6">
 						<MudStack Spacing="0" Style="min-width: 220px">
 							@if (!_isLoadingData)
@@ -509,6 +525,16 @@
 		if (!confirmed) return;
 
 		ServerDataService.Dissociate(ContextService.CurrentServer!);
+		await EcoCraftDbContext.SaveChangesAsync();
+		StateHasChanged();
+	}
+
+	private async Task RefreshApiKey()
+	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.ApiKey.ConfirmRefresh"));
+		if (!confirmed) return;
+
+		ContextService.CurrentServer!.ApiKey = Guid.NewGuid();
 		await EcoCraftDbContext.SaveChangesAsync();
 		StateHasChanged();
 	}

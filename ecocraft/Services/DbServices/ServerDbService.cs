@@ -39,6 +39,12 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 		return context.Servers
 			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 	}
+	
+	public Task<Server?> GetByApiKeyAsync(Guid apiKey)
+	{
+		return context.Servers
+			.FirstOrDefaultAsync(s => s.ApiKey == apiKey);
+	}
 
     public Task<Server?> GetByJoinCodeAsync(string joinCode)
     {

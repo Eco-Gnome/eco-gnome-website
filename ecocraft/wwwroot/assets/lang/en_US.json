@@ -115,6 +115,12 @@
         "JoinCodeLength": "Join code should be 8 characters"
     },
     "ServerManagement": {
+        "ApiKey": {
+            "Tooltip": "This API Key allows you to contact eco gnome API and edit your server, upload json file, push eco data, ...",
+            "Label": "Server API Key (secret, do not share)",
+            "Refresh": "Refresh your API Key in case it has been compromised.",
+            "ConfirmRefresh": "Are you sure you want to refresh your API Key ? You will need to update any service that use your current API Key."
+        },
         "ModUpload": {
             "Description": "You are part of a small group of server admins allowed to upload mod icons on Eco Gnome. Simply upload a .unity3d file to import its icons into the site. These icons will be available for all users and all servers. Icons are identified by their item class name (e.g., WorkbenchItem). This feature is resource-intensive, so please use it carefully and avoid spamming. Contact Zangdar on discord if you have any issues or questions."
         },

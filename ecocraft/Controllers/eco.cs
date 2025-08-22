@@ -183,7 +183,7 @@ public class EcoController(
     private async Task<ActionResult<Server>> TryGetServer(string ecoServerId)
     {
         if (string.IsNullOrWhiteSpace(ecoServerId))
-            return BadRequest("ecoServerId and required and cannot be empty.");
+            return BadRequest("ecoServerId is required and cannot be empty.");
 
         var server = await serverDbService.GetByEcoServerIdAsync(ecoServerId);
         if (server is null)
