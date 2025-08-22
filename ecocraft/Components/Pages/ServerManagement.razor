@@ -6,6 +6,7 @@
 @using ecocraft.Services.ImportData
 @using ecocraft.Services.DbServices
 @using ecocraft.Components.Utils
+@using MudBlazor.Extensions
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
@@ -89,6 +90,7 @@
 										<MudTd>@context.Item2</MudTd>
 									</RowTemplate>
 								</MudTable>
+								<MudText Typo="Typo.body2" Class="pa-1 pt-2">@LocalizationService.GetTranslation("ServerManagement.ServerSettings.LastDataUploadTime") @(ContextService.CurrentServer!.LastDataUploadTime?.ToString() ?? "???")</MudText>
 							}
 							else
 							{

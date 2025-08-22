@@ -39,6 +39,7 @@ public class ImportDataService(
         ImportTags(server, importedData.Tags);
         errorCount += ImportRecipes(server, importedData.Recipes, out var recipeErrorNames);
 
+        server.LastDataUploadTime = DateTime.Now;
         await dbContext.SaveChangesAsync();
 
         return (errorCount, itemErrorNames.Concat(recipeErrorNames).ToArray());
@@ -53,6 +54,7 @@ public class ImportDataService(
         ImportTags(targetServer, data.Tags);
         ImportRecipes(targetServer, data.Recipes, out _);
 
+        targetServer.LastDataUploadTime = DateTime.Now;
         await dbContext.SaveChangesAsync();
     }
 

@@ -657,6 +657,7 @@ public class Server
     public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
     public DateTime CreationDateTime { get; set; }
+    public DateTime? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }
 	public Guid ApiKey { get; set; } = Guid.NewGuid();
 
