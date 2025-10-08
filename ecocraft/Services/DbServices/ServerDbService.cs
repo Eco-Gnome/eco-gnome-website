@@ -23,6 +23,7 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 	{
 		return context.Servers
 			.Where(s => s.IsDefault)
+			.OrderByDescending(s => s.CreationDateTime)
 			.ToListAsync();
 	}
 
@@ -39,7 +40,7 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 		return context.Servers
 			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 	}
-	
+
 	public Task<Server?> GetByApiKeyAsync(Guid apiKey)
 	{
 		return context.Servers
