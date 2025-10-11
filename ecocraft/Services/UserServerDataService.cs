@@ -286,7 +286,7 @@ public class UserServerDataService(
 
         foreach (var element in recipe.Elements)
         {
-            AddUserElement(element, userRecipe, dataContext);
+            AddUserElementIfNotExists(element, userRecipe, dataContext);
         }
 
         if (!UserCraftingTables.Select(uct => uct.CraftingTable).Contains(recipe.CraftingTable))
@@ -313,18 +313,21 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserElement(Element element, UserRecipe userRecipe, DataContext dataContext)
+    public void AddUserElementIfNotExists(Element element, UserRecipe userRecipe, DataContext dataContext)
     {
-        var userElement = new UserElement
+        if (element.GetCurrentUserElement(dataContext) is null)
         {
-            Element = element,
-            DataContext = dataContext,
-            Share = element.DefaultShare,
-            IsReintegrated = element.DefaultIsReintegrated,
-            UserRecipe = userRecipe
-        };
+            var userElement = new UserElement
+            {
+                Element = element,
+                DataContext = dataContext,
+                Share = element.DefaultShare,
+                IsReintegrated = element.DefaultIsReintegrated,
+                UserRecipe = userRecipe
+            };
 
-        userElementDbService.Add(userElement);
+            userElementDbService.Add(userElement);
+        }
 
         foreach (var itemOrTag in element.ItemOrTag.GetAssociatedItemsAndSelf())
         {

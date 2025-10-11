@@ -70,6 +70,11 @@ public class Element
     public Skill? Skill { get; set; }
     public List<UserElement> UserElements { get; set; } = [];
 
+    public UserElement GetMandatoryCurrentUserElement(DataContext dataContext)
+    {
+        return UserElements.First(ur => ur.DataContextId == dataContext.Id);
+    }
+
     public UserElement? GetCurrentUserElement(DataContext dataContext)
     {
         return UserElements.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
@@ -275,6 +280,16 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public UserPrice? GetCurrentUserPrice(DataContext dataContext)
     {
         return UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+    }
+
+    public UserPrice GetMandatoryCurrentUserPrice(DataContext dataContext)
+    {
+        if (UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id) is null)
+        {
+            throw new Exception(this.ToString());
+        }
+
+        return UserPrices.First(ur => ur.DataContextId == dataContext.Id);
     }
 
     public List<ItemOrTag> GetAssociatedItemsAndSelf()

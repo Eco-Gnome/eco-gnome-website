@@ -288,6 +288,7 @@
         "3": " !"
     },
     "PriceCalculator": {
+        "MagickFix": "Magick Fix (Try it before reset!)",
         "PageTitle": "Price Calculator",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
