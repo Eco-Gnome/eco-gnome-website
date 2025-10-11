@@ -694,30 +694,30 @@ public class LocalizedField
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; } // Added so it's deleted in cascade if server is deleted
-    public string en_US { get; set; }
-    public string fr { get; set; }
-    public string es { get; set; }
-    public string de { get; set; }
-    public string ko { get; set; }
-    public string pt_BR { get; set; }
-    public string zh_Hans { get; set; }
-    public string ru { get; set; }
-    public string it { get; set; }
-    public string pt_PT { get; set; }
-    public string hu { get; set; }
-    public string ja { get; set; }
-    public string nn { get; set; }
-    public string pl { get; set; }
-    public string nl { get; set; }
-    public string ro { get; set; }
-    public string da { get; set; }
-    public string cs { get; set; }
-    public string sv { get; set; }
-    public string uk { get; set; }
-    public string el { get; set; }
-    public string ar_sa { get; set; }
-    public string vi { get; set; }
-    public string tr { get; set; }
+    public string en_US { get; set; } = "";
+    public string fr { get; set; } = "";
+    public string es { get; set; } = "";
+    public string de { get; set; } = "";
+    public string ko { get; set; } = "";
+    public string pt_BR { get; set; } = "";
+    public string zh_Hans { get; set; } = "";
+    public string ru { get; set; } = "";
+    public string it { get; set; } = "";
+    public string pt_PT { get; set; } = "";
+    public string hu { get; set; } = "";
+    public string ja { get; set; } = "";
+    public string nn { get; set; } = "";
+    public string pl { get; set; } = "";
+    public string nl { get; set; } = "";
+    public string ro { get; set; } = "";
+    public string da { get; set; } = "";
+    public string cs { get; set; } = "";
+    public string sv { get; set; } = "";
+    public string uk { get; set; } = "";
+    public string el { get; set; } = "";
+    public string ar_sa { get; set; } = "";
+    public string vi { get; set; } = "";
+    public string tr { get; set; } = "";
 
     public Server Server { get; set; }
     public List<Recipe> Recipes { get; set; } = [];
