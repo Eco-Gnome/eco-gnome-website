@@ -1,5 +1,6 @@
 ﻿using AssetRipper.Export.UnityProjects;
 using AssetRipper.Export.UnityProjects.Configuration;
+using AssetRipper.IO.Files;
 using Cpp2IL.Core.Extensions;
 using ecocraft.Models;
 
@@ -46,16 +47,15 @@ public static class AssetRipperService
 
     private static string ExtractUnityFiles(string path)
     {
-        LibraryConfiguration settings = new();
-        ExportHandler export = new ExportHandler(settings);
-        var gameData = export.LoadAndProcess([path]);
+        ExportHandler export = new ExportHandler(new());
+        var gameData = export.LoadAndProcess([path], LocalFileSystem.Instance);
 
         if (Directory.Exists(ExportPath))
         {
             Directory.Delete(ExportPath, recursive: true);
         }
         Directory.CreateDirectory(ExportPath);
-        export.Export(gameData, ExportPath);
+        export.Export(gameData, ExportPath, LocalFileSystem.Instance);
 
         return ExportPath;
     }
