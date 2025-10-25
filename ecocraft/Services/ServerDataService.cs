@@ -318,12 +318,13 @@ public class ServerDataService(
         dynamicValueDbService.Delete(dynamicValue);
     }
 
-    public Modifier ImportModifier(DynamicValue dynamicValue, string dynamicType, ISLinkedToModifier iSLinkedToModifier)
+    public Modifier ImportModifier(DynamicValue dynamicValue, string dynamicType, string valueType, ISLinkedToModifier iSLinkedToModifier)
     {
         var modifier = new Modifier
         {
             DynamicValue = dynamicValue,
             DynamicType = dynamicType,
+            ValueType = valueType,
         };
 
         switch (iSLinkedToModifier)
@@ -341,9 +342,10 @@ public class ServerDataService(
         return modifier;
     }
 
-    public void RefreshModifier(Modifier modifier, string dynamicType, ISLinkedToModifier iSLinkedToModifier)
+    public void RefreshModifier(Modifier modifier, string dynamicType, string valueType, ISLinkedToModifier iSLinkedToModifier)
     {
         modifier.DynamicType = dynamicType;
+        modifier.ValueType = valueType;
 
         switch (iSLinkedToModifier)
         {

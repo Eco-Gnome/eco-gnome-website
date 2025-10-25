@@ -484,11 +484,11 @@ public class ImportDataService(
 
             if (dbModifier is null)
             {
-                serverDataService.ImportModifier(dynamicValue, modifier.DynamicType, iSLinkedToModifier);
+                serverDataService.ImportModifier(dynamicValue, modifier.DynamicType, modifier.ValueType, iSLinkedToModifier);
             }
             else
             {
-                serverDataService.RefreshModifier(dbModifier, modifier.DynamicType, iSLinkedToModifier);
+                serverDataService.RefreshModifier(dbModifier, modifier.DynamicType, modifier.ValueType, iSLinkedToModifier);
             }
         }
 
@@ -734,6 +734,7 @@ public class ImportDataService(
         {
             Item = modifier.Skill?.Name ?? modifier.Talent?.Name ?? "",
             DynamicType = modifier.DynamicType,
+            ValueType = modifier.ValueType,
         };
     }
 
@@ -816,6 +817,7 @@ public class ImportDataService(
     {
         public required string DynamicType { get; init; }
         public required string Item { get; init; }
+        public string ValueType { get; init; } = "";
     }
 
     private class ElementDto

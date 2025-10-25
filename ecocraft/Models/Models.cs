@@ -129,7 +129,7 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill)?.GetPercent(modifier.Skill) ?? 1m;
+                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed")?.GetPercent(modifier.Skill) ?? 1m;
                     break;
                 case "Talent":
                     multiplier *= modifier.Talent?.GetCurrentUserTalent(dataContext) is not null ? modifier.Talent.Value : 1m;
@@ -192,7 +192,7 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill);
+                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed");
                     multiplier *= bestPluginModule?.GetPercent(modifier.Skill) ?? 1m;
 
                     if (multiplier != 1m)
@@ -246,10 +246,22 @@ public class DynamicValue
     }
 }
 
+/*
+ValueType in ECO is:
+    Efficiency,
+    Speed,
+    CalorieReduction,
+    Damage,
+    Yield,
+    Misc,
+    LaborEfficiency
+ */
+
 public class Modifier
 {
     [Key] public Guid Id { get; set; }
     public required string DynamicType { get; set; }
+    public string ValueType { get; set; } = "";
     [ForeignKey("DynamicValue")] public Guid DynamicValueId { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     [ForeignKey("Talent")] public Guid? TalentId { get; set; }
@@ -537,12 +549,11 @@ public class UserCraftingTable
     public PluginModule? PluginModule { get; set; }
     public List<PluginModule> SkilledPluginModules { get; set; } = [];
 
-    public PluginModule? GetBestPluginModule(Skill? skill)
+    public PluginModule? GetBestPluginModule(Skill? skill, bool requireSpeed = false)
     {
         return SkilledPluginModules
             .Concat([PluginModule])
-            .Where(pm => pm is not null)
-            .MinBy(pm => pm!.GetPercent(skill));
+            .Where(pm => pm is not null && (requireSpeed ? pm.PluginType != PluginType.Resource : pm.PluginType != PluginType.Speed)).MinBy(pm => pm!.GetPercent(skill));
     }
 }
 
