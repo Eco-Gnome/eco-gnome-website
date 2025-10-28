@@ -72,7 +72,7 @@
         "CraftTimeReductionTooltip": "{initialValue} mit {Prozent}% Reduktion durch das Upgrade-Modul {upgradeModuleName}",
         "Dynamic": "dynamisch",
         "Labor": "Arbeit",
-        "TotalReductionTooltip": "mit einer Gesamtreduktion von {Prozent}% aufgrund von:",
+        "TotalReductionTooltip": "mit einer Gesamtreduktion von {Prozent}% aufgrund von: ",
         "SkillReductionTooltip": "Fertigkeit {skill} {skillLevel} -> {Prozent}%",
         "TalentReductionTooltip": "Talent {talentName} -> {Prozent}%",
         "ModuleReductionTooltip": "Modul {ModulName} -> {Prozent}%",

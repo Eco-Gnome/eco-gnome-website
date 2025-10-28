@@ -72,7 +72,7 @@
         "CraftTimeReductionTooltip": "업그레이드 모듈 {업그레이드모듈명}으로 인해 {퍼센트}% 감소한 {초기값}입니다",
         "Dynamic": "동적",
         "Labor": "노동력",
-        "TotalReductionTooltip": "로 인해 총 {퍼센트}% 감소합니다:",
+        "TotalReductionTooltip": "로 인해 총 {퍼센트}% 감소합니다: ",
         "SkillReductionTooltip": "스킬 {스킬} {스킬 레벨} -> {퍼센트}%",
         "TalentReductionTooltip": "특성 {특성명} -> {퍼센트}%",
         "ModuleReductionTooltip": "모듈 {모듈명} -> {퍼센트}%",

@@ -72,7 +72,7 @@
         "CraftTimeReductionTooltip": "{початкове значення} зі зменшенням на {відсоток}% завдяки оновленню модуля {ім'я_модуля_оновлення}",
         "Dynamic": "динамічний",
         "Labor": "Трудомісткість",
-        "TotalReductionTooltip": "із загальним зменшенням на {відсоток}% за рахунок:",
+        "TotalReductionTooltip": "із загальним зменшенням на {відсоток}% за рахунок: ",
         "SkillReductionTooltip": "Вміння {вміння} {рівень вміння} -> {відсоток}%",
         "TalentReductionTooltip": "Талант {talentName} -> {відсоток}%",
         "ModuleReductionTooltip": "Модуль {moduleName} -> {відсоток}%",

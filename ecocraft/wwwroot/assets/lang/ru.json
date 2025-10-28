@@ -72,7 +72,7 @@
         "CraftTimeReductionTooltip": "{initialValue} с {процентным}% снижением благодаря модулю обновления {upgradeModuleName}",
         "Dynamic": "динамический",
         "Labor": "Труд",
-        "TotalReductionTooltip": "с общим снижением на {процентов}% за счет:",
+        "TotalReductionTooltip": "с общим снижением на {процентов}% за счет: ",
         "SkillReductionTooltip": "Навык {skill} {skillLevel} -> {percent}%",
         "TalentReductionTooltip": "Талант {talentName} -> {процент}%",
         "ModuleReductionTooltip": "Модуль {moduleName} -> {percent}%",
