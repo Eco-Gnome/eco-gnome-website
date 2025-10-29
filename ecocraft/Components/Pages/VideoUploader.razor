@@ -1,0 +1,167 @@
+﻿@page "/videos-uploader-ne-pas-partager-hors-lcp"
+@using ecocraft.Services
+@using Variant = MudBlazor.Variant
+@inject ISnackbar Snackbar
+@inject VideoUploadService VideoUploadService
+@inject IJSRuntime JsRuntime
+
+<MudPaper Class="pa-6 d-flex flex-column gap-4" Elevation="2">
+    <MudText Typo="Typo.h6">Upload vidéo (.mp4, max 20 Mo)</MudText>
+
+    <MudStack>
+        <MudFileUpload T="IBrowserFile"
+                       FilesChanged="OnFilesChanged"
+                       Accept="video/mp4">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.UploadFile">
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+        @if (_selectError is not null)
+        {
+            <MudAlert Severity="Severity.Error">@_selectError</MudAlert>
+        }
+    </MudStack>
+
+    <MudPaper>
+        <MudStack>
+            @foreach (var file in files)
+            {
+                <MudCard>
+                    <MudStack Row>
+                        <MudLink Href="@($"/videos/{file}")">
+                            <MudText>@file</MudText>
+                        </MudLink>
+                        <MudIconButton Size="Size.Small" Icon="@MDIIcons.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => DeleteFile(file))"></MudIconButton>
+                    </MudStack>
+                </MudCard>
+            }
+        </MudStack>
+    </MudPaper>
+
+    @if (_selectedFile is not null)
+    {
+        <MudPaper Class="pa-4 d-flex flex-column gap-2" Elevation="1">
+            <MudText Typo="Typo.subtitle2">@_selectedFile.Name</MudText>
+            <MudText Typo="Typo.body2">
+                Taille :
+                @($"{_selectedFile.Size / 1024.0 / 1024.0:0.00} Mo")
+            </MudText>
+
+            @if (_error is not null)
+            {
+                <MudAlert Severity="Severity.Error">@_error</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Tertiary"
+                       Disabled="_isUploading"
+                       OnClick="@(() => Upload())">
+                @_buttonText
+            </MudButton>
+
+            @if (_isUploading)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+            }
+        </MudPaper>
+    }
+</MudPaper>
+
+@code {
+    private IBrowserFile? _selectedFile;
+    private string? _error;
+    private string? _selectError;
+    private bool _isUploading;
+    private string _buttonText = "Envoyer";
+    private List<string> files = [];
+
+    protected override Task OnInitializedAsync()
+    {
+        RefreshFiles();
+        return Task.CompletedTask;
+    }
+
+    private void RefreshFiles()
+    {
+        files = VideoUploadService.GetFiles();
+    }
+
+    private async Task DeleteFile(string file)
+    {
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Êtes vous sûr de vouloir supprimer {file} ?");
+        if (!confirmed) return;
+
+        VideoUploadService.DeleteFile(file);
+        RefreshFiles();
+        StateHasChanged();
+    }
+
+    private async Task OnFilesChanged(IBrowserFile? file)
+    {
+        _selectError = null;
+        _selectedFile = null;
+
+        if (file is null)
+            return;
+
+        if (!file.Name.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
+        {
+            _selectError = "Uniquement .mp4.";
+            return;
+        }
+
+        const long maxBytes = 20L * 1024L * 1024L;
+        if (file.Size > maxBytes)
+        {
+            _selectError = "Fichier trop gros (max 20 Mo).";
+            return;
+        }
+
+        _selectedFile = file;
+    }
+
+    private async Task Upload()
+    {
+        if (_selectedFile is null)
+            return;
+
+        _isUploading = true;
+        _buttonText = "Envoi...";
+        _error = null;
+
+        try
+        {
+            // On ouvre le stream du browserfile
+            using var stream = _selectedFile.OpenReadStream(20 * 1024 * 1024);
+
+            var url = await VideoUploadService.SaveFileAsync(
+                stream,
+                _selectedFile.Name,
+                _selectedFile.ContentType,
+                _selectedFile.Size
+            );
+
+            RefreshFiles();
+
+            Snackbar.Add($"Upload OK ✅ → {url}", Severity.Success);
+            _buttonText = "Envoyé";
+            _selectedFile = null;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            Snackbar.Add("Échec upload ❌", Severity.Error);
+            _buttonText = "Réessayer";
+        }
+        finally
+        {
+            _isUploading = false;
+        }
+
+        StateHasChanged();
+    }
+}
+
