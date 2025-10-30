@@ -98,9 +98,9 @@ public class VideoUploadService
         if (!originalFileName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || contentType != "audio/mpeg")
             throw new InvalidOperationException("Unauthorized format. MP3 only.");
 
-        const long maxBytes = 10L * 1024L * 1024L;
+        const long maxBytes = 20L * 1024L * 1024L;
         if (length > maxBytes)
-            throw new InvalidOperationException("File too large (>10 Mo).");
+            throw new InvalidOperationException("File too large (>20 Mo).");
 
         if (mp3Stream == null) throw new ArgumentNullException(nameof(mp3Stream));
 

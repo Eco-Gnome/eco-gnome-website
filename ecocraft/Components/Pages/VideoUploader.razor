@@ -6,10 +6,11 @@
 @inject VideoUploadService VideoUploadService
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
+@inject LocalizationService LocalizationService
 
 <MudPaper Class="pa-6 d-flex flex-column gap-4" Elevation="2">
-    <MudText Typo="Typo.h6">Upload video (.mp4, max 20 Mo)</MudText>
-
+    <MudText Typo="Typo.h6">Upload MP4 or MP3 for ScreenPlayers mod (radio, jukebox, televisions, ...)</MudText>
+    <MudText Typo="Typo.body2">Attention ! L'ensemble de ces fichiers est partagé entre tous les joueurs du serveur. Respectez les fichiers des autres joueurs et supprimez ceux que vous n'utilisez plus. Le serveur est limité à 100 fichiers maximum.</MudText>
     <MudStack Row>
         <MudStack>
             <MudFileUpload T="IBrowserFile"
@@ -20,8 +21,12 @@
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                StartIcon="@Icons.Material.Filled.UploadFile">
-                        <MudText>Upload MP4</MudText>
+                        <MudText>Upload MP4 (max 20 Mo)</MudText>
                     </MudButton>
+                    @if (_isUploadingMp4)
+                    {
+                        <MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
+                    }
                 </ActivatorContent>
             </MudFileUpload>
             @if (_errorMp4 is not null)
@@ -38,8 +43,12 @@
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                StartIcon="@Icons.Material.Filled.UploadFile">
-                        <MudText>Upload MP3</MudText>
+                        <MudText>Upload MP3 (max 20 Mo)</MudText>
                     </MudButton>
+                    @if (_isUploadingMp3)
+                    {
+                        <MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
+                    }
                 </ActivatorContent>
             </MudFileUpload>
             @if (_errorMp3 is not null)
@@ -55,7 +64,7 @@
             {
                 <MudCard>
                     <MudStack Row>
-                        <MudLink Href="@($"/videos/{ContextService.CurrentServer!.Id}/{file}")">
+                        <MudLink Href="@($"/videos/{ContextService.CurrentServer!.Id}/{file}")" Target="_blank">
                             <MudText>@file</MudText>
                         </MudLink>
                         <MudIconButton Size="Size.Small" Icon="@MDIIcons.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => DeleteFile(file))"></MudIconButton>
@@ -116,6 +125,12 @@
         StateHasChanged();
     }
 
+    private async Task CopyToClipboard(string text)
+	{
+		await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+		Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarCopy"), Severity.Info);
+	}
+
     private async Task UploadMp4(IBrowserFile? file)
     {
         if (file is null)
@@ -123,6 +138,13 @@
 
         _isUploadingMp4 = true;
         _errorMp4 = null;
+
+        RefreshFiles();
+        if (_files.Count >= 100)
+        {
+            _errorMp4 = "Maximum de 100 fichiers atteint ! Supprimez en pour uploader à nouveau.";
+            return;
+        }
 
         try
         {
@@ -161,6 +183,13 @@
 
         _isUploadingMp3 = true;
         _errorMp3 = null;
+
+        RefreshFiles();
+        if (_files.Count >= 100)
+        {
+            _errorMp3 = "Maximum de 100 fichiers atteint ! Supprimez en pour uploader à nouveau.";
+            return;
+        }
 
         try
         {
