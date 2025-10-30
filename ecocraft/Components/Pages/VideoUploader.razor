@@ -1,37 +1,61 @@
-﻿@page "/videos-uploader-ne-pas-partager-hors-lcp"
+﻿@page "/videos-upload"
 @using ecocraft.Services
 @using Variant = MudBlazor.Variant
+@inject ContextService ContextService
 @inject ISnackbar Snackbar
 @inject VideoUploadService VideoUploadService
 @inject IJSRuntime JsRuntime
+@inject NavigationManager Navigation
 
 <MudPaper Class="pa-6 d-flex flex-column gap-4" Elevation="2">
-    <MudText Typo="Typo.h6">Upload vidéo (.mp4, max 20 Mo)</MudText>
+    <MudText Typo="Typo.h6">Upload video (.mp4, max 20 Mo)</MudText>
 
-    <MudStack>
-        <MudFileUpload T="IBrowserFile"
-                       FilesChanged="OnFilesChanged"
-                       Accept="video/mp4">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.UploadFile">
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
-        @if (_selectError is not null)
-        {
-            <MudAlert Severity="Severity.Error">@_selectError</MudAlert>
-        }
+    <MudStack Row>
+        <MudStack>
+            <MudFileUpload T="IBrowserFile"
+                           Disabled="_isUploadingMp4"
+                           FilesChanged="UploadMp4"
+                           Accept="video/mp4">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.UploadFile">
+                        <MudText>Upload MP4</MudText>
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            @if (_errorMp4 is not null)
+            {
+                <MudAlert Severity="Severity.Error">@_errorMp4</MudAlert>
+            }
+        </MudStack>
+        <MudStack>
+            <MudFileUpload T="IBrowserFile"
+                           Disabled="_isUploadingMp3"
+                           FilesChanged="UploadMp3"
+                           Accept="video/mp3">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.UploadFile">
+                        <MudText>Upload MP3</MudText>
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            @if (_errorMp3 is not null)
+            {
+                <MudAlert Severity="Severity.Error">@_errorMp3</MudAlert>
+            }
+        </MudStack>
     </MudStack>
 
     <MudPaper>
         <MudStack>
-            @foreach (var file in files)
+            @foreach (var file in _files)
             {
                 <MudCard>
                     <MudStack Row>
-                        <MudLink Href="@($"/videos/{file}")">
+                        <MudLink Href="@($"/videos/{ContextService.CurrentServer!.Id}/{file}")">
                             <MudText>@file</MudText>
                         </MudLink>
                         <MudIconButton Size="Size.Small" Icon="@MDIIcons.Filled.DeleteForever" Color="Color.Error" OnClick="@(() => DeleteFile(file))"></MudIconButton>
@@ -40,43 +64,36 @@
             }
         </MudStack>
     </MudPaper>
-
-    @if (_selectedFile is not null)
-    {
-        <MudPaper Class="pa-4 d-flex flex-column gap-2" Elevation="1">
-            <MudText Typo="Typo.subtitle2">@_selectedFile.Name</MudText>
-            <MudText Typo="Typo.body2">
-                Taille :
-                @($"{_selectedFile.Size / 1024.0 / 1024.0:0.00} Mo")
-            </MudText>
-
-            @if (_error is not null)
-            {
-                <MudAlert Severity="Severity.Error">@_error</MudAlert>
-            }
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Tertiary"
-                       Disabled="_isUploading"
-                       OnClick="@(() => Upload())">
-                @_buttonText
-            </MudButton>
-
-            @if (_isUploading)
-            {
-                <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-            }
-        </MudPaper>
-    }
 </MudPaper>
 
 @code {
-    private IBrowserFile? _selectedFile;
-    private string? _error;
-    private string? _selectError;
-    private bool _isUploading;
-    private string _buttonText = "Envoyer";
-    private List<string> files = [];
+    private string? _errorMp4;
+    private string? _errorMp3;
+    private bool _isUploadingMp4;
+    private bool _isUploadingMp3;
+    private List<string> _files = [];
+
+    protected override void OnInitialized()
+    {
+        if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentServer!.HasVideoUploader)
+        {
+            Navigation.NavigateTo("/");
+        }
+
+        ContextService.OnContextChanged += OnContextChanged;
+    }
+
+    private void OnContextChanged()
+    {
+        // Make sure you don't have access to this page if your server has not video uploader
+        if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentServer!.HasVideoUploader)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        RefreshFiles();
+    }
 
     protected override Task OnInitializedAsync()
     {
@@ -86,79 +103,90 @@
 
     private void RefreshFiles()
     {
-        files = VideoUploadService.GetFiles();
+        _files = VideoUploadService.GetFiles(ContextService.CurrentServer!);
     }
 
     private async Task DeleteFile(string file)
     {
-        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Êtes vous sûr de vouloir supprimer {file} ?");
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete file {file} ?");
         if (!confirmed) return;
 
-        VideoUploadService.DeleteFile(file);
+        VideoUploadService.DeleteFile(ContextService.CurrentServer!, file);
         RefreshFiles();
         StateHasChanged();
     }
 
-    private async Task OnFilesChanged(IBrowserFile? file)
+    private async Task UploadMp4(IBrowserFile? file)
     {
-        _selectError = null;
-        _selectedFile = null;
-
         if (file is null)
             return;
 
-        if (!file.Name.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
-        {
-            _selectError = "Uniquement .mp4.";
-            return;
-        }
-
-        const long maxBytes = 20L * 1024L * 1024L;
-        if (file.Size > maxBytes)
-        {
-            _selectError = "Fichier trop gros (max 20 Mo).";
-            return;
-        }
-
-        _selectedFile = file;
-    }
-
-    private async Task Upload()
-    {
-        if (_selectedFile is null)
-            return;
-
-        _isUploading = true;
-        _buttonText = "Envoi...";
-        _error = null;
+        _isUploadingMp4 = true;
+        _errorMp4 = null;
 
         try
         {
             // On ouvre le stream du browserfile
-            using var stream = _selectedFile.OpenReadStream(20 * 1024 * 1024);
+            await using var stream = file.OpenReadStream(20 * 1024 * 1024);
 
             var url = await VideoUploadService.SaveFileAsync(
+                ContextService.CurrentServer!,
                 stream,
-                _selectedFile.Name,
-                _selectedFile.ContentType,
-                _selectedFile.Size
+                file.Name,
+                file.ContentType,
+                file.Size
             );
 
             RefreshFiles();
 
             Snackbar.Add($"Upload OK ✅ → {url}", Severity.Success);
-            _buttonText = "Envoyé";
-            _selectedFile = null;
         }
         catch (Exception ex)
         {
-            _error = ex.Message;
-            Snackbar.Add("Échec upload ❌", Severity.Error);
-            _buttonText = "Réessayer";
+            _errorMp4 = ex.Message;
+            Snackbar.Add("Upload error", Severity.Error);
         }
         finally
         {
-            _isUploading = false;
+            _isUploadingMp4 = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task UploadMp3(IBrowserFile? file)
+    {
+        if (file is null)
+            return;
+
+        _isUploadingMp3 = true;
+        _errorMp3 = null;
+
+        try
+        {
+            // On ouvre le stream du browserfile
+            await using var stream = file.OpenReadStream(20 * 1024 * 1024);
+
+            await VideoUploadService.Mp3StreamToMp4Async(
+                ContextService.CurrentServer!,
+                stream,
+                file.Name,
+                file.ContentType,
+                file.Size
+            );
+
+            RefreshFiles();
+
+            Snackbar.Add("Upload ok", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            _errorMp3 = ex.Message;
+            Snackbar.Add("Upload error", Severity.Error);
+        }
+        finally
+        {
+            _isUploadingMp3 = false;
         }
 
         StateHasChanged();

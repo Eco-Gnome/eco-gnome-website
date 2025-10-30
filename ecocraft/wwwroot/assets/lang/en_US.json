@@ -52,6 +52,7 @@
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
         "ShoppingList": "Shopping List",
+        "VideosUpload": "Videos Uploader",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Source Code",
@@ -213,7 +214,10 @@
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
+        "SettingsCol": "Settings",
+        "HasVideoUploader": "Can Upload Videos",
         "IdCol": "Id",
+        "CopySecretId": "Copy Secret Id",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Delete server",

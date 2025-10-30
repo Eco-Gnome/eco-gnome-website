@@ -10,6 +10,13 @@
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.ShoppingList")">
         <MudNavLink IconColor="Color.Primary" Href="shopping-list" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.Cart">@LocalizationService.GetTranslation("NavMenu.ShoppingList")</MudNavLink>
     </MudTooltip>
+
+    @if (!IsLoadingUserAndServer && (ContextService.CurrentServer?.HasVideoUploader ?? false))
+    {
+        <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.VideosUpload")">
+            <MudNavLink IconColor="Color.Primary" Href="videos-upload" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.VideoPlus">@LocalizationService.GetTranslation("NavMenu.VideosUpload")</MudNavLink>
+        </MudTooltip>
+    }
     <!--<MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>-->

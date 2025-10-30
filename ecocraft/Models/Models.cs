@@ -682,6 +682,7 @@ public class Server
     public string Name { get; set; }
     public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
+    public bool HasVideoUploader { get; set; } = false;
     public DateTime CreationDateTime { get; set; }
     public DateTime? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }

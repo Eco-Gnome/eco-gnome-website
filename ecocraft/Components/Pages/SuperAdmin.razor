@@ -59,6 +59,9 @@
                         <MudTooltip Text="@context.Id.ToString()">
                             <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
                         </MudTooltip>
+                        <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.CopySecretId")">
+                            <MudIconButton Icon="@Icons.Material.Outlined.FileCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.SecretId.ToString()))"/>
+                        </MudTooltip>
                     </MudTd>
                     <MudTd>
                         @context.Pseudo
@@ -123,7 +126,7 @@
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.ServerNameCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.DataCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("JoinCode")</MudTh>
+                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.SettingsCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol")</MudTh>
                     <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ActionCol")</MudTh>
@@ -158,7 +161,12 @@
                         <MudIconButton Size="Size.Small" Color="Color.Default" Icon="@(context.IsEmpty ? MDIIcons.Outline.Battery : MDIIcons.Filled.BatteryHigh)"/>
                     </MudTd>
                     <MudTd>
-                        @context.JoinCode
+                        <MudTooltip Text="@(LocalizationService.GetTranslation("SuperAdmin.HasVideoUploader"))">
+                            <MudIconButton Size="Size.Small"
+                                           Icon="@(context.HasVideoUploader ? MDIIcons.Filled.Upload : MDIIcons.Filled.UploadOff)"
+                                           Color="@(context.HasVideoUploader ? Color.Primary : Color.Default)"
+                                           OnClick="() => ToggleHasVideoUploader(context)"/>
+                        </MudTooltip>
                     </MudTd>
                     <MudTd>
                         @context.UserServers.Count
@@ -277,6 +285,12 @@
             );
             StateHasChanged();
         }
+    }
+
+    public async Task ToggleHasVideoUploader(Server server)
+    {
+        server.HasVideoUploader = !server.HasVideoUploader;
+        await DbContext.SaveChangesAsync();
     }
 
     public async Task ToggleCanUploadMod(User user)
