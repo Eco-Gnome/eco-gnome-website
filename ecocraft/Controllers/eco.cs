@@ -127,8 +127,84 @@ public class EcoController(
         return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
     }
 
+    /* Deprecated, keep it for compatibility */
     [HttpGet("categories-items")]
     public async Task<IActionResult> GetCategoriesAndItems([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? context)
+    {
+        var result = await GetItemsAndDataContext(ecoServerId, ecoUserId, context);
+        if (result.Result is not null) return result.Result;
+
+        var (items, dataContext) = result.Value;
+
+        var categoryToBuy = GetCategoryToBuy(items, dataContext, []);
+
+        var categoriesToSell = items.ToSell
+            .GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.SkillId ?? null)
+            .Select(m => new EcoGnomeCategory(
+                "Sell",
+                OfferType.Sell,
+                m.Select(i => new EcoGnomeItem(
+                    i.Name,
+                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
+                )).ToList()
+            ));
+
+        return Ok(categoriesToSell.Concat([categoryToBuy]));
+    }
+
+    [HttpGet("categories-items-v2")]
+    public async Task<IActionResult> GetCategoriesAndItemsV2([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string filterSkill = "", [FromQuery] GroupBy groupBy = 0, [FromQuery] string? context = "")
+    {
+        var result = await GetItemsAndDataContext(ecoServerId, ecoUserId, context);
+        if (result.Result is not null) return result.Result;
+
+        var (items, dataContext) = result.Value;
+        var filterSkills = filterSkill == "" ? [] : filterSkill.Split(',').ToList();
+
+        var categoryToBuy = GetCategoryToBuy(items, dataContext, filterSkills);
+
+        List<EcoGnomeCategory> categoriesToSell;
+        var categories = items.ToSell;
+
+        if (filterSkills.Count > 0)
+        {
+            categories = categories.Where(i => i.Elements.Any(e => e.IsProduct() && filterSkills.Contains(e.Recipe.Skill?.Name))).ToList();
+        }
+
+        if (groupBy != GroupBy.None)
+        {
+            var groupedCategories = groupBy switch
+            {
+                GroupBy.Margin => categories.GroupBy(i => i.GetCurrentUserPrice(dataContext)?.UserMargin?.Name ?? null),
+                GroupBy.Skill => categories.GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.Skill?.Name ?? null),
+                _ => throw new ArgumentOutOfRangeException(nameof(groupBy), groupBy, null)
+            };
+
+            categoriesToSell = groupedCategories.Select(m => new EcoGnomeCategory(
+                groupBy switch { GroupBy.Margin => m.Key?.ToString() ?? "", GroupBy.Skill => m.Key?.ToString() ?? "", _ => "Production" },
+                OfferType.Sell,
+                m.Select(i => new EcoGnomeItem(
+                    i.Name,
+                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
+                )).ToList()
+            )).ToList();
+        }
+        else
+        {
+            categoriesToSell = [new EcoGnomeCategory(
+                filterSkill != "" ? filterSkill : "Production",
+                OfferType.Sell,
+                categories.Select(i => new EcoGnomeItem(
+                    i.Name,
+                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
+                )).ToList()
+            )];
+        }
+
+        return Ok(categoriesToSell.Concat([categoryToBuy]));
+    }
+
+    private async Task<ActionResult<((List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) items, DataContext dataContext)>> GetItemsAndDataContext(string ecoServerId, string ecoUserId, string? context)
     {
         var result = await TryGetDataContext(ecoServerId, ecoUserId, context);
 
@@ -140,27 +216,26 @@ public class EcoController(
 
         var items = priceCalculatorService.GetCategorizedItemOrTags(dataContext);
 
-        var categoryToBuy = new EcoGnomeCategory(
-            "Buy",
+        return (items, dataContext);
+    }
+
+    private static EcoGnomeCategory GetCategoryToBuy((List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) items, DataContext dataContext, List<string> filterSkills)
+    {
+        var toBuy = items.ToBuy;
+
+        if (filterSkills.Count > 0)
+        {
+            toBuy = toBuy.Where(i => i.Elements.Any(e => e.IsIngredient() && filterSkills.Contains(e.Recipe.Skill?.Name))).ToList();
+        }
+
+        return new EcoGnomeCategory(
+            "Acquisition",
             OfferType.Buy,
-            items.ToBuy.SelectMany(t => t.IsTag ? t.AssociatedItems : [t]).Distinct().Select(t => new EcoGnomeItem(
+            toBuy.SelectMany(t => t.IsTag ? t.AssociatedItems : [t]).Distinct().Select(t => new EcoGnomeItem(
                 t.Name,
                 Math.Round(t.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 0, 2, MidpointRounding.AwayFromZero)
             )).ToList()
         );
-
-        var categoriesToSell = items.ToSell
-            .GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.SkillId ?? null)
-            .Select(m => new EcoGnomeCategory(
-                "Some Skill", // Not used in EcoGnomeMod for now
-                OfferType.Sell,
-                m.Select(i => new EcoGnomeItem(
-                    i.Name,
-                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
-                )).ToList()
-            ));
-
-        return Ok(categoriesToSell.Concat([categoryToBuy]));
     }
 
     [HttpGet("server-prices")]
@@ -187,7 +262,7 @@ public class EcoController(
 
         var server = await serverDbService.GetByEcoServerIdAsync(ecoServerId);
         if (server is null)
-            return BadRequest("Can't find server.");
+            return BadRequest("Can't find server. Did you register your server thanks to /egserver <joinCode> ?");
 
         return server;
     }
@@ -199,7 +274,7 @@ public class EcoController(
 
         var userServer = (await userDbService.GetUserServerByEcoIdsAsync(ecoUserId, ecoServerId)).FirstOrDefault();
         if (userServer is null)
-            return BadRequest("Can't find user or server.");
+            return BadRequest("Can't find user or server. Did you register your user thanks to /eguser <secretId> ?");
 
         if (!string.IsNullOrWhiteSpace(dataContext))
         {
@@ -223,6 +298,13 @@ public enum OfferType
     All,
     Buy,
     Sell
+}
+
+public enum GroupBy
+{
+    None,
+    Margin,
+    Skill,
 }
 
 public class EcoGnomeCategory(string name, OfferType offerType, List<EcoGnomeItem> items)

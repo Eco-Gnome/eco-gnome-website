@@ -24,6 +24,7 @@ public class UserElementDbService(EcoCraftDbContext context) : IGenericUserDbSer
 			.Where(up => up.DataContextId == dataContext.Id)
 			.Include(ue => ue.Element)
 			.ThenInclude(e => e.Recipe)
+			.ThenInclude(r => r.Skill)
 			.Include(ue => ue.Element)
 			.ThenInclude(e => e.Quantity)
 			.ToListAsync();
