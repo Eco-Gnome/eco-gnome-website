@@ -1,0 +1,362 @@
+﻿@page "/map-generator"
+@using System.Web
+@using ecocraft.Models.MapGenerator
+@using ecocraft.Services
+@using SkiaSharp;
+@inject LocalizationService LocalizationService
+@inject ISnackbar Snackbar
+@inject JSInteropService JSService
+
+<PageTitle>@LocalizationService.GetTranslation("MapGenerator.Title")</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
+
+    <MudGrid Justify="Justify.Center">
+        <MudItem xd="12">
+            <h1>@LocalizationService.GetTranslation("MapGenerator.Title")</h1>
+        </MudItem>
+
+        <MudFlexBreak/>
+
+        @if (!_mapLoaded)
+        {
+            <MudItem xs="4">
+                @LocalizationService.GetTranslation("MapGenerator.CreationTitle")
+                <MudNumericField T="int"
+                                 @bind-Value="@_mapSize"
+                                 Min="20"
+                                 Max="200"
+                                 Variant="Variant.Outlined"/>
+                <MudButton OnClick="() => CreateNewMap()">@LocalizationService.GetTranslation("MapGenerator.CreateButton")</MudButton>
+            </MudItem>
+            <MudItem xs="4">
+                <MudStack>
+                    @LocalizationService.GetTranslation("MapGenerator.LoadTitle")
+                    <input type="file" multiple hidden id="MapFileUpload"/><label class="fake-button" for="MapFileUpload">@LocalizationService.GetTranslation("MapGenerator.ImportButton")</label>
+                    <MudCheckBox @bind-Value="_rebaseHeightmap">@LocalizationService.GetTranslation("MapGenerator.RebaseHeightmap")</MudCheckBox>
+                </MudStack>
+            </MudItem>
+
+            <MudFlexBreak/>
+        }
+        else
+        {
+            // Left Toolbar
+            <MudItem xs="1">
+                <MudPaper>
+                    <MudStack>
+                        <MudIconButton Icon="@MDIIcons.Filled.ViewList" OnClick="() => ChangeDimension(1)" Color="@(_currentDimension == 1 ? Color.Primary : Color.Default)"/>
+                        <MudIconButton Icon="@MDIIcons.Filled.Map" OnClick="() => ChangeDimension(2)" Color="@(_currentDimension == 2 ? Color.Primary : Color.Default)"/>
+                        <MudIconButton Icon="@MDIIcons.Filled.Cube" OnClick="() => ChangeDimension(3)" Color="@(_currentDimension == 3 ? Color.Primary : Color.Default)"/>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            // MainFrame
+            <MudItem xs="8">
+                <MudGrid Style="@($"{(_currentDimension == 1 ? "" : "display: none;")}")">
+                    @foreach (var contribution in Contributions)
+                    {
+                        <MudItem xs="4">
+                            <MudStack>
+                                @(contribution.Name):
+                                <MudImage id="@(contribution.ImageName)" Fluid />
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+
+                <div id="canvasContainer" class="canvas-container" Style="@($"{(_cursorTool is not null ? $"cursor: {_cursorTool};" : "")} {(_currentDimension == 2 ? "" : "display: none;")}")">
+                    @foreach (var contribution in Contributions)
+                    {
+                        <canvas style="@($"position: absolute; top: 0; left: 0; width:100%; display: {(_currentContribution == contribution || _currentContribution?.SubLayerOf == contribution.Name ? "block" : "none")}")" id="@(contribution.CanvasName)"></canvas>
+                    }
+                </div>
+
+                @if (_currentDimension == 3)
+                {
+                    <div class="view-3d">
+                        <div id="container-3d" class="container-3d"></div>
+                    </div>
+                }
+            </MudItem>
+
+            // Right Toolbar
+            <MudItem xs="1">
+                @if (_currentDimension == 2)
+                {
+                    <MudPaper>
+                        <MudStack>
+                            @foreach (var contribution in Contributions)
+                            {
+                                <MudIconButton Icon="@contribution.Icon" OnClick="() => ChangeContribution(contribution)" Color="@(_currentContribution == contribution ? Color.Primary : Color.Default)"/>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudItem>
+            // Details
+            <MudItem xs="2">
+                @switch (_currentDimension)
+                {
+                    case 1:
+                        <MudPaper>
+                            <MudButton Color="Color.Warning"
+                                       OnClick="@(() => ExportMap())">@LocalizationService.GetTranslation("MapGenerator.Export")</MudButton>
+                        </MudPaper>
+                        break;
+                    case 2:
+                        <MudCard>
+                            <MudCardHeader>@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Title")</MudCardHeader>
+                            <MudCardContent>
+                                <MudStack>
+                                    <MudDivider />
+                                    @if (_currentContribution?.Name is "Biomes" or "Water")
+                                    {
+                                        <MudStack Spacing="0">
+                                            <MudStack Row Justify="Justify.SpaceBetween">
+                                                <MudText Class="pb-4 flex-3">@LocalizationService.GetTranslation("MapGenerator.2dToolbar.ToolSize"):</MudText>
+                                                <MudTextField ReadOnly
+                                                              Value="@_toolSize"
+                                                              Variant="Variant.Outlined"
+                                                              AdornmentText="px"
+                                                              Adornment="Adornment.End"
+                                                              Class="rectangle-input flex-no-grow"/>
+                                            </MudStack>
+                                            <MudSlider T="int"
+                                                       Value="@_toolSize"
+                                                       Immediate
+                                                       Step="1"
+                                                       Min="1"
+                                                       Max="200"
+                                                       ValueChanged="@(i => ChangeToolSize(i))"/>
+                                        </MudStack>
+                                        <MudStack Row>
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Pen")">
+                                                <MudIconButton Variant="Variant.Filled" Color="@(_currentTool == "pen" ? Color.Primary : Color.Default)" Icon="@MDIIcons.Filled.Pencil" OnClick="@(() => ChangeTool("pen"))"/>
+                                            </MudTooltip>
+                                            @if (_currentContribution?.Name == "Water")
+                                            {
+                                                <MudTooltip Text="@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Eraser")">
+                                                    <MudIconButton Variant="Variant.Filled" Color="@(_currentTool == "eraser" ? Color.Primary : Color.Default)" Icon="@MDIIcons.Filled.Eraser" OnClick="@(() => ChangeTool("eraser"))"/>
+                                                </MudTooltip>
+                                            }
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Fill")">
+                                                <MudIconButton Variant="Variant.Filled" Color="@(_currentTool == "fill" ? Color.Primary : Color.Default)" Icon="@MDIIcons.Filled.FormatColorFill" OnClick="@(() => ChangeTool("fill"))"/>
+                                            </MudTooltip>
+                                        </MudStack>
+                                        <MudDivider/>
+                                    }
+
+
+                                    @if (_currentContribution?.Name == "Biomes") {
+                                        @foreach (var biome in Biomes)
+                                        {
+                                            <MudStack Row>
+                                                <MudButton Style="@($"background-color: {biome.Color}; width: 100px; height: 20px; border: 1px solid black;")" OnClick="() => ChangeColor(biome.Color)"/>
+                                                <MudText Color="@(_currentColor == biome.Color ? Color.Primary : Color.Default)">@biome.Name</MudText>
+                                            </MudStack>
+                                        }
+                                    }
+                                    else if (_currentContribution?.Name == "Water")
+                                    {
+                                        <MudStack Row>
+                                            <MudButton Style="@($"background-color: {EcoColors.River}; width: 100px; height: 20px; border: 1px solid black;")" OnClick="() => ChangeColor(EcoColors.River)"/>
+                                            <MudText Color="@(_currentColor == EcoColors.River ? Color.Primary : Color.Default)">@LocalizationService.GetTranslation("MapGenerator.2dToolbar.River")</MudText>
+                                        </MudStack>
+                                        <MudStack Row>
+                                            <MudButton Style="@($"background-color: {EcoColors.Lake}; width: 100px; height: 20px; border: 1px solid black;")" OnClick="() => ChangeColor(EcoColors.Lake)"/>
+                                            <MudText Color="@(_currentColor == EcoColors.Lake ? Color.Primary : Color.Default)">@LocalizationService.GetTranslation("MapGenerator.2dToolbar.Lake")</MudText>
+                                        </MudStack>
+                                    }
+
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                        break;
+                    case 3:
+                        break;
+                }
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+
+@code{
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    private const int MaxFiles = 6;
+
+    private static readonly List<Biome> Biomes =
+    [
+        new Biome("DeepOcean", EcoColors.DeepOcean, -0.7m, -0.2m, 0m, 0.4m, 0m, 1m),
+        new Biome("Ocean", EcoColors.Ocean, -0.15m, -0.05m, 0.4m, 1m, 0m, 1m),
+        new Biome("Coast", EcoColors.Coast, -0.05m, 0.03m, 0m, 1m, 0m, 1m),
+        new Biome("Grasslands", EcoColors.Grasslands, 0.03m, 1m, 0.4m, 0.8m, 0.3m, 0.5m),
+        new Biome("WarmForest", EcoColors.WarmForest, 0.03m, 1m, 0.5m, 0.8m, 0.5m, 0.6m),
+        new Biome("Desert", EcoColors.Desert, 0.03m, 1m, 0.7m, 1m, 0m, 0.3m),
+        new Biome("RainForest", EcoColors.RainForest, 0.03m, 1m, 0.6m, 0.8m, 0.7m, 1m),
+        new Biome("Wetland", EcoColors.Wetland, 0.03m, 1m, 0.4m, 0.6m, 0.6m, 0.8m),
+        new Biome("ColdForest", EcoColors.ColdForest, 0.03m, 1m, 0.2m, 0.5m, 0.5m, 0.6m),
+        new Biome("Taiga", EcoColors.Taiga, 0.03m, 1m, 0.2m, 0.3m, 0.2m, 0.5m),
+        new Biome("Tundra", EcoColors.Tundra, 0.03m, 1m, 0.1m, 0.2m, 0m, 0.6m),
+        new Biome("Ice", EcoColors.Ice, 0.03m, 1m, 0m, 0.1m, 0m, 0.6m)
+    ];
+
+    private static readonly List<Contribution> Contributions = [
+        new Contribution("Biomes", MDIIcons.Filled.Island, EcoColors.DeepOcean, EcoColors.Ocean),
+        new Contribution("Water", MDIIcons.Filled.Water, SKColors.Empty, EcoColors.River, "Biomes"),
+        new Contribution("Temperature", MDIIcons.Filled.Thermometer, SKColors.Black),
+        new Contribution("Rainfall", MDIIcons.Filled.WeatherPouring, SKColors.Black),
+        new Contribution("Heightmap", MDIIcons.Filled.Terrain, EcoColors.WaterLevelHeight),
+        new Contribution("Waterlevel", MDIIcons.Filled.WaterOpacity, SKColors.Empty, null, "Heightmap"),
+    ];
+
+    private MudFileUpload<IReadOnlyList<IBrowserFile>> MapUploadButton;
+    private bool _mapLoaded = false;
+    private int _mapSize = 100;
+    private bool _rebaseHeightmap = false;
+    private int _currentDimension = 2;
+    private Contribution? _currentContribution;
+    private SKColor _currentColor = EcoColors.Ocean;
+    private int _toolSize = 10;
+    private string _currentTool = "pen";
+    private string? _cursorTool = null;
+
+    protected override void OnInitialized()
+    {
+        Snackbar.Configuration.MaxDisplayedSnackbars = 6;
+        ChangeTool(_currentTool);
+        JSService.EnqueueAction(async js => await js.InvokeVoidAsync("MapGenerator1d.initialize", DotNetObjectReference.Create(this), "MapFileUpload", Contributions.Select(c => c.Name)));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSService.ExecutePendingActionsAsync();
+    }
+
+    private void ChangeContribution(Contribution contribution)
+    {
+        _currentContribution = contribution;
+
+        if (_currentContribution.SelectedColor is not null)
+        {
+            ChangeColor((SKColor)_currentContribution.SelectedColor);
+        }
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.changeCanvas", _currentContribution.CanvasName);
+        });
+    }
+
+    private void ChangeTool(string tool)
+    {
+        _currentTool = tool;
+
+        _cursorTool = _currentTool switch
+        {
+            "pen" => "none",
+            "eraser" => "none",
+            "fill" => "url(\"data:image/svg+xml," + Uri.EscapeDataString("<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">" + MDIIcons.Filled.FormatColorFill + "</svg>") + "\") 18 14, auto",
+            _ => _cursorTool
+        };
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.changeTool", _currentTool);
+        });
+    }
+
+    private async Task ChangeDimension(int dimension)
+    {
+        if (_currentDimension == 2)
+        {
+            await JSService.ExecuteActionAsync(async js => await js.InvokeAsync<Task>("MapGenerator2d.saveImages", Contributions.Select(c => c.ImageName)));
+        }
+
+        _currentDimension = dimension;
+    }
+
+    private void ChangeColor(SKColor color)
+    {
+        _currentColor = color;
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.changeColor", _currentColor.ToString());
+        });
+    }
+
+    private void ChangeToolSize(int toolSize)
+    {
+        _toolSize = toolSize;
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.changeToolSize", _toolSize);
+        });
+    }
+
+    private async Task ExportMap()
+    {
+        await JSService.ExecuteActionAsync(async js => await js.InvokeAsync<Task>("MapGenerator1d.downloadImages", Contributions.Select(c => c.ImageName)));
+    }
+
+    private void CreateNewMap()
+    {
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.initialize", Contributions.Select(c => c.CanvasName), _mapSize * 10, "canvasContainer", _currentTool, _toolSize, _currentColor.ToString());
+            await js.InvokeVoidAsync("MapGenerator2d.generateDefaultMap", Contributions.Select(c => c.DefaultColor.ToString()));
+        });
+
+        _mapLoaded = true;
+        _currentContribution = Contributions.First();
+    }
+
+    [JSInvokable]
+    public void ImportMap(int mapSize)
+    {
+        _mapSize = mapSize / 10;
+
+        JSService.EnqueueAction(async js =>
+        {
+            await js.InvokeVoidAsync("MapGenerator2d.initialize", Contributions.Select(c => c.CanvasName), _mapSize * 10, "canvasContainer", _currentTool, _toolSize, _currentColor.ToString());
+            await js.InvokeVoidAsync("MapGenerator2d.importExistingMap", Contributions.Select(c => c.ImageName));
+        });
+
+        _mapLoaded = true;
+        _currentContribution = Contributions.First();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void WarnUser(string type, string additional = "")
+    {
+        switch (type)
+        {
+            case "IMAGE_WRONG_SIZE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ImageWrongSize", additional), Severity.Error);
+                break;
+            case "IMAGE_NOT_SQUARE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ImageNotSquare", additional), Severity.Error);
+                break;
+            case "NO_BIOMES_FILE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.NoBiomesFile"), Severity.Error);
+                break;
+            case "WRONG_FILE_TYPE":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.WrongFileType", additional), Severity.Warning);
+                break;
+            case "UNABLE_TO_PROCESS":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.UnprocessableFile", additional), Severity.Warning);
+                break;
+            case "PROCESS_SUCCESS":
+                Snackbar.Add(LocalizationService.GetTranslation("MapGenerator.Snackbar.ProcessedFile", additional), Severity.Success);
+                break;
+        }
+    }
+
+}
+
+
