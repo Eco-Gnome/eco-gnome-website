@@ -2,16 +2,8 @@
 @using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
-@using ecocraft.Services.DbServices
-@inject EcoCraftDbContext EcoCraftDbContext
 @inject ContextService ContextService
 @inject IDialogService DialogService
-@inject ServerDbService ServerDbService
-@inject UserServerDataService UserServerDataService
-@inject UserDbService UserDbService
-@inject ServerDataService ServerDataService
-@inject ISnackbar Snackbar
-@inject NavigationManager Navigation
 @inject LocalStorageService LocalStorageService
 @inject LocalizationService LocalizationService
 @inject NavigationManager NavManager
@@ -110,7 +102,6 @@
     [Parameter]
     public EventCallback<bool> IsDarkModeChanged { get; set; }
 
-    IList<IBrowserFile> _files = new List<IBrowserFile>();
     private string? _lastAcknowledgeVersion;
     private string EnvironmentLabel;
 
@@ -147,27 +138,15 @@
         ContextService.OnContextChanged -= StateHasChanged;
     }
 
-    private async Task OnDarkModeChanged(bool newValue)
-    {
-        IsDarkMode = newValue;
-        await IsDarkModeChanged.InvokeAsync(newValue);
-    }
-
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)
     {
         await LocalizationService.SetLanguageAsync(languageCodes.First());
         ContextService.InvokeContextChanged();
-
     }
 
     private async Task OnSelectedServerChanged(IEnumerable<Server> servers)
     {
         await ContextService.ChangeServer(servers.First());
-    }
-
-    private async Task Save()
-    {
-        await EcoCraftDbContext.SaveChangesAsync();
     }
 
     private void OpenServerDialog()

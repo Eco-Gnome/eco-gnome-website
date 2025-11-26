@@ -3,38 +3,55 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class ModUploadHistoryDbService(EcoCraftDbContext context) : IGenericDbService<ModUploadHistory>
+public class ModUploadHistoryDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<ModUploadHistory>
 {
-	public Task<List<ModUploadHistory>> GetAllAsync()
+	public async Task<List<ModUploadHistory>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.ModUploadHistories
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.ModUploadHistories
 			.Include(muh => muh.User)
 			.Include(muh => muh.Server)
 			.OrderByDescending(muh => muh.UploadDateTime)
 			.ToListAsync();
 	}
 
-	public Task<ModUploadHistory?> GetByIdAsync(Guid id)
+	public async Task<ModUploadHistory?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.ModUploadHistories
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.ModUploadHistories
 			.Include(muh => muh.User)
 			.FirstOrDefaultAsync(muh => muh.Id == id);
 	}
 
-	public ModUploadHistory Add(ModUploadHistory muh)
+	private ModUploadHistory CloneForDb(ModUploadHistory modUploadHistory)
 	{
-		context.ModUploadHistories.Add(muh);
-
-		return muh;
+		return new ModUploadHistory
+		{
+			Id = modUploadHistory.Id,
+			FileName = modUploadHistory.FileName,
+			FileHash = modUploadHistory.FileHash,
+			IconsCount = modUploadHistory.IconsCount,
+			UploadDateTime = modUploadHistory.UploadDateTime,
+			UserId = modUploadHistory.User.Id,
+			ServerId = modUploadHistory.Server?.Id,
+		};
 	}
 
-	public void Update(ModUploadHistory muh)
+	public void Create(EcoCraftDbContext context, ModUploadHistory modUploadHistory)
 	{
-		context.ModUploadHistories.Update(muh);
+		context.Add(CloneForDb(modUploadHistory));
 	}
 
-	public void Delete(ModUploadHistory muh)
+	public void UpdateAll(EcoCraftDbContext context, ModUploadHistory modUploadHistory)
 	{
-		context.ModUploadHistories.Remove(muh);
+		context.Attach(CloneForDb(modUploadHistory)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, ModUploadHistory modUploadHistory)
+	{
+		var entity = new ModUploadHistory { Id = modUploadHistory.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

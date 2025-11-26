@@ -3,16 +3,21 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
+@using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
 @inject ShoppingListDataService ShoppingListDataService
 @inject ShoppingListService ShoppingListService
-@inject EcoCraftDbContext EcoCraftDbContext
 @inject LocalizationService LocalizationService
-@inject UserServerDataService UserServerDataService
-@inject ServerDataService ServerDataService
+@inject UserSkillDbService UserSkillDbService
+@inject UserCraftingTableDbService UserCraftingTableDbService
+@inject UserRecipeDbService UserRecipeDbService
+@inject ServerDbService ServerDbService
+@inject DataContextDbService DataContextDbService
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("ShoppingList.PageTitle") - Eco Gnome</PageTitle>
 
@@ -32,20 +37,20 @@
                 <MudStack Row Spacing="3">
                     @foreach (var shoppingList in ContextService.CurrentUserServer!.DataContexts.Where(d => d.IsShoppingList))
                     {
-                        <MudButton Color="_selectedShoppingList == shoppingList ? Color.Primary : Color.Default"
+                        <MudButton Color="@(_selectedShoppingList?.Id == shoppingList.Id ? Color.Primary : Color.Default)"
                                    Variant="Variant.Filled"
-                                   OnClick="() => SelectShoppingList(shoppingList)">
+                                   OnClick="@(() => SelectShoppingList(shoppingList))">
                             @shoppingList.Name
                             <MudIconButton Icon="@MDIIcons.Filled.Close"
                                            Size="Size.Medium"
                                            Class="pa-0 ml-2"
-                                           OnClick="() => DeleteShoppingList(shoppingList)"/>
+                                           OnClick="@(() => DeleteShoppingList(shoppingList))"/>
                         </MudButton>
                     }
                     <MudButton Color="Color.Tertiary"
                                EndIcon="@MDIIcons.Filled.Plus"
                                Variant="Variant.Outlined"
-                               OnClick="() => AddShoppingList()">
+                               OnClick="@(() => AddShoppingList())">
                         @LocalizationService.GetTranslation("ShoppingList.AddShoppingList")
                     </MudButton>
                 </MudStack>
@@ -59,7 +64,7 @@
                     </MudStack>
                 </MudItem>
             }
-            else if (_selectedShoppingList is not null && ServerDataService.IsDataRetrieved && UserServerDataService.IsDataRetrieved)
+            else if (_selectedShoppingList is not null)
             {
                 <ErrorBoundary>
                     <ChildContent>
@@ -188,7 +193,7 @@
                                         </MudStack>
                                     </ItemTemplate>
                                 </MudAutocomplete>
-                                <MudTreeView Items="_TreeItems">
+                                <MudTreeView Items="TreeItems">
                                     <ItemTemplate>
                                         <MudTreeViewItem Items="@context.Children" Expanded="@context.Expanded">
                                             <BodyContent Context="other">
@@ -252,7 +257,7 @@
                                                         @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()))
                                                         {
                                                             var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
-                                                            var possibleRecipes = ServerDataService.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))).ToList();
+                                                            var possibleRecipes = ContextService.CurrentServerData!.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))).ToList();
                                                             var isFullfilled = context.Value.ChildrenUserRecipes
                                                                 .Sum(ur => ur.Recipe.Elements
                                                                     .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))
@@ -321,7 +326,7 @@
 @code {
     private DataContext? _selectedShoppingList;
     private bool _isLoadingData;
-    private List<TreeItemData<UserRecipe>> _TreeItems { get; set; } = [];
+    private List<TreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
     private bool _expandedShoppingLists;
     private bool ExpandedShoppingLists
@@ -382,12 +387,12 @@
 
     private void RebuildTree()
     {
-        _TreeItems.Clear();
+        TreeItems.Clear();
 
         if (_selectedShoppingList is not null) {
             foreach (var rootShoppingListRecipe in _selectedShoppingList!.GetRootShoppingListRecipes())
             {
-                _TreeItems.Add(CreateTreeItemData(rootShoppingListRecipe));
+                TreeItems.Add(CreateTreeItemData(rootShoppingListRecipe));
             }
         }
     }
@@ -395,10 +400,16 @@
     private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
     {
         var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(element.ItemOrTag) && e.IsProduct()).Quantity.GetDynamicValue(_selectedShoppingList));
-        ShoppingListDataService.AddUserRecipe(_selectedShoppingList, recipe, userRecipe, (int)quantityToCraft);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList, recipe, userRecipe, (int)quantityToCraft);
+            return Task.CompletedTask;
+        });
+
         _openedAddChildrenContext = null;
         _openedAddChildrenIngredient = null;
-        await Calculate();
+        Rebuild();
     }
 
     private TreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
@@ -428,7 +439,14 @@
     private async Task OnQuantityToCraftChanged(UserRecipe userRecipe, int value)
     {
         userRecipe.RoundFactor = value;
-        await Calculate();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
     }
 
     private void OnContextChanged()
@@ -441,8 +459,10 @@
         _selectedShoppingList = shoppingList ?? ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.IsShoppingList);
         _isLoadingData = true;
         StateHasChanged();
-        await ServerDataService.RetrieveServerData(ContextService.CurrentServer);
-        await UserServerDataService.RetrieveUserData(_selectedShoppingList);
+
+        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(_selectedShoppingList!.Id, ContextService.CurrentServerData!);
+
         _isLoadingData = false;
         RebuildTree();
         StateHasChanged();
@@ -460,8 +480,7 @@
 
     public async Task AddShoppingList()
     {
-        var shoppingList = ShoppingListDataService.CreateShoppingList(ContextService.CurrentUserServer!);
-        await EcoCraftDbContext.SaveChangesAsync();
+        var shoppingList = await ShoppingListDataService.CreateShoppingList(ContextService.CurrentUserServer!);
         await SelectShoppingList(shoppingList);
         StateHasChanged();
     }
@@ -469,7 +488,13 @@
     private async Task UpdateShoppingListName(string name)
     {
         _selectedShoppingList!.Name = name;
-        await EcoCraftDbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            DataContextDbService.UpdateName(context, _selectedShoppingList);
+            return Task.CompletedTask;
+        });
+
         StateHasChanged();
     }
 
@@ -478,10 +503,15 @@
         var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ShoppingList.ConfirmDeleteShoppingList", shoppingList.Name));
         if (!confirmed) return;
 
-        ShoppingListDataService.RemoveShoppingList(shoppingList);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            DataContextDbService.Destroy(context, shoppingList);
+            return Task.CompletedTask;
+        });
 
-        if (_selectedShoppingList == shoppingList)
+        ContextService.CurrentUserServer!.DataContexts.Remove(shoppingList);
+
+        if (_selectedShoppingList?.Id == shoppingList.Id)
         {
             await RetrieveData();
         }
@@ -489,14 +519,17 @@
 
     private async Task RemoveShoppingListRecipe(UserRecipe userRecipe)
     {
-        ShoppingListDataService.RemoveUserRecipe(_selectedShoppingList!, userRecipe);
-        await Calculate();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, userRecipe);
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
     }
 
-    private async Task Calculate()
+    private void Rebuild()
     {
-        // await ShoppingListService.Calculate(_selectedShoppingList!, _selectedShoppingList!.GetRootShoppingListRecipes());
-        await EcoCraftDbContext.SaveChangesAsync();
         RebuildTree();
         StateHasChanged();
     }
@@ -504,7 +537,12 @@
     public async Task OnLevelChanged(UserSkill userSkill, int level)
     {
         userSkill.Level = level;
-        await Calculate();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSkillDbService.UpdateLevel(context, userSkill);
+            return Task.CompletedTask;
+        });
+        Rebuild();
     }
 
     private async Task IncreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
@@ -518,28 +556,37 @@
 
         shoppingListCraftingTable.PluginModule = pluginModules[currentIndex + 1];
 
-        await Calculate();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserCraftingTableDbService.UpdateAll(context, shoppingListCraftingTable);
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
     }
 
     private async Task DecreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
     {
         var currentIndex = pluginModules.FindIndex(pm => pm == shoppingListCraftingTable.PluginModule);
 
-        if (currentIndex == -1)
+        switch (currentIndex)
         {
-            return;
+            case -1:
+                return;
+            case 0:
+                shoppingListCraftingTable.PluginModule = null;
+                break;
+            default:
+                shoppingListCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+                break;
         }
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserCraftingTableDbService.UpdateAll(context, shoppingListCraftingTable);
+            return Task.CompletedTask;
+        });
 
-        if (currentIndex == 0)
-        {
-            shoppingListCraftingTable.PluginModule = null;
-        }
-        else
-        {
-            shoppingListCraftingTable.PluginModule = pluginModules[currentIndex - 1];
-        }
-
-        await Calculate();
+        Rebuild();
     }
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
@@ -568,11 +615,16 @@
     {
         if (recipe is null) return;
 
-        ShoppingListDataService.AddUserRecipe(_selectedShoppingList!, recipe);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe);
+
+            return Task.CompletedTask;
+        });
 
         _emptyRecipe = null;
 
-        await Calculate();
+        Rebuild();
     }
 
     private async Task RemoveAllUserData()

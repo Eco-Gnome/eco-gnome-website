@@ -4,7 +4,6 @@ using ecocraft.Extensions;
 using ecocraft.Models;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
 using ecocraft.Services.ImportData;
@@ -29,9 +28,9 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-builder.Services.AddDbContext<EcoCraftDbContext>(options =>
+builder.Services.AddDbContextFactory<EcoCraftDbContext>(options =>
     options
-        .UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"),
+        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
             o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
         .EnableSensitiveDataLogging()
         .UseLoggerFactory(LoggerFactory.Create(bd =>
@@ -62,6 +61,7 @@ builder.Services.AddScoped<UserPriceDbService>();
 builder.Services.AddScoped<UserRecipeDbService>();
 builder.Services.AddScoped<UserMarginDbService>();
 builder.Services.AddScoped<UserSettingDbService>();
+builder.Services.AddScoped<UserServerDbService>();
 builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
 builder.Services.AddScoped<DataContextDbService>();

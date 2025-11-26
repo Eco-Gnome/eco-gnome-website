@@ -375,6 +375,8 @@ FodyWeavers.xsd
 /ecocraft/ecocraft.db
 /ecocraft/ecocraft.bk.db
 
+/DataMigrator/ecocraft.db
+
 # Icons
 /ecocraft/tmp
 /ecocraft/Exports

@@ -21,10 +21,10 @@ public interface ISLinkedToModifier;
 // Eco Data
 public class Recipe: IHasLocalizedName
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
-    public required string FamilyName { get; set; }
+    public string FamilyName { get; set; }
     [ForeignKey("DynamicValue")] public Guid CraftMinutesId { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public long SkillLevel { get; set; }
@@ -56,7 +56,7 @@ public class Recipe: IHasLocalizedName
 
 public class Element
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
     public int Index { get; set; }
@@ -103,7 +103,7 @@ public class Element
 
 public class DynamicValue
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public decimal BaseValue { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
@@ -259,8 +259,8 @@ ValueType in ECO is:
 
 public class Modifier
 {
-    [Key] public Guid Id { get; set; }
-    public required string DynamicType { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string DynamicType { get; set; }
     public string ValueType { get; set; } = "";
     [ForeignKey("DynamicValue")] public Guid DynamicValueId { get; set; }
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
@@ -273,8 +273,8 @@ public class Modifier
 
 public class ItemOrTag: IHasLocalizedName, IHasIconName
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public bool IsTag { get; set; }
     public decimal? MinPrice { get; set; }
@@ -322,8 +322,8 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
 
 public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     public string? Profession { get; set; }
     public int MaxLevel { get; set; }
@@ -357,11 +357,11 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
 
 public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
-    [ForeignKey("LocalizedName")] public Guid? LocalizedNameId { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
+    [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("LocalizedDescription")] public Guid? LocalizedDescriptionId { get; set; }
-    public required string TalentGroupName { get; set; }
+    public string TalentGroupName { get; set; }
     public decimal Value { get; set; }
     public int Level { get; set; }
     public int MaxLevel { get; set; }
@@ -381,8 +381,8 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
 
 public class CraftingTable: IHasLocalizedName, IHasIconName
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
@@ -413,8 +413,8 @@ public enum PluginType
 
 public class PluginModule: IHasLocalizedName, IHasIconName
 {
-    [Key] public Guid Id { get; set; }
-    public required string Name { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
     public PluginType PluginType { get; set; }
@@ -457,9 +457,9 @@ public class PluginModule: IHasLocalizedName, IHasIconName
 // User Data
 public class User
 {
-    [Key] public Guid Id { get; init; }
+    [Key] public Guid Id { get; init; } = Guid.NewGuid();
     public string Pseudo { get; set; }
-    public DateTime CreationDateTime { get; init; }
+    public DateTimeOffset CreationDateTime { get; init; }
     public Guid SecretId { get; set; }
     public bool SuperAdmin { get; set; }
     public bool CanUploadMod { get; set; }
@@ -471,7 +471,7 @@ public class User
 
 public class UserServer
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public string? Pseudo { get; set; }
     public string? EcoUserId { get; set; }
     public bool IsAdmin { get; set; }
@@ -490,7 +490,7 @@ public class UserServer
 
 public class DataContext
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
     public string Name { get; set; }
     public bool IsDefault { get; set; }
@@ -514,7 +514,7 @@ public class DataContext
 
 public class UserSetting
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public MarginType MarginType { get; set; } = MarginType.MarkUp;
@@ -528,7 +528,7 @@ public class UserSetting
 
 public class UserMargin
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public string Name { get; set; } = "";
 
@@ -540,7 +540,7 @@ public class UserMargin
 
 public class UserCraftingTable
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
@@ -562,7 +562,7 @@ public class UserCraftingTable
 
 public class UserSkill
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Skill")] public Guid? SkillId { get; set; }
     public int Level { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
@@ -573,7 +573,7 @@ public class UserSkill
 
 public class UserTalent
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Talent")] public Guid TalentId { get; set; }
     public int Level { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
@@ -589,7 +589,7 @@ internal interface IHasPrice
 
 public class UserElement: IHasPrice
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Element")] public Guid ElementId { get; set; }
 
     public decimal? Price { get; set; }
@@ -608,7 +608,7 @@ public class UserElement: IHasPrice
 
 public class UserPrice: IHasPrice
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
 
     public decimal? Price { get; set; }
@@ -663,17 +663,18 @@ public class UserPrice: IHasPrice
 
 public class UserRecipe
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Recipe")] public Guid RecipeId { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public int RoundFactor { get; set; }
     public bool LockShare { get; set; } = false;
 
+    // For Shopping List only
+    [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }
+
     public Recipe Recipe { get; set; }
     public DataContext DataContext { get; set; }
 
-    // For Shopping List only
-    [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }
     public UserRecipe? ParentUserRecipe { get; set; }
     public List<UserRecipe> ChildrenUserRecipes { get; set; } = [];
     public List<UserElement> UserElements { get; set; } = [];
@@ -682,13 +683,13 @@ public class UserRecipe
 // Server Data
 public class Server
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; }
     public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
     public bool HasVideoUploader { get; set; } = false;
-    public DateTime CreationDateTime { get; set; }
-    public DateTime? LastDataUploadTime { get; set; }
+    public DateTimeOffset CreationDateTime { get; set; }
+    public DateTimeOffset? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }
 	public Guid ApiKey { get; set; } = Guid.NewGuid();
 
@@ -708,11 +709,11 @@ public class Server
 // History
 public class ModUploadHistory
 {
-    [Key] public Guid Id { get; init; }
-    public required string FileName { get; set; }
-    public required string FileHash { get; set; }
-    public required int IconsCount { get; set; }
-    public required DateTime UploadDateTime { get; init; }
+    [Key] public Guid Id { get; init; } = Guid.NewGuid();
+    public string FileName { get; set; }
+    public string FileHash { get; set; }
+    public int IconsCount { get; set; }
+    public DateTimeOffset UploadDateTime { get; init; }
     [ForeignKey("User")] public Guid UserId { get; set; }
     [ForeignKey("Server")] public Guid? ServerId { get; set; }
 
@@ -723,7 +724,7 @@ public class ModUploadHistory
 // Utils
 public class LocalizedField
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("Server")] public Guid ServerId { get; set; } // Added so it's deleted in cascade if server is deleted
     public string en_US { get; set; } = "";
     public string fr { get; set; } = "";

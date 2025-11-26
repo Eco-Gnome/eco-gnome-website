@@ -3,25 +3,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbService<UserRecipe>
+public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserRecipe>
 {
-    public Task<List<UserRecipe>> GetAllAsync()
+    public async Task<List<UserRecipe>> GetAllAsync(EcoCraftDbContext? context = null)
     {
-        return context.UserRecipes
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.UserRecipes
             .ToListAsync();
     }
 
-    public Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext)
+    public async Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
     {
-        return context.UserRecipes
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.UserRecipes
             .Where(s => s.DataContextId == dataContext.Id)
             .Include(r => r.UserElements)
             .ToListAsync();
     }
 
-    public Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext)
+    public async Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext, EcoCraftDbContext? context = null)
     {
-        return context.UserRecipes
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.UserRecipes
             .Where(ur => ur.DataContextId == dataContext.Id)
             .Include(ur => ur.Recipe)
             .ThenInclude(r => r.Elements)
@@ -31,25 +37,46 @@ public class UserRecipeDbService(EcoCraftDbContext context) : IGenericUserDbServ
             .ToListAsync();
     }
 
-    public Task<UserRecipe?> GetByIdAsync(Guid id)
+    public async Task<UserRecipe?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
     {
-        return context.UserRecipes
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.UserRecipes
             .FirstOrDefaultAsync(up => up.Id == id);
     }
 
-    public UserRecipe Add(UserRecipe userRecipe)
+    private UserRecipe CloneForDb(UserRecipe userRecipe)
     {
-        context.UserRecipes.Add(userRecipe);
-        return userRecipe;
+        return new UserRecipe
+        {
+            Id = userRecipe.Id,
+            RecipeId = userRecipe.Recipe.Id,
+            DataContextId = userRecipe.DataContext.Id,
+            RoundFactor = userRecipe.RoundFactor,
+            LockShare = userRecipe.LockShare,
+            ParentUserRecipeId = userRecipe.ParentUserRecipe?.Id,
+        };
     }
 
-    public void Update(UserRecipe userRecipe)
+    public void Create(EcoCraftDbContext context, UserRecipe userRecipe)
     {
-        context.UserRecipes.Update(userRecipe);
+        context.Add(CloneForDb(userRecipe));
     }
 
-    public void Delete(UserRecipe userRecipe)
+    public void UpdateAll(EcoCraftDbContext context, UserRecipe userRecipe)
     {
-        context.UserRecipes.Remove(userRecipe);
+        context.Attach(CloneForDb(userRecipe)).State = EntityState.Modified;
+    }
+
+    public void UpdateRoundFactor(EcoCraftDbContext context, UserRecipe userRecipe)
+    {
+        var entry = context.Attach(userRecipe);
+        entry.Property(x => x.RoundFactor).IsModified = true;
+    }
+
+    public void Destroy(EcoCraftDbContext context, UserRecipe userRecipe)
+    {
+        var entity = new UserRecipe { Id = userRecipe.Id };
+        context.Entry(entity).State = EntityState.Deleted;
     }
 }

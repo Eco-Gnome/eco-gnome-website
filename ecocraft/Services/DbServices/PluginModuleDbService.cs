@@ -3,51 +3,73 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class PluginModuleDbService(EcoCraftDbContext context) : IGenericNamedDbService<PluginModule>
+public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<PluginModule>
 {
-    public Task<List<PluginModule>> GetAllAsync()
+    public async Task<List<PluginModule>> GetAllAsync(EcoCraftDbContext? context = null)
     {
-        return context.PluginModules
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.PluginModules
             .Include(s => s.LocalizedName)
             .Include(s => s.Skill)
             .ToListAsync();
     }
 
-    public Task<List<PluginModule>> GetByServerAsync(Server server)
+    public async Task<List<PluginModule>> GetByServerAsync(Server server, EcoCraftDbContext? context = null)
     {
-        return context.PluginModules
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.PluginModules
             .Where(s => s.ServerId == server.Id)
             .Include(s => s.LocalizedName)
             .Include(s => s.Skill)
             .ToListAsync();
     }
 
-    public Task<PluginModule?> GetByIdAsync(Guid id)
+    public async Task<PluginModule?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
     {
-        return context.PluginModules
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.PluginModules
             .FirstOrDefaultAsync(pm => pm.Id == id);
     }
 
-    public Task<PluginModule?> GetByNameAsync(string name)
+    public async Task<PluginModule?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
     {
-        return context.PluginModules
+        context ??= await factory.CreateDbContextAsync();
+
+        return await context.PluginModules
             .FirstOrDefaultAsync(pm => pm.Name == name);
     }
 
-    public PluginModule Add(PluginModule pluginModule)
+    private PluginModule CloneForDb(PluginModule pluginModule)
     {
-        context.PluginModules.Add(pluginModule);
-
-        return pluginModule;
+        return new PluginModule
+        {
+            Id = pluginModule.Id,
+            Name = pluginModule.Name,
+            LocalizedNameId = pluginModule.LocalizedName.Id,
+            PluginType = pluginModule.PluginType,
+            Percent = pluginModule.Percent,
+            SkillPercent = pluginModule.SkillPercent,
+            SkillId = pluginModule.Skill?.Id,
+            ServerId = pluginModule.Server.Id,
+        };
     }
 
-    public void Update(PluginModule pluginModule)
+    public void Create(EcoCraftDbContext context, PluginModule pluginModule)
     {
-        context.PluginModules.Update(pluginModule);
+        context.Add(CloneForDb(pluginModule));
     }
 
-    public void Delete(PluginModule pluginModule)
+    public void UpdateAll(EcoCraftDbContext context, PluginModule pluginModule)
     {
-        context.PluginModules.Remove(pluginModule);
+        context.Attach(CloneForDb(pluginModule)).State = EntityState.Modified;
+    }
+
+    public void Destroy(EcoCraftDbContext context, PluginModule pluginModule)
+    {
+        var entity = new PluginModule { Id = pluginModule.Id };
+        context.Entry(entity).State = EntityState.Deleted;
     }
 }

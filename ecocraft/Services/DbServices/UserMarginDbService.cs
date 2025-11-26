@@ -3,41 +3,57 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserMarginDbService(EcoCraftDbContext context) : IGenericDbService<UserMargin>
+public class UserMarginDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<UserMargin>
 {
-	public Task<List<UserMargin>> GetAllAsync()
+	public async Task<List<UserMargin>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.UserMargins
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserMargins
 			.ToListAsync();
 	}
 
-	public Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext)
+	public async Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
 	{
-        return context.UserMargins
+		context ??= await factory.CreateDbContextAsync();
+
+        return await context.UserMargins
             .Where(s => s.DataContextId == dataContext.Id)
             .ToListAsync();
     }
 
-	public Task<UserMargin?> GetByIdAsync(Guid id)
+	public async Task<UserMargin?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.UserMargins
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserMargins
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserMargin Add(UserMargin userMargin)
+	private UserMargin CloneForDb(UserMargin userMargin)
 	{
-		context.UserMargins.Add(userMargin);
-
-		return userMargin;
+		return new UserMargin
+		{
+			Id = userMargin.Id,
+			DataContextId = userMargin.DataContext.Id,
+			Name = userMargin.Name,
+			Margin = userMargin.Margin,
+		};
 	}
 
-	public void Update(UserMargin UserMargin)
+	public void Create(EcoCraftDbContext context, UserMargin userMargin)
 	{
-		context.UserMargins.Update(UserMargin);
+		context.Add(CloneForDb(userMargin));
 	}
 
-	public void Delete(UserMargin UserMargin)
+	public void UpdateAll(EcoCraftDbContext context, UserMargin userMargin)
 	{
-		context.UserMargins.Remove(UserMargin);
+		context.Attach(CloneForDb(userMargin)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, UserMargin userMargin)
+	{
+		var entity = new UserMargin { Id = userMargin.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

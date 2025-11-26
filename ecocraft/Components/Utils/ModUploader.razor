@@ -2,12 +2,13 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
 @using StableNameDotNet
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject ContextService ContextService
-@inject EcoCraftDbContext DbContext
 @inject ModUploadHistoryDbService ModUploadHistoryDbService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <MudStack Row Spacing="2" AlignItems="AlignItems.Center">
     <MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
@@ -84,17 +85,21 @@
                 Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.NoIconsError"), Severity.Error);
             }
 
-            ModUploadHistoryDbService.Add(new ModUploadHistory
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
             {
-                FileName = fileName,
-                FileHash = fileHash,
-                IconsCount = icons.Count,
-                UploadDateTime = DateTime.Now,
-                User = ContextService.CurrentUser!,
-                Server = specificServer,
+                ModUploadHistoryDbService.Create(context, new ModUploadHistory
+                {
+                    FileName = fileName,
+                    FileHash = fileHash,
+                    IconsCount = icons.Count,
+                    UploadDateTime = DateTimeOffset.UtcNow,
+                    User = ContextService.CurrentUser!,
+                    Server = specificServer,
+                });
+
+                return Task.CompletedTask;
             });
 
-            await DbContext.SaveChangesAsync();
         }
         catch (Exception ex)
         {

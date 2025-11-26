@@ -77,7 +77,7 @@
 		var recipeNodes = new List<RecipeNode>();
 
 		// Create Tags and Items
-		foreach (var itemOrTag in UserServerDataService.UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct())
+		/*foreach (var itemOrTag in UserRecipes.Select(ur => ur.Recipe).SelectMany(r => r.Elements).Select(e => e.ItemOrTag).Distinct())
 		{
 			NodeModel node;
 
@@ -168,7 +168,7 @@
 				link.Labels.Add(new LinkLabelModel(link, element.Quantity.BaseValue.ToString()));
 				Diagram.Links.Add(link);
 			}
-		}
+		}*/
 
 		// Algorithme de placement
 

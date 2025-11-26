@@ -5,14 +5,16 @@
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
 @using ecocraft.Components.Utils
+@using Microsoft.EntityFrameworkCore
 @inject ContextService ContextService
-@inject EcoCraftDbContext DbContext
 @inject NavigationManager Navigation
 @inject UserDbService UserDbService
+@inject UserServerDbService UserServerDbService
 @inject ServerDbService ServerDbService
 @inject ModUploadHistoryDbService ModUploadHistoryDbService
 @inject ISnackbar Snackbar
 @inject LocalizationService LocalizationService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("SuperAdmin.Title") - Eco Gnome</PageTitle>
 
@@ -290,13 +292,23 @@
     public async Task ToggleHasVideoUploader(Server server)
     {
         server.HasVideoUploader = !server.HasVideoUploader;
-        await DbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+            ServerDbService.UpdateHasVideoUploader(context, server);
+            return Task.CompletedTask;
+		});
     }
 
     public async Task ToggleCanUploadMod(User user)
     {
         user.CanUploadMod = !user.CanUploadMod;
-        await DbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+            UserDbService.UpdateCanUploadMod(context, user);
+            return Task.CompletedTask;
+		});
     }
 
     public async Task RetrieveModUploadHistories() {
@@ -339,7 +351,13 @@
             if (confirmedTwice)
             {
                 user.SuperAdmin = !user.SuperAdmin;
-                await DbContext.SaveChangesAsync();
+
+                await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		        {
+                    UserDbService.UpdateSuperAdmin(context, user);
+                    return Task.CompletedTask;
+		        });
+
                 StateHasChanged();
             }
         }
@@ -348,7 +366,13 @@
     private async Task ToggleDefault(Server server)
     {
         server.IsDefault = !server.IsDefault;
-        await DbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+            ServerDbService.UpdateIsDefault(context, server);
+            return Task.CompletedTask;
+		});
+
         await RetrieveUsers();
         StateHasChanged();
     }
@@ -391,8 +415,13 @@
         {
             _isLoading = true;
             StateHasChanged();
-            UserDbService.Delete(user);
-            await DbContext.SaveChangesAsync();
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		    {
+                UserDbService.Destroy(context, user);
+                return Task.CompletedTask;
+            });
+
             await RetrieveUsers();
             _isLoading = false;
             StateHasChanged();
@@ -407,7 +436,11 @@
         {
             currentUserServer.IsAdmin = !currentUserServer.IsAdmin;
 
-            await DbContext.SaveChangesAsync();
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		    {
+                UserServerDbService.UpdateIsAdmin(context, currentUserServer);
+                return Task.CompletedTask;
+		    });
         }
         else
         {
@@ -426,8 +459,13 @@
         {
             _isLoading = true;
             StateHasChanged();
-            ServerDbService.Delete(server);
-            await DbContext.SaveChangesAsync();
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		    {
+                ServerDbService.Destroy(context, server);
+                return Task.CompletedTask;
+		    });
+
             await RetrieveServers();
             _isLoading = false;
             StateHasChanged();

@@ -3,10 +3,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Server>
+public enum RegisterServerResult
 {
-	public async Task<List<Server>> GetAllAsync()
+	Success,
+	EcoGnomeServerNotFound,
+	EcoServerAlreadyRegisteredWithOtherEcoServer,
+	EcoGnomeServerAlreadyLinkedToOtherEcoServer
+}
+
+public class RegisterServerResultInfo
+{
+	public RegisterServerResult Result { get; set; }
+	public string? OtherServerName { get; set; }
+}
+
+public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<Server>
+{
+	public async Task<List<Server>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
+		context ??= await factory.CreateDbContextAsync();
+
 		var servers = await context.Servers
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.User)
@@ -19,77 +35,209 @@ public class ServerDbService(EcoCraftDbContext context) : IGenericDbService<Serv
 		return servers;
 	}
 
-	public Task<List<Server>> GetAllDefaultAsync()
+	public async Task<List<Server>> GetAllDefaultAsync(EcoCraftDbContext? context = null)
 	{
-		return context.Servers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Servers
 			.Where(s => s.IsDefault)
 			.OrderByDescending(s => s.CreationDateTime)
 			.ToListAsync();
 	}
 
-	public Task<Server?> GetByIdAsync(Guid id)
+	public async Task<Server> GetServerWithData(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.Servers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Servers
+			.AsNoTrackingWithIdentityResolution()
+			.Where(s => s.Id == id)
+			// Skills
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.LocalizedName)
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.Talents)
+			.ThenInclude(t => t.LocalizedName)
+			// Crafting Tables
+			.Include(u => u.CraftingTables)
+			.ThenInclude(ct => ct.PluginModules)
+			.Include(u => u.CraftingTables)
+			.ThenInclude(s => s.LocalizedName)
+			// Plugin Modules
+			.Include(u => u.PluginModules)
+			.ThenInclude(s => s.LocalizedName)
+			.Include(u => u.PluginModules)
+			.ThenInclude(s => s.Skill)
+			// Recipe
+			.Include(u => u.Recipes)
+			.ThenInclude(c => c.Elements)
+			.ThenInclude(e => e.Quantity)
+			.ThenInclude(dv => dv.Modifiers)
+			.Include(u => u.Recipes)
+			.ThenInclude(s => s.LocalizedName)
+			.Include(u => u.Recipes)
+			.ThenInclude(s => s.CraftMinutes)
+			.ThenInclude(dv => dv.Modifiers)
+			.Include(u => u.Recipes)
+			.ThenInclude(s => s.Labor)
+			.ThenInclude(dv => dv.Modifiers)
+			// ItemOrTag
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.AssociatedItems)
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.AssociatedTags)
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.LocalizedName)
+			.FirstAsync();
+	}
+
+	public async Task<Server?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	{
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Servers
 			.Include(s => s.UserServers)
-			.ThenInclude(us => us.User)
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public Task<Server?> GetByEcoServerIdAsync(string ecoServerId)
+	public async Task<Server?> GetByEcoServerIdAsync(string ecoServerId, EcoCraftDbContext? context = null)
 	{
-		return context.Servers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Servers
 			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 	}
 
-	public Task<Server?> GetByApiKeyAsync(Guid apiKey)
+	public async Task<Server?> GetByApiKeyAsync(Guid apiKey, EcoCraftDbContext? context = null)
 	{
-		return context.Servers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Servers
 			.FirstOrDefaultAsync(s => s.ApiKey == apiKey);
 	}
 
-    public Task<Server?> GetByJoinCodeAsync(string joinCode)
+    public async Task<Server?> GetByJoinCodeAsync(string joinCode, EcoCraftDbContext? context = null)
     {
-        return context.Servers.FirstOrDefaultAsync(s => s.JoinCode == joinCode);
+		context ??= await factory.CreateDbContextAsync();
+
+        return await context.Servers
+	        .FirstOrDefaultAsync(s => s.JoinCode == joinCode);
     }
 
-    public Server Add(Server server)
-	{
-		context.Servers.Add(server);
+    public async Task<RegisterServerResultInfo> RegisterServerAsync(string joinCode, string ecoServerId)
+    {
+	    await using var context = await factory.CreateDbContextAsync();
 
-		return server;
-	}
+	    // 1. On récupère le serveur Eco-Gnome ciblé
+	    var server = await context.Servers
+		    .FirstOrDefaultAsync(s => s.JoinCode == joinCode);
 
-	public void Update(Server server)
-	{
-		context.Servers.Update(server);
-	}
+	    if (server is null)
+	    {
+		    return new RegisterServerResultInfo
+		    {
+			    Result = RegisterServerResult.EcoGnomeServerNotFound
+		    };
+	    }
 
-	public async Task<Server> AddAndSave(Server server)
-	{
-		context.Servers.Add(server);
+	    // 2. On regarde si l'ecoServerId est déjà utilisé ailleurs
+	    var alreadyRegisteredServer = await context.Servers
+		    .FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 
-		await context.SaveChangesAsync();
+	    if (alreadyRegisteredServer is not null && alreadyRegisteredServer.Id != server.Id)
+	    {
+		    return new RegisterServerResultInfo
+		    {
+			    Result = RegisterServerResult.EcoServerAlreadyRegisteredWithOtherEcoServer,
+			    OtherServerName = alreadyRegisteredServer.Name
+		    };
+	    }
 
-		return server;
-	}
+	    // 3. On vérifie si ce serveur Eco-Gnome est déjà lié à un autre Eco server
+	    if (server.EcoServerId is not null && server.EcoServerId != ecoServerId)
+	    {
+		    return new RegisterServerResultInfo
+		    {
+			    Result = RegisterServerResult.EcoGnomeServerAlreadyLinkedToOtherEcoServer
+		    };
+	    }
 
-	public Task UpdateAndSave(Server server)
-	{
-		context.Servers.Update(server);
+	    // 4. On fait l'association
+	    server.EcoServerId = ecoServerId;
 
-		return context.SaveChangesAsync();
-	}
+	    await context.SaveChangesAsync();
 
-	public void Delete(Server server)
-	{
-		context.Servers.Remove(server);
-	}
+	    return new RegisterServerResultInfo
+	    {
+		    Result = RegisterServerResult.Success
+	    };
+    }
 
-	public async Task DeleteAsync(Server server, User user)
-	{
-		context.Entry(server).State = EntityState.Detached;
-		context.Set<Server>().Local.Remove(server);
-		await context.Entry(user).Collection(u => u.UserServers).LoadAsync();
-		await context.Servers.Where(s => s.Id == server.Id).ExecuteDeleteAsync();
-	}
+    private Server CloneForDb(Server server)
+    {
+	    return new Server
+	    {
+		    Id = server.Id,
+		    Name = server.Name,
+		    EcoServerId = server.EcoServerId,
+		    IsDefault = server.IsDefault,
+		    HasVideoUploader = server.HasVideoUploader,
+		    CreationDateTime = server.CreationDateTime,
+		    LastDataUploadTime = server.LastDataUploadTime,
+		    JoinCode = server.JoinCode,
+		    ApiKey = server.ApiKey,
+	    };
+    }
+
+    public void Create(EcoCraftDbContext context, Server server)
+    {
+	    context.Add(CloneForDb(server));
+    }
+
+    public void UpdateAll(EcoCraftDbContext context, Server server)
+    {
+	    context.Attach(CloneForDb(server)).State = EntityState.Modified;
+    }
+
+    public void UpdateEcoServerId(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.EcoServerId).IsModified = true;
+    }
+
+    public void UpdateApiKey(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.ApiKey).IsModified = true;
+    }
+
+    public void UpdateName(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.Name).IsModified = true;
+    }
+
+    public void UpdateJoinCode(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.JoinCode).IsModified = true;
+    }
+
+    public void UpdateHasVideoUploader(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.HasVideoUploader).IsModified = true;
+    }
+
+    public void UpdateIsDefault(EcoCraftDbContext context, Server server)
+    {
+	    var entry = context.Attach(server);
+	    entry.Property(x => x.IsDefault).IsModified = true;
+    }
+
+    public void Destroy(EcoCraftDbContext context, Server server)
+    {
+	    var entity = new Server { Id = server.Id };
+	    context.Entry(entity).State = EntityState.Deleted;
+    }
 }

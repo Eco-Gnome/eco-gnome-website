@@ -3,40 +3,63 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserSkillDbService(EcoCraftDbContext context) : IGenericUserDbService<UserSkill>
+public class UserSkillDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserSkill>
 {
-	public Task<List<UserSkill>> GetAllAsync()
+	public async Task<List<UserSkill>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.UserSkills
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSkills
 			.ToListAsync();
 	}
 
-	public Task<List<UserSkill>> GetByDataContextAsync(DataContext dataContext)
+	public async Task<List<UserSkill>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
 	{
-		return context.UserSkills
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSkills
 			.Where(s => s.DataContextId == dataContext.Id)
 			.ToListAsync();
 	}
 
-	public Task<UserSkill?> GetByIdAsync(Guid id)
+	public async Task<UserSkill?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.UserSkills
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSkills
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserSkill Add(UserSkill userSkill)
+	private UserSkill CloneForDb(UserSkill userSkill)
 	{
-		context.UserSkills.Add(userSkill);
-		return userSkill;
+		return new UserSkill
+		{
+			Id = userSkill.Id,
+			SkillId = userSkill.Skill?.Id,
+			Level = userSkill.Level,
+			DataContextId = userSkill.DataContext.Id,
+		};
 	}
 
-	public void Update(UserSkill userSkill)
+	public void Create(EcoCraftDbContext context, UserSkill userSkill)
 	{
-		context.UserSkills.Update(userSkill);
+		context.Add(CloneForDb(userSkill));
 	}
 
-	public void Delete(UserSkill userSkill)
+	public void UpdateAll(EcoCraftDbContext context, UserSkill userSkill)
 	{
-		context.UserSkills.Remove(userSkill);
+		context.Attach(CloneForDb(userSkill)).State = EntityState.Modified;
+	}
+
+	public void UpdateLevel(EcoCraftDbContext context, UserSkill userSkill)
+	{
+		var entry = context.Attach(userSkill);
+		entry.Property(x => x.Level).IsModified = true;
+	}
+
+	public void Destroy(EcoCraftDbContext context, UserSkill userSkill)
+	{
+		var entity = new UserSkill { Id = userSkill.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

@@ -3,40 +3,56 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserTalentDbService(EcoCraftDbContext context) : IGenericUserDbService<UserTalent>
+public class UserTalentDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserTalent>
 {
-	public Task<List<UserTalent>> GetAllAsync()
+	public async Task<List<UserTalent>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.UserTalents
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserTalents
 			.ToListAsync();
 	}
 
-	public Task<List<UserTalent>> GetByDataContextAsync(DataContext dataContext)
+	public async Task<List<UserTalent>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
 	{
-		return context.UserTalents
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserTalents
 			.Where(s => s.DataContextId == dataContext.Id)
 			.ToListAsync();
 	}
 
-	public Task<UserTalent?> GetByIdAsync(Guid id)
+	public async Task<UserTalent?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.UserTalents
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserTalents
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserTalent Add(UserTalent talent)
+	private UserTalent CloneForDb(UserTalent userTalent)
 	{
-		context.UserTalents.Add(talent);
-		return talent;
+		return new UserTalent
+		{
+			Id = userTalent.Id,
+			TalentId = userTalent.Talent.Id,
+			DataContextId = userTalent.DataContext.Id,
+		};
 	}
 
-	public void Update(UserTalent userTalent)
+	public void Create(EcoCraftDbContext context, UserTalent userTalent)
 	{
-		context.UserTalents.Update(userTalent);
+		context.Add(CloneForDb(userTalent));
 	}
 
-	public void Delete(UserTalent userTalent)
+	public void UpdateAll(EcoCraftDbContext context, UserTalent userTalent)
 	{
-		context.UserTalents.Remove(userTalent);
+		context.Attach(CloneForDb(userTalent)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, UserTalent userTalent)
+	{
+		var entity = new UserTalent { Id = userTalent.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

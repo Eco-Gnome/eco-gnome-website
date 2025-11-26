@@ -3,34 +3,47 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class DynamicValueDbService(EcoCraftDbContext context)
+public class DynamicValueDbService(IDbContextFactory<EcoCraftDbContext> factory)
 {
-	public Task<List<DynamicValue>> GetAllAsync()
+	public async Task<List<DynamicValue>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.DynamicValues
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.DynamicValues
 			.ToListAsync();
 	}
 
-	public Task<DynamicValue?> GetByIdAsync(Guid id)
+	public async Task<DynamicValue?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.DynamicValues
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.DynamicValues
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public DynamicValue Add(DynamicValue dynamicValue)
+	private DynamicValue CloneForDb(DynamicValue dynamicValue)
 	{
-		context.DynamicValues.Add(dynamicValue);
-
-		return dynamicValue;
+		return new DynamicValue
+		{
+			Id = dynamicValue.Id,
+			BaseValue = dynamicValue.BaseValue,
+			ServerId = dynamicValue.Server.Id,
+		};
 	}
 
-	public void Update(DynamicValue dynamicValue)
+	public void Create(EcoCraftDbContext context, DynamicValue dynamicValue)
 	{
-		context.DynamicValues.Update(dynamicValue);
+		context.Add(CloneForDb(dynamicValue));
 	}
 
-	public void Delete(DynamicValue dynamicValue)
+	public void UpdateAll(EcoCraftDbContext context, DynamicValue dynamicValue)
 	{
-		context.DynamicValues.Remove(dynamicValue);
+		context.Attach(CloneForDb(dynamicValue)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, DynamicValue dynamicValue)
+	{
+		var entity = new DynamicValue { Id = dynamicValue.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

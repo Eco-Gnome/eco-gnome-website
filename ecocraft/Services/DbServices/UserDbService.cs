@@ -3,37 +3,56 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
+public enum RegisterUserResult
 {
-	public Task<List<User>> GetAllAsync()
+	Success,
+	EcoServerNotFound,
+	InvalidUserSecretId,
+	EcoGnomeUserNotFound,
+	UserNotInServer,
+	UserAlreadyAssociatedToAnotherEcoUser
+}
+
+public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<User>
+{
+	public async Task<List<User>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.Users.Include(u => u.UserServers)
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Users
+			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
 			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
 	}
 
-	public Task<User?> GetByIdAsync(Guid id)
+	public async Task<User?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.Users
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Users
+			.Include(u => u.UserServers)
+			.ThenInclude(us => us.Server)
+			.FirstOrDefaultAsync(u => u.Id == id);
+	}
+
+	public async Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId, EcoCraftDbContext? context = null)
+	{
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Users
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.DataContexts)
-			.FirstOrDefaultAsync(u => u.Id == id);
+			.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
 	}
 
-	public Task<User?> GetBySecretIdAsync(Guid secretId)
+	public async Task<List<UserServer>> GetUserServerByEcoIdsAsync(string ecoUserId, string ecoServerId)
 	{
-		return context.Users
-			.Include(u => u.UserServers)
-			.ThenInclude(us => us.Server)
-			.FirstOrDefaultAsync(u => u.SecretId == secretId);
-	}
+		await using var context = await factory.CreateDbContextAsync();
 
-	public Task<List<UserServer>> GetUserServerByEcoIdsAsync(string ecoUserId, string ecoServerId)
-	{
-		return context.UserServers
+		return await context.UserServers
 			.Include(us => us.Server)
 			.Include(us => us.DataContexts)
 			.Include(us => us.User)
@@ -42,46 +61,108 @@ public class UserDbService(EcoCraftDbContext context) : IGenericDbService<User>
 			.ToListAsync();
 	}
 
-	public Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId)
+	public async Task<User?> SearchByIdAndSecretAsync(Guid id, Guid secretId)
 	{
-		return context.Users.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
+		await using var context = await factory.CreateDbContextAsync();
+
+		return await context.Users
+			.FirstOrDefaultAsync(u => u.Id == id && u.SecretId == secretId);
 	}
 
-	public User Add(User user)
+	public async Task<RegisterUserResult> RegisterUserAsync(string ecoServerId, string userSecretId, string ecoUserId, string serverPseudo)
 	{
-		context.Users.Add(user);
+		await using var context = await factory.CreateDbContextAsync();
 
-		return user;
-	}
+		if (!Guid.TryParse(userSecretId, out var userSecretGuid))
+		{
+			return RegisterUserResult.InvalidUserSecretId;
+		}
 
-	public void Update(User user)
-	{
-		context.Users.Update(user);
-	}
+		var server = await context.Servers
+			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 
-	public async Task<User> AddAndSave(User user)
-	{
-		context.Users.Add(user);
+		if (server is null)
+		{
+			return RegisterUserResult.EcoServerNotFound;
+		}
+
+		var user = await context.Users
+			.Include(u => u.UserServers)
+			.ThenInclude(us => us.Server)
+			.FirstOrDefaultAsync(u => u.SecretId == userSecretGuid);
+
+		if (user is null)
+		{
+			return RegisterUserResult.EcoGnomeUserNotFound;
+		}
+
+		var userServer = user.UserServers
+			.FirstOrDefault(us => us.Server.EcoServerId == ecoServerId);
+
+		if (userServer is null)
+		{
+			return RegisterUserResult.UserNotInServer;
+		}
+
+		if (userServer.EcoUserId is not null && userServer.EcoUserId != ecoUserId)
+		{
+			return RegisterUserResult.UserAlreadyAssociatedToAnotherEcoUser;
+		}
+
+		userServer.EcoUserId = ecoUserId;
+		userServer.Pseudo = serverPseudo;
 
 		await context.SaveChangesAsync();
 
-		return user;
+		return RegisterUserResult.Success;
 	}
 
-	public Task<int> CountUsers()
+	public async Task<int> CountUsers()
 	{
-		return context.Users.CountAsync();
+		await using var context = await factory.CreateDbContextAsync();
+
+		return await context.Users.CountAsync();
 	}
 
-	public Task UpdateAndSave(User user)
+	private User CloneForDb(User user)
 	{
-		context.Users.Update(user);
-
-		return context.SaveChangesAsync();
+		return new User
+		{
+			Id = user.Id,
+			Pseudo = user.Pseudo,
+			CreationDateTime = user.CreationDateTime,
+			SecretId = user.SecretId,
+			SuperAdmin = user.SuperAdmin,
+			CanUploadMod = user.CanUploadMod,
+			ShowHelp = user.ShowHelp,
+		};
 	}
 
-	public void Delete(User user)
+	public void Create(EcoCraftDbContext context, User user)
 	{
-		context.Users.Remove(user);
+		context.Add(CloneForDb(user));
+	}
+
+	public void UpdateAll(EcoCraftDbContext context, User user)
+	{
+		context.Attach(CloneForDb(user)).State = EntityState.Modified;
+	}
+
+	public void UpdateCanUploadMod(EcoCraftDbContext context, User user)
+	{
+		var entry = context.Attach(user);
+		entry.Property(x => x.CanUploadMod).IsModified = true;
+	}
+
+	public void UpdateSuperAdmin(EcoCraftDbContext context, User user)
+	{
+		var entry = context.Attach(user);
+		entry.Property(x => x.SuperAdmin).IsModified = true;
+	}
+
+	public void Destroy(EcoCraftDbContext context, User user)
+	{
+		var entity = new UserPrice { Id = user.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

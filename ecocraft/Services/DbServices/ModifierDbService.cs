@@ -3,34 +3,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class ModifierDbService(EcoCraftDbContext context)
+public class ModifierDbService(IDbContextFactory<EcoCraftDbContext> factory)
 {
-	public Task<List<Modifier>> GetAllAsync()
+	public async Task<List<Modifier>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.Modifiers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Modifiers
 			.ToListAsync();
 	}
 
-	public Task<Modifier?> GetByIdAsync(Guid id)
+	public async Task<Modifier?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.Modifiers
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.Modifiers
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public Modifier Add(Modifier modifier)
+	private Modifier CloneForDb(Modifier modifier)
 	{
-		context.Modifiers.Add(modifier);
-
-		return modifier;
+		return new Modifier
+		{
+			Id = modifier.Id,
+			DynamicType = modifier.DynamicType,
+			ValueType = modifier.ValueType,
+			DynamicValueId = modifier.DynamicValue.Id,
+			SkillId = modifier.Skill?.Id,
+			TalentId = modifier.Talent?.Id,
+		};
 	}
 
-	public void Update(Modifier modifier)
+	public void Create(EcoCraftDbContext context, Modifier modifier)
 	{
-		context.Modifiers.Update(modifier);
+		context.Add(CloneForDb(modifier));
 	}
 
-	public void Delete(Modifier modifier)
+	public void UpdateAll(EcoCraftDbContext context, Modifier modifier)
 	{
-		context.Modifiers.Remove(modifier);
+		context.Attach(CloneForDb(modifier)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, Modifier modifier)
+	{
+		var entity = new Modifier { Id = modifier.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

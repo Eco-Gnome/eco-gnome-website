@@ -1,86 +1,33 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
 public class UserServerDataService(
     UserSkillDbService userSkillDbService,
-    UserCraftingTableDbService userCraftingTableDbService,
-    UserSettingDbService userSettingDbService,
-    UserElementDbService userElementDbService,
-    UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
-    UserMarginDbService userMarginDbService,
+    UserCraftingTableDbService userCraftingTableDbService,
     UserTalentDbService userTalentDbService,
-    ServerDataService serverDataService,
+    UserPriceDbService userPriceDbService,
+    UserElementDbService userElementDbService,
+    UserMarginDbService userMarginDbService,
     LocalizationService localizationService)
 {
-    private DataContext? _dataContext;
-    public bool IsDataRetrieved { get; private set; }
-
-    public List<UserSkill> UserSkills { get; private set; } = [];
-    public List<UserTalent> UserTalents { get; private set; } = [];
-    public List<UserCraftingTable> UserCraftingTables { get; private set; } = [];
-    public UserSetting? UserSetting { get; private set; }
-    public List<UserPrice> UserPrices { get; private set; } = [];
-    public List<UserRecipe> UserRecipes { get; private set; } = [];
-    public List<UserMargin> UserMargins { get; private set; } = [];
-
-
-    public async Task RetrieveUserData(DataContext? dataContext, bool force = false)
-    {
-        if (dataContext is null)
-        {
-            UserSkills = [];
-            UserTalents = [];
-            UserCraftingTables = [];
-            UserSetting = null;
-            UserPrices = [];
-            UserRecipes = [];
-            UserMargins = [];
-
-            IsDataRetrieved = false;
-            _dataContext = null;
-
-            return;
-        }
-
-        if (IsDataRetrieved && _dataContext == dataContext && !force) return;
-
-        _dataContext = dataContext;
-
-        var userSkillsTask = userSkillDbService.GetByDataContextAsync(dataContext);
-        var userTalentsTask = userTalentDbService.GetByDataContextAsync(dataContext);
-        var userCraftingTablesTask = userCraftingTableDbService.GetByDataContextAsync(dataContext);
-        var userSettingsTask = userSettingDbService.GetByDataContextAsync(dataContext);
-        var userPricesTask = userPriceDbService.GetByDataContextAsync(dataContext);
-        var userRecipesTask = userRecipeDbService.GetByDataContextAsync(dataContext);
-        var userMarginsTask = userMarginDbService.GetByDataContextAsync(dataContext);
-
-        await Task.WhenAll(userSkillsTask, userTalentsTask, userCraftingTablesTask, userSettingsTask, userPricesTask, userRecipesTask, userMarginsTask);
-
-        UserSkills = userSkillsTask.Result;
-        UserTalents = userTalentsTask.Result;
-        UserCraftingTables = userCraftingTablesTask.Result;
-        UserSetting = userSettingsTask.Result;
-        UserPrices = userPricesTask.Result;
-        UserRecipes = userRecipesTask.Result;
-        UserMargins = userMarginsTask.Result;
-
-        IsDataRetrieved = true;
-    }
-
-    public void AddUserSkill(Skill? skill, DataContext dataContext, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
+    public void AddUserSkill(EcoCraftDbContext context, DataContext dataContext, Server server, Skill? skill, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
     {
         var userSkill = new UserSkill
         {
             Skill = skill,
+            SkillId = skill?.Id,
             DataContext = dataContext,
+            DataContextId = dataContext.Id,
             Level = 1,
         };
 
-        UserSkills.Add(userSkill);
-        userSkillDbService.Add(userSkill);
+        userSkillDbService.Create(context, userSkill);
+        dataContext.UserSkills.Add(userSkill);
+        skill?.UserSkills.Add(userSkill);
 
         if (!addRecipes) return;
 
@@ -94,106 +41,115 @@ public class UserServerDataService(
 
         foreach (var recipe in recipes)
         {
-            AddUserRecipe(recipe, dataContext);
+            AddUserRecipe(context, dataContext, server, recipe);
         }
     }
 
-    public void RemoveUserSkill(UserSkill userSkill)
+    public void RemoveUserSkill(EcoCraftDbContext context, UserSkill userSkill)
     {
         // Remove related recipes
-        foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.Skill == userSkill.Skill).ToList())
+        foreach (var userRecipe in userSkill.DataContext.UserRecipes.Where(ur => ur.Recipe.Skill == userSkill.Skill).ToList())
         {
-            RemoveUserRecipe(userRecipe);
+            RemoveUserRecipe(context, userRecipe);
         }
 
+        userSkillDbService.Destroy(context, userSkill);
         userSkill.DataContext.UserSkills.Remove(userSkill);
-        UserSkills.Remove(userSkill);
-        userSkillDbService.Delete(userSkill);
+        userSkill.Skill?.UserSkills.Remove(userSkill);
     }
 
-    public void AddUserTalent(Talent talent, DataContext dataContext)
+    public void AddUserTalent(EcoCraftDbContext context, Talent talent, DataContext dataContext)
     {
         var userTalent = new UserTalent
         {
             Talent = talent,
+            TalentId = talent.Id,
             DataContext = dataContext,
+            DataContextId = dataContext.Id,
             Level = 1,
         };
 
-        userTalentDbService.Add(userTalent);
-        UserTalents.Add(userTalent);
+        userTalentDbService.Create(context, userTalent);
+        dataContext.UserTalents.Add(userTalent);
+        talent.UserTalents.Add(userTalent);
     }
 
-    public void RemoveUserTalent(UserTalent userTalent)
+    public void RemoveUserTalent(EcoCraftDbContext context, UserTalent userTalent)
     {
-        userTalentDbService.Delete(userTalent);
-        UserTalents.Remove(userTalent);
+        userTalentDbService.Destroy(context, userTalent);
+        userTalent.DataContext.UserTalents.Remove(userTalent);
+        userTalent.Talent.UserTalents.Remove(userTalent);
     }
 
-    public void CreateUserMargin(DataContext dataContext)
+    public void CreateUserMargin(EcoCraftDbContext context, DataContext dataContext)
     {
         var userMargin = new UserMargin
         {
             Name = localizationService.GetTranslation("UserServerDataService.NewMargin"),
             DataContext = dataContext,
+            DataContextId = dataContext.Id,
             Margin = 0,
         };
 
-        UserMargins.Add(userMargin);
-        userMarginDbService.Add(userMargin);
+        userMarginDbService.Create(context, userMargin);
+        dataContext.UserMargins.Add(userMargin);
     }
 
-    public void RemoveUserMargin(UserMargin userMargin)
+    public void RemoveUserMargin(EcoCraftDbContext context, UserMargin userMargin)
     {
-        UserMargins.Remove(userMargin);
-        foreach (var userPrice in UserPrices.Where(up => up.UserMargin == userMargin))
+        var replacementMargin = userMargin.DataContext.UserMargins.First();
+
+        foreach (var userPrice in userMargin.DataContext.UserPrices.Where(up => up.UserMargin == userMargin))
         {
-            userPrice.UserMargin = UserMargins.First();
+            userPrice.UserMargin = replacementMargin;
+            userPriceDbService.UpdateAll(context, userPrice);
+            replacementMargin.UserPrices.Add(userPrice);
         }
-        userMarginDbService.Delete(userMargin);
+
+        userMarginDbService.Destroy(context, userMargin);
+        userMargin.DataContext.UserMargins.Remove(userMargin);
     }
 
-    public void UserSkillLevelChange(UserSkill userSkill, DataContext dataContext, bool isIncrease)
+    public void UserSkillLevelChange(EcoCraftDbContext context, DataContext dataContext, Server server, UserSkill userSkill, bool isIncrease)
     {
         if (isIncrease)
         {
             // Get all recipes that should now be added, but not the existing ones
-            foreach (var recipe in serverDataService.Recipes.Where(r =>
+            foreach (var recipe in server.Recipes.Where(r =>
                          r.Skill == userSkill.Skill && r.SkillLevel <= userSkill.Level &&
-                         !UserRecipes.Select(ur => ur.Recipe).Contains(r)).ToList())
+                         !dataContext.UserRecipes.Select(ur => ur.Recipe).Contains(r)).ToList())
             {
-                AddUserRecipe(recipe, dataContext);
+                AddUserRecipe(context, dataContext, server, recipe);
             }
         }
         else
         {
             // Get all recipes that should now be removed
-            foreach (var userRecipe in UserRecipes
+            foreach (var userRecipe in dataContext.UserRecipes
                          .Where(ur => ur.Recipe.Skill == userSkill.Skill && ur.Recipe.SkillLevel > userSkill.Level)
                          .ToList())
             {
-                RemoveUserRecipe(userRecipe);
+                RemoveUserRecipe(context, userRecipe);
             }
         }
     }
 
-    public void RecalculateUserRecipes(DataContext dataContext)
+    public void RecalculateUserRecipes(EcoCraftDbContext context, DataContext dataContext, Server server)
     {
         // We remove all recipes that does not meet the requirements
-        foreach (var userRecipe in UserRecipes.ToList())
+        foreach (var userRecipe in dataContext.UserRecipes.ToList())
         {
-            if (userRecipe.Recipe.Skill is not null && userRecipe.Recipe.SkillLevel >
-                UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
+            if (userRecipe.Recipe.Skill is not null && userRecipe.Recipe.SkillLevel > dataContext.UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
             {
-                RemoveUserRecipe(userRecipe);
+                RemoveUserRecipe(context, userRecipe);
             }
         }
 
-        var selectedRecipes = UserRecipes.Select(ur => ur.Recipe);
-        var onlyLevelAccessible = UserSetting!.OnlyLevelAccessibleRecipes;
+        var selectedRecipes = dataContext.UserRecipes.Select(ur => ur.Recipe);
+        var onlyLevelAccessible = dataContext.UserSettings.First().OnlyLevelAccessibleRecipes;
 
         // We add all recipes that does meet the requirements
-        foreach (var userSkill in UserSkills.ToList())
+        foreach (var userSkill in dataContext.UserSkills.ToList())
         {
             var recipesToAdd = userSkill.Skill?.Recipes ?? [];
 
@@ -206,172 +162,176 @@ public class UserServerDataService(
 
             foreach (var recipe in recipesToAdd)
             {
-                AddUserRecipe(recipe, dataContext);
+                AddUserRecipe(context, dataContext, server, recipe);
             }
         }
     }
 
-    public void ToggleEmptyUserSkill(DataContext dataContext, bool displayNonSkilledRecipes)
+    public void ToggleEmptyUserSkill(EcoCraftDbContext context, DataContext dataContext, Server server, bool displayNonSkilledRecipes)
     {
-        var nullUserSkill = UserSkills.FirstOrDefault(us => us.Skill is null);
+        var nullUserSkill = dataContext.UserSkills.FirstOrDefault(us => us.Skill is null);
 
         if (displayNonSkilledRecipes)
         {
             if (nullUserSkill is null)
             {
                 // Add a fake UserSkill without skill, so we can retrieve recipes that doesn't require skill easily
-                AddUserSkill(null, dataContext, false, false);
+                AddUserSkill(context, dataContext, server, null, false, false);
             }
         }
         else
         {
             if (nullUserSkill is not null)
             {
-                RemoveUserSkill(nullUserSkill);
+                RemoveUserSkill(context, nullUserSkill);
             }
         }
     }
 
-    public void AddUserCraftingTable(CraftingTable craftingTable, DataContext dataContext, bool addedByUser = false)
+    public void AddUserCraftingTable(EcoCraftDbContext context, DataContext dataContext, Server server, CraftingTable craftingTable, bool addedByUser = false)
     {
         var userCraftingTable = new UserCraftingTable
         {
             CraftingTable = craftingTable,
+            CraftingTableId = craftingTable.Id,
             DataContext = dataContext,
+            DataContextId = dataContext.Id,
             PluginModule = null
         };
 
-        UserCraftingTables.Add(userCraftingTable);
-        userCraftingTableDbService.Add(userCraftingTable);
+        userCraftingTableDbService.Create(context, userCraftingTable);
+        dataContext.UserCraftingTables.Add(userCraftingTable);
+        craftingTable.UserCraftingTables.Add(userCraftingTable);
 
         // If the crafting table is added by user, we add all recipes related to the crafting table and to skills
         if (addedByUser)
         {
-            foreach (var recipe in serverDataService.Recipes.Where(r =>
-                             UserSkills.Select(us => us.Skill).Contains(r.Skill) && r.CraftingTable == craftingTable)
-                         .ToList())
+            foreach (var recipe in server.Recipes.Where(r => dataContext.UserSkills.Select(us => us.Skill).Contains(r.Skill) && r.CraftingTable == craftingTable).ToList())
             {
-                AddUserRecipe(recipe, dataContext);
+                AddUserRecipe(context, dataContext, server, recipe);
             }
         }
     }
 
-    public void RemoveUserCraftingTable(UserCraftingTable userCraftingTable)
+    public void RemoveUserCraftingTable(EcoCraftDbContext context, DataContext dataContext, UserCraftingTable userCraftingTable)
     {
-        userCraftingTable.DataContext.UserCraftingTables.Remove(userCraftingTable);
-        UserCraftingTables.Remove(userCraftingTable);
-        userCraftingTableDbService.Delete(userCraftingTable);
+        userCraftingTableDbService.Destroy(context, userCraftingTable);
+        dataContext.UserCraftingTables.Remove(userCraftingTable);
+        userCraftingTable.CraftingTable.UserCraftingTables.Remove(userCraftingTable);
 
-        foreach (var userRecipe in UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable).ToList())
+        foreach (var userRecipe in dataContext.UserRecipes.Where(ur => ur.Recipe.CraftingTable == userCraftingTable.CraftingTable).ToList())
         {
-            RemoveUserRecipe(userRecipe, false);
+            RemoveUserRecipe(context, userRecipe, false);
         }
     }
 
-    public void UpdateUserSetting(UserSetting userSetting)
-    {
-        userSettingDbService.Update(userSetting);
-    }
-
-    public void AddUserRecipe(Recipe recipe, DataContext dataContext)
+    public void AddUserRecipe(EcoCraftDbContext context, DataContext dataContext, Server server, Recipe recipe)
     {
         var userRecipe = new UserRecipe
         {
             Recipe = recipe,
+            RecipeId = recipe.Id,
             DataContext = dataContext,
+            DataContextId = dataContext.Id,
         };
 
-        UserRecipes.Add(userRecipe);
-        userRecipeDbService.Add(userRecipe);
+        userRecipeDbService.Create(context, userRecipe);
+        dataContext.UserRecipes.Add(userRecipe);
+        recipe.UserRecipes.Add(userRecipe);
 
         foreach (var element in recipe.Elements)
         {
-            AddUserElementIfNotExists(element, userRecipe, dataContext);
+            AddUserElementIfNotExists(context, element, userRecipe, dataContext);
         }
 
-        if (!UserCraftingTables.Select(uct => uct.CraftingTable).Contains(recipe.CraftingTable))
+        if (!dataContext.UserCraftingTables.Select(uct => uct.CraftingTable).Contains(recipe.CraftingTable))
         {
-            AddUserCraftingTable(recipe.CraftingTable, dataContext);
+            AddUserCraftingTable(context, dataContext, server, recipe.CraftingTable);
         }
     }
 
-    public void RemoveUserRecipe(UserRecipe userRecipe, bool removeCraftingTables = true)
+    public void RemoveUserRecipe(EcoCraftDbContext context, UserRecipe userRecipe, bool removeCraftingTables = true)
     {
         foreach (var userElement in userRecipe.UserElements.ToList())
         {
-            RemoveUserElement(userElement);
+            RemoveUserElement(context, userElement);
         }
 
+        userRecipeDbService.Destroy(context, userRecipe);
         userRecipe.DataContext.UserRecipes.Remove(userRecipe);
-        UserRecipes.Remove(userRecipe);
-        userRecipeDbService.Delete(userRecipe);
+        userRecipe.Recipe.UserRecipes.Remove(userRecipe);
 
-        if (removeCraftingTables && UserRecipes.All(ur => ur.Recipe.CraftingTable != userRecipe.Recipe.CraftingTable))
+        if (removeCraftingTables && userRecipe.DataContext.UserRecipes.All(ur => ur.Recipe.CraftingTable != userRecipe.Recipe.CraftingTable))
         {
-            RemoveUserCraftingTable(
-                UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable));
+            RemoveUserCraftingTable(context, userRecipe.DataContext, userRecipe.DataContext.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable));
         }
     }
 
-    public void AddUserElementIfNotExists(Element element, UserRecipe userRecipe, DataContext dataContext)
+    public void AddUserElementIfNotExists(EcoCraftDbContext context, Element element, UserRecipe userRecipe, DataContext dataContext)
     {
         if (element.GetCurrentUserElement(dataContext) is null)
         {
             var userElement = new UserElement
             {
                 Element = element,
+                ElementId = element.Id,
                 DataContext = dataContext,
+                DataContextId = dataContext.Id,
                 Share = element.DefaultShare,
                 IsReintegrated = element.DefaultIsReintegrated,
-                UserRecipe = userRecipe
+                UserRecipe = userRecipe,
+                UserRecipeId = userRecipe.Id
             };
 
-            userElementDbService.Add(userElement);
+            userElementDbService.Create(context, userElement);
+            element.UserElements.Add(userElement);
+            dataContext.UserElements.Add(userElement);
+            userRecipe.UserElements.Add(userElement);
         }
 
         foreach (var itemOrTag in element.ItemOrTag.GetAssociatedItemsAndSelf())
         {
             if (itemOrTag.GetCurrentUserPrice(dataContext) is null)
             {
-                AddUserPrice(itemOrTag, dataContext);
+                AddUserPrice(context, dataContext, itemOrTag);
             }
         }
     }
 
-    private void RemoveUserElement(UserElement userElement)
+    private void RemoveUserElement(EcoCraftDbContext context, UserElement userElement)
     {
         // Remove any existing PrimaryUserPrice
         foreach (var userPrice in userElement.UserPricesPrimaryOf)
         {
             userPrice.PrimaryUserElement = null;
+            userPriceDbService.UpdateAll(context, userPrice);
         }
 
         var itemOrTagAssociated = userElement.Element.ItemOrTag;
-        var dataContext = userElement.DataContext;
 
-        userElement.DataContext.UserElements.Remove(userElement);
+        userElementDbService.Destroy(context, userElement);
         userElement.Element.UserElements.Remove(userElement);
         userElement.UserRecipe.UserElements.Remove(userElement);
-        userElementDbService.Delete(userElement);
+        userElement.DataContext.UserElements.Remove(userElement);
 
-        // Remove the UserPrice of the related itemOrTag and it's associated items, if no other related Elements have a UserElement
-        if (itemOrTagAssociated.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(dataContext) is null))
+        // Remove the UserPrice of the related itemOrTag, and it's associated items, if no other related Elements have a UserElement
+        if (itemOrTagAssociated.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null))
         {
-            var itemOrTagAssociatedUserPrice = itemOrTagAssociated.GetCurrentUserPrice(dataContext);
+            var itemOrTagAssociatedUserPrice = itemOrTagAssociated.GetCurrentUserPrice(userElement.DataContext);
 
             if (itemOrTagAssociatedUserPrice is not null)
             {
-                RemoveUserPrice(itemOrTagAssociatedUserPrice);
+                RemoveUserPrice(context, itemOrTagAssociatedUserPrice);
 
                 foreach (var itemOrTag in itemOrTagAssociated.AssociatedItems)
                 {
-                    if (itemOrTag.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(dataContext) is null))
+                    if (itemOrTag.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null))
                     {
-                        var itemOrTagUserPrice = itemOrTag.GetCurrentUserPrice(dataContext);
+                        var itemOrTagUserPrice = itemOrTag.GetCurrentUserPrice(userElement.DataContext);
 
                         if (itemOrTagUserPrice is not null)
                         {
-                            RemoveUserPrice(itemOrTagUserPrice);
+                            RemoveUserPrice(context, itemOrTagUserPrice);
                         }
                     }
                 }
@@ -379,68 +339,72 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserPrice(ItemOrTag itemOrTag, DataContext dataContext)
+    private void AddUserPrice(EcoCraftDbContext context, DataContext dataContext, ItemOrTag itemOrTag)
     {
+        var userMargin = dataContext.UserMargins.First();
+
         var userPrice = new UserPrice
         {
             ItemOrTag = itemOrTag,
+            ItemOrTagId = itemOrTag.Id,
             DataContext = dataContext,
-            UserMargin = UserMargins.First(),
+            DataContextId = dataContext.Id,
+            UserMarginId = userMargin.Id,
             OverrideIsBought = false,
             Price = itemOrTag.DefaultPrice ?? itemOrTag.MinPrice,
         };
 
-        UserPrices.Add(userPrice);
-        userPriceDbService.Add(userPrice);
+        userPriceDbService.Create(context, userPrice);
+        dataContext.UserPrices.Add(userPrice);
+        itemOrTag.UserPrices.Add(userPrice);
+        userMargin.UserPrices.Add(userPrice);
     }
 
-    private void RemoveUserPrice(UserPrice userPrice)
+    private void RemoveUserPrice(EcoCraftDbContext context, UserPrice userPrice)
     {
+        userPriceDbService.Destroy(context, userPrice);
         userPrice.DataContext.UserPrices.Remove(userPrice);
         userPrice.ItemOrTag.UserPrices.Remove(userPrice);
-        UserPrices.Remove(userPrice);
-        userPriceDbService.Delete(userPrice);
+        userPrice.UserMargin?.UserPrices.Remove(userPrice);
     }
 
-    public List<Recipe> GetAvailableRecipes()
+    public List<Recipe> GetAvailableRecipes(DataContext dataContext, Server server)
     {
         var recipes = new HashSet<Recipe>();
 
-        foreach (var userSkill in UserSkills)
+        foreach (var userSkill in dataContext.UserSkills)
         {
-            var foundRecipes = serverDataService.Recipes.Where(r => r.Skill == userSkill.Skill);
+            var foundRecipes = server.Recipes.Where(r => r.Skill == userSkill.Skill);
 
-            recipes.UnionWith(UserSetting!.OnlyLevelAccessibleRecipes
+            recipes.UnionWith(dataContext.UserSettings.First().OnlyLevelAccessibleRecipes
                 ? foundRecipes.Where(r => r.SkillLevel <= userSkill.Level).ToList()
                 : foundRecipes);
         }
 
-        if (UserSetting!.DisplayNonSkilledRecipes)
+        if (dataContext.UserSettings.First().DisplayNonSkilledRecipes)
         {
-            recipes.UnionWith(UserRecipes.Select(ucr => ucr.Recipe)
-                .Where(r => r.Skill is null).ToList());
+            recipes.UnionWith(dataContext.UserRecipes.Select(ucr => ucr.Recipe).Where(r => r.Skill is null).ToList());
         }
 
-        return recipes.Where(r => !UserRecipes.Select(ur => ur.Recipe).Contains(r))
+        return recipes
+            .Where(r => !dataContext.UserRecipes.Select(ur => ur.Recipe).Contains(r))
             .ToList();
     }
 
-    public List<Skill> GetAvailableSkills()
+    public List<Skill> GetAvailableSkills(DataContext dataContext, Server server)
     {
-        var userSkills = UserSkills.Select(us => us.Skill);
+        var userSkills = dataContext.UserSkills.Select(us => us.Skill);
 
-        return serverDataService.Skills.Where(s => !userSkills.Contains(s)).ToList();
+        return server.Skills.Where(s => !userSkills.Contains(s)).ToList();
     }
 
-    public List<CraftingTable> GetAvailableCraftingTables()
+    public List<CraftingTable> GetAvailableCraftingTables(DataContext dataContext, Server server)
     {
-        var userCraftingTables = UserCraftingTables.Select(uct => uct.CraftingTable);
+        var userCraftingTables = dataContext.UserCraftingTables.Select(uct => uct.CraftingTable);
 
         // Retrieve crafting tables that are not already used, and only crafting table that have a recipe with a skill defined in UserSkill
-        return serverDataService.CraftingTables.Where(ct =>
-            !userCraftingTables.Contains(ct) && ct.Recipes.Select(r => r.Skill)
-                .Any(s => UserSkills.Select(us => us.Skill).Contains(s))).ToList();
+        return server.CraftingTables
+            .Where(ct => !userCraftingTables.Contains(ct) && ct.Recipes.Select(r => r.Skill).Any(s => dataContext.UserSkills.Select(us => us.Skill).Contains(s)))
+            .ToList();
     }
-
-
 }

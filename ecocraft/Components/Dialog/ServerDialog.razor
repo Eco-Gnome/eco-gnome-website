@@ -2,11 +2,13 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
 @inject LocalizationService LocalizationService
 @inject ServerDbService ServerDbService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <MudDialog>
     <TitleContent>
@@ -109,9 +111,14 @@
             return;
         }
 
-        Server newServer = new Server { Name = ServerName, IsDefault = false, CreationDateTime = DateTime.UtcNow };
+        Server newServer = new Server { Name = ServerName, IsDefault = false, CreationDateTime = DateTimeOffset.UtcNow };
         newServer.GenerateJoinCode();
-        await ServerDbService.AddAndSave(newServer);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+            ServerDbService.Create(context, newServer);
+            return Task.CompletedTask;
+		});
 
         await ContextService.JoinServer(newServer, true);
 

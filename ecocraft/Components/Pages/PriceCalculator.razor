@@ -7,19 +7,25 @@
 @using ecocraft.Services.DbServices
 @using System.Globalization;
 @using ecocraft.Components.Utils
+@using Microsoft.EntityFrameworkCore
 @inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
-@inject ServerDataService ServerDataService
+@inject ServerDbService ServerDbService
 @inject UserServerDataService UserServerDataService
+@inject UserSettingDbService UserSettingDbService
 @inject UserPriceDbService UserPriceDbService
+@inject UserSkillDbService UserSkillDbService
+@inject UserTalentDbService UserTalentDbService
+@inject UserCraftingTableDbService UserCraftingTableDbService
+@inject UserMarginDbService UserMarginDbService
 @inject PriceCalculatorService PriceCalculatorService
-@inject EcoCraftDbContext EcoCraftDbContext
 @inject LocalizationService LocalizationService
 @inject DataContextDbService DataContextDbService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("PriceCalculator.PageTitle") - Eco Gnome</PageTitle>
 
@@ -29,16 +35,16 @@
             <MudStack Row Spacing="3">
                 @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
                 {
-                    <MudButton Color="_selectedDataContext == dataContext ? Color.Primary : Color.Default"
+                    <MudButton Color="@(_selectedDataContext?.Id == dataContext.Id ? Color.Primary : Color.Default)"
                                Variant="Variant.Filled"
-                               OnClick="() => SelectDataContext(dataContext)">
+                               OnClick="@(() => SelectDataContext(dataContext))">
                         @dataContext.Name
                         @if (!dataContext.IsDefault)
                         {
                             <MudIconButton Icon="@MDIIcons.Filled.Close"
                                            Size="Size.Medium"
                                            Class="pa-0 ml-2"
-                                           OnClick="() => DeleteDataContext(dataContext)"/>
+                                           OnClick="@(() => DeleteDataContext(dataContext))"/>
                         }
 
                     </MudButton>
@@ -46,7 +52,7 @@
                 <MudButton Color="Color.Tertiary"
                            EndIcon="@MDIIcons.Filled.Plus"
                            Variant="Variant.Outlined"
-                           OnClick="() => AddDataContext()">
+                           OnClick="@(() => AddDataContext())">
                     @LocalizationService.GetTranslation("PriceCalculator.AddDataContext")
                 </MudButton>
             </MudStack>
@@ -60,7 +66,7 @@
                 </MudStack>
             </MudItem>
         }
-        else if (_selectedDataContext is not null && ServerDataService.IsDataRetrieved && UserServerDataService.IsDataRetrieved)
+        else if (_selectedDataContext is not null && ContextService.CurrentServerData is not null)
         {
             <ErrorBoundary>
                 <ChildContent>
@@ -68,10 +74,10 @@
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                             <MudExpansionPanels MultiExpansion="true">
 
-                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({UserServerDataService.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
+                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({_selectedDataContext.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
                                     <MudAutocomplete T="Skill"
                                                      Value="_emptySkill"
-                                                     Disabled="@(UserServerDataService.GetAvailableSkills().Count == 0)"
+                                                     Disabled="@(UserServerDataService.GetAvailableSkills(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchSkills"
                                                      ValueChanged="AddUserSkill"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddSkill")"
@@ -85,7 +91,7 @@
                                             <MudStack Class="pl-2" Spacing="0">
                                                 @if (!string.IsNullOrEmpty(context.Profession) && _previousProfession != context.Profession)
                                                 {
-                                                    <MudText Color="Color.Primary" Typo="Typo.caption">@LocalizationService.GetTranslation(ServerDataService.Skills.First(s => s.Name == context.Profession))</MudText>
+                                                    <MudText Color="Color.Primary" Typo="Typo.caption">@LocalizationService.GetTranslation(ContextService.CurrentServerData!.Skills.First(s => s.Name == context.Profession))</MudText>
                                                 }
                                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                                     <EcoIcon Item="@context" Size="24"/>
@@ -98,7 +104,7 @@
                                         </ItemTemplate>
                                     </MudAutocomplete>
 
-                                    <MudTable Items="UserServerDataService.UserSkills.Where(us => us.Skill is not null)"
+                                    <MudTable Items="_selectedDataContext.UserSkills.Where(us => us.Skill is not null)"
                                               Hover="true"
                                               Dense="true"
                                               Class="mt-4">
@@ -172,10 +178,10 @@
                                         </RowTemplate>
                                     </MudTable>
                                 </MudExpansionPanel>
-                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({UserServerDataService.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
+                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({_selectedDataContext.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
                                     <MudAutocomplete T="CraftingTable"
                                                      Value="_emptyCraftingTable"
-                                                     Disabled="@(UserServerDataService.GetAvailableCraftingTables().Count == 0)"
+                                                     Disabled="@(UserServerDataService.GetAvailableCraftingTables(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchCraftingTables"
                                                      ValueChanged="AddUserCraftingTable"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddCraftingTable")"
@@ -193,7 +199,7 @@
                                         </ItemTemplate>
                                     </MudAutocomplete>
 
-                                    <MudTable Items="@UserServerDataService.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
+                                    <MudTable Items="@_selectedDataContext.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
                                               FixedHeader="true"
                                               Hover="true"
                                               Class="mt-4"
@@ -284,10 +290,10 @@
                                         </RowTemplate>
                                     </MudTable>
                                 </MudExpansionPanel>
-                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("Margins")} ({UserServerDataService.UserMargins.Count})")" @bind-Expanded="ExpandedMargins">
-                                    @if (UserServerDataService.UserSetting is not null)
+                                <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("Margins")} ({_selectedDataContext.UserMargins.Count})")" @bind-Expanded="ExpandedMargins">
+                                    @if (_selectedDataContext.UserSettings.FirstOrDefault() is not null)
                                     {
-                                        <MudTable Items="UserServerDataService.UserMargins"
+                                        <MudTable Items="_selectedDataContext.UserMargins"
                                                   FixedHeader="true"
                                                   Hover="true"
                                                   Class="mt-4"
@@ -353,19 +359,19 @@
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.Tooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.NonSkilled")</MudText>
                                             </MudTooltip>
-                                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
+                                            <MudCheckBox T="bool" Value="_selectedDataContext.UserSettings.First().DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.Tooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.LevelAccessible")</MudText>
                                             </MudTooltip>
-                                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
+                                            <MudCheckBox T="bool" Value="_selectedDataContext.UserSettings.First().OnlyLevelAccessibleRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionOnlyLevelChanged"/>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.ApplyMarginBetweenSkills.Tooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.ApplyMarginBetweenSkills.ApplyMarginBetweenSkills")</MudText>
                                             </MudTooltip>
-                                            <MudCheckBox T="bool" Value="UserServerDataService.UserSetting!.ApplyMarginBetweenSkills" Variant="Variant.Outlined" ValueChanged="OnOptionApplyMarginBetweenSkillsChanged"/>
+                                            <MudCheckBox T="bool" Value="_selectedDataContext.UserSettings.First().ApplyMarginBetweenSkills" Variant="Variant.Outlined" ValueChanged="OnOptionApplyMarginBetweenSkillsChanged"/>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip>
@@ -383,7 +389,7 @@
                                             <div class="flex-no-grow">
                                                 <MudSelect T="MarginType"
                                                            Class="select-dense very-dense"
-                                                           Value="UserServerDataService.UserSetting!.MarginType"
+                                                           Value="_selectedDataContext.UserSettings.First().MarginType"
                                                            Variant="Variant.Outlined"
                                                            ValueChanged="OnOptionMarginTypeChanged">
                                                     <MudSelectItem Value="@MarginType.MarkUp">@LocalizationService.GetTranslation("PriceCalculator.MarginType.MarkUp")</MudSelectItem>
@@ -399,7 +405,7 @@
                                                 <MudNumericField T="decimal"
                                                                  ValueChanged="UpdateCalorieCost"
                                                                  Style="height: 35px; width: 100px"
-                                                                 Value="UserServerDataService.UserSetting!.CalorieCost"
+                                                                 Value="_selectedDataContext.UserSettings.First().CalorieCost"
                                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                                  Variant="Variant.Outlined"/>
                                             </div>
@@ -632,7 +638,7 @@
                                     <MudSpacer/>
                                     <MudAutocomplete T="Recipe"
                                                      Value="_emptyRecipe"
-                                                     Disabled="@(UserServerDataService.GetAvailableRecipes().Count == 0)"
+                                                     Disabled="@(UserServerDataService.GetAvailableRecipes(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchRecipes"
                                                      ValueChanged="AddUserRecipe"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
@@ -758,7 +764,7 @@
                                                                Variant="Variant.Outlined"
                                                                AnchorOrigin="Origin.BottomLeft"
                                                                TransformOrigin="Origin.TopLeft">
-                                                        @foreach (var userMargin in UserServerDataService.UserMargins)
+                                                        @foreach (var userMargin in _selectedDataContext.UserMargins)
                                                         {
                                                             <MudSelectItem T="UserMargin"
                                                                            Value="userMargin">
@@ -800,7 +806,7 @@
                                                 <MudIconButton Icon="@(relatedUserElements.Count > 1 ? Icons.Material.Filled.PlaylistRemove : Icons.Material.Filled.Clear)"
                                                                tabindex="-1"
                                                                Size="Size.Small"
-                                                               OnClick="@(() => RemoveUserRecipes(UserServerDataService.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"/>
+                                                               OnClick="@(() => RemoveUserRecipes(_selectedDataContext.UserRecipes.Where(ur => relatedUserElements.Select(ue => ue.Element.Recipe).Contains(ur.Recipe)).ToList()))"/>
                                             </MudStack>
                                         </MudTd>
                                     }
@@ -1023,13 +1029,14 @@
 
     private async Task RetrieveData(DataContext? dataContext = null)
     {
+        _isLoadingData = true;
+        StateHasChanged();
+
         _selectedDataContext = dataContext ?? ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
         await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
 
-        _isLoadingData = true;
-        StateHasChanged();
-        await ServerDataService.RetrieveServerData(ContextService.CurrentServer!);
-        await UserServerDataService.RetrieveUserData(_selectedDataContext);
+        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+        _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         _isLoadingData = false;
 
         StateHasChanged();
@@ -1038,25 +1045,28 @@
     // Add missing UserElements, UserPrices, User Skills and UserCraftingTables - in case of server data change
     private async Task MagickFix()
     {
-        foreach (var userRecipe in UserServerDataService.UserRecipes)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            foreach (var element in userRecipe.Recipe.Elements)
+            foreach (var userRecipe in _selectedDataContext!.UserRecipes)
             {
-                UserServerDataService.AddUserElementIfNotExists(element, userRecipe.Recipe.GetCurrentUserRecipe(_selectedDataContext!)!, _selectedDataContext!);
+                foreach (var element in userRecipe.Recipe.Elements)
+                {
+                    UserServerDataService.AddUserElementIfNotExists(context, element, userRecipe.Recipe.GetCurrentUserRecipe(_selectedDataContext!)!, _selectedDataContext!);
+                }
+
+                if (userRecipe.Recipe.Skill?.GetCurrentUserSkill(_selectedDataContext!) is null)
+                {
+                    UserServerDataService.AddUserSkill(context, _selectedDataContext!, ContextService.CurrentServerData!, userRecipe.Recipe.Skill, _selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes);
+                }
+
+                if (userRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(_selectedDataContext!) is null)
+                {
+                    UserServerDataService.AddUserCraftingTable(context, _selectedDataContext!, ContextService.CurrentServerData!, userRecipe.Recipe.CraftingTable);
+                }
             }
 
-            if (userRecipe.Recipe.Skill?.GetCurrentUserSkill(_selectedDataContext!) is null)
-            {
-                UserServerDataService.AddUserSkill(userRecipe.Recipe.Skill, _selectedDataContext!, UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes);
-            }
-
-            if (userRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(_selectedDataContext!) is null)
-            {
-                UserServerDataService.AddUserCraftingTable(userRecipe.Recipe.CraftingTable, _selectedDataContext!);
-            }
-        }
-
-        await EcoCraftDbContext.SaveChangesAsync();
+            return Task.CompletedTask;
+        });
 
         Navigation.NavigateTo("/", forceLoad: true);
     }
@@ -1077,11 +1087,11 @@
 
         if (string.IsNullOrEmpty(value))
         {
-            result = UserServerDataService.GetAvailableSkills();
+            result = UserServerDataService.GetAvailableSkills(_selectedDataContext!, ContextService.CurrentServerData!);
         }
         else
         {
-            result = UserServerDataService.GetAvailableSkills()
+            result = UserServerDataService.GetAvailableSkills(_selectedDataContext!, ContextService.CurrentServerData!)
                 .Where(s => LocalizationService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
@@ -1218,7 +1228,6 @@
             }
         }
 
-        await EcoCraftDbContext.SaveChangesAsync();
         await Calculate();
     }
 
@@ -1228,11 +1237,11 @@
 
         if (string.IsNullOrEmpty(value))
         {
-            result = UserServerDataService.GetAvailableRecipes();
+            result = UserServerDataService.GetAvailableRecipes(_selectedDataContext!, ContextService.CurrentServerData!);
         }
         else
         {
-            result = UserServerDataService.GetAvailableRecipes()
+            result = UserServerDataService.GetAvailableRecipes(_selectedDataContext!, ContextService.CurrentServerData!)
                 .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
@@ -1259,11 +1268,11 @@
 
         if (string.IsNullOrEmpty(value))
         {
-            result = UserServerDataService.GetAvailableCraftingTables();
+            result = UserServerDataService.GetAvailableCraftingTables(_selectedDataContext!, ContextService.CurrentServerData!);
         }
         else
         {
-            result = UserServerDataService.GetAvailableCraftingTables()
+            result = UserServerDataService.GetAvailableCraftingTables(_selectedDataContext!, ContextService.CurrentServerData!)
                 .Where(s => LocalizationService.GetTranslation(s).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
@@ -1275,8 +1284,10 @@
 
     private async Task SelectDataContext(DataContext dataContext)
     {
-        await UserServerDataService.RetrieveUserData(null);
-        await RetrieveData(dataContext);
+        if (_selectedDataContext?.Id != dataContext.Id)
+        {
+            await RetrieveData(dataContext);
+        }
     }
 
     private async Task DeleteDataContext(DataContext dataContext)
@@ -1287,22 +1298,23 @@
         var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("DataContext.DeletionConfirmation", dataContext.Name));
         if (!confirmed) return;
 
-        DataContextDbService.Delete(dataContext);
-        await EcoCraftDbContext.SaveChangesAsync();
-
-        if (_selectedDataContext == dataContext)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            _selectedDataContext = ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
-            await UserServerDataService.RetrieveUserData(null);
-            await RetrieveData(_selectedDataContext);
+            DataContextDbService.Destroy(context, dataContext);
+            return Task.CompletedTask;
+        });
+
+        ContextService.CurrentUserServer!.DataContexts.Remove(dataContext);
+
+        if (_selectedDataContext?.Id == dataContext.Id)
+        {
+            await RetrieveData(ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault));
         }
     }
 
     private async Task AddDataContext()
     {
-        var dataContext = await ContextService.AddDataContext(ContextService.CurrentUserServer!);
-        await EcoCraftDbContext.SaveChangesAsync();
-        await UserServerDataService.RetrieveUserData(null);
+        DataContext dataContext = await ContextService.AddDataContext(ContextService.CurrentUserServer!);
         await RetrieveData(dataContext);
     }
 
@@ -1313,18 +1325,25 @@
             return;
         }
 
-        UserServerDataService.AddUserSkill(skill, _selectedDataContext!, UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.AddUserSkill(context, _selectedDataContext!, ContextService.CurrentServerData!, skill, _selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes);
+            return Task.CompletedTask;
+        });
+
         _emptySkill = null;
 
-        await EcoCraftDbContext.SaveChangesAsync();
         await Calculate();
     }
 
-    private async Task RemoveUserSkill(UserSkill skill)
+    private async Task RemoveUserSkill(UserSkill userSkill)
     {
-        UserServerDataService.RemoveUserSkill(skill);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.RemoveUserSkill(context, userSkill);
+            return Task.CompletedTask;
+        });
 
-        await EcoCraftDbContext.SaveChangesAsync();
         await Calculate();
     }
 
@@ -1335,17 +1354,25 @@
             return;
         }
 
-        UserServerDataService.AddUserCraftingTable(craftingTable, _selectedDataContext!, true);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.AddUserCraftingTable(context, _selectedDataContext!, ContextService.CurrentServerData!, craftingTable, true);
+            return Task.CompletedTask;
+        });
+
         _emptyCraftingTable = null;
 
-        await EcoCraftDbContext.SaveChangesAsync();
         await Calculate();
     }
 
     private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
     {
-        UserServerDataService.RemoveUserCraftingTable(craftingTable);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.RemoveUserCraftingTable(context, _selectedDataContext!, craftingTable);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
@@ -1356,34 +1383,50 @@
             return;
         }
 
-        UserServerDataService.AddUserRecipe(recipe, _selectedDataContext!);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.AddUserRecipe(context, _selectedDataContext!, ContextService.CurrentServerData!, recipe);
+            return Task.CompletedTask;
+        });
+
         _emptyRecipe = null;
 
-        await EcoCraftDbContext.SaveChangesAsync();
         await Calculate();
     }
 
     private async Task RemoveUserRecipe(UserRecipe recipe)
     {
-        UserServerDataService.RemoveUserRecipe(recipe);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.RemoveUserRecipe(context, recipe);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
     {
-        userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task RemoveUserRecipes(List<UserRecipe> recipes)
     {
-        foreach (var recipe in recipes)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            UserServerDataService.RemoveUserRecipe(recipe);
-        }
-        await EcoCraftDbContext.SaveChangesAsync();
+            foreach (var recipe in recipes)
+            {
+                UserServerDataService.RemoveUserRecipe(context, recipe);
+            }
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
@@ -1391,107 +1434,173 @@
     {
         if (userSkill.Level == newLevel) return;
 
-        var isIncrease = newLevel - userSkill.Level > 0;
-        userSkill.Level = newLevel;
-
-        if (UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            UserServerDataService.UserSkillLevelChange(userSkill, _selectedDataContext!, isIncrease);
-        }
+            var isIncrease = newLevel - userSkill.Level > 0;
+            userSkill.Level = newLevel;
+            UserSkillDbService.UpdateLevel(context, userSkill);
 
-        if (!isIncrease) {
-            foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext) is not null && newLevel < t.Level))
+            if (_selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes)
             {
-                UserServerDataService.RemoveUserTalent(talent.GetCurrentUserTalent(_selectedDataContext)!);
+                UserServerDataService.UserSkillLevelChange(context, _selectedDataContext!, ContextService.CurrentServerData!, userSkill, isIncrease);
             }
-        }
-        await EcoCraftDbContext.SaveChangesAsync();
+
+            if (!isIncrease)
+            {
+                foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext!) is not null && newLevel < t.Level))
+                {
+                    UserTalentDbService.Destroy(context, talent.GetCurrentUserTalent(_selectedDataContext!)!);
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task OnOptionDisplayChanged()
     {
-        UserServerDataService.UserSetting!.DisplayNonSkilledRecipes = !UserServerDataService.UserSetting.DisplayNonSkilledRecipes;
-        UserServerDataService.ToggleEmptyUserSkill(_selectedDataContext!, UserServerDataService.UserSetting!.DisplayNonSkilledRecipes);
-        await EcoCraftDbContext.SaveChangesAsync();
+        _selectedDataContext!.UserSettings.First().DisplayNonSkilledRecipes = !_selectedDataContext!.UserSettings.First().DisplayNonSkilledRecipes;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            UserServerDataService.ToggleEmptyUserSkill(context, _selectedDataContext!, ContextService.CurrentServerData!, _selectedDataContext!.UserSettings.First().DisplayNonSkilledRecipes);
+            return Task.CompletedTask;
+        });
     }
 
     private async Task OnOptionOnlyLevelChanged()
     {
-        UserServerDataService.UserSetting!.OnlyLevelAccessibleRecipes = !UserServerDataService.UserSetting.OnlyLevelAccessibleRecipes;
-        UserServerDataService.RecalculateUserRecipes(_selectedDataContext!);
+        _selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes = !_selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            UserServerDataService.RecalculateUserRecipes(context, _selectedDataContext!, ContextService.CurrentServerData!);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task OnOptionApplyMarginBetweenSkillsChanged()
     {
-        UserServerDataService.UserSetting!.ApplyMarginBetweenSkills = !UserServerDataService.UserSetting.ApplyMarginBetweenSkills;
+        _selectedDataContext!.UserSettings.First().ApplyMarginBetweenSkills = !_selectedDataContext!.UserSettings.First().ApplyMarginBetweenSkills;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task OnOptionMarginTypeChanged(MarginType marginType)
     {
-        UserServerDataService.UserSetting!.MarginType = marginType;
-        await EcoCraftDbContext.SaveChangesAsync();
+        _selectedDataContext!.UserSettings.First().MarginType = marginType;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task UpdateCalorieCost(decimal calorieCost)
     {
-        UserServerDataService.UserSetting!.CalorieCost = calorieCost;
-        UserServerDataService.UpdateUserSetting(UserServerDataService.UserSetting);
-        await EcoCraftDbContext.SaveChangesAsync();
+        _selectedDataContext!.UserSettings.First().CalorieCost = calorieCost;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
     {
         userMargin.Margin = margin;
-        await EcoCraftDbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserMarginDbService.UpdateAll(context, userMargin);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task UpdateMarginName(UserMargin userMargin, string name)
     {
         userMargin.Name = name;
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserMarginDbService.UpdateAll(context, userMargin);
+            return Task.CompletedTask;
+        });
     }
 
     private async Task OnAddMargin()
     {
-        UserServerDataService.CreateUserMargin(_selectedDataContext!);
-        await EcoCraftDbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.CreateUserMargin(context, _selectedDataContext!);
+            return Task.CompletedTask;
+        });
     }
 
     private async Task OnRemoveMargin(UserMargin userMargin)
     {
-        if(UserServerDataService.UserMargins.Count == 1)
+        if (_selectedDataContext!.UserMargins.Count == 1)
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.CantRemoveLastMargin"), Severity.Error);
             return;
         }
-        UserServerDataService.RemoveUserMargin(userMargin);
-        await EcoCraftDbContext.SaveChangesAsync();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.RemoveUserMargin(context, userMargin);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin userMargin)
     {
         userPrice.UserMargin = userMargin;
-        UserPriceDbService.Update(userPrice);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserPriceDbService.UpdateUserMargin(context, userPrice);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)
     {
         userPrice.Price = value;
-        UserPriceDbService.Update(userPrice);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserPriceDbService.UpdatePrice(context, userPrice);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private Recipe ExtractBestRecipe(ItemOrTag itemOrTag, List<UserElement> userElements)
     {
-
         if (itemOrTag.GetCurrentUserPrice(_selectedDataContext!)?.PrimaryUserElement is not null)
         {
             return itemOrTag.GetCurrentUserPrice(_selectedDataContext!)!.PrimaryUserElement!.Element.Recipe;
@@ -1517,11 +1626,16 @@
         StateHasChanged();
     }
 
-    private void UpdateDataContextValues(string name)
+    private async Task UpdateDataContextValues(string name)
     {
         _selectedDataContext!.Name = name;
-        DataContextDbService.Update(_selectedDataContext);
-        EcoCraftDbContext.SaveChanges();
+        ContextService.CurrentUserServer!.DataContexts.First(d => d.Id == _selectedDataContext.Id).Name = name;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            DataContextDbService.UpdateName(context, _selectedDataContext);
+            return Task.CompletedTask;
+        });
     }
 
     private async Task ShowCraftingTableDialog(CraftingTable craftingTable)
@@ -1563,12 +1677,26 @@
     private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, decimal value)
     {
         userCraftingTable.CraftMinuteFee = value;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserCraftingTableDbService.UpdateCraftMinuteFee(context, userCraftingTable);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
     private async Task OverridePrice(bool value, UserPrice userPrice)
     {
         userPrice.OverrideIsBought = value;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserPriceDbService.UpdateOverrideIsBought(context, userPrice);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 

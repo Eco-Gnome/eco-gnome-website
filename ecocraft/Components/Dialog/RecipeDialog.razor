@@ -234,7 +234,7 @@
                                 <MudTd Class="px-1">
                                     <MudStack Row Spacing="1">
                                         <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
-                                            @((UserServerDataService.UserSetting!.CalorieCost / 1000).ToString("0.#####"))
+                                            @((DataContext.UserSettings.First().CalorieCost / 1000).ToString("0.#####"))
                                         </MudText>
                                         <MudText Color="Color.Primary">
                                             $/cal
@@ -467,7 +467,7 @@
 
     private decimal GetLaborPrice()
     {
-        return Recipe.Labor.GetDynamicValue(DataContext) * UserServerDataService.UserSetting!.CalorieCost / 1000;
+        return Recipe.Labor.GetDynamicValue(DataContext) * DataContext.UserSettings.First().CalorieCost / 1000;
     }
 
     private decimal GetCraftMinutePrice()

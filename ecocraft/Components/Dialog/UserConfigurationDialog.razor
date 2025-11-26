@@ -1,14 +1,17 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
 @inject ContextService ContextService
 @inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
 @inject EcoCraftDbContext EcoCraftDbContext
 @inject UserDbService UserDbService
+@inject UserServerDbService UserServerDbService
 @inject LocalStorageService LocalStorageService
 @inject NavigationManager Navigation
 @inject LocalizationService LocalizationService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <MudDialog>
 	<TitleContent>
@@ -138,21 +141,15 @@
 	[CascadingParameter]
 	private IMudDialogInstance MudDialog { get; set; }
 
-	private void Submit()
-	{
-		MudDialog.Close();
-	}
-
-	private void Cancel()
-	{
-		MudDialog.Cancel();
-	}
-
 	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
 	{
 		if (newPseudo == "") return;
 		userServer.Pseudo = newPseudo;
-		await ContextService.UpdateCurrentUser();
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			UserServerDbService.UpdateAll(context, userServer);
+			return Task.CompletedTask;
+		});
 	}
 
 	private void LeaveServer(UserServer userServer)
@@ -190,8 +187,14 @@
 	private async Task OnUpdateUserName(string newPseudo)
 	{
 		ContextService.CurrentUser!.Pseudo = newPseudo;
-		await EcoCraftDbContext.SaveChangesAsync();
-		ContextService.InvokeContextChanged();
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			UserDbService.UpdateAll(context, ContextService.CurrentUser);
+			return Task.CompletedTask;
+		});
+
+		// ContextService.InvokeContextChanged();
 	}
 
 	private async Task ExportUser()
@@ -199,11 +202,9 @@
 		var content = $"{ContextService.CurrentUser!.Id}:{ContextService.CurrentUser.SecretId}";
 		var bytes = System.Text.Encoding.UTF8.GetBytes(content);
 
-		// Conversion en base64 pour le passer à JavaScript
 		var base64 = Convert.ToBase64String(bytes);
 		var fileName = "eco_gnome_user_backup.txt";
 
-		// Appel de JavaScript pour déclencher le téléchargement
 		await JsRuntime.InvokeVoidAsync("triggerFileDownload", fileName, base64);
 	}
 
@@ -236,7 +237,7 @@
 				var publicUserId = content.Split(':')[0].ToLower();
 				var secretUserId = content.Split(':')[1].ToLower();
 
-				var foundUser = await UserDbService.GetByIdAndSecretAsync(new Guid(publicUserId), new Guid(secretUserId));
+				var foundUser = await UserDbService.SearchByIdAndSecretAsync(new Guid(publicUserId), new Guid(secretUserId));
 
 				if (foundUser is not null)
 				{

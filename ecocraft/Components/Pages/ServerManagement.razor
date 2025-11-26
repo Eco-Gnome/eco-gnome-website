@@ -6,17 +6,18 @@
 @using ecocraft.Services.ImportData
 @using ecocraft.Services.DbServices
 @using ecocraft.Components.Utils
-@using MudBlazor.Extensions
+@using Microsoft.EntityFrameworkCore
 @inject ImportDataService ImportDataService
 @inject ContextService ContextService
 @inject NavigationManager Navigation
 @inject ServerDbService ServerDbService
-@inject EcoCraftDbContext EcoCraftDbContext
+@inject UserServerDbService UserServerDbService
+@inject ItemOrTagDbService ItemOrTagDbService
 @inject ServerDataService ServerDataService
-@inject UserServerDataService UserServerDataService
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JsRuntime
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
 
@@ -102,7 +103,7 @@
 								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation1")" />
 								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation2")" />
 								<MudStack Row>
-									<MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+									<MudFileUpload T="IBrowserFile" FilesChanged="UploadDataJsonFile">
 										<ActivatorContent>
 											<MudButton Disabled="_showUploadServerDataLoader"
 											           Variant="Variant.Filled"
@@ -275,7 +276,7 @@
 				</MudStack>
 			</MudItem>
 		}
-		else if (ServerDataService.IsDataRetrieved)
+		else if (ContextService.CurrentServerData is not null)
 		{
 			<MudItem lg="4" md="12">
 				<MudTable Items="@GetTags()"
@@ -410,7 +411,6 @@
 </MudContainer>
 
 @code {
-	private bool _askDeleteConfirmation;
 	private bool _showUploadServerDataLoader;
 	private bool _copyExistingServerClicked;
 	private bool _showCopyExistingServerLoader;
@@ -450,19 +450,19 @@
 			Navigation.NavigateTo("/");
 			return;
 		}
-		
+
 		_ = RetrieveData();
 	}
 
 	private async Task RetrieveData()
 	{
-		if (!ServerDataService.IsDataRetrieved)
+		if (ContextService.CurrentServerData is null)
 		{
 			_stats.Clear();
 			_isLoadingData = true;
 			StateHasChanged();
 
-			await ServerDataService.RetrieveServerData(ContextService.CurrentServer!);
+			ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
 
 			_isLoadingData = false;
 		}
@@ -481,14 +481,14 @@
 	{
 		_stats.Clear();
 
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills"), ServerDataService.Skills.Count(s => s.Profession is not null)));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Talents"), ServerDataService.Skills.SelectMany(s => s.Talents).Count()));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting"), ServerDataService.CraftingTables.Count));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules"), ServerDataService.PluginModules.Count));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes"), ServerDataService.Recipes.Count));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ServerDataService.Recipes.SelectMany(r => r.Elements).Count()));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ServerDataService.ItemOrTags.Count(i => !i.IsTag)));
-		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ServerDataService.ItemOrTags.Count(i => i.IsTag)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Skills"), ContextService.CurrentServerData!.Skills.Count(s => s.Profession is not null)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Talents"), ContextService.CurrentServerData.Skills.SelectMany(s => s.Talents).Count()));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Crafting"), ContextService.CurrentServerData.CraftingTables.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Modules"), ContextService.CurrentServerData.PluginModules.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Recipes"), ContextService.CurrentServerData.Recipes.Count));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ContextService.CurrentServerData.Recipes.SelectMany(r => r.Elements).Count()));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ContextService.CurrentServerData.ItemOrTags.Count(i => !i.IsTag)));
+		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ContextService.CurrentServerData.ItemOrTags.Count(i => i.IsTag)));
 	}
 
 	private async Task CopyExistingServer()
@@ -512,7 +512,7 @@
 
 	private List<ItemOrTag> GetItems()
 	{
-		return ServerDataService.ItemOrTags.Where(e => !e.IsTag)
+		return ContextService.CurrentServerData!.ItemOrTags.Where(e => !e.IsTag)
 			.OrderBy(iot => LocalizationService.GetTranslation(iot)).ToList();
 	}
 
@@ -526,8 +526,8 @@
 		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ServerDissociate"));
 		if (!confirmed) return;
 
-		ServerDataService.Dissociate(ContextService.CurrentServer!);
-		await EcoCraftDbContext.SaveChangesAsync();
+		await ServerDataService.Dissociate(ContextService.CurrentServer!);
+
 		StateHasChanged();
 	}
 
@@ -537,19 +537,24 @@
 		if (!confirmed) return;
 
 		ContextService.CurrentServer!.ApiKey = Guid.NewGuid();
-		await EcoCraftDbContext.SaveChangesAsync();
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ServerDbService.UpdateApiKey(context, ContextService.CurrentServer);
+			return Task.CompletedTask;
+		});
+
 		StateHasChanged();
 	}
 
 	private List<ItemOrTag> GetTags()
 	{
-		return ServerDataService.ItemOrTags
+		return ContextService.CurrentServerData!.ItemOrTags
 			.Where(e => e.IsTag)
 			.OrderBy(iot => LocalizationService.GetTranslation(iot))
 			.ToList();
 	}
 
-	private async Task UploadFiles(IBrowserFile? file)
+	private async Task UploadDataJsonFile(IBrowserFile? file)
 	{
 		if (file is not { ContentType: "application/json" })
 		{
@@ -607,13 +612,13 @@
 			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
 		}
 
-		await ServerDataService.RetrieveServerData(ContextService.CurrentServer, true);
-		await UserServerDataService.RetrieveUserData(null);
+		ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+
 		_showUploadServerDataLoader = false;
 		StateHasChanged();
 	}
 
-	private void ToggleAdmin(UserServer userServer)
+	private async Task ToggleAdmin(UserServer userServer)
 	{
 		if (userServer == ContextService.CurrentUserServer)
 		{
@@ -622,25 +627,49 @@
 		}
 
 		userServer.IsAdmin = !userServer.IsAdmin;
-		EcoCraftDbContext.SaveChanges();
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			UserServerDbService.UpdateIsAdmin(context, userServer);
+
+			return Task.CompletedTask;
+		});
 	}
 
-	private async Task OnMinValueChange(ItemOrTag context, decimal? minPrice)
+	private async Task OnMinValueChange(ItemOrTag iot, decimal? minPrice)
 	{
-		context.MinPrice = minPrice;
-		await EcoCraftDbContext.SaveChangesAsync();
+		iot.MinPrice = minPrice;
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ItemOrTagDbService.UpdatePrices(context, iot);
+
+			return Task.CompletedTask;
+		});
 	}
 
-	private async Task OnDefaultValueChange(ItemOrTag context, decimal? defaultValue)
+	private async Task OnDefaultValueChange(ItemOrTag iot, decimal? defaultValue)
 	{
-		context.DefaultPrice = defaultValue;
-		await EcoCraftDbContext.SaveChangesAsync();
+		iot.DefaultPrice = defaultValue;
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ItemOrTagDbService.UpdatePrices(context, iot);
+
+			return Task.CompletedTask;
+		});
 	}
 
-	private async Task OnMaxValueChange(ItemOrTag context, decimal? maxPrice)
+	private async Task OnMaxValueChange(ItemOrTag iot, decimal? maxPrice)
 	{
-		context.MaxPrice = maxPrice;
-		await EcoCraftDbContext.SaveChangesAsync();
+		iot.MaxPrice = maxPrice;
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ItemOrTagDbService.UpdatePrices(context, iot);
+
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task OnClearMinPrices(List<ItemOrTag> itemOrTags)
@@ -648,11 +677,16 @@
 		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMin"));
 		if (!confirmed) return;
 
-		foreach (var itemOrTag in itemOrTags)
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
 		{
-			itemOrTag.MinPrice = null;
-		}
-		await EcoCraftDbContext.SaveChangesAsync();
+			foreach (var itemOrTag in itemOrTags)
+			{
+				itemOrTag.MinPrice = null;
+				ItemOrTagDbService.UpdatePrices(context, itemOrTag);
+			}
+
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task OnClearDefaultPrices(List<ItemOrTag> itemOrTags)
@@ -660,11 +694,16 @@
 		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllDefault"));
 		if (!confirmed) return;
 
-		foreach (var itemOrTag in itemOrTags)
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
 		{
-			itemOrTag.DefaultPrice = null;
-		}
-		await EcoCraftDbContext.SaveChangesAsync();
+			foreach (var itemOrTag in itemOrTags)
+			{
+				itemOrTag.DefaultPrice = null;
+				ItemOrTagDbService.UpdatePrices(context, itemOrTag);
+			}
+
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task CopyToClipboard(string text)
@@ -678,18 +717,29 @@
 		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.Confirm.ClearAllMax"));
 		if (!confirmed) return;
 
-		foreach (var itemOrTag in itemOrTags)
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
 		{
-			itemOrTag.MaxPrice = null;
-		}
-		await EcoCraftDbContext.SaveChangesAsync();
+			foreach (var itemOrTag in itemOrTags)
+			{
+				itemOrTag.MaxPrice = null;
+				ItemOrTagDbService.UpdatePrices(context, itemOrTag);
+			}
+
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
 	{
 		if (newServerName == "") return;
+
 		userServer.Server.Name = newServerName;
-		await ServerDbService.UpdateAndSave(userServer.Server);
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ServerDbService.UpdateName(context, userServer.Server);
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task UpdateJoinCode(UserServer userServer)
@@ -698,7 +748,12 @@
 		if (!confirmed) return;
 
 		userServer.Server.GenerateJoinCode();
-		await ServerDbService.UpdateAndSave(userServer.Server);
+
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ServerDbService.UpdateJoinCode(context, userServer.Server);
+			return Task.CompletedTask;
+		});
 	}
 
 	private List<UserServer> GetUserServers()
@@ -731,10 +786,7 @@
 
 	private void CancelKick(UserServer userServer)
 	{
-		if (_askKickConfirmations.ContainsKey(userServer))
-		{
-			_askKickConfirmations.Remove(userServer);
-		}
+		_askKickConfirmations.Remove(userServer);
 	}
 
 	private async Task ConfirmKick(UserServer userServerToKick)
@@ -746,9 +798,8 @@
 			return;
 		}
 
-		if (_askKickConfirmations.ContainsKey(userServerToKick))
+		if (_askKickConfirmations.Remove(userServerToKick))
 		{
-			_askKickConfirmations.Remove(userServerToKick);
 			await ContextService.KickFromServer(userServerToKick);
 		}
 	}

@@ -1,8 +1,7 @@
-﻿@using ecocraft.Models
-@using ecocraft.Services
+﻿@using ecocraft.Services
 @using ecocraft.Components.Utils
-@inject ServerDataService ServerDataService
 @inject LocalizationService LocalizationService
+@inject ContextService ContextService
 
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
@@ -12,7 +11,7 @@
     </TitleContent>
     <DialogContent>
         <MudGrid>
-            @foreach (var itemOrTag in ServerDataService.ItemOrTags.Where(i => i.MinPrice is not null || i.DefaultPrice is not null || i.MaxPrice is not null))
+            @foreach (var itemOrTag in ContextService.CurrentServerData!.ItemOrTags.Where(i => i.MinPrice is not null || i.DefaultPrice is not null || i.MaxPrice is not null))
             {
                 <MudItem xs="3">
                     <MudStack Row AlignItems="AlignItems.Center">

@@ -1,19 +1,20 @@
 ﻿using ecocraft.Extensions;
 using ecocraft.Models;
 using ecocraft.Services.DbServices;
-using MudBlazor;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
 
 public class ContextService(
-    LocalizationService localizationService,
-    EcoCraftDbContext dbContext,
+    IDbContextFactory<EcoCraftDbContext> factory,
     LocalStorageService localStorageService,
-    ServerDbService serverDbService,
+    LocalizationService localizationService,
     DataContextDbService dataContextDbService,
-    ServerDataService serverDataService,
-    UserServerDataService userServerDataService,
-    UserDbService userDbService)
+    UserMarginDbService userMarginDbService,
+    UserSettingDbService userSettingDbService,
+    ServerDbService serverDbService,
+    UserDbService userDbService,
+    UserServerDbService userServerDbService)
 {
     private readonly List<Server> _defaultServers = [];
 
@@ -21,24 +22,20 @@ public class ContextService(
     public Server? CurrentServer { get; private set; }
     public UserServer? CurrentUserServer { get; private set; }
     public User? CurrentUser { get; private set; }
+    public Server? CurrentServerData { get; set; }
 
     public List<Server> AvailableServers
     {
         get { return _defaultServers.Concat(CurrentUser?.UserServers.Select(cus => cus.Server) ?? []).Distinct().ToList(); }
     }
 
-    public async Task UpdateCurrentUser()
-    {
-        await userDbService.UpdateAndSave(CurrentUser!);
-    }
-
     public async Task ChangeServer(Server server, bool isAdmin = false)
     {
-        if (CurrentServer == server)
+        if (CurrentServer?.Id == server.Id)
         {
             return;
         }
-        
+
         var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
 
         if (userServer == null)
@@ -52,9 +49,6 @@ public class ContextService(
 
         await localStorageService.AddItem("ServerId", CurrentServer?.Id.ToString() ?? "");
 
-        await serverDataService.RetrieveServerData(null);
-        await userServerDataService.RetrieveUserData(null);
-
         OnContextChanged?.Invoke();
     }
 
@@ -65,34 +59,32 @@ public class ContextService(
 
         if (!string.IsNullOrEmpty(localUserId))
         {
-            var searchedUser = await userDbService.GetByIdAsync(new Guid(localUserId));
+            var searchedUser = await userDbService.GetByIdAndSecretAsync(new Guid(localUserId), new Guid(secretUserId));
 
             if (searchedUser is not null)
             {
-                // For Migration Purpose
-                if (searchedUser.SecretId.ToString() == new Guid().ToString())
-                {
-                    searchedUser.SecretId = Guid.NewGuid();
-                    secretUserId = searchedUser.SecretId.ToString();
-                    await dbContext.SaveChangesAsync();
-                }
-
-                if (searchedUser.SecretId.ToString().Equals(secretUserId))
-                {
-                    CurrentUser = searchedUser;
-                }
+                CurrentUser = searchedUser;
             }
         }
 
-        var newUser = new User
+        if (CurrentUser is null)
         {
-            SecretId = Guid.NewGuid(),
-            CreationDateTime = DateTime.UtcNow,
-            SuperAdmin = await userDbService.CountUsers() == 0,
-        };
-        newUser.GeneratePseudo();
+            var newUser = new User
+            {
+                SecretId = Guid.NewGuid(),
+                CreationDateTime = DateTimeOffset.UtcNow,
+                SuperAdmin = await userDbService.CountUsers() == 0,
+            };
+            newUser.GeneratePseudo();
 
-        CurrentUser ??= await userDbService.AddAndSave(newUser);
+            await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+            {
+                userDbService.Create(context, newUser);
+                return Task.CompletedTask;
+            });
+
+            CurrentUser = newUser;
+        }
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         await localStorageService.AddItem("SecretUserId", CurrentUser.SecretId.ToString());
@@ -145,7 +137,7 @@ public class ContextService(
         if (searchedServer is not null)
         {
             CurrentServer = searchedServer;
-            CurrentUserServer = CurrentUser!.UserServers.First(us => us.Server == searchedServer);
+            CurrentUserServer = CurrentUser!.UserServers.First(us => us.Server.Id == searchedServer.Id);
         }
     }
 
@@ -163,10 +155,15 @@ public class ContextService(
             IsAdmin = isAdmin,
         };
 
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            userServerDbService.Create(context, userServer);
+            return Task.CompletedTask;
+        });
+
         CurrentUser!.UserServers.Add(userServer);
 
         await AddDataContext(userServer, true);
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task<DataContext> AddDataContext(UserServer userServer, bool isDefault = false)
@@ -180,35 +177,56 @@ public class ContextService(
             IsDefault = isDefault,
         };
 
-        dataContext.UserSettings.Add(new UserSetting
+        var userSetting = new UserSetting
         {
             DataContext = dataContext,
-        });
+        };
 
-        dataContext.UserMargins.Add(new UserMargin
+        dataContext.UserSettings.Add(userSetting);
+
+        var userMargin = new UserMargin
         {
             DataContext = dataContext,
             Name = localizationService.GetTranslation("ContextService.DefaultMargin"),
             Margin = 20,
+        };
+
+        dataContext.UserMargins.Add(userMargin);
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            dataContextDbService.Create(context, dataContext);
+            userSettingDbService.Create(context, userSetting);
+            userMarginDbService.Create(context, userMargin);
+            return Task.CompletedTask;
         });
 
-        dataContextDbService.Add(dataContext);
-        await dbContext.SaveChangesAsync();
+        userServer.DataContexts.Add(dataContext);
 
         return dataContext;
     }
 
 	public async Task LeaveServer(UserServer userServerToLeave)
-	{
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            userServerDbService.Destroy(context, userServerToLeave);
+            return Task.CompletedTask;
+        });
+
         CurrentUser?.UserServers.Remove(userServerToLeave);
-        await dbContext.SaveChangesAsync();
         CurrentServer = null;
 	}
 
 	public async Task KickFromServer(UserServer userServerToKick)
 	{
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            userServerDbService.Destroy(context, userServerToKick);
+            return Task.CompletedTask;
+        });
+
 		userServerToKick.Server.UserServers.Remove(userServerToKick);
-		await dbContext.SaveChangesAsync();
 	}
 
 	public async Task DeleteCurrentServer()
@@ -218,8 +236,15 @@ public class ContextService(
             return;
         }
 
-        await serverDbService.DeleteAsync(CurrentServer!, CurrentUser!);
-        await dbContext.SaveChangesAsync();
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            serverDbService.Destroy(context, CurrentServer!);
+            return Task.CompletedTask;
+        });
+
+        CurrentUser!.UserServers.Remove(CurrentUserServer!);
+        CurrentServer = null;
+        CurrentUserServer = null;
 
         var server = CurrentUser!.UserServers.FirstOrDefault()?.Server;
 

@@ -3,40 +3,59 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.DbServices;
 
-public class UserSettingDbService(EcoCraftDbContext context) : IGenericDbService<UserSetting>
+public class UserSettingDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<UserSetting>
 {
-	public Task<List<UserSetting>> GetAllAsync()
+	public async Task<List<UserSetting>> GetAllAsync(EcoCraftDbContext? context = null)
 	{
-		return context.UserSettings
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSettings
 			.ToListAsync();
 	}
 
-	public Task<UserSetting?> GetByDataContextAsync(DataContext dataContext)
+	public async Task<UserSetting?> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
 	{
-		return context.UserSettings
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSettings
 			.FirstOrDefaultAsync(us => us.DataContextId == dataContext.Id);
 	}
 
-	public Task<UserSetting?> GetByIdAsync(Guid id)
+	public async Task<UserSetting?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
 	{
-		return context.UserSettings
+		context ??= await factory.CreateDbContextAsync();
+
+		return await context.UserSettings
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
-	public UserSetting Add(UserSetting userSetting)
+	private UserSetting CloneForDb(UserSetting userSetting)
 	{
-		context.UserSettings.Add(userSetting);
-
-		return userSetting;
+		return new UserSetting
+		{
+			Id = userSetting.Id,
+			DataContextId = userSetting.DataContext.Id,
+			MarginType = userSetting.MarginType,
+			CalorieCost = userSetting.CalorieCost,
+			DisplayNonSkilledRecipes = userSetting.DisplayNonSkilledRecipes,
+			OnlyLevelAccessibleRecipes = userSetting.OnlyLevelAccessibleRecipes,
+			ApplyMarginBetweenSkills = userSetting.ApplyMarginBetweenSkills,
+		};
 	}
 
-	public void Update(UserSetting userSetting)
+	public void Create(EcoCraftDbContext context, UserSetting userSetting)
 	{
-		context.UserSettings.Update(userSetting);
+		context.Add(CloneForDb(userSetting));
 	}
 
-	public void Delete(UserSetting userSetting)
+	public void UpdateAll(EcoCraftDbContext context, UserSetting userSetting)
 	{
-		context.UserSettings.Remove(userSetting);
+		context.Attach(CloneForDb(userSetting)).State = EntityState.Modified;
+	}
+
+	public void Destroy(EcoCraftDbContext context, UserSetting userSetting)
+	{
+		var entity = new UserSetting { Id = userSetting.Id };
+		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

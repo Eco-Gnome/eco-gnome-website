@@ -1,9 +1,11 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services
 {
     public class ShoppingListDataService(
+        IDbContextFactory<EcoCraftDbContext> factory,
         ContextService contextService,
         DataContextDbService dataContextDbService,
         UserRecipeDbService userRecipeDbService,
@@ -11,7 +13,7 @@ namespace ecocraft.Services
         UserSkillDbService userSkillDbService,
         LocalizationService localizationService)
     {
-        public DataContext CreateShoppingList(UserServer userServer)
+        public async Task<DataContext> CreateShoppingList(UserServer userServer)
         {
             var shoppingList = new DataContext
             {
@@ -20,19 +22,18 @@ namespace ecocraft.Services
                 IsShoppingList = true,
             };
 
+            await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+            {
+                dataContextDbService.Create(context, shoppingList);
+                return Task.CompletedTask;
+            });
+
             contextService.CurrentUserServer!.DataContexts.Add(shoppingList);
-            dataContextDbService.Add(shoppingList);
 
             return shoppingList;
         }
 
-        public void RemoveShoppingList(DataContext shoppingList)
-        {
-            contextService.CurrentUserServer!.DataContexts.Remove(shoppingList);
-            dataContextDbService.Delete(shoppingList);
-        }
-
-        public void AddUserRecipe(DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1)
+        public void AddUserRecipe(EcoCraftDbContext context, DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1)
         {
             var userRecipe = new UserRecipe
             {
@@ -42,21 +43,21 @@ namespace ecocraft.Services
                 ParentUserRecipe = parent,
             };
 
+            userRecipeDbService.Create(context, userRecipe);
             shoppingList.UserRecipes.Add(userRecipe);
-            userRecipeDbService.Add(userRecipe);
 
             if (recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList) is null)
             {
-                GetOrCreateUserCraftingTable(shoppingList, recipe.CraftingTable);
+                GetOrCreateUserCraftingTable(context, shoppingList, recipe.CraftingTable);
             }
 
             if (recipe.Skill is not null && recipe.Skill.GetCurrentUserSkill(shoppingList) is null)
             {
-                GetOrCreateUserSkill(shoppingList, recipe.Skill);
+                GetOrCreateUserSkill(context, shoppingList, recipe.Skill);
             }
         }
 
-        public void RemoveUserRecipe(DataContext shoppingList, UserRecipe shoppingListRecipe)
+        public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
             var currentUserCraftingTable = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList);
             var currentUserSkill = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList);
@@ -67,23 +68,23 @@ namespace ecocraft.Services
 
             foreach (var recipe in shoppingListRecipe.ChildrenUserRecipes.ToList())
             {
-                RemoveUserRecipe(shoppingList, recipe);
+                RemoveUserRecipe(context, shoppingList, recipe);
             }
 
-            userRecipeDbService.Delete(shoppingListRecipe);
+            userRecipeDbService.Destroy(context, shoppingListRecipe);
 
             if (currentUserCraftingTable is not null && currentUserCraftingTable.CraftingTable.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
             {
-                RemoveUserCraftingTable(shoppingList, currentUserCraftingTable);
+                RemoveUserCraftingTable(context, shoppingList, currentUserCraftingTable);
             }
 
             if (currentUserSkill is not null && currentUserSkill.Skill!.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
             {
-                RemoveUserSkill(shoppingList, currentUserSkill);
+                RemoveUserSkill(context, shoppingList, currentUserSkill);
             }
         }
 
-        private UserCraftingTable GetOrCreateUserCraftingTable(DataContext shoppingList, CraftingTable craftingTable)
+        private UserCraftingTable GetOrCreateUserCraftingTable(EcoCraftDbContext context, DataContext shoppingList, CraftingTable craftingTable)
         {
             var shoppingListCraftingTable = shoppingList.UserCraftingTables.Find(slct => slct.CraftingTable == craftingTable);
 
@@ -99,19 +100,19 @@ namespace ecocraft.Services
                 DataContext = shoppingList,
             };
 
+            userCraftingTableDbService.Create(context, userCraftingTable);
             craftingTable.UserCraftingTables.Add(userCraftingTable);
-            userCraftingTableDbService.Add(userCraftingTable);
 
             return userCraftingTable;
         }
 
-        private void RemoveUserCraftingTable(DataContext shoppingList, UserCraftingTable userCraftingTable)
+        private void RemoveUserCraftingTable(EcoCraftDbContext context, DataContext shoppingList, UserCraftingTable userCraftingTable)
         {
             shoppingList.UserCraftingTables.Remove(userCraftingTable);
-            userCraftingTableDbService.Delete(userCraftingTable);
+            userCraftingTableDbService.Destroy(context, userCraftingTable);
         }
 
-        private UserSkill GetOrCreateUserSkill(DataContext shoppingList, Skill skill)
+        private UserSkill GetOrCreateUserSkill(EcoCraftDbContext context, DataContext shoppingList, Skill skill)
         {
             var shoppingListSkill = shoppingList.UserSkills.Find(sls => sls.Skill == skill);
 
@@ -127,16 +128,16 @@ namespace ecocraft.Services
                 DataContext = shoppingList,
             };
 
+            userSkillDbService.Create(context, userSkill);
             skill.UserSkills.Add(userSkill);
-            userSkillDbService.Add(userSkill);
 
             return userSkill;
         }
 
-        private void RemoveUserSkill(DataContext shoppingList, UserSkill userSkill)
+        private void RemoveUserSkill(EcoCraftDbContext context, DataContext shoppingList, UserSkill userSkill)
         {
             shoppingList.UserSkills.Remove(userSkill);
-            userSkillDbService.Delete(userSkill);
+            userSkillDbService.Destroy(context, userSkill);
         }
     }
 }

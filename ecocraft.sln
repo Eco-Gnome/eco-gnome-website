@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ecocraft", "ecocraft\ecocraft.csproj", "{134CEC88-6132-4787-911D-14909DD6A063}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMigrator", "DataMigrator\DataMigrator.csproj", "{3093B93D-BF46-4AE9-8B5E-19B35635848A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{134CEC88-6132-4787-911D-14909DD6A063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{134CEC88-6132-4787-911D-14909DD6A063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{134CEC88-6132-4787-911D-14909DD6A063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3093B93D-BF46-4AE9-8B5E-19B35635848A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3093B93D-BF46-4AE9-8B5E-19B35635848A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3093B93D-BF46-4AE9-8B5E-19B35635848A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3093B93D-BF46-4AE9-8B5E-19B35635848A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,10 +1,9 @@
-﻿namespace ecocraft.Services.DbServices;
+﻿using ecocraft.Models;
+
+namespace ecocraft.Services.DbServices;
 
 public interface IGenericDbService<T> where T : class
 {
-	Task<List<T>> GetAllAsync();
-	Task<T?> GetByIdAsync(Guid id);
-	T Add(T entity);
-	void Update(T entity);
-	void Delete(T entity);
+	Task<List<T>> GetAllAsync(EcoCraftDbContext? context = null);
+	Task<T?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null);
 }

@@ -2,11 +2,24 @@
 
 namespace ecocraft.Models;
 
-public class EcoCraftDbContext : DbContext
+public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : DbContext(options)
 {
-	public EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options)
-		: base(options)
+	public static async Task ContextSaveAsync(IDbContextFactory<EcoCraftDbContext> factory, Func<EcoCraftDbContext, Task> action)
 	{
+		await using var ctx = await factory.CreateDbContextAsync();
+		await using var tx = await ctx.Database.BeginTransactionAsync();
+
+		await action(ctx);
+
+		await ctx.SaveChangesAsync();
+		await tx.CommitAsync();
+	}
+
+	public static async Task ContextGetAsync(IDbContextFactory<EcoCraftDbContext> factory, Func<EcoCraftDbContext, Task> action)
+	{
+		await using var ctx = await factory.CreateDbContextAsync();
+
+		await action(ctx);
 	}
 
 	public DbSet<Recipe> Recipes { get; set; }
