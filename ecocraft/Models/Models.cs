@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ecocraft.Services;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
@@ -359,13 +359,16 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
 {
     [Key] public Guid Id { get; set; }
     public required string Name { get; set; }
-    [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
+    [ForeignKey("LocalizedName")] public Guid? LocalizedNameId { get; set; }
+    [ForeignKey("LocalizedDescription")] public Guid? LocalizedDescriptionId { get; set; }
     public required string TalentGroupName { get; set; }
     public decimal Value { get; set; }
     public int Level { get; set; }
+    public int MaxLevel { get; set; }
     [ForeignKey("Skill")] public Guid SkillId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
+    public LocalizedField LocalizedDescription { get; set; }
     public Skill Skill { get; set; }
     public List<Modifier> Modifiers { get; set; } = [];
     public List<UserTalent> UserTalents { get; set; } = [];
@@ -572,6 +575,7 @@ public class UserTalent
 {
     [Key] public Guid Id { get; set; }
     [ForeignKey("Talent")] public Guid TalentId { get; set; }
+    public int Level { get; set; }
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public Talent Talent { get; set; }
@@ -751,6 +755,7 @@ public class LocalizedField
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Skill> Skills { get; set; } = [];
     public List<Talent> Talents { get; set; } = [];
+    public List<Talent> TalentDescriptions { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
 

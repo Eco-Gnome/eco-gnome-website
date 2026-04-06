@@ -11,7 +11,7 @@ public class ImportDataService(
     LocalizationService localizationService,
     ServerDataService serverDataService)
 {
-    private const int SupportedVersion = 1;
+    private const int SupportedVersion = 2;
 
     public async Task<(int, string[])> ImportServerData(string jsonContent, Server server)
     {
@@ -112,11 +112,29 @@ public class ImportDataService(
 
             if (dbTalent is null)
             {
-                serverDataService.ImportTalent(skill, newTalent.Name, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+                serverDataService.ImportTalent(
+                    skill,
+                    newTalent.Name,
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName),
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription),
+                    newTalent.TalentGroupName,
+                    newTalent.Level,
+                    newTalent.MaxLevel,
+                    newTalent.Value
+                );
             }
             else
             {
-                serverDataService.RefreshTalent(dbTalent, skill, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+                serverDataService.RefreshTalent(
+                    dbTalent,
+                    skill,
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName),
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription, dbTalent.LocalizedDescription),
+                    newTalent.TalentGroupName,
+                    newTalent.Level,
+                    newTalent.MaxLevel,
+                    newTalent.Value
+                );
             }
         }
 
@@ -642,8 +660,10 @@ public class ImportDataService(
         {
             Name = talent.Name,
             LocalizedName = LocalizedFieldToDto(talent.LocalizedName),
+            LocalizedDescription = LocalizedFieldToDto(talent.LocalizedDescription),
             TalentGroupName = talent.TalentGroupName,
             Level = talent.Level,
+            MaxLevel = talent.MaxLevel,
             Value = talent.Value,
         };
     }
@@ -772,9 +792,11 @@ public class ImportDataService(
 
     private class TalentDto : EcoItemDto
     {
+        public required Dictionary<LanguageCode, string> LocalizedDescription { get; init; }
         public required string TalentGroupName { get; init; }
         public required decimal Value { get; init; }
         public required int Level { get; init; }
+        public required int MaxLevel { get; init; }
     }
 
     private class ItemDto : EcoItemDto

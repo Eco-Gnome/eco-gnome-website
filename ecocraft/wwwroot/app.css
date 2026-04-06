@@ -258,6 +258,72 @@
     box-shadow: 0 0 6px rgba(255, 255, 0, 0.75) !important;
 }
 
+.talent-level-control {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    overflow: visible;
+}
+
+.talent-level-action {
+    position: absolute;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    line-height: 1;
+    text-align: center;
+    border-radius: 4px;
+    user-select: none;
+    font-weight: 700;
+    cursor: pointer;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: #4da6ff !important;
+}
+
+.talent-level-action-up {
+    top: -15px;
+}
+
+.talent-level-action-down {
+    bottom: -15px;
+}
+
+.talent-level-action.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.talent-icon-wrapper {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.talent-current-level {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    line-height: 1;
+    pointer-events: none;
+    font-weight: 800;
+    z-index: 2;
+    color: #ffffff;
+    text-shadow: 1px 0 0 #000,
+                 0 1px 0 #000,
+                 -1px 0 0 #000,
+                 0 -1px 0 #000;
+}
+
 .no-pluginmodule {
     filter: grayscale(100%);
 }

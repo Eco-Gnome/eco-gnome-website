@@ -1,4 +1,4 @@
-﻿using ecocraft.Models;
+using ecocraft.Models;
 using ecocraft.Services.DbServices;
 
 namespace ecocraft.Services;
@@ -127,15 +127,17 @@ public class ServerDataService(
         skillDbService.Delete(skill);
     }
 
-    public Talent ImportTalent(Skill skill, string name, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    public Talent ImportTalent(Skill skill, string name, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value)
     {
         var talent = new Talent
         {
             Skill = skill,
             Name = name,
             LocalizedName = localizedName,
+            LocalizedDescription = localizedDescription,
             TalentGroupName = talentGroupName,
             Level = level,
+            MaxLevel = maxLevel,
             Value = value,
         };
 
@@ -144,12 +146,14 @@ public class ServerDataService(
         return talent;
     }
 
-    public void RefreshTalent(Talent talent, Skill skill, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    public void RefreshTalent(Talent talent, Skill skill, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value)
     {
         talent.Skill = skill;
         talent.LocalizedName = localizedName;
+        talent.LocalizedDescription = localizedDescription;
         talent.TalentGroupName = talentGroupName;
         talent.Level = level;
+        talent.MaxLevel = maxLevel;
         talent.Value = value;
 
         talentDbService.Update(talent);

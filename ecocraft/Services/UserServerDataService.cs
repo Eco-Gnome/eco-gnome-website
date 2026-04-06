@@ -117,6 +117,7 @@ public class UserServerDataService(
         {
             Talent = talent,
             DataContext = dataContext,
+            Level = 1,
         };
 
         userTalentDbService.Add(userTalent);

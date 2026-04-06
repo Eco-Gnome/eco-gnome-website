@@ -132,11 +132,32 @@
                                                     @foreach (var talentGroup in context.Skill!.Talents.Where(t => context.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
                                                     {
                                                         var talent = talentGroup.First();
+                                                        var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
 
                                                         <MudTooltip Text="@LocalizationService.GetTranslation(talent)" RootClass="d-flex">
-                                                            <MudLink OnClick="() => ToggleTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
-                                                                <EcoIcon Item="talent" Size="32" Class="@($"{(talent.GetCurrentUserTalent(_selectedDataContext) is null ? "no-talent" : "has-talent")}")"/>
-                                                            </MudLink>
+                                                            @if (talent.MaxLevel <= 1)
+                                                            {
+                                                                <MudLink OnClick="() => ToggleBinaryTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
+                                                                    <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                                </MudLink>
+                                                            }
+                                                            else
+                                                            {
+                                                                var isMaxLevelReached = userTalent is not null && userTalent.Level >= talent.MaxLevel;
+                                                                var isMinLevelReached = userTalent is null;
+                                                                var currentLevel = userTalent?.Level ?? 0;
+
+                                                                <div class="talent-level-control">
+                                                                    <div class="talent-icon-wrapper">
+                                                                        <MudLink OnClick="() => IncreaseTalentLevel(talentGroup.ToList())"
+                                                                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">+</MudLink>
+                                                                        <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                                        <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
+                                                                        <MudLink OnClick="() => DecreaseTalentLevel(talentGroup.ToList())"
+                                                                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">-</MudLink>
+                                                                    </div>
+                                                                </div>
+                                                            }
                                                         </MudTooltip>
                                                     }
                                                 </MudStack>
@@ -1070,29 +1091,130 @@
         return Task.FromResult(result);
     }
 
-    private async Task ToggleTalent(List<Talent> talents, bool forceRemove = false)
+    private void RemoveTalentGroup(List<Talent> talents, DataContext dataContext)
     {
+        foreach (var talent in talents)
+        {
+            var currentUserTalent = talent.GetCurrentUserTalent(dataContext);
+            if (currentUserTalent is not null)
+            {
+                UserServerDataService.RemoveUserTalent(currentUserTalent);
+            }
+        }
+    }
+
+    private async Task ToggleBinaryTalent(List<Talent> talents)
+    {
+        if (_selectedDataContext is null || talents.Count == 0)
+        {
+            return;
+        }
+
         var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedDataContext) is not null);
+
+        if (isRemove)
+        {
+            RemoveTalentGroup(talents, _selectedDataContext);
+        }
+        else
+        {
+            var firstTalent = talents.First();
+            var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
+                .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
+                .Select(ut => ut.Talent)
+                .ToList();
+
+            if (selectedTalentsWithSameLevel.Count > 0)
+            {
+                RemoveTalentGroup(selectedTalentsWithSameLevel, _selectedDataContext);
+            }
+
+            foreach (var talent in talents)
+            {
+                if (talent.GetCurrentUserTalent(_selectedDataContext) is null)
+                {
+                    UserServerDataService.AddUserTalent(talent, _selectedDataContext);
+                }
+            }
+        }
+
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
+    }
+
+    private async Task IncreaseTalentLevel(List<Talent> talents)
+    {
+        if (_selectedDataContext is null || talents.Count == 0)
+        {
+            return;
+        }
+
+        var firstTalent = talents.First();
+        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedDataContext);
+
+        if (existingUserTalent is null)
+        {
+            var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
+                .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
+                .Select(ut => ut.Talent)
+                .ToList();
+
+            if (selectedTalentsWithSameLevel.Count > 0)
+            {
+                RemoveTalentGroup(selectedTalentsWithSameLevel, _selectedDataContext);
+            }
+
+            foreach (var talent in talents)
+            {
+                UserServerDataService.AddUserTalent(talent, _selectedDataContext);
+            }
+        }
+        else if (existingUserTalent.Level < firstTalent.MaxLevel)
+        {
+            foreach (var talent in talents)
+            {
+                var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
+                if (userTalent is not null)
+                {
+                    userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                }
+            }
+        }
+
+        await EcoCraftDbContext.SaveChangesAsync();
+        await Calculate();
+    }
+
+    private async Task DecreaseTalentLevel(List<Talent> talents)
+    {
+        if (_selectedDataContext is null || talents.Count == 0)
+        {
+            return;
+        }
+
+        var firstTalent = talents.First();
+        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedDataContext);
+
+        if (existingUserTalent is null)
+        {
+            return;
+        }
 
         foreach (var talent in talents)
         {
-            if (isRemove || forceRemove)
+            var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
+            if (userTalent is null)
             {
-                UserServerDataService.RemoveUserTalent(talent.GetCurrentUserTalent(_selectedDataContext)!);
+                continue;
+            }
+
+            if (userTalent.Level <= 1)
+            {
+                UserServerDataService.RemoveUserTalent(userTalent);
             }
             else
             {
-                var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
-                    .Where(ut => ut.Talent.Skill == talents.First().Skill && ut.Talent.Level == talents.First().Level && !talents.Contains(ut.Talent))
-                    .Select(ut => ut.Talent)
-                    .ToList();
-
-                if (selectedTalentsWithSameLevel.Count > 0)
-                {
-                    await ToggleTalent(selectedTalentsWithSameLevel, true);
-                }
-
-                UserServerDataService.AddUserTalent(talent, _selectedDataContext!);
+                userTalent.Level--;
             }
         }
 
