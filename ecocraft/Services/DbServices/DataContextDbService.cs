@@ -24,7 +24,7 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 	public async Task<DataContext> GetDataContextWithData(Guid id, Server server)
 	{
-		var context = await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
 
 		var dataContext = await context.DataContexts
 			.AsNoTrackingWithIdentityResolution()

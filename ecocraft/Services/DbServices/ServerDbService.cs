@@ -26,11 +26,12 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		var servers = await context.Servers
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.User)
+			.Include(s => s.Skills)
 			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
 
 		foreach (var server in servers)
-			server.IsEmpty = !await context.Entry(server).Collection(s => s.Skills).Query().AnyAsync();
+			server.IsEmpty = server.Skills.Count == 0;
 
 		return servers;
 	}

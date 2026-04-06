@@ -383,3 +383,6 @@ FodyWeavers.xsd
 /ecocraft/wwwroot/assets/
 /ecocraft/wwwroot/videos/
 /ecocraft/ffmpeg.exe
+
+# Docker
+/pgdata

@@ -162,7 +162,7 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 
 	public void Destroy(EcoCraftDbContext context, User user)
 	{
-		var entity = new UserPrice { Id = user.Id };
+		var entity = new User { Id = user.Id };
 		context.Entry(entity).State = EntityState.Deleted;
 	}
 }

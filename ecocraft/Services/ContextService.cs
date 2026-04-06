@@ -69,11 +69,13 @@ public class ContextService(
 
         if (CurrentUser is null)
         {
+            var isFirstUser = await userDbService.CountUsers() == 0;
+
             var newUser = new User
             {
                 SecretId = Guid.NewGuid(),
                 CreationDateTime = DateTimeOffset.UtcNow,
-                SuperAdmin = await userDbService.CountUsers() == 0,
+                SuperAdmin = isFirstUser,
             };
             newUser.GeneratePseudo();
 
@@ -84,6 +86,25 @@ public class ContextService(
             });
 
             CurrentUser = newUser;
+
+            if (isFirstUser)
+            {
+                var defaultServer = new Server
+                {
+                    Name = "Default",
+                    IsDefault = true,
+                    CreationDateTime = DateTimeOffset.UtcNow,
+                };
+                defaultServer.GenerateJoinCode();
+
+                await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+                {
+                    serverDbService.Create(context, defaultServer);
+                    return Task.CompletedTask;
+                });
+
+                await JoinServer(defaultServer, isAdmin: true);
+            }
         }
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
