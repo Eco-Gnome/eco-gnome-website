@@ -366,6 +366,8 @@ FodyWeavers.xsd
 
 # Rider
 .idea
+.vscode
+.claude
 
 #DB
 /ecocraft/ecocraft.db-shm
