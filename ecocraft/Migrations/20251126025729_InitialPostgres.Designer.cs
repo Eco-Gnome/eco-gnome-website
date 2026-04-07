@@ -349,7 +349,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid?>("ServerId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("UploadDateTime")
+                    b.Property<DateTimeOffset>("UploadDateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
@@ -504,7 +504,7 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("ApiKey")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreationDateTime")
+                    b.Property<DateTimeOffset>("CreationDateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EcoServerId")
@@ -520,7 +520,7 @@ namespace ecocraft.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("LastDataUploadTime")
+                    b.Property<DateTimeOffset?>("LastDataUploadTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
@@ -576,8 +576,14 @@ namespace ecocraft.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("LocalizedDescriptionId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("MaxLevel")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -595,6 +601,8 @@ namespace ecocraft.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocalizedDescriptionId");
+
                     b.HasIndex("LocalizedNameId");
 
                     b.HasIndex("SkillId");
@@ -611,7 +619,7 @@ namespace ecocraft.Migrations
                     b.Property<bool>("CanUploadMod")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("CreationDateTime")
+                    b.Property<DateTimeOffset>("CreationDateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Pseudo")
@@ -892,6 +900,9 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("TalentId")
                         .HasColumnType("uuid");
@@ -1189,6 +1200,10 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.Talent", b =>
                 {
+                    b.HasOne("ecocraft.Models.LocalizedField", "LocalizedDescription")
+                        .WithMany("TalentDescriptions")
+                        .HasForeignKey("LocalizedDescriptionId");
+
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
                         .WithMany("Talents")
                         .HasForeignKey("LocalizedNameId")
@@ -1199,6 +1214,8 @@ namespace ecocraft.Migrations
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("LocalizedDescription");
 
                     b.Navigation("LocalizedName");
 
@@ -1462,6 +1479,8 @@ namespace ecocraft.Migrations
                     b.Navigation("Recipes");
 
                     b.Navigation("Skills");
+
+                    b.Navigation("TalentDescriptions");
 
                     b.Navigation("Talents");
                 });

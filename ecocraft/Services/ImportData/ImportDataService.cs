@@ -31,6 +31,7 @@ public partial class ImportDataService(
         await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
             var serverWithData = await serverDbService.GetServerWithData(server.Id, context);
+            context.Attach(serverWithData);
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new LanguageCodeDictionaryConverter());

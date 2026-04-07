@@ -26,7 +26,7 @@ public class ContextService(
 
     public List<Server> AvailableServers
     {
-        get { return _defaultServers.Concat(CurrentUser?.UserServers.Select(cus => cus.Server) ?? []).Distinct().ToList(); }
+        get { return _defaultServers.Concat(CurrentUser?.UserServers.Select(cus => cus.Server) ?? []).DistinctBy(s => s.Id).ToList(); }
     }
 
     public async Task ChangeServer(Server server, bool isAdmin = false)
@@ -229,9 +229,16 @@ public class ContextService(
 
 	public async Task LeaveServer(UserServer userServerToLeave)
     {
+        var server = userServerToLeave.Server;
+        var shouldDeleteServer = server.UserServers.Count <= 1;
+
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
             userServerDbService.Destroy(context, userServerToLeave);
+            if (shouldDeleteServer)
+            {
+                serverDbService.Destroy(context, server);
+            }
             return Task.CompletedTask;
         });
 
@@ -241,9 +248,16 @@ public class ContextService(
 
 	public async Task KickFromServer(UserServer userServerToKick)
 	{
+        var server = userServerToKick.Server;
+        var shouldDeleteServer = server.UserServers.Count <= 1;
+
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
             userServerDbService.Destroy(context, userServerToKick);
+            if (shouldDeleteServer)
+            {
+                serverDbService.Destroy(context, server);
+            }
             return Task.CompletedTask;
         });
 

@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class ModifierDbService(IDbContextFactory<EcoCraftDbContext> factory)
 {
-	public async Task<List<Modifier>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Modifier>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Modifier>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Modifiers
 			.ToListAsync();
 	}
 
-	public async Task<Modifier?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Modifier?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Modifier?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Modifiers
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}

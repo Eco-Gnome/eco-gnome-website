@@ -178,10 +178,10 @@
                     </MudTd>
                     <MudTd>
                         <MudStack Row AlignItems="AlignItems.Center">
-                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
-                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? MDIIcons.Filled.Shield : MDIIcons.Filled.ShieldOff)"
+                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
+                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? MDIIcons.Filled.Shield : MDIIcons.Filled.ShieldOff)"
                                                Size="Size.Small"
-                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == context)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
+                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
                                                OnClick="@(() => ToggleSelfAdmin(context))"/>
                             </MudTooltip>
                             <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
@@ -367,13 +367,20 @@
     {
         server.IsDefault = !server.IsDefault;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
 		{
+            if (server.IsDefault)
+            {
+                // Unset other defaults
+                await context.Servers
+                    .Where(s => s.IsDefault && s.Id != server.Id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsDefault, false));
+            }
+
             ServerDbService.UpdateIsDefault(context, server);
-            return Task.CompletedTask;
 		});
 
-        await RetrieveUsers();
+        await RetrieveServers();
         StateHasChanged();
     }
 
@@ -423,6 +430,7 @@
             });
 
             await RetrieveUsers();
+            await RetrieveServers();
             _isLoading = false;
             StateHasChanged();
         }
@@ -430,7 +438,7 @@
 
     private async Task ToggleSelfAdmin(Server server)
     {
-        var currentUserServer = ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.Server == server);
+        var currentUserServer = ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == server.Id);
 
         if (currentUserServer is not null)
         {

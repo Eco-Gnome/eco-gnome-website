@@ -501,7 +501,9 @@
 		await Task.Yield();
 
 		await ImportDataService.CopyServerData(_copyServer!, ContextService.CurrentServer!);
-		await ServerDataService.CopyServerContribution(_copyServer!);
+		await ServerDataService.CopyServerContribution(_copyServer!, ContextService.CurrentServer!);
+
+		ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
 
 		_showCopyExistingServerLoader = false;
 		_copyExistingServerClicked = false;

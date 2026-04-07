@@ -5,10 +5,14 @@ namespace ecocraft.Services.DbServices;
 
 public class ModUploadHistoryDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<ModUploadHistory>
 {
-	public async Task<List<ModUploadHistory>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<ModUploadHistory>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<ModUploadHistory>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.ModUploadHistories
 			.Include(muh => muh.User)
 			.Include(muh => muh.Server)
@@ -16,10 +20,14 @@ public class ModUploadHistoryDbService(IDbContextFactory<EcoCraftDbContext> fact
 			.ToListAsync();
 	}
 
-	public async Task<ModUploadHistory?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<ModUploadHistory?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<ModUploadHistory?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.ModUploadHistories
 			.Include(muh => muh.User)
 			.FirstOrDefaultAsync(muh => muh.Id == id);

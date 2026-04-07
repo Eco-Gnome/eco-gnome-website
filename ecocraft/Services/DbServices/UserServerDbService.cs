@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class UserServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<UserServer>
 {
-	public async Task<List<UserServer>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserServer>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserServer>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserServers
 			.ToListAsync();
 	}
 
-	public async Task<UserServer?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserServer?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserServer?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserServers
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
@@ -46,14 +54,18 @@ public class UserServerDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
 	public void UpdateEcoUserIdAndPseudo(EcoCraftDbContext context, UserServer userServer)
 	{
-		var entry = context.Attach(userServer);
+		var stub = new UserServer { Id = userServer.Id, EcoUserId = userServer.EcoUserId, Pseudo = userServer.Pseudo };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.EcoUserId).IsModified = true;
 		entry.Property(x => x.Pseudo).IsModified = true;
 	}
 
 	public void UpdateIsAdmin(EcoCraftDbContext context, UserServer userServer)
 	{
-		var entry = context.Attach(userServer);
+		var stub = new UserServer { Id = userServer.Id, IsAdmin = userServer.IsAdmin };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.IsAdmin).IsModified = true;
 	}
 

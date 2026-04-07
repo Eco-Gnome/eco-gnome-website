@@ -5,27 +5,39 @@ namespace ecocraft.Services.DbServices;
 
 public class UserSkillDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserSkill>
 {
-	public async Task<List<UserSkill>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserSkill>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserSkill>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserSkills
 			.ToListAsync();
 	}
 
-	public async Task<List<UserSkill>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+	public async Task<List<UserSkill>> GetByDataContextAsync(DataContext dataContext)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByDataContextAsync(dataContext, context);
+	}
 
+	public async Task<List<UserSkill>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+	{
 		return await context.UserSkills
 			.Where(s => s.DataContextId == dataContext.Id)
 			.ToListAsync();
 	}
 
-	public async Task<UserSkill?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserSkill?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserSkill?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserSkills
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
@@ -53,7 +65,9 @@ public class UserSkillDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 
 	public void UpdateLevel(EcoCraftDbContext context, UserSkill userSkill)
 	{
-		var entry = context.Attach(userSkill);
+		var stub = new UserSkill { Id = userSkill.Id, Level = userSkill.Level };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.Level).IsModified = true;
 	}
 

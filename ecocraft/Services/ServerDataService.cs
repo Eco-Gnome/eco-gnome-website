@@ -10,43 +10,52 @@ public class ServerDataService(
     UserServerDbService userServerDbService,
     ItemOrTagDbService itemOrTagDbService)
 {
-    public async Task CopyServerContribution(Server copyServer)
+    public async Task CopyServerContribution(Server sourceServer, Server targetServer)
     {
         await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
-            var data = await itemOrTagDbService.GetByServerAsync(copyServer, context);
+            var sourceItems = await itemOrTagDbService.GetByServerAsync(sourceServer, context);
+            var targetItems = await context.ItemOrTags
+                .Where(i => i.ServerId == targetServer.Id)
+                .ToListAsync();
 
-            foreach (var item in copyServer.ItemOrTags)
+            foreach (var targetItem in targetItems)
             {
-                var copyItem = data.FirstOrDefault(i => i.Name == item.Name);
+                var sourceItem = sourceItems.FirstOrDefault(i => i.Name == targetItem.Name);
 
-                if (copyItem is not null)
+                if (sourceItem is not null)
                 {
-                    item.MinPrice = copyItem.MinPrice;
-                    item.DefaultPrice = copyItem.DefaultPrice;
-                    item.MaxPrice = copyItem.MaxPrice;
+                    targetItem.MinPrice = sourceItem.MinPrice;
+                    targetItem.DefaultPrice = sourceItem.DefaultPrice;
+                    targetItem.MaxPrice = sourceItem.MaxPrice;
                 }
             }
-
-            await context.SaveChangesAsync();
         });
     }
 
     public async Task Dissociate(Server server)
     {
-        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
             server.EcoServerId = null;
             serverDbService.UpdateEcoServerId(context, server);
 
-            foreach (var userServer in server.UserServers)
+            var userServers = await context.UserServers
+                .Where(us => us.ServerId == server.Id)
+                .ToListAsync();
+
+            foreach (var us in userServers)
             {
-                userServer.EcoUserId = null;
-                userServer.Pseudo = null;
-                userServerDbService.UpdateEcoUserIdAndPseudo(context, userServer);
+                us.EcoUserId = null;
+                us.Pseudo = null;
             }
 
-            return Task.CompletedTask;
+            // Update in-memory state
+            foreach (var us in server.UserServers)
+            {
+                us.EcoUserId = null;
+                us.Pseudo = null;
+            }
         });
     }
 }

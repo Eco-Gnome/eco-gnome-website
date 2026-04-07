@@ -5,20 +5,28 @@ namespace ecocraft.Services.DbServices;
 
 public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<PluginModule>
 {
-    public async Task<List<PluginModule>> GetAllAsync(EcoCraftDbContext? context = null)
+    public async Task<List<PluginModule>> GetAllAsync()
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetAllAsync(context);
+    }
 
+    public async Task<List<PluginModule>> GetAllAsync(EcoCraftDbContext context)
+    {
         return await context.PluginModules
             .Include(s => s.LocalizedName)
             .Include(s => s.Skill)
             .ToListAsync();
     }
 
-    public async Task<List<PluginModule>> GetByServerAsync(Server server, EcoCraftDbContext? context = null)
+    public async Task<List<PluginModule>> GetByServerAsync(Server server)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByServerAsync(server, context);
+    }
 
+    public async Task<List<PluginModule>> GetByServerAsync(Server server, EcoCraftDbContext context)
+    {
         return await context.PluginModules
             .Where(s => s.ServerId == server.Id)
             .Include(s => s.LocalizedName)
@@ -26,18 +34,26 @@ public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory)
             .ToListAsync();
     }
 
-    public async Task<PluginModule?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+    public async Task<PluginModule?> GetByIdAsync(Guid id)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByIdAsync(id, context);
+    }
 
+    public async Task<PluginModule?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+    {
         return await context.PluginModules
             .FirstOrDefaultAsync(pm => pm.Id == id);
     }
 
-    public async Task<PluginModule?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
+    public async Task<PluginModule?> GetByNameAsync(string name)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByNameAsync(name, context);
+    }
 
+    public async Task<PluginModule?> GetByNameAsync(string name, EcoCraftDbContext context)
+    {
         return await context.PluginModules
             .FirstOrDefaultAsync(pm => pm.Name == name);
     }

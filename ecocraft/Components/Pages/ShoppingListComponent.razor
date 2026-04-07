@@ -456,12 +456,23 @@
 
     private async Task RetrieveData(DataContext? shoppingList = null)
     {
-        _selectedShoppingList = shoppingList ?? ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.IsShoppingList);
+        if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
+        {
+            return;
+        }
+
+        _selectedShoppingList = shoppingList ?? ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => d.IsShoppingList);
+
+        if (_selectedShoppingList is null)
+        {
+            return;
+        }
+
         _isLoadingData = true;
         StateHasChanged();
 
-        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
-        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(_selectedShoppingList!.Id, ContextService.CurrentServerData!);
+        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(_selectedShoppingList.Id, ContextService.CurrentServerData!);
 
         _isLoadingData = false;
         RebuildTree();

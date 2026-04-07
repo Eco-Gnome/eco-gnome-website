@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class UserPriceDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserPrice>
 {
-	public async Task<List<UserPrice>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserPrice>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserPrice>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserPrices
 			.ToListAsync();
 	}
 
-	public async Task<List<UserPrice>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+	public async Task<List<UserPrice>> GetByDataContextAsync(DataContext dataContext)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByDataContextAsync(dataContext, context);
+	}
 
+	public async Task<List<UserPrice>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+	{
 		return await context.UserPrices
 			.Where(up => up.DataContextId == dataContext.Id)
 			.ToListAsync();
@@ -34,10 +42,14 @@ public class UserPriceDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 			.ToListAsync();
 	}
 
-	public async Task<UserPrice?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserPrice?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserPrice?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserPrices
 			.FirstOrDefaultAsync(up => up.Id == id);
 	}
@@ -70,19 +82,25 @@ public class UserPriceDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 
 	public void UpdatePrice(EcoCraftDbContext context, UserPrice userPrice)
 	{
-		var entry = context.Attach(userPrice);
+		var stub = new UserPrice { Id = userPrice.Id, Price = userPrice.Price };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.Price).IsModified = true;
 	}
 
 	public void UpdateOverrideIsBought(EcoCraftDbContext context, UserPrice userPrice)
 	{
-		var entry = context.Attach(userPrice);
+		var stub = new UserPrice { Id = userPrice.Id, OverrideIsBought = userPrice.OverrideIsBought };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.OverrideIsBought).IsModified = true;
 	}
 
 	public void UpdateUserMargin(EcoCraftDbContext context, UserPrice userPrice)
 	{
-		var entry = context.Attach(userPrice);
+		var stub = new UserPrice { Id = userPrice.Id, UserMarginId = userPrice.UserMarginId };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.UserMarginId).IsModified = true;
 	}
 

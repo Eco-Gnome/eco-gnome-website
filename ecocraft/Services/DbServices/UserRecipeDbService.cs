@@ -5,28 +5,40 @@ namespace ecocraft.Services.DbServices;
 
 public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserRecipe>
 {
-    public async Task<List<UserRecipe>> GetAllAsync(EcoCraftDbContext? context = null)
+    public async Task<List<UserRecipe>> GetAllAsync()
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetAllAsync(context);
+    }
 
+    public async Task<List<UserRecipe>> GetAllAsync(EcoCraftDbContext context)
+    {
         return await context.UserRecipes
             .ToListAsync();
     }
 
-    public async Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+    public async Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByDataContextAsync(dataContext, context);
+    }
 
+    public async Task<List<UserRecipe>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+    {
         return await context.UserRecipes
             .Where(s => s.DataContextId == dataContext.Id)
             .Include(r => r.UserElements)
             .ToListAsync();
     }
 
-    public async Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+    public async Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByDataContextForEcoApiAsync(dataContext, context);
+    }
 
+    public async Task<List<UserRecipe>> GetByDataContextForEcoApiAsync(DataContext dataContext, EcoCraftDbContext context)
+    {
         return await context.UserRecipes
             .Where(ur => ur.DataContextId == dataContext.Id)
             .Include(ur => ur.Recipe)
@@ -37,10 +49,14 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
             .ToListAsync();
     }
 
-    public async Task<UserRecipe?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+    public async Task<UserRecipe?> GetByIdAsync(Guid id)
     {
-        context ??= await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
+        return await GetByIdAsync(id, context);
+    }
 
+    public async Task<UserRecipe?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+    {
         return await context.UserRecipes
             .FirstOrDefaultAsync(up => up.Id == id);
     }
@@ -70,7 +86,9 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
     public void UpdateRoundFactor(EcoCraftDbContext context, UserRecipe userRecipe)
     {
-        var entry = context.Attach(userRecipe);
+        var stub = new UserRecipe { Id = userRecipe.Id, RoundFactor = userRecipe.RoundFactor };
+        var entry = context.Entry(stub);
+        entry.State = EntityState.Unchanged;
         entry.Property(x => x.RoundFactor).IsModified = true;
     }
 

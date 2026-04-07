@@ -15,10 +15,14 @@ public enum RegisterUserResult
 
 public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<User>
 {
-	public async Task<List<User>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<User>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<User>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Users
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
@@ -26,20 +30,28 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 			.ToListAsync();
 	}
 
-	public async Task<User?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<User?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<User?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Users
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
 			.FirstOrDefaultAsync(u => u.Id == id);
 	}
 
-	public async Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId, EcoCraftDbContext? context = null)
+	public async Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAndSecretAsync(id, secretId, context);
+	}
 
+	public async Task<User?> GetByIdAndSecretAsync(Guid id, Guid secretId, EcoCraftDbContext context)
+	{
 		return await context.Users
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
@@ -150,13 +162,17 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 
 	public void UpdateCanUploadMod(EcoCraftDbContext context, User user)
 	{
-		var entry = context.Attach(user);
+		var stub = new User { Id = user.Id, CanUploadMod = user.CanUploadMod };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.CanUploadMod).IsModified = true;
 	}
 
 	public void UpdateSuperAdmin(EcoCraftDbContext context, User user)
 	{
-		var entry = context.Attach(user);
+		var stub = new User { Id = user.Id, SuperAdmin = user.SuperAdmin };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.SuperAdmin).IsModified = true;
 	}
 

@@ -5,19 +5,27 @@ namespace ecocraft.Services.DbServices;
 
 public class ElementDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<Element>
 {
-	public async Task<List<Element>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Element>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Element>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Elements
 			.Include(p => p.Recipe)
 			.ToListAsync();
 	}
 
-	public async Task<Element?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Element?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Element?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Elements
 			.Include(p => p.Recipe)
 			.FirstOrDefaultAsync(p => p.Id == id);

@@ -2,9 +2,15 @@
 @using ecocraft.Services
 @using ecocraft.Components.Utils
 @using ecocraft.Extensions
+@using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
+@inject UserElementDbService UserElementDbService
+@inject UserPriceDbService UserPriceDbService
+@inject UserRecipeDbService UserRecipeDbService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <MudDialog Style="min-height: 500px;" Class="pb-4">
     <TitleContent>
@@ -431,10 +437,18 @@
     {
         userElement.IsReintegrated = value;
 
-        if (userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.PrimaryUserElement == userElement)
+        var userPrice = userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!;
+        if (userPrice.PrimaryUserElement == userElement)
         {
-            userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.PrimaryUserElement = null;
+            userPrice.PrimaryUserElement = null;
         }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserElementDbService.UpdateAll(context, userElement);
+            UserPriceDbService.UpdateAll(context, userPrice);
+            return Task.CompletedTask;
+        });
 
         await FirstOnly();
         await PriceCalculatorService.Calculate(DataContext);
@@ -445,13 +459,27 @@
     {
         userPrice.Price = value;
 
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserPriceDbService.UpdateAll(context, userPrice);
+            return Task.CompletedTask;
+        });
+
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
 
-    private void ToggleLock()
+    private async Task ToggleLock()
     {
-        Recipe.GetCurrentUserRecipe(DataContext)!.LockShare = !Recipe.GetCurrentUserRecipe(DataContext)!.LockShare;
+        var userRecipe = Recipe.GetCurrentUserRecipe(DataContext)!;
+        userRecipe.LockShare = !userRecipe.LockShare;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserRecipeDbService.UpdateAll(context, userRecipe);
+            return Task.CompletedTask;
+        });
+
         StateHasChanged();
     }
 
@@ -488,6 +516,13 @@
     private async Task RoundFactorChange(int value, UserRecipe userRecipe)
     {
         userRecipe.RoundFactor = value;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserRecipeDbService.UpdateAll(context, userRecipe);
+            return Task.CompletedTask;
+        });
+
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
@@ -531,6 +566,7 @@
             }
         }
 
+        await SaveProductShares();
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
@@ -544,6 +580,7 @@
             userElement.Share = 1m / userElements.Count;
         }
 
+        await SaveProductShares();
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
@@ -558,6 +595,7 @@
             userElement.Share = userElement.Element.Quantity.BaseValue / totalQuantity;
         }
 
+        await SaveProductShares();
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
@@ -571,6 +609,7 @@
             userElement.Share = userElement.Element.Index == 0 ? 1 : 0;
         }
 
+        await SaveProductShares();
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
     }
@@ -584,7 +623,21 @@
             userElement.Share = userElement.Element.Index == 0 ? 0.8m : 0.2m / (userElements.Count - 1);
         }
 
+        await SaveProductShares();
         await PriceCalculatorService.Calculate(DataContext);
         StateHasChanged();
+    }
+
+    private async Task SaveProductShares()
+    {
+        var userElements = GetProductUserElements();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var ue in userElements)
+            {
+                UserElementDbService.UpdateAll(context, ue);
+            }
+            return Task.CompletedTask;
+        });
     }
 }

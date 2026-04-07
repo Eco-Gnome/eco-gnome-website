@@ -892,6 +892,8 @@
 </MudContainer>
 
 @code {
+    private CancellationTokenSource? _dataContextNameCts;
+
     private bool _showDetailedTags;
     private bool ShowDetailedTags
     {
@@ -1039,6 +1041,7 @@
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         _isLoadingData = false;
 
+        await Calculate();
         StateHasChanged();
     }
 
@@ -1101,14 +1104,14 @@
         return Task.FromResult(result);
     }
 
-    private void RemoveTalentGroup(List<Talent> talents, DataContext dataContext)
+    private void RemoveTalentGroup(EcoCraftDbContext context, List<Talent> talents, DataContext dataContext)
     {
         foreach (var talent in talents)
         {
             var currentUserTalent = talent.GetCurrentUserTalent(dataContext);
             if (currentUserTalent is not null)
             {
-                UserServerDataService.RemoveUserTalent(currentUserTalent);
+                UserServerDataService.RemoveUserTalent(context, currentUserTalent);
             }
         }
     }
@@ -1122,33 +1125,37 @@
 
         var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedDataContext) is not null);
 
-        if (isRemove)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            RemoveTalentGroup(talents, _selectedDataContext);
-        }
-        else
-        {
-            var firstTalent = talents.First();
-            var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
-                .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
-                .Select(ut => ut.Talent)
-                .ToList();
-
-            if (selectedTalentsWithSameLevel.Count > 0)
+            if (isRemove)
             {
-                RemoveTalentGroup(selectedTalentsWithSameLevel, _selectedDataContext);
+                RemoveTalentGroup(context, talents, _selectedDataContext);
             }
-
-            foreach (var talent in talents)
+            else
             {
-                if (talent.GetCurrentUserTalent(_selectedDataContext) is null)
+                var firstTalent = talents.First();
+                var selectedTalentsWithSameLevel = _selectedDataContext.UserTalents
+                    .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
+                    .Select(ut => ut.Talent)
+                    .ToList();
+
+                if (selectedTalentsWithSameLevel.Count > 0)
                 {
-                    UserServerDataService.AddUserTalent(talent, _selectedDataContext);
+                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedDataContext);
+                }
+
+                foreach (var talent in talents)
+                {
+                    if (talent.GetCurrentUserTalent(_selectedDataContext) is null)
+                    {
+                        UserServerDataService.AddUserTalent(context, talent, _selectedDataContext);
+                    }
                 }
             }
-        }
 
-        await EcoCraftDbContext.SaveChangesAsync();
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
@@ -1162,36 +1169,40 @@
         var firstTalent = talents.First();
         var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedDataContext);
 
-        if (existingUserTalent is null)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            var selectedTalentsWithSameLevel = UserServerDataService.UserTalents
-                .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
-                .Select(ut => ut.Talent)
-                .ToList();
+            if (existingUserTalent is null)
+            {
+                var selectedTalentsWithSameLevel = _selectedDataContext.UserTalents
+                    .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
+                    .Select(ut => ut.Talent)
+                    .ToList();
 
-            if (selectedTalentsWithSameLevel.Count > 0)
-            {
-                RemoveTalentGroup(selectedTalentsWithSameLevel, _selectedDataContext);
-            }
-
-            foreach (var talent in talents)
-            {
-                UserServerDataService.AddUserTalent(talent, _selectedDataContext);
-            }
-        }
-        else if (existingUserTalent.Level < firstTalent.MaxLevel)
-        {
-            foreach (var talent in talents)
-            {
-                var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
-                if (userTalent is not null)
+                if (selectedTalentsWithSameLevel.Count > 0)
                 {
-                    userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedDataContext);
+                }
+
+                foreach (var talent in talents)
+                {
+                    UserServerDataService.AddUserTalent(context, talent, _selectedDataContext);
                 }
             }
-        }
+            else if (existingUserTalent.Level < firstTalent.MaxLevel)
+            {
+                foreach (var talent in talents)
+                {
+                    var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
+                    if (userTalent is not null)
+                    {
+                        userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                    }
+                }
+            }
 
-        await EcoCraftDbContext.SaveChangesAsync();
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
@@ -1210,23 +1221,28 @@
             return;
         }
 
-        foreach (var talent in talents)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
-            if (userTalent is null)
+            foreach (var talent in talents)
             {
-                continue;
+                var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
+                if (userTalent is null)
+                {
+                    continue;
+                }
+
+                if (userTalent.Level <= 1)
+                {
+                    UserServerDataService.RemoveUserTalent(context, userTalent);
+                }
+                else
+                {
+                    userTalent.Level--;
+                }
             }
 
-            if (userTalent.Level <= 1)
-            {
-                UserServerDataService.RemoveUserTalent(userTalent);
-            }
-            else
-            {
-                userTalent.Level--;
-            }
-        }
+            return Task.CompletedTask;
+        });
 
         await Calculate();
     }
@@ -1407,9 +1423,11 @@
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
     {
+        userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
+            UserPriceDbService.UpdateAll(context, userPrice);
             return Task.CompletedTask;
         });
 
@@ -1576,6 +1594,7 @@
     private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin userMargin)
     {
         userPrice.UserMargin = userMargin;
+        userPrice.UserMarginId = userMargin.Id;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -1631,6 +1650,19 @@
         _selectedDataContext!.Name = name;
         ContextService.CurrentUserServer!.DataContexts.First(d => d.Id == _selectedDataContext.Id).Name = name;
 
+        _dataContextNameCts?.Cancel();
+        _dataContextNameCts = new CancellationTokenSource();
+        var token = _dataContextNameCts.Token;
+
+        try
+        {
+            await Task.Delay(300, token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             DataContextDbService.UpdateName(context, _selectedDataContext);
@@ -1671,6 +1703,13 @@
     private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)
     {
         userPrice.PrimaryUserPrice = userPrice.PrimaryUserPrice == target ? null : target;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserPriceDbService.UpdateAll(context, userPrice);
+            return Task.CompletedTask;
+        });
+
         await Calculate();
     }
 
@@ -1724,6 +1763,11 @@
 
         userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
 
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
+        });
+
         await Calculate();
     }
 
@@ -1744,6 +1788,12 @@
         }
 
         userCraftingTable.SkilledPluginModules.Clear();
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
+        });
+
         await Calculate();
     }
 
@@ -1757,6 +1807,11 @@
         {
             userCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
+        });
 
         await Calculate();
     }

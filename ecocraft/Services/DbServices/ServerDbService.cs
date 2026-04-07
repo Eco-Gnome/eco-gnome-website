@@ -19,10 +19,14 @@ public class RegisterServerResultInfo
 
 public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<Server>
 {
-	public async Task<List<Server>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Server>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Server>> GetAllAsync(EcoCraftDbContext context)
+	{
 		var servers = await context.Servers
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.User)
@@ -36,20 +40,28 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		return servers;
 	}
 
-	public async Task<List<Server>> GetAllDefaultAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Server>> GetAllDefaultAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllDefaultAsync(context);
+	}
 
+	public async Task<List<Server>> GetAllDefaultAsync(EcoCraftDbContext context)
+	{
 		return await context.Servers
 			.Where(s => s.IsDefault)
 			.OrderByDescending(s => s.CreationDateTime)
 			.ToListAsync();
 	}
 
-	public async Task<Server> GetServerWithData(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Server> GetServerWithData(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetServerWithData(id, context);
+	}
 
+	public async Task<Server> GetServerWithData(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Servers
 			.AsNoTrackingWithIdentityResolution()
 			.Where(s => s.Id == id)
@@ -92,35 +104,52 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.FirstAsync();
 	}
 
-	public async Task<Server?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Server?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Server?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Servers
 			.Include(s => s.UserServers)
+			.ThenInclude(us => us.User)
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public async Task<Server?> GetByEcoServerIdAsync(string ecoServerId, EcoCraftDbContext? context = null)
+	public async Task<Server?> GetByEcoServerIdAsync(string ecoServerId)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByEcoServerIdAsync(ecoServerId, context);
+	}
 
+	public async Task<Server?> GetByEcoServerIdAsync(string ecoServerId, EcoCraftDbContext context)
+	{
 		return await context.Servers
 			.FirstOrDefaultAsync(s => s.EcoServerId == ecoServerId);
 	}
 
-	public async Task<Server?> GetByApiKeyAsync(Guid apiKey, EcoCraftDbContext? context = null)
+	public async Task<Server?> GetByApiKeyAsync(Guid apiKey)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByApiKeyAsync(apiKey, context);
+	}
 
+	public async Task<Server?> GetByApiKeyAsync(Guid apiKey, EcoCraftDbContext context)
+	{
 		return await context.Servers
 			.FirstOrDefaultAsync(s => s.ApiKey == apiKey);
 	}
 
-    public async Task<Server?> GetByJoinCodeAsync(string joinCode, EcoCraftDbContext? context = null)
+    public async Task<Server?> GetByJoinCodeAsync(string joinCode)
     {
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByJoinCodeAsync(joinCode, context);
+    }
 
+    public async Task<Server?> GetByJoinCodeAsync(string joinCode, EcoCraftDbContext context)
+    {
         return await context.Servers
 	        .FirstOrDefaultAsync(s => s.JoinCode == joinCode);
     }
@@ -202,37 +231,49 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 
     public void UpdateEcoServerId(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, EcoServerId = server.EcoServerId };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.EcoServerId).IsModified = true;
     }
 
     public void UpdateApiKey(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, ApiKey = server.ApiKey };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.ApiKey).IsModified = true;
     }
 
     public void UpdateName(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, Name = server.Name };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.Name).IsModified = true;
     }
 
     public void UpdateJoinCode(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, JoinCode = server.JoinCode };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.JoinCode).IsModified = true;
     }
 
     public void UpdateHasVideoUploader(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, HasVideoUploader = server.HasVideoUploader };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.HasVideoUploader).IsModified = true;
     }
 
     public void UpdateIsDefault(EcoCraftDbContext context, Server server)
     {
-	    var entry = context.Attach(server);
+	    var stub = new Server { Id = server.Id, IsDefault = server.IsDefault };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.IsDefault).IsModified = true;
     }
 

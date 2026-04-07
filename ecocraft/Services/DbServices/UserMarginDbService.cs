@@ -5,27 +5,39 @@ namespace ecocraft.Services.DbServices;
 
 public class UserMarginDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericDbService<UserMargin>
 {
-	public async Task<List<UserMargin>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserMargin>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserMargin>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserMargins
 			.ToListAsync();
 	}
 
-	public async Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+	public async Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByDataContextAsync(dataContext, context);
+	}
 
+	public async Task<List<UserMargin>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+	{
         return await context.UserMargins
             .Where(s => s.DataContextId == dataContext.Id)
             .ToListAsync();
     }
 
-	public async Task<UserMargin?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserMargin?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserMargin?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserMargins
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}

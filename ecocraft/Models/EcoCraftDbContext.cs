@@ -454,6 +454,10 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.ToTable("UserServer");
 
 		modelBuilder.Entity<UserServer>()
+			.HasIndex(us => new { us.UserId, us.ServerId })
+			.IsUnique();
+
+		modelBuilder.Entity<UserServer>()
 			.HasOne(us => us.User)
 			.WithMany(u => u.UserServers)
 			.HasForeignKey(us => us.UserId)

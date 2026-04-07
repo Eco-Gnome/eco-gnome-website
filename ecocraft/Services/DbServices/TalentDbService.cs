@@ -5,36 +5,52 @@ namespace ecocraft.Services.DbServices;
 
 public class TalentDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<Talent>
 {
-	public async Task<List<Talent>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Talent>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Talent>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Talents
 			.ToListAsync();
 	}
 
-	public async Task<List<Talent>> GetBySkillAsync(Skill skill, EcoCraftDbContext? context = null)
+	public async Task<List<Talent>> GetBySkillAsync(Skill skill)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetBySkillAsync(skill, context);
+	}
 
+	public async Task<List<Talent>> GetBySkillAsync(Skill skill, EcoCraftDbContext context)
+	{
 		return await context.Talents
 			.Where(s => s.SkillId == skill.Id)
 			.Include(s => s.LocalizedName)
 			.ToListAsync();
 	}
 
-	public async Task<Talent?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Talent?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Talent?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Talents
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public async Task<Talent?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
+	public async Task<Talent?> GetByNameAsync(string name)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByNameAsync(name, context);
+	}
 
+	public async Task<Talent?> GetByNameAsync(string name, EcoCraftDbContext context)
+	{
 		return await context.Talents
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}

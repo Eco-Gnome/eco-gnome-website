@@ -349,6 +349,7 @@ public class UserServerDataService(
             ItemOrTagId = itemOrTag.Id,
             DataContext = dataContext,
             DataContextId = dataContext.Id,
+            UserMargin = userMargin,
             UserMarginId = userMargin.Id,
             OverrideIsBought = false,
             Price = itemOrTag.DefaultPrice ?? itemOrTag.MinPrice,

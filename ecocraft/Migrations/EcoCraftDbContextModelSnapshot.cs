@@ -574,13 +574,13 @@ namespace ecocraft.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("LocalizedDescriptionId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("LocalizedNameId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("MaxLevel")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -829,7 +829,8 @@ namespace ecocraft.Migrations
 
                     b.HasIndex("ServerId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ServerId")
+                        .IsUnique();
 
                     b.ToTable("UserServer", (string)null);
                 });
@@ -899,7 +900,7 @@ namespace ecocraft.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("TalentId")
                         .HasColumnType("uuid");

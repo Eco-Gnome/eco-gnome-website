@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class DynamicValueDbService(IDbContextFactory<EcoCraftDbContext> factory)
 {
-	public async Task<List<DynamicValue>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<DynamicValue>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<DynamicValue>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.DynamicValues
 			.ToListAsync();
 	}
 
-	public async Task<DynamicValue?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<DynamicValue?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<DynamicValue?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.DynamicValues
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}

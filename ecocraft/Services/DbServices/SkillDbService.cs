@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class SkillDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<Skill>
 {
-	public async Task<List<Skill>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Skill>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Skill>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Skills
 			.ToListAsync();
 	}
 
-	public async Task<List<Skill>> GetByServerAsync(Server server, EcoCraftDbContext? context = null)
+	public async Task<List<Skill>> GetByServerAsync(Server server)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByServerAsync(server, context);
+	}
 
+	public async Task<List<Skill>> GetByServerAsync(Server server, EcoCraftDbContext context)
+	{
 		return await context.Skills
 			.Where(s => s.ServerId == server.Id)
 			.Include(s => s.LocalizedName)
@@ -25,18 +33,26 @@ public class SkillDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGen
 			.ToListAsync();
 	}
 
-	public async Task<Skill?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Skill?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Skill?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Skills
 			.FirstOrDefaultAsync(s => s.Id == id);
 	}
 
-	public async Task<Skill?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
+	public async Task<Skill?> GetByNameAsync(string name)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByNameAsync(name, context);
+	}
 
+	public async Task<Skill?> GetByNameAsync(string name, EcoCraftDbContext context)
+	{
 		return await context.Skills
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}

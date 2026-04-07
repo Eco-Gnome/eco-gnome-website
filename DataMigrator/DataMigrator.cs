@@ -159,6 +159,22 @@ class DataMigrator
                     prop.SetValue(entity, (DateTime?)DateTime.SpecifyKind(value.Value, DateTimeKind.Utc));
                 }
             }
+            else if (prop.PropertyType == typeof(DateTimeOffset))
+            {
+                var value = (DateTimeOffset)prop.GetValue(entity)!;
+                if (value.Offset != TimeSpan.Zero)
+                {
+                    prop.SetValue(entity, value.ToUniversalTime());
+                }
+            }
+            else if (prop.PropertyType == typeof(DateTimeOffset?))
+            {
+                var value = (DateTimeOffset?)prop.GetValue(entity);
+                if (value.HasValue && value.Value.Offset != TimeSpan.Zero)
+                {
+                    prop.SetValue(entity, (DateTimeOffset?)value.Value.ToUniversalTime());
+                }
+            }
         }
     }
 

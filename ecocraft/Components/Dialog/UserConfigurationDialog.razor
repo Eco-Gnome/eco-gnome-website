@@ -168,7 +168,7 @@
 		}
 	}
 
-	private async void ConfirmLeaveServer(UserServer userServerToLeave)
+	private async Task ConfirmLeaveServer(UserServer userServerToLeave)
 	{
 		if (_askLeaveConfirmations.ContainsKey(userServerToLeave))
 		{
@@ -217,7 +217,11 @@
 		userServer.EcoUserId = null;
 		userServer.Pseudo = null;
 
-		await EcoCraftDbContext.SaveChangesAsync();
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			UserServerDbService.UpdateAll(context, userServer);
+			return Task.CompletedTask;
+		});
 	}
 
 	private async Task ImportUser(IBrowserFile? file)

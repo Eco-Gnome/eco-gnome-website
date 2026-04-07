@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 {
-	public async Task<List<DataContext>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<DataContext>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<DataContext>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.DataContexts
 			.ToListAsync();
 	}
 
-	public async Task<List<DataContext>> GetByUserServerAsync(UserServer userServer, EcoCraftDbContext? context = null)
+	public async Task<List<DataContext>> GetByUserServerAsync(UserServer userServer)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByUserServerAsync(userServer, context);
+	}
 
+	public async Task<List<DataContext>> GetByUserServerAsync(UserServer userServer, EcoCraftDbContext context)
+	{
 		return await context.DataContexts
 			.Where(s => s.UserServerId == userServer.Id)
 			.ToListAsync();
@@ -112,10 +120,14 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		});
 	}
 
-	public async Task<DataContext?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<DataContext?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<DataContext?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.DataContexts
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
@@ -144,7 +156,9 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 	public void UpdateName(EcoCraftDbContext context, DataContext dataContext)
 	{
-		var entry = context.Attach(dataContext);
+		var stub = new DataContext { Id = dataContext.Id, Name = dataContext.Name };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.Name).IsModified = true;
 	}
 

@@ -399,11 +399,18 @@ namespace ecocraft.Migrations
                     TalentGroupName = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<decimal>(type: "numeric", nullable: false),
                     Level = table.Column<int>(type: "integer", nullable: false),
+                    MaxLevel = table.Column<int>(type: "integer", nullable: false),
+                    LocalizedDescriptionId = table.Column<Guid>(type: "uuid", nullable: true),
                     SkillId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Talent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Talent_LocalizedField_LocalizedDescriptionId",
+                        column: x => x.LocalizedDescriptionId,
+                        principalTable: "LocalizedField",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Talent_LocalizedField_LocalizedNameId",
                         column: x => x.LocalizedNameId,
@@ -658,6 +665,7 @@ namespace ecocraft.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
                     TalentId = table.Column<Guid>(type: "uuid", nullable: false),
                     DataContextId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
@@ -931,6 +939,11 @@ namespace ecocraft.Migrations
                 name: "IX_Skill_ServerId",
                 table: "Skill",
                 column: "ServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Talent_LocalizedDescriptionId",
+                table: "Talent",
+                column: "LocalizedDescriptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Talent_LocalizedNameId",

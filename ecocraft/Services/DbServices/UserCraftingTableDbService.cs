@@ -5,10 +5,14 @@ namespace ecocraft.Services.DbServices;
 
 public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserCraftingTable>
 {
-	public async Task<List<UserCraftingTable>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserCraftingTable>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserCraftingTable>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserCraftingTables
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
@@ -16,10 +20,14 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.ToListAsync();
 	}
 
-	public async Task<List<UserCraftingTable>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+	public async Task<List<UserCraftingTable>> GetByDataContextAsync(DataContext dataContext)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByDataContextAsync(dataContext, context);
+	}
 
+	public async Task<List<UserCraftingTable>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+	{
 		return await context.UserCraftingTables
 			.Where(s => s.DataContextId == dataContext.Id)
 			.Include(uct => uct.CraftingTable)
@@ -28,10 +36,14 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.ToListAsync();
 	}
 
-	public async Task<UserCraftingTable?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserCraftingTable?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserCraftingTable?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserCraftingTables
 			.FirstOrDefaultAsync(uct => uct.Id == id);
 	}
@@ -58,9 +70,27 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		context.Attach(CloneForDb(userCraftingTable)).State = EntityState.Modified;
 	}
 
+	public async Task UpdateAllAsync(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	{
+		var existing = await context.UserCraftingTables
+			.Include(uct => uct.SkilledPluginModules)
+			.FirstAsync(uct => uct.Id == userCraftingTable.Id);
+
+		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
+		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
+
+		existing.SkilledPluginModules.Clear();
+		foreach (var pm in userCraftingTable.SkilledPluginModules)
+		{
+			existing.SkilledPluginModules.Add(context.PluginModules.Attach(new PluginModule { Id = pm.Id }).Entity);
+		}
+	}
+
 	public void UpdateCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
 	{
-		var entry = context.Attach(userCraftingTable);
+		var stub = new UserCraftingTable { Id = userCraftingTable.Id, CraftMinuteFee = userCraftingTable.CraftMinuteFee };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.CraftMinuteFee).IsModified = true;
 	}
 

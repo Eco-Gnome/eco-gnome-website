@@ -134,7 +134,7 @@
             return;
         }
 
-        var server = ServerDbService.GetByJoinCodeAsync(JoinCode).Result;
+        var server = await ServerDbService.GetByJoinCodeAsync(JoinCode);
 
         if (server is null)
         {

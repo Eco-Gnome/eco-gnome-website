@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class ItemOrTagDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<ItemOrTag>
 {
-	public async Task<List<ItemOrTag>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<ItemOrTag>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<ItemOrTag>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.ItemOrTags
 			.ToListAsync();
 	}
 
-	public async Task<List<ItemOrTag>> GetByServerAsync(Server server, EcoCraftDbContext? context = null)
+	public async Task<List<ItemOrTag>> GetByServerAsync(Server server)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByServerAsync(server, context);
+	}
 
+	public async Task<List<ItemOrTag>> GetByServerAsync(Server server, EcoCraftDbContext context)
+	{
 		return await context.ItemOrTags
 			.Include(s => s.AssociatedItems)
 			.Include(s => s.AssociatedTags)
@@ -25,28 +33,40 @@ public class ItemOrTagDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 			.ToListAsync();
 	}
 
-	public async Task<List<ItemOrTag>> GetWithPriceSetByServerAsync(Server server, EcoCraftDbContext? context = null)
+	public async Task<List<ItemOrTag>> GetWithPriceSetByServerAsync(Server server)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetWithPriceSetByServerAsync(server, context);
+	}
 
+	public async Task<List<ItemOrTag>> GetWithPriceSetByServerAsync(Server server, EcoCraftDbContext context)
+	{
 		return await context.ItemOrTags
 			.Where(s => s.MaxPrice != null || s.MinPrice != null || s.DefaultPrice != null)
 			.Where(s => s.ServerId == server.Id)
 			.ToListAsync();
 	}
 
-	public async Task<ItemOrTag?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<ItemOrTag?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<ItemOrTag?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.ItemOrTags
 			.FirstOrDefaultAsync(i => i.Id == id);
 	}
 
-	public async Task<ItemOrTag?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
+	public async Task<ItemOrTag?> GetByNameAsync(string name)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByNameAsync(name, context);
+	}
 
+	public async Task<ItemOrTag?> GetByNameAsync(string name, EcoCraftDbContext context)
+	{
 		return await context.ItemOrTags
 			.FirstOrDefaultAsync(s => s.Name == name);
 	}
@@ -78,10 +98,25 @@ public class ItemOrTagDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 
 	public void UpdatePrices(EcoCraftDbContext context, ItemOrTag itemOrTag)
 	{
-		var entry = context.Attach(itemOrTag);
-		entry.Property(x => x.MinPrice).IsModified = true;
-		entry.Property(x => x.DefaultPrice).IsModified = true;
-		entry.Property(x => x.MaxPrice).IsModified = true;
+		var tracked = context.ChangeTracker.Entries<ItemOrTag>().FirstOrDefault(e => e.Entity.Id == itemOrTag.Id);
+		if (tracked != null)
+		{
+			tracked.Entity.MinPrice = itemOrTag.MinPrice;
+			tracked.Entity.DefaultPrice = itemOrTag.DefaultPrice;
+			tracked.Entity.MaxPrice = itemOrTag.MaxPrice;
+			tracked.Property(x => x.MinPrice).IsModified = true;
+			tracked.Property(x => x.DefaultPrice).IsModified = true;
+			tracked.Property(x => x.MaxPrice).IsModified = true;
+		}
+		else
+		{
+			var stub = new ItemOrTag { Id = itemOrTag.Id, MinPrice = itemOrTag.MinPrice, DefaultPrice = itemOrTag.DefaultPrice, MaxPrice = itemOrTag.MaxPrice };
+			var entry = context.Entry(stub);
+			entry.State = EntityState.Unchanged;
+			entry.Property(x => x.MinPrice).IsModified = true;
+			entry.Property(x => x.DefaultPrice).IsModified = true;
+			entry.Property(x => x.MaxPrice).IsModified = true;
+		}
 	}
 
 	public void Destroy(EcoCraftDbContext context, ItemOrTag itemOrTag)

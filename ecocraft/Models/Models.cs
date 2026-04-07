@@ -484,7 +484,7 @@ public class UserServer
 
     public string GetPseudo()
     {
-        return Pseudo is not null ? Pseudo : User.Pseudo;
+        return Pseudo ?? User.Pseudo;
     }
 }
 

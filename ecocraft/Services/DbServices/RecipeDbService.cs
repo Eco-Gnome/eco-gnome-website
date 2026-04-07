@@ -5,19 +5,27 @@ namespace ecocraft.Services.DbServices;
 
 public class RecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericNamedDbService<Recipe>
 {
-	public async Task<List<Recipe>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<Recipe>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<Recipe>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.Recipes
 			.Include(r => r.Elements)
 			.ToListAsync();
 	}
 
-	public async Task<List<Recipe>> GetByServerAsync(Server server, EcoCraftDbContext? context = null)
+	public async Task<List<Recipe>> GetByServerAsync(Server server)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByServerAsync(server, context);
+	}
 
+	public async Task<List<Recipe>> GetByServerAsync(Server server, EcoCraftDbContext context)
+	{
 		return await context.Recipes
 			.Include(c => c.Elements)
 			.ThenInclude(e => e.Quantity)
@@ -31,19 +39,27 @@ public class RecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.ToListAsync();
 	}
 
-	public async Task<Recipe?> GetByNameAsync(string name, EcoCraftDbContext? context = null)
+	public async Task<Recipe?> GetByNameAsync(string name)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByNameAsync(name, context);
+	}
 
+	public async Task<Recipe?> GetByNameAsync(string name, EcoCraftDbContext context)
+	{
 		return await context.Recipes
 			.Include(r => r.Elements)
 			.FirstOrDefaultAsync(r => r.Name == name);
 	}
 
-	public async Task<Recipe?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<Recipe?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<Recipe?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.Recipes
 			.Include(r => r.Elements)
 			.FirstOrDefaultAsync(r => r.Id == id);

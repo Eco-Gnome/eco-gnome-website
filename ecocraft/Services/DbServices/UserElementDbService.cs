@@ -5,18 +5,26 @@ namespace ecocraft.Services.DbServices;
 
 public class UserElementDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGenericUserDbService<UserElement>
 {
-	public async Task<List<UserElement>> GetAllAsync(EcoCraftDbContext? context = null)
+	public async Task<List<UserElement>> GetAllAsync()
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetAllAsync(context);
+	}
 
+	public async Task<List<UserElement>> GetAllAsync(EcoCraftDbContext context)
+	{
 		return await context.UserElements
 			.ToListAsync();
 	}
 
-	public async Task<List<UserElement>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext? context = null)
+	public async Task<List<UserElement>> GetByDataContextAsync(DataContext dataContext)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByDataContextAsync(dataContext, context);
+	}
 
+	public async Task<List<UserElement>> GetByDataContextAsync(DataContext dataContext, EcoCraftDbContext context)
+	{
 		return await context.UserElements
 			.Where(s => s.DataContextId == dataContext.Id)
 			.ToListAsync();
@@ -36,10 +44,14 @@ public class UserElementDbService(IDbContextFactory<EcoCraftDbContext> factory) 
 			.ToListAsync();
 	}
 
-	public async Task<UserElement?> GetByIdAsync(Guid id, EcoCraftDbContext? context = null)
+	public async Task<UserElement?> GetByIdAsync(Guid id)
 	{
-		context ??= await factory.CreateDbContextAsync();
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetByIdAsync(id, context);
+	}
 
+	public async Task<UserElement?> GetByIdAsync(Guid id, EcoCraftDbContext context)
+	{
 		return await context.UserElements
 			.FirstOrDefaultAsync(ue => ue.Id == id);
 	}
