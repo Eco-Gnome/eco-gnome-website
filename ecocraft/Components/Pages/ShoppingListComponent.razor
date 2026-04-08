@@ -11,8 +11,10 @@
 @inject ShoppingListService ShoppingListService
 @inject LocalizationService LocalizationService
 @inject UserSkillDbService UserSkillDbService
+@inject UserTalentDbService UserTalentDbService
 @inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserRecipeDbService UserRecipeDbService
+@inject UserServerDataService UserServerDataService
 @inject ServerDbService ServerDbService
 @inject DataContextDbService DataContextDbService
 @inject IJSRuntime JsRuntime
@@ -82,47 +84,139 @@
                                     </MudStack>
                                 </MudExpansionPanel>
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Skills")" @bind-Expanded="ExpandedSkills">
-                                    <MudStack Class="pa-3">
-                                        @foreach (var shoppingListSkill in _selectedShoppingList.UserSkills)
-                                        {
-                                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                                <EcoIcon Item="shoppingListSkill.Skill"/>
-                                                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(shoppingListSkill.Skill)</MudText>
+                                    <MudTable Items="_selectedShoppingList.UserSkills.Where(us => us.Skill is not null)"
+                                              Hover="true"
+                                              Dense="true"
+                                              Class="mt-4">
+                                        <HeaderContent>
+                                            <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
+                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
+                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Talents")</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd Class="pa-1">
+                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                                    <EcoIcon Item="@context.Skill"/>
+                                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
+                                                </MudStack>
+                                            </MudTd>
+                                            <MudTd Class="px-0">
                                                 <MudNumericField T="int"
-                                                                 Value="shoppingListSkill.Level"
+                                                                 Value="@context.Level"
                                                                  Class="square-input flex-no-grow"
                                                                  Min="1"
-                                                                 Max="7"
+                                                                 Max="@(context.Skill!.MaxLevel)"
                                                                  Variant="Variant.Outlined"
                                                                  Immediate="true"
-                                                                 ValueChanged="(int newValue) => OnLevelChanged(shoppingListSkill, newValue)"/>
-                                            </MudStack>
-                                        }
-                                    </MudStack>
+                                                                 ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
+                                            </MudTd>
+                                            <MudTd Class="px-0">
+                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="2">
+                                                    @foreach (var talentGroup in context.Skill!.Talents.Where(t => context.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
+                                                    {
+                                                        var talent = talentGroup.First();
+                                                        var userTalent = talent.GetCurrentUserTalent(_selectedShoppingList);
+
+                                                        <MudTooltip Text="@LocalizationService.GetTranslation(talent)" RootClass="d-flex">
+                                                            @if (talent.MaxLevel <= 1)
+                                                            {
+                                                                <MudLink OnClick="() => ToggleBinaryTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
+                                                                    <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                                </MudLink>
+                                                            }
+                                                            else
+                                                            {
+                                                                var isMaxLevelReached = userTalent is not null && userTalent.Level >= talent.MaxLevel;
+                                                                var isMinLevelReached = userTalent is null;
+                                                                var currentLevel = userTalent?.Level ?? 0;
+
+                                                                <div class="talent-level-control">
+                                                                    <div class="talent-icon-wrapper">
+                                                                        <MudLink OnClick="() => IncreaseTalentLevel(talentGroup.ToList())"
+                                                                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">+</MudLink>
+                                                                        <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                                                                        <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
+                                                                        <MudLink OnClick="() => DecreaseTalentLevel(talentGroup.ToList())"
+                                                                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">-</MudLink>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </MudTooltip>
+                                                    }
+                                                </MudStack>
+                                            </MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
                                 </MudExpansionPanel>
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.CraftingTables")" @bind-Expanded="ExpandedCraftingTables">
-                                    <MudStack Class="pa-3">
-                                        @foreach (var craftingTable in _selectedShoppingList.UserCraftingTables)
-                                        {
-                                            var pluginModules = craftingTable.CraftingTable.PluginModules.OrderByDescending(pm => pm.Percent).ThenBy(pm => LocalizationService.GetTranslation(pm)).ToList();
+                                    <MudTable Items="@_selectedShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
+                                              FixedHeader="true"
+                                              Hover="true"
+                                              Class="mt-4"
+                                              Dense="true">
+                                        <HeaderContent>
+                                            <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd Class="pa-1">
+                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                                    <EcoIcon Item="@context.CraftingTable"/>
+                                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
+                                                </MudStack>
+                                            </MudTd>
+                                            <MudTd Class="pa-1">
+                                                @if (context.CraftingTable.PluginModules.Count > 0)
+                                                {
+                                                    var genericPluginModules = context.CraftingTable.PluginModules
+                                                        .Where(p => p.Skill is null)
+                                                        .OrderByDescending(pm => pm.Percent)
+                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
+                                                        .ToList();
 
-                                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                                <EcoIcon Item="@craftingTable.CraftingTable"/>
-                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(craftingTable.CraftingTable)</MudText>
-                                                <MudIconButton Icon="@MDIIcons.Filled.Minus"
-                                                               Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm.Id == craftingTable.PluginModuleId) <= -1)"
-                                                               OnClick="@(() => DecreasePluginModule(craftingTable, pluginModules))"/>
-                                                <MudTooltip Text="@(craftingTable.PluginModule is not null ? LocalizationService.GetTranslation(craftingTable.PluginModule) + $" [{((1 - craftingTable.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                    <EcoIcon Item="@craftingTable.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
-                                                </MudTooltip>
-                                                <MudIconButton Icon="@MDIIcons.Filled.Plus"
-                                                               Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm.Id == craftingTable.PluginModuleId) == pluginModules.Count - 1)"
-                                                               OnClick="@(() => IncreasePluginModule(craftingTable, pluginModules))"/>
-                                            </MudStack>
-                                        }
-                                    </MudStack>
+                                                    var skilledPluginModules = context.CraftingTable.PluginModules
+                                                        .Where(p => p.Skill is not null)
+                                                        .OrderByDescending(pm => pm.SkillPercent)
+                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
+                                                        .ToList();
+
+                                                    var currentPluginModuleId = context.PluginModuleId;
+                                                    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
+
+                                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                                        <MudIconButton Icon="@MDIIcons.Filled.Minus"
+                                                                       Size="Size.Small"
+                                                                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
+                                                                       OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
+                                                        <MudTooltip Text="@(context.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                            <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
+                                                        </MudTooltip>
+                                                        @if (!shouldDisableIncrease)
+                                                        {
+                                                            <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                                                                           Size="Size.Small"
+                                                                           Disabled="shouldDisableIncrease"
+                                                                           OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
+                                                        }
+
+                                                        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
+                                                        {
+                                                            @foreach (var skilledPluginModule in skilledPluginModules)
+                                                            {
+                                                                <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
+                                                                    <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
+                                                                        <EcoIcon Item="@skilledPluginModule"
+                                                                                 Size="24"
+                                                                                 Class="@($"{(context.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                                                                    </MudTooltip>
+                                                                </MudLink>
+                                                            }
+                                                        }
+                                                    </MudStack>
+                                                }
+                                            </MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
                                 </MudExpansionPanel>
                             </MudExpansionPanels>
                         </MudItem>
@@ -325,6 +419,7 @@
 
 @code {
     private DataContext? _selectedShoppingList;
+    private DataContext? _referenceDataContext;
     private bool _isLoadingData;
     private List<TreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
@@ -399,12 +494,14 @@
 
     private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
     {
-        var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e => e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(element.ItemOrTag) && e.IsProduct()).Quantity.GetDynamicValue(_selectedShoppingList));
+        var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e =>
+            e.IsProduct() &&
+            e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == element.ItemOrTag.Id))
+            .Quantity.GetDynamicValue(_selectedShoppingList));
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList, recipe, userRecipe, (int)quantityToCraft);
-            return Task.CompletedTask;
+            return ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList, recipe, userRecipe, (int)quantityToCraft, _referenceDataContext);
         });
 
         _openedAddChildrenContext = null;
@@ -473,6 +570,11 @@
 
         ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
         _selectedShoppingList = await DataContextDbService.GetDataContextWithData(_selectedShoppingList.Id, ContextService.CurrentServerData!);
+        var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
+            .FirstOrDefault(d => !d.IsShoppingList && d.IsDefault)?.Id;
+        _referenceDataContext = referenceDataContextId is not null
+            ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, ContextService.CurrentServerData!)
+            : null;
 
         _isLoadingData = false;
         RebuildTree();
@@ -545,14 +647,178 @@
         StateHasChanged();
     }
 
+    private void RemoveTalentGroup(EcoCraftDbContext context, List<Talent> talents, DataContext dataContext)
+    {
+        foreach (var talent in talents)
+        {
+            var currentUserTalent = talent.GetCurrentUserTalent(dataContext);
+            if (currentUserTalent is not null)
+            {
+                UserServerDataService.RemoveUserTalent(context, currentUserTalent);
+            }
+        }
+    }
+
+    private async Task ToggleBinaryTalent(List<Talent> talents)
+    {
+        if (_selectedShoppingList is null || talents.Count == 0)
+        {
+            return;
+        }
+
+        var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedShoppingList) is not null);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            if (isRemove)
+            {
+                RemoveTalentGroup(context, talents, _selectedShoppingList);
+            }
+            else
+            {
+                var firstTalent = talents.First();
+                var talentIds = talents.Select(t => t.Id).ToHashSet();
+                var selectedTalentsWithSameLevel = _selectedShoppingList.UserTalents
+                    .Where(ut => ut.Talent.SkillId == firstTalent.SkillId && ut.Talent.Level == firstTalent.Level && !talentIds.Contains(ut.TalentId))
+                    .Select(ut => ut.Talent)
+                    .ToList();
+
+                if (selectedTalentsWithSameLevel.Count > 0)
+                {
+                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedShoppingList);
+                }
+
+                foreach (var talent in talents)
+                {
+                    if (talent.GetCurrentUserTalent(_selectedShoppingList) is null)
+                    {
+                        UserServerDataService.AddUserTalent(context, talent, _selectedShoppingList);
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
+    }
+
+    private async Task IncreaseTalentLevel(List<Talent> talents)
+    {
+        if (_selectedShoppingList is null || talents.Count == 0)
+        {
+            return;
+        }
+
+        var firstTalent = talents.First();
+        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedShoppingList);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            if (existingUserTalent is null)
+            {
+                var talentIds = talents.Select(t => t.Id).ToHashSet();
+                var selectedTalentsWithSameLevel = _selectedShoppingList.UserTalents
+                    .Where(ut => ut.Talent.SkillId == firstTalent.SkillId && ut.Talent.Level == firstTalent.Level && !talentIds.Contains(ut.TalentId))
+                    .Select(ut => ut.Talent)
+                    .ToList();
+
+                if (selectedTalentsWithSameLevel.Count > 0)
+                {
+                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedShoppingList);
+                }
+
+                foreach (var talent in talents)
+                {
+                    UserServerDataService.AddUserTalent(context, talent, _selectedShoppingList);
+                }
+            }
+            else if (existingUserTalent.Level < firstTalent.MaxLevel)
+            {
+                foreach (var talent in talents)
+                {
+                    var userTalent = talent.GetCurrentUserTalent(_selectedShoppingList);
+                    if (userTalent is not null)
+                    {
+                        userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                        UserTalentDbService.UpdateLevel(context, userTalent);
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
+    }
+
+    private async Task DecreaseTalentLevel(List<Talent> talents)
+    {
+        if (_selectedShoppingList is null || talents.Count == 0)
+        {
+            return;
+        }
+
+        var firstTalent = talents.First();
+        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedShoppingList);
+
+        if (existingUserTalent is null)
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var talent in talents)
+            {
+                var userTalent = talent.GetCurrentUserTalent(_selectedShoppingList);
+                if (userTalent is null)
+                {
+                    continue;
+                }
+
+                if (userTalent.Level <= 1)
+                {
+                    UserServerDataService.RemoveUserTalent(context, userTalent);
+                }
+                else
+                {
+                    userTalent.Level--;
+                    UserTalentDbService.UpdateLevel(context, userTalent);
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        Rebuild();
+    }
+
     public async Task OnLevelChanged(UserSkill userSkill, int level)
     {
+        if (_selectedShoppingList is null || userSkill.Level == level)
+        {
+            return;
+        }
+
+        var isIncrease = level > userSkill.Level;
         userSkill.Level = level;
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             UserSkillDbService.UpdateLevel(context, userSkill);
+
+            if (!isIncrease)
+            {
+                foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedShoppingList) is not null && level < t.Level))
+                {
+                    UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(_selectedShoppingList)!);
+                }
+            }
+
             return Task.CompletedTask;
         });
+
         Rebuild();
     }
 
@@ -566,11 +832,11 @@
         }
 
         shoppingListCraftingTable.PluginModule = pluginModules[currentIndex + 1];
+        shoppingListCraftingTable.PluginModuleId = shoppingListCraftingTable.PluginModule.Id;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            UserCraftingTableDbService.UpdateAll(context, shoppingListCraftingTable);
-            return Task.CompletedTask;
+            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -586,15 +852,40 @@
                 return;
             case 0:
                 shoppingListCraftingTable.PluginModule = null;
+                shoppingListCraftingTable.PluginModuleId = null;
                 break;
             default:
                 shoppingListCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+                shoppingListCraftingTable.PluginModuleId = shoppingListCraftingTable.PluginModule.Id;
                 break;
         }
+
+        shoppingListCraftingTable.SkilledPluginModules.Clear();
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            UserCraftingTableDbService.UpdateAll(context, shoppingListCraftingTable);
-            return Task.CompletedTask;
+            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
+        });
+
+        Rebuild();
+    }
+
+    private async Task ToggleSkilledPluginModule(UserCraftingTable shoppingListCraftingTable, PluginModule pluginModule)
+    {
+        var existingPluginModule = shoppingListCraftingTable.SkilledPluginModules.FirstOrDefault(pm => pm.Id == pluginModule.Id);
+
+        if (existingPluginModule is not null)
+        {
+            shoppingListCraftingTable.SkilledPluginModules.Remove(existingPluginModule);
+        }
+        else
+        {
+            shoppingListCraftingTable.SkilledPluginModules.Add(pluginModule);
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -636,9 +927,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe);
-
-            return Task.CompletedTask;
+            return ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, sourceDataContext: _referenceDataContext);
         });
 
         _emptyRecipe = null;

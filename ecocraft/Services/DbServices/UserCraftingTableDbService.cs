@@ -82,8 +82,20 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		existing.SkilledPluginModules.Clear();
 		foreach (var pm in userCraftingTable.SkilledPluginModules)
 		{
-			existing.SkilledPluginModules.Add(context.PluginModules.Attach(new PluginModule { Id = pm.Id }).Entity);
+			existing.SkilledPluginModules.Add(GetTrackedPluginModule(context, pm.Id));
 		}
+	}
+
+	private static PluginModule GetTrackedPluginModule(EcoCraftDbContext context, Guid pluginModuleId)
+	{
+		var trackedEntry = context.ChangeTracker.Entries<PluginModule>()
+			.FirstOrDefault(entry => entry.Entity.Id == pluginModuleId);
+		if (trackedEntry is not null)
+		{
+			return trackedEntry.Entity;
+		}
+
+		return context.PluginModules.Attach(new PluginModule { Id = pluginModuleId }).Entity;
 	}
 
 	public void UpdateCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)

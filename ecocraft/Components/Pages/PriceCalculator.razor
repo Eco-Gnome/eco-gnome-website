@@ -238,12 +238,13 @@
                                                         .ThenBy(pm => LocalizationService.GetTranslation(pm))
                                                         .ToList();
 
-                                                    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm == context.PluginModule) == genericPluginModules.Count - 1;
+                                                    var currentPluginModuleId = context.PluginModuleId;
+                                                    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
 
                                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                                         <MudIconButton Icon="@MDIIcons.Filled.Minus"
                                                                        Size="Size.Small"
-                                                                       Disabled="@(genericPluginModules.FindIndex(pm => pm == context.PluginModule) <= -1)"
+                                                                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
                                                                        OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
                                                         <MudTooltip Text="@(context.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
                                                             <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
@@ -256,13 +257,13 @@
                                                                            OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
                                                         }
 
-                                                        @if (genericPluginModules.LastOrDefault() == context.PluginModule)
+                                                        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
                                                         {
                                                             @foreach (var skilledPluginModule in skilledPluginModules)
                                                             {
                                                                 <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
                                                                     <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
-                                                                        <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(context.SkilledPluginModules.Contains(skilledPluginModule) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                                                                        <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(context.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
                                                                     </MudTooltip>
                                                                 </MudLink>
                                                             }
@@ -1756,7 +1757,7 @@
 
     private async Task IncreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+        var currentIndex = pluginModules.FindIndex(pm => pm.Id == userCraftingTable.PluginModuleId);
 
         if (currentIndex == pluginModules.Count - 1)
         {
@@ -1764,6 +1765,7 @@
         }
 
         userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
+        userCraftingTable.PluginModuleId = userCraftingTable.PluginModule.Id;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
@@ -1775,7 +1777,7 @@
 
     private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm == userCraftingTable.PluginModule);
+        var currentIndex = pluginModules.FindIndex(pm => pm.Id == userCraftingTable.PluginModuleId);
 
         switch (currentIndex)
         {
@@ -1783,9 +1785,11 @@
                 return;
             case 0:
                 userCraftingTable.PluginModule = null;
+                userCraftingTable.PluginModuleId = null;
                 break;
             default:
                 userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
+                userCraftingTable.PluginModuleId = userCraftingTable.PluginModule.Id;
                 break;
         }
 
@@ -1801,9 +1805,11 @@
 
     private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
     {
-        if (userCraftingTable.SkilledPluginModules.Contains(pluginModule))
+        var existingPluginModule = userCraftingTable.SkilledPluginModules.FirstOrDefault(pm => pm.Id == pluginModule.Id);
+
+        if (existingPluginModule is not null)
         {
-            userCraftingTable.SkilledPluginModules.Remove(pluginModule);
+            userCraftingTable.SkilledPluginModules.Remove(existingPluginModule);
         }
         else
         {

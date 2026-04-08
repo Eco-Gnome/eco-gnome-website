@@ -11,6 +11,7 @@ namespace ecocraft.Services
         UserRecipeDbService userRecipeDbService,
         UserCraftingTableDbService userCraftingTableDbService,
         UserSkillDbService userSkillDbService,
+        UserTalentDbService userTalentDbService,
         LocalizationService localizationService)
     {
         public async Task<DataContext> CreateShoppingList(UserServer userServer)
@@ -33,7 +34,7 @@ namespace ecocraft.Services
             return shoppingList;
         }
 
-        public void AddUserRecipe(EcoCraftDbContext context, DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1)
+        public async Task AddUserRecipe(EcoCraftDbContext context, DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1, DataContext? sourceDataContext = null)
         {
             var userRecipe = new UserRecipe
             {
@@ -53,12 +54,12 @@ namespace ecocraft.Services
 
             if (recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList) is null)
             {
-                GetOrCreateUserCraftingTable(context, shoppingList, recipe.CraftingTable);
+                await GetOrCreateUserCraftingTable(context, shoppingList, recipe.CraftingTable, sourceDataContext);
             }
 
             if (recipe.Skill is not null && recipe.Skill.GetCurrentUserSkill(shoppingList) is null)
             {
-                GetOrCreateUserSkill(context, shoppingList, recipe.Skill);
+                GetOrCreateUserSkill(context, shoppingList, recipe.Skill, sourceDataContext);
             }
         }
 
@@ -103,7 +104,7 @@ namespace ecocraft.Services
             }
         }
 
-        private UserCraftingTable GetOrCreateUserCraftingTable(EcoCraftDbContext context, DataContext shoppingList, CraftingTable craftingTable)
+        private async Task<UserCraftingTable> GetOrCreateUserCraftingTable(EcoCraftDbContext context, DataContext shoppingList, CraftingTable craftingTable, DataContext? sourceDataContext)
         {
             var shoppingListCraftingTable = shoppingList.UserCraftingTables.Find(slct => slct.CraftingTableId == craftingTable.Id);
 
@@ -112,12 +113,20 @@ namespace ecocraft.Services
                 return shoppingListCraftingTable;
             }
 
+            var sourceUserCraftingTable = sourceDataContext is not null
+                ? craftingTable.GetCurrentUserCraftingTable(sourceDataContext)
+                : null;
+
+            var pluginModule = sourceUserCraftingTable?.PluginModuleId is Guid pluginModuleId
+                ? craftingTable.PluginModules.FirstOrDefault(pm => pm.Id == pluginModuleId)
+                : null;
+
             var userCraftingTable = new UserCraftingTable
             {
                 CraftingTable = craftingTable,
                 CraftingTableId = craftingTable.Id,
-                PluginModule = craftingTable.GetCurrentUserCraftingTable(shoppingList)?.PluginModule,
-                PluginModuleId = craftingTable.GetCurrentUserCraftingTable(shoppingList)?.PluginModule?.Id,
+                PluginModule = pluginModule,
+                PluginModuleId = pluginModule?.Id,
                 DataContext = shoppingList,
                 DataContextId = shoppingList.Id,
             };
@@ -125,6 +134,14 @@ namespace ecocraft.Services
             userCraftingTableDbService.Create(context, userCraftingTable);
             shoppingList.UserCraftingTables.Add(userCraftingTable);
             craftingTable.UserCraftingTables.Add(userCraftingTable);
+
+            if (sourceUserCraftingTable is not null && sourceUserCraftingTable.SkilledPluginModules.Count > 0)
+            {
+                userCraftingTable.SkilledPluginModules = craftingTable.PluginModules
+                    .Where(pm => sourceUserCraftingTable.SkilledPluginModules.Any(spm => spm.Id == pm.Id))
+                    .ToList();
+                await userCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
+            }
 
             return userCraftingTable;
         }
@@ -136,7 +153,7 @@ namespace ecocraft.Services
             userCraftingTableDbService.Destroy(context, userCraftingTable);
         }
 
-        private UserSkill GetOrCreateUserSkill(EcoCraftDbContext context, DataContext shoppingList, Skill skill)
+        private UserSkill GetOrCreateUserSkill(EcoCraftDbContext context, DataContext shoppingList, Skill skill, DataContext? sourceDataContext)
         {
             var shoppingListSkill = shoppingList.UserSkills.Find(sls => sls.SkillId == skill.Id);
 
@@ -149,7 +166,7 @@ namespace ecocraft.Services
             {
                 Skill = skill,
                 SkillId = skill.Id,
-                Level = Math.Max(skill.GetCurrentUserSkill(shoppingList)?.Level ?? 1, 1),
+                Level = Math.Max(skill.GetCurrentUserSkill(sourceDataContext ?? shoppingList)?.Level ?? 1, 1),
                 DataContext = shoppingList,
                 DataContextId = shoppingList.Id,
             };
@@ -163,6 +180,13 @@ namespace ecocraft.Services
 
         private void RemoveUserSkill(EcoCraftDbContext context, DataContext shoppingList, UserSkill userSkill)
         {
+            foreach (var userTalent in shoppingList.UserTalents.Where(ut => ut.Talent.SkillId == userSkill.SkillId).ToList())
+            {
+                shoppingList.UserTalents.Remove(userTalent);
+                userTalent.Talent.UserTalents.Remove(userTalent);
+                userTalentDbService.Destroy(context, userTalent);
+            }
+
             shoppingList.UserSkills.Remove(userSkill);
             userSkill.Skill?.UserSkills.Remove(userSkill);
             userSkillDbService.Destroy(context, userSkill);
