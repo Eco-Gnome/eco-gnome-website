@@ -111,14 +111,14 @@
                                                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(craftingTable.CraftingTable)</MudText>
                                                 <MudIconButton Icon="@MDIIcons.Filled.Minus"
                                                                Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm == craftingTable.PluginModule) <= -1)"
+                                                               Disabled="@(pluginModules.FindIndex(pm => pm.Id == craftingTable.PluginModuleId) <= -1)"
                                                                OnClick="@(() => DecreasePluginModule(craftingTable, pluginModules))"/>
                                                 <MudTooltip Text="@(craftingTable.PluginModule is not null ? LocalizationService.GetTranslation(craftingTable.PluginModule) + $" [{((1 - craftingTable.PluginModule.Percent) * 100).ToString("0.##")}%]" : LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
                                                     <EcoIcon Item="@craftingTable.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
                                                 </MudTooltip>
                                                 <MudIconButton Icon="@MDIIcons.Filled.Plus"
                                                                Size="Size.Small"
-                                                               Disabled="@(pluginModules.FindIndex(pm => pm == craftingTable.PluginModule) == pluginModules.Count - 1)"
+                                                               Disabled="@(pluginModules.FindIndex(pm => pm.Id == craftingTable.PluginModuleId) == pluginModules.Count - 1)"
                                                                OnClick="@(() => IncreasePluginModule(craftingTable, pluginModules))"/>
                                             </MudStack>
                                         }
@@ -176,7 +176,7 @@
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                                 <MudAutocomplete T="Recipe"
                                                  Value="_emptyRecipe"
-                                                 Disabled="@(ContextService.CurrentServer!.Recipes.Count == 0)"
+                                                 Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
                                                  SearchFunc="SearchRecipes"
                                                  ValueChanged="AddShoppingListRecipe"
                                                  Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
@@ -202,7 +202,7 @@
                                                         var firstProduct = context.Value.Recipe.Elements.First(e => e.IsProduct() && e.Index == 0);
                                                         var number = firstProduct.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
                                                         var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
-                                                            .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Contains(firstProduct.ItemOrTag))
+                                                            .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Any(iot => iot.Id == firstProduct.ItemOrTag.Id))
                                                             .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
 
                                                         <MudTooltip Text="@(number + " " + LocalizationService.GetTranslation(firstProduct.ItemOrTag))">
@@ -225,7 +225,7 @@
                                                             @foreach (var product in context.Value.Recipe.Elements.Where(e => e.IsProduct() && e.Index > 0))
                                                             {
                                                                 var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
-                                                                    .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Contains(product.ItemOrTag))
+                                                                    .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Any(iot => iot.Id == product.ItemOrTag.Id))
                                                                     .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
 
                                                                 <MudTooltip Text="@LocalizationService.GetTranslation(product.ItemOrTag)">
@@ -257,10 +257,10 @@
                                                         @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()))
                                                         {
                                                             var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
-                                                            var possibleRecipes = ContextService.CurrentServerData!.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))).ToList();
+                                                            var possibleRecipes = ContextService.CurrentServerData!.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))).ToList();
                                                             var isFullfilled = context.Value.ChildrenUserRecipes
                                                                 .Sum(ur => ur.Recipe.Elements
-                                                                    .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Contains(ingredient.ItemOrTag))
+                                                                    .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
                                                                     .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * ur.RoundFactor))
                                                                 ) >= ingredientNumber;
 
@@ -558,7 +558,7 @@
 
     private async Task IncreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm == shoppingListCraftingTable.PluginModule);
+        var currentIndex = pluginModules.FindIndex(pm => pm.Id == shoppingListCraftingTable.PluginModuleId);
 
         if (currentIndex == pluginModules.Count - 1)
         {
@@ -578,7 +578,7 @@
 
     private async Task DecreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm == shoppingListCraftingTable.PluginModule);
+        var currentIndex = pluginModules.FindIndex(pm => pm.Id == shoppingListCraftingTable.PluginModuleId);
 
         switch (currentIndex)
         {
@@ -602,21 +602,29 @@
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
     {
+        if (ContextService.CurrentServerData is null)
+        {
+            return Task.FromResult(Enumerable.Empty<Recipe>());
+        }
+
         IEnumerable<Recipe> result;
 
         if (string.IsNullOrEmpty(value))
         {
-            result = ContextService.CurrentServer!.Recipes;
+            result = ContextService.CurrentServerData.Recipes;
         }
         else
         {
-            result = ContextService.CurrentServer!.Recipes
+            result = ContextService.CurrentServerData.Recipes
                 .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
 
-        var selectedRecipes = _selectedShoppingList!.UserRecipes.Where(slr => slr.ParentUserRecipe is not null).Select(slr => slr.Recipe);
-        result = result.Where(r => !selectedRecipes.Contains(r)).OrderBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
+        var selectedRecipeIds = _selectedShoppingList!.UserRecipes
+            .Where(slr => slr.ParentUserRecipe is not null)
+            .Select(slr => slr.RecipeId)
+            .ToHashSet();
+        result = result.Where(r => !selectedRecipeIds.Contains(r.Id)).OrderBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
 
         return Task.FromResult(result);
     }
