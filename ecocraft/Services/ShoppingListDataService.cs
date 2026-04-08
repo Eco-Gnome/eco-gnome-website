@@ -64,8 +64,13 @@ namespace ecocraft.Services
 
         public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
-            var currentUserCraftingTable = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList);
-            var currentUserSkill = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList);
+            RemoveUserRecipe(context, shoppingList, shoppingListRecipe, true);
+        }
+
+        private void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, bool destroyInDatabase)
+        {
+            var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
+            var currentUserSkillId = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList)?.Id;
 
             shoppingList.UserRecipes.Remove(shoppingListRecipe);
             shoppingListRecipe.Recipe.UserRecipes.Remove(shoppingListRecipe);
@@ -73,16 +78,25 @@ namespace ecocraft.Services
 
             foreach (var recipe in shoppingListRecipe.ChildrenUserRecipes.ToList())
             {
-                RemoveUserRecipe(context, shoppingList, recipe);
+                RemoveUserRecipe(context, shoppingList, recipe, false);
             }
 
-            userRecipeDbService.Destroy(context, shoppingListRecipe);
+            if (destroyInDatabase)
+            {
+                userRecipeDbService.Destroy(context, shoppingListRecipe);
+            }
 
+            var currentUserCraftingTable = currentUserCraftingTableId is not null
+                ? shoppingList.UserCraftingTables.FirstOrDefault(uct => uct.Id == currentUserCraftingTableId)
+                : null;
             if (currentUserCraftingTable is not null && currentUserCraftingTable.CraftingTable.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
             {
                 RemoveUserCraftingTable(context, shoppingList, currentUserCraftingTable);
             }
 
+            var currentUserSkill = currentUserSkillId is not null
+                ? shoppingList.UserSkills.FirstOrDefault(us => us.Id == currentUserSkillId)
+                : null;
             if (currentUserSkill is not null && currentUserSkill.Skill!.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
             {
                 RemoveUserSkill(context, shoppingList, currentUserSkill);
