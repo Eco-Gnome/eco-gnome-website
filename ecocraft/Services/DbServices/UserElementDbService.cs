@@ -78,7 +78,38 @@ public class UserElementDbService(IDbContextFactory<EcoCraftDbContext> factory) 
 
 	public void UpdateAll(EcoCraftDbContext context, UserElement userElement)
 	{
-		context.Attach(CloneForDb(userElement)).State = EntityState.Modified;
+		var trackedEntity = context.UserElements.Local.FirstOrDefault(ue => ue.Id == userElement.Id);
+
+		if (trackedEntity is not null)
+		{
+			trackedEntity.Price = userElement.Price;
+			trackedEntity.IsMarginPrice = userElement.IsMarginPrice;
+			trackedEntity.Share = userElement.Share;
+			trackedEntity.IsReintegrated = userElement.IsReintegrated;
+
+			var trackedEntry = context.Entry(trackedEntity);
+			trackedEntry.Property(x => x.Price).IsModified = true;
+			trackedEntry.Property(x => x.IsMarginPrice).IsModified = true;
+			trackedEntry.Property(x => x.Share).IsModified = true;
+			trackedEntry.Property(x => x.IsReintegrated).IsModified = true;
+			return;
+		}
+
+		var stub = new UserElement
+		{
+			Id = userElement.Id,
+			Price = userElement.Price,
+			IsMarginPrice = userElement.IsMarginPrice,
+			Share = userElement.Share,
+			IsReintegrated = userElement.IsReintegrated,
+		};
+
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.Price).IsModified = true;
+		entry.Property(x => x.IsMarginPrice).IsModified = true;
+		entry.Property(x => x.Share).IsModified = true;
+		entry.Property(x => x.IsReintegrated).IsModified = true;
 	}
 
 	public void Destroy(EcoCraftDbContext context, UserElement userElement)
