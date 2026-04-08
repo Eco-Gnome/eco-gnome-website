@@ -22,9 +22,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft;Include Error Detail=true;"
+      DataProtection__KeysPath: /app/dpkeys
     volumes:
       - app-assets:/app/wwwroot/assets
       - app-videos:/app/wwwroot/videos
+      - app-dpkeys:/app/dpkeys
     depends_on:
       db:
         condition: service_healthy
@@ -32,3 +34,4 @@ services:
 volumes:
   app-assets:
   app-videos:
+  app-dpkeys:

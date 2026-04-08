@@ -1,9 +1,11 @@
 using System.Globalization;
+using System.IO;
 using ecocraft.Components;
 using ecocraft.Extensions;
 using ecocraft.Models;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
 using ecocraft.Services.ImportData;
@@ -13,6 +15,14 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization();
+
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"]
+                             ?? Path.Combine(builder.Environment.ContentRootPath, ".aspnet-dp-keys");
+Directory.CreateDirectory(dataProtectionKeysPath);
+builder.Services
+    .AddDataProtection()
+    .SetApplicationName("ecocraft")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
 
 // var supportedCultures = new[] { "en", "en-US", "en-GB", "fr", "fr-FR", "es-ES", "es", "de", "de-DE" }; // Ajoutez les cultures que vous supportez
 builder.Services.Configure<RequestLocalizationOptions>(options =>
