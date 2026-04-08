@@ -29,9 +29,11 @@ public partial class ImportDataService
 
     private class TalentDto : EcoItemDto
     {
+        public required Dictionary<LanguageCode, string> LocalizedDescription { get; init; }
         public required string TalentGroupName { get; init; }
         public required decimal Value { get; init; }
         public required int Level { get; init; }
+        public required int MaxLevel { get; init; }
     }
 
     private class ItemDto : EcoItemDto
@@ -119,8 +121,10 @@ public partial class ImportDataService
         {
             Name = talent.Name,
             LocalizedName = LocalizedFieldToDto(talent.LocalizedName),
+            LocalizedDescription = LocalizedFieldToDto(talent.LocalizedDescription),
             TalentGroupName = talent.TalentGroupName,
             Level = talent.Level,
+            MaxLevel = talent.MaxLevel,
             Value = talent.Value,
         };
     }

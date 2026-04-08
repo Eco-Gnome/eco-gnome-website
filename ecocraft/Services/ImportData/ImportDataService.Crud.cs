@@ -39,15 +39,17 @@ public partial class ImportDataService
         context.Skills.Remove(skill);
     }
 
-    private Talent ImportTalent(EcoCraftDbContext context, Skill skill, string name, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    private Talent ImportTalent(EcoCraftDbContext context, Skill skill, string name, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value)
     {
         var talent = new Talent
         {
             Skill = skill,
             Name = name,
             LocalizedName = localizedName,
+            LocalizedDescription = localizedDescription,
             TalentGroupName = talentGroupName,
             Level = level,
+            MaxLevel = maxLevel,
             Value = value,
         };
 
@@ -56,12 +58,14 @@ public partial class ImportDataService
         return talent;
     }
 
-    private void RefreshTalent(EcoCraftDbContext context, Talent talent, Skill skill, LocalizedField localizedName, string talentGroupName, int level, decimal value)
+    private void RefreshTalent(EcoCraftDbContext context, Talent talent, Skill skill, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value)
     {
         talent.Skill = skill;
         talent.LocalizedName = localizedName;
+        talent.LocalizedDescription = localizedDescription;
         talent.TalentGroupName = talentGroupName;
         talent.Level = level;
+        talent.MaxLevel = maxLevel;
         talent.Value = value;
 
         context.Talents.Update(talent);

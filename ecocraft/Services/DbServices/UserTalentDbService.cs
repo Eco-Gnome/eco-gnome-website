@@ -48,6 +48,7 @@ public class UserTalentDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 		{
 			Id = userTalent.Id,
 			TalentId = userTalent.Talent.Id,
+			Level = userTalent.Level,
 			DataContextId = userTalent.DataContext.Id,
 		};
 	}
@@ -60,6 +61,14 @@ public class UserTalentDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 	public void UpdateAll(EcoCraftDbContext context, UserTalent userTalent)
 	{
 		context.Attach(CloneForDb(userTalent)).State = EntityState.Modified;
+	}
+
+	public void UpdateLevel(EcoCraftDbContext context, UserTalent userTalent)
+	{
+		var stub = new UserTalent { Id = userTalent.Id, Level = userTalent.Level };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.Level).IsModified = true;
 	}
 
 	public void Destroy(EcoCraftDbContext context, UserTalent userTalent)

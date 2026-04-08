@@ -1196,6 +1196,7 @@
                     if (userTalent is not null)
                     {
                         userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                        UserTalentDbService.UpdateLevel(context, userTalent);
                     }
                 }
             }
@@ -1238,6 +1239,7 @@
                 else
                 {
                     userTalent.Level--;
+                    UserTalentDbService.UpdateLevel(context, userTalent);
                 }
             }
 
@@ -1467,7 +1469,7 @@
             {
                 foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext!) is not null && newLevel < t.Level))
                 {
-                    UserTalentDbService.Destroy(context, talent.GetCurrentUserTalent(_selectedDataContext!)!);
+                    UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(_selectedDataContext!)!);
                 }
             }
 

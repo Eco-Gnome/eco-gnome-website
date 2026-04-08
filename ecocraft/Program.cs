@@ -11,6 +11,7 @@ using ecocraft.Services.DbServices;
 using ecocraft.Services.ImportData;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,12 +115,7 @@ var app = builder.Build();
 var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
 app.UseRequestLocalization(locOptions!.Value);
 
-// Appliquer automatiquement les migrations
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<EcoCraftDbContext>();
-    dbContext.Database.Migrate(); // Applique toutes les migrations en attente
-}
+await ApplyMigrationsWithRetryAsync(app.Services, app.Logger);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -180,3 +176,49 @@ app.MapRazorComponents<App>()
 StaticEnvironmentAccessor.WebHostEnvironment = app.Services.GetRequiredService<IWebHostEnvironment>();
 
 app.Run();
+
+static async Task ApplyMigrationsWithRetryAsync(IServiceProvider services, ILogger logger)
+{
+    const int maxAttempts = 10;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            await using var scope = services.CreateAsyncScope();
+            var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<EcoCraftDbContext>>();
+            await using var dbContext = await factory.CreateDbContextAsync();
+
+            await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied successfully.");
+            return;
+        }
+        catch (Exception ex) when (IsTransientDatabaseStartupFailure(ex) && attempt < maxAttempts)
+        {
+            var delay = TimeSpan.FromSeconds(Math.Min(attempt * 2, 15));
+            logger.LogWarning(ex,
+                "Database is not ready yet while applying migrations (attempt {Attempt}/{MaxAttempts}). Retrying in {DelaySeconds}s.",
+                attempt,
+                maxAttempts,
+                delay.TotalSeconds);
+
+            await Task.Delay(delay);
+        }
+    }
+
+    await using var finalScope = services.CreateAsyncScope();
+    var finalFactory = finalScope.ServiceProvider.GetRequiredService<IDbContextFactory<EcoCraftDbContext>>();
+    await using var finalContext = await finalFactory.CreateDbContextAsync();
+    await finalContext.Database.MigrateAsync();
+}
+
+static bool IsTransientDatabaseStartupFailure(Exception exception)
+{
+    return exception switch
+    {
+        PostgresException { SqlState: "57P03" } => true,
+        NpgsqlException { InnerException: not null } npgsqlException => IsTransientDatabaseStartupFailure(npgsqlException.InnerException),
+        AggregateException aggregateException => aggregateException.InnerExceptions.Any(innerException => IsTransientDatabaseStartupFailure(innerException)),
+        _ => false,
+    };
+}

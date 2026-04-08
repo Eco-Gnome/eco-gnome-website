@@ -44,11 +44,31 @@ public partial class ImportDataService
 
             if (dbTalent is null)
             {
-                ImportTalent(context, skill, newTalent.Name, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+                ImportTalent(
+                    context,
+                    skill,
+                    newTalent.Name,
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName),
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription),
+                    newTalent.TalentGroupName,
+                    newTalent.Level,
+                    newTalent.MaxLevel,
+                    newTalent.Value
+                );
             }
             else
             {
-                RefreshTalent(context, dbTalent, skill, TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName), newTalent.TalentGroupName, newTalent.Level, newTalent.Value);
+                RefreshTalent(
+                    context,
+                    dbTalent,
+                    skill,
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName),
+                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription, dbTalent.LocalizedDescription),
+                    newTalent.TalentGroupName,
+                    newTalent.Level,
+                    newTalent.MaxLevel,
+                    newTalent.Value
+                );
             }
         }
 
