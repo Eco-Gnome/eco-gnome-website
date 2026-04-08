@@ -540,6 +540,7 @@
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
+            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
             return Task.CompletedTask;
         });
 
@@ -697,6 +698,7 @@
                 }
             }
 
+            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
             return Task.CompletedTask;
         });
 
@@ -746,6 +748,7 @@
                 }
             }
 
+            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
             return Task.CompletedTask;
         });
 
@@ -788,6 +791,7 @@
                 }
             }
 
+            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
             return Task.CompletedTask;
         });
 
@@ -816,6 +820,7 @@
                 }
             }
 
+            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
             return Task.CompletedTask;
         });
 
@@ -836,7 +841,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
+            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -864,7 +869,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
+            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -885,7 +890,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            return UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
+            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -942,5 +947,11 @@
         await ContextService.ChangeServer(currentServer);
 
         Navigation.NavigateTo("/shopping-list", forceLoad: true);
+    }
+
+    private async Task PersistCraftingTableAndSynchronize(EcoCraftDbContext context, UserCraftingTable shoppingListCraftingTable)
+    {
+        await UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
+        ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
     }
 }

@@ -68,6 +68,14 @@ namespace ecocraft.Services
             RemoveUserRecipe(context, shoppingList, shoppingListRecipe, true);
         }
 
+        public void SynchronizeRecipeTree(EcoCraftDbContext context, DataContext shoppingList)
+        {
+            foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
+            {
+                SynchronizeRecipeSubtree(context, shoppingList, rootRecipe);
+            }
+        }
+
         private void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, bool destroyInDatabase)
         {
             var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
@@ -102,6 +110,55 @@ namespace ecocraft.Services
             {
                 RemoveUserSkill(context, shoppingList, currentUserSkill);
             }
+        }
+
+        private void SynchronizeRecipeSubtree(EcoCraftDbContext context, DataContext shoppingList, UserRecipe parentRecipe)
+        {
+            foreach (var childRecipe in parentRecipe.ChildrenUserRecipes)
+            {
+                var expectedRoundFactor = GetExpectedRoundFactor(shoppingList, parentRecipe, childRecipe);
+
+                if (childRecipe.RoundFactor != expectedRoundFactor)
+                {
+                    childRecipe.RoundFactor = expectedRoundFactor;
+                    userRecipeDbService.UpdateRoundFactor(context, childRecipe);
+                }
+
+                SynchronizeRecipeSubtree(context, shoppingList, childRecipe);
+            }
+        }
+
+        private static int GetExpectedRoundFactor(DataContext shoppingList, UserRecipe parentRecipe, UserRecipe childRecipe)
+        {
+            var matchingIngredients = parentRecipe.Recipe.Elements
+                .Where(e =>
+                    e.IsIngredient() &&
+                    childRecipe.Recipe.Elements.Any(product =>
+                        product.IsProduct() &&
+                        product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == e.ItemOrTag.Id)))
+                .ToList();
+
+            if (matchingIngredients.Count == 0)
+            {
+                return Math.Max(childRecipe.RoundFactor, 1);
+            }
+
+            var requiredCrafts = matchingIngredients
+                .Select(ingredient =>
+                {
+                    var requiredQuantity = Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList) * parentRecipe.RoundFactor);
+                    var producedQuantity = childRecipe.Recipe.Elements
+                        .Where(product =>
+                            product.IsProduct() &&
+                            product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
+                        .Sum(product => product.Quantity.GetDynamicValue(shoppingList));
+
+                    return producedQuantity <= 0 ? 1m : requiredQuantity / producedQuantity;
+                })
+                .DefaultIfEmpty(1m)
+                .Max();
+
+            return Math.Max((int)Math.Ceiling(requiredCrafts), 1);
         }
 
         private async Task<UserCraftingTable> GetOrCreateUserCraftingTable(EcoCraftDbContext context, DataContext shoppingList, CraftingTable craftingTable, DataContext? sourceDataContext)
