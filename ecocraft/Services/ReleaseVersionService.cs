@@ -13,6 +13,20 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.0",
+            "2026-04-08",
+            "PostgreSQL Migration, Shopping List Improvements & Better Talent Handling",
+            """
+            - Eco v13 Compatibility: Eco Gnome is now compatible with version 13 of Eco.
+            - PostgreSQL Migration: Eco Gnome now runs on PostgreSQL, with updated data access, migrations, and server-side persistence improvements.
+            - Deployment & Migration Tools: Added Docker support and a dedicated data migration tool to make hosting and moving existing data easier.
+            - Shopping List Improvements: The Shopping List has been significantly improved, with better recipe tree handling, more reliable parent/child tracking, and more accurate crafting requirement calculations.
+            - Dynamic Quantity Updates: Shopping List sub-recipes now react properly to talent, skill, and module changes so required craft counts stay in sync.
+            - Talent Improvements: Added support for multi-level talents and improved talent import/retrieval behavior.
+            - Stability Fixes: Fixed several PostgreSQL-specific issues, including cascade deletion problems, shopping list persistence issues, and duplicate/incorrect user-server data behavior.
+            """
+        ),
+        new ReleaseVersion(
             "1.2.1",
             "2025-06-14",
             "Pre release of Shopping List",
