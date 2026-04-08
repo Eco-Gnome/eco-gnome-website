@@ -260,9 +260,9 @@
 
 .talent-level-control {
     width: 32px;
-    height: 32px;
-    display: inline-block;
-    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .talent-level-action {
@@ -285,11 +285,11 @@
 }
 
 .talent-level-action-up {
-    top: -15px;
+    top: 0;
 }
 
 .talent-level-action-down {
-    bottom: -15px;
+    bottom: 0;
 }
 
 .talent-level-action.disabled {
@@ -300,7 +300,7 @@
 .talent-icon-wrapper {
     position: relative;
     width: 32px;
-    height: 32px;
+    min-height: 62px;
     display: flex;
     align-items: center;
     justify-content: center;
