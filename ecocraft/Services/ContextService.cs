@@ -36,7 +36,7 @@ public class ContextService(
             return;
         }
 
-        var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
+        var userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id || us.Server.Id == server.Id);
 
         if (userServer == null)
         {
@@ -169,11 +169,25 @@ public class ContextService(
 
     public async Task JoinServer(Server server, bool isAdmin = false)
     {
+        var existingUserServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id || us.Server.Id == server.Id);
+
+        if (existingUserServer is not null)
+        {
+            if (existingUserServer.DataContexts.Count == 0)
+            {
+                await AddDataContext(existingUserServer, true);
+            }
+
+            return;
+        }
+
         var userServer = new UserServer
         {
             User = CurrentUser!,
             Server = server,
             IsAdmin = isAdmin,
+            UserId = CurrentUser!.Id,
+            ServerId = server.Id,
         };
 
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>

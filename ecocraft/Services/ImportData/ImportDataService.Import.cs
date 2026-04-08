@@ -53,7 +53,8 @@ public partial class ImportDataService
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
-                    newTalent.Value
+                    newTalent.Value,
+                    newTalent.Cap
                 );
             }
             else
@@ -67,7 +68,8 @@ public partial class ImportDataService
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
-                    newTalent.Value
+                    newTalent.Value,
+                    newTalent.Cap
                 );
             }
         }

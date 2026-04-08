@@ -71,6 +71,9 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.Include(u => u.Skills)
 			.ThenInclude(s => s.Talents)
 			.ThenInclude(t => t.LocalizedName)
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.Talents)
+			.ThenInclude(t => t.LocalizedDescription)
 			// Crafting Tables
 			.Include(u => u.CraftingTables)
 			.ThenInclude(ct => ct.PluginModules)

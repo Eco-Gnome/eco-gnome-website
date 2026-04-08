@@ -32,6 +32,7 @@ public partial class ImportDataService
         public required Dictionary<LanguageCode, string> LocalizedDescription { get; init; }
         public required string TalentGroupName { get; init; }
         public required decimal Value { get; init; }
+        public decimal? Cap { get; init; }
         public required int Level { get; init; }
         public required int MaxLevel { get; init; }
     }
@@ -126,6 +127,7 @@ public partial class ImportDataService
             Level = talent.Level,
             MaxLevel = talent.MaxLevel,
             Value = talent.Value,
+            Cap = talent.Cap,
         };
     }
 

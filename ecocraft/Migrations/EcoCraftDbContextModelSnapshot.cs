@@ -570,6 +570,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("Cap")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 

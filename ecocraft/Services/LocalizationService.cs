@@ -130,41 +130,46 @@ public partial class LocalizationService(LocalStorageService localStorageService
     public string GetTranslation(IHasLocalizedName? hasLocalizedName)
     {
         if (hasLocalizedName is null) return "BUG_NO_NAME";
+        return GetTranslation(hasLocalizedName.LocalizedName);
+    }
 
+    public string GetTranslation(LocalizedField? localizedField)
+    {
+        if (localizedField is null) return string.Empty;
+        return GetLocalizedFieldTranslation(localizedField);
+    }
+
+    private string GetLocalizedFieldTranslation(LocalizedField localizedField)
+    {
         var translation = CurrentLanguageCode switch
         {
-            LanguageCode.en_US => hasLocalizedName.LocalizedName.en_US,
-            LanguageCode.fr => hasLocalizedName.LocalizedName.fr,
-            LanguageCode.es => hasLocalizedName.LocalizedName.es,
-            LanguageCode.de => hasLocalizedName.LocalizedName.de,
-            LanguageCode.ko => hasLocalizedName.LocalizedName.ko,
-            LanguageCode.pt_BR => hasLocalizedName.LocalizedName.pt_BR,
-            LanguageCode.zh_Hans => hasLocalizedName.LocalizedName.zh_Hans,
-            LanguageCode.ru => hasLocalizedName.LocalizedName.ru,
-            LanguageCode.it => hasLocalizedName.LocalizedName.it,
-            LanguageCode.pt_PT => hasLocalizedName.LocalizedName.pt_PT,
-            LanguageCode.hu => hasLocalizedName.LocalizedName.hu,
-            LanguageCode.ja => hasLocalizedName.LocalizedName.ja,
-            LanguageCode.nn => hasLocalizedName.LocalizedName.nn,
-            LanguageCode.pl => hasLocalizedName.LocalizedName.pl,
-            LanguageCode.nl => hasLocalizedName.LocalizedName.nl,
-            LanguageCode.ro => hasLocalizedName.LocalizedName.ro,
-            LanguageCode.da => hasLocalizedName.LocalizedName.da,
-            LanguageCode.cs => hasLocalizedName.LocalizedName.cs,
-            LanguageCode.sv => hasLocalizedName.LocalizedName.sv,
-            LanguageCode.uk => hasLocalizedName.LocalizedName.uk,
-            LanguageCode.el => hasLocalizedName.LocalizedName.el,
-            LanguageCode.ar_sa => hasLocalizedName.LocalizedName.ar_sa,
-            LanguageCode.vi => hasLocalizedName.LocalizedName.vi,
-            LanguageCode.tr => hasLocalizedName.LocalizedName.tr,
+            LanguageCode.en_US => localizedField.en_US,
+            LanguageCode.fr => localizedField.fr,
+            LanguageCode.es => localizedField.es,
+            LanguageCode.de => localizedField.de,
+            LanguageCode.ko => localizedField.ko,
+            LanguageCode.pt_BR => localizedField.pt_BR,
+            LanguageCode.zh_Hans => localizedField.zh_Hans,
+            LanguageCode.ru => localizedField.ru,
+            LanguageCode.it => localizedField.it,
+            LanguageCode.pt_PT => localizedField.pt_PT,
+            LanguageCode.hu => localizedField.hu,
+            LanguageCode.ja => localizedField.ja,
+            LanguageCode.nn => localizedField.nn,
+            LanguageCode.pl => localizedField.pl,
+            LanguageCode.nl => localizedField.nl,
+            LanguageCode.ro => localizedField.ro,
+            LanguageCode.da => localizedField.da,
+            LanguageCode.cs => localizedField.cs,
+            LanguageCode.sv => localizedField.sv,
+            LanguageCode.uk => localizedField.uk,
+            LanguageCode.el => localizedField.el,
+            LanguageCode.ar_sa => localizedField.ar_sa,
+            LanguageCode.vi => localizedField.vi,
+            LanguageCode.tr => localizedField.tr,
             _ => throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}")
         };
 
-        if (string.IsNullOrEmpty(translation))
-        {
-            translation = hasLocalizedName.LocalizedName.en_US;
-        }
-
-        return translation;
+        return string.IsNullOrEmpty(translation) ? localizedField.en_US : translation;
     }
 }

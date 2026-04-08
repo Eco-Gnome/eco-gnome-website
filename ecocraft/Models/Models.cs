@@ -132,8 +132,14 @@ public class DynamicValue
                     multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed")?.GetPercent(modifier.Skill) ?? 1m;
                     break;
                 case "Talent":
-                    multiplier *= modifier.Talent?.GetCurrentUserTalent(dataContext) is not null ? modifier.Talent.Value : 1m;
+                {
+                    var userTalent = modifier.TalentId is not null
+                        ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
+                        : null;
+                    var talent = modifier.Talent ?? userTalent?.Talent;
+                    multiplier *= userTalent is not null && talent is not null ? talent.GetMultiplierForLevel(userTalent.Level) : 1m;
                     break;
+                }
                 case "Skill":
                     multiplier *= modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
                     break;
@@ -205,17 +211,23 @@ public class DynamicValue
                     }
                     break;
                 case "Talent":
-                    multiplier = modifier.Talent?.GetCurrentUserTalent(dataContext) is not null ? modifier.Talent.Value : 1m;
+                {
+                    var userTalent = modifier.TalentId is not null
+                        ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
+                        : null;
+                    var talent = modifier.Talent ?? userTalent?.Talent;
+                    multiplier = userTalent is not null && talent is not null ? talent.GetMultiplierForLevel(userTalent.Level) : 1m;
 
                     if (multiplier != 1m)
                     {
                         tooltip.Add(localizationService.GetTranslation(
                             "RecipeDialog.TalentReductionTooltip",
-                            localizationService.GetTranslation(modifier.Talent),
+                            localizationService.GetTranslation(talent),
                             Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
                         ));
                     }
                     break;
+                }
                 case "Skill":
                     multiplier = modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
 
@@ -363,6 +375,7 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     [ForeignKey("LocalizedDescription")] public Guid? LocalizedDescriptionId { get; set; }
     public string TalentGroupName { get; set; }
     public decimal Value { get; set; }
+    public decimal? Cap { get; set; }
     public int Level { get; set; }
     public int MaxLevel { get; set; }
     [ForeignKey("Skill")] public Guid SkillId { get; set; }
@@ -375,7 +388,24 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
 
     public UserTalent? GetCurrentUserTalent(DataContext dataContext)
     {
-        return UserTalents.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserTalents.FirstOrDefault(ur => ur.TalentId == Id);
+    }
+
+    public decimal GetMultiplierForLevel(int level)
+    {
+        if (MaxLevel <= 1 || Cap is null)
+        {
+            return Value;
+        }
+
+        var clampedLevel = Math.Clamp(level, 1, MaxLevel);
+        var step = ((decimal)Cap - Value) / (MaxLevel - 1);
+        return Value + step * (clampedLevel - 1);
+    }
+
+    public decimal GetReductionPercentForLevel(int level)
+    {
+        return Math.Round((1 - GetMultiplierForLevel(level)) * 100, 1, MidpointRounding.AwayFromZero);
     }
 }
 

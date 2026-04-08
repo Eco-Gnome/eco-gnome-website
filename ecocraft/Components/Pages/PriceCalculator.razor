@@ -137,13 +137,20 @@
                                                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="2">
                                                     @foreach (var talentGroup in context.Skill!.Talents.Where(t => context.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
                                                     {
-                                                        var talent = talentGroup.First();
+                                                        var talents = talentGroup.ToList();
+                                                        var talent = talents.First();
                                                         var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
+                                                        var currentReduction = userTalent is null ? 0m : talent.GetReductionPercentForLevel(userTalent.Level);
+                                                        var showReductionPercent = talent.Cap is not null || (talent.Value != 1m && talent.Value != 0m);
+                                                        var description = LocalizationService.GetTranslation(talent.LocalizedDescription);
+                                                        var tooltipTitle = showReductionPercent
+                                                            ? $"{LocalizationService.GetTranslation(talent)} [{currentReduction.ToString("0.##")}%]"
+                                                            : LocalizationService.GetTranslation(talent);
 
-                                                        <MudTooltip Text="@LocalizationService.GetTranslation(talent)" RootClass="d-flex">
+                                                        <MudTooltip Text="@(string.IsNullOrWhiteSpace(description) ? tooltipTitle : $"{tooltipTitle} - {description}")" RootClass="d-flex">
                                                             @if (talent.MaxLevel <= 1)
                                                             {
-                                                                <MudLink OnClick="() => ToggleBinaryTalent(talentGroup.ToList())" Class="d-flex" Style="align-items: center">
+                                                                <MudLink OnClick="() => ToggleBinaryTalent(talents)" Class="d-flex" Style="align-items: center">
                                                                     <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                                                                 </MudLink>
                                                             }
@@ -155,11 +162,11 @@
 
                                                                 <div class="talent-level-control">
                                                                     <div class="talent-icon-wrapper">
-                                                                        <MudLink OnClick="() => IncreaseTalentLevel(talentGroup.ToList())"
+                                                                        <MudLink OnClick="() => IncreaseTalentLevel(talents)"
                                                                                  Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">+</MudLink>
                                                                         <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                                                                         <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
-                                                                        <MudLink OnClick="() => DecreaseTalentLevel(talentGroup.ToList())"
+                                                                        <MudLink OnClick="() => DecreaseTalentLevel(talents)"
                                                                                  Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">-</MudLink>
                                                                     </div>
                                                                 </div>
