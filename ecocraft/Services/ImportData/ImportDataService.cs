@@ -22,6 +22,15 @@ public partial class ImportDataService(
     private List<Recipe> Recipes { get; set; } = [];
     private List<ItemOrTag> ItemOrTags { get; set; } = [];
 
+    private void SetTrackedCollectionsFromServer(Server serverWithData)
+    {
+        Skills = serverWithData.Skills;
+        PluginModules = serverWithData.PluginModules;
+        CraftingTables = serverWithData.CraftingTables;
+        Recipes = serverWithData.Recipes;
+        ItemOrTags = serverWithData.ItemOrTags;
+    }
+
     public async Task<(int, string[])> ImportServerData(string jsonContent, Server server)
     {
         var errorCount = 0;
@@ -32,6 +41,7 @@ public partial class ImportDataService(
         {
             var serverWithData = await serverDbService.GetServerWithData(server.Id, context);
             context.Attach(serverWithData);
+            SetTrackedCollectionsFromServer(serverWithData);
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new LanguageCodeDictionaryConverter());
@@ -66,14 +76,16 @@ public partial class ImportDataService(
         await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
             var data = await GetServerDataAsDto(context, copyServer);
+            var targetServerWithData = await serverDbService.GetServerWithData(targetServer.Id, context);
+            context.Attach(targetServerWithData);
+            SetTrackedCollectionsFromServer(targetServerWithData);
 
-            ImportSkills(context, targetServer, data.Skills);
-            ImportItems(context, targetServer, data.Items, out _);
-            ImportTags(context, targetServer, data.Tags);
-            ImportRecipes(context, targetServer, data.Recipes, out _);
+            ImportSkills(context, targetServerWithData, data.Skills);
+            ImportItems(context, targetServerWithData, data.Items, out _);
+            ImportTags(context, targetServerWithData, data.Tags);
+            ImportRecipes(context, targetServerWithData, data.Recipes, out _);
 
-            targetServer.LastDataUploadTime = DateTimeOffset.UtcNow;
-            serverDbService.UpdateAll(context, targetServer);
+            targetServerWithData.LastDataUploadTime = DateTimeOffset.UtcNow;
         });
     }
 }

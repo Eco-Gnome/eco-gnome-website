@@ -472,6 +472,17 @@
 		StateHasChanged();
 	}
 
+	private async Task RefreshCurrentServerDataAndStats()
+	{
+		var refreshedServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+		ContextService.CurrentServerData = refreshedServerData;
+
+		// Keep the lightweight server context in sync with metadata updated during import.
+		ContextService.CurrentServer.LastDataUploadTime = refreshedServerData.LastDataUploadTime;
+
+		RecalculateStats();
+	}
+
 	public void Dispose()
 	{
 		ContextService.OnContextChanged -= OnContextChanged;
@@ -503,12 +514,10 @@
 		await ImportDataService.CopyServerData(_copyServer!, ContextService.CurrentServer!);
 		await ServerDataService.CopyServerContribution(_copyServer!, ContextService.CurrentServer!);
 
-		ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
-
 		_showCopyExistingServerLoader = false;
 		_copyExistingServerClicked = false;
 
-		RecalculateStats();
+		await RefreshCurrentServerDataAndStats();
 		StateHasChanged();
 	}
 
@@ -601,7 +610,6 @@
 
 			}
 
-			RecalculateStats();
 		}
 		catch (ImportException ex)
 		{
@@ -614,7 +622,7 @@
 			Snackbar.Add("UNEXPECTED_ERROR: " + ex.Message, Severity.Error);
 		}
 
-		ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+		await RefreshCurrentServerDataAndStats();
 
 		_showUploadServerDataLoader = false;
 		StateHasChanged();
