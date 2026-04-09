@@ -718,6 +718,11 @@ public class Server
     public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
     public bool HasVideoUploader { get; set; } = false;
+    public bool IsCalorieCostLocked { get; set; } = false;
+    public decimal? LockedCalorieCost { get; set; }
+    public decimal? CalorieCostMin { get; set; }
+    public decimal? CalorieCostDefault { get; set; }
+    public decimal? CalorieCostMax { get; set; }
     public DateTimeOffset CreationDateTime { get; set; }
     public DateTimeOffset? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }

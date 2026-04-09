@@ -507,7 +507,19 @@ namespace ecocraft.Migrations
                     b.Property<string>("EcoServerId")
                         .HasColumnType("text");
 
+                    b.Property<decimal?>("CalorieCostDefault")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("CalorieCostMax")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("CalorieCostMin")
+                        .HasColumnType("numeric");
+
                     b.Property<bool>("HasVideoUploader")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsCalorieCostLocked")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsDefault")
@@ -516,6 +528,9 @@ namespace ecocraft.Migrations
                     b.Property<string>("JoinCode")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("LockedCalorieCost")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTimeOffset?>("LastDataUploadTime")
                         .HasColumnType("timestamp with time zone");

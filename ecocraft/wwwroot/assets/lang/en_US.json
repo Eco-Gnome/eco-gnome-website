@@ -125,6 +125,23 @@
         "ModUpload": {
             "Description": "You are part of a small group of server admins allowed to upload mod icons on Eco Gnome. Simply upload a .unity3d file to import its icons into the site. These icons will be available for all users and all servers. Icons are identified by their item class name (e.g., WorkbenchItem). This feature is resource-intensive, so please use it carefully and avoid spamming. Contact Zangdar on discord if you have any issues or questions."
         },
+        "CalorieCostPolicy": {
+            "Title": "Calories Cost Policy",
+            "Lock": "Lock value for all players",
+            "LockedValue": "Locked value",
+            "LockedHint": "Players cannot edit this value while lock is enabled.",
+            "Min": "Min",
+            "Default": "Default",
+            "Max": "Max",
+            "Save": "Save policy",
+            "Snackbar": {
+                "InvalidBounds": "Invalid boundaries. Make sure Min <= Default <= Max.",
+                "MissingLockValue": "Please set a locked value before saving.",
+                "LockOutOfBounds": "Locked value must stay within min/max boundaries.",
+                "Saved": "Calories cost policy saved.",
+                "SaveError": "Could not save calories cost policy"
+            }
+        },
         "ModUploadLimitToServer": "Limit to my server",
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
@@ -337,7 +354,12 @@
         },
         "CalorieCost": {
             "Tooltip": "The cost of the food you eat, for 1000 calories spent in a craft. If you buy only salads that brings 700cal for 5$, then Cost per 1000 calories is 1000 * 5 / 700 = 7,14$",
-            "CalorieCost": "Cost per 1000 calories"
+            "CalorieCost": "Cost per 1000 calories",
+            "LockedTooltip": "This value is locked by your server admin.",
+            "LockedSummary": "Locked by server admin: {value}",
+            "BoundariesSummary": "Server boundaries: min {min} / default {default} / max {max}",
+            "LockedSnackbar": "This value is locked by your server admin.",
+            "BoundedSnackbar": "Value adjusted to fit server boundaries."
         },
         "ItemsToBuy": "Items to buy",
         "IngredientSearch": "Ingredient Items Or Tags",

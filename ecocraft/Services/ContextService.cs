@@ -52,6 +52,11 @@ public class ContextService(
             server.UserServers = serverWithUsers.UserServers;
             server.EcoServerId = serverWithUsers.EcoServerId;
             server.HasVideoUploader = serverWithUsers.HasVideoUploader;
+            server.IsCalorieCostLocked = serverWithUsers.IsCalorieCostLocked;
+            server.LockedCalorieCost = serverWithUsers.LockedCalorieCost;
+            server.CalorieCostMin = serverWithUsers.CalorieCostMin;
+            server.CalorieCostDefault = serverWithUsers.CalorieCostDefault;
+            server.CalorieCostMax = serverWithUsers.CalorieCostMax;
             server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
@@ -230,6 +235,9 @@ public class ContextService(
         var userSetting = new UserSetting
         {
             DataContext = dataContext,
+            CalorieCost = userServer.Server.IsCalorieCostLocked
+                ? userServer.Server.LockedCalorieCost ?? userServer.Server.CalorieCostDefault ?? 0
+                : userServer.Server.CalorieCostDefault ?? 0
         };
 
         dataContext.UserSettings.Add(userSetting);

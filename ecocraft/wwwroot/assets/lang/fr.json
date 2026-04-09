@@ -119,6 +119,23 @@
         "ModUpload": {
             "Description": "Vous faites partie d'un petit groupe d'administrateurs de serveurs autorisés à télécharger des icônes de mods sur Eco Gnome. Il vous suffit de télécharger un fichier .unity3d pour importer ses icônes sur le site. Ces icônes seront disponibles pour tous les utilisateurs et tous les serveurs. Les icônes sont identifiées par le nom de leur classe d'objet (par exemple, WorkbenchItem). Cette fonctionnalité est gourmande en ressources, veuillez donc l'utiliser avec précaution et éviter le spam. Contactez Zangdar sur discord si vous avez des problèmes ou des questions."
         },
+        "CalorieCostPolicy": {
+            "Title": "Politique de cout des calories",
+            "Lock": "Verrouiller la valeur pour tous les joueurs",
+            "LockedValue": "Valeur verrouillee",
+            "LockedHint": "Les joueurs ne peuvent pas modifier cette valeur quand le verrou est actif.",
+            "Min": "Min",
+            "Default": "Defaut",
+            "Max": "Max",
+            "Save": "Enregistrer la politique",
+            "Snackbar": {
+                "InvalidBounds": "Bornes invalides. Verifiez que Min <= Defaut <= Max.",
+                "MissingLockValue": "Veuillez definir une valeur verrouillee avant de sauvegarder.",
+                "LockOutOfBounds": "La valeur verrouillee doit rester dans les bornes min/max.",
+                "Saved": "Politique de cout des calories enregistree.",
+                "SaveError": "Impossible de sauvegarder la politique de cout des calories"
+            }
+        },
         "ModUploadLimitToServer": "Limite à mon serveur",
         "Confirm": {
             "ClearAllMax": "Êtes-vous sûr de vouloir supprimer tous les prix maximums ?",

@@ -215,6 +215,11 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    EcoServerId = server.EcoServerId,
 		    IsDefault = server.IsDefault,
 		    HasVideoUploader = server.HasVideoUploader,
+		    IsCalorieCostLocked = server.IsCalorieCostLocked,
+		    LockedCalorieCost = server.LockedCalorieCost,
+		    CalorieCostMin = server.CalorieCostMin,
+		    CalorieCostDefault = server.CalorieCostDefault,
+		    CalorieCostMax = server.CalorieCostMax,
 		    CreationDateTime = server.CreationDateTime,
 		    LastDataUploadTime = server.LastDataUploadTime,
 		    JoinCode = server.JoinCode,
@@ -270,6 +275,26 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.HasVideoUploader).IsModified = true;
+    }
+
+    public void UpdateCalorieCostPolicy(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server
+	    {
+		    Id = server.Id,
+		    IsCalorieCostLocked = server.IsCalorieCostLocked,
+		    LockedCalorieCost = server.LockedCalorieCost,
+		    CalorieCostMin = server.CalorieCostMin,
+		    CalorieCostDefault = server.CalorieCostDefault,
+		    CalorieCostMax = server.CalorieCostMax
+	    };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.IsCalorieCostLocked).IsModified = true;
+	    entry.Property(x => x.LockedCalorieCost).IsModified = true;
+	    entry.Property(x => x.CalorieCostMin).IsModified = true;
+	    entry.Property(x => x.CalorieCostDefault).IsModified = true;
+	    entry.Property(x => x.CalorieCostMax).IsModified = true;
     }
 
     public void UpdateIsDefault(EcoCraftDbContext context, Server server)
