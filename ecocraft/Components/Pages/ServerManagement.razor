@@ -774,10 +774,18 @@
 		{
 			_showDeleteServerLoader = true;
 			await InvokeAsync(StateHasChanged);
-			await ContextService.DeleteCurrentServer();
-			_showDeleteServerLoader = false;
-			await InvokeAsync(StateHasChanged);
-			Navigation.NavigateTo("/");
+			try
+			{
+				await ContextService.DeleteCurrentServer();
+				Navigation.NavigateTo("/");
+				return;
+			}
+			catch (Exception ex)
+			{
+				_showDeleteServerLoader = false;
+				await InvokeAsync(StateHasChanged);
+				Snackbar.Add($"Delete server failed: {ex.Message}", Severity.Error);
+			}
 		}
 	}
 

@@ -246,14 +246,14 @@ public class ContextService(
         var server = userServerToLeave.Server;
         var shouldDeleteServer = server.UserServers.Count <= 1;
 
-        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
             userServerDbService.Destroy(context, userServerToLeave);
             if (shouldDeleteServer)
             {
+                await ClearTalentLocalizedDescriptionsForServer(context, server.Id);
                 serverDbService.Destroy(context, server);
             }
-            return Task.CompletedTask;
         });
 
         CurrentUser?.UserServers.Remove(userServerToLeave);
@@ -265,14 +265,14 @@ public class ContextService(
         var server = userServerToKick.Server;
         var shouldDeleteServer = server.UserServers.Count <= 1;
 
-        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
         {
             userServerDbService.Destroy(context, userServerToKick);
             if (shouldDeleteServer)
             {
+                await ClearTalentLocalizedDescriptionsForServer(context, server.Id);
                 serverDbService.Destroy(context, server);
             }
-            return Task.CompletedTask;
         });
 
 		userServerToKick.Server.UserServers.Remove(userServerToKick);
@@ -280,26 +280,89 @@ public class ContextService(
 
 	public async Task DeleteCurrentServer()
     {
-        if (!CurrentUserServer!.IsAdmin)
+        if (CurrentUserServer is null || CurrentServer is null || CurrentUser is null)
         {
             return;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        if (!CurrentUserServer.IsAdmin)
         {
+            return;
+        }
+
+        var deletedServerId = CurrentServer.Id;
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        {
+            await ClearTalentLocalizedDescriptionsForServer(context, deletedServerId);
             serverDbService.Destroy(context, CurrentServer!);
-            return Task.CompletedTask;
         });
 
-        CurrentUser!.UserServers.Remove(CurrentUserServer!);
+        CurrentUser.UserServers.RemoveAll(us => us.ServerId == deletedServerId || us.Server.Id == deletedServerId);
+        CurrentServerData = null;
         CurrentServer = null;
         CurrentUserServer = null;
 
-        var server = CurrentUser!.UserServers.FirstOrDefault()?.Server;
+        var server = CurrentUser.UserServers.FirstOrDefault()?.Server;
 
         if (server is not null)
         {
-            await ChangeServer(CurrentUser!.UserServers.First().Server);
+            await ChangeServer(CurrentUser.UserServers.First().Server);
+            return;
         }
+
+        await localStorageService.AddItem("ServerId", "");
+        OnContextChanged?.Invoke();
+    }
+
+    public async Task DeleteServerAsSuperAdmin(Guid serverId)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        {
+            await ClearTalentLocalizedDescriptionsForServer(context, serverId);
+            serverDbService.Destroy(context, new Server { Id = serverId });
+        });
+
+        await HandleDeletedServer(serverId);
+    }
+
+    public async Task HandleDeletedServer(Guid serverId)
+    {
+        if (CurrentUser is null)
+        {
+            return;
+        }
+
+        _defaultServers.RemoveAll(s => s.Id == serverId);
+        CurrentUser.UserServers.RemoveAll(us => us.ServerId == serverId || us.Server.Id == serverId);
+
+        if (CurrentServer?.Id == serverId)
+        {
+            CurrentServerData = null;
+            CurrentServer = null;
+            CurrentUserServer = null;
+
+            var nextServer = CurrentUser.UserServers.FirstOrDefault()?.Server;
+            if (nextServer is not null)
+            {
+                await ChangeServer(nextServer);
+                return;
+            }
+
+            await localStorageService.AddItem("ServerId", "");
+        }
+
+        OnContextChanged?.Invoke();
+    }
+
+    private static async Task ClearTalentLocalizedDescriptionsForServer(EcoCraftDbContext context, Guid serverId)
+    {
+        await context.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Talent"" AS t
+            SET ""LocalizedDescriptionId"" = NULL
+            FROM ""Skill"" AS s
+            WHERE t.""SkillId"" = s.""Id""
+              AND s.""ServerId"" = {serverId}
+              AND t.""LocalizedDescriptionId"" IS NOT NULL;");
     }
 }

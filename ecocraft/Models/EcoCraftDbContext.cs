@@ -198,6 +198,12 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.ToTable("Talent");
 
 		modelBuilder.Entity<Talent>()
+			.HasOne(s => s.LocalizedDescription)
+			.WithMany(lt => lt.TalentDescriptions)
+			.HasForeignKey(s => s.LocalizedDescriptionId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<Talent>()
 			.HasOne(s => s.LocalizedName)
 			.WithMany(lt => lt.Talents)
 			.HasForeignKey(s => s.LocalizedNameId)

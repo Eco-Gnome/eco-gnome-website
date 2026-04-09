@@ -468,11 +468,17 @@
             _isLoading = true;
             StateHasChanged();
 
-            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-		    {
-                ServerDbService.Destroy(context, server);
-                return Task.CompletedTask;
-		    });
+            try
+            {
+                await ContextService.DeleteServerAsSuperAdmin(server.Id);
+            }
+            catch (Exception ex)
+            {
+                _isLoading = false;
+                Snackbar.Add($"Delete server failed: {ex.Message}", Severity.Error);
+                StateHasChanged();
+                return;
+            }
 
             await RetrieveServers();
             _isLoading = false;

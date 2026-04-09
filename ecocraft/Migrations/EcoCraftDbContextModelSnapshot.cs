@@ -1203,7 +1203,8 @@ namespace ecocraft.Migrations
                 {
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedDescription")
                         .WithMany("TalentDescriptions")
-                        .HasForeignKey("LocalizedDescriptionId");
+                        .HasForeignKey("LocalizedDescriptionId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.LocalizedField", "LocalizedName")
                         .WithMany("Talents")
