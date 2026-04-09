@@ -44,6 +44,21 @@ public class ContextService(
             userServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id);
         }
 
+        // Rehydrate selected server with full members list to keep admin pages in sync
+        // when switching from header without a full page reload.
+        var serverWithUsers = await serverDbService.GetByIdAsync(server.Id);
+        if (serverWithUsers is not null)
+        {
+            server.UserServers = serverWithUsers.UserServers;
+            server.EcoServerId = serverWithUsers.EcoServerId;
+            server.HasVideoUploader = serverWithUsers.HasVideoUploader;
+            server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
+            server.JoinCode = serverWithUsers.JoinCode;
+            server.ApiKey = serverWithUsers.ApiKey;
+        }
+
+        // Force pages to reload server-scoped data instead of reusing previous server cache.
+        CurrentServerData = null;
         CurrentServer = server;
         CurrentUserServer = userServer;
 

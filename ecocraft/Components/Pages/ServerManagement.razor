@@ -227,38 +227,41 @@
 						</MudStack>
 					</MudTd>
 					<MudTd>
+						@{
+							var isCurrentUser = context.UserId == ContextService.CurrentUser!.Id;
+						}
 						<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Spacing="3">
-							@if (context != ContextService.CurrentUserServer)
-							{
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself")" Disabled="@(!isCurrentUser)">
 								<MudButton Variant="Variant.Filled"
 								           Color="@(context.IsAdmin ? Color.Warning : Color.Error)"
 								           StartIcon="@(context.IsAdmin ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp)"
+								           Disabled="@isCurrentUser"
 								           OnClick="@(() => ToggleAdmin(context))">
 									@(context.IsAdmin ? LocalizationService.GetTranslation("ServerManagement.Members.DemoteAdmin") : LocalizationService.GetTranslation("ServerManagement.Members.PromoteAdmin"))
 								</MudButton>
-							}
+							</MudTooltip>
 
-							@if (context != ContextService.CurrentUserServer)
-							{
+							<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself")" Disabled="@(!isCurrentUser)">
 								<MudButton HtmlTag="label"
 								           Variant="Variant.Filled"
 								           Color="Color.Primary"
 								           StartIcon="@Icons.Material.Filled.ExitToApp"
+								           Disabled="@isCurrentUser"
 								           OnClick="@(() => KickUser(context))">
 									@LocalizationService.GetTranslation("ServerManagement.Members.KickUser")
 								</MudButton>
-								@if (_askKickConfirmations.ContainsKey(context))
-								{
-									<br/>
-									<MudButton Variant="Variant.Filled"
-									           Color="Color.Success"
-									           StartIcon="@Icons.Material.Filled.Close"
-									           OnClick="@(() => CancelKick(context))" />
-									<MudButton Variant="Variant.Filled"
-									           Color="Color.Warning"
-									           StartIcon="@Icons.Material.Filled.Check"
-									           OnClick="@(() => ConfirmKick(context))" />
-								}
+							</MudTooltip>
+							@if (_askKickConfirmations.ContainsKey(context))
+							{
+								<br/>
+								<MudButton Variant="Variant.Filled"
+								           Color="Color.Success"
+								           StartIcon="@Icons.Material.Filled.Close"
+								           OnClick="@(() => CancelKick(context))" />
+								<MudButton Variant="Variant.Filled"
+								           Color="Color.Warning"
+								           StartIcon="@Icons.Material.Filled.Check"
+								           OnClick="@(() => ConfirmKick(context))" />
 							}
 						</MudStack>
 					</MudTd>
@@ -451,11 +454,20 @@
 			return;
 		}
 
+		_selectedTag = null;
+		_copyServer = null;
+
 		_ = RetrieveData();
 	}
 
 	private async Task RetrieveData()
 	{
+		var refreshedServer = await ServerDbService.GetByIdAsync(ContextService.CurrentServer!.Id);
+		if (refreshedServer is not null)
+		{
+			ContextService.CurrentServer!.UserServers = refreshedServer.UserServers;
+		}
+
 		if (ContextService.CurrentServerData is null)
 		{
 			_stats.Clear();
@@ -630,7 +642,7 @@
 
 	private async Task ToggleAdmin(UserServer userServer)
 	{
-		if (userServer == ContextService.CurrentUserServer)
+		if (userServer.UserId == ContextService.CurrentUser!.Id)
 		{
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
 			return;
@@ -809,7 +821,7 @@
 
 	private async Task ConfirmKick(UserServer userServerToKick)
 	{
-		if (userServerToKick == ContextService.CurrentUserServer)
+		if (userServerToKick.UserId == ContextService.CurrentUser!.Id)
 		{
 			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.Snackbar.CantEditYourself"), Severity.Error);
 
