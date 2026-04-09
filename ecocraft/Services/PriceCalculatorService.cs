@@ -215,10 +215,40 @@ public class PriceCalculatorService(
             .Where(r => r.Skill is not null)
             .ToList();
 
+        Guid? primarySkillId = null;
+        var hasPrimarySelection = userPrice.PrimaryUserElement is not null || userPrice.PrimaryUserPrice is not null;
+
+        if (userPrice.PrimaryUserElement is not null)
+        {
+            primarySkillId = userPrice.PrimaryUserElement.Element.Recipe.SkillId;
+        }
+        else if (userPrice.PrimaryUserPrice is not null)
+        {
+            primarySkillId = userPrice.PrimaryUserPrice.PrimaryUserElement?.Element.Recipe.SkillId;
+
+            // If only a primary item is selected (tag case), infer the recipe skill currently used by that item.
+            if (primarySkillId is null)
+            {
+                var selectedPrimaryItemProducer = userPrice.PrimaryUserPrice.ItemOrTag.Elements
+                    .Where(e => e.IsProduct())
+                    .Select(e => e.GetCurrentUserElement(dataContext))
+                    .Where(ue => ue is not null && !ue.IsReintegrated && ue.Price is not null)
+                    .MinBy(ue => ue!.Price);
+
+                primarySkillId = selectedPrimaryItemProducer?.Element.Recipe.SkillId;
+            }
+        }
+        var hasCrossSkillRecipe = recipesThatProduceMyIngredient.Any(r => r.SkillId != userRecipe.Recipe.SkillId);
+
+        if (hasPrimarySelection)
+        {
+            hasCrossSkillRecipe = primarySkillId != userRecipe.Recipe.SkillId;
+        }
+
         if (dataContext.UserSettings.First().ApplyMarginBetweenSkills
             && userPrice is { OverrideIsBought: false, MarginPrice: not null }
             && recipesThatProduceMyIngredient.Count > 0
-            && recipesThatProduceMyIngredient.Any(r => r.Skill != userRecipe.Recipe.Skill))
+            && hasCrossSkillRecipe)
         {
             ingredient.Price = userPrice.MarginPrice;
             ingredient.IsMarginPrice = true;
