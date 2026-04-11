@@ -191,6 +191,18 @@ public class EcoController(
 
         var items = priceCalculatorService.GetCategorizedItemOrTags(dataContext);
 
+        // Include tags that have a calculated price
+        var tagsWithPrice = dataContext.UserPrices
+            .Where(up => up.ItemOrTag.IsTag && up.GetMarginPriceOrPrice() is not null)
+            .Select(up => up.ItemOrTag)
+            .ToList();
+
+        var sellTags = tagsWithPrice.Where(t => t.AssociatedItems.Intersect(items.ToSell).Any()).Except(items.ToSell).ToList();
+        var buyTags = tagsWithPrice.Where(t => t.AssociatedItems.Intersect(items.ToBuy).Any()).Except(items.ToBuy).ToList();
+
+        items.ToSell.AddRange(sellTags);
+        items.ToBuy.AddRange(buyTags);
+
         return (items, dataContext);
     }
 
@@ -206,7 +218,7 @@ public class EcoController(
         return new EcoGnomeCategory(
             "Acquisition",
             OfferType.Buy,
-            toBuy.SelectMany(t => t.IsTag ? t.AssociatedItems : [t]).Distinct().Select(t => new EcoGnomeItem(
+            toBuy.SelectMany(t => t.IsTag ? t.GetAssociatedItemsAndSelf() : [t]).Distinct().Select(t => new EcoGnomeItem(
                 t.Name,
                 Math.Round(t.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 0, 2, MidpointRounding.AwayFromZero)
             )).ToList()
