@@ -38,6 +38,16 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev-${{ github.sha }}
 
+    - name: Build and push Migrator image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: DataMigrator/Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrator:dev
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrator:dev-${{ github.sha }}
+
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v1
       with:

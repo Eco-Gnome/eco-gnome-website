@@ -31,6 +31,18 @@ services:
       db:
         condition: service_healthy
 
+  migrator:
+    image: ghcr.io/eco-gnome/eco-gnome-website-migrator:latest
+    profiles: ["migrate"]
+    environment:
+      SQLITE_PATH: /data/ecocraft.db
+      POSTGRES_CONNECTION: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=${POSTGRES_PASSWORD}"
+    volumes:
+      - ./ecocraft.db:/data/ecocraft.db
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db-data:
   app-assets:
