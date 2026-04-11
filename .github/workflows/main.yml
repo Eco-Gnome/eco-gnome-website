@@ -45,6 +45,6 @@ jobs:
         username: ${{ secrets.SFTP_USERNAME }}
         password: ${{ secrets.SFTP_PASSWORD }}
         script: |
-          cd /home/ecocraft/prod
+          cd /home/ecocraft/ecognome-prod
           docker compose pull app
           docker compose up -d
