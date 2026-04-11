@@ -88,6 +88,27 @@ public class UserPriceDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 		entry.Property(x => x.Price).IsModified = true;
 	}
 
+	public void UpdateCalculatedPrices(EcoCraftDbContext context, UserPrice userPrice)
+	{
+		var trackedEntity = context.UserPrices.Local.FirstOrDefault(up => up.Id == userPrice.Id);
+
+		if (trackedEntity is not null)
+		{
+			trackedEntity.Price = userPrice.Price;
+			trackedEntity.MarginPrice = userPrice.MarginPrice;
+			var trackedEntry = context.Entry(trackedEntity);
+			trackedEntry.Property(x => x.Price).IsModified = true;
+			trackedEntry.Property(x => x.MarginPrice).IsModified = true;
+			return;
+		}
+
+		var stub = new UserPrice { Id = userPrice.Id, Price = userPrice.Price, MarginPrice = userPrice.MarginPrice };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.Price).IsModified = true;
+		entry.Property(x => x.MarginPrice).IsModified = true;
+	}
+
 	public void UpdateOverrideIsBought(EcoCraftDbContext context, UserPrice userPrice)
 	{
 		var stub = new UserPrice { Id = userPrice.Id, OverrideIsBought = userPrice.OverrideIsBought };

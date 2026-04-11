@@ -7,6 +7,7 @@ namespace ecocraft.Services;
 public class PriceCalculatorService(
     IDbContextFactory<EcoCraftDbContext> factory,
     UserElementDbService userElementDbService,
+    UserPriceDbService userPriceDbService,
     LocalizationService localizationService)
 {
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags(DataContext dataContext)
@@ -201,6 +202,13 @@ public class PriceCalculatorService(
                     nbHandled++;
                 }
             } while (nbHandled > 0);
+
+            // Persist all calculated prices
+            foreach (var up in dataContext.UserPrices)
+                userPriceDbService.UpdateCalculatedPrices(context, up);
+
+            foreach (var ue in dataContext.UserElements)
+                userElementDbService.UpdateAll(context, ue);
 
             return Task.CompletedTask;
         });
