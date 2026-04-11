@@ -44,6 +44,7 @@ jobs:
         context: .
         file: DataMigrator/Dockerfile
         push: true
+        provenance: false
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrator:dev
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrator:dev-${{ github.sha }}
