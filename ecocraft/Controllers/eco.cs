@@ -83,31 +83,6 @@ public class EcoController(
         return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
     }
 
-    /* Deprecated, keep it for compatibility */
-    [HttpGet("categories-items")]
-    public async Task<IActionResult> GetCategoriesAndItems([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? context)
-    {
-        var result = await GetItemsAndDataContext(ecoServerId, ecoUserId, context);
-        if (result.Result is not null) return result.Result;
-
-        var (items, dataContext) = result.Value;
-
-        var categoryToBuy = GetCategoryToBuy(items, dataContext, []);
-
-        var categoriesToSell = items.ToSell
-            .GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.SkillId ?? null)
-            .Select(m => new EcoGnomeCategory(
-                "Sell",
-                OfferType.Sell,
-                m.Select(i => new EcoGnomeItem(
-                    i.Name,
-                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
-                )).ToList()
-            ));
-
-        return Ok(categoriesToSell.Concat([categoryToBuy]));
-    }
-
     [HttpGet("categories-items-v2")]
     public async Task<IActionResult> GetCategoriesAndItemsV2([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string filterSkill = "", [FromQuery] GroupBy groupBy = 0, [FromQuery] string? context = "")
     {
@@ -124,7 +99,10 @@ public class EcoController(
 
         if (filterSkills.Count > 0)
         {
-            categories = categories.Where(i => i.Elements.Any(e => e.IsProduct() && filterSkills.Contains(e.Recipe.Skill?.Name))).ToList();
+            categories = categories.Where(i =>
+                i.GetAssociatedItemsAndSelf().Any(iot =>
+                    iot.Elements.Any(e => e.Quantity is not null && e.IsProduct() && filterSkills.Contains(e.Recipe?.Skill?.Name)))
+            ).ToList();
         }
 
         if (groupBy != GroupBy.None)
@@ -132,7 +110,7 @@ public class EcoController(
             var groupedCategories = groupBy switch
             {
                 GroupBy.Margin => categories.GroupBy(i => i.GetCurrentUserPrice(dataContext)?.UserMargin?.Name ?? null),
-                GroupBy.Skill => categories.GroupBy(i => i.Elements.FirstOrDefault()?.Recipe.Skill?.Name ?? null),
+                GroupBy.Skill => categories.GroupBy(i => i.GetAssociatedItemsAndSelf().SelectMany(iot => iot.Elements).FirstOrDefault()?.Recipe.Skill?.Name ?? null),
                 _ => throw new ArgumentOutOfRangeException(nameof(groupBy), groupBy, null)
             };
 
@@ -213,7 +191,10 @@ public class EcoController(
 
         if (filterSkills.Count > 0)
         {
-            toBuy = toBuy.Where(i => i.Elements.Any(e => e.IsIngredient() && filterSkills.Contains(e.Recipe.Skill?.Name))).ToList();
+            toBuy = toBuy.Where(i =>
+                i.GetAssociatedItemsAndSelf().Any(iot =>
+                    iot.Elements.Any(e => e.Quantity is not null && e.IsIngredient() && filterSkills.Contains(e.Recipe?.Skill?.Name)))
+            ).ToList();
         }
 
         return new EcoGnomeCategory(
