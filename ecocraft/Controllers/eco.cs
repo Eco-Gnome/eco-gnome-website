@@ -175,6 +175,7 @@ public class EcoController(
                 .ThenInclude(i => i.AssociatedItems)
             .Include(up => up.ItemOrTag)
                 .ThenInclude(i => i.Elements)
+                .ThenInclude(e => e.Quantity)
             .Include(up => up.UserMargin)
             .ToListAsync());
 
