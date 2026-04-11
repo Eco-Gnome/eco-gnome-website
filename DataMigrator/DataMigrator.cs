@@ -48,10 +48,12 @@ class DataMigrator
         await CopyTable<Talent>(sqlite, pg);             // FK Skill, LocalizedField
         await CopyTable<PluginModule>(sqlite, pg);       // FK Server, Skill, LocalizedField
         await CopyTable<CraftingTable>(sqlite, pg);      // FK Server, LocalizedField
+        await CopyJoinTable("CraftingTablePluginModule", sqlite, pg); // M2M CraftingTable <-> PluginModule
 
         await CopyTable<DynamicValue>(sqlite, pg);       // FK Server
 
-        await CopyTable<ItemOrTag>(sqlite, pg);          // FK Server, LocalizedField (assoc M2M en table join auto)
+        await CopyTable<ItemOrTag>(sqlite, pg);          // FK Server, LocalizedField
+        await CopyJoinTable("ItemTagAssoc", sqlite, pg);    // M2M ItemOrTag <-> ItemOrTag
 
         await CopyTable<Recipe>(sqlite, pg);             // FK Skill, CraftingTable, Server, LocalizedField, DynamicValue
         await CopyTable<Element>(sqlite, pg);            // FK Recipe, ItemOrTag, DynamicValue (ItemOrTag copié plus tard)
@@ -65,6 +67,7 @@ class DataMigrator
         await CopyTable<UserSetting>(sqlite, pg);        // FK DataContext
         await CopyTable<UserMargin>(sqlite, pg);         // FK DataContext
         await CopyTable<UserCraftingTable>(sqlite, pg);  // FK DataContext, CraftingTable, PluginModule
+        await CopyJoinTable("UserCraftingTablePluginModule", sqlite, pg); // M2M UserCraftingTable <-> PluginModule
         await CopyTable<UserSkill>(sqlite, pg);          // FK DataContext, Skill
         await CopyTable<UserTalent>(sqlite, pg);         // FK DataContext, Talent
         await CopyUserRecipe(sqlite, pg);         // FK DataContext, Recipe, self FK ParentUserRecipe
@@ -320,6 +323,80 @@ class DataMigrator
         }
 
         Console.WriteLine($"[DONE] UserPrice : {insertedTotal} lignes copiées.");
+    }
+
+    private static async Task CopyJoinTable(string tableName, EcoCraftDbContext sqlite, EcoCraftDbContext pg)
+    {
+        var countResult = await sqlite.Database.SqlQueryRaw<int>($"SELECT COUNT(*) AS \"Value\" FROM \"{tableName}\"").FirstAsync();
+        if (countResult == 0)
+        {
+            Console.WriteLine($"[EMPTY] {tableName}");
+            return;
+        }
+
+        // Lire les colonnes de la table
+        var columns = new List<string>();
+        using (var cmd = sqlite.Database.GetDbConnection().CreateCommand())
+        {
+            await sqlite.Database.OpenConnectionAsync();
+            cmd.CommandText = $"PRAGMA table_info(\"{tableName}\")";
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                columns.Add(reader.GetString(1)); // colonne "name"
+            }
+        }
+
+        var columnList = string.Join(", ", columns.Select(c => $"\"{c}\""));
+
+        // Lire toutes les lignes depuis SQLite
+        var rows = new List<object[]>();
+        using (var cmd = sqlite.Database.GetDbConnection().CreateCommand())
+        {
+            cmd.CommandText = $"SELECT {columnList} FROM \"{tableName}\"";
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var values = new object[reader.FieldCount];
+                reader.GetValues(values);
+                // SQLite stocke les GUIDs en texte, PostgreSQL attend des uuid
+                for (var i = 0; i < values.Length; i++)
+                {
+                    if (values[i] is string s && Guid.TryParse(s, out var guid))
+                        values[i] = guid;
+                }
+                rows.Add(values);
+            }
+        }
+
+        Console.WriteLine($"[COPY] {tableName} : {rows.Count} lignes...");
+
+        // Insérer par batch dans PostgreSQL
+        const int batchSize = 5000;
+        var inserted = 0;
+
+        foreach (var batch in rows.Chunk(batchSize))
+        {
+            var allParams = new List<object>();
+            var valuesClauses = new List<string>();
+
+            for (var r = 0; r < batch.Length; r++)
+            {
+                var row = batch[r];
+                var offset = r * columns.Count;
+                var paramList = string.Join(", ", Enumerable.Range(0, columns.Count).Select(i => $"{{{offset + i}}}"));
+                valuesClauses.Add($"({paramList})");
+                allParams.AddRange(row);
+            }
+
+            var sql = $"INSERT INTO \"{tableName}\" ({columnList}) VALUES {string.Join(", ", valuesClauses)}";
+            await pg.Database.ExecuteSqlRawAsync(sql, allParams.ToArray());
+
+            inserted += batch.Length;
+            Console.WriteLine($"    -> {inserted}/{rows.Count}");
+        }
+
+        Console.WriteLine($"[DONE] {tableName} : {inserted} lignes copiées.");
     }
 
     private static async Task PatchSqliteSchema(EcoCraftDbContext sqlite)
