@@ -19,8 +19,8 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set image name to lowercase
-      run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+    - name: Set image name
+      run: echo "IMAGE_NAME=eco-gnome/eco-gnome-website" >> "$GITHUB_ENV"
 
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
