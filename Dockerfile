@@ -22,8 +22,17 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
+# Stash container-owned assets so the entrypoint can copy them
+# into the volume-mounted directory at startup
+RUN mkdir -p /app/assets-seed \
+    && mv wwwroot/assets/eco-icons /app/assets-seed/eco-icons \
+    && mv wwwroot/assets/lang /app/assets-seed/lang
+
 # Create directories for runtime-generated assets
 RUN mkdir -p wwwroot/assets wwwroot/videos
 
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "ecocraft.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]
