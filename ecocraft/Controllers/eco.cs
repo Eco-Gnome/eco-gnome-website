@@ -110,7 +110,7 @@ public class EcoController(
             var groupedCategories = groupBy switch
             {
                 GroupBy.Margin => categories.GroupBy(i => i.GetCurrentUserPrice(dataContext)?.UserMargin?.Name ?? null),
-                GroupBy.Skill => categories.GroupBy(i => i.GetAssociatedItemsAndSelf().SelectMany(iot => iot.Elements).FirstOrDefault()?.Recipe.Skill?.Name ?? null),
+                GroupBy.Skill => categories.GroupBy(i => i.GetAssociatedItemsAndSelf().SelectMany(iot => iot.Elements).FirstOrDefault(e => e.Recipe?.Skill != null)?.Recipe.Skill?.Name),
                 _ => throw new ArgumentOutOfRangeException(nameof(groupBy), groupBy, null)
             };
 
