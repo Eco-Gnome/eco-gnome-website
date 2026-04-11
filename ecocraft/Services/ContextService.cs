@@ -268,37 +268,55 @@ public class ContextService(
     {
         var server = userServerToLeave.Server;
         var shouldDeleteServer = server.UserServers.Count <= 1;
+        var serverId = server.Id;
 
-        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
             userServerDbService.Destroy(context, userServerToLeave);
-            if (shouldDeleteServer)
-            {
-                await ClearTalentLocalizedDescriptionsForServer(context, server.Id);
-                serverDbService.Destroy(context, server);
-            }
+            return Task.CompletedTask;
         });
 
         CurrentUser?.UserServers.Remove(userServerToLeave);
         CurrentServer = null;
+
+        if (shouldDeleteServer)
+        {
+            _ = Task.Run(async () =>
+            {
+                await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+                {
+                    await ClearTalentLocalizedDescriptionsForServer(context, serverId);
+                    serverDbService.Destroy(context, new Server { Id = serverId });
+                });
+            });
+        }
 	}
 
 	public async Task KickFromServer(UserServer userServerToKick)
 	{
         var server = userServerToKick.Server;
         var shouldDeleteServer = server.UserServers.Count <= 1;
+        var serverId = server.Id;
 
-        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
             userServerDbService.Destroy(context, userServerToKick);
-            if (shouldDeleteServer)
-            {
-                await ClearTalentLocalizedDescriptionsForServer(context, server.Id);
-                serverDbService.Destroy(context, server);
-            }
+            return Task.CompletedTask;
         });
 
 		userServerToKick.Server.UserServers.Remove(userServerToKick);
+
+        if (shouldDeleteServer)
+        {
+            _ = Task.Run(async () =>
+            {
+                await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+                {
+                    await ClearTalentLocalizedDescriptionsForServer(context, serverId);
+                    serverDbService.Destroy(context, new Server { Id = serverId });
+                });
+            });
+        }
 	}
 
 	public async Task DeleteCurrentServer()

@@ -2,6 +2,7 @@
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Controllers;
 
@@ -11,9 +12,9 @@ public class EcoController(
     UserPriceDbService userPriceDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
-    UserElementDbService userElementDbService,
     PriceCalculatorService priceCalculatorService,
-    ItemOrTagDbService itemOrTagDbService
+    ItemOrTagDbService itemOrTagDbService,
+    IDbContextFactory<EcoCraftDbContext> dbContextFactory
 ) : ControllerBase
 {
     /*
@@ -166,8 +167,27 @@ public class EcoController(
         if (result.Result is not null) return result.Result;
         var dataContext = result.Value!;
 
-        await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext);
-        await userElementDbService.GetByDataContextForEcoApiAsync(dataContext);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        dataContext.UserPrices.AddRange(await dbContext.UserPrices
+            .Where(up => up.DataContextId == dataContext.Id)
+            .Include(up => up.ItemOrTag)
+                .ThenInclude(i => i.AssociatedItems)
+            .Include(up => up.ItemOrTag)
+                .ThenInclude(i => i.Elements)
+            .Include(up => up.UserMargin)
+            .ToListAsync());
+
+        dataContext.UserElements.AddRange(await dbContext.UserElements
+            .Where(ue => ue.DataContextId == dataContext.Id)
+            .Include(ue => ue.Element)
+                .ThenInclude(e => e.Recipe)
+                .ThenInclude(r => r.Skill)
+            .Include(ue => ue.Element)
+                .ThenInclude(e => e.ItemOrTag)
+            .Include(ue => ue.Element)
+                .ThenInclude(e => e.Quantity)
+            .ToListAsync());
 
         var items = priceCalculatorService.GetCategorizedItemOrTags(dataContext);
 

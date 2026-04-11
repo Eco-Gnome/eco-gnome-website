@@ -174,7 +174,15 @@
 		{
 			_askLeaveConfirmations.Remove(userServerToLeave);
 			await ContextService.LeaveServer(userServerToLeave);
-			await ContextService.ChangeServer(ContextService.CurrentUser!.UserServers.FirstOrDefault()?.Server!);
+			var nextServer = ContextService.CurrentUser!.UserServers.FirstOrDefault()?.Server;
+			if (nextServer is not null)
+			{
+				await ContextService.ChangeServer(nextServer);
+			}
+			else
+			{
+				MudDialog.Close();
+			}
 		}
 	}
 

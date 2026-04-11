@@ -951,7 +951,11 @@
     {
         var currentServer = ContextService.CurrentServer!;
         await ContextService.LeaveServer(ContextService.CurrentUserServer!);
-        await ContextService.ChangeServer(currentServer);
+
+        if (ContextService.CurrentUser!.UserServers.Any())
+        {
+            await ContextService.ChangeServer(currentServer);
+        }
 
         Navigation.NavigateTo("/shopping-list", forceLoad: true);
     }

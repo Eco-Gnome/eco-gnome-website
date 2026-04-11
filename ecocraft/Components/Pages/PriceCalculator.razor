@@ -1426,7 +1426,11 @@
 
         var currentServer = ContextService.CurrentServer!;
         await ContextService.LeaveServer(ContextService.CurrentUserServer!);
-        await ContextService.ChangeServer(currentServer, isAdmin);
+
+        if (ContextService.CurrentUser!.UserServers.Any())
+        {
+            await ContextService.ChangeServer(currentServer, isAdmin);
+        }
 
         Navigation.NavigateTo("/", forceLoad: true);
     }
