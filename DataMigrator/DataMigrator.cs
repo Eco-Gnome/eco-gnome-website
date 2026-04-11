@@ -26,6 +26,10 @@ class DataMigrator
         using var sqlite = new EcoCraftDbContext(sqliteOptions);
         using var pg = new EcoCraftDbContext(postgresOptions);
 
+        // Ajouter les colonnes manquantes au SQLite si la DB est ancienne
+        Console.WriteLine("Mise à jour du schéma SQLite (colonnes manquantes)...");
+        await PatchSqliteSchema(sqlite);
+
         Console.WriteLine("Suppression de la base PostgreSQL existante...");
         await pg.Database.EnsureDeletedAsync();
 
@@ -192,6 +196,7 @@ class DataMigrator
 
         Console.WriteLine("Chargement des UserRecipe depuis SQLite...");
         var all = await sqlite.UserRecipes
+            .AsNoTracking()
             .ToListAsync();
 
         if (all.Count == 0)
@@ -260,6 +265,7 @@ class DataMigrator
 
         Console.WriteLine("Chargement des UserPrice depuis SQLite...");
         var all = await sqlite.UserPrices
+            .AsNoTracking()
             .ToListAsync();
 
         if (all.Count == 0)
@@ -314,6 +320,35 @@ class DataMigrator
         }
 
         Console.WriteLine($"[DONE] UserPrice : {insertedTotal} lignes copiées.");
+    }
+
+    private static async Task PatchSqliteSchema(EcoCraftDbContext sqlite)
+    {
+        var alterCommands = new (string table, string column, string type, string? defaultValue)[]
+        {
+            ("Server", "CalorieCostDefault", "REAL", null),
+            ("Server", "CalorieCostMax", "REAL", null),
+            ("Server", "CalorieCostMin", "REAL", null),
+            ("Server", "IsCalorieCostLocked", "INTEGER", "0"),
+            ("Server", "LockedCalorieCost", "REAL", null),
+            ("Talent", "Cap", "REAL", null),
+        };
+
+        foreach (var (table, column, type, defaultValue) in alterCommands)
+        {
+            try
+            {
+                var defaultClause = defaultValue != null ? $" DEFAULT {defaultValue}" : "";
+                await sqlite.Database.ExecuteSqlRawAsync(
+                    $"ALTER TABLE \"{table}\" ADD COLUMN \"{column}\" {type}{defaultClause}");
+                Console.WriteLine($"  + {table}.{column} ajouté");
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+            {
+                // La colonne existe deja, on ignore
+                Console.WriteLine($"  ~ {table}.{column} existe déjà");
+            }
+        }
     }
 
 }

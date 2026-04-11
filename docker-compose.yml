@@ -40,7 +40,7 @@ services:
       SQLITE_PATH: /data/ecocraft.db
       POSTGRES_CONNECTION: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft"
     volumes:
-      - ./ecocraft.db:/data/ecocraft.db:ro
+      - ./ecocraft.db:/data/ecocraft.db
     depends_on:
       db:
         condition: service_healthy

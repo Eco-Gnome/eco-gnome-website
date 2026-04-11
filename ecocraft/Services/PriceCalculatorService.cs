@@ -112,10 +112,11 @@ public class PriceCalculatorService(
                             .Select(iot => iot.GetCurrentUserPrice(dataContext)!)
                             .ToList();
 
-                        if (!associatedItemsUserPrices.All(up => up.Price is not null)) continue;
+                        if (associatedItemsUserPrices.Count == 0 || !associatedItemsUserPrices.All(up => up.Price is not null)) continue;
 
-                        ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.Price = associatedItemsUserPrices.Min(up => up.Price);
-                        ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.MarginPrice = associatedItemsUserPrices.First(up => up.Price == ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.Price).MarginPrice;
+                        var cheapest = associatedItemsUserPrices.MinBy(up => up.Price)!;
+                        ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.Price = cheapest.Price;
+                        ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!.MarginPrice = cheapest.MarginPrice;
                         SetPriceOrMarginPrice(context, dataContext, ingredient, ingredient.Element.ItemOrTag.GetCurrentUserPrice(dataContext)!, userRecipe);
 
                         if (debug) Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
