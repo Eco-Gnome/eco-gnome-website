@@ -31,6 +31,20 @@ services:
       db:
         condition: service_healthy
 
+  migrator:
+    build:
+      context: .
+      dockerfile: DataMigrator/Dockerfile
+    profiles: ["migrate"]
+    environment:
+      SQLITE_PATH: /data/ecocraft.db
+      POSTGRES_CONNECTION: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft"
+    volumes:
+      - ./ecocraft.db:/data/ecocraft.db:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   app-assets:
   app-videos:

@@ -8,11 +8,10 @@ class DataMigrator
     {
         Console.WriteLine("=== EcoCraft data migration SQLite -> PostgreSQL ===");
 
-        // À ADAPTER selon ton contexte
-        var sqlitePath = @"C:\Users\thiba\Documents\Repositories\eco-calculator-website\DataMigrator\ecocraft.db";
-        var sqliteConnectionString = $"Data Source={sqlitePath};Foreign Keys=True;"; // ton fichier SQLite
-        var postgresConnectionString =
-            "Host=localhost;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft";
+        var sqlitePath = Environment.GetEnvironmentVariable("SQLITE_PATH") ?? "/data/ecocraft.db";
+        var sqliteConnectionString = $"Data Source={sqlitePath};Foreign Keys=True;";
+        var postgresConnectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
+            ?? "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft";
 
         // Contexte SQLite
         var sqliteOptions = new DbContextOptionsBuilder<EcoCraftDbContext>()
@@ -26,6 +25,9 @@ class DataMigrator
 
         using var sqlite = new EcoCraftDbContext(sqliteOptions);
         using var pg = new EcoCraftDbContext(postgresOptions);
+
+        Console.WriteLine("Suppression de la base PostgreSQL existante...");
+        await pg.Database.EnsureDeletedAsync();
 
         Console.WriteLine("Applique les migrations sur PostgreSQL...");
         await pg.Database.MigrateAsync();
