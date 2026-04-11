@@ -5,51 +5,46 @@ on:
     branches:
       - master
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+env:
+  REGISTRY: ghcr.io
 
-    env:
-      SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
-      SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
-      SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+    - name: Set image name to lowercase
+      run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
       with:
-        dotnet-version: '9.x'
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Restore dependencies
-      run: |
-        dotnet restore
-
-    - name: Build the project
-      run: |
-        dotnet publish -c Release -o ./publish
-
-    - name: Upload files via SFTP
-      uses: appleboy/scp-action@v0.1.3
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
       with:
-        host: ${{ env.SFTP_SERVER }}
-        username: ${{ env.SFTP_USERNAME }}
-        password: ${{ env.SFTP_PASSWORD }}
-        source: "./publish/*"
-        target: "/home/ecocraft/www"
-        strip_components: 1
-      env:
-        DEBUG: 'true'
+        context: .
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    - name: Restart application via SSH
-      uses: appleboy/ssh-action@v0.1.4
+    - name: Deploy to server via SSH
+      uses: appleboy/ssh-action@v1
       with:
-        host: ${{ env.SFTP_SERVER }}
-        username: ${{ env.SFTP_USERNAME }}
-        password: ${{ env.SFTP_PASSWORD }}
+        host: ${{ secrets.SFTP_SERVER }}
+        username: ${{ secrets.SFTP_USERNAME }}
+        password: ${{ secrets.SFTP_PASSWORD }}
         script: |
-          cd /home/ecocraft/www
-          systemctl stop ecocraft.service
-          systemctl start ecocraft.service
+          cd /home/ecocraft/prod
+          docker compose pull app
+          docker compose up -d

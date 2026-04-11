@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecocraft
+      POSTGRES_USER: ecocraft
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecocraft"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ghcr.io/eco-gnome/eco-gnome-website:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3030:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=${POSTGRES_PASSWORD};Include Error Detail=true;"
+      DataProtection__KeysPath: /app/dpkeys
+    volumes:
+      - app-assets:/app/wwwroot/assets
+      - app-videos:/app/wwwroot/videos
+      - app-dpkeys:/app/dpkeys
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  app-assets:
+  app-videos:
+  app-dpkeys:
