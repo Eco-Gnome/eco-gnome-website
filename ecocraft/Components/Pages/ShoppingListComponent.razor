@@ -5,6 +5,7 @@
 @using ecocraft.Components.Utils
 @using ecocraft.Services.DbServices
 @using Microsoft.EntityFrameworkCore
+@using System.Globalization
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
 @inject ShoppingListDataService ShoppingListDataService
@@ -104,6 +105,9 @@
                                                 <MudNumericField T="int"
                                                                  Value="@context.Level"
                                                                  Class="square-input flex-no-grow"
+                                                                 Format="0"
+                                                                 Step="1"
+                                                                 Culture="CultureInfo.InvariantCulture"
                                                                  Min="1"
                                                                  Max="@(context.Skill!.MaxLevel)"
                                                                  Variant="Variant.Outlined"
@@ -347,6 +351,8 @@
                                                                          Value="context.Value.RoundFactor"
                                                                          ValueChanged="@(v => OnQuantityToCraftChanged(context.Value, v))"
                                                                          Format="0"
+                                                                         Step="1"
+                                                                         Culture="CultureInfo.InvariantCulture"
                                                                          Variant="Variant.Filled"
                                                                          Class="rectangle-input"
                                                                          Min="1"
