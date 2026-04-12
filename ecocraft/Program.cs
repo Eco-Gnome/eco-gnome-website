@@ -3,6 +3,7 @@ using System.IO;
 using ecocraft.Components;
 using ecocraft.Extensions;
 using ecocraft.Models;
+using MudBlazor;
 using MudBlazor.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
@@ -38,6 +39,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
+builder.Services.AddMudMarkdownServices();
 
 builder.Services.AddDbContextFactory<EcoCraftDbContext>(options =>
     options

@@ -17,17 +17,20 @@
                            Disabled="_isUploadingMp4"
                            FilesChanged="UploadMp4"
                            Accept="video/mp4">
-                <ActivatorContent>
+                <CustomContent Context="fileUpload">
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.UploadFile">
+                               StartIcon="@Icons.Material.Filled.UploadFile"
+                               OnClick="@fileUpload.OpenFilePickerAsync">
                         <MudText>Upload MP4 (max 20 Mo)</MudText>
                     </MudButton>
                     @if (_isUploadingMp4)
                     {
                         <MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
                     }
-                </ActivatorContent>
+                </CustomContent>
+                <SelectedTemplate>
+                </SelectedTemplate>
             </MudFileUpload>
             @if (_errorMp4 is not null)
             {
@@ -39,17 +42,20 @@
                            Disabled="_isUploadingMp3"
                            FilesChanged="UploadMp3"
                            Accept="video/mp3">
-                <ActivatorContent>
+                <CustomContent Context="fileUpload">
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.UploadFile">
+                               StartIcon="@Icons.Material.Filled.UploadFile"
+                               OnClick="@fileUpload.OpenFilePickerAsync">
                         <MudText>Upload MP3 (max 20 Mo)</MudText>
                     </MudButton>
                     @if (_isUploadingMp3)
                     {
                         <MudProgressCircular Size="Size.Small" Color="Color.Error" Indeterminate="true" Class="ml-2"/>
                     }
-                </ActivatorContent>
+                </CustomContent>
+                <SelectedTemplate>
+                </SelectedTemplate>
             </MudFileUpload>
             @if (_errorMp3 is not null)
             {

@@ -48,11 +48,14 @@
 
 			<MudTooltip Text="@LocalizationService.GetTranslation("UserConfigurationDialog.ImportReplace")">
 				<MudFileUpload T="IBrowserFile" FilesChanged="ImportUser">
-					<ActivatorContent>
+					<CustomContent Context="fileUpload">
 						<MudIconButton Variant="Variant.Filled"
 						               Color="Color.Warning"
-						               Icon="@Icons.Material.Filled.CloudUpload" />
-					</ActivatorContent>
+						               Icon="@Icons.Material.Filled.CloudUpload"
+						               OnClick="@fileUpload.OpenFilePickerAsync" />
+					</CustomContent>
+					<SelectedTemplate>
+					</SelectedTemplate>
 				</MudFileUpload>
 			</MudTooltip>
 		</MudStack>

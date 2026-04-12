@@ -104,18 +104,21 @@
 								<MudMarkdown Value="@LocalizationService.GetTranslation("ServerManagement.ServerSettings.EcoGnomeModExplanation2")" />
 								<MudStack Row>
 									<MudFileUpload T="IBrowserFile" FilesChanged="UploadDataJsonFile">
-										<ActivatorContent>
+										<CustomContent Context="fileUpload">
 											<MudButton Disabled="_showUploadServerDataLoader"
 											           Variant="Variant.Filled"
 											           Color="Color.Primary"
-											           StartIcon="@Icons.Material.Filled.CloudUpload">
+											           StartIcon="@Icons.Material.Filled.CloudUpload"
+											           OnClick="@fileUpload.OpenFilePickerAsync">
 												@LocalizationService.GetTranslation("ServerManagement.ServerSettings.Upload")
 												@if (_showUploadServerDataLoader)
 												{
 													<MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
 												}
 											</MudButton>
-										</ActivatorContent>
+										</CustomContent>
+										<SelectedTemplate>
+										</SelectedTemplate>
 									</MudFileUpload>
 
 									<div class="py-4 ml-4 mr-2 border-l-1"></div>

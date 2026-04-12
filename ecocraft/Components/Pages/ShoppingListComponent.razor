@@ -428,7 +428,7 @@
     private DataContext? _selectedShoppingList;
     private DataContext? _referenceDataContext;
     private bool _isLoadingData;
-    private List<TreeItemData<UserRecipe>> TreeItems { get; set; } = [];
+    private List<ITreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
     private bool _expandedShoppingLists;
     private bool ExpandedShoppingLists
@@ -464,7 +464,7 @@
     }
 
     private Recipe? _emptyRecipe;
-    private TreeItemData<UserRecipe>? _openedAddChildrenContext;
+    private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
     private Element? _openedAddChildrenIngredient;
 
     protected override void OnInitialized()
@@ -516,7 +516,7 @@
         Rebuild();
     }
 
-    private TreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
+    private ITreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
     {
         return new TreeItemData<UserRecipe>
         {
@@ -526,7 +526,7 @@
         };
     }
 
-    private void ToggleAddChildren(TreeItemData<UserRecipe> context, Element ingredient)
+    private void ToggleAddChildren(ITreeItemData<UserRecipe> context, Element ingredient)
     {
         if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
         {

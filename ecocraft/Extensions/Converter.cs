@@ -5,34 +5,29 @@ namespace ecocraft.Extensions;
 
 public static class CultureInvariantConverter
 {
-    public static readonly Converter<decimal> DotOrCommaDecimal = new Converter<decimal>
-    {
-        SetFunc = value => $"{value:0.##}",
-        GetFunc = number =>
+    public static readonly IConverter<decimal, string> DotOrCommaDecimal = Conversions.From<decimal, string>(
+        value => $"{value:0.##}",
+        number =>
         {
-            if (String.IsNullOrWhiteSpace(number)) return 0;
-
-            number = number.Replace(',', '.');
-
-            return decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0;
-        },
-    };
-
-    public static readonly Converter<decimal?> DotOrCommaDecimalNull = new Converter<decimal?>
-    {
-        SetFunc = value => value is null ? null : $"{Math.Round((decimal)value, 2, MidpointRounding.AwayFromZero):0.##}",
-        GetFunc = number =>
-        {
-            if (String.IsNullOrWhiteSpace(number)) return null;
-
-            number = number.Replace(',', '.');
-
-            if (decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
+            if (string.IsNullOrWhiteSpace(number))
             {
-                return result;
+                return 0m;
             }
 
-            return null;
-        },
-    };
+            number = number.Replace(',', '.');
+            return decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0m;
+        });
+
+    public static readonly IConverter<decimal?, string?> DotOrCommaDecimalNull = Conversions.From<decimal?, string?>(
+        value => value is null ? null : $"{Math.Round(value.Value, 2, MidpointRounding.AwayFromZero):0.##}",
+        number =>
+        {
+            if (string.IsNullOrWhiteSpace(number))
+            {
+                return null;
+            }
+
+            number = number.Replace(',', '.');
+            return decimal.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : null;
+        });
 }

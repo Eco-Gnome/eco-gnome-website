@@ -133,6 +133,7 @@
                                                              HideSpinButtons="@(!canContributePrice)"
                                                              Value="@context.Price"
                                                              Immediate="true"
+                                                             DebounceInterval="150"
                                                              Format="0.##"
                                                              Variant="Variant.Outlined"
                                                              Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"

@@ -12,18 +12,21 @@
 
 <MudStack Row Spacing="2" AlignItems="AlignItems.Center">
     <MudFileUpload T="IBrowserFile" FilesChanged="UploadModFiles">
-        <ActivatorContent>
+        <CustomContent Context="fileUpload">
             <MudButton Disabled="_showUploadModLoader"
                        Variant="Variant.Filled"
                        Color="Color"
-                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       OnClick="@fileUpload.OpenFilePickerAsync">
                 @LocalizationService.GetTranslation("SuperAdmin.ModUpload")
                 @if (_showUploadModLoader)
                 {
                     <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
                 }
             </MudButton>
-        </ActivatorContent>
+        </CustomContent>
+        <SelectedTemplate>
+        </SelectedTemplate>
     </MudFileUpload>
 
     <MudCheckBox T="bool" @bind-Value="_limitToMyServer" Label="@LocalizationService.GetTranslation("ServerManagement.ModUploadLimitToServer")" />
