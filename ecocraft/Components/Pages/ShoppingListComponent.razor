@@ -281,6 +281,7 @@
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                                 <MudAutocomplete T="Recipe"
                                                  Value="_emptyRecipe"
+                                                 @bind-Text="_recipeAutocompleteText"
                                                  Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
                                                  SearchFunc="SearchRecipes"
                                                  ValueChanged="AddShoppingListRecipe"
@@ -470,6 +471,7 @@
     }
 
     private Recipe? _emptyRecipe;
+    private string? _recipeAutocompleteText;
     private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
     private Element? _openedAddChildrenIngredient;
 
@@ -949,6 +951,7 @@
         });
 
         _emptyRecipe = null;
+        _recipeAutocompleteText = string.Empty;
 
         Rebuild();
     }

@@ -77,6 +77,7 @@
                                 <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({_selectedDataContext.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
                                     <MudAutocomplete T="Skill"
                                                      Value="_emptySkill"
+                                                     @bind-Text="_skillAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableSkills(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchSkills"
                                                      ValueChanged="AddUserSkill"
@@ -191,6 +192,7 @@
                                 <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({_selectedDataContext.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
                                     <MudAutocomplete T="CraftingTable"
                                                      Value="_emptyCraftingTable"
+                                                     @bind-Text="_craftingTableAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableCraftingTables(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchCraftingTables"
                                                      ValueChanged="AddUserCraftingTable"
@@ -664,6 +666,7 @@
                                     <MudSpacer/>
                                     <MudAutocomplete T="Recipe"
                                                      Value="_emptyRecipe"
+                                                     @bind-Text="_recipeAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableRecipes(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchRecipes"
                                                      ValueChanged="AddUserRecipe"
@@ -1003,6 +1006,9 @@
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
+    private string? _skillAutocompleteText;
+    private string? _recipeAutocompleteText;
+    private string? _craftingTableAutocompleteText;
     private string? _previousProfession;
 
     private ItemOrTag? _selectedTagToBuy;
@@ -1010,6 +1016,11 @@
 
     private ItemOrTag? _selectedItemToSell;
     private string _searchItemToSell = "";
+
+    private const int CalculateDebounceDelayMs = 200;
+    private readonly object _calculateDebounceLock = new();
+    private readonly SemaphoreSlim _calculateSemaphore = new(1, 1);
+    private CancellationTokenSource? _calculateDebounceCts;
 
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
 
@@ -1294,6 +1305,14 @@
 
     public void Dispose()
     {
+        lock (_calculateDebounceLock)
+        {
+            _calculateDebounceCts?.Cancel();
+            _calculateDebounceCts?.Dispose();
+            _calculateDebounceCts = null;
+        }
+
+        _calculateSemaphore.Dispose();
         ContextService.OnContextChanged -= OnContextChanged;
     }
 
@@ -1567,6 +1586,7 @@
         });
 
         _emptySkill = null;
+        _skillAutocompleteText = string.Empty;
 
         await Calculate();
     }
@@ -1596,6 +1616,7 @@
         });
 
         _emptyCraftingTable = null;
+        _craftingTableAutocompleteText = string.Empty;
 
         await Calculate();
     }
@@ -1625,6 +1646,7 @@
         });
 
         _emptyRecipe = null;
+        _recipeAutocompleteText = string.Empty;
 
         await Calculate();
     }
@@ -2085,7 +2107,57 @@
 
     private async Task Calculate()
     {
-        await PriceCalculatorService.Calculate(_selectedDataContext!);
-        StateHasChanged();
+        CancellationTokenSource debounceCts;
+        lock (_calculateDebounceLock)
+        {
+            _calculateDebounceCts?.Cancel();
+            _calculateDebounceCts?.Dispose();
+            _calculateDebounceCts = new CancellationTokenSource();
+            debounceCts = _calculateDebounceCts;
+        }
+
+        try
+        {
+            // Collapse burst clicks on skill/talent controls into a single recompute.
+            await Task.Delay(CalculateDebounceDelayMs, debounceCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        var semaphoreLocked = false;
+        try
+        {
+            await _calculateSemaphore.WaitAsync(debounceCts.Token);
+            semaphoreLocked = true;
+
+            if (debounceCts.IsCancellationRequested || _selectedDataContext is null)
+            {
+                return;
+            }
+
+            await PriceCalculatorService.Calculate(_selectedDataContext);
+
+            if (!debounceCts.IsCancellationRequested)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Newer calculate request superseded this one.
+        }
+        catch (ObjectDisposedException)
+        {
+            // Component is being disposed.
+        }
+        finally
+        {
+            if (semaphoreLocked)
+            {
+                _calculateSemaphore.Release();
+            }
+        }
     }
 }
