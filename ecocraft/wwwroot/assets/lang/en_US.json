@@ -129,7 +129,6 @@
             "Title": "Calories Cost Policy",
             "Lock": "Lock value for all players",
             "LockedValue": "Locked value",
-            "LockedHint": "Players cannot edit this value while lock is enabled.",
             "Min": "Min",
             "Default": "Default",
             "Max": "Max",

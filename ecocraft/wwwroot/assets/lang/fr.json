@@ -123,7 +123,6 @@
             "Title": "Politique de cout des calories",
             "Lock": "Verrouiller la valeur pour tous les joueurs",
             "LockedValue": "Valeur verrouillee",
-            "LockedHint": "Les joueurs ne peuvent pas modifier cette valeur quand le verrou est actif.",
             "Min": "Min",
             "Default": "Defaut",
             "Max": "Max",
@@ -343,7 +342,12 @@
         },
         "CalorieCost": {
             "Tooltip": "Le coût de la nourriture que vous mangez, pour 1000 calories dépensées dans un métier. Si vous n'achetez que des salades qui apportent 700cal pour 5$, alors le coût pour 1000 calories est de 1000 * 5 / 700 = 7,14$",
-            "CalorieCost": "Coût pour 1000 calories"
+            "CalorieCost": "Coût pour 1000 calories",
+            "LockedTooltip": "Cette valeur est verrouillee par l'administrateur du serveur.",
+            "LockedSummary": "Verrouille par l'administrateur du serveur : {value}",
+            "BoundariesSummary": "Bornes du serveur : min {min} / defaut {default} / max {max}",
+            "LockedSnackbar": "Cette valeur est verrouillee par l'administrateur du serveur.",
+            "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
         },
         "ItemsToBuy": "Articles à acheter",
         "IngredientSearch": "Ingrédients ou étiquettes",

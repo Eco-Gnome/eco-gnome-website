@@ -78,70 +78,6 @@
 							<MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => RefreshApiKey())"/>
 						</MudTooltip>
 					</MudStack>
-					<MudPaper Class="pa-3 mud-background">
-						<MudStack Spacing="2">
-							<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-								<MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Title")</MudText>
-								<MudSwitch T="bool"
-								           Color="Color.Warning"
-								           Value="_isCalorieCostLocked"
-								           ValueChanged="OnCalorieLockChangedAsync"
-								           Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Lock")"/>
-							</MudStack>
-
-							@if (_isCalorieCostLocked)
-							{
-								<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-									<MudNumericField T="decimal?"
-									                 Class="rectangle-input"
-									                 Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.LockedValue")"
-									                 Value="_lockedCalorieCost"
-									                 ValueChanged="OnLockedCalorieCostChanged"
-									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-									                 Variant="Variant.Outlined"
-									                 Adornment="Adornment.End"
-									                 AdornmentIcon="@Icons.Material.Filled.Clear"
-									                 OnAdornmentClick="ClearLockedCalorieCost"/>
-									<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.LockedHint")</MudText>
-								</MudStack>
-							}
-							else
-							{
-								<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-									<MudNumericField T="decimal?"
-									                 Class="rectangle-input"
-									                 Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Min")"
-									                 Value="_calorieCostMin"
-									                 ValueChanged="OnCalorieCostMinChanged"
-									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-									                 Variant="Variant.Outlined"
-									                 Adornment="Adornment.End"
-									                 AdornmentIcon="@Icons.Material.Filled.Clear"
-									                 OnAdornmentClick="ClearCalorieCostMin"/>
-									<MudNumericField T="decimal?"
-									                 Class="rectangle-input"
-									                 Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Default")"
-									                 Value="_calorieCostDefault"
-									                 ValueChanged="OnCalorieCostDefaultChanged"
-									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-									                 Variant="Variant.Outlined"
-									                 Adornment="Adornment.End"
-									                 AdornmentIcon="@Icons.Material.Filled.Clear"
-									                 OnAdornmentClick="ClearCalorieCostDefault"/>
-									<MudNumericField T="decimal?"
-									                 Class="rectangle-input"
-									                 Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Max")"
-									                 Value="_calorieCostMax"
-									                 ValueChanged="OnCalorieCostMaxChanged"
-									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-									                 Variant="Variant.Outlined"
-									                 Adornment="Adornment.End"
-									                 AdornmentIcon="@Icons.Material.Filled.Clear"
-									                 OnAdornmentClick="ClearCalorieCostMax"/>
-								</MudStack>
-							}
-						</MudStack>
-					</MudPaper>
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Start" Spacing="6">
 						<MudStack Spacing="0" Style="min-width: 220px">
 							@if (!_isLoadingData)
@@ -386,7 +322,7 @@
 				</MudTable>
 			</MudItem>
 			<MudItem lg="8" md="12">
-				<MudTable Items="@GetItems()" Filter="new Func<ItemOrTag, bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
+				<MudTable @key="_itemsTableRenderVersion" Items="@GetItemsWithCalorieCostPolicyRow()" Filter="new Func<ItemOrTag, bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
 					<HeaderContent>
 						<MudTh>
 							<MudStack Row AlignItems="AlignItems.Center">
@@ -431,42 +367,102 @@
 						</MudTh>
 					</HeaderContent>
 					<RowTemplate>
-						<MudTd>
-							<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
-						</MudTd>
-						<MudTd>
-							<MudNumericField T="decimal?"
-							                 Class="rectangle-input"
-							                 Disabled="@(context.IsTag)"
-							                 HideSpinButtons="@(context.IsTag)"
-							                 Value="context.MinPrice"
-							                 Format="F2"
-							                 Variant="Variant.Outlined"
-							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-							                 ValueChanged="@(value => OnMinValueChange(context, value))"/>
-						</MudTd>
-						<MudTd>
-							<MudNumericField T="decimal?"
-							                 Class="rectangle-input"
-							                 Disabled="@(context.IsTag)"
-							                 HideSpinButtons="@(context.IsTag)"
-							                 Value="context.DefaultPrice"
-							                 Format="F2"
-							                 Variant="Variant.Outlined"
-							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-							                 ValueChanged="@(value => OnDefaultValueChange(context, value))"/>
-						</MudTd>
-						<MudTd>
-							<MudNumericField T="decimal?"
-							                 Class="rectangle-input"
-							                 Disabled="@(context.IsTag)"
-							                 HideSpinButtons="@(context.IsTag)"
-							                 Value="context.MaxPrice"
-							                 Format="F2"
-							                 Variant="Variant.Outlined"
-							                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-							                 ValueChanged="@(value => OnMaxValueChange(context, value))"/>
-						</MudTd>
+						@if (IsCalorieCostPolicyRow(context))
+						{
+							<MudTd>
+								<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+									<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Title")</MudText>
+									<MudSwitch T="bool"
+									           Color="Color.Warning"
+									           Value="_isCalorieCostLocked"
+									           ValueChanged="OnCalorieLockChangedAsync"
+									           Label="@LocalizationService.GetTranslation("ServerManagement.CalorieCostPolicy.Lock")"/>
+								</MudStack>
+							</MudTd>
+							@if (_isCalorieCostLocked)
+							{
+								<MudTd></MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_lockedCalorieCost"
+									                 Format="F2"
+									                 ValueChanged="OnLockedCalorieCostChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd></MudTd>
+							}
+							else
+							{
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_calorieCostMin"
+									                 Format="F2"
+									                 ValueChanged="OnCalorieCostMinChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_calorieCostDefault"
+									                 Format="F2"
+									                 ValueChanged="OnCalorieCostDefaultChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_calorieCostMax"
+									                 Format="F2"
+									                 ValueChanged="OnCalorieCostMaxChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+							}
+						}
+						else
+						{
+							<MudTd>
+								<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+							</MudTd>
+							<MudTd>
+								<MudNumericField T="decimal?"
+								                 Class="rectangle-input"
+								                 Disabled="@(context.IsTag)"
+								                 HideSpinButtons="@(context.IsTag)"
+								                 Value="context.MinPrice"
+								                 Format="F2"
+								                 Variant="Variant.Outlined"
+								                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+								                 ValueChanged="@(value => OnMinValueChange(context, value))"/>
+							</MudTd>
+							<MudTd>
+								<MudNumericField T="decimal?"
+								                 Class="rectangle-input"
+								                 Disabled="@(context.IsTag)"
+								                 HideSpinButtons="@(context.IsTag)"
+								                 Value="context.DefaultPrice"
+								                 Format="F2"
+								                 Variant="Variant.Outlined"
+								                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+								                 ValueChanged="@(value => OnDefaultValueChange(context, value))"/>
+							</MudTd>
+							<MudTd>
+								<MudNumericField T="decimal?"
+								                 Class="rectangle-input"
+								                 Disabled="@(context.IsTag)"
+								                 HideSpinButtons="@(context.IsTag)"
+								                 Value="context.MaxPrice"
+								                 Format="F2"
+								                 Variant="Variant.Outlined"
+								                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+								                 ValueChanged="@(value => OnMaxValueChange(context, value))"/>
+							</MudTd>
+						}
 					</RowTemplate>
 					<PagerContent>
 						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
@@ -492,9 +488,15 @@
 	private string _searchPseudo = "";
 	private string _searchTag = "";
 	private string _searchItem = "";
+	private int _itemsTableRenderVersion;
 	private Server? _copyServer;
 	private ItemOrTag? _selectedTag;
 	private List<(string, decimal)> _stats = [];
+	private readonly ItemOrTag _calorieCostPolicyRow = new()
+	{
+		Name = "__calorie_cost_policy_row__",
+		IsTag = true
+	};
 
 	protected override void OnInitialized()
 	{
@@ -610,7 +612,7 @@
 
 		if (_isCalorieCostLocked && _lockedCalorieCost is null)
 		{
-			_lockedCalorieCost = _calorieCostDefault ?? _calorieCostMin ?? _calorieCostMax ?? 0;
+			_lockedCalorieCost = 0;
 		}
 
 		await PersistCalorieCostPolicy();
@@ -618,7 +620,7 @@
 
 	private async Task OnLockedCalorieCostChanged(decimal? value)
 	{
-		_lockedCalorieCost = value;
+		_lockedCalorieCost = _isCalorieCostLocked && value is null ? 0 : value;
 		await PersistCalorieCostPolicy();
 	}
 
@@ -640,26 +642,6 @@
 		await PersistCalorieCostPolicy();
 	}
 
-	private Task ClearLockedCalorieCost()
-	{
-		return OnLockedCalorieCostChanged(null);
-	}
-
-	private Task ClearCalorieCostMin()
-	{
-		return OnCalorieCostMinChanged(null);
-	}
-
-	private Task ClearCalorieCostDefault()
-	{
-		return OnCalorieCostDefaultChanged(null);
-	}
-
-	private Task ClearCalorieCostMax()
-	{
-		return OnCalorieCostMaxChanged(null);
-	}
-
 	private async Task PersistCalorieCostPolicy()
 	{
 		var currentServer = ContextService.CurrentServer;
@@ -668,10 +650,10 @@
 			return;
 		}
 
-		// Keep lock meaningful when enabled, even if the input was cleared.
+		// With lock enabled, an empty locked value falls back to 0.
 		if (_isCalorieCostLocked && _lockedCalorieCost is null)
 		{
-			_lockedCalorieCost = _calorieCostDefault ?? _calorieCostMin ?? _calorieCostMax ?? 0;
+			_lockedCalorieCost = 0;
 		}
 
 		currentServer.IsCalorieCostLocked = _isCalorieCostLocked;
@@ -739,6 +721,18 @@
 	{
 		return ContextService.CurrentServerData!.ItemOrTags.Where(e => !e.IsTag)
 			.OrderBy(iot => LocalizationService.GetTranslation(iot)).ToList();
+	}
+
+	private List<ItemOrTag> GetItemsWithCalorieCostPolicyRow()
+	{
+		var items = GetItems();
+		items.Insert(0, _calorieCostPolicyRow);
+		return items;
+	}
+
+	private bool IsCalorieCostPolicyRow(ItemOrTag itemOrTag)
+	{
+		return ReferenceEquals(itemOrTag, _calorieCostPolicyRow);
 	}
 
 	private void ToggleTag(ItemOrTag tag)
@@ -911,6 +905,12 @@
 
 			return Task.CompletedTask;
 		});
+
+		// Keep the policy row in sync with the Min column clear action.
+		_calorieCostMin = null;
+		await PersistCalorieCostPolicy();
+		await RefreshCurrentServerDataAndStats();
+		await RefreshItemsTableAsync();
 	}
 
 	private async Task OnClearDefaultPrices(List<ItemOrTag> itemOrTags)
@@ -928,6 +928,20 @@
 
 			return Task.CompletedTask;
 		});
+
+		// In lock mode, the Default column shows the locked value.
+		if (_isCalorieCostLocked)
+		{
+			_lockedCalorieCost = null;
+		}
+		else
+		{
+			_calorieCostDefault = null;
+		}
+
+		await PersistCalorieCostPolicy();
+		await RefreshCurrentServerDataAndStats();
+		await RefreshItemsTableAsync();
 	}
 
 	private async Task CopyToClipboard(string text)
@@ -951,6 +965,18 @@
 
 			return Task.CompletedTask;
 		});
+
+		// Keep the policy row in sync with the Max column clear action.
+		_calorieCostMax = null;
+		await PersistCalorieCostPolicy();
+		await RefreshCurrentServerDataAndStats();
+		await RefreshItemsTableAsync();
+	}
+
+	private async Task RefreshItemsTableAsync()
+	{
+		_itemsTableRenderVersion++;
+		await InvokeAsync(StateHasChanged);
 	}
 
 	private async Task OnServerNameChanged(UserServer userServer, string newServerName)
@@ -1048,6 +1074,9 @@
 
 	private bool FilterItem(ItemOrTag itemOrTag)
 	{
+		if (IsCalorieCostPolicyRow(itemOrTag))
+			return true;
+
 		return FilterItemOrTag(itemOrTag, _searchItem, _selectedTag);
 	}
 

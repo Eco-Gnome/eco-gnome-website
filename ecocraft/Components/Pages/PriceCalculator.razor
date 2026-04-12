@@ -398,6 +398,7 @@
                                                 <MudSelect T="MarginType"
                                                            Class="select-dense very-dense"
                                                            Value="_selectedDataContext.UserSettings.First().MarginType"
+                                                           Style="width: 100px"
                                                            Variant="Variant.Outlined"
                                                            ValueChanged="OnOptionMarginTypeChanged">
                                                     <MudSelectItem Value="@MarginType.MarkUp">@LocalizationService.GetTranslation("PriceCalculator.MarginType.MarkUp")</MudSelectItem>
@@ -410,25 +411,23 @@
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CalorieCost.CalorieCost")</MudText>
                                             </MudTooltip>
                                             <div>
-                                                <MudNumericField T="decimal"
-                                                                 ValueChanged="UpdateCalorieCost"
-                                                                 Class="@GetCalorieCostInputClass()"
-                                                                 Style="height: 35px; width: 100px"
-                                                                 Value="_selectedDataContext.UserSettings.First().CalorieCost"
-                                                                 Disabled="IsServerCalorieCostLocked"
-                                                                 HideSpinButtons="IsServerCalorieCostLocked"
-                                                                 Min="GetCalorieCostInputMin()"
-                                                                 Max="GetCalorieCostInputMax()"
-                                                                 Adornment="@(IsServerCalorieCostLocked ? Adornment.End : Adornment.None)"
-                                                                 AdornmentIcon="@Icons.Material.Filled.Lock"
-                                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                                 Variant="Variant.Outlined"/>
+                                                <MudTooltip Disabled="@(!ShouldShowCalorieCostPolicyIndicator())" Text="@GetCalorieCostPolicyIndicatorTooltip()">
+                                                    <MudNumericField T="decimal"
+                                                                     ValueChanged="UpdateCalorieCost"
+                                                                     Class="@GetCalorieCostInputClass()"
+                                                                     Value="_selectedDataContext.UserSettings.First().CalorieCost"
+                                                                     Disabled="IsServerCalorieCostLocked"
+                                                                     HideSpinButtons="IsServerCalorieCostLocked"
+                                                                     Min="GetCalorieCostInputMin()"
+                                                                     Max="GetCalorieCostInputMax()"
+                                                                     Adornment="@(ShouldShowCalorieCostPolicyIndicator() ? Adornment.End : Adornment.None)"
+                                                                     AdornmentIcon="@GetCalorieCostPolicyIndicatorIcon()"
+                                                                     AdornmentColor="@(ShouldShowCalorieCostPolicyIndicator() ? Color.Warning : Color.Default)"
+                                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                                     Variant="Variant.Outlined"/>
+                                                </MudTooltip>
                                             </div>
                                         </MudStack>
-                                        @if (!string.IsNullOrWhiteSpace(GetCalorieCostPolicySummary()))
-                                        {
-                                            <MudText Typo="Typo.caption" Color="Color.Warning">@GetCalorieCostPolicySummary()</MudText>
-                                        }
                                     </MudStack>
                                 </MudExpansionPanel>
                             </MudExpansionPanels>
@@ -1058,12 +1057,27 @@
         await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
 
         ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+        SyncCurrentServerCaloriePolicyFromServerData();
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         await EnforceServerCaloriePolicyIfNeeded();
         _isLoadingData = false;
 
         await Calculate();
         StateHasChanged();
+    }
+
+    private void SyncCurrentServerCaloriePolicyFromServerData()
+    {
+        if (ContextService.CurrentServer is null || ContextService.CurrentServerData is null)
+        {
+            return;
+        }
+
+        ContextService.CurrentServer.IsCalorieCostLocked = ContextService.CurrentServerData.IsCalorieCostLocked;
+        ContextService.CurrentServer.LockedCalorieCost = ContextService.CurrentServerData.LockedCalorieCost;
+        ContextService.CurrentServer.CalorieCostMin = ContextService.CurrentServerData.CalorieCostMin;
+        ContextService.CurrentServer.CalorieCostDefault = ContextService.CurrentServerData.CalorieCostDefault;
+        ContextService.CurrentServer.CalorieCostMax = ContextService.CurrentServerData.CalorieCostMax;
     }
 
     private string GetCalorieCostTooltip()
@@ -1076,6 +1090,39 @@
         return LocalizationService.GetTranslation("PriceCalculator.CalorieCost.Tooltip");
     }
 
+    private bool ShouldShowCalorieCostPolicyIndicator()
+    {
+        return IsServerCalorieCostLocked || IsCalorieCostAtMin() || IsCalorieCostAtMax();
+    }
+
+    private string GetCalorieCostPolicyIndicatorTooltip()
+    {
+        if (IsServerCalorieCostLocked)
+        {
+            var summary = GetCalorieCostPolicySummary();
+            return string.IsNullOrWhiteSpace(summary)
+                ? LocalizationService.GetTranslation("PriceCalculator.CalorieCost.LockedTooltip")
+                : summary;
+        }
+
+        if (IsCalorieCostAtMin())
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice");
+        }
+
+        if (IsCalorieCostAtMax())
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice");
+        }
+
+        return string.Empty;
+    }
+
+    private string GetCalorieCostPolicyIndicatorIcon()
+    {
+        return IsServerCalorieCostLocked ? Icons.Material.Filled.Lock : MDIIcons.Outline.Information;
+    }
+
     private string GetCalorieCostPolicySummary()
     {
         if (ContextService.CurrentServer is null)
@@ -1083,11 +1130,11 @@
             return string.Empty;
         }
 
-        if (IsServerCalorieCostLocked && ContextService.CurrentServer.LockedCalorieCost is not null)
+        if (IsServerCalorieCostLocked)
         {
             return LocalizationService.GetTranslation(
                 "PriceCalculator.CalorieCost.LockedSummary",
-                ContextService.CurrentServer.LockedCalorieCost.Value.ToString("0.##"));
+                (ContextService.CurrentServer.LockedCalorieCost ?? 0).ToString("0.##"));
         }
 
         var min = ContextService.CurrentServer.CalorieCostMin;
@@ -1174,20 +1221,27 @@
             return;
         }
 
-        if (!ContextService.CurrentServer.IsCalorieCostLocked || ContextService.CurrentServer.LockedCalorieCost is null)
-        {
-            return;
-        }
-
         var userSetting = _selectedDataContext.UserSettings.First();
-        var lockedCalorieCost = ContextService.CurrentServer.LockedCalorieCost.Value;
-
-        if (userSetting.CalorieCost == lockedCalorieCost)
+        if (ContextService.CurrentServer.IsCalorieCostLocked)
         {
-            return;
-        }
+            var lockedCalorieCost = ContextService.CurrentServer.LockedCalorieCost ?? 0;
+            if (userSetting.CalorieCost == lockedCalorieCost)
+            {
+                return;
+            }
 
-        userSetting.CalorieCost = lockedCalorieCost;
+            userSetting.CalorieCost = lockedCalorieCost;
+        }
+        else
+        {
+            var boundedCalorieCost = ApplyCalorieCostBounds(userSetting.CalorieCost, out var wasAdjusted);
+            if (!wasAdjusted)
+            {
+                return;
+            }
+
+            userSetting.CalorieCost = boundedCalorieCost;
+        }
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
