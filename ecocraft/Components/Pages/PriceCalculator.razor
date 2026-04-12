@@ -423,7 +423,7 @@
                                                                      Value="_selectedDataContext.UserSettings.First().CalorieCost"
                                                                      Disabled="IsServerCalorieCostLocked"
                                                                      HideSpinButtons="IsServerCalorieCostLocked"
-                                                                     Step="0.01m"
+                                                                     Step="1m"
                                                                      Format="0.##"
                                                                      Culture="CultureInfo.CurrentUICulture"
                                                                      Min="GetCalorieCostInputMin()"
@@ -1017,11 +1017,6 @@
     private ItemOrTag? _selectedItemToSell;
     private string _searchItemToSell = "";
 
-    private const int CalculateDebounceDelayMs = 200;
-    private readonly object _calculateDebounceLock = new();
-    private readonly SemaphoreSlim _calculateSemaphore = new(1, 1);
-    private CancellationTokenSource? _calculateDebounceCts;
-
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
 
     protected override void OnInitialized()
@@ -1305,14 +1300,6 @@
 
     public void Dispose()
     {
-        lock (_calculateDebounceLock)
-        {
-            _calculateDebounceCts?.Cancel();
-            _calculateDebounceCts?.Dispose();
-            _calculateDebounceCts = null;
-        }
-
-        _calculateSemaphore.Dispose();
         ContextService.OnContextChanged -= OnContextChanged;
     }
 
@@ -2107,57 +2094,7 @@
 
     private async Task Calculate()
     {
-        CancellationTokenSource debounceCts;
-        lock (_calculateDebounceLock)
-        {
-            _calculateDebounceCts?.Cancel();
-            _calculateDebounceCts?.Dispose();
-            _calculateDebounceCts = new CancellationTokenSource();
-            debounceCts = _calculateDebounceCts;
-        }
-
-        try
-        {
-            // Collapse burst clicks on skill/talent controls into a single recompute.
-            await Task.Delay(CalculateDebounceDelayMs, debounceCts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-
-        var semaphoreLocked = false;
-        try
-        {
-            await _calculateSemaphore.WaitAsync(debounceCts.Token);
-            semaphoreLocked = true;
-
-            if (debounceCts.IsCancellationRequested || _selectedDataContext is null)
-            {
-                return;
-            }
-
-            await PriceCalculatorService.Calculate(_selectedDataContext);
-
-            if (!debounceCts.IsCancellationRequested)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Newer calculate request superseded this one.
-        }
-        catch (ObjectDisposedException)
-        {
-            // Component is being disposed.
-        }
-        finally
-        {
-            if (semaphoreLocked)
-            {
-                _calculateSemaphore.Release();
-            }
-        }
+        await PriceCalculatorService.Calculate(_selectedDataContext!);
+        StateHasChanged();
     }
 }
