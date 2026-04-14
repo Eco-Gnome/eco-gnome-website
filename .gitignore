@@ -386,3 +386,4 @@ FodyWeavers.xsd
 
 # Docker
 /pgdata
+/dumps

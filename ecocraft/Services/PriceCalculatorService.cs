@@ -58,6 +58,11 @@ public class PriceCalculatorService(
     {
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
+            // Heal any missing UserPrices before calculating. Can happen when server data
+            // updates add new products/ingredients to existing recipes, or after partial
+            // failures in AddUserElementIfNotExists.
+            EnsureUserPricesExist(context, dataContext);
+
             // Reset Prices
             var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
 
@@ -212,6 +217,40 @@ public class PriceCalculatorService(
 
             return Task.CompletedTask;
         });
+    }
+
+    private void EnsureUserPricesExist(EcoCraftDbContext context, DataContext dataContext)
+    {
+        var userMargin = dataContext.UserMargins.FirstOrDefault();
+        if (userMargin is null) return;
+
+        var itemOrTags = dataContext.UserRecipes
+            .SelectMany(ur => ur.Recipe.Elements)
+            .SelectMany(e => e.ItemOrTag.GetAssociatedItemsAndSelf())
+            .Distinct()
+            .ToList();
+
+        foreach (var itemOrTag in itemOrTags)
+        {
+            if (itemOrTag.GetCurrentUserPrice(dataContext) is not null) continue;
+
+            var userPrice = new UserPrice
+            {
+                ItemOrTag = itemOrTag,
+                ItemOrTagId = itemOrTag.Id,
+                DataContext = dataContext,
+                DataContextId = dataContext.Id,
+                UserMargin = userMargin,
+                UserMarginId = userMargin.Id,
+                OverrideIsBought = false,
+                Price = itemOrTag.DefaultPrice ?? itemOrTag.MinPrice,
+            };
+
+            userPriceDbService.Create(context, userPrice);
+            dataContext.UserPrices.Add(userPrice);
+            itemOrTag.UserPrices.Add(userPrice);
+            userMargin.UserPrices.Add(userPrice);
+        }
     }
 
     private void SetPriceOrMarginPrice(EcoCraftDbContext context, DataContext dataContext, UserElement ingredient, UserPrice userPrice, UserRecipe userRecipe)
