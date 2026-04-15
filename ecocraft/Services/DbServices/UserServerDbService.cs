@@ -29,6 +29,12 @@ public class UserServerDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 			.FirstOrDefaultAsync(us => us.Id == id);
 	}
 
+	public async Task<int> CountByServerIdAsync(Guid serverId)
+	{
+		await using var context = await factory.CreateDbContextAsync();
+		return await context.UserServers.CountAsync(us => us.ServerId == serverId);
+	}
+
 	private UserServer CloneForDb(UserServer userServer)
 	{
 		return new UserServer

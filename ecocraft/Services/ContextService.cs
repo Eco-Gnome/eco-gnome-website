@@ -267,8 +267,9 @@ public class ContextService(
 	public async Task LeaveServer(UserServer userServerToLeave)
     {
         var server = userServerToLeave.Server;
-        var shouldDeleteServer = server.UserServers.Count <= 1;
         var serverId = server.Id;
+        var remainingMembers = await userServerDbService.CountByServerIdAsync(serverId);
+        var shouldDeleteServer = remainingMembers <= 1;
 
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
@@ -295,8 +296,9 @@ public class ContextService(
 	public async Task KickFromServer(UserServer userServerToKick)
 	{
         var server = userServerToKick.Server;
-        var shouldDeleteServer = server.UserServers.Count <= 1;
         var serverId = server.Id;
+        var remainingMembers = await userServerDbService.CountByServerIdAsync(serverId);
+        var shouldDeleteServer = remainingMembers <= 1;
 
         await EcoCraftDbContext.ContextSaveAsync(factory, context =>
         {
