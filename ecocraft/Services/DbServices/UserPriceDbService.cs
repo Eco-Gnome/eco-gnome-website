@@ -127,7 +127,6 @@ public class UserPriceDbService(IDbContextFactory<EcoCraftDbContext> factory) : 
 
 	public void Destroy(EcoCraftDbContext context, UserPrice userPrice)
 	{
-		var entity = new UserPrice { Id = userPrice.Id };
-		context.Entry(entity).State = EntityState.Deleted;
+		context.QueueDelete<UserPrice>(userPrice.Id);
 	}
 }

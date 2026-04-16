@@ -53,6 +53,15 @@ public class UserServerDataService(
             RemoveUserRecipe(context, userRecipe);
         }
 
+        // Remove UserTalents tied to this skill (no DB cascade: UserTalent FKs DataContext/Talent, not UserSkill)
+        if (userSkill.Skill is not null)
+        {
+            foreach (var userTalent in userSkill.DataContext.UserTalents.Where(ut => ut.Talent.SkillId == userSkill.Skill.Id).ToList())
+            {
+                RemoveUserTalent(context, userTalent);
+            }
+        }
+
         userSkillDbService.Destroy(context, userSkill);
         userSkill.DataContext.UserSkills.Remove(userSkill);
         userSkill.Skill?.UserSkills.Remove(userSkill);
@@ -263,7 +272,11 @@ public class UserServerDataService(
 
         if (removeCraftingTables && userRecipe.DataContext.UserRecipes.All(ur => ur.Recipe.CraftingTable != userRecipe.Recipe.CraftingTable))
         {
-            RemoveUserCraftingTable(context, userRecipe.DataContext, userRecipe.DataContext.UserCraftingTables.First(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable));
+            var orphanUserCraftingTable = userRecipe.DataContext.UserCraftingTables.FirstOrDefault(uct => uct.CraftingTable == userRecipe.Recipe.CraftingTable);
+            if (orphanUserCraftingTable is not null)
+            {
+                RemoveUserCraftingTable(context, userRecipe.DataContext, orphanUserCraftingTable);
+            }
         }
     }
 
@@ -300,7 +313,9 @@ public class UserServerDataService(
 
     private void RemoveUserElement(EcoCraftDbContext context, UserElement userElement)
     {
-        // Remove any existing PrimaryUserPrice
+        // Clear any UserPrice pointing to this UserElement as its primary element first, so the
+        // DB-level UserPrice → PrimaryUserElement cascade doesn't fire when the UserElement
+        // row disappears.
         foreach (var userPrice in userElement.UserPricesPrimaryOf)
         {
             userPrice.PrimaryUserElement = null;

@@ -73,7 +73,6 @@ public class UserTalentDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
 	public void Destroy(EcoCraftDbContext context, UserTalent userTalent)
 	{
-		var entity = new UserTalent { Id = userTalent.Id };
-		context.Entry(entity).State = EntityState.Deleted;
+		context.QueueDelete<UserTalent>(userTalent.Id);
 	}
 }

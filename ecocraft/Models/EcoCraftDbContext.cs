@@ -4,6 +4,24 @@ namespace ecocraft.Models;
 
 public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : DbContext(options)
 {
+	// Deletes collected during an action and flushed via ExecuteDelete after SaveChanges.
+	// This bypasses EF's change tracker for deletes entirely, which avoids the cascade
+	// ordering problem: stub-based tracker deletes have no navigation info, so EF can't
+	// sequence DELETEs around DB-level Cascade FKs, and redundant DELETEs throw
+	// DbUpdateConcurrencyException on 0 rows affected. ExecuteDelete issues one SQL
+	// DELETE per type, lets the DB handle cascades, and doesn't care about 0 rows.
+	private readonly Dictionary<Type, HashSet<Guid>> _pendingDeletes = new();
+
+	public void QueueDelete<T>(Guid id) where T : class
+	{
+		if (!_pendingDeletes.TryGetValue(typeof(T), out var ids))
+		{
+			ids = new HashSet<Guid>();
+			_pendingDeletes[typeof(T)] = ids;
+		}
+		ids.Add(id);
+	}
+
 	public static async Task ContextSaveAsync(IDbContextFactory<EcoCraftDbContext> factory, Func<EcoCraftDbContext, Task> action)
 	{
 		await using var ctx = await factory.CreateDbContextAsync();
@@ -11,8 +29,45 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 
 		await action(ctx);
 
+		// Apply INSERTs and UPDATEs via the tracker (safe — no cascade conflicts possible).
 		await ctx.SaveChangesAsync();
+
+		// Apply DELETEs via direct SQL — no tracker, no batch ordering issues.
+		await ctx.FlushPendingDeletesAsync();
+
 		await tx.CommitAsync();
+	}
+
+	private async Task FlushPendingDeletesAsync()
+	{
+		foreach (var (type, ids) in _pendingDeletes)
+		{
+			if (ids.Count == 0) continue;
+			await DispatchDeleteAsync(type, ids);
+		}
+		_pendingDeletes.Clear();
+	}
+
+	// Explicit type dispatch — keeps the mapping visible and avoids reflection. Extend when
+	// a new User* entity joins the codebase.
+	private async Task DispatchDeleteAsync(Type type, HashSet<Guid> ids)
+	{
+		if (type == typeof(UserSkill))
+			await UserSkills.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserTalent))
+			await UserTalents.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserRecipe))
+			await UserRecipes.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserCraftingTable))
+			await UserCraftingTables.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserElement))
+			await UserElements.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserPrice))
+			await UserPrices.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserMargin))
+			await UserMargins.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else
+			throw new InvalidOperationException($"No QueueDelete handler registered for {type.Name}. Add it to DispatchDeleteAsync.");
 	}
 
 	public static async Task ContextGetAsync(IDbContextFactory<EcoCraftDbContext> factory, Func<EcoCraftDbContext, Task> action)

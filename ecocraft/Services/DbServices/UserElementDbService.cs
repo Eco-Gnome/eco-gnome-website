@@ -114,7 +114,6 @@ public class UserElementDbService(IDbContextFactory<EcoCraftDbContext> factory) 
 
 	public void Destroy(EcoCraftDbContext context, UserElement userElement)
 	{
-		var entity = new UserElement { Id = userElement.Id };
-		context.Entry(entity).State = EntityState.Deleted;
+		context.QueueDelete<UserElement>(userElement.Id);
 	}
 }

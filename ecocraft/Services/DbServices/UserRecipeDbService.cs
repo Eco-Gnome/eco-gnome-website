@@ -94,7 +94,6 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
     public void Destroy(EcoCraftDbContext context, UserRecipe userRecipe)
     {
-        var entity = new UserRecipe { Id = userRecipe.Id };
-        context.Entry(entity).State = EntityState.Deleted;
+        context.QueueDelete<UserRecipe>(userRecipe.Id);
     }
 }

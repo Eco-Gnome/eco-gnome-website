@@ -65,7 +65,6 @@ public class UserMarginDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
 	public void Destroy(EcoCraftDbContext context, UserMargin userMargin)
 	{
-		var entity = new UserMargin { Id = userMargin.Id };
-		context.Entry(entity).State = EntityState.Deleted;
+		context.QueueDelete<UserMargin>(userMargin.Id);
 	}
 }

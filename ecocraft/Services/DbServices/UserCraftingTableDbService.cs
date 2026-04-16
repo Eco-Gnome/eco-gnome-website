@@ -108,7 +108,6 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 
 	public void Destroy(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
 	{
-		var entity = new UserCraftingTable { Id = userCraftingTable.Id };
-		context.Entry(entity).State = EntityState.Deleted;
+		context.QueueDelete<UserCraftingTable>(userCraftingTable.Id);
 	}
 }

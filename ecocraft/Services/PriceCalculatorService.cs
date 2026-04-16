@@ -174,7 +174,11 @@ public class PriceCalculatorService(
                     // We add the labor cost
                     ingredientCostSum += userRecipe.Recipe.Labor.GetDynamicValue(dataContext) * dataContext.UserSettings.First().CalorieCost / 1000;
                     // We add the craft minute fee
-                    ingredientCostSum += userRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(dataContext)!.CraftMinuteFee * userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext);
+                    var currentUserCraftingTable = userRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(dataContext);
+                    if (currentUserCraftingTable is not null)
+                    {
+                        ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext);
+                    }
 
                     foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
                     {
