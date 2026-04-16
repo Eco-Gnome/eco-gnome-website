@@ -615,18 +615,26 @@
             return;
         }
 
-        var seenParentIds = new HashSet<Guid>();
-        var parentRecipesSnapshot = new List<UserRecipe>();
+        var processedParentIds = new HashSet<Guid>();
+        var queuedParentIds = new HashSet<Guid>();
+        var queue = new Queue<UserRecipe>();
+
         foreach (var parentRecipe in parentRecipes)
         {
-            if (seenParentIds.Add(parentRecipe.Id))
+            if (queuedParentIds.Add(parentRecipe.Id))
             {
-                parentRecipesSnapshot.Add(parentRecipe);
+                queue.Enqueue(parentRecipe);
             }
         }
 
-        foreach (var parentRecipe in parentRecipesSnapshot)
+        while (queue.Count > 0)
         {
+            var parentRecipe = queue.Dequeue();
+            if (!processedParentIds.Add(parentRecipe.Id))
+            {
+                continue;
+            }
+
             foreach (var ingredient in parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()))
             {
                 var requiredQuantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
@@ -643,7 +651,17 @@
                     continue;
                 }
 
-                await AddChildRecipeCore(context, parentRecipe, ingredient, requiredQuantity, chosenRecipe);
+                var missingQuantity = requiredQuantity - producedQuantity;
+                if (missingQuantity <= 0)
+                {
+                    continue;
+                }
+
+                var createdRecipe = await AddChildRecipeCore(context, parentRecipe, ingredient, missingQuantity, chosenRecipe);
+                if (queuedParentIds.Add(createdRecipe.Id))
+                {
+                    queue.Enqueue(createdRecipe);
+                }
             }
         }
     }
