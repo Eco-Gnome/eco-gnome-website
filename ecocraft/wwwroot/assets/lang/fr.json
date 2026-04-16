@@ -135,6 +135,18 @@
                 "SaveError": "Impossible de sauvegarder la politique de cout des calories"
             }
         },
+        "MarginPolicy": {
+            "Title": "Politique de marge",
+            "Lock": "Verrouiller la valeur pour tous les joueurs",
+            "LockedValue": "Valeur verrouillee",
+            "Min": "Min",
+            "Default": "Defaut",
+            "Max": "Max",
+            "Save": "Enregistrer la politique",
+            "Snackbar": {
+                "SaveError": "Impossible de sauvegarder la politique de marge"
+            }
+        },
         "ModUploadLimitToServer": "Limite à mon serveur",
         "Confirm": {
             "ClearAllMax": "Êtes-vous sûr de vouloir supprimer tous les prix maximums ?",
@@ -209,7 +221,9 @@
         "NameLabel": "Nom de la liste de course",
         "ConfirmDeleteShoppingList": "Êtes vous sur de vouloir supprimer la liste de course {name} ?",
         "Skills": "Configuration des métiers",
-        "CraftingTables": "Configuration des Tables d'artisanat"
+        "CraftingTables": "Configuration des Tables d'artisanat",
+        "RememberRecipeChoiceLabel": "Réutiliser automatiquement le choix déjà présent",
+        "RememberRecipeChoiceTooltip": "Si activé, utilise automatiquement la recette déjà choisie dans cette liste pour le même objet. Si aucun choix unique n'existe, la sélection reste manuelle."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",
@@ -346,6 +360,13 @@
             "LockedTooltip": "Cette valeur est verrouillee par l'administrateur du serveur.",
             "LockedSummary": "Verrouille par l'administrateur du serveur : {value}",
             "BoundariesSummary": "Bornes du serveur : min {min} / defaut {default} / max {max}",
+            "LockedSnackbar": "Cette valeur est verrouillee par l'administrateur du serveur.",
+            "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
+        },
+        "Margin": {
+            "LockedTooltip": "Cette valeur est verrouillee par l'administrateur du serveur.",
+            "LockedSummary": "Verrouille par l'administrateur du serveur : {value} %",
+            "BoundariesSummary": "Bornes du serveur : min {min} % / defaut {default} % / max {max} %",
             "LockedSnackbar": "Cette valeur est verrouillee par l'administrateur du serveur.",
             "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
         },

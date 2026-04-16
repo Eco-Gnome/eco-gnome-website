@@ -522,22 +522,37 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsCalorieCostLocked")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
+	                    b.Property<bool>("IsDefault")
+	                        .HasColumnType("boolean");
 
-                    b.Property<string>("JoinCode")
-                        .IsRequired()
-                        .HasColumnType("text");
+	                    b.Property<bool>("IsMarginLocked")
+	                        .HasColumnType("boolean");
 
-                    b.Property<decimal?>("LockedCalorieCost")
-                        .HasColumnType("numeric");
+	                    b.Property<string>("JoinCode")
+	                        .IsRequired()
+	                        .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("LastDataUploadTime")
-                        .HasColumnType("timestamp with time zone");
+	                    b.Property<decimal?>("LockedCalorieCost")
+	                        .HasColumnType("numeric");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+	                    b.Property<decimal?>("LockedMargin")
+	                        .HasColumnType("numeric");
+
+	                    b.Property<DateTimeOffset?>("LastDataUploadTime")
+	                        .HasColumnType("timestamp with time zone");
+
+	                    b.Property<decimal?>("MarginDefault")
+	                        .HasColumnType("numeric");
+
+	                    b.Property<decimal?>("MarginMax")
+	                        .HasColumnType("numeric");
+
+	                    b.Property<decimal?>("MarginMin")
+	                        .HasColumnType("numeric");
+
+	                    b.Property<string>("Name")
+	                        .IsRequired()
+	                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

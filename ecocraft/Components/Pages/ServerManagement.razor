@@ -325,7 +325,7 @@
 				</MudTable>
 			</MudItem>
 			<MudItem lg="8" md="12">
-				<MudTable @key="_itemsTableRenderVersion" Items="@GetItemsWithCalorieCostPolicyRow()" Filter="new Func<ItemOrTag, bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
+				<MudTable @key="_itemsTableRenderVersion" Items="@GetItemsWithPolicyRows()" Filter="new Func<ItemOrTag, bool>(FilterItem)" Virtualize="false" FixedHeader="true" Height="700px" Dense="true" Hover="true">
 					<HeaderContent>
 						<MudTh>
 							<MudStack Row AlignItems="AlignItems.Center">
@@ -427,6 +427,63 @@
 								</MudTd>
 							}
 						}
+						else if (IsMarginPolicyRow(context))
+						{
+							<MudTd>
+								<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+									<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("ServerManagement.MarginPolicy.Title")</MudText>
+									<MudSwitch T="bool"
+									           Color="Color.Warning"
+									           Value="_isMarginLocked"
+									           ValueChanged="OnMarginLockChangedAsync"
+									           Label="@LocalizationService.GetTranslation("ServerManagement.MarginPolicy.Lock")"/>
+								</MudStack>
+							</MudTd>
+							@if (_isMarginLocked)
+							{
+								<MudTd></MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_lockedMargin"
+									                 Format="F2"
+									                 ValueChanged="OnLockedMarginChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd></MudTd>
+							}
+							else
+							{
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_marginMin"
+									                 Format="F2"
+									                 ValueChanged="OnMarginMinChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_marginDefault"
+									                 Format="F2"
+									                 ValueChanged="OnMarginDefaultChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+								<MudTd>
+									<MudNumericField T="decimal?"
+									                 Class="rectangle-input"
+									                 Value="_marginMax"
+									                 Format="F2"
+									                 ValueChanged="OnMarginMaxChanged"
+									                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+									                 Variant="Variant.Outlined"/>
+								</MudTd>
+							}
+						}
 						else
 						{
 							<MudTd>
@@ -487,6 +544,11 @@
 	private decimal? _calorieCostMin;
 	private decimal? _calorieCostDefault;
 	private decimal? _calorieCostMax;
+	private bool _isMarginLocked;
+	private decimal? _lockedMargin;
+	private decimal? _marginMin;
+	private decimal? _marginDefault;
+	private decimal? _marginMax;
 	private readonly Dictionary<UserServer, bool> _askKickConfirmations = new ();
 	private string _searchPseudo = "";
 	private string _searchTag = "";
@@ -498,6 +560,11 @@
 	private readonly ItemOrTag _calorieCostPolicyRow = new()
 	{
 		Name = "__calorie_cost_policy_row__",
+		IsTag = true
+	};
+	private readonly ItemOrTag _marginPolicyRow = new()
+	{
+		Name = "__margin_policy_row__",
 		IsTag = true
 	};
 
@@ -549,10 +616,16 @@
 			ContextService.CurrentServer.CalorieCostMin = refreshedServer.CalorieCostMin;
 			ContextService.CurrentServer.CalorieCostDefault = refreshedServer.CalorieCostDefault;
 			ContextService.CurrentServer.CalorieCostMax = refreshedServer.CalorieCostMax;
+			ContextService.CurrentServer.IsMarginLocked = refreshedServer.IsMarginLocked;
+			ContextService.CurrentServer.LockedMargin = refreshedServer.LockedMargin;
+			ContextService.CurrentServer.MarginMin = refreshedServer.MarginMin;
+			ContextService.CurrentServer.MarginDefault = refreshedServer.MarginDefault;
+			ContextService.CurrentServer.MarginMax = refreshedServer.MarginMax;
 			ContextService.CurrentServer.LastDataUploadTime = refreshedServer.LastDataUploadTime;
 		}
 
 		LoadCalorieCostPolicyFromCurrentServer();
+		LoadMarginPolicyFromCurrentServer();
 
 		if (ContextService.CurrentServerData is null)
 		{
@@ -577,6 +650,15 @@
 		_calorieCostMin = ContextService.CurrentServer?.CalorieCostMin;
 		_calorieCostDefault = ContextService.CurrentServer?.CalorieCostDefault;
 		_calorieCostMax = ContextService.CurrentServer?.CalorieCostMax;
+	}
+
+	private void LoadMarginPolicyFromCurrentServer()
+	{
+		_isMarginLocked = ContextService.CurrentServer?.IsMarginLocked ?? false;
+		_lockedMargin = ContextService.CurrentServer?.LockedMargin;
+		_marginMin = ContextService.CurrentServer?.MarginMin;
+		_marginDefault = ContextService.CurrentServer?.MarginDefault;
+		_marginMax = ContextService.CurrentServer?.MarginMax;
 	}
 
 	private async Task RefreshCurrentServerDataAndStats()
@@ -701,6 +783,97 @@
 		}
 	}
 
+	private async Task OnMarginLockChangedAsync(bool value)
+	{
+		_isMarginLocked = value;
+
+		if (_isMarginLocked && _lockedMargin is null)
+		{
+			_lockedMargin = 0;
+		}
+
+		await PersistMarginPolicy();
+	}
+
+	private async Task OnLockedMarginChanged(decimal? value)
+	{
+		_lockedMargin = _isMarginLocked && value is null ? 0 : value;
+		await PersistMarginPolicy();
+	}
+
+	private async Task OnMarginMinChanged(decimal? value)
+	{
+		_marginMin = value;
+		await PersistMarginPolicy();
+	}
+
+	private async Task OnMarginDefaultChanged(decimal? value)
+	{
+		_marginDefault = value;
+		await PersistMarginPolicy();
+	}
+
+	private async Task OnMarginMaxChanged(decimal? value)
+	{
+		_marginMax = value;
+		await PersistMarginPolicy();
+	}
+
+	private async Task PersistMarginPolicy()
+	{
+		var currentServer = ContextService.CurrentServer;
+		if (currentServer is null)
+		{
+			return;
+		}
+
+		// With lock enabled, an empty locked value falls back to 0.
+		if (_isMarginLocked && _lockedMargin is null)
+		{
+			_lockedMargin = 0;
+		}
+
+		currentServer.IsMarginLocked = _isMarginLocked;
+		currentServer.LockedMargin = _lockedMargin;
+		currentServer.MarginMin = _marginMin;
+		currentServer.MarginDefault = _marginDefault;
+		currentServer.MarginMax = _marginMax;
+
+		try
+		{
+			await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+			{
+				ServerDbService.UpdateMarginPolicy(context, currentServer);
+
+				if (currentServer.IsMarginLocked && currentServer.LockedMargin is not null)
+				{
+					await context.UserMargins
+						.Where(um => um.DataContext.UserServer.ServerId == currentServer.Id)
+						.ExecuteUpdateAsync(s => s
+							.SetProperty(x => x.Margin, currentServer.LockedMargin.Value));
+				}
+			});
+
+			if (currentServer.IsMarginLocked && currentServer.LockedMargin is not null)
+			{
+				foreach (var userServer in currentServer.UserServers)
+				{
+					foreach (var dataContext in userServer.DataContexts)
+					{
+						foreach (var userMargin in dataContext.UserMargins)
+						{
+							userMargin.Margin = currentServer.LockedMargin.Value;
+						}
+					}
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.MarginPolicy.Snackbar.SaveError")}: {ex.Message}", Severity.Error);
+		}
+	}
+
 	private async Task CopyExistingServer()
 	{
 		if (_copyServer is null) return;
@@ -726,16 +899,22 @@
 			.OrderBy(iot => LocalizationService.GetTranslation(iot)).ToList();
 	}
 
-	private List<ItemOrTag> GetItemsWithCalorieCostPolicyRow()
+	private List<ItemOrTag> GetItemsWithPolicyRows()
 	{
 		var items = GetItems();
 		items.Insert(0, _calorieCostPolicyRow);
+		items.Insert(1, _marginPolicyRow);
 		return items;
 	}
 
 	private bool IsCalorieCostPolicyRow(ItemOrTag itemOrTag)
 	{
 		return ReferenceEquals(itemOrTag, _calorieCostPolicyRow);
+	}
+
+	private bool IsMarginPolicyRow(ItemOrTag itemOrTag)
+	{
+		return ReferenceEquals(itemOrTag, _marginPolicyRow);
 	}
 
 	private void ToggleTag(ItemOrTag tag)
@@ -911,7 +1090,9 @@
 
 		// Keep the policy row in sync with the Min column clear action.
 		_calorieCostMin = null;
+		_marginMin = null;
 		await PersistCalorieCostPolicy();
+		await PersistMarginPolicy();
 		await RefreshCurrentServerDataAndStats();
 		await RefreshItemsTableAsync();
 	}
@@ -942,7 +1123,17 @@
 			_calorieCostDefault = null;
 		}
 
+		if (_isMarginLocked)
+		{
+			_lockedMargin = null;
+		}
+		else
+		{
+			_marginDefault = null;
+		}
+
 		await PersistCalorieCostPolicy();
+		await PersistMarginPolicy();
 		await RefreshCurrentServerDataAndStats();
 		await RefreshItemsTableAsync();
 	}
@@ -971,7 +1162,9 @@
 
 		// Keep the policy row in sync with the Max column clear action.
 		_calorieCostMax = null;
+		_marginMax = null;
 		await PersistCalorieCostPolicy();
+		await PersistMarginPolicy();
 		await RefreshCurrentServerDataAndStats();
 		await RefreshItemsTableAsync();
 	}
@@ -1077,7 +1270,7 @@
 
 	private bool FilterItem(ItemOrTag itemOrTag)
 	{
-		if (IsCalorieCostPolicyRow(itemOrTag))
+		if (IsCalorieCostPolicyRow(itemOrTag) || IsMarginPolicyRow(itemOrTag))
 			return true;
 
 		return FilterItemOrTag(itemOrTag, _searchItem, _selectedTag);

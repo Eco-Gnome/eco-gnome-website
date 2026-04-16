@@ -332,16 +332,27 @@
                                                                   ValueChanged="@((string v) => UpdateMarginName(context, v))"/>
                                                 </MudTd>
                                                 <MudTd Class="py-1">
-                                                    <MudNumericField T="decimal"
-                                                                     Immediate
-                                                                     Class="rectangle-input"
-                                                                     Style="width: 93px"
-                                                                     Value="context.Margin"
-                                                                     Adornment="Adornment.End"
-                                                                     AdornmentText="% "
-                                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                                     ValueChanged="@(v => UpdateMargin(context, v))"
-                                                                     Variant="Variant.Outlined"/>
+                                                    <MudTooltip Disabled="@(!ShouldShowMarginPolicyIndicator(context))" Text="@GetMarginPolicyIndicatorTooltip(context)">
+                                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                                                            <MudNumericField T="decimal"
+                                                                             @key="GetMarginFieldRenderKey(context)"
+                                                                             Immediate
+                                                                             Class="@GetMarginInputClass(context)"
+                                                                             Style="width: 93px"
+                                                                             Value="@GetDisplayedMarginValue(context)"
+                                                                             Disabled="IsServerMarginLocked"
+                                                                             HideSpinButtons="IsServerMarginLocked"
+                                                                             Min="GetMarginInputMin()"
+                                                                             Max="GetMarginInputMax()"
+                                                                             Adornment="@(ShouldShowMarginPolicyIndicator(context) ? Adornment.End : Adornment.None)"
+                                                                             AdornmentIcon="@GetMarginPolicyIndicatorIcon()"
+                                                                             AdornmentColor="@(ShouldShowMarginPolicyIndicator(context) ? Color.Warning : Color.Default)"
+                                                                             Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                                             ValueChanged="@(v => UpdateMargin(context, v))"
+                                                                             Variant="Variant.Outlined"/>
+                                                            <MudText Class="ml-1">%</MudText>
+                                                        </MudStack>
+                                                    </MudTooltip>
                                                 </MudTd>
                                                 <MudTd Class="py-1" Style="text-align: right;">
                                                     <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.RemoveMargin")" Class="flex">
@@ -1005,6 +1016,7 @@
 
     private DataContext? _selectedDataContext;
     private bool IsServerCalorieCostLocked => ContextService.CurrentServer?.IsCalorieCostLocked ?? false;
+    private bool IsServerMarginLocked => ContextService.CurrentServer?.IsMarginLocked ?? false;
 
     private MudAutocomplete<Skill>? _skillAutocompleteRef;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
@@ -1075,8 +1087,10 @@
 
         ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
         SyncCurrentServerCaloriePolicyFromServerData();
+        SyncCurrentServerMarginPolicyFromServerData();
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         await EnforceServerCaloriePolicyIfNeeded();
+        await EnforceServerMarginPolicyIfNeeded();
         _isLoadingData = false;
 
         await Calculate();
@@ -1095,6 +1109,20 @@
         ContextService.CurrentServer.CalorieCostMin = ContextService.CurrentServerData.CalorieCostMin;
         ContextService.CurrentServer.CalorieCostDefault = ContextService.CurrentServerData.CalorieCostDefault;
         ContextService.CurrentServer.CalorieCostMax = ContextService.CurrentServerData.CalorieCostMax;
+    }
+
+    private void SyncCurrentServerMarginPolicyFromServerData()
+    {
+        if (ContextService.CurrentServer is null || ContextService.CurrentServerData is null)
+        {
+            return;
+        }
+
+        ContextService.CurrentServer.IsMarginLocked = ContextService.CurrentServerData.IsMarginLocked;
+        ContextService.CurrentServer.LockedMargin = ContextService.CurrentServerData.LockedMargin;
+        ContextService.CurrentServer.MarginMin = ContextService.CurrentServerData.MarginMin;
+        ContextService.CurrentServer.MarginDefault = ContextService.CurrentServerData.MarginDefault;
+        ContextService.CurrentServer.MarginMax = ContextService.CurrentServerData.MarginMax;
     }
 
     private string GetCalorieCostTooltip()
@@ -1200,11 +1228,21 @@
 
     private decimal GetCalorieCostInputMin()
     {
+        if (IsServerCalorieCostLocked)
+        {
+            return decimal.MinValue;
+        }
+
         return ContextService.CurrentServer?.CalorieCostMin ?? decimal.MinValue;
     }
 
     private decimal GetCalorieCostInputMax()
     {
+        if (IsServerCalorieCostLocked)
+        {
+            return decimal.MaxValue;
+        }
+
         return ContextService.CurrentServer?.CalorieCostMax ?? decimal.MaxValue;
     }
 
@@ -1263,6 +1301,207 @@
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             UserSettingDbService.UpdateAll(context, userSetting);
+            return Task.CompletedTask;
+        });
+    }
+
+    private bool ShouldShowMarginPolicyIndicator(UserMargin userMargin)
+    {
+        return IsServerMarginLocked || IsMarginAtMin(userMargin) || IsMarginAtMax(userMargin);
+    }
+
+    private string GetMarginPolicyIndicatorTooltip(UserMargin userMargin)
+    {
+        if (IsServerMarginLocked)
+        {
+            var summary = GetMarginPolicySummary();
+            return string.IsNullOrWhiteSpace(summary)
+                ? LocalizationService.GetTranslation("PriceCalculator.Margin.LockedTooltip")
+                : summary;
+        }
+
+        if (IsMarginAtMin(userMargin))
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice");
+        }
+
+        if (IsMarginAtMax(userMargin))
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice");
+        }
+
+        return string.Empty;
+    }
+
+    private string GetMarginPolicyIndicatorIcon()
+    {
+        return IsServerMarginLocked ? Icons.Material.Filled.Lock : MDIIcons.Outline.Information;
+    }
+
+    private decimal GetDisplayedMarginValue(UserMargin userMargin)
+    {
+        if (!IsServerMarginLocked)
+        {
+            return userMargin.Margin;
+        }
+
+        return ContextService.CurrentServer?.LockedMargin ?? userMargin.Margin;
+    }
+
+    private string GetMarginFieldRenderKey(UserMargin userMargin)
+    {
+        var server = ContextService.CurrentServer;
+        return $"margin-{userMargin.Id}-{IsServerMarginLocked}-{GetDisplayedMarginValue(userMargin).ToString(CultureInfo.InvariantCulture)}-{server?.LockedMargin?.ToString(CultureInfo.InvariantCulture)}-{server?.MarginMin?.ToString(CultureInfo.InvariantCulture)}-{server?.MarginMax?.ToString(CultureInfo.InvariantCulture)}";
+    }
+
+    private string GetMarginPolicySummary()
+    {
+        if (ContextService.CurrentServer is null)
+        {
+            return string.Empty;
+        }
+
+        if (IsServerMarginLocked)
+        {
+            return LocalizationService.GetTranslation(
+                "PriceCalculator.Margin.LockedSummary",
+                (ContextService.CurrentServer.LockedMargin ?? 0).ToString("0.##"));
+        }
+
+        var min = ContextService.CurrentServer.MarginMin;
+        var @default = ContextService.CurrentServer.MarginDefault;
+        var max = ContextService.CurrentServer.MarginMax;
+
+        if (min is null && @default is null && max is null)
+        {
+            return string.Empty;
+        }
+
+        return LocalizationService.GetTranslation(
+            "PriceCalculator.Margin.BoundariesSummary",
+            min?.ToString("0.##") ?? "-",
+            @default?.ToString("0.##") ?? "-",
+            max?.ToString("0.##") ?? "-");
+    }
+
+    private string GetMarginInputClass(UserMargin userMargin)
+    {
+        var isMinPrice = IsMarginAtMin(userMargin);
+        var isMaxPrice = IsMarginAtMax(userMargin);
+
+        return $"rectangle-input small-adornment {(IsServerMarginLocked ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}";
+    }
+
+    private bool IsMarginAtMin(UserMargin userMargin)
+    {
+        if (IsServerMarginLocked || ContextService.CurrentServer?.MarginMin is not decimal min)
+        {
+            return false;
+        }
+
+        return userMargin.Margin == min;
+    }
+
+    private bool IsMarginAtMax(UserMargin userMargin)
+    {
+        if (IsServerMarginLocked || ContextService.CurrentServer?.MarginMax is not decimal max)
+        {
+            return false;
+        }
+
+        return userMargin.Margin == max;
+    }
+
+    private decimal GetMarginInputMin()
+    {
+        if (IsServerMarginLocked)
+        {
+            return decimal.MinValue;
+        }
+
+        return ContextService.CurrentServer?.MarginMin ?? decimal.MinValue;
+    }
+
+    private decimal GetMarginInputMax()
+    {
+        if (IsServerMarginLocked)
+        {
+            return decimal.MaxValue;
+        }
+
+        return ContextService.CurrentServer?.MarginMax ?? decimal.MaxValue;
+    }
+
+    private decimal ApplyMarginBounds(decimal margin, out bool wasAdjusted)
+    {
+        wasAdjusted = false;
+
+        var min = ContextService.CurrentServer?.MarginMin;
+        var max = ContextService.CurrentServer?.MarginMax;
+        var adjustedValue = margin;
+
+        if (min is not null && adjustedValue < min.Value)
+        {
+            adjustedValue = min.Value;
+            wasAdjusted = true;
+        }
+
+        if (max is not null && adjustedValue > max.Value)
+        {
+            adjustedValue = max.Value;
+            wasAdjusted = true;
+        }
+
+        return adjustedValue;
+    }
+
+    private async Task EnforceServerMarginPolicyIfNeeded()
+    {
+        if (_selectedDataContext is null || ContextService.CurrentServer is null || _selectedDataContext.UserMargins.Count == 0)
+        {
+            return;
+        }
+
+        var hasAnyAdjustment = false;
+
+        foreach (var userMargin in _selectedDataContext.UserMargins)
+        {
+            if (ContextService.CurrentServer.IsMarginLocked)
+            {
+                var lockedMargin = ContextService.CurrentServer.LockedMargin ?? 0;
+                if (userMargin.Margin == lockedMargin)
+                {
+                    continue;
+                }
+
+                userMargin.Margin = lockedMargin;
+                hasAnyAdjustment = true;
+            }
+            else
+            {
+                var boundedMargin = ApplyMarginBounds(userMargin.Margin, out var wasAdjusted);
+                if (!wasAdjusted)
+                {
+                    continue;
+                }
+
+                userMargin.Margin = boundedMargin;
+                hasAnyAdjustment = true;
+            }
+        }
+
+        if (!hasAnyAdjustment)
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var userMargin in _selectedDataContext.UserMargins)
+            {
+                UserMarginDbService.UpdateAll(context, userMargin);
+            }
+
             return Task.CompletedTask;
         });
     }
@@ -1789,7 +2028,21 @@
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
     {
-        userMargin.Margin = margin;
+        if (IsServerMarginLocked)
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Margin.LockedSnackbar"), Severity.Warning);
+            await EnforceServerMarginPolicyIfNeeded();
+            await Calculate();
+            return;
+        }
+
+        var boundedMargin = ApplyMarginBounds(margin, out var wasAdjusted);
+        if (wasAdjusted)
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Margin.BoundedSnackbar"), Severity.Warning);
+        }
+
+        userMargin.Margin = boundedMargin;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -1814,9 +2067,12 @@
     {
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            UserServerDataService.CreateUserMargin(context, _selectedDataContext!);
+            UserServerDataService.CreateUserMargin(context, _selectedDataContext!, ContextService.CurrentServer);
             return Task.CompletedTask;
         });
+
+        await EnforceServerMarginPolicyIfNeeded();
+        await Calculate();
     }
 
     private async Task OnRemoveMargin(UserMargin userMargin)
@@ -2097,6 +2353,7 @@
 
     private async Task Calculate()
     {
+        await EnforceServerMarginPolicyIfNeeded();
         await PriceCalculatorService.Calculate(_selectedDataContext!);
         StateHasChanged();
     }

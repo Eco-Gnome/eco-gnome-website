@@ -229,6 +229,26 @@
                                         </RowTemplate>
                                     </MudTable>
                                 </MudExpansionPanel>
+                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
+                                    <MudStack Class="pa-3">
+                                        <MudTextField T="string"
+                                                      Value="_selectedShoppingList.Name"
+                                                      Typo="Typo.body2"
+                                                      Immediate
+                                                      Label="@LocalizationService.GetTranslation("PriceCalculator.ContextName")"
+                                                      Style="border-bottom-color: gray"
+                                                      ValueChanged="@(v => UpdateShoppingListName(v))"/>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.RememberRecipeChoiceTooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.RememberRecipeChoiceLabel")</MudText>
+                                            </MudTooltip>
+                                            <MudCheckBox T="bool"
+                                                         Value="_autoUseExistingChoiceEnabled"
+                                                         Variant="Variant.Outlined"
+                                                         ValueChanged="OnAutoUseExistingChoiceChanged"/>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudExpansionPanel>
                             </MudExpansionPanels>
                         </MudItem>
                         <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
@@ -374,13 +394,8 @@
                                                                 ) >= ingredientNumber;
 
                                                             <MudTooltip Text="@LocalizationService.GetTranslation(ingredient.ItemOrTag)">
-                                                                <MudLink Color="Color.Default" OnClick="@(
-                                                                                                        isFullfilled || possibleRecipes.Count == 0
-                                                                                                            ? () => { }
-                                                                                                            : possibleRecipes.Count == 1
-                                                                                                                ? () => AddChildRecipe(context.Value, ingredient, Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor), possibleRecipes.First())
-                                                                                                                : () => ToggleAddChildren(context, ingredient)
-                                                                                                        )">
+                                                                <MudLink Color="Color.Default"
+                                                                         OnClick="@(() => HandleIngredientClick(context, ingredient, possibleRecipes, isFullfilled))">
                                                                     <MudStack Row AlignItems="AlignItems.Center">
                                                                         <EcoIcon Size="32"
                                                                                  Item="ingredient.ItemOrTag"
@@ -399,7 +414,7 @@
                                                                 @foreach (var recipe in possibleRecipes)
                                                                 {
                                                                     <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
-                                                                        <MudLink OnClick="@(() => AddChildRecipe(context.Value, ingredient, Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor), recipe))">
+                                                                        <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
                                                                             <EcoIcon Size="24" Item="recipe.CraftingTable"/>
                                                                         </MudLink>
                                                                     </MudTooltip>
@@ -471,6 +486,19 @@
         }
     }
 
+    private bool _expandedOptions;
+    private bool ExpandedOptions
+    {
+        get => _expandedOptions;
+        set
+        {
+            _expandedOptions = value;
+            _ = LocalStorageService.AddItem("ExpandedShoppingListOptions", value.ToString());
+        }
+    }
+
+    private bool _autoUseExistingChoiceEnabled;
+
     private Recipe? _emptyRecipe;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
     private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
@@ -486,6 +514,14 @@
         _expandedShoppingLists = await LocalStorageService.GetItem("ExpandedShoppingLists") != "False";
         _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
         _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
+        _expandedOptions = await LocalStorageService.GetItem("ExpandedShoppingListOptions") != "False";
+        _autoUseExistingChoiceEnabled = await LocalStorageService.GetItem("ShoppingListAutoUseExistingChoice") == "True";
+    }
+
+    private async Task OnAutoUseExistingChoiceChanged(bool value)
+    {
+        _autoUseExistingChoiceEnabled = value;
+        await LocalStorageService.AddItem("ShoppingListAutoUseExistingChoice", value.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -508,16 +544,170 @@
         }
     }
 
-    private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
+    private static decimal GetIngredientQuantityGoal(UserRecipe userRecipe, Element ingredient, DataContext shoppingList)
+    {
+        return Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList) * userRecipe.RoundFactor);
+    }
+
+    private static decimal GetProducedQuantityForIngredient(UserRecipe parentRecipe, Element ingredient, DataContext shoppingList)
+    {
+        return parentRecipe.ChildrenUserRecipes
+            .Sum(ur => ur.Recipe.Elements
+                .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
+                .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(shoppingList) * ur.RoundFactor)));
+    }
+
+    private List<Recipe> GetPossibleRecipesForIngredient(Element ingredient)
+    {
+        if (ContextService.CurrentServerData is null)
+        {
+            return [];
+        }
+
+        return ContextService.CurrentServerData.Recipes
+            .Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .ToList();
+    }
+
+    private Recipe? GetSingleChosenRecipeForIngredient(Element ingredient, List<Recipe> possibleRecipes)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return null;
+        }
+
+        var possibleRecipeIds = possibleRecipes.Select(r => r.Id).ToHashSet();
+        var matchingRecipeIds = _selectedShoppingList.UserRecipes
+            .Where(ur => ur.Recipe.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .Select(ur => ur.RecipeId)
+            .Where(recipeId => possibleRecipeIds.Contains(recipeId))
+            .Distinct()
+            .ToList();
+
+        if (matchingRecipeIds.Count != 1)
+        {
+            return null;
+        }
+
+        return possibleRecipes.FirstOrDefault(r => r.Id == matchingRecipeIds[0]);
+    }
+
+    private static bool IsIngredientAlreadyInBranch(UserRecipe parentRecipe, Element ingredient)
+    {
+        UserRecipe? current = parentRecipe;
+        while (current is not null)
+        {
+            var containsItemInBranch = current.Recipe.Elements.Any(e =>
+                e.IsProduct() &&
+                e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id));
+            if (containsItemInBranch)
+            {
+                return true;
+            }
+
+            current = current.ParentUserRecipe;
+        }
+
+        return false;
+    }
+
+    private async Task<UserRecipe> AddChildRecipeCore(EcoCraftDbContext context, UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
     {
         var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e =>
             e.IsProduct() &&
             e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == element.ItemOrTag.Id))
             .Quantity.GetDynamicValue(_selectedShoppingList));
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        return await ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, userRecipe, (int)quantityToCraft, _referenceDataContext);
+    }
+
+    private async Task ApplyAutoChosenRecipesForMissingIngredients(EcoCraftDbContext context, IEnumerable<UserRecipe> parentRecipes)
+    {
+        if (_selectedShoppingList is null || ContextService.CurrentServerData is null || !_autoUseExistingChoiceEnabled)
         {
-            return ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList, recipe, userRecipe, (int)quantityToCraft, _referenceDataContext);
+            return;
+        }
+
+        var seenParentIds = new HashSet<Guid>();
+        var parentRecipesSnapshot = new List<UserRecipe>();
+        foreach (var parentRecipe in parentRecipes)
+        {
+            if (seenParentIds.Add(parentRecipe.Id))
+            {
+                parentRecipesSnapshot.Add(parentRecipe);
+            }
+        }
+
+        foreach (var parentRecipe in parentRecipesSnapshot)
+        {
+            foreach (var ingredient in parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()))
+            {
+                var requiredQuantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
+                var producedQuantity = GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList);
+                if (producedQuantity >= requiredQuantity || IsIngredientAlreadyInBranch(parentRecipe, ingredient))
+                {
+                    continue;
+                }
+
+                var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
+                var chosenRecipe = GetSingleChosenRecipeForIngredient(ingredient, possibleRecipes);
+                if (chosenRecipe is null)
+                {
+                    continue;
+                }
+
+                await AddChildRecipeCore(context, parentRecipe, ingredient, requiredQuantity, chosenRecipe);
+            }
+        }
+    }
+
+    private async Task HandleIngredientClick(ITreeItemData<UserRecipe> context, Element ingredient, List<Recipe> possibleRecipes, bool isFullfilled)
+    {
+        if (_selectedShoppingList is null || isFullfilled || possibleRecipes.Count == 0)
+        {
+            return;
+        }
+
+        var quantityGoal = GetIngredientQuantityGoal(context.Value, ingredient, _selectedShoppingList);
+        if (possibleRecipes.Count == 1)
+        {
+            await AddChildRecipe(context.Value, ingredient, quantityGoal, possibleRecipes[0]);
+            return;
+        }
+
+        if (!_autoUseExistingChoiceEnabled)
+        {
+            ToggleAddChildren(context, ingredient);
+            return;
+        }
+
+        var chosenRecipe = GetSingleChosenRecipeForIngredient(ingredient, possibleRecipes);
+        if (chosenRecipe is null)
+        {
+            ToggleAddChildren(context, ingredient);
+            return;
+        }
+
+        await AddChildRecipe(context.Value, ingredient, quantityGoal, chosenRecipe);
+    }
+
+    private async Task AddChildRecipeFromManualSelection(UserRecipe userRecipe, Element ingredient, Recipe recipe)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return;
+        }
+
+        var quantityGoal = GetIngredientQuantityGoal(userRecipe, ingredient, _selectedShoppingList);
+        await AddChildRecipe(userRecipe, ingredient, quantityGoal, recipe);
+    }
+
+    private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            var createdRecipe = await AddChildRecipeCore(context, userRecipe, element, quantityGoal, recipe);
+            await ApplyAutoChosenRecipesForMissingIngredients(context, new[] { createdRecipe });
         });
 
         _openedAddChildrenContext = null;
@@ -553,11 +743,11 @@
     {
         userRecipe.RoundFactor = value;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
             ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, _selectedShoppingList!, userRecipe);
-            return Task.CompletedTask;
+            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
         });
 
         Rebuild();
@@ -741,7 +931,7 @@
 
         var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedShoppingList) is not null);
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             if (isRemove)
             {
@@ -771,7 +961,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            return Task.CompletedTask;
+            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -787,7 +977,7 @@
         var firstTalent = talents.First();
         var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedShoppingList);
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             if (existingUserTalent is null)
             {
@@ -821,7 +1011,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            return Task.CompletedTask;
+            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -842,7 +1032,7 @@
             return;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             foreach (var talent in talents)
             {
@@ -864,7 +1054,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            return Task.CompletedTask;
+            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -880,7 +1070,7 @@
         var isIncrease = level > userSkill.Level;
         userSkill.Level = level;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             UserSkillDbService.UpdateLevel(context, userSkill);
 
@@ -893,7 +1083,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            return Task.CompletedTask;
+            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -911,9 +1101,9 @@
         shoppingListCraftingTable.PluginModule = pluginModules[currentIndex + 1];
         shoppingListCraftingTable.PluginModuleId = shoppingListCraftingTable.PluginModule.Id;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
-            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
+            await PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -939,9 +1129,9 @@
 
         shoppingListCraftingTable.SkilledPluginModules.Clear();
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
-            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
+            await PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -960,9 +1150,9 @@
             shoppingListCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
-            return PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
+            await PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
         });
 
         Rebuild();
@@ -1002,9 +1192,10 @@
     {
         if (recipe is null) return;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
-            return ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, sourceDataContext: _referenceDataContext);
+            var createdRecipe = await ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, sourceDataContext: _referenceDataContext);
+            await ApplyAutoChosenRecipesForMissingIngredients(context, new[] { createdRecipe });
         });
 
         _emptyRecipe = null;
@@ -1030,6 +1221,7 @@
     {
         await UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
         ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
+        await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
     }
 
     private async Task RefreshRecipeAutocompleteAsync()

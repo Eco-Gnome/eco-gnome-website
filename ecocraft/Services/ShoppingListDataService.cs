@@ -34,7 +34,7 @@ namespace ecocraft.Services
             return shoppingList;
         }
 
-        public async Task AddUserRecipe(EcoCraftDbContext context, DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1, DataContext? sourceDataContext = null)
+        public async Task<UserRecipe> AddUserRecipe(EcoCraftDbContext context, DataContext shoppingList, Recipe recipe, UserRecipe? parent = null, int quantityToCraft = 1, DataContext? sourceDataContext = null)
         {
             var userRecipe = new UserRecipe
             {
@@ -61,6 +61,8 @@ namespace ecocraft.Services
             {
                 GetOrCreateUserSkill(context, shoppingList, recipe.Skill, sourceDataContext);
             }
+
+            return userRecipe;
         }
 
         public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)

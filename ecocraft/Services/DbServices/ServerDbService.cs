@@ -220,6 +220,11 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    CalorieCostMin = server.CalorieCostMin,
 		    CalorieCostDefault = server.CalorieCostDefault,
 		    CalorieCostMax = server.CalorieCostMax,
+		    IsMarginLocked = server.IsMarginLocked,
+		    LockedMargin = server.LockedMargin,
+		    MarginMin = server.MarginMin,
+		    MarginDefault = server.MarginDefault,
+		    MarginMax = server.MarginMax,
 		    CreationDateTime = server.CreationDateTime,
 		    LastDataUploadTime = server.LastDataUploadTime,
 		    JoinCode = server.JoinCode,
@@ -295,6 +300,26 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    entry.Property(x => x.CalorieCostMin).IsModified = true;
 	    entry.Property(x => x.CalorieCostDefault).IsModified = true;
 	    entry.Property(x => x.CalorieCostMax).IsModified = true;
+    }
+
+    public void UpdateMarginPolicy(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server
+	    {
+		    Id = server.Id,
+		    IsMarginLocked = server.IsMarginLocked,
+		    LockedMargin = server.LockedMargin,
+		    MarginMin = server.MarginMin,
+		    MarginDefault = server.MarginDefault,
+		    MarginMax = server.MarginMax
+	    };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.IsMarginLocked).IsModified = true;
+	    entry.Property(x => x.LockedMargin).IsModified = true;
+	    entry.Property(x => x.MarginMin).IsModified = true;
+	    entry.Property(x => x.MarginDefault).IsModified = true;
+	    entry.Property(x => x.MarginMax).IsModified = true;
     }
 
     public void UpdateIsDefault(EcoCraftDbContext context, Server server)

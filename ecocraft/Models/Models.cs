@@ -727,6 +727,11 @@ public class Server
     public decimal? CalorieCostMin { get; set; }
     public decimal? CalorieCostDefault { get; set; }
     public decimal? CalorieCostMax { get; set; }
+    public bool IsMarginLocked { get; set; } = false;
+    public decimal? LockedMargin { get; set; }
+    public decimal? MarginMin { get; set; }
+    public decimal? MarginDefault { get; set; }
+    public decimal? MarginMax { get; set; }
     public DateTimeOffset CreationDateTime { get; set; }
     public DateTimeOffset? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }

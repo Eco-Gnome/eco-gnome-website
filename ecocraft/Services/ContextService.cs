@@ -57,6 +57,11 @@ public class ContextService(
             server.CalorieCostMin = serverWithUsers.CalorieCostMin;
             server.CalorieCostDefault = serverWithUsers.CalorieCostDefault;
             server.CalorieCostMax = serverWithUsers.CalorieCostMax;
+            server.IsMarginLocked = serverWithUsers.IsMarginLocked;
+            server.LockedMargin = serverWithUsers.LockedMargin;
+            server.MarginMin = serverWithUsers.MarginMin;
+            server.MarginDefault = serverWithUsers.MarginDefault;
+            server.MarginMax = serverWithUsers.MarginMax;
             server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
@@ -246,7 +251,9 @@ public class ContextService(
         {
             DataContext = dataContext,
             Name = localizationService.GetTranslation("ContextService.DefaultMargin"),
-            Margin = 20,
+            Margin = userServer.Server.IsMarginLocked
+                ? userServer.Server.LockedMargin ?? userServer.Server.MarginDefault ?? 0
+                : userServer.Server.MarginDefault ?? 20,
         };
 
         dataContext.UserMargins.Add(userMargin);

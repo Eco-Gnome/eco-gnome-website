@@ -141,6 +141,18 @@
                 "SaveError": "Could not save calories cost policy"
             }
         },
+        "MarginPolicy": {
+            "Title": "Margin Policy",
+            "Lock": "Lock value for all players",
+            "LockedValue": "Locked value",
+            "Min": "Min",
+            "Default": "Default",
+            "Max": "Max",
+            "Save": "Save policy",
+            "Snackbar": {
+                "SaveError": "Could not save margin policy"
+            }
+        },
         "ModUploadLimitToServer": "Limit to my server",
         "Confirm": {
             "ClearAllMax": "Are you sure you want to clear all max prices?",
@@ -216,7 +228,9 @@
         "NameLabel": "Shopping list name",
         "ConfirmDeleteShoppingList": "Are you sure you want to delete shopping list {name}?",
         "Skills": "Skills Configuration",
-        "CraftingTables": "Crafting Tables Configuration"
+        "CraftingTables": "Crafting Tables Configuration",
+        "RememberRecipeChoiceLabel": "Auto-use existing chosen recipe",
+        "RememberRecipeChoiceTooltip": "When enabled, automatically uses the recipe already chosen in this list for the same item. If no unique choice exists, selection remains manual."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
@@ -357,6 +371,13 @@
             "LockedTooltip": "This value is locked by your server admin.",
             "LockedSummary": "Locked by server admin: {value}",
             "BoundariesSummary": "Server boundaries: min {min} / default {default} / max {max}",
+            "LockedSnackbar": "This value is locked by your server admin.",
+            "BoundedSnackbar": "Value adjusted to fit server boundaries."
+        },
+        "Margin": {
+            "LockedTooltip": "This value is locked by your server admin.",
+            "LockedSummary": "Locked by server admin: {value} %",
+            "BoundariesSummary": "Server boundaries: min {min} % / default {default} % / max {max} %",
             "LockedSnackbar": "This value is locked by your server admin.",
             "BoundedSnackbar": "Value adjusted to fit server boundaries."
         },

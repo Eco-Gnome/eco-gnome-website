@@ -90,14 +90,19 @@ public class UserServerDataService(
         userTalent.Talent.UserTalents.Remove(userTalent);
     }
 
-    public void CreateUserMargin(EcoCraftDbContext context, DataContext dataContext)
+    public void CreateUserMargin(EcoCraftDbContext context, DataContext dataContext, Server? server = null)
     {
+        var effectiveServer = server;
+        var marginValue = effectiveServer?.IsMarginLocked == true
+            ? effectiveServer.LockedMargin ?? effectiveServer.MarginDefault ?? 0
+            : effectiveServer?.MarginDefault ?? 0;
+
         var userMargin = new UserMargin
         {
             Name = localizationService.GetTranslation("UserServerDataService.NewMargin"),
             DataContext = dataContext,
             DataContextId = dataContext.Id,
-            Margin = 0,
+            Margin = marginValue,
         };
 
         userMarginDbService.Create(context, userMargin);
