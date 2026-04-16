@@ -72,8 +72,13 @@ namespace ecocraft.Services
         {
             foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
             {
-                SynchronizeRecipeSubtree(context, shoppingList, rootRecipe);
+                SynchronizeRecipeChildren(context, shoppingList, rootRecipe);
             }
+        }
+
+        public void SynchronizeRecipeSubtreeFrom(EcoCraftDbContext context, DataContext shoppingList, UserRecipe parentRecipe)
+        {
+            SynchronizeRecipeChildren(context, shoppingList, parentRecipe);
         }
 
         private void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, bool destroyInDatabase)
@@ -122,7 +127,7 @@ namespace ecocraft.Services
             }
         }
 
-        private void SynchronizeRecipeSubtree(EcoCraftDbContext context, DataContext shoppingList, UserRecipe parentRecipe)
+        private void SynchronizeRecipeChildren(EcoCraftDbContext context, DataContext shoppingList, UserRecipe parentRecipe)
         {
             foreach (var childRecipe in parentRecipe.ChildrenUserRecipes)
             {
@@ -134,7 +139,7 @@ namespace ecocraft.Services
                     userRecipeDbService.UpdateRoundFactor(context, childRecipe);
                 }
 
-                SynchronizeRecipeSubtree(context, shoppingList, childRecipe);
+                SynchronizeRecipeChildren(context, shoppingList, childRecipe);
             }
         }
 

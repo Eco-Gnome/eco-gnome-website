@@ -556,7 +556,7 @@
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
-            ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
+            ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, _selectedShoppingList!, userRecipe);
             return Task.CompletedTask;
         });
 
