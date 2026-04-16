@@ -668,32 +668,65 @@
 
     private async Task HandleIngredientClick(ITreeItemData<UserRecipe> context, Element ingredient, List<Recipe> possibleRecipes, bool isFullfilled)
     {
-        if (_selectedShoppingList is null || isFullfilled || possibleRecipes.Count == 0)
+        if (_selectedShoppingList is null)
         {
             return;
         }
 
-        var quantityGoal = GetIngredientQuantityGoal(context.Value, ingredient, _selectedShoppingList);
+        if (isFullfilled)
+        {
+            await RemoveIngredientChildren(context.Value, ingredient);
+            return;
+        }
+
+        if (possibleRecipes.Count == 0)
+        {
+            return;
+        }
+
         if (possibleRecipes.Count == 1)
         {
+            var quantityGoal = GetIngredientQuantityGoal(context.Value, ingredient, _selectedShoppingList);
             await AddChildRecipe(context.Value, ingredient, quantityGoal, possibleRecipes[0]);
             return;
         }
 
-        if (!_isAutoExpandEnabled)
+        // Manual user click opens recipe choice when multiple recipes exist.
+        // Automatic choice is reserved for auto-expand loops only.
+        ToggleAddChildren(context, ingredient);
+    }
+
+    private async Task RemoveIngredientChildren(UserRecipe parentRecipe, Element ingredient)
+    {
+        if (_selectedShoppingList is null)
         {
-            ToggleAddChildren(context, ingredient);
             return;
         }
 
-        var chosenRecipe = GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
-        if (chosenRecipe is null)
+        var childrenToRemove = parentRecipe.ChildrenUserRecipes
+            .Where(childRecipe => childRecipe.Recipe.Elements.Any(product =>
+                product.IsProduct() &&
+                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .ToList();
+
+        if (childrenToRemove.Count == 0)
         {
-            ToggleAddChildren(context, ingredient);
             return;
         }
 
-        await AddChildRecipe(context.Value, ingredient, quantityGoal, chosenRecipe);
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var childRecipe in childrenToRemove)
+            {
+                ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, childRecipe);
+            }
+
+            return Task.CompletedTask;
+        });
+
+        _openedAddChildrenContext = null;
+        _openedAddChildrenIngredient = null;
+        Rebuild();
     }
 
     private async Task AddChildRecipeFromManualSelection(UserRecipe userRecipe, Element ingredient, Recipe recipe)
