@@ -280,11 +280,12 @@
                         <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                                 <MudAutocomplete T="Recipe"
+                                                 @ref="_recipeAutocompleteRef"
                                                  Value="_emptyRecipe"
-                                                 @bind-Text="_recipeAutocompleteText"
                                                  Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
                                                  SearchFunc="SearchRecipes"
                                                  ValueChanged="AddShoppingListRecipe"
+                                                 CoerceText="false"
                                                  Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
                                                  Class="auto-complete-input"
                                                  Dense="true"
@@ -471,7 +472,7 @@
     }
 
     private Recipe? _emptyRecipe;
-    private string? _recipeAutocompleteText;
+    private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
     private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
     private Element? _openedAddChildrenIngredient;
 
@@ -574,27 +575,83 @@
             return;
         }
 
-        _selectedShoppingList = shoppingList ?? ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => d.IsShoppingList);
-
-        if (_selectedShoppingList is null)
+        var targetShoppingList = shoppingList ?? ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => d.IsShoppingList);
+        if (targetShoppingList is null)
         {
+            _selectedShoppingList = null;
+            _referenceDataContext = null;
+            TreeItems.Clear();
             return;
         }
 
+        var targetShoppingListId = targetShoppingList.Id;
         _isLoadingData = true;
         StateHasChanged();
 
-        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
-        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(_selectedShoppingList.Id, ContextService.CurrentServerData!);
-        var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
-            .FirstOrDefault(d => !d.IsShoppingList && d.IsDefault)?.Id;
-        _referenceDataContext = referenceDataContextId is not null
-            ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, ContextService.CurrentServerData!)
-            : null;
+        try
+        {
+            var serverData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+            if (serverData is null)
+            {
+                _selectedShoppingList = null;
+                _referenceDataContext = null;
+                TreeItems.Clear();
+                return;
+            }
 
-        _isLoadingData = false;
-        RebuildTree();
-        StateHasChanged();
+            ContextService.CurrentServerData = serverData;
+            _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
+
+            var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
+                .FirstOrDefault(d => !d.IsShoppingList && d.IsDefault)?.Id;
+            try
+            {
+                _referenceDataContext = referenceDataContextId is not null
+                    ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, serverData)
+                    : null;
+            }
+            catch (Exception referenceEx)
+            {
+                Console.WriteLine($"[ShoppingList] Failed to load reference data context {referenceDataContextId}: {referenceEx}");
+                _referenceDataContext = null;
+            }
+
+            RebuildTree();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ShoppingList] Failed to load shopping list {targetShoppingListId}: {ex}");
+
+            var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
+                .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
+                .Select(d => d.Id)
+                .ToList();
+
+            _selectedShoppingList = null;
+            if (ContextService.CurrentServerData is not null)
+            {
+                foreach (var fallbackId in fallbackShoppingListIds)
+                {
+                    try
+                    {
+                        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(fallbackId, ContextService.CurrentServerData);
+                        break;
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        Console.WriteLine($"[ShoppingList] Failed to load fallback shopping list {fallbackId}: {fallbackEx}");
+                    }
+                }
+            }
+
+            _referenceDataContext = null;
+            RebuildTree();
+        }
+        finally
+        {
+            _isLoadingData = false;
+            StateHasChanged();
+        }
     }
 
     public void Dispose()
@@ -951,9 +1008,9 @@
         });
 
         _emptyRecipe = null;
-        _recipeAutocompleteText = string.Empty;
 
         Rebuild();
+        await RefreshRecipeAutocompleteAsync();
     }
 
     private async Task RemoveAllUserData()
@@ -973,5 +1030,15 @@
     {
         await UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
         ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
+    }
+
+    private async Task RefreshRecipeAutocompleteAsync()
+    {
+        await Task.Yield();
+
+        if (_recipeAutocompleteRef is not null)
+        {
+            await _recipeAutocompleteRef.ClearAsync();
+        }
     }
 }

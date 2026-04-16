@@ -45,7 +45,7 @@ public class Recipe: IHasLocalizedName
 
     public UserRecipe? GetCurrentUserRecipe(DataContext dataContext)
     {
-        return UserRecipes.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserRecipes.FirstOrDefault(ur => ur.RecipeId == Id);
     }
 
     public override string ToString()
@@ -72,12 +72,12 @@ public class Element
 
     public UserElement GetMandatoryCurrentUserElement(DataContext dataContext)
     {
-        return UserElements.First(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserElements.First(ur => ur.ElementId == Id);
     }
 
     public UserElement? GetCurrentUserElement(DataContext dataContext)
     {
-        return UserElements.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserElements.FirstOrDefault(ur => ur.ElementId == Id);
     }
 
     public bool IsIngredient()
@@ -353,7 +353,7 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
 
     public UserSkill? GetCurrentUserSkill(DataContext dataContext)
     {
-        return UserSkills.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserSkills.FirstOrDefault(ur => ur.SkillId == Id);
     }
 
     public override string ToString()
@@ -424,7 +424,7 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
 
     public UserCraftingTable? GetCurrentUserCraftingTable(DataContext dataContext)
     {
-        return UserCraftingTables.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        return dataContext.UserCraftingTables.FirstOrDefault(ur => ur.CraftingTableId == Id);
     }
 
     public override string ToString()
@@ -538,7 +538,11 @@ public class DataContext
 
     public List<UserRecipe> GetRootShoppingListRecipes()
     {
-        return UserRecipes.Where(ur => ur.ParentUserRecipe is null).ToList();
+        var userRecipeIds = UserRecipes.Select(ur => ur.Id).ToHashSet();
+
+        return UserRecipes
+            .Where(ur => ur.ParentUserRecipeId is null || !userRecipeIds.Contains(ur.ParentUserRecipeId.Value))
+            .ToList();
     }
 }
 

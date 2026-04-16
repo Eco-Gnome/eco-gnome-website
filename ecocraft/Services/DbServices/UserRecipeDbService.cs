@@ -86,6 +86,15 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 
     public void UpdateRoundFactor(EcoCraftDbContext context, UserRecipe userRecipe)
     {
+        var trackedEntry = context.ChangeTracker.Entries<UserRecipe>().FirstOrDefault(e => e.Entity.Id == userRecipe.Id);
+
+        if (trackedEntry is not null)
+        {
+            trackedEntry.Entity.RoundFactor = userRecipe.RoundFactor;
+            trackedEntry.Property(x => x.RoundFactor).IsModified = true;
+            return;
+        }
+
         var stub = new UserRecipe { Id = userRecipe.Id, RoundFactor = userRecipe.RoundFactor };
         var entry = context.Entry(stub);
         entry.State = EntityState.Unchanged;

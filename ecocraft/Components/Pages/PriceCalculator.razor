@@ -76,11 +76,12 @@
 
                                 <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({_selectedDataContext.UserSkills.Where(us => us.Skill is not null).ToList().Count})")" @bind-Expanded="ExpandedSkills">
                                     <MudAutocomplete T="Skill"
+                                                     @ref="_skillAutocompleteRef"
                                                      Value="_emptySkill"
-                                                     @bind-Text="_skillAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableSkills(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchSkills"
                                                      ValueChanged="AddUserSkill"
+                                                     CoerceText="false"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddSkill")"
                                                      Dense="true"
                                                      Class="auto-complete-input"
@@ -191,11 +192,12 @@
                                 </MudExpansionPanel>
                                 <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({_selectedDataContext.UserCraftingTables.Count})")" @bind-Expanded="ExpandedCraftingTables">
                                     <MudAutocomplete T="CraftingTable"
+                                                     @ref="_craftingTableAutocompleteRef"
                                                      Value="_emptyCraftingTable"
-                                                     @bind-Text="_craftingTableAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableCraftingTables(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchCraftingTables"
                                                      ValueChanged="AddUserCraftingTable"
+                                                     CoerceText="false"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddCraftingTable")"
                                                      Dense="true"
                                                      Class="mt-4 auto-complete-input"
@@ -665,11 +667,12 @@
                                     <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToSell")</MudText>
                                     <MudSpacer/>
                                     <MudAutocomplete T="Recipe"
+                                                     @ref="_recipeAutocompleteRef"
                                                      Value="_emptyRecipe"
-                                                     @bind-Text="_recipeAutocompleteText"
                                                      Disabled="@(UserServerDataService.GetAvailableRecipes(_selectedDataContext, ContextService.CurrentServerData!).Count == 0)"
                                                      SearchFunc="SearchRecipes"
                                                      ValueChanged="AddUserRecipe"
+                                                     CoerceText="false"
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
                                                      Class="auto-complete-input"
                                                      Dense="true"
@@ -1003,12 +1006,12 @@
     private DataContext? _selectedDataContext;
     private bool IsServerCalorieCostLocked => ContextService.CurrentServer?.IsCalorieCostLocked ?? false;
 
+    private MudAutocomplete<Skill>? _skillAutocompleteRef;
+    private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
+    private MudAutocomplete<CraftingTable>? _craftingTableAutocompleteRef;
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
-    private string? _skillAutocompleteText;
-    private string? _recipeAutocompleteText;
-    private string? _craftingTableAutocompleteText;
     private string? _previousProfession;
 
     private ItemOrTag? _selectedTagToBuy;
@@ -1573,9 +1576,9 @@
         });
 
         _emptySkill = null;
-        _skillAutocompleteText = string.Empty;
 
         await Calculate();
+        await RefreshSkillAutocompleteAsync();
     }
 
     private async Task RemoveUserSkill(UserSkill userSkill)
@@ -1603,9 +1606,9 @@
         });
 
         _emptyCraftingTable = null;
-        _craftingTableAutocompleteText = string.Empty;
 
         await Calculate();
+        await RefreshCraftingTableAutocompleteAsync();
     }
 
     private async Task RemoveUserCraftingTable(UserCraftingTable craftingTable)
@@ -1633,9 +1636,9 @@
         });
 
         _emptyRecipe = null;
-        _recipeAutocompleteText = string.Empty;
 
         await Calculate();
+        await RefreshRecipeAutocompleteAsync();
     }
 
     private async Task RemoveUserRecipe(UserRecipe recipe)
@@ -2096,5 +2099,36 @@
     {
         await PriceCalculatorService.Calculate(_selectedDataContext!);
         StateHasChanged();
+    }
+
+    private async Task RefreshSkillAutocompleteAsync()
+    {
+        // Let MudAutocomplete finish its internal selection pipeline, then force-clear text/value.
+        await Task.Yield();
+
+        if (_skillAutocompleteRef is not null)
+        {
+            await _skillAutocompleteRef.ClearAsync();
+        }
+    }
+
+    private async Task RefreshCraftingTableAutocompleteAsync()
+    {
+        await Task.Yield();
+
+        if (_craftingTableAutocompleteRef is not null)
+        {
+            await _craftingTableAutocompleteRef.ClearAsync();
+        }
+    }
+
+    private async Task RefreshRecipeAutocompleteAsync()
+    {
+        await Task.Yield();
+
+        if (_recipeAutocompleteRef is not null)
+        {
+            await _recipeAutocompleteRef.ClearAsync();
+        }
     }
 }

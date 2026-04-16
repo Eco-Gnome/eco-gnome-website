@@ -80,12 +80,22 @@ namespace ecocraft.Services
         {
             var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
             var currentUserSkillId = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList)?.Id;
+            var childrenRecipes = shoppingList.UserRecipes
+                .Where(ur => ur.ParentUserRecipeId == shoppingListRecipe.Id)
+                .ToList();
 
             shoppingList.UserRecipes.Remove(shoppingListRecipe);
             shoppingListRecipe.Recipe.UserRecipes.Remove(shoppingListRecipe);
-            shoppingListRecipe.ParentUserRecipe?.ChildrenUserRecipes.Remove(shoppingListRecipe);
+            if (shoppingListRecipe.ParentUserRecipe is not null)
+            {
+                shoppingListRecipe.ParentUserRecipe.ChildrenUserRecipes.Remove(shoppingListRecipe);
+            }
+            else if (shoppingListRecipe.ParentUserRecipeId is Guid parentId)
+            {
+                shoppingList.UserRecipes.FirstOrDefault(ur => ur.Id == parentId)?.ChildrenUserRecipes.Remove(shoppingListRecipe);
+            }
 
-            foreach (var recipe in shoppingListRecipe.ChildrenUserRecipes.ToList())
+            foreach (var recipe in childrenRecipes)
             {
                 RemoveUserRecipe(context, shoppingList, recipe, false);
             }

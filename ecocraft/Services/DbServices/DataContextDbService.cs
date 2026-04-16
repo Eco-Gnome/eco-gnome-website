@@ -71,52 +71,118 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		var itemOrTags = server.ItemOrTags.ToDictionary(s => s.Id);
 		var recipes = server.Recipes.ToDictionary(s => s.Id);
 		var elements = server.Recipes.SelectMany(s => s.Elements).ToDictionary(s => s.Id);
+		var userRecipes = dataContext.UserRecipes.ToDictionary(ur => ur.Id);
 
 
-		dataContext.UserSkills.ForEach(us =>
+		dataContext.UserSkills.ToList().ForEach(us =>
 		{
-			if (us.SkillId is not null)
+			if (us.SkillId is null)
 			{
-				us.Skill = skills[us.SkillId.Value];
-				us.Skill.UserSkills.Add(us);
+				return;
 			}
+
+			if (!skills.TryGetValue(us.SkillId.Value, out var skill))
+			{
+				dataContext.UserSkills.Remove(us);
+				return;
+			}
+
+			us.Skill = skill;
+			us.Skill.UserSkills.Add(us);
 		});
 
-		dataContext.UserTalents.ForEach(ut =>
+		dataContext.UserTalents.ToList().ForEach(ut =>
 		{
-			ut.Talent = talents[ut.TalentId];
+			if (!talents.TryGetValue(ut.TalentId, out var talent))
+			{
+				dataContext.UserTalents.Remove(ut);
+				return;
+			}
+
+			ut.Talent = talent;
 			ut.Talent.UserTalents.Add(ut);
 		});
 
-		dataContext.UserCraftingTables.ForEach(uct =>
+		dataContext.UserCraftingTables.ToList().ForEach(uct =>
 		{
-			uct.CraftingTable = craftingTables[uct.CraftingTableId];
-			uct.CraftingTable.UserCraftingTables.Add(uct);
-			if (uct.PluginModuleId is not null)
+			if (!craftingTables.TryGetValue(uct.CraftingTableId, out var craftingTable))
 			{
-				uct.PluginModule = pluginModules[uct.PluginModuleId.Value];
+				dataContext.UserCraftingTables.Remove(uct);
+				return;
+			}
+
+			uct.CraftingTable = craftingTable;
+			uct.CraftingTable.UserCraftingTables.Add(uct);
+
+			if (uct.PluginModuleId is Guid pluginModuleId && pluginModules.TryGetValue(pluginModuleId, out var pluginModule))
+			{
+				uct.PluginModule = pluginModule;
 				uct.PluginModule.UserCraftingTables.Add(uct);
 			}
-			uct.SkilledPluginModules = uct.SkilledPluginModules.Select(s => server.PluginModules.First(pm => pm.Id == s.Id)).ToList();
+			else
+			{
+				uct.PluginModule = null;
+				uct.PluginModuleId = null;
+			}
+
+			uct.SkilledPluginModules = uct.SkilledPluginModules
+				.Where(spm => pluginModules.ContainsKey(spm.Id))
+				.Select(spm => pluginModules[spm.Id])
+				.ToList();
 			// We don't care about the reverse of the skilledPluginModules
 		});
 
-		dataContext.UserPrices.ForEach(up =>
+		dataContext.UserPrices.ToList().ForEach(up =>
 		{
-			up.ItemOrTag = itemOrTags[up.ItemOrTagId];
+			if (!itemOrTags.TryGetValue(up.ItemOrTagId, out var itemOrTag))
+			{
+				dataContext.UserPrices.Remove(up);
+				return;
+			}
+
+			up.ItemOrTag = itemOrTag;
 			up.ItemOrTag.UserPrices.Add(up);
+		});
+
+		dataContext.UserRecipes.ToList().ForEach(ur =>
+		{
+			if (!recipes.TryGetValue(ur.RecipeId, out var recipe))
+			{
+				dataContext.UserRecipes.Remove(ur);
+				userRecipes.Remove(ur.Id);
+				return;
+			}
+
+			ur.DataContext = dataContext;
+			ur.Recipe = recipe;
+			ur.Recipe.UserRecipes.Add(ur);
+			ur.ParentUserRecipe = null;
+			ur.ChildrenUserRecipes.Clear();
+			ur.UserElements.Clear();
 		});
 
 		dataContext.UserRecipes.ForEach(ur =>
 		{
-			ur.Recipe = recipes[ur.RecipeId];
-			ur.Recipe.UserRecipes.Add(ur);
+			if (ur.ParentUserRecipeId is Guid parentId && userRecipes.TryGetValue(parentId, out var parent))
+			{
+				ur.ParentUserRecipe = parent;
+				parent.ChildrenUserRecipes.Add(ur);
+			}
 		});
 
-		dataContext.UserElements.ForEach(ue =>
+		dataContext.UserElements.ToList().ForEach(ue =>
 		{
-			ue.Element = elements[ue.ElementId];
+			if (!elements.TryGetValue(ue.ElementId, out var element) || !userRecipes.TryGetValue(ue.UserRecipeId, out var userRecipe))
+			{
+				dataContext.UserElements.Remove(ue);
+				return;
+			}
+
+			ue.DataContext = dataContext;
+			ue.Element = element;
+			ue.UserRecipe = userRecipe;
 			ue.Element.UserElements.Add(ue);
+			userRecipe.UserElements.Add(ue);
 		});
 	}
 
