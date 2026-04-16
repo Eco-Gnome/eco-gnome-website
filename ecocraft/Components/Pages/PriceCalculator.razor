@@ -70,6 +70,7 @@
         {
             <ErrorBoundary>
                 <ChildContent>
+                    @{ if (_calculationError is not null) { throw _calculationError; } }
                     <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                             <MudExpansionPanels MultiExpansion="true">
@@ -2351,10 +2352,22 @@
         await DialogService.ShowAsync<ServerPricesDialog>("", options);
     }
 
+    private Exception? _calculationError;
+
     private async Task Calculate()
     {
-        await EnforceServerMarginPolicyIfNeeded();
-        await PriceCalculatorService.Calculate(_selectedDataContext!);
+        try
+        {
+            await EnforceServerMarginPolicyIfNeeded();
+            await PriceCalculatorService.Calculate(_selectedDataContext!);
+            _calculationError = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"PriceCalculator.Calculate failed: {ex}");
+            _calculationError = ex;
+        }
+
         StateHasChanged();
     }
 
