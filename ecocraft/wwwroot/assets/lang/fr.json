@@ -222,8 +222,8 @@
         "ConfirmDeleteShoppingList": "Êtes vous sur de vouloir supprimer la liste de course {name} ?",
         "Skills": "Configuration des métiers",
         "CraftingTables": "Configuration des Tables d'artisanat",
-        "RememberRecipeChoiceLabel": "Réutiliser automatiquement le choix déjà présent",
-        "RememberRecipeChoiceTooltip": "Si activé, utilise automatiquement la recette déjà choisie dans cette liste pour le même objet. Si aucun choix unique n'existe, la sélection reste manuelle."
+        "AutoExpandLabel": "Déploiement auto selon les choix existants",
+        "AutoExpandTooltip": "Si activé, le déploiement des recettes réutilise la recette déjà choisie pour le même objet dans cette liste et ajoute automatiquement les sous-recettes. S'il n'existe pas de choix unique, la sélection reste manuelle."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",

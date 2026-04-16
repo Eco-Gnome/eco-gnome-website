@@ -73,17 +73,6 @@
                     <ChildContent>
                         <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
                             <MudExpansionPanels MultiExpansion="true">
-                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Settings")" @bind-Expanded="ExpandedShoppingLists">
-                                    <MudStack Class="pa-3">
-                                        <MudTextField T="string"
-                                                      Value="_selectedShoppingList.Name"
-                                                      Typo="Typo.body2"
-                                                      Immediate
-                                                      Label="@LocalizationService.GetTranslation("ShoppingList.NameLabel")"
-                                                      Style="border-bottom-color: gray"
-                                                      ValueChanged="@(v => UpdateShoppingListName(v))"/>
-                                    </MudStack>
-                                </MudExpansionPanel>
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Skills")" @bind-Expanded="ExpandedSkills">
                                     <MudTable Items="_selectedShoppingList.UserSkills.Where(us => us.Skill is not null)"
                                               Hover="true"
@@ -235,17 +224,17 @@
                                                       Value="_selectedShoppingList.Name"
                                                       Typo="Typo.body2"
                                                       Immediate
-                                                      Label="@LocalizationService.GetTranslation("PriceCalculator.ContextName")"
+                                                      Label="@LocalizationService.GetTranslation("ShoppingList.NameLabel")"
                                                       Style="border-bottom-color: gray"
                                                       ValueChanged="@(v => UpdateShoppingListName(v))"/>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.RememberRecipeChoiceTooltip")">
-                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.RememberRecipeChoiceLabel")</MudText>
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutoExpandTooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.AutoExpandLabel")</MudText>
                                             </MudTooltip>
                                             <MudCheckBox T="bool"
-                                                         Value="_autoUseExistingChoiceEnabled"
+                                                         Value="_isAutoExpandEnabled"
                                                          Variant="Variant.Outlined"
-                                                         ValueChanged="OnAutoUseExistingChoiceChanged"/>
+                                                         ValueChanged="OnAutoExpandChanged"/>
                                         </MudStack>
                                     </MudStack>
                                 </MudExpansionPanel>
@@ -453,17 +442,6 @@
     private bool _isLoadingData;
     private List<ITreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
-    private bool _expandedShoppingLists;
-    private bool ExpandedShoppingLists
-    {
-        get => _expandedShoppingLists;
-        set
-        {
-            _expandedShoppingLists = value;
-            _ = LocalStorageService.AddItem("ExpandedShoppingLists", value.ToString());
-        }
-    }
-
     private bool _expandedSkills;
     private bool ExpandedSkills
     {
@@ -497,7 +475,10 @@
         }
     }
 
-    private bool _autoUseExistingChoiceEnabled;
+    private const string AutoExpandStorageKey = "ShoppingListAutoExpand";
+    private const string LegacyAutoExpandStorageKey = "ShoppingListAutoUseExistingChoice";
+
+    private bool _isAutoExpandEnabled;
 
     private Recipe? _emptyRecipe;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
@@ -511,17 +492,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _expandedShoppingLists = await LocalStorageService.GetItem("ExpandedShoppingLists") != "False";
         _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
         _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
         _expandedOptions = await LocalStorageService.GetItem("ExpandedShoppingListOptions") != "False";
-        _autoUseExistingChoiceEnabled = await LocalStorageService.GetItem("ShoppingListAutoUseExistingChoice") == "True";
+
+        var autoExpandSetting = await LocalStorageService.GetItem(AutoExpandStorageKey);
+        if (string.IsNullOrEmpty(autoExpandSetting))
+        {
+            autoExpandSetting = await LocalStorageService.GetItem(LegacyAutoExpandStorageKey);
+        }
+
+        _isAutoExpandEnabled = autoExpandSetting == "True";
     }
 
-    private async Task OnAutoUseExistingChoiceChanged(bool value)
+    private async Task OnAutoExpandChanged(bool value)
     {
-        _autoUseExistingChoiceEnabled = value;
-        await LocalStorageService.AddItem("ShoppingListAutoUseExistingChoice", value.ToString());
+        _isAutoExpandEnabled = value;
+        await LocalStorageService.AddItem(AutoExpandStorageKey, value.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -569,7 +556,7 @@
             .ToList();
     }
 
-    private Recipe? GetSingleChosenRecipeForIngredient(Element ingredient, List<Recipe> possibleRecipes)
+    private Recipe? GetSingleExistingRecipeChoiceForIngredient(Element ingredient, List<Recipe> possibleRecipes)
     {
         if (_selectedShoppingList is null)
         {
@@ -621,9 +608,9 @@
         return await ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, userRecipe, (int)quantityToCraft, _referenceDataContext);
     }
 
-    private async Task ApplyAutoChosenRecipesForMissingIngredients(EcoCraftDbContext context, IEnumerable<UserRecipe> parentRecipes)
+    private async Task ApplyAutoExpandForMissingIngredients(EcoCraftDbContext context, IEnumerable<UserRecipe> parentRecipes)
     {
-        if (_selectedShoppingList is null || ContextService.CurrentServerData is null || !_autoUseExistingChoiceEnabled)
+        if (_selectedShoppingList is null || ContextService.CurrentServerData is null || !_isAutoExpandEnabled)
         {
             return;
         }
@@ -650,7 +637,7 @@
                 }
 
                 var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
-                var chosenRecipe = GetSingleChosenRecipeForIngredient(ingredient, possibleRecipes);
+                var chosenRecipe = GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
                 if (chosenRecipe is null)
                 {
                     continue;
@@ -675,13 +662,13 @@
             return;
         }
 
-        if (!_autoUseExistingChoiceEnabled)
+        if (!_isAutoExpandEnabled)
         {
             ToggleAddChildren(context, ingredient);
             return;
         }
 
-        var chosenRecipe = GetSingleChosenRecipeForIngredient(ingredient, possibleRecipes);
+        var chosenRecipe = GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
         if (chosenRecipe is null)
         {
             ToggleAddChildren(context, ingredient);
@@ -707,7 +694,7 @@
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             var createdRecipe = await AddChildRecipeCore(context, userRecipe, element, quantityGoal, recipe);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, new[] { createdRecipe });
+            await ApplyAutoExpandForMissingIngredients(context, new[] { createdRecipe });
         });
 
         _openedAddChildrenContext = null;
@@ -747,7 +734,7 @@
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
             ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, _selectedShoppingList!, userRecipe);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
         });
 
         Rebuild();
@@ -961,7 +948,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -1011,7 +998,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -1054,7 +1041,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -1083,7 +1070,7 @@
             }
 
             ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
         Rebuild();
@@ -1195,7 +1182,7 @@
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             var createdRecipe = await ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, sourceDataContext: _referenceDataContext);
-            await ApplyAutoChosenRecipesForMissingIngredients(context, new[] { createdRecipe });
+            await ApplyAutoExpandForMissingIngredients(context, new[] { createdRecipe });
         });
 
         _emptyRecipe = null;
@@ -1221,7 +1208,7 @@
     {
         await UserCraftingTableDbService.UpdateAllAsync(context, shoppingListCraftingTable);
         ShoppingListDataService.SynchronizeRecipeTree(context, _selectedShoppingList!);
-        await ApplyAutoChosenRecipesForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
+        await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
     }
 
     private async Task RefreshRecipeAutocompleteAsync()

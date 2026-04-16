@@ -229,8 +229,8 @@
         "ConfirmDeleteShoppingList": "Are you sure you want to delete shopping list {name}?",
         "Skills": "Skills Configuration",
         "CraftingTables": "Crafting Tables Configuration",
-        "RememberRecipeChoiceLabel": "Auto-use existing chosen recipe",
-        "RememberRecipeChoiceTooltip": "When enabled, automatically uses the recipe already chosen in this list for the same item. If no unique choice exists, selection remains manual."
+        "AutoExpandLabel": "Auto-expand using existing recipe choices",
+        "AutoExpandTooltip": "When enabled, recipe expansion reuses the already chosen recipe for the same item in this shopping list and automatically adds child recipes. If no unique prior choice exists, selection stays manual."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
