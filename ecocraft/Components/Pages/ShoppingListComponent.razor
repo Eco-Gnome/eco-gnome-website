@@ -236,6 +236,15 @@
                                                          Variant="Variant.Outlined"
                                                          ValueChanged="OnAutoExpandChanged"/>
                                         </MudStack>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutoPropagateRecipeChoiceTooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.AutoPropagateRecipeChoiceLabel")</MudText>
+                                            </MudTooltip>
+                                            <MudCheckBox T="bool"
+                                                         Value="_isRecipeChoicePropagationEnabled"
+                                                         Variant="Variant.Outlined"
+                                                         ValueChanged="OnRecipeChoicePropagationChanged"/>
+                                        </MudStack>
                                     </MudStack>
                                 </MudExpansionPanel>
                             </MudExpansionPanels>
@@ -477,8 +486,10 @@
 
     private const string AutoExpandStorageKey = "ShoppingListAutoExpand";
     private const string LegacyAutoExpandStorageKey = "ShoppingListAutoUseExistingChoice";
+    private const string RecipeChoicePropagationStorageKey = "ShoppingListAutoPropagateRecipeChoice";
 
     private bool _isAutoExpandEnabled;
+    private bool _isRecipeChoicePropagationEnabled;
 
     private Recipe? _emptyRecipe;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
@@ -503,12 +514,19 @@
         }
 
         _isAutoExpandEnabled = autoExpandSetting == "True";
+        _isRecipeChoicePropagationEnabled = await LocalStorageService.GetItem(RecipeChoicePropagationStorageKey) == "True";
     }
 
     private async Task OnAutoExpandChanged(bool value)
     {
         _isAutoExpandEnabled = value;
         await LocalStorageService.AddItem(AutoExpandStorageKey, value.ToString());
+    }
+
+    private async Task OnRecipeChoicePropagationChanged(bool value)
+    {
+        _isRecipeChoicePropagationEnabled = value;
+        await LocalStorageService.AddItem(RecipeChoicePropagationStorageKey, value.ToString());
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -692,6 +710,12 @@
 
         if (possibleRecipes.Count == 1)
         {
+            if (_isRecipeChoicePropagationEnabled)
+            {
+                await PropagateManualRecipeChoiceAcrossTree(ingredient, possibleRecipes[0]);
+                return;
+            }
+
             var quantityGoal = GetIngredientQuantityGoal(context.Value, ingredient, _selectedShoppingList);
             await AddChildRecipe(context.Value, ingredient, quantityGoal, possibleRecipes[0]);
             return;
@@ -709,11 +733,7 @@
             return;
         }
 
-        var childrenToRemove = parentRecipe.ChildrenUserRecipes
-            .Where(childRecipe => childRecipe.Recipe.Elements.Any(product =>
-                product.IsProduct() &&
-                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
-            .ToList();
+        var childrenToRemove = GetMatchingChildrenForIngredient(parentRecipe, ingredient);
 
         if (childrenToRemove.Count == 0)
         {
@@ -735,10 +755,108 @@
         Rebuild();
     }
 
+    private static List<UserRecipe> GetMatchingChildrenForIngredient(UserRecipe parentRecipe, Element ingredient)
+    {
+        return parentRecipe.ChildrenUserRecipes
+            .Where(childRecipe => childRecipe.Recipe.Elements.Any(product =>
+                product.IsProduct() &&
+                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .ToList();
+    }
+
+    private List<(Guid ParentRecipeId, Guid IngredientId)> GetMatchingIngredientTargetsForPropagation(Element sourceIngredient)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return [];
+        }
+
+        var sourceIngredientIds = sourceIngredient.ItemOrTag.GetAssociatedTagsAndSelf()
+            .Select(iot => iot.Id)
+            .ToHashSet();
+
+        return _selectedShoppingList.UserRecipes
+            .SelectMany(parentRecipe => parentRecipe.Recipe.Elements
+                .Where(candidateIngredient =>
+                    candidateIngredient.IsIngredient() &&
+                    candidateIngredient.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => sourceIngredientIds.Contains(iot.Id)))
+                .OrderBy(candidateIngredient => candidateIngredient.Index)
+                .Select(candidateIngredient => (parentRecipe.Id, candidateIngredient.Id)))
+            .ToList();
+    }
+
+    private async Task PropagateManualRecipeChoiceAcrossTree(Element sourceIngredient, Recipe chosenRecipe)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            var targets = GetMatchingIngredientTargetsForPropagation(sourceIngredient);
+            var createdRecipes = new List<UserRecipe>();
+
+            foreach (var (parentRecipeId, ingredientId) in targets)
+            {
+                var parentRecipe = _selectedShoppingList.UserRecipes.FirstOrDefault(ur => ur.Id == parentRecipeId);
+                if (parentRecipe is null)
+                {
+                    continue;
+                }
+
+                var ingredient = parentRecipe.Recipe.Elements.FirstOrDefault(e => e.Id == ingredientId);
+                if (ingredient is null || !ingredient.IsIngredient())
+                {
+                    continue;
+                }
+
+                var canChosenRecipeCraftIngredient = chosenRecipe.Elements.Any(product =>
+                    product.IsProduct() &&
+                    !product.DefaultIsReintegrated &&
+                    product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id));
+
+                if (!canChosenRecipeCraftIngredient)
+                {
+                    continue;
+                }
+
+                var existingChildren = GetMatchingChildrenForIngredient(parentRecipe, ingredient);
+                var alreadyAppliedSingleChoice = existingChildren.Count == 1 && existingChildren[0].RecipeId == chosenRecipe.Id;
+                if (!alreadyAppliedSingleChoice)
+                {
+                    foreach (var childRecipe in existingChildren)
+                    {
+                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe);
+                    }
+
+                    var quantityGoal = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
+                    var createdRecipe = await AddChildRecipeCore(context, parentRecipe, ingredient, quantityGoal, chosenRecipe);
+                    createdRecipes.Add(createdRecipe);
+                }
+            }
+
+            if (createdRecipes.Count > 0)
+            {
+                await ApplyAutoExpandForMissingIngredients(context, createdRecipes);
+            }
+        });
+
+        _openedAddChildrenContext = null;
+        _openedAddChildrenIngredient = null;
+        Rebuild();
+    }
+
     private async Task AddChildRecipeFromManualSelection(UserRecipe userRecipe, Element ingredient, Recipe recipe)
     {
         if (_selectedShoppingList is null)
         {
+            return;
+        }
+
+        if (_isRecipeChoicePropagationEnabled)
+        {
+            await PropagateManualRecipeChoiceAcrossTree(ingredient, recipe);
             return;
         }
 

@@ -223,7 +223,9 @@
         "Skills": "Configuration des métiers",
         "CraftingTables": "Configuration des Tables d'artisanat",
         "AutoExpandLabel": "Déploiement auto selon les choix existants",
-        "AutoExpandTooltip": "Si activé, le déploiement des recettes réutilise la recette déjà choisie pour le même objet dans cette liste et ajoute automatiquement les sous-recettes. S'il n'existe pas de choix unique, la sélection reste manuelle."
+        "AutoExpandTooltip": "Si activé, le déploiement des recettes réutilise la recette déjà choisie pour le même objet dans cette liste et ajoute automatiquement les sous-recettes. S'il n'existe pas de choix unique, la sélection reste manuelle.",
+        "AutoPropagateRecipeChoiceLabel": "Propagation auto des choix de recette",
+        "AutoPropagateRecipeChoiceTooltip": "Si active, un choix manuel de recette est propage a tous les ingredients identiques deja presents dans l'arbre."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",

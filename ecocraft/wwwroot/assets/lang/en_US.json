@@ -230,7 +230,9 @@
         "Skills": "Skills Configuration",
         "CraftingTables": "Crafting Tables Configuration",
         "AutoExpandLabel": "Auto-expand using existing recipe choices",
-        "AutoExpandTooltip": "When enabled, recipe expansion reuses the already chosen recipe for the same item in this shopping list and automatically adds child recipes. If no unique prior choice exists, selection stays manual."
+        "AutoExpandTooltip": "When enabled, recipe expansion reuses the already chosen recipe for the same item in this shopping list and automatically adds child recipes. If no unique prior choice exists, selection stays manual.",
+        "AutoPropagateRecipeChoiceLabel": "Auto-propagate recipe choices",
+        "AutoPropagateRecipeChoiceTooltip": "When enabled, a manual recipe selection is propagated to all identical ingredients already present in the tree."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
