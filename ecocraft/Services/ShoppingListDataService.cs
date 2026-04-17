@@ -48,7 +48,14 @@ namespace ecocraft.Services
             };
 
             userRecipeDbService.Create(context, userRecipe);
-            shoppingList.UserRecipes.Add(userRecipe);
+            if (parent is null)
+            {
+                shoppingList.UserRecipes.Insert(0, userRecipe);
+            }
+            else
+            {
+                shoppingList.UserRecipes.Add(userRecipe);
+            }
             recipe.UserRecipes.Add(userRecipe);
             parent?.ChildrenUserRecipes.Add(userRecipe);
 

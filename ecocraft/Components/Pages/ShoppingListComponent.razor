@@ -372,7 +372,7 @@
                                                     </MudStack>
                                                     <MudStack Class="flex-grow-1"></MudStack>
                                                     <MudStack Row AlignItems="AlignItems.Center">
-                                                        @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()))
+                                                        @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
                                                         {
                                                             var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
                                                             var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
@@ -759,13 +759,35 @@
         Rebuild();
     }
 
+    private static int GetChildDisplayOrder(UserRecipe parentRecipe, UserRecipe childRecipe)
+    {
+        var matchingIngredientIndex = parentRecipe.Recipe.Elements
+            .Where(e => e.IsIngredient())
+            .Where(ingredient => childRecipe.Recipe.Elements.Any(product =>
+                product.IsProduct() &&
+                !product.DefaultIsReintegrated &&
+                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .Select(ingredient => ingredient.Index)
+            .DefaultIfEmpty(int.MaxValue)
+            .Min();
+
+        return matchingIngredientIndex;
+    }
+
+    private static IEnumerable<UserRecipe> GetOrderedChildrenForDisplay(UserRecipe parentRecipe)
+    {
+        return parentRecipe.ChildrenUserRecipes
+            .OrderBy(childRecipe => GetChildDisplayOrder(parentRecipe, childRecipe))
+            .ThenBy(childRecipe => childRecipe.Recipe.Name);
+    }
+
     private ITreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
     {
         return new TreeItemData<UserRecipe>
         {
             Value = userRecipe,
             Expanded = true,
-            Children = userRecipe.ChildrenUserRecipes.Select(CreateTreeItemData).ToList()
+            Children = GetOrderedChildrenForDisplay(userRecipe).Select(CreateTreeItemData).ToList()
         };
     }
 
