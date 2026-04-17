@@ -245,6 +245,15 @@
                                                          Variant="Variant.Outlined"
                                                          ValueChanged="OnRecipeChoicePropagationChanged"/>
                                         </MudStack>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.GuidedAutoExpandTooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.GuidedAutoExpandLabel")</MudText>
+                                            </MudTooltip>
+                                            <MudCheckBox T="bool"
+                                                         Value="_isGuidedAutoExpandEnabled"
+                                                         Variant="Variant.Outlined"
+                                                         ValueChanged="OnGuidedAutoExpandChanged"/>
+                                        </MudStack>
                                     </MudStack>
                                 </MudExpansionPanel>
                             </MudExpansionPanels>
@@ -379,49 +388,68 @@
                                                                          Style="width: 65px;"
                                                                          Immediate/>
                                                     </MudStack>
-                                                    <MudStack Class="flex-grow-1"></MudStack>
-                                                    <MudStack Row AlignItems="AlignItems.Center">
-                                                        @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
-                                                        {
-                                                            var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
-                                                            var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
-                                                            var isFullfilled = context.Value.ChildrenUserRecipes
-                                                                .Sum(ur => ur.Recipe.Elements
-                                                                    .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
-                                                                    .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * ur.RoundFactor))
-                                                                ) >= ingredientNumber;
-
-                                                            <MudTooltip Text="@LocalizationService.GetTranslation(ingredient.ItemOrTag)">
-                                                                <MudLink Color="Color.Default"
-                                                                         OnClick="@(() => HandleIngredientClick(context, ingredient, possibleRecipes, isFullfilled))">
-                                                                    <MudStack Row AlignItems="AlignItems.Center">
-                                                                        <EcoIcon Size="32"
-                                                                                 Item="ingredient.ItemOrTag"
-                                                                                 NumberClass="mb-n1 text-shadow-black"
-                                                                                 Number="ingredientNumber"
-                                                                                 NumberColor="Color.Default"
-                                                                                 ForegroundIconColor="Color.Dark"
-                                                                                 ForegroundIcon="@(isFullfilled ? MDIIcons.Outline.CheckCircle : null)"/>
-                                                                    </MudStack>
-                                                                </MudLink>
-                                                            </MudTooltip>
-
-                                                            @if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+                                                    <div class="shopping-list-ingredient-scroll">
+                                                        <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-ingredient-row">
+                                                            @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
                                                             {
-                                                                <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
-                                                                @foreach (var recipe in possibleRecipes)
-                                                                {
-                                                                    <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
-                                                                        <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
-                                                                            <EcoIcon Size="24" Item="recipe.CraftingTable"/>
+                                                                var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
+                                                                var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
+                                                                var isFullfilled = context.Value.ChildrenUserRecipes
+                                                                    .Sum(ur => ur.Recipe.Elements
+                                                                        .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
+                                                                        .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * ur.RoundFactor))
+                                                                    ) >= ingredientNumber;
+                                                                var isGuidedPendingChoice = IsGuidedRunPausedForIngredient(context.Value, ingredient);
+                                                                var isGuidedMutedChoice = IsGuidedRunPaused && !isGuidedPendingChoice;
+
+                                                                <MudStack Row AlignItems="AlignItems.Center" Class="@GetChoiceContainerClass(isGuidedPendingChoice, isGuidedMutedChoice)">
+                                                                    <MudTooltip Text="@LocalizationService.GetTranslation(ingredient.ItemOrTag)">
+                                                                        <MudLink Color="Color.Default"
+                                                                                 OnClick="@(() => HandleIngredientClick(context, ingredient, possibleRecipes, isFullfilled))">
+                                                                            <MudStack Row AlignItems="AlignItems.Center">
+                                                                                <EcoIcon Size="32"
+                                                                                         Item="ingredient.ItemOrTag"
+                                                                                         NumberClass="mb-n1 text-shadow-black"
+                                                                                         Number="ingredientNumber"
+                                                                                         NumberColor="Color.Default"
+                                                                                         ForegroundIconColor="Color.Dark"
+                                                                                         ForegroundIcon="@(isFullfilled ? MDIIcons.Outline.CheckCircle : null)"/>
+                                                                            </MudStack>
                                                                         </MudLink>
                                                                     </MudTooltip>
-                                                                }
 
-                                                                <MudIcon Icon="@MDIIcons.Filled.ArrowLeftBold"/>
+                                                                    @if (IsAddChildrenOpen(context, ingredient))
+                                                                    {
+                                                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@GetChoiceRowClass(isGuidedPendingChoice)">
+                                                                            <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
+                                                                            @foreach (var recipe in possibleRecipes)
+                                                                            {
+                                                                                <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
+                                                                                    <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
+                                                                                        <EcoIcon Size="24" Item="recipe.CraftingTable"/>
+                                                                                    </MudLink>
+                                                                                </MudTooltip>
+                                                                            }
+
+                                                                            @if (isGuidedPendingChoice)
+                                                                            {
+                                                                                <span class="guided-choice-scroll-anchor" @ref="_guidedPendingChoiceAnchorRef"></span>
+                                                                                <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandTooltip")">
+                                                                                    <MudButton Variant="Variant.Outlined"
+                                                                                               Color="Color.Warning"
+                                                                                               Size="Size.Small"
+                                                                                               StartIcon="@MDIIcons.Filled.StopCircle"
+                                                                                               OnClick="StopGuidedAutoExpandRun"/>
+                                                                                </MudTooltip>
+                                                                            }
+
+                                                                            <MudIcon Icon="@MDIIcons.Filled.ArrowLeftBold"/>
+                                                                        </MudStack>
+                                                                    }
+                                                                </MudStack>
                                                             }
-                                                        }
-                                                    </MudStack>
+                                                        </MudStack>
+                                                    </div>
                                                     <MudIconButton Icon="@MDIIcons.Filled.Close"
                                                                    Size="Size.Small"
                                                                    OnClick="() => RemoveShoppingListRecipe(context.Value)"/>
@@ -487,14 +515,24 @@
     private const string AutoExpandStorageKey = "ShoppingListAutoExpand";
     private const string LegacyAutoExpandStorageKey = "ShoppingListAutoUseExistingChoice";
     private const string RecipeChoicePropagationStorageKey = "ShoppingListAutoPropagateRecipeChoice";
+    private const string GuidedAutoExpandStorageKey = "ShoppingListGuidedAutoExpand";
 
     private bool _isAutoExpandEnabled;
     private bool _isRecipeChoicePropagationEnabled;
+    private bool _isGuidedAutoExpandEnabled;
+    private bool _isGuidedRunActive;
+    private readonly Queue<Guid> _guidedRunQueue = new();
+    private readonly HashSet<Guid> _guidedRunQueuedIds = [];
+    private Guid? _guidedPendingParentRecipeId;
+    private Guid? _guidedPendingIngredientId;
+    private ElementReference _guidedPendingChoiceAnchorRef;
+    private bool _shouldScrollToGuidedPendingChoice;
 
     private Recipe? _emptyRecipe;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
     private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
     private Element? _openedAddChildrenIngredient;
+    private bool IsGuidedRunPaused => _isGuidedRunActive && _guidedPendingParentRecipeId.HasValue && _guidedPendingIngredientId.HasValue;
 
     protected override void OnInitialized()
     {
@@ -515,6 +553,7 @@
 
         _isAutoExpandEnabled = autoExpandSetting == "True";
         _isRecipeChoicePropagationEnabled = await LocalStorageService.GetItem(RecipeChoicePropagationStorageKey) == "True";
+        _isGuidedAutoExpandEnabled = await LocalStorageService.GetItem(GuidedAutoExpandStorageKey) == "True";
     }
 
     private async Task OnAutoExpandChanged(bool value)
@@ -529,11 +568,29 @@
         await LocalStorageService.AddItem(RecipeChoicePropagationStorageKey, value.ToString());
     }
 
+    private async Task OnGuidedAutoExpandChanged(bool value)
+    {
+        _isGuidedAutoExpandEnabled = value;
+        await LocalStorageService.AddItem(GuidedAutoExpandStorageKey, value.ToString());
+        if (!value && _isGuidedRunActive)
+        {
+            ResetGuidedRunState();
+            Rebuild();
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await RetrieveData();
+            return;
+        }
+
+        if (_shouldScrollToGuidedPendingChoice && IsGuidedRunPaused)
+        {
+            _shouldScrollToGuidedPendingChoice = false;
+            await JsRuntime.InvokeVoidAsync("scrollElementIntoViewCenter", _guidedPendingChoiceAnchorRef);
         }
     }
 
@@ -708,6 +765,22 @@
             return;
         }
 
+        if (_isGuidedAutoExpandEnabled && IsIngredientAlreadyInBranch(context.Value, ingredient))
+        {
+            return;
+        }
+
+        if (_isGuidedRunActive && IsGuidedRunPausedForIngredient(context.Value, ingredient))
+        {
+            return;
+        }
+
+        if (_isGuidedAutoExpandEnabled)
+        {
+            await StartGuidedAutoExpandFromIngredient(context.Value, ingredient, possibleRecipes);
+            return;
+        }
+
         if (possibleRecipes.Count == 1)
         {
             if (_isRecipeChoicePropagationEnabled)
@@ -721,8 +794,7 @@
             return;
         }
 
-        // Manual user click opens recipe choice when multiple recipes exist.
-        // Automatic choice is reserved for auto-expand loops only.
+        // Manual mode keeps multi-choice explicit with inline recipe selection.
         ToggleAddChildren(context, ingredient);
     }
 
@@ -731,6 +803,11 @@
         if (_selectedShoppingList is null)
         {
             return;
+        }
+
+        if (_isGuidedRunActive)
+        {
+            ResetGuidedRunState();
         }
 
         var childrenToRemove = GetMatchingChildrenForIngredient(parentRecipe, ingredient);
@@ -785,17 +862,17 @@
             .ToList();
     }
 
-    private async Task PropagateManualRecipeChoiceAcrossTree(Element sourceIngredient, Recipe chosenRecipe)
+    private async Task<List<UserRecipe>> PropagateRecipeChoiceAcrossTreeCore(Element sourceIngredient, Recipe chosenRecipe, bool runAutoExpandAfterApply)
     {
         if (_selectedShoppingList is null)
         {
-            return;
+            return [];
         }
 
+        var createdRecipes = new List<UserRecipe>();
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
             var targets = GetMatchingIngredientTargetsForPropagation(sourceIngredient);
-            var createdRecipes = new List<UserRecipe>();
 
             foreach (var (parentRecipeId, ingredientId) in targets)
             {
@@ -836,11 +913,18 @@
                 }
             }
 
-            if (createdRecipes.Count > 0)
+            if (runAutoExpandAfterApply && createdRecipes.Count > 0)
             {
                 await ApplyAutoExpandForMissingIngredients(context, createdRecipes);
             }
         });
+
+        return createdRecipes;
+    }
+
+    private async Task PropagateManualRecipeChoiceAcrossTree(Element sourceIngredient, Recipe chosenRecipe)
+    {
+        await PropagateRecipeChoiceAcrossTreeCore(sourceIngredient, chosenRecipe, runAutoExpandAfterApply: true);
 
         _openedAddChildrenContext = null;
         _openedAddChildrenIngredient = null;
@@ -852,6 +936,28 @@
         if (_selectedShoppingList is null)
         {
             return;
+        }
+
+        if (_isGuidedRunActive && IsGuidedRunPausedForIngredient(userRecipe, ingredient))
+        {
+            _guidedPendingParentRecipeId = null;
+            _guidedPendingIngredientId = null;
+            _openedAddChildrenContext = null;
+            _openedAddChildrenIngredient = null;
+
+            var createdRecipes = await ApplyRecipeChoiceToIngredient(userRecipe, ingredient, recipe, runAutoExpandAfterApply: false);
+            foreach (var createdRecipe in createdRecipes)
+            {
+                EnqueueGuidedParent(createdRecipe);
+            }
+
+            await ContinueGuidedRunAsync();
+            return;
+        }
+
+        if (_isGuidedRunActive)
+        {
+            ResetGuidedRunState();
         }
 
         if (_isRecipeChoicePropagationEnabled)
@@ -866,15 +972,26 @@
 
     private async Task AddChildRecipe(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
     {
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            var createdRecipe = await AddChildRecipeCore(context, userRecipe, element, quantityGoal, recipe);
-            await ApplyAutoExpandForMissingIngredients(context, new[] { createdRecipe });
-        });
+        await AddChildRecipeCoreAndOptionallyAutoExpand(userRecipe, element, quantityGoal, recipe, runAutoExpandAfterAdd: true);
 
         _openedAddChildrenContext = null;
         _openedAddChildrenIngredient = null;
         Rebuild();
+    }
+
+    private async Task<UserRecipe> AddChildRecipeCoreAndOptionallyAutoExpand(UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe, bool runAutoExpandAfterAdd)
+    {
+        UserRecipe? createdRecipe = null;
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            createdRecipe = await AddChildRecipeCore(context, userRecipe, element, quantityGoal, recipe);
+            if (runAutoExpandAfterAdd && createdRecipe is not null)
+            {
+                await ApplyAutoExpandForMissingIngredients(context, new[] { createdRecipe });
+            }
+        });
+
+        return createdRecipe!;
     }
 
     private static int GetChildDisplayOrder(UserRecipe parentRecipe, UserRecipe childRecipe)
@@ -909,8 +1026,52 @@
         };
     }
 
+    private static string GetChoiceContainerClass(bool isGuidedPendingChoice, bool isGuidedMutedChoice)
+    {
+        if (isGuidedPendingChoice)
+        {
+            return "shopping-list-choice-container guided-choice-focus";
+        }
+
+        if (isGuidedMutedChoice)
+        {
+            return "shopping-list-choice-container guided-choice-muted";
+        }
+
+        return "shopping-list-choice-container";
+    }
+
+    private static string GetChoiceRowClass(bool isGuidedPendingChoice)
+    {
+        return isGuidedPendingChoice
+            ? "shopping-list-choice-row shopping-list-choice-row-pending"
+            : "shopping-list-choice-row";
+    }
+
+    private bool IsAddChildrenOpen(ITreeItemData<UserRecipe> context, Element ingredient)
+    {
+        if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+        {
+            return true;
+        }
+
+        return IsGuidedRunPausedForIngredient(context.Value, ingredient);
+    }
+
+    private bool IsGuidedRunPausedForIngredient(UserRecipe userRecipe, Element ingredient)
+    {
+        return IsGuidedRunPaused
+               && _guidedPendingParentRecipeId == userRecipe.Id
+               && _guidedPendingIngredientId == ingredient.Id;
+    }
+
     private void ToggleAddChildren(ITreeItemData<UserRecipe> context, Element ingredient)
     {
+        if (IsGuidedRunPausedForIngredient(context.Value, ingredient))
+        {
+            return;
+        }
+
         if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
         {
             _openedAddChildrenContext = null;
@@ -920,6 +1081,198 @@
         {
             _openedAddChildrenContext = context;
             _openedAddChildrenIngredient = ingredient;
+        }
+    }
+
+    private void StopGuidedAutoExpandRun()
+    {
+        if (!_isGuidedRunActive)
+        {
+            return;
+        }
+
+        ResetGuidedRunState();
+        Rebuild();
+    }
+
+    private void ResetGuidedRunState()
+    {
+        _isGuidedRunActive = false;
+        _guidedPendingParentRecipeId = null;
+        _guidedPendingIngredientId = null;
+        _shouldScrollToGuidedPendingChoice = false;
+        _guidedPendingChoiceAnchorRef = default;
+        _guidedRunQueue.Clear();
+        _guidedRunQueuedIds.Clear();
+        _openedAddChildrenContext = null;
+        _openedAddChildrenIngredient = null;
+    }
+
+    private async Task StartGuidedAutoExpandFromIngredient(UserRecipe parentRecipe, Element ingredient, List<Recipe> possibleRecipes)
+    {
+        ResetGuidedRunState();
+        _isGuidedRunActive = true;
+
+        var chosenRecipe = ResolveGuidedRecipeChoice(ingredient, possibleRecipes);
+        if (chosenRecipe is null)
+        {
+            PauseGuidedRun(parentRecipe, ingredient);
+            Rebuild();
+            return;
+        }
+
+        var createdRecipes = await ApplyRecipeChoiceToIngredient(parentRecipe, ingredient, chosenRecipe, runAutoExpandAfterApply: false);
+        foreach (var createdRecipe in createdRecipes)
+        {
+            EnqueueGuidedParent(createdRecipe);
+        }
+
+        await ContinueGuidedRunAsync();
+    }
+
+    private async Task<List<UserRecipe>> ApplyRecipeChoiceToIngredient(UserRecipe parentRecipe, Element ingredient, Recipe chosenRecipe, bool runAutoExpandAfterApply)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return [];
+        }
+
+        var requiredQuantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
+        var producedQuantity = GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList);
+        var missingQuantity = requiredQuantity - producedQuantity;
+        if (missingQuantity <= 0)
+        {
+            return [];
+        }
+
+        if (_isRecipeChoicePropagationEnabled)
+        {
+            return await PropagateRecipeChoiceAcrossTreeCore(ingredient, chosenRecipe, runAutoExpandAfterApply);
+        }
+
+        var createdRecipe = await AddChildRecipeCoreAndOptionallyAutoExpand(parentRecipe, ingredient, missingQuantity, chosenRecipe, runAutoExpandAfterAdd: runAutoExpandAfterApply);
+        return [createdRecipe];
+    }
+
+    private Recipe? ResolveGuidedRecipeChoice(Element ingredient, List<Recipe> possibleRecipes)
+    {
+        if (possibleRecipes.Count == 1)
+        {
+            return possibleRecipes[0];
+        }
+
+        return GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
+    }
+
+    private void PauseGuidedRun(UserRecipe parentRecipe, Element ingredient)
+    {
+        var isNewPendingChoice = _guidedPendingParentRecipeId != parentRecipe.Id || _guidedPendingIngredientId != ingredient.Id;
+        _guidedPendingParentRecipeId = parentRecipe.Id;
+        _guidedPendingIngredientId = ingredient.Id;
+        if (isNewPendingChoice)
+        {
+            _shouldScrollToGuidedPendingChoice = true;
+        }
+
+        _openedAddChildrenContext = null;
+        _openedAddChildrenIngredient = null;
+    }
+
+    private void EnqueueGuidedParent(UserRecipe parentRecipe)
+    {
+        if (_guidedRunQueuedIds.Add(parentRecipe.Id))
+        {
+            _guidedRunQueue.Enqueue(parentRecipe.Id);
+        }
+    }
+
+    private bool TryDequeueGuidedParent(out UserRecipe? parentRecipe)
+    {
+        parentRecipe = null;
+        if (_selectedShoppingList is null)
+        {
+            return false;
+        }
+
+        while (_guidedRunQueue.Count > 0)
+        {
+            var parentRecipeId = _guidedRunQueue.Dequeue();
+            _guidedRunQueuedIds.Remove(parentRecipeId);
+            parentRecipe = _selectedShoppingList.UserRecipes.FirstOrDefault(ur => ur.Id == parentRecipeId);
+            if (parentRecipe is not null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async Task ContinueGuidedRunAsync()
+    {
+        if (_selectedShoppingList is null || !_isGuidedRunActive)
+        {
+            return;
+        }
+
+        var hasTreeChanged = false;
+        while (_isGuidedRunActive && !IsGuidedRunPaused && TryDequeueGuidedParent(out var parentRecipe))
+        {
+            if (parentRecipe is null)
+            {
+                continue;
+            }
+
+            foreach (var ingredient in parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
+            {
+                var requiredQuantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
+                var producedQuantity = GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList);
+                if (producedQuantity >= requiredQuantity || IsIngredientAlreadyInBranch(parentRecipe, ingredient))
+                {
+                    continue;
+                }
+
+                var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
+                if (possibleRecipes.Count == 0)
+                {
+                    continue;
+                }
+
+                var chosenRecipe = ResolveGuidedRecipeChoice(ingredient, possibleRecipes);
+                if (chosenRecipe is null)
+                {
+                    PauseGuidedRun(parentRecipe, ingredient);
+                    EnqueueGuidedParent(parentRecipe);
+                    Rebuild();
+                    return;
+                }
+
+                var createdRecipes = await ApplyRecipeChoiceToIngredient(parentRecipe, ingredient, chosenRecipe, runAutoExpandAfterApply: false);
+                if (createdRecipes.Count == 0)
+                {
+                    continue;
+                }
+
+                hasTreeChanged = true;
+                foreach (var createdRecipe in createdRecipes)
+                {
+                    EnqueueGuidedParent(createdRecipe);
+                }
+            }
+        }
+
+        if (_isGuidedRunActive && !IsGuidedRunPaused && _guidedRunQueue.Count == 0)
+        {
+            ResetGuidedRunState();
+        }
+
+        if (hasTreeChanged || !_isGuidedRunActive)
+        {
+            Rebuild();
+        }
+        else
+        {
+            StateHasChanged();
         }
     }
 
@@ -947,6 +1300,11 @@
         if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
         {
             return;
+        }
+
+        if (_isGuidedRunActive)
+        {
+            ResetGuidedRunState();
         }
 
         var targetShoppingList = shoppingList ?? ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => d.IsShoppingList);
@@ -1079,6 +1437,11 @@
 
     private async Task RemoveShoppingListRecipe(UserRecipe userRecipe)
     {
+        if (_isGuidedRunActive)
+        {
+            ResetGuidedRunState();
+        }
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, userRecipe);
@@ -1375,6 +1738,11 @@
     private async Task AddShoppingListRecipe(Recipe? recipe)
     {
         if (recipe is null) return;
+
+        if (_isGuidedRunActive)
+        {
+            ResetGuidedRunState();
+        }
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {

@@ -359,3 +359,50 @@
                  -1px 0 0 #000,
                  0 -1px 0 #000
 }
+
+.guided-choice-focus {
+    border: 1px solid rgba(255, 193, 7, 0.75);
+    border-radius: 8px;
+    padding: 2px 4px;
+    background-color: rgba(255, 193, 7, 0.12);
+    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.25);
+}
+
+.guided-choice-muted {
+    opacity: 0.45;
+    transition: opacity 0.15s ease;
+}
+
+.shopping-list-ingredient-scroll {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.shopping-list-ingredient-row {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    column-gap: 4px;
+    width: max-content;
+    min-width: 100%;
+}
+
+.shopping-list-choice-container {
+    flex: 0 0 auto;
+}
+
+.shopping-list-choice-row {
+    flex-wrap: nowrap;
+    row-gap: 0;
+}
+
+.shopping-list-choice-row-pending {
+    max-width: none;
+}
+
+.guided-choice-scroll-anchor {
+    display: block;
+    width: 1px;
+    height: 1px;
+}

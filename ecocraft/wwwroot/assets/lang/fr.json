@@ -225,7 +225,11 @@
         "AutoExpandLabel": "Déploiement auto selon les choix existants",
         "AutoExpandTooltip": "Si activé, le déploiement des recettes réutilise la recette déjà choisie pour le même objet dans cette liste et ajoute automatiquement les sous-recettes. S'il n'existe pas de choix unique, la sélection reste manuelle.",
         "AutoPropagateRecipeChoiceLabel": "Propagation auto des choix de recette",
-        "AutoPropagateRecipeChoiceTooltip": "Si active, un choix manuel de recette est propage a tous les ingredients identiques deja presents dans l'arbre."
+        "AutoPropagateRecipeChoiceTooltip": "Si active, un choix manuel de recette est propage a tous les ingredients identiques deja presents dans l'arbre.",
+        "GuidedAutoExpandLabel": "Expansion guidee auto vers ressources brutes",
+        "GuidedAutoExpandTooltip": "Si active, un clic ingredient lance une expansion guidee jusqu'aux ressources non craftables. En cas d'ambiguite, le run se met en pause pour votre choix puis reprend automatiquement.",
+        "StopGuidedAutoExpandLabel": "Stop auto-expand",
+        "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",

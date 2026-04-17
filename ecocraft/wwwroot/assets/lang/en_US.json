@@ -232,7 +232,11 @@
         "AutoExpandLabel": "Auto-expand using existing recipe choices",
         "AutoExpandTooltip": "When enabled, recipe expansion reuses the already chosen recipe for the same item in this shopping list and automatically adds child recipes. If no unique prior choice exists, selection stays manual.",
         "AutoPropagateRecipeChoiceLabel": "Auto-propagate recipe choices",
-        "AutoPropagateRecipeChoiceTooltip": "When enabled, a manual recipe selection is propagated to all identical ingredients already present in the tree."
+        "AutoPropagateRecipeChoiceTooltip": "When enabled, a manual recipe selection is propagated to all identical ingredients already present in the tree.",
+        "GuidedAutoExpandLabel": "Guided auto-expand to raw resources",
+        "GuidedAutoExpandTooltip": "When enabled, clicking an ingredient starts guided expansion to non-craftable resources. If multiple recipes are possible, the run pauses for your choice and resumes automatically.",
+        "StopGuidedAutoExpandLabel": "Stop auto-expand",
+        "StopGuidedAutoExpandTooltip": "Stop the current guided auto-expand run and keep all recipes already added."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
