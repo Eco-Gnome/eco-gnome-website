@@ -27,16 +27,7 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
     <ChildContent>
         <MudGrid Style="height: auto">
-            <MudItem xs="12" Class="pa-2 mt-2">
-                <MudPaper>
-                    <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center" Class="pa-2">
-                        <MudText Typo="Typo.body1" Color="Color.Secondary">
-                            @LocalizationService.GetTranslation("DevFeature.1") <MudLink Href="https://github.com/Eco-Gnome/eco-gnome-website/discussions/71">@LocalizationService.GetTranslation("DevFeature.2")</MudLink>@LocalizationService.GetTranslation("DevFeature.3")
-                        </MudText>
-                    </MudStack>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" Class="pa-2">
+            <MudItem xs="12" Class="px-4 pt-4">
                 <MudStack Row Spacing="3">
                     @foreach (var shoppingList in ContextService.CurrentUserServer!.DataContexts.Where(d => d.IsShoppingList))
                     {

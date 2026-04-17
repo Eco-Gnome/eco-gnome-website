@@ -13,6 +13,21 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.1",
+            "2026-04-17",
+            "MudBlazor 9.3 Migration, Shopping List Guided Expansion & Stability Improvements",
+            """
+            - UI Framework Upgrade: Migrated Eco Gnome to MudBlazor 9.3 and aligned component behavior.
+            - Shopping List Guided Expansion: Added guided auto-expand to raw resources with pause on ambiguous recipe choices, automatic resume after selection, inline stop control, and optional propagation of recipe choices across identical ingredients.
+            - Shopping List UX: Added auto-scroll to the current pending choice, immediate node ordering without refresh, and horizontal scrolling to keep recipe rows readable on one line.
+            - Shopping List Reliability: Improved recursion depth handling, by-product exclusion (`!DefaultIsReintegrated`), branch synchronization, and manual sub-recipe quantity consistency.
+            - Price Calculator & Policies: Improved calorie/margin policy handling, enforced safer numeric input behavior, and reduced talent recalculation noise with debouncing.
+            - Server/Admin/API Fixes: Resolved multiple regressions around tag APIs, price persistence, server management refresh, and admin/server edge cases.
+            - Deployment & Tooling: Improved Docker and DataMigrator integration, with CI/CD and migration reliability fixes.
+            - Stability: Fixed several EF tracking/deletion edge cases and hardened calculation error handling.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.0",
             "2026-04-08",
             "PostgreSQL Migration, Shopping List Improvements & Better Talent Handling",
