@@ -67,7 +67,7 @@ namespace ecocraft.Services
 
         public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
-            RemoveUserRecipe(context, shoppingList, shoppingListRecipe, true);
+            RemoveUserRecipeInternal(context, shoppingList, shoppingListRecipe);
         }
 
         public void SynchronizeRecipeTree(EcoCraftDbContext context, DataContext shoppingList)
@@ -83,7 +83,7 @@ namespace ecocraft.Services
             SynchronizeRecipeChildren(context, shoppingList, parentRecipe);
         }
 
-        private void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, bool destroyInDatabase)
+        private void RemoveUserRecipeInternal(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
             var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
             var currentUserSkillId = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList)?.Id;
@@ -104,13 +104,10 @@ namespace ecocraft.Services
 
             foreach (var recipe in childrenRecipes)
             {
-                RemoveUserRecipe(context, shoppingList, recipe, false);
+                RemoveUserRecipeInternal(context, shoppingList, recipe);
             }
 
-            if (destroyInDatabase)
-            {
-                userRecipeDbService.Destroy(context, shoppingListRecipe);
-            }
+            userRecipeDbService.Destroy(context, shoppingListRecipe);
 
             var currentUserCraftingTable = currentUserCraftingTableId is not null
                 ? shoppingList.UserCraftingTables.FirstOrDefault(uct => uct.Id == currentUserCraftingTableId)

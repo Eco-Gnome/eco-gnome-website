@@ -652,10 +652,6 @@
 
                 var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
                 var chosenRecipe = GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
-                if (chosenRecipe is null && possibleRecipes.Count == 1)
-                {
-                    chosenRecipe = possibleRecipes[0];
-                }
                 if (chosenRecipe is null)
                 {
                     continue;
