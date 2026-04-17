@@ -375,7 +375,7 @@
                                                         @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()))
                                                         {
                                                             var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
-                                                            var possibleRecipes = ContextService.CurrentServerData!.Recipes.Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))).ToList();
+                                                            var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
                                                             var isFullfilled = context.Value.ChildrenUserRecipes
                                                                 .Sum(ur => ur.Recipe.Elements
                                                                     .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
@@ -552,7 +552,9 @@
         }
 
         return ContextService.CurrentServerData.Recipes
-            .Where(r => r.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .Where(r => r.Elements.Any(e => e.IsProduct()
+                && !e.DefaultIsReintegrated
+                && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
             .ToList();
     }
 
@@ -565,7 +567,9 @@
 
         var possibleRecipeIds = possibleRecipes.Select(r => r.Id).ToHashSet();
         var matchingRecipeIds = _selectedShoppingList.UserRecipes
-            .Where(ur => ur.Recipe.Elements.Any(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+            .Where(ur => ur.Recipe.Elements.Any(e => e.IsProduct()
+                && !e.DefaultIsReintegrated
+                && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
             .Select(ur => ur.RecipeId)
             .Where(recipeId => possibleRecipeIds.Contains(recipeId))
             .Distinct()
@@ -586,6 +590,7 @@
         {
             var containsItemInBranch = current.Recipe.Elements.Any(e =>
                 e.IsProduct() &&
+                !e.DefaultIsReintegrated &&
                 e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id));
             if (containsItemInBranch)
             {
@@ -602,6 +607,7 @@
     {
         var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e =>
             e.IsProduct() &&
+            !e.DefaultIsReintegrated &&
             e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == element.ItemOrTag.Id))
             .Quantity.GetDynamicValue(_selectedShoppingList));
 
@@ -646,6 +652,10 @@
 
                 var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
                 var chosenRecipe = GetSingleExistingRecipeChoiceForIngredient(ingredient, possibleRecipes);
+                if (chosenRecipe is null && possibleRecipes.Count == 1)
+                {
+                    chosenRecipe = possibleRecipes[0];
+                }
                 if (chosenRecipe is null)
                 {
                     continue;
