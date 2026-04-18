@@ -258,8 +258,8 @@
                                                         <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Groups.Player")</MudTh>
                                                         @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
                                                         {
-                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")</MudTh>
-                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Price")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Margin")</MudTh>
                                                         }
                                                         @if (_groupBy is EconomyGroupBy.Item)
                                                         {
@@ -276,6 +276,10 @@
                                                             <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.ConfiguredContexts")</MudTh>
                                                             <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Spread")</MudTh>
                                                         }
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Context")</MudTh>
+                                                        }
                                                         <MudTh></MudTh>
                                                     </HeaderContent>
                                                     <RowTemplate Context="playerDetail">
@@ -287,8 +291,8 @@
                                                         </MudTd>
                                                         @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
                                                         {
-                                                            <MudTd>@FormatDecimal(playerDetail.PriceAverage)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.MarginAverage)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.ConfiguredPrice)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.ConfiguredMargin)</MudTd>
                                                         }
                                                         @if (_groupBy is EconomyGroupBy.Item)
                                                         {
@@ -304,6 +308,10 @@
                                                             <MudTd>@FormatDecimal(playerDetail.MarginMax)</MudTd>
                                                             <MudTd>@playerDetail.ConfiguredContextsCount</MudTd>
                                                             <MudTd>@FormatPlayerDetailSpread(playerDetail)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTd>@GetPlayerDetailContextLabel(playerDetail)</MudTd>
                                                         }
                                                         <MudTd>
                                                             <MudTooltip Text="@GetOpenDrilldownTooltip()">
@@ -1209,7 +1217,17 @@
     {
         return row.PlayerDetails
             .OrderBy(detail => detail.PlayerName)
+            .ThenByDescending(detail => detail.IsDefaultContext)
+            .ThenBy(detail => detail.DataContextName)
+            .ThenBy(detail => detail.DataContextId)
             .ThenBy(detail => detail.UserServerId);
+    }
+
+    private static string GetPlayerDetailContextLabel(EconomyGlobalPlayerDetailRow detail)
+    {
+        return string.IsNullOrWhiteSpace(detail.DataContextName)
+            ? "-"
+            : detail.DataContextName;
     }
 
     private string GetPrimaryRecipeLabel(EconomyGlobalPlayerDetailRow detail)

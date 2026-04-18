@@ -333,6 +333,10 @@
         "PageTitle": "Price Calculator",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
+        "Status": {
+            "Loading": "Loading...",
+            "Recalculating": "Recalculating..."
+        },
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
         "Reset": "Reset",
         "Skills": "Skills",
@@ -458,9 +462,11 @@
         },
         "Columns": {
             "Entity": "Name",
+            "Price": "Price",
             "PriceMin": "Price min",
             "PriceAvg": "Price avg",
             "PriceMax": "Price max",
+            "Margin": "Margin",
             "MarginMin": "Margin min",
             "MarginAvg": "Margin avg",
             "MarginMax": "Margin max",

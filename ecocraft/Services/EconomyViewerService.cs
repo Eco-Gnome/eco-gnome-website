@@ -59,8 +59,13 @@ public sealed class EconomyGlobalPlayerDetailRow
 {
     public Guid UserServerId { get; set; }
     public string PlayerName { get; set; } = string.Empty;
+    public Guid? DataContextId { get; set; }
+    public string? DataContextName { get; set; }
+    public bool IsDefaultContext { get; set; }
     public Guid? PrimaryRecipeId { get; set; }
     public string? PrimaryRecipeName { get; set; }
+    public decimal? ConfiguredPrice { get; set; }
+    public decimal? ConfiguredMargin { get; set; }
     public decimal? PriceMin { get; set; }
     public decimal? PriceAverage { get; set; }
     public decimal? PriceMax { get; set; }
@@ -199,6 +204,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         string PlayerName,
         Guid DataContextId,
         string DataContextName,
+        bool IsDefaultContext,
         Guid ItemOrTagId,
         string ItemName,
         bool IsTag,
@@ -208,12 +214,20 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         string? PrimaryRecipeName
     );
 
+    private sealed record ProducedItemRecipeFact(
+        Guid DataContextId,
+        Guid ItemOrTagId,
+        Guid RecipeId,
+        string RecipeName
+    );
+
     private sealed record RecipeFact(
         Guid UserId,
         Guid UserServerId,
         string PlayerName,
         Guid DataContextId,
         string DataContextName,
+        bool IsDefaultContext,
         Guid RecipeId,
         string RecipeName,
         Guid? SkillId,
@@ -550,13 +564,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                     ConfiguredPlayersCount = configuredPlayersCount,
                     ConfiguredContextsCount = configuredContextsCount,
                     Spread = spread,
-                    PlayerDetails = BuildGlobalPlayerDetails(group.Select(g => (
-                        g.UserId,
-                        g.UserServerId,
-                        g.PlayerName,
-                        g.DataContextId,
-                        g.UnitPrice,
-                        g.Margin)))
+                    PlayerDetails = BuildGlobalRecipePlayerDetails(group)
                 };
             });
     }
@@ -596,6 +604,8 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                         g.UserServerId,
                         g.PlayerName,
                         g.DataContextId,
+                        g.DataContextName,
+                        g.IsDefaultContext,
                         g.UnitPrice,
                         g.Margin)))
                 };
@@ -634,7 +644,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
     }
 
     private static List<EconomyGlobalPlayerDetailRow> BuildGlobalPlayerDetails(
-        IEnumerable<(Guid UserId, Guid UserServerId, string PlayerName, Guid DataContextId, decimal? Price, decimal? Margin)> facts)
+        IEnumerable<(Guid UserId, Guid UserServerId, string PlayerName, Guid DataContextId, string DataContextName, bool IsDefaultContext, decimal? Price, decimal? Margin)> facts)
     {
         return facts
             .GroupBy(f => new { f.UserServerId, f.PlayerName })
@@ -643,10 +653,20 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 var (priceMin, priceAverage, priceMax, marginMin, marginAverage, marginMax, _, configuredContextsCount, spread) =
                     ComputeMetrics(group.Select(g => (g.UserId, g.DataContextId, g.Price, g.Margin)));
 
+                var (configuredPrice, configuredMargin) = ResolveConfiguredPriceAndMargin(
+                    group.Select(g => (
+                        g.DataContextId,
+                        g.DataContextName,
+                        g.IsDefaultContext,
+                        g.Price,
+                        g.Margin)));
+
                 return new EconomyGlobalPlayerDetailRow
                 {
                     UserServerId = group.Key.UserServerId,
                     PlayerName = group.Key.PlayerName,
+                    ConfiguredPrice = configuredPrice,
+                    ConfiguredMargin = configuredMargin,
                     PriceMin = priceMin,
                     PriceAverage = priceAverage,
                     PriceMax = priceMax,
@@ -665,11 +685,15 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
     private static List<EconomyGlobalPlayerDetailRow> BuildGlobalItemPlayerDetails(IEnumerable<PriceFact> facts)
     {
         return facts
-            .GroupBy(f => new { f.UserServerId, f.PlayerName })
+            .GroupBy(f => new { f.UserServerId, f.PlayerName, f.DataContextId, f.DataContextName, f.IsDefaultContext })
+            .Where(group => group.Any(entry => entry.EffectivePrice is not null || entry.Margin is not null))
             .Select(group =>
             {
                 var (priceMin, priceAverage, priceMax, marginMin, marginAverage, marginMax, _, configuredContextsCount, spread) =
                     ComputeMetrics(group.Select(g => (g.UserId, g.DataContextId, g.EffectivePrice, g.Margin)));
+
+                var (configuredPrice, configuredMargin) = ResolveConfiguredValues(
+                    group.Select(g => (g.EffectivePrice, g.Margin)));
 
                 var (primaryRecipeId, primaryRecipeName) = ResolvePrimaryRecipe(
                     group.Select(g => (g.PrimaryRecipeId, g.PrimaryRecipeName)));
@@ -678,8 +702,13 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 {
                     UserServerId = group.Key.UserServerId,
                     PlayerName = group.Key.PlayerName,
+                    DataContextId = group.Key.DataContextId,
+                    DataContextName = group.Key.DataContextName,
+                    IsDefaultContext = group.Key.IsDefaultContext,
                     PrimaryRecipeId = primaryRecipeId,
                     PrimaryRecipeName = primaryRecipeName,
+                    ConfiguredPrice = configuredPrice,
+                    ConfiguredMargin = configuredMargin,
                     PriceMin = priceMin,
                     PriceAverage = priceAverage,
                     PriceMax = priceMax,
@@ -691,6 +720,49 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 };
             })
             .OrderBy(row => row.PlayerName)
+            .ThenByDescending(row => row.IsDefaultContext)
+            .ThenBy(row => row.DataContextName)
+            .ThenBy(row => row.DataContextId)
+            .ThenBy(row => row.UserServerId)
+            .ToList();
+    }
+
+    private static List<EconomyGlobalPlayerDetailRow> BuildGlobalRecipePlayerDetails(IEnumerable<RecipeFact> facts)
+    {
+        return facts
+            .GroupBy(f => new { f.UserServerId, f.PlayerName, f.DataContextId, f.DataContextName, f.IsDefaultContext })
+            .Where(group => group.Any(entry => entry.UnitPrice is not null || entry.Margin is not null))
+            .Select(group =>
+            {
+                var (priceMin, priceAverage, priceMax, marginMin, marginAverage, marginMax, _, configuredContextsCount, spread) =
+                    ComputeMetrics(group.Select(g => (g.UserId, g.DataContextId, g.UnitPrice, g.Margin)));
+
+                var (configuredPrice, configuredMargin) = ResolveConfiguredValues(
+                    group.Select(g => (g.UnitPrice, g.Margin)));
+
+                return new EconomyGlobalPlayerDetailRow
+                {
+                    UserServerId = group.Key.UserServerId,
+                    PlayerName = group.Key.PlayerName,
+                    DataContextId = group.Key.DataContextId,
+                    DataContextName = group.Key.DataContextName,
+                    IsDefaultContext = group.Key.IsDefaultContext,
+                    ConfiguredPrice = configuredPrice,
+                    ConfiguredMargin = configuredMargin,
+                    PriceMin = priceMin,
+                    PriceAverage = priceAverage,
+                    PriceMax = priceMax,
+                    MarginMin = marginMin,
+                    MarginAverage = marginAverage,
+                    MarginMax = marginMax,
+                    ConfiguredContextsCount = configuredContextsCount,
+                    Spread = spread
+                };
+            })
+            .OrderBy(row => row.PlayerName)
+            .ThenByDescending(row => row.IsDefaultContext)
+            .ThenBy(row => row.DataContextName)
+            .ThenBy(row => row.DataContextId)
             .ThenBy(row => row.UserServerId)
             .ToList();
     }
@@ -717,6 +789,72 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             .First();
 
         return (best.RecipeId, best.RecipeName);
+    }
+
+    private static (decimal? Price, decimal? Margin) ResolveConfiguredPriceAndMargin(
+        IEnumerable<(Guid DataContextId, string DataContextName, bool IsDefaultContext, decimal? Price, decimal? Margin)> facts)
+    {
+        var byContext = facts
+            .GroupBy(f => new { f.DataContextId, f.DataContextName, f.IsDefaultContext })
+            .Select(group =>
+            {
+                var prices = group
+                    .Where(entry => entry.Price is not null)
+                    .Select(entry => entry.Price!.Value)
+                    .Distinct()
+                    .ToList();
+
+                var margins = group
+                    .Where(entry => entry.Margin is not null)
+                    .Select(entry => entry.Margin!.Value)
+                    .Distinct()
+                    .ToList();
+
+                return new
+                {
+                    group.Key.DataContextId,
+                    group.Key.DataContextName,
+                    group.Key.IsDefaultContext,
+                    Price = prices.Count == 1 ? prices[0] : (decimal?)null,
+                    Margin = margins.Count == 1 ? margins[0] : (decimal?)null
+                };
+            })
+            .OrderByDescending(context => context.IsDefaultContext)
+            .ThenBy(context => context.DataContextName)
+            .ThenBy(context => context.DataContextId)
+            .ToList();
+
+        if (byContext.Count == 0)
+        {
+            return (null, null);
+        }
+
+        var preferred = byContext[0];
+        var configuredPrice = preferred.Price ?? byContext.Select(context => context.Price).FirstOrDefault(price => price is not null);
+        var configuredMargin = preferred.Margin ?? byContext.Select(context => context.Margin).FirstOrDefault(margin => margin is not null);
+
+        return (configuredPrice, configuredMargin);
+    }
+
+    private static (decimal? Price, decimal? Margin) ResolveConfiguredValues(
+        IEnumerable<(decimal? Price, decimal? Margin)> facts)
+    {
+        var prices = facts
+            .Where(entry => entry.Price is not null)
+            .Select(entry => entry.Price!.Value)
+            .Distinct()
+            .ToList();
+
+        var margins = facts
+            .Where(entry => entry.Margin is not null)
+            .Select(entry => entry.Margin!.Value)
+            .Distinct()
+            .ToList();
+
+        return (
+            prices.Count == 1 ? prices[0] : null,
+            margins.Count == 1 ? margins[0] : null
+        );
     }
 
     private static IEnumerable<EconomyGlobalRow> SortGlobalRows(IEnumerable<EconomyGlobalRow> rows, EconomyGlobalSortBy sortBy, bool descending)
@@ -1115,7 +1253,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
 
     private async Task<List<PriceFact>> GetPriceFactsAsync(EcoCraftDbContext context, Guid serverId)
     {
-        return await context.UserPrices
+        var priceFacts = await context.UserPrices
             .AsNoTracking()
             .Where(up => up.DataContext.UserServer.ServerId == serverId && !up.DataContext.IsShoppingList)
             .Select(up => new PriceFact(
@@ -1124,6 +1262,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 up.DataContext.UserServer.Pseudo ?? up.DataContext.UserServer.User.Pseudo,
                 up.DataContextId,
                 up.DataContext.Name,
+                up.DataContext.IsDefault,
                 up.ItemOrTagId,
                 up.ItemOrTag.Name,
                 up.ItemOrTag.IsTag,
@@ -1133,6 +1272,63 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 up.PrimaryUserElement != null ? up.PrimaryUserElement.Element.Recipe.Name : null
             ))
             .ToListAsync();
+
+        var producedItemRecipeFacts = await context.UserElements
+            .AsNoTracking()
+            .Where(ue => ue.DataContext.UserServer.ServerId == serverId
+                         && !ue.DataContext.IsShoppingList
+                         && ue.Element.Quantity.BaseValue > 0
+                         && !ue.IsReintegrated)
+            .Select(ue => new ProducedItemRecipeFact(
+                ue.DataContextId,
+                ue.Element.ItemOrTagId,
+                ue.Element.RecipeId,
+                ue.Element.Recipe.Name))
+            .ToListAsync();
+
+        var fallbackRecipeByContextAndItem = producedItemRecipeFacts
+            .Where(f => !string.IsNullOrWhiteSpace(f.RecipeName))
+            .GroupBy(f => new { f.DataContextId, f.ItemOrTagId })
+            .ToDictionary(
+                group => (group.Key.DataContextId, group.Key.ItemOrTagId),
+                group => group
+                    .GroupBy(entry => new { entry.RecipeId, entry.RecipeName })
+                    .OrderByDescending(recipeGroup => recipeGroup.Count())
+                    .ThenBy(recipeGroup => recipeGroup.Key.RecipeName)
+                    .ThenBy(recipeGroup => recipeGroup.Key.RecipeId)
+                    .Select(recipeGroup => (RecipeId: (Guid?)recipeGroup.Key.RecipeId, RecipeName: (string?)recipeGroup.Key.RecipeName))
+                    .First());
+
+        return priceFacts
+            .Select(priceFact =>
+            {
+                var recipeId = priceFact.PrimaryRecipeId;
+                var recipeName = priceFact.PrimaryRecipeName;
+
+                if (recipeId is null
+                    && fallbackRecipeByContextAndItem.TryGetValue((priceFact.DataContextId, priceFact.ItemOrTagId), out var fallbackRecipe))
+                {
+                    recipeId = fallbackRecipe.RecipeId;
+                    recipeName = fallbackRecipe.RecipeName;
+                }
+
+                return new PriceFact(
+                    priceFact.UserId,
+                    priceFact.UserServerId,
+                    priceFact.PlayerName,
+                    priceFact.DataContextId,
+                    priceFact.DataContextName,
+                    priceFact.IsDefaultContext,
+                    priceFact.ItemOrTagId,
+                    priceFact.ItemName,
+                    priceFact.IsTag,
+                    priceFact.EffectivePrice,
+                    priceFact.Margin,
+                    recipeId,
+                    recipeName
+                );
+            })
+            .ToList();
     }
 
     private async Task<List<RecipeFact>> GetRecipeFactsAsync(EcoCraftDbContext context, Guid serverId)
@@ -1157,6 +1353,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 ue.DataContext.UserServer.Pseudo ?? ue.DataContext.UserServer.User.Pseudo,
                 ue.DataContextId,
                 ue.DataContext.Name,
+                ue.DataContext.IsDefault,
                 ue.Element.RecipeId,
                 ue.Element.Recipe.Name,
                 ue.Element.Recipe.SkillId,
@@ -1189,6 +1386,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 ue.DataContext.UserServer.Pseudo ?? ue.DataContext.UserServer.User.Pseudo,
                 ue.DataContextId,
                 ue.DataContext.Name,
+                ue.DataContext.IsDefault,
                 ue.Element.RecipeId,
                 ue.Element.Recipe.Name,
                 ue.Element.Recipe.SkillId,

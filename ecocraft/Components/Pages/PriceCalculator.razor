@@ -2397,10 +2397,10 @@
     {
         if (_isLoadingData)
         {
-            return "Chargement...";
+            return LocalizationService.GetTranslation("PriceCalculator.Status.Loading");
         }
 
-        return "Recalcul...";
+        return LocalizationService.GetTranslation("PriceCalculator.Status.Recalculating");
     }
 
     private async Task RefreshSkillAutocompleteAsync()
