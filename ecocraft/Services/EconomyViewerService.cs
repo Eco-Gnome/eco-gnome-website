@@ -35,8 +35,8 @@ public enum EconomyComparisonEntity
 public enum EconomyComparisonSortBy
 {
     Entity,
-    TargetValue,
-    MyValue,
+    Player1Value,
+    Player2Value,
     DeltaAbs,
     DeltaPct
 }
@@ -88,9 +88,10 @@ public sealed class EconomyPlayerDetailQuery
 {
     public Guid ServerId { get; set; }
     public Guid RequestingUserServerId { get; set; }
-    public Guid TargetUserServerId { get; set; }
-    public Guid? TargetDataContextId { get; set; }
-    public Guid? MyDataContextId { get; set; }
+    public Guid Player1UserServerId { get; set; }
+    public Guid Player2UserServerId { get; set; }
+    public Guid? Player1DataContextId { get; set; }
+    public Guid? Player2DataContextId { get; set; }
     public EconomyComparisonEntity ComparisonBy { get; set; } = EconomyComparisonEntity.Item;
     public EconomyComparisonSortBy SortBy { get; set; } = EconomyComparisonSortBy.DeltaAbs;
     public bool SortDescending { get; set; } = true;
@@ -141,12 +142,12 @@ public sealed class EconomyPlayerComparisonRow
     public Guid? RecipeId { get; set; }
     public Guid? SkillId { get; set; }
     public bool? IsTag { get; set; }
-    public decimal? TargetValue { get; set; }
-    public decimal? MyValue { get; set; }
+    public decimal? Player1Value { get; set; }
+    public decimal? Player2Value { get; set; }
     public decimal? DeltaAbs { get; set; }
     public decimal? DeltaPct { get; set; }
-    public decimal? TargetMargin { get; set; }
-    public decimal? MyMargin { get; set; }
+    public decimal? Player1Margin { get; set; }
+    public decimal? Player2Margin { get; set; }
     public decimal? MarginDeltaAbs { get; set; }
     public string Status { get; set; } = "NoData";
     public bool IsDifferent { get; set; }
@@ -154,17 +155,18 @@ public sealed class EconomyPlayerComparisonRow
 
 public sealed class EconomyPlayerDetailResult
 {
-    public Guid TargetUserServerId { get; set; }
-    public string TargetPlayerName { get; set; } = string.Empty;
-    public string MyPlayerName { get; set; } = string.Empty;
-    public List<EconomyPlayerContextOption> TargetPlayerContexts { get; set; } = [];
-    public List<EconomyPlayerContextOption> MyPlayerContexts { get; set; } = [];
-    public Guid? SelectedTargetDataContextId { get; set; }
-    public Guid? SelectedMyDataContextId { get; set; }
-    public List<EconomyPlayerContextSummary> TargetContextSummaries { get; set; } = [];
-    public List<EconomyPlayerContextSummary> MyContextSummaries { get; set; } = [];
-    public List<EconomyPlayerCraftingTableSummary> TargetCraftingTableSummaries { get; set; } = [];
-    public List<EconomyPlayerCraftingTableSummary> MyCraftingTableSummaries { get; set; } = [];
+    public Guid Player1UserServerId { get; set; }
+    public Guid Player2UserServerId { get; set; }
+    public string Player1Name { get; set; } = string.Empty;
+    public string Player2Name { get; set; } = string.Empty;
+    public List<EconomyPlayerContextOption> Player1Contexts { get; set; } = [];
+    public List<EconomyPlayerContextOption> Player2Contexts { get; set; } = [];
+    public Guid? SelectedPlayer1DataContextId { get; set; }
+    public Guid? SelectedPlayer2DataContextId { get; set; }
+    public List<EconomyPlayerContextSummary> Player1ContextSummaries { get; set; } = [];
+    public List<EconomyPlayerContextSummary> Player2ContextSummaries { get; set; } = [];
+    public List<EconomyPlayerCraftingTableSummary> Player1CraftingTableSummaries { get; set; } = [];
+    public List<EconomyPlayerCraftingTableSummary> Player2CraftingTableSummaries { get; set; } = [];
     public List<EconomyPlayerComparisonRow> ComparisonRows { get; set; } = [];
     public int TotalComparisonCount { get; set; }
     public int Page { get; set; }
@@ -254,14 +256,20 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         var page = Math.Max(1, query.Page);
         var pageSize = applyPaging ? Math.Clamp(query.PageSize, 10, 300) : 0;
 
+        if (query.Player1UserServerId == query.Player2UserServerId)
+        {
+            throw new ArgumentException("Player1 and Player2 must be different users.");
+        }
+
         await using var context = await factory.CreateDbContextAsync();
 
         await EnsureUserServerMembershipAsync(context, query.ServerId, query.RequestingUserServerId);
-        await EnsureUserServerMembershipAsync(context, query.ServerId, query.TargetUserServerId);
+        await EnsureUserServerMembershipAsync(context, query.ServerId, query.Player1UserServerId);
+        await EnsureUserServerMembershipAsync(context, query.ServerId, query.Player2UserServerId);
 
-        var targetUser = await context.UserServers
+        var player1User = await context.UserServers
             .AsNoTracking()
-            .Where(us => us.Id == query.TargetUserServerId)
+            .Where(us => us.Id == query.Player1UserServerId)
             .Select(us => new
             {
                 us.Id,
@@ -269,9 +277,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             })
             .FirstAsync();
 
-        var myUser = await context.UserServers
+        var player2User = await context.UserServers
             .AsNoTracking()
-            .Where(us => us.Id == query.RequestingUserServerId)
+            .Where(us => us.Id == query.Player2UserServerId)
             .Select(us => new
             {
                 us.Id,
@@ -279,9 +287,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             })
             .FirstAsync();
 
-        var targetContexts = await context.DataContexts
+        var player1Contexts = await context.DataContexts
             .AsNoTracking()
-            .Where(dc => dc.UserServerId == query.TargetUserServerId && !dc.IsShoppingList)
+            .Where(dc => dc.UserServerId == query.Player1UserServerId && !dc.IsShoppingList)
             .OrderByDescending(dc => dc.IsDefault)
             .ThenBy(dc => dc.Name)
             .Select(dc => new EconomyPlayerContextOption
@@ -292,9 +300,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             })
             .ToListAsync();
 
-        var myContexts = await context.DataContexts
+        var player2Contexts = await context.DataContexts
             .AsNoTracking()
-            .Where(dc => dc.UserServerId == query.RequestingUserServerId && !dc.IsShoppingList)
+            .Where(dc => dc.UserServerId == query.Player2UserServerId && !dc.IsShoppingList)
             .OrderByDescending(dc => dc.IsDefault)
             .ThenBy(dc => dc.Name)
             .Select(dc => new EconomyPlayerContextOption
@@ -305,17 +313,17 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             })
             .ToListAsync();
 
-        var selectedTargetContextId = ResolveSelectedContextId(targetContexts, query.TargetDataContextId);
-        var selectedMyContextId = ResolveSelectedContextId(myContexts, query.MyDataContextId);
+        var selectedPlayer1ContextId = ResolveSelectedContextId(player1Contexts, query.Player1DataContextId);
+        var selectedPlayer2ContextId = ResolveSelectedContextId(player2Contexts, query.Player2DataContextId);
 
-        var targetContextSummaries = await BuildTargetContextSummariesAsync(context, targetContexts);
-        var myContextSummaries = await BuildTargetContextSummariesAsync(context, myContexts);
-        var targetCraftingTableSummaries = await BuildContextCraftingTableSummariesAsync(context, targetContexts.Select(c => c.Id).ToList());
-        var myCraftingTableSummaries = await BuildContextCraftingTableSummariesAsync(context, myContexts.Select(c => c.Id).ToList());
+        var player1ContextSummaries = await BuildContextSummariesAsync(context, player1Contexts);
+        var player2ContextSummaries = await BuildContextSummariesAsync(context, player2Contexts);
+        var player1CraftingTableSummaries = await BuildContextCraftingTableSummariesAsync(context, player1Contexts.Select(c => c.Id).ToList());
+        var player2CraftingTableSummaries = await BuildContextCraftingTableSummariesAsync(context, player2Contexts.Select(c => c.Id).ToList());
 
-        var comparisonRows = selectedTargetContextId is null
+        var comparisonRows = selectedPlayer1ContextId is null
             ? []
-            : await BuildComparisonRowsAsync(context, query, selectedTargetContextId.Value, selectedMyContextId);
+            : await BuildComparisonRowsAsync(context, query, selectedPlayer1ContextId.Value, selectedPlayer2ContextId);
 
         if (!string.IsNullOrWhiteSpace(query.SearchText))
         {
@@ -341,17 +349,18 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
 
         return new EconomyPlayerDetailResult
         {
-            TargetUserServerId = targetUser.Id,
-            TargetPlayerName = targetUser.PlayerName,
-            MyPlayerName = myUser.PlayerName,
-            TargetPlayerContexts = targetContexts,
-            MyPlayerContexts = myContexts,
-            SelectedTargetDataContextId = selectedTargetContextId,
-            SelectedMyDataContextId = selectedMyContextId,
-            TargetContextSummaries = targetContextSummaries,
-            MyContextSummaries = myContextSummaries,
-            TargetCraftingTableSummaries = targetCraftingTableSummaries,
-            MyCraftingTableSummaries = myCraftingTableSummaries,
+            Player1UserServerId = player1User.Id,
+            Player2UserServerId = player2User.Id,
+            Player1Name = player1User.PlayerName,
+            Player2Name = player2User.PlayerName,
+            Player1Contexts = player1Contexts,
+            Player2Contexts = player2Contexts,
+            SelectedPlayer1DataContextId = selectedPlayer1ContextId,
+            SelectedPlayer2DataContextId = selectedPlayer2ContextId,
+            Player1ContextSummaries = player1ContextSummaries,
+            Player2ContextSummaries = player2ContextSummaries,
+            Player1CraftingTableSummaries = player1CraftingTableSummaries,
+            Player2CraftingTableSummaries = player2CraftingTableSummaries,
             ComparisonRows = pagedRows,
             TotalComparisonCount = totalComparisonCount,
             Page = applyPaging ? page : 1,
@@ -633,10 +642,10 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         {
             (EconomyComparisonSortBy.Entity, false) => rows.OrderBy(r => r.EntityName),
             (EconomyComparisonSortBy.Entity, true) => rows.OrderByDescending(r => r.EntityName),
-            (EconomyComparisonSortBy.TargetValue, false) => rows.OrderBy(r => r.TargetValue ?? decimal.MaxValue),
-            (EconomyComparisonSortBy.TargetValue, true) => rows.OrderByDescending(r => r.TargetValue ?? decimal.MinValue),
-            (EconomyComparisonSortBy.MyValue, false) => rows.OrderBy(r => r.MyValue ?? decimal.MaxValue),
-            (EconomyComparisonSortBy.MyValue, true) => rows.OrderByDescending(r => r.MyValue ?? decimal.MinValue),
+            (EconomyComparisonSortBy.Player1Value, false) => rows.OrderBy(r => r.Player1Value ?? decimal.MaxValue),
+            (EconomyComparisonSortBy.Player1Value, true) => rows.OrderByDescending(r => r.Player1Value ?? decimal.MinValue),
+            (EconomyComparisonSortBy.Player2Value, false) => rows.OrderBy(r => r.Player2Value ?? decimal.MaxValue),
+            (EconomyComparisonSortBy.Player2Value, true) => rows.OrderByDescending(r => r.Player2Value ?? decimal.MinValue),
             (EconomyComparisonSortBy.DeltaAbs, false) => rows.OrderBy(r => r.DeltaAbs ?? decimal.MaxValue),
             (EconomyComparisonSortBy.DeltaAbs, true) => rows.OrderByDescending(r => r.DeltaAbs ?? decimal.MinValue),
             (EconomyComparisonSortBy.DeltaPct, false) => rows.OrderBy(r => r.DeltaPct ?? decimal.MaxValue),
@@ -645,9 +654,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         };
     }
 
-    private async Task<List<EconomyPlayerContextSummary>> BuildTargetContextSummariesAsync(EcoCraftDbContext context, List<EconomyPlayerContextOption> targetContexts)
+    private async Task<List<EconomyPlayerContextSummary>> BuildContextSummariesAsync(EcoCraftDbContext context, List<EconomyPlayerContextOption> contexts)
     {
-        var contextIds = targetContexts.Select(c => c.Id).ToList();
+        var contextIds = contexts.Select(c => c.Id).ToList();
         if (contextIds.Count == 0)
         {
             return [];
@@ -692,7 +701,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             .GroupBy(s => s.DataContextId)
             .ToDictionary(g => g.Key, g => g.First());
 
-        return targetContexts.Select(ctx =>
+        return contexts.Select(ctx =>
             {
                 var scopedPrices = priceFacts.Where(p => p.DataContextId == ctx.Id).ToList();
                 var configuredValues = scopedPrices.Where(p => p.EffectivePrice is not null).Select(p => p.EffectivePrice!.Value).ToList();
@@ -713,7 +722,7 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                     CalorieCost = userSetting?.CalorieCost
                 };
             })
-            .OrderByDescending(s => targetContexts.First(c => c.Id == s.DataContextId).IsDefault)
+            .OrderByDescending(s => contexts.First(c => c.Id == s.DataContextId).IsDefault)
             .ThenBy(s => s.DataContextName)
             .ToList();
     }
@@ -749,27 +758,27 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
     private async Task<List<EconomyPlayerComparisonRow>> BuildComparisonRowsAsync(
         EcoCraftDbContext context,
         EconomyPlayerDetailQuery query,
-        Guid selectedTargetContextId,
-        Guid? selectedMyContextId)
+        Guid selectedPlayer1ContextId,
+        Guid? selectedPlayer2ContextId)
     {
         return query.ComparisonBy switch
         {
-            EconomyComparisonEntity.Item => await BuildItemComparisonRowsAsync(context, selectedTargetContextId, selectedMyContextId),
-            EconomyComparisonEntity.Recipe => await BuildRecipeComparisonRowsAsync(context, selectedTargetContextId, selectedMyContextId),
-            EconomyComparisonEntity.Skill => await BuildSkillComparisonRowsAsync(context, selectedTargetContextId, selectedMyContextId),
+            EconomyComparisonEntity.Item => await BuildItemComparisonRowsAsync(context, selectedPlayer1ContextId, selectedPlayer2ContextId),
+            EconomyComparisonEntity.Recipe => await BuildRecipeComparisonRowsAsync(context, selectedPlayer1ContextId, selectedPlayer2ContextId),
+            EconomyComparisonEntity.Skill => await BuildSkillComparisonRowsAsync(context, selectedPlayer1ContextId, selectedPlayer2ContextId),
             _ => []
         };
     }
 
     private async Task<List<EconomyPlayerComparisonRow>> BuildItemComparisonRowsAsync(
         EcoCraftDbContext context,
-        Guid targetDataContextId,
-        Guid? myDataContextId)
+        Guid player1DataContextId,
+        Guid? player2DataContextId)
     {
-        var contextIds = new List<Guid> { targetDataContextId };
-        if (myDataContextId is Guid myContext)
+        var contextIds = new List<Guid> { player1DataContextId };
+        if (player2DataContextId is Guid player2Context)
         {
-            contextIds.Add(myContext);
+            contextIds.Add(player2Context);
         }
 
         var itemFacts = await context.UserPrices
@@ -790,17 +799,17 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             .GroupBy(f => new { f.ItemOrTagId, f.Name, f.IsTag })
             .Select(group =>
             {
-                var target = group.FirstOrDefault(g => g.DataContextId == targetDataContextId);
-                var mine = myDataContextId is Guid myContextId ? group.FirstOrDefault(g => g.DataContextId == myContextId) : null;
+                var player1 = group.FirstOrDefault(g => g.DataContextId == player1DataContextId);
+                var player2 = player2DataContextId is Guid player2ContextId ? group.FirstOrDefault(g => g.DataContextId == player2ContextId) : null;
 
                 return BuildComparisonRow(
                     group.Key.ItemOrTagId.ToString(),
                     group.Key.Name,
                     group.Key.IsTag ? "Tag" : "Item",
-                    target?.Value,
-                    mine?.Value,
-                    target?.Margin,
-                    mine?.Margin,
+                    player1?.Value,
+                    player2?.Value,
+                    player1?.Margin,
+                    player2?.Margin,
                     itemOrTagId: group.Key.ItemOrTagId,
                     isTag: group.Key.IsTag);
             })
@@ -809,13 +818,13 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
 
     private async Task<List<EconomyPlayerComparisonRow>> BuildRecipeComparisonRowsAsync(
         EcoCraftDbContext context,
-        Guid targetDataContextId,
-        Guid? myDataContextId)
+        Guid player1DataContextId,
+        Guid? player2DataContextId)
     {
-        var contextIds = new List<Guid> { targetDataContextId };
-        if (myDataContextId is Guid myContext)
+        var contextIds = new List<Guid> { player1DataContextId };
+        if (player2DataContextId is Guid player2Context)
         {
-            contextIds.Add(myContext);
+            contextIds.Add(player2Context);
         }
 
         var facts = await GetRecipeComparisonFactsAsync(context, contextIds);
@@ -840,17 +849,17 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             .GroupBy(g => new { g.RecipeId, g.RecipeName, g.SkillId, g.SkillName })
             .Select(group =>
             {
-                var target = group.FirstOrDefault(g => g.DataContextId == targetDataContextId);
-                var mine = myDataContextId is Guid myContextId ? group.FirstOrDefault(g => g.DataContextId == myContextId) : null;
+                var player1 = group.FirstOrDefault(g => g.DataContextId == player1DataContextId);
+                var player2 = player2DataContextId is Guid player2ContextId ? group.FirstOrDefault(g => g.DataContextId == player2ContextId) : null;
 
                 return BuildComparisonRow(
                     group.Key.RecipeId.ToString(),
                     group.Key.RecipeName,
                     group.Key.SkillName,
-                    target?.HasValue == true ? target.Value : null,
-                    mine?.HasValue == true ? mine.Value : null,
-                    target?.HasMargin == true ? target.Margin : null,
-                    mine?.HasMargin == true ? mine.Margin : null,
+                    player1?.HasValue == true ? player1.Value : null,
+                    player2?.HasValue == true ? player2.Value : null,
+                    player1?.HasMargin == true ? player1.Margin : null,
+                    player2?.HasMargin == true ? player2.Margin : null,
                     recipeId: group.Key.RecipeId,
                     skillId: group.Key.SkillId);
             })
@@ -859,13 +868,13 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
 
     private async Task<List<EconomyPlayerComparisonRow>> BuildSkillComparisonRowsAsync(
         EcoCraftDbContext context,
-        Guid targetDataContextId,
-        Guid? myDataContextId)
+        Guid player1DataContextId,
+        Guid? player2DataContextId)
     {
-        var contextIds = new List<Guid> { targetDataContextId };
-        if (myDataContextId is Guid myContext)
+        var contextIds = new List<Guid> { player1DataContextId };
+        if (player2DataContextId is Guid player2Context)
         {
-            contextIds.Add(myContext);
+            contextIds.Add(player2Context);
         }
 
         var facts = await GetRecipeComparisonFactsAsync(context, contextIds);
@@ -888,18 +897,18 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             .GroupBy(g => new { g.SkillId, g.SkillName })
             .Select(group =>
             {
-                var target = group.FirstOrDefault(g => g.DataContextId == targetDataContextId);
-                var mine = myDataContextId is Guid myContextId ? group.FirstOrDefault(g => g.DataContextId == myContextId) : null;
+                var player1 = group.FirstOrDefault(g => g.DataContextId == player1DataContextId);
+                var player2 = player2DataContextId is Guid player2ContextId ? group.FirstOrDefault(g => g.DataContextId == player2ContextId) : null;
                 var key = group.Key.SkillId?.ToString() ?? "no-skill";
 
                 return BuildComparisonRow(
                     key,
                     group.Key.SkillName,
                     null,
-                    target?.HasValue == true ? target.Value : null,
-                    mine?.HasValue == true ? mine.Value : null,
-                    target?.HasMargin == true ? target.Margin : null,
-                    mine?.HasMargin == true ? mine.Margin : null,
+                    player1?.HasValue == true ? player1.Value : null,
+                    player2?.HasValue == true ? player2.Value : null,
+                    player1?.HasMargin == true ? player1.Margin : null,
+                    player2?.HasMargin == true ? player2.Margin : null,
                     skillId: group.Key.SkillId);
             })
             .ToList();
@@ -909,10 +918,10 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         string entityKey,
         string entityName,
         string? secondaryLabel,
-        decimal? targetValue,
-        decimal? myValue,
-        decimal? targetMargin,
-        decimal? myMargin,
+        decimal? player1Value,
+        decimal? player2Value,
+        decimal? player1Margin,
+        decimal? player2Margin,
         Guid? itemOrTagId = null,
         Guid? recipeId = null,
         Guid? skillId = null,
@@ -922,21 +931,21 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         decimal? deltaPct = null;
         decimal? marginDelta = null;
 
-        if (targetValue is not null && myValue is not null)
+        if (player1Value is not null && player2Value is not null)
         {
-            deltaAbs = targetValue.Value - myValue.Value;
-            if (myValue.Value != 0)
+            deltaAbs = player2Value.Value - player1Value.Value;
+            if (player1Value.Value != 0)
             {
-                deltaPct = deltaAbs / myValue.Value * 100;
+                deltaPct = deltaAbs / player1Value.Value * 100;
             }
         }
 
-        if (targetMargin is not null && myMargin is not null)
+        if (player1Margin is not null && player2Margin is not null)
         {
-            marginDelta = targetMargin.Value - myMargin.Value;
+            marginDelta = player2Margin.Value - player1Margin.Value;
         }
 
-        var status = GetComparisonStatus(targetValue, myValue, deltaAbs);
+        var status = GetComparisonStatus(player1Value, player2Value, deltaAbs);
 
         return new EconomyPlayerComparisonRow
         {
@@ -947,33 +956,33 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             RecipeId = recipeId,
             SkillId = skillId,
             IsTag = isTag,
-            TargetValue = targetValue,
-            MyValue = myValue,
+            Player1Value = player1Value,
+            Player2Value = player2Value,
             DeltaAbs = deltaAbs,
             DeltaPct = deltaPct,
-            TargetMargin = targetMargin,
-            MyMargin = myMargin,
+            Player1Margin = player1Margin,
+            Player2Margin = player2Margin,
             MarginDeltaAbs = marginDelta,
             Status = status,
             IsDifferent = status is not "Same" and not "NoData"
         };
     }
 
-    private static string GetComparisonStatus(decimal? targetValue, decimal? myValue, decimal? deltaAbs)
+    private static string GetComparisonStatus(decimal? player1Value, decimal? player2Value, decimal? deltaAbs)
     {
-        if (targetValue is null && myValue is null)
+        if (player1Value is null && player2Value is null)
         {
             return "NoData";
         }
 
-        if (targetValue is not null && myValue is null)
+        if (player1Value is not null && player2Value is null)
         {
-            return "OnlyTarget";
+            return "OnlyPlayer1";
         }
 
-        if (targetValue is null && myValue is not null)
+        if (player1Value is null && player2Value is not null)
         {
-            return "OnlyMine";
+            return "OnlyPlayer2";
         }
 
         if (deltaAbs == 0)
@@ -1086,3 +1095,4 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         }
     }
 }
+

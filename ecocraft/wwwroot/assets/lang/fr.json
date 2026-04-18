@@ -463,13 +463,14 @@
         "Drilldown": {
             "Title": "Detail joueur",
             "NoData": "Aucune donnee joueur chargee.",
-            "CompareHeader": "Comparaison {target} vs {me}",
-            "TargetBadge": "Cible",
-            "MyBadge": "Moi",
-            "TargetPlayer": "Joueur cible",
+            "CompareHeader": "Comparaison {player1} vs {player2}",
+            "Player1Badge": "Player 1",
+            "Player2Badge": "Player 2",
+            "Player1": "Player 1",
+            "Player2": "Player 2",
             "CompareBy": "Comparer par",
-            "TargetContext": "Contexte cible",
-            "MyContext": "Mon contexte",
+            "Player1Context": "Contexte player 1",
+            "Player2Context": "Contexte player 2",
             "Search": "Recherche comparaison",
             "OnlyDifferences": "Seulement les differences",
             "OnlyCommon": "Seulement les elements en commun",
@@ -479,6 +480,15 @@
             "PriceOptionsComparison": "Options Price Calculator comparees",
             "ComparisonTable": "Comparaison",
             "NoComparisonData": "Aucune ligne de comparaison pour les filtres selectionnes.",
+            "AtLeastTwoPlayersRequired": "Au moins 2 joueurs sont requis pour ouvrir le drill-down.",
+            "StatusTooltip": {
+                "Higher": "{1} est plus eleve que {0} (calcule sur Player 2 - Player 1).",
+                "Lower": "{1} est plus bas que {0} (calcule sur Player 2 - Player 1).",
+                "Same": "{0} et {1} ont la meme valeur.",
+                "OnlyPlayer1": "Valeur disponible uniquement pour {0}.",
+                "OnlyPlayer2": "Valeur disponible uniquement pour {1}.",
+                "NoData": "Aucune valeur pour {0} et {1}."
+            },
             "Values": {
                 "Enabled": "Active",
                 "Disabled": "Desactive"
@@ -491,8 +501,8 @@
                 "ConfiguredItems": "Items configures",
                 "Recipes": "Recettes",
                 "Skills": "Metiers",
-                "TargetValue": "Valeur cible",
-                "MyValue": "Ma valeur",
+                "Player1Value": "Valeur player 1",
+                "Player2Value": "Valeur player 2",
                 "DeltaAbs": "Delta",
                 "DeltaPct": "Delta %",
                 "Status": "Statut"
@@ -502,8 +512,8 @@
             "Higher": "Plus eleve",
             "Lower": "Plus bas",
             "Same": "Identique",
-            "OnlyTarget": "Seulement cible",
-            "OnlyMine": "Seulement moi",
+            "OnlyPlayer1": "Seulement player 1",
+            "OnlyPlayer2": "Seulement player 2",
             "NoData": "Pas de donnee"
         },
         "Errors": {
@@ -516,7 +526,7 @@
             "Line1": "La vue globale agrege tous les contextes serveur hors shopping list.",
             "Line2": "Utilise Regrouper par, Joueur et Metier pour reduire le scope.",
             "Line3": "La recherche Nom filtre immediatement les lignes visibles du tableau.",
-            "Line4": "Le drill-down permet de comparer un contexte joueur avec le tien.",
+            "Line4": "Le drill-down permet de comparer deux joueurs du serveur.",
             "Line5": "Cette page est en lecture seule et n'ecrit aucune donnee."
         }
     },

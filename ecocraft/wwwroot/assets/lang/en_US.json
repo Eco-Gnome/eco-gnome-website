@@ -474,13 +474,14 @@
         "Drilldown": {
             "Title": "Player Drill-down",
             "NoData": "No player data loaded.",
-            "CompareHeader": "Comparing {target} with {me}",
-            "TargetBadge": "Target",
-            "MyBadge": "Mine",
-            "TargetPlayer": "Target player",
+            "CompareHeader": "Comparing {player1} with {player2}",
+            "Player1Badge": "Player 1",
+            "Player2Badge": "Player 2",
+            "Player1": "Player 1",
+            "Player2": "Player 2",
             "CompareBy": "Compare by",
-            "TargetContext": "Target context",
-            "MyContext": "My context",
+            "Player1Context": "Player 1 context",
+            "Player2Context": "Player 2 context",
             "Search": "Search in comparison",
             "OnlyDifferences": "Only differences",
             "OnlyCommon": "Only common elements",
@@ -490,6 +491,15 @@
             "PriceOptionsComparison": "Compared Price Calculator options",
             "ComparisonTable": "Comparison",
             "NoComparisonData": "No comparison row available for the selected filters.",
+            "AtLeastTwoPlayersRequired": "At least 2 players are required to open drill-down.",
+            "StatusTooltip": {
+                "Higher": "{1} is higher than {0} (computed as Player 2 - Player 1).",
+                "Lower": "{1} is lower than {0} (computed as Player 2 - Player 1).",
+                "Same": "{0} and {1} have the same value.",
+                "OnlyPlayer1": "Value exists only for {0}.",
+                "OnlyPlayer2": "Value exists only for {1}.",
+                "NoData": "No value for {0} and {1}."
+            },
             "Values": {
                 "Enabled": "Enabled",
                 "Disabled": "Disabled"
@@ -502,8 +512,8 @@
                 "ConfiguredItems": "Configured items",
                 "Recipes": "Recipes",
                 "Skills": "Skills",
-                "TargetValue": "Target value",
-                "MyValue": "My value",
+                "Player1Value": "Player 1 value",
+                "Player2Value": "Player 2 value",
                 "DeltaAbs": "Delta",
                 "DeltaPct": "Delta %",
                 "Status": "Status"
@@ -513,8 +523,8 @@
             "Higher": "Higher",
             "Lower": "Lower",
             "Same": "Same",
-            "OnlyTarget": "Only target",
-            "OnlyMine": "Only mine",
+            "OnlyPlayer1": "Only player 1",
+            "OnlyPlayer2": "Only player 2",
             "NoData": "No data"
         },
         "Errors": {
@@ -527,7 +537,7 @@
             "Line1": "Global view aggregates all server contexts except shopping lists.",
             "Line2": "Use Group by, Player and Skill filters to narrow the dataset.",
             "Line3": "The Name search filters rows immediately in the visible table.",
-            "Line4": "Open drill-down to compare one player context with yours.",
+            "Line4": "Open drill-down to compare any two players.",
             "Line5": "This page is read-only and never writes server data."
         }
     },
