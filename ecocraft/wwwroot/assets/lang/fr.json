@@ -322,10 +322,6 @@
         "MagickFix": "Correction Magique (A essayer avant de reset!)",
         "ContextName": "Nom du contexte",
         "AddDataContext": "Ajouter un nouveau contexte",
-        "Status": {
-            "Loading": "Chargement...",
-            "Recalculating": "Recalcul..."
-        },
         "LoadError": "Une erreur s'est produite lors du chargement. Vous pouvez essayer de réinitialiser toutes vos données pour corriger l'erreur.",
         "Reset": "Réinitialiser",
         "Skills": "Compétences",
