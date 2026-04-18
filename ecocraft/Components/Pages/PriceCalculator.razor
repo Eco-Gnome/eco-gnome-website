@@ -336,7 +336,6 @@
                                                     <MudTooltip Disabled="@(!ShouldShowMarginPolicyIndicator(context))" Text="@GetMarginPolicyIndicatorTooltip(context)">
                                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                                             <MudNumericField T="decimal"
-                                                                             @key="GetMarginFieldRenderKey(context)"
                                                                              Immediate
                                                                              Class="@GetMarginInputClass(context)"
                                                                              Style="width: 93px"
@@ -802,7 +801,7 @@
                                                                Adornment="Adornment.None"
                                                                Value="context.GetMandatoryCurrentUserPrice(_selectedDataContext).UserMargin"
                                                                ValueChanged="@(value => ChangeUserPriceMargin(context.GetMandatoryCurrentUserPrice(_selectedDataContext), value))"
-                                                               ToStringFunc="@(um => ShowMarginNames ? "None" : ((um?.Margin ?? 0).ToString("0.##") + " %"))"
+                                                               ToStringFunc="GetUserMarginDisplayLabel"
                                                                Class="margin-select"
                                                                Dense="true"
                                                                Variant="Variant.Outlined"
@@ -812,7 +811,7 @@
                                                         {
                                                             <MudSelectItem T="UserMargin"
                                                                            Value="userMargin">
-                                                                @(ShowMarginNames ? userMargin.Name : userMargin.Margin.ToString("0.##") + " %")
+                                                                @GetUserMarginDisplayLabel(userMargin)
                                                             </MudSelectItem>
                                                         }
                                                     </MudSelect>
@@ -1347,12 +1346,6 @@
         }
 
         return ContextService.CurrentServer?.LockedMargin ?? userMargin.Margin;
-    }
-
-    private string GetMarginFieldRenderKey(UserMargin userMargin)
-    {
-        var server = ContextService.CurrentServer;
-        return $"margin-{userMargin.Id}-{IsServerMarginLocked}-{GetDisplayedMarginValue(userMargin).ToString(CultureInfo.InvariantCulture)}-{server?.LockedMargin?.ToString(CultureInfo.InvariantCulture)}-{server?.MarginMin?.ToString(CultureInfo.InvariantCulture)}-{server?.MarginMax?.ToString(CultureInfo.InvariantCulture)}";
     }
 
     private string GetMarginPolicySummary()
@@ -2093,8 +2086,13 @@
         await Calculate();
     }
 
-    private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin userMargin)
+    private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin? userMargin)
     {
+        if (userMargin is null)
+        {
+            return;
+        }
+
         userPrice.UserMargin = userMargin;
         userPrice.UserMarginId = userMargin.Id;
 
@@ -2105,6 +2103,22 @@
         });
 
         await Calculate();
+    }
+
+    private string GetUserMarginDisplayLabel(UserMargin? userMargin)
+    {
+        if (userMargin is null)
+        {
+            return string.Empty;
+        }
+
+        var marginValue = userMargin.Margin.ToString("0.##") + " %";
+        if (!ShowMarginNames)
+        {
+            return marginValue;
+        }
+
+        return string.IsNullOrWhiteSpace(userMargin.Name) ? marginValue : userMargin.Name;
     }
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)
