@@ -332,6 +332,10 @@
         "PageTitle": "Price Calculator",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
+        "Status": {
+            "Loading": "Loading...",
+            "Recalculating": "Recalculating..."
+        },
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
         "Reset": "Reset",
         "Skills": "Skills",
