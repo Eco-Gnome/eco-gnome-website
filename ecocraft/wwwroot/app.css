@@ -406,3 +406,72 @@
     width: 1px;
     height: 1px;
 }
+
+.economy-drilldown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.economy-drilldown-modal-wrapper {
+    width: min(1240px, calc(100vw - 48px));
+}
+
+.economy-drilldown-modal {
+    width: 100%;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.economy-help-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1301;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.economy-help-modal-wrapper {
+    width: min(760px, calc(100vw - 48px));
+}
+
+.economy-help-modal {
+    width: 100%;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+}
+
+@media (max-width: 960px) {
+    .economy-drilldown-overlay {
+        padding: 12px;
+    }
+
+    .economy-drilldown-modal-wrapper {
+        width: calc(100vw - 24px);
+    }
+
+    .economy-drilldown-modal {
+        max-height: calc(100vh - 24px);
+    }
+
+    .economy-help-overlay {
+        padding: 12px;
+    }
+
+    .economy-help-modal-wrapper {
+        width: calc(100vw - 24px);
+    }
+
+    .economy-help-modal {
+        max-height: calc(100vh - 24px);
+    }
+}

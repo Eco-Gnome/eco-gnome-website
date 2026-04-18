@@ -89,6 +89,7 @@ builder.Services.AddScoped<UserServerDataService>();
 builder.Services.AddScoped<VideoUploadService>();
 builder.Services.AddScoped<ShoppingListService>();
 builder.Services.AddScoped<ShoppingListDataService>();
+builder.Services.AddScoped<EconomyViewerService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();

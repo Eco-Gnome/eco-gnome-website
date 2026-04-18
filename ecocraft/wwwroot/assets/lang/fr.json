@@ -1,4 +1,4 @@
-{
+﻿{
     "Cancel": "Annuler",
     "CopyToClipboard": "Copier dans le presse-papiers",
     "CraftingTable": "Table d'artisanat",
@@ -52,6 +52,7 @@
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
+        "EconomyViewer": "Economy Viewer",
         "VideosUpload": "Upload de Vidéos",
         "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin",
@@ -407,6 +408,118 @@
             "PriceCopied": "Prix copié dans le presse-papiers"
         }
     },
+    "EconomyViewer": {
+        "PageTitle": "Economy Viewer",
+        "ServerContextMissing": "Selectionnez un serveur avant d'ouvrir Economy Viewer.",
+        "ReadOnlyBanner": "Economy Viewer est strictement en lecture seule. Aucune configuration serveur ou joueur ne peut etre modifiee ici.",
+        "ReadOnlyChip": "Lecture seule",
+        "GlobalViewTitle": "Vue globale serveur",
+        "NoGlobalData": "Aucune donnee disponible pour les filtres actuels.",
+        "Groups": {
+            "Item": "Item",
+            "Recipe": "Recette",
+            "Skill": "Metier",
+            "Player": "Joueur"
+        },
+        "Filters": {
+            "GroupBy": "Regrouper par",
+            "Player": "Filtre joueur",
+            "AllPlayers": "Tous les joueurs",
+            "MinSpread": "Spread minimum",
+            "Skill": "Filtre metier",
+            "AllSkills": "Tous les metiers",
+            "ShowIncompleteRows": "Afficher les lignes incompletes (-)",
+            "SortBy": "Trier par",
+            "SortDescending": "Decroissant",
+            "SortDirectionHint": "Basculer le sens du tri",
+            "SortDirectionAsc": "Croissant",
+            "SortDirectionDesc": "Decroissant",
+            "SortDirectionAZ": "A vers Z",
+            "SortDirectionZA": "Z vers A"
+        },
+        "Actions": {
+            "ApplyFilters": "Appliquer les filtres",
+            "ResetFilters": "Reinitialiser",
+            "Previous": "Precedent",
+            "Next": "Suivant",
+            "OpenDrilldown": "Ouvrir le detail",
+            "Help": "Comment ca marche"
+        },
+        "Columns": {
+            "Entity": "Nom",
+            "PriceMin": "Prix min",
+            "PriceAvg": "Prix moyen",
+            "PriceMax": "Prix max",
+            "MarginMin": "Marge min",
+            "MarginAvg": "Marge moyenne",
+            "MarginMax": "Marge max",
+            "ConfiguredPlayers": "Joueurs configures",
+            "ConfiguredContexts": "Contextes configures",
+            "Spread": "Spread"
+        },
+        "Pagination": {
+            "PageInfo": "Page {page} / {totalPages} ({totalRows} lignes)"
+        },
+        "Drilldown": {
+            "Title": "Detail joueur",
+            "NoData": "Aucune donnee joueur chargee.",
+            "CompareHeader": "Comparaison {target} vs {me}",
+            "TargetBadge": "Cible",
+            "MyBadge": "Moi",
+            "TargetPlayer": "Joueur cible",
+            "CompareBy": "Comparer par",
+            "TargetContext": "Contexte cible",
+            "MyContext": "Mon contexte",
+            "Search": "Recherche comparaison",
+            "OnlyDifferences": "Seulement les differences",
+            "OnlyCommon": "Seulement les elements en commun",
+            "ContextSummaries": "Contextes compares",
+            "CraftingTablesComparison": "Comparaison des tables d'artisanat",
+            "NoCraftingTableData": "Aucune table d'artisanat configuree pour ce contexte.",
+            "PriceOptionsComparison": "Options Price Calculator comparees",
+            "ComparisonTable": "Comparaison",
+            "NoComparisonData": "Aucune ligne de comparaison pour les filtres selectionnes.",
+            "Values": {
+                "Enabled": "Active",
+                "Disabled": "Desactive"
+            },
+            "Columns": {
+                "Role": "Role",
+                "Player": "Joueur",
+                "Option": "Option",
+                "Context": "Contexte",
+                "ConfiguredItems": "Items configures",
+                "Recipes": "Recettes",
+                "Skills": "Metiers",
+                "TargetValue": "Valeur cible",
+                "MyValue": "Ma valeur",
+                "DeltaAbs": "Delta",
+                "DeltaPct": "Delta %",
+                "Status": "Statut"
+            }
+        },
+        "Status": {
+            "Higher": "Plus eleve",
+            "Lower": "Plus bas",
+            "Same": "Identique",
+            "OnlyTarget": "Seulement cible",
+            "OnlyMine": "Seulement moi",
+            "NoData": "Pas de donnee"
+        },
+        "Errors": {
+            "Unauthorized": "Vous n'avez pas acces a ces donnees serveur.",
+            "LoadGlobal": "Echec du chargement des donnees globales",
+            "LoadDrilldown": "Echec du chargement du detail joueur"
+        },
+        "Help": {
+            "Title": "Comment fonctionne Economy Viewer",
+            "Line1": "La vue globale agrege tous les contextes serveur hors shopping list.",
+            "Line2": "Utilise Regrouper par, Joueur et Metier pour reduire le scope.",
+            "Line3": "La recherche Nom filtre immediatement les lignes visibles du tableau.",
+            "Line4": "Le drill-down permet de comparer un contexte joueur avec le tien.",
+            "Line5": "Cette page est en lecture seule et n'ecrit aucune donnee."
+        }
+    },
     "Recipe": "Recette",
     "ContextService": {
         "DefaultMargin": "Marge par défaut"
@@ -415,3 +528,6 @@
         "NewMargin": "Nouvelle marge"
     }
 }
+
+
+

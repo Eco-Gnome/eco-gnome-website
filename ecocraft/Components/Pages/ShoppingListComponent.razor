@@ -426,11 +426,10 @@
                                                                             {
                                                                                 <span class="guided-choice-scroll-anchor" @ref="_guidedPendingChoiceAnchorRef"></span>
                                                                                 <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandTooltip")">
-                                                                                    <MudButton Variant="Variant.Outlined"
-                                                                                               Color="Color.Warning"
-                                                                                               Size="Size.Small"
-                                                                                               StartIcon="@MDIIcons.Filled.StopCircle"
-                                                                                               OnClick="StopGuidedAutoExpandRun"/>
+                                                                                    <MudIconButton Icon="@MDIIcons.Filled.StopCircle"
+                                                                                                   Color="Color.Warning"
+                                                                                                   Size="Size.Small"
+                                                                                                   OnClick="StopGuidedAutoExpandRun"/>
                                                                                 </MudTooltip>
                                                                             }
 

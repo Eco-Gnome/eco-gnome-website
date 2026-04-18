@@ -13,16 +13,46 @@ public class LocalStorageService
 
     public async Task AddItem(string key, string value)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
+        }
+        catch (Exception ex) when (IsJsRuntimeUnavailable(ex))
+        {
+            // Circuit disconnected/disposed: no-op.
+        }
     }
 
     public async Task RemoveItem(string key)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
+        }
+        catch (Exception ex) when (IsJsRuntimeUnavailable(ex))
+        {
+            // Circuit disconnected/disposed: no-op.
+        }
     }
 
-    public Task<string> GetItem(string key)
+    public async Task<string> GetItem(string key)
     {
-        return _jsRuntime.InvokeAsync<string>("localStorage.getItem", key).AsTask();
+        try
+        {
+            return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
+        }
+        catch (Exception ex) when (IsJsRuntimeUnavailable(ex))
+        {
+            // Circuit disconnected/disposed: treat as key not found.
+            return string.Empty;
+        }
+    }
+
+    private static bool IsJsRuntimeUnavailable(Exception ex)
+    {
+        return ex is JSDisconnectedException
+            or ObjectDisposedException
+            or TaskCanceledException
+            or OperationCanceledException;
     }
 }
