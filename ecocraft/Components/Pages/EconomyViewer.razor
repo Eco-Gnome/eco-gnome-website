@@ -129,6 +129,10 @@
                         {
                             <MudTable Items="_globalResult.Rows" Filter="new Func<EconomyGlobalRow, bool>(FilterGlobalRow)" Dense="true" Hover="true" Class="mt-3">
                                 <HeaderContent>
+                                    @if (ShouldShowGlobalExpansionColumn())
+                                    {
+                                        <MudTh Class="economy-global-expand-cell"></MudTh>
+                                    }
                                     <MudTh>
                                         <MudStack Row AlignItems="AlignItems.Center">
                                             <MudTableSortLabel InitialDirection="SortDirection.Ascending"
@@ -197,6 +201,18 @@
                                     }
                                 </HeaderContent>
                                 <RowTemplate>
+                                    @if (ShouldShowGlobalExpansionColumn())
+                                    {
+                                        <MudTd Class="economy-global-expand-cell">
+                                            @if (CanExpandGlobalRow(context))
+                                            {
+                                                <MudIconButton Icon="@(IsGlobalRowExpanded(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)"
+                                                               Size="Size.Small"
+                                                               Color="Color.Primary"
+                                                               OnClick="@(() => ToggleGlobalRowExpansion(context))"/>
+                                            }
+                                        </MudTd>
+                                    }
                                     <MudTd>
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                             <EcoIcon Item="@GetGlobalRowIcon(context)"
@@ -232,6 +248,78 @@
                                         </MudTd>
                                     }
                                 </RowTemplate>
+                                <ChildRowContent>
+                                    @if (CanExpandGlobalRow(context) && IsGlobalRowExpanded(context))
+                                    {
+                                        <MudTr>
+                                            <MudTd colspan="@GetGlobalTableColumnCount()" Class="economy-global-player-details-cell">
+                                                <MudTable Items="GetGlobalRowPlayerDetails(context)" Dense="true" Hover="true" Elevation="0" Class="economy-global-player-details-table">
+                                                    <HeaderContent>
+                                                        <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Groups.Player")</MudTh>
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")</MudTh>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("Recipe")</MudTh>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Skill)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMin")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMax")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMin")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMax")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.ConfiguredContexts")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Spread")</MudTh>
+                                                        }
+                                                        <MudTh></MudTh>
+                                                    </HeaderContent>
+                                                    <RowTemplate Context="playerDetail">
+                                                        <MudTd>
+                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                                                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small"/>
+                                                                <MudText Typo="Typo.body2">@playerDetail.PlayerName</MudText>
+                                                            </MudStack>
+                                                        </MudTd>
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTd>@FormatDecimal(playerDetail.PriceAverage)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.MarginAverage)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item)
+                                                        {
+                                                            <MudTd>@GetPrimaryRecipeLabel(playerDetail)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Skill)
+                                                        {
+                                                            <MudTd>@FormatDecimal(playerDetail.PriceMin)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.PriceAverage)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.PriceMax)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.MarginMin)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.MarginAverage)</MudTd>
+                                                            <MudTd>@FormatDecimal(playerDetail.MarginMax)</MudTd>
+                                                            <MudTd>@playerDetail.ConfiguredContextsCount</MudTd>
+                                                            <MudTd>@FormatPlayerDetailSpread(playerDetail)</MudTd>
+                                                        }
+                                                        <MudTd>
+                                                            <MudTooltip Text="@GetOpenDrilldownTooltip()">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.PersonSearch"
+                                                                               Color="Color.Primary"
+                                                                               Size="Size.Small"
+                                                                               Disabled="@(!CanOpenDrilldown)"
+                                                                               OnClick="@(async () => await OpenDrilldownFromPlayerRowAsync(playerDetail.UserServerId))"/>
+                                                            </MudTooltip>
+                                                        </MudTd>
+                                                    </RowTemplate>
+                                                </MudTable>
+                                            </MudTd>
+                                        </MudTr>
+                                    }
+                                </ChildRowContent>
                                 <NoRecordsContent>
                                     <MudText Class="pa-4">@LocalizationService.GetTranslation("EconomyViewer.NoGlobalData")</MudText>
                                 </NoRecordsContent>
@@ -694,6 +782,7 @@
 
     private EconomyGlobalResult _globalResult = new();
     private EconomyPlayerDetailResult? _drilldown;
+    private readonly HashSet<string> _expandedGlobalRowKeys = [];
 
     private List<ItemOrTag> _availableItems = [];
     private List<Recipe> _availableRecipes = [];
@@ -888,6 +977,8 @@
 
         try
         {
+            ResetGlobalRowExpansionState();
+
             if (showLoadingIndicator)
             {
                 _isLoadingGlobal = true;
@@ -1013,6 +1104,7 @@
     private async Task OnGroupByChanged(EconomyGroupBy value)
     {
         _groupBy = value;
+        ResetGlobalRowExpansionState();
 
         await LoadGlobalAsync();
     }
@@ -1061,6 +1153,78 @@
 
         var subLabel = GetGlobalRowSubLabel(row);
         return !string.IsNullOrWhiteSpace(subLabel) && subLabel.Contains(search, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool ShouldShowGlobalExpansionColumn()
+    {
+        return _groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe or EconomyGroupBy.Skill;
+    }
+
+    private bool CanExpandGlobalRow(EconomyGlobalRow row)
+    {
+        return ShouldShowGlobalExpansionColumn() && row.PlayerDetails.Count > 1;
+    }
+
+    private bool IsGlobalRowExpanded(EconomyGlobalRow row)
+    {
+        return _expandedGlobalRowKeys.Contains(row.GroupKey);
+    }
+
+    private void ToggleGlobalRowExpansion(EconomyGlobalRow row)
+    {
+        if (!CanExpandGlobalRow(row))
+        {
+            return;
+        }
+
+        if (!_expandedGlobalRowKeys.Add(row.GroupKey))
+        {
+            _expandedGlobalRowKeys.Remove(row.GroupKey);
+        }
+    }
+
+    private void ResetGlobalRowExpansionState()
+    {
+        _expandedGlobalRowKeys.Clear();
+    }
+
+    private int GetGlobalTableColumnCount()
+    {
+        var count = 9;
+
+        if (ShouldShowGlobalExpansionColumn())
+        {
+            count++;
+        }
+
+        if (_groupBy is EconomyGroupBy.Player)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    private IEnumerable<EconomyGlobalPlayerDetailRow> GetGlobalRowPlayerDetails(EconomyGlobalRow row)
+    {
+        return row.PlayerDetails
+            .OrderBy(detail => detail.PlayerName)
+            .ThenBy(detail => detail.UserServerId);
+    }
+
+    private string GetPrimaryRecipeLabel(EconomyGlobalPlayerDetailRow detail)
+    {
+        if (detail.PrimaryRecipeId is Guid recipeId && _recipesById.TryGetValue(recipeId, out var recipe))
+        {
+            return LocalizationService.GetTranslation(recipe);
+        }
+
+        if (!string.IsNullOrWhiteSpace(detail.PrimaryRecipeName))
+        {
+            return detail.PrimaryRecipeName!;
+        }
+
+        return "-";
     }
 
     private async Task OnShowIncompleteRowsChanged(bool value)
@@ -1565,6 +1729,23 @@
         return rounded.ToString("0.##", CultureInfo.CurrentUICulture) + " %";
     }
 
+    private string FormatPlayerDetailSpread(EconomyGlobalPlayerDetailRow row)
+    {
+        if (!_showSpreadAsPercent)
+        {
+            return FormatDecimal(row.Spread);
+        }
+
+        var spreadPercent = GetSpreadPercentValue(row);
+        if (spreadPercent is null)
+        {
+            return "-";
+        }
+
+        var rounded = Math.Round(spreadPercent.Value, 2, MidpointRounding.AwayFromZero);
+        return rounded.ToString("0.##", CultureInfo.CurrentUICulture) + " %";
+    }
+
     private string FormatBooleanSetting(bool? value)
     {
         if (value is null)
@@ -1628,6 +1809,26 @@
     }
 
     private static decimal? GetSpreadPercentValue(EconomyGlobalRow row)
+    {
+        if (row.Spread is null || row.PriceMin is null)
+        {
+            return null;
+        }
+
+        if (row.Spread == 0)
+        {
+            return 0;
+        }
+
+        if (row.PriceMin == 0)
+        {
+            return null;
+        }
+
+        return row.Spread.Value / row.PriceMin.Value * 100m;
+    }
+
+    private static decimal? GetSpreadPercentValue(EconomyGlobalPlayerDetailRow row)
     {
         if (row.Spread is null || row.PriceMin is null)
         {

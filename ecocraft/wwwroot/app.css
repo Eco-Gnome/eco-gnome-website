@@ -462,6 +462,19 @@
     overflow-y: auto;
 }
 
+.economy-global-expand-cell {
+    width: 36px;
+}
+
+.economy-global-player-details-cell {
+    background-color: var(--mud-palette-surface);
+    padding-top: 0 !important;
+}
+
+.economy-global-player-details-table {
+    margin-left: 20px;
+}
+
 @media (max-width: 960px) {
     .economy-drilldown-overlay {
         padding: 12px;

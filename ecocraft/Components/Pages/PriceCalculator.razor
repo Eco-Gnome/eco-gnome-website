@@ -55,18 +55,18 @@
                            OnClick="@(() => AddDataContext())">
                     @LocalizationService.GetTranslation("PriceCalculator.AddDataContext")
                 </MudButton>
+                <MudSpacer/>
+                @if (ShouldShowStatusIndicator)
+                {
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Style="min-width: 150px; justify-content: flex-end;">
+                        <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true"/>
+                        <MudText Typo="Typo.body2">@GetStatusLabel()</MudText>
+                    </MudStack>
+                }
             </MudStack>
         </MudItem>
 
-        @if (_isLoadingData)
-        {
-            <MudItem xs="12" Class="px-4 pt-4">
-                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                    <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
-                </MudStack>
-            </MudItem>
-        }
-        else if (_selectedDataContext is not null && ContextService.CurrentServerData is not null)
+        @if (!_isLoadingData && _selectedDataContext is not null && ContextService.CurrentServerData is not null)
         {
             <ErrorBoundary>
                 <ChildContent>
@@ -1013,6 +1013,9 @@
     }
 
     private bool _isLoadingData;
+    private int _activeCalculations;
+    private bool IsCalculationInProgress => _activeCalculations > 0;
+    private bool ShouldShowStatusIndicator => _isLoadingData || IsCalculationInProgress;
 
     private DataContext? _selectedDataContext;
     private bool IsServerCalorieCostLocked => ContextService.CurrentServer?.IsCalorieCostLocked ?? false;
@@ -1091,9 +1094,9 @@
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         await EnforceServerCaloriePolicyIfNeeded();
         await EnforceServerMarginPolicyIfNeeded();
-        _isLoadingData = false;
 
         await Calculate();
+        _isLoadingData = false;
         StateHasChanged();
     }
 
@@ -2370,6 +2373,9 @@
 
     private async Task Calculate()
     {
+        System.Threading.Interlocked.Increment(ref _activeCalculations);
+        StateHasChanged();
+
         try
         {
             await EnforceServerMarginPolicyIfNeeded();
@@ -2380,8 +2386,21 @@
         {
             _calculationError = ex;
         }
+        finally
+        {
+            System.Threading.Interlocked.Decrement(ref _activeCalculations);
+            StateHasChanged();
+        }
+    }
 
-        StateHasChanged();
+    private string GetStatusLabel()
+    {
+        if (_isLoadingData)
+        {
+            return "Chargement...";
+        }
+
+        return "Recalcul...";
     }
 
     private async Task RefreshSkillAutocompleteAsync()

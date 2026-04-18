@@ -55,6 +55,22 @@ public sealed class EconomyGlobalQuery
     public int PageSize { get; set; } = 50;
 }
 
+public sealed class EconomyGlobalPlayerDetailRow
+{
+    public Guid UserServerId { get; set; }
+    public string PlayerName { get; set; } = string.Empty;
+    public Guid? PrimaryRecipeId { get; set; }
+    public string? PrimaryRecipeName { get; set; }
+    public decimal? PriceMin { get; set; }
+    public decimal? PriceAverage { get; set; }
+    public decimal? PriceMax { get; set; }
+    public decimal? MarginMin { get; set; }
+    public decimal? MarginAverage { get; set; }
+    public decimal? MarginMax { get; set; }
+    public int ConfiguredContextsCount { get; set; }
+    public decimal? Spread { get; set; }
+}
+
 public sealed class EconomyGlobalRow
 {
     public string GroupKey { get; set; } = string.Empty;
@@ -74,6 +90,7 @@ public sealed class EconomyGlobalRow
     public int ConfiguredPlayersCount { get; set; }
     public int ConfiguredContextsCount { get; set; }
     public decimal? Spread { get; set; }
+    public List<EconomyGlobalPlayerDetailRow> PlayerDetails { get; set; } = [];
 }
 
 public sealed class EconomyGlobalResult
@@ -186,7 +203,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
         string ItemName,
         bool IsTag,
         decimal? EffectivePrice,
-        decimal? Margin
+        decimal? Margin,
+        Guid? PrimaryRecipeId,
+        string? PrimaryRecipeName
     );
 
     private sealed record RecipeFact(
@@ -435,7 +454,8 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                     MarginMax = marginMax,
                     ConfiguredPlayersCount = configuredPlayersCount,
                     ConfiguredContextsCount = configuredContextsCount,
-                    Spread = spread
+                    Spread = spread,
+                    PlayerDetails = BuildGlobalItemPlayerDetails(group)
                 };
             });
     }
@@ -529,7 +549,14 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                     MarginMax = marginMax,
                     ConfiguredPlayersCount = configuredPlayersCount,
                     ConfiguredContextsCount = configuredContextsCount,
-                    Spread = spread
+                    Spread = spread,
+                    PlayerDetails = BuildGlobalPlayerDetails(group.Select(g => (
+                        g.UserId,
+                        g.UserServerId,
+                        g.PlayerName,
+                        g.DataContextId,
+                        g.UnitPrice,
+                        g.Margin)))
                 };
             });
     }
@@ -563,7 +590,14 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                     MarginMax = marginMax,
                     ConfiguredPlayersCount = configuredPlayersCount,
                     ConfiguredContextsCount = configuredContextsCount,
-                    Spread = spread
+                    Spread = spread,
+                    PlayerDetails = BuildGlobalPlayerDetails(group.Select(g => (
+                        g.UserId,
+                        g.UserServerId,
+                        g.PlayerName,
+                        g.DataContextId,
+                        g.UnitPrice,
+                        g.Margin)))
                 };
             });
     }
@@ -597,6 +631,92 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             configuredFacts.Select(f => f.DataContextId).Distinct().Count(),
             spread
         );
+    }
+
+    private static List<EconomyGlobalPlayerDetailRow> BuildGlobalPlayerDetails(
+        IEnumerable<(Guid UserId, Guid UserServerId, string PlayerName, Guid DataContextId, decimal? Price, decimal? Margin)> facts)
+    {
+        return facts
+            .GroupBy(f => new { f.UserServerId, f.PlayerName })
+            .Select(group =>
+            {
+                var (priceMin, priceAverage, priceMax, marginMin, marginAverage, marginMax, _, configuredContextsCount, spread) =
+                    ComputeMetrics(group.Select(g => (g.UserId, g.DataContextId, g.Price, g.Margin)));
+
+                return new EconomyGlobalPlayerDetailRow
+                {
+                    UserServerId = group.Key.UserServerId,
+                    PlayerName = group.Key.PlayerName,
+                    PriceMin = priceMin,
+                    PriceAverage = priceAverage,
+                    PriceMax = priceMax,
+                    MarginMin = marginMin,
+                    MarginAverage = marginAverage,
+                    MarginMax = marginMax,
+                    ConfiguredContextsCount = configuredContextsCount,
+                    Spread = spread
+                };
+            })
+            .OrderBy(row => row.PlayerName)
+            .ThenBy(row => row.UserServerId)
+            .ToList();
+    }
+
+    private static List<EconomyGlobalPlayerDetailRow> BuildGlobalItemPlayerDetails(IEnumerable<PriceFact> facts)
+    {
+        return facts
+            .GroupBy(f => new { f.UserServerId, f.PlayerName })
+            .Select(group =>
+            {
+                var (priceMin, priceAverage, priceMax, marginMin, marginAverage, marginMax, _, configuredContextsCount, spread) =
+                    ComputeMetrics(group.Select(g => (g.UserId, g.DataContextId, g.EffectivePrice, g.Margin)));
+
+                var (primaryRecipeId, primaryRecipeName) = ResolvePrimaryRecipe(
+                    group.Select(g => (g.PrimaryRecipeId, g.PrimaryRecipeName)));
+
+                return new EconomyGlobalPlayerDetailRow
+                {
+                    UserServerId = group.Key.UserServerId,
+                    PlayerName = group.Key.PlayerName,
+                    PrimaryRecipeId = primaryRecipeId,
+                    PrimaryRecipeName = primaryRecipeName,
+                    PriceMin = priceMin,
+                    PriceAverage = priceAverage,
+                    PriceMax = priceMax,
+                    MarginMin = marginMin,
+                    MarginAverage = marginAverage,
+                    MarginMax = marginMax,
+                    ConfiguredContextsCount = configuredContextsCount,
+                    Spread = spread
+                };
+            })
+            .OrderBy(row => row.PlayerName)
+            .ThenBy(row => row.UserServerId)
+            .ToList();
+    }
+
+    private static (Guid? RecipeId, string? RecipeName) ResolvePrimaryRecipe(
+        IEnumerable<(Guid? RecipeId, string? RecipeName)> primaryRecipes)
+    {
+        var candidates = primaryRecipes
+            .Where(recipe => recipe.RecipeId is not null && !string.IsNullOrWhiteSpace(recipe.RecipeName))
+            .Select(recipe => (RecipeId: recipe.RecipeId!.Value, RecipeName: recipe.RecipeName!.Trim()))
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return (null, null);
+        }
+
+        var best = candidates
+            .GroupBy(recipe => new { recipe.RecipeId, recipe.RecipeName })
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key.RecipeName)
+            .ThenBy(group => group.Key.RecipeId)
+            .Select(group => group.First())
+            .First();
+
+        return (best.RecipeId, best.RecipeName);
     }
 
     private static IEnumerable<EconomyGlobalRow> SortGlobalRows(IEnumerable<EconomyGlobalRow> rows, EconomyGlobalSortBy sortBy, bool descending)
@@ -1008,7 +1128,9 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
                 up.ItemOrTag.Name,
                 up.ItemOrTag.IsTag,
                 up.MarginPrice ?? up.Price,
-                up.UserMargin != null ? (decimal?)up.UserMargin.Margin : null
+                up.UserMargin != null ? (decimal?)up.UserMargin.Margin : null,
+                up.PrimaryUserElement != null ? up.PrimaryUserElement.Element.RecipeId : null,
+                up.PrimaryUserElement != null ? up.PrimaryUserElement.Element.Recipe.Name : null
             ))
             .ToListAsync();
     }
