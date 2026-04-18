@@ -390,11 +390,18 @@
 
 .shopping-list-choice-container {
     flex: 0 0 auto;
+    min-width: max-content;
 }
 
 .shopping-list-choice-row {
     flex-wrap: nowrap;
     row-gap: 0;
+    flex: 0 0 auto;
+    width: max-content;
+}
+
+.shopping-list-choice-row > * {
+    flex: 0 0 auto;
 }
 
 .shopping-list-choice-row-pending {
