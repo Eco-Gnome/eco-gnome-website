@@ -52,6 +52,7 @@
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
         "ShoppingList": "Shopping List",
+        "EconomyViewer": "Economy Viewer",
         "VideosUpload": "Videos Uploader",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
@@ -416,6 +417,130 @@
             "CantRemoveLastMargin": "You can't remove your last margin",
             "PriceNotWellConfigured": "This price isn't well configured",
             "PriceCopied": "Price copied to clipboard"
+        }
+    },
+    "EconomyViewer": {
+        "PageTitle": "Economy Viewer",
+        "ServerContextMissing": "Please select a server before opening Economy Viewer.",
+        "ReadOnlyBanner": "Economy Viewer is strictly read-only. No server or player setting can be edited from this page.",
+        "ReadOnlyChip": "Read-only",
+        "GlobalViewTitle": "Global Server View",
+        "NoGlobalData": "No data available for the current filters.",
+        "Groups": {
+            "Item": "Item",
+            "Recipe": "Recipe",
+            "Skill": "Skill",
+            "Player": "Player"
+        },
+        "Filters": {
+            "GroupBy": "Group by",
+            "Player": "Player filter",
+            "AllPlayers": "All players",
+            "MinSpread": "Minimum spread",
+            "Skill": "Skill filter",
+            "AllSkills": "All skills",
+            "ShowIncompleteRows": "Show incomplete rows (-)",
+            "SortBy": "Sort by",
+            "SortDescending": "Descending",
+            "SortDirectionHint": "Toggle sort direction",
+            "SortDirectionAsc": "Ascending",
+            "SortDirectionDesc": "Descending",
+            "SortDirectionAZ": "A to Z",
+            "SortDirectionZA": "Z to A"
+        },
+        "Actions": {
+            "ApplyFilters": "Apply filters",
+            "ResetFilters": "Reset filters",
+            "Previous": "Previous",
+            "Next": "Next",
+            "OpenDrilldown": "Open drill-down",
+            "Help": "How it works"
+        },
+        "Columns": {
+            "Entity": "Name",
+            "Price": "Price",
+            "PriceMin": "Price min",
+            "PriceAvg": "Price avg",
+            "PriceMax": "Price max",
+            "Margin": "Margin",
+            "MarginMin": "Margin min",
+            "MarginAvg": "Margin avg",
+            "MarginMax": "Margin max",
+            "ConfiguredPlayers": "Configured players",
+            "ConfiguredContexts": "Configured contexts",
+            "Spread": "Spread"
+        },
+        "Pagination": {
+            "PageInfo": "Page {page} / {totalPages} ({totalRows} rows)"
+        },
+        "Drilldown": {
+            "Title": "Player Drill-down",
+            "NoData": "No player data loaded.",
+            "CompareHeader": "Comparing {player1} with {player2}",
+            "Player1Badge": "Player 1",
+            "Player2Badge": "Player 2",
+            "Player1": "Player 1",
+            "Player2": "Player 2",
+            "CompareBy": "Compare by",
+            "Player1Context": "Player 1 context",
+            "Player2Context": "Player 2 context",
+            "Search": "Search in comparison",
+            "OnlyDifferences": "Only differences",
+            "OnlyCommon": "Only common elements",
+            "ContextSummaries": "Compared contexts",
+            "CraftingTablesComparison": "Crafting tables comparison",
+            "NoCraftingTableData": "No crafting table configured for this context.",
+            "PriceOptionsComparison": "Compared Price Calculator options",
+            "ComparisonTable": "Comparison",
+            "NoComparisonData": "No comparison row available for the selected filters.",
+            "AtLeastTwoPlayersRequired": "At least 2 players are required to open drill-down.",
+            "StatusTooltip": {
+                "Higher": "{1} is higher than {0} (computed as Player 2 - Player 1).",
+                "Lower": "{1} is lower than {0} (computed as Player 2 - Player 1).",
+                "Same": "{0} and {1} have the same value.",
+                "OnlyPlayer1": "Value exists only for {0}.",
+                "OnlyPlayer2": "Value exists only for {1}.",
+                "NoData": "No value for {0} and {1}."
+            },
+            "Values": {
+                "Enabled": "Enabled",
+                "Disabled": "Disabled"
+            },
+            "Columns": {
+                "Role": "Role",
+                "Player": "Player",
+                "Option": "Option",
+                "Context": "Context",
+                "ConfiguredItems": "Configured items",
+                "Recipes": "Recipes",
+                "Skills": "Skills",
+                "Player1Value": "Player 1 value",
+                "Player2Value": "Player 2 value",
+                "DeltaAbs": "Delta",
+                "DeltaPct": "Delta %",
+                "Status": "Status"
+            }
+        },
+        "Status": {
+            "Higher": "Higher",
+            "Lower": "Lower",
+            "Same": "Same",
+            "OnlyPlayer1": "Only player 1",
+            "OnlyPlayer2": "Only player 2",
+            "NoData": "No data"
+        },
+        "Errors": {
+            "Unauthorized": "You are not allowed to access this server data.",
+            "LoadGlobal": "Failed to load global economy data",
+            "LoadDrilldown": "Failed to load player drill-down"
+        },
+        "Help": {
+            "Title": "How Economy Viewer Works",
+            "Line1": "Global view aggregates all server contexts except shopping lists.",
+            "Line2": "Use Group by, Player and Skill filters to narrow the dataset.",
+            "Line3": "The Name search filters rows immediately in the visible table.",
+            "Line4": "Open drill-down to compare any two players.",
+            "Line5": "This page is read-only and never writes server data."
         }
     },
     "Recipe": "Recipe",
