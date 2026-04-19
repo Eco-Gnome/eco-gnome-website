@@ -64,6 +64,7 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	{
 		return await context.Servers
 			.AsNoTrackingWithIdentityResolution()
+			.AsSplitQuery()
 			.Where(s => s.Id == id)
 			// Skills
 			.Include(u => u.Skills)

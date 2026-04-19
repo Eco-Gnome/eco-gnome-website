@@ -118,6 +118,20 @@ namespace ecocraft.Migrations
                     b.ToTable("DataContext", (string)null);
                 });
 
+            modelBuilder.Entity("ecocraft.Models.AppSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("PriceCalculatorMetricsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppSetting", (string)null);
+                });
+
             modelBuilder.Entity("ecocraft.Models.DynamicValue", b =>
                 {
                     b.Property<Guid>("Id")
@@ -879,6 +893,9 @@ namespace ecocraft.Migrations
 
                     b.Property<decimal>("CalorieCost")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("CalculationMode")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");

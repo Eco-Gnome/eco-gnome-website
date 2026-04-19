@@ -434,8 +434,16 @@
     [Parameter]
     public required Recipe Recipe { get; set; }
 
+    [Parameter]
+    public Func<string, Task>? RecalculateRequested { get; set; }
+
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
+        if (userElement.IsReintegrated == value)
+        {
+            return;
+        }
+
         userElement.IsReintegrated = value;
 
         var userPrice = userElement.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!;
@@ -452,12 +460,15 @@
         });
 
         await FirstOnly();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
     }
 
     private async Task UpdatePrice(UserPrice userPrice, decimal? value)
     {
+        if (userPrice.Price == value)
+        {
+            return;
+        }
+
         userPrice.Price = value;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -466,8 +477,7 @@
             return Task.CompletedTask;
         });
 
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(UpdatePrice));
     }
 
     private async Task ToggleLock()
@@ -516,6 +526,11 @@
 
     private async Task RoundFactorChange(int value, UserRecipe userRecipe)
     {
+        if (userRecipe.RoundFactor == value)
+        {
+            return;
+        }
+
         userRecipe.RoundFactor = value;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -524,8 +539,7 @@
             return Task.CompletedTask;
         });
 
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(RoundFactorChange));
     }
 
     private List<UserElement> GetIngredientUserElements()
@@ -568,8 +582,7 @@
         }
 
         await SaveProductShares();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(UpdateShare));
     }
 
     private async Task Equality()
@@ -582,8 +595,7 @@
         }
 
         await SaveProductShares();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(Equality));
     }
 
     private async Task Equilibrate()
@@ -597,8 +609,7 @@
         }
 
         await SaveProductShares();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(Equilibrate));
     }
 
     private async Task FirstOnly()
@@ -611,8 +622,7 @@
         }
 
         await SaveProductShares();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(FirstOnly));
     }
 
     private async Task Honest()
@@ -625,8 +635,7 @@
         }
 
         await SaveProductShares();
-        await PriceCalculatorService.Calculate(DataContext);
-        StateHasChanged();
+        await RecalculateFromDialog(nameof(Honest));
     }
 
     private async Task SaveProductShares()
@@ -640,5 +649,18 @@
             }
             return Task.CompletedTask;
         });
+    }
+
+    private async Task RecalculateFromDialog(string origin)
+    {
+        if (RecalculateRequested is not null)
+        {
+            await RecalculateRequested(origin);
+            StateHasChanged();
+            return;
+        }
+
+        await PriceCalculatorService.Calculate(DataContext, $"RecipeDialog:{origin}");
+        StateHasChanged();
     }
 }

@@ -87,6 +87,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 	public DbSet<CraftingTable> CraftingTables { get; set; }
 	public DbSet<PluginModule> PluginModules { get; set; }
 	public DbSet<User> Users { get; set; }
+	public DbSet<AppSetting> AppSettings { get; set; }
 	public DbSet<UserServer> UserServers { get; set; }
 	public DbSet<DataContext> DataContexts { get; set; }
 	public DbSet<UserSetting> UserSettings { get; set; }
@@ -326,6 +327,10 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// * User Data
+		// AppSetting
+		modelBuilder.Entity<AppSetting>()
+			.ToTable("AppSetting");
+
 		// User
 		modelBuilder.Entity<User>()
 			.ToTable("User");
