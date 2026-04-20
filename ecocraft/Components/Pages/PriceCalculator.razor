@@ -711,6 +711,8 @@
                     <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                             <MudTable Items="@_itemsToSellDisplay"
+                                      @ref="_itemsToSellTableRef"
+                                      id="@ItemsToSellTableDomId"
                                       Filter="new Func<ItemOrTag, bool>(FilterItemToSell)"
                                       Class="mud-table-container-no-overflow-y recipe-table"
                                       Dense="true"
@@ -1014,6 +1016,52 @@
     private HashSet<Guid> _autoCalculatedSellItemIds = [];
     private Dictionary<Guid, UserElement> _userElementsByElementId = [];
 
+    private sealed class ServerDataGraphMetrics
+    {
+        public static ServerDataGraphMetrics Empty { get; } = new();
+
+        public int Skills { get; init; }
+        public int Talents { get; init; }
+        public int CraftingTables { get; init; }
+        public int CraftingTablePluginModules { get; init; }
+        public int PluginModules { get; init; }
+        public int Recipes { get; init; }
+        public int RecipeElements { get; init; }
+        public int ItemOrTags { get; init; }
+        public int AssociatedItems { get; init; }
+        public int AssociatedTags { get; init; }
+    }
+
+    private sealed class DataContextGraphMetrics
+    {
+        public static DataContextGraphMetrics Empty { get; } = new();
+
+        public int UserSkills { get; init; }
+        public int UserTalents { get; init; }
+        public int UserCraftingTables { get; init; }
+        public int UserCraftingTableSkilledPluginModules { get; init; }
+        public int UserRecipes { get; init; }
+        public int UserElements { get; init; }
+        public int UserPrices { get; init; }
+        public int UserMargins { get; init; }
+        public int UserSettings { get; init; }
+    }
+
+    private sealed class DisplayCacheRefreshMetrics
+    {
+        public static DisplayCacheRefreshMetrics Empty { get; } = new();
+
+        public long TotalMilliseconds { get; init; }
+        public long CategorizeForDisplayMilliseconds { get; init; }
+        public long CategorizeForAutoSellMilliseconds { get; init; }
+        public long AutoSellIdProjectionMilliseconds { get; init; }
+        public long UserElementsIndexMilliseconds { get; init; }
+        public int ItemsToBuyCount { get; init; }
+        public int ItemsToSellCount { get; init; }
+        public int AutoCalculatedSellCount { get; init; }
+        public int UserElementsByElementIdCount { get; init; }
+    }
+
     private bool _showDetailedTags;
     private bool ShowDetailedTags
     {
@@ -1103,6 +1151,7 @@
     private MudAutocomplete<Skill>? _skillAutocompleteRef;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
     private MudAutocomplete<CraftingTable>? _craftingTableAutocompleteRef;
+    private MudTable<ItemOrTag>? _itemsToSellTableRef;
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
@@ -1115,6 +1164,11 @@
     private string _searchItemToSell = "";
 
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
+    private bool _collapseSellGroupsOnNextRender;
+    private bool _groupLimiterInteropUnavailable;
+    private const int SellGroupCollapseThreshold = 7;
+    private const int SellGroupMaxOpenGroups = 3;
+    private const string ItemsToSellTableDomId = "items-to-sell-table";
 
     protected override void OnInitialized()
     {
@@ -1189,6 +1243,8 @@
 
             _retrieveToRenderStopwatch = null;
         }
+
+        await ConfigureItemsToSellGroupBehaviorAsync();
     }
 
     private async Task RetrieveData(DataContext? dataContext = null)
@@ -1198,10 +1254,17 @@
         var selectedDataContextStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var localStorageStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var serverLoadStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var serverLoadDbStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var serverLoadGraphAnalysisStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var syncPolicyStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var dataContextLoadStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var dataContextGraphAnalysisStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var policyEnforcementStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var enforceCaloriePolicyStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var enforceMarginPolicyStopwatch = isMetricsEnabled ? new Stopwatch() : null;
         var calculateStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var serverGraphMetrics = ServerDataGraphMetrics.Empty;
+        var dataContextGraphMetrics = DataContextGraphMetrics.Empty;
 
         _retrieveToRenderStopwatch = isMetricsEnabled ? Stopwatch.StartNew() : null;
         _isLoadingData = true;
@@ -1216,7 +1279,12 @@
         localStorageStopwatch?.Stop();
 
         serverLoadStopwatch?.Start();
+        serverLoadDbStopwatch?.Start();
         ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+        serverLoadDbStopwatch?.Stop();
+        serverLoadGraphAnalysisStopwatch?.Start();
+        serverGraphMetrics = BuildServerDataGraphMetrics(ContextService.CurrentServerData);
+        serverLoadGraphAnalysisStopwatch?.Stop();
         serverLoadStopwatch?.Stop();
 
         syncPolicyStopwatch?.Start();
@@ -1227,10 +1295,20 @@
         dataContextLoadStopwatch?.Start();
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
         dataContextLoadStopwatch?.Stop();
+        var shouldCollapseSellGroups = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+        _groupDefinitionToSell.IsInitiallyExpanded = !shouldCollapseSellGroups;
+        _collapseSellGroupsOnNextRender = shouldCollapseSellGroups;
+        dataContextGraphAnalysisStopwatch?.Start();
+        dataContextGraphMetrics = BuildDataContextGraphMetrics(_selectedDataContext);
+        dataContextGraphAnalysisStopwatch?.Stop();
 
         policyEnforcementStopwatch?.Start();
+        enforceCaloriePolicyStopwatch?.Start();
         await EnforceServerCaloriePolicyIfNeeded();
+        enforceCaloriePolicyStopwatch?.Stop();
+        enforceMarginPolicyStopwatch?.Start();
         await EnforceServerMarginPolicyIfNeeded();
+        enforceMarginPolicyStopwatch?.Stop();
         policyEnforcementStopwatch?.Stop();
 
         calculateStopwatch?.Start();
@@ -1256,6 +1334,42 @@
                 _selectedDataContext.UserPrices.Count,
                 ContextService.CurrentServerData?.ItemOrTags.Count ?? 0,
                 ContextService.CurrentServerData?.Recipes.Count ?? 0);
+
+            _logger?.LogInformation(
+                "PriceCalculator refresh serverDataLoad details. totalMs={TotalMs} dbFetchMs={DbFetchMs} graphMetricsMs={GraphMetricsMs} skills={Skills} talents={Talents} craftingTables={CraftingTables} craftingTablePluginModules={CraftingTablePluginModules} pluginModules={PluginModules} recipes={Recipes} recipeElements={RecipeElements} itemOrTags={ItemOrTags} associatedItems={AssociatedItems} associatedTags={AssociatedTags}",
+                serverLoadStopwatch?.ElapsedMilliseconds ?? 0,
+                serverLoadDbStopwatch?.ElapsedMilliseconds ?? 0,
+                serverLoadGraphAnalysisStopwatch?.ElapsedMilliseconds ?? 0,
+                serverGraphMetrics.Skills,
+                serverGraphMetrics.Talents,
+                serverGraphMetrics.CraftingTables,
+                serverGraphMetrics.CraftingTablePluginModules,
+                serverGraphMetrics.PluginModules,
+                serverGraphMetrics.Recipes,
+                serverGraphMetrics.RecipeElements,
+                serverGraphMetrics.ItemOrTags,
+                serverGraphMetrics.AssociatedItems,
+                serverGraphMetrics.AssociatedTags);
+
+            _logger?.LogInformation(
+                "PriceCalculator refresh dataContextLoad details. totalMs={TotalMs} graphMetricsMs={GraphMetricsMs} userSkills={UserSkills} userTalents={UserTalents} userCraftingTables={UserCraftingTables} userCraftingTableSkilledPluginModules={UserCraftingTableSkilledPluginModules} userRecipes={UserRecipes} userElements={UserElements} userPrices={UserPrices} userMargins={UserMargins} userSettings={UserSettings}",
+                dataContextLoadStopwatch?.ElapsedMilliseconds ?? 0,
+                dataContextGraphAnalysisStopwatch?.ElapsedMilliseconds ?? 0,
+                dataContextGraphMetrics.UserSkills,
+                dataContextGraphMetrics.UserTalents,
+                dataContextGraphMetrics.UserCraftingTables,
+                dataContextGraphMetrics.UserCraftingTableSkilledPluginModules,
+                dataContextGraphMetrics.UserRecipes,
+                dataContextGraphMetrics.UserElements,
+                dataContextGraphMetrics.UserPrices,
+                dataContextGraphMetrics.UserMargins,
+                dataContextGraphMetrics.UserSettings);
+
+            _logger?.LogInformation(
+                "PriceCalculator refresh policyEnforcement details. totalMs={TotalMs} caloriePolicyMs={CaloriePolicyMs} marginPolicyMs={MarginPolicyMs}",
+                policyEnforcementStopwatch?.ElapsedMilliseconds ?? 0,
+                enforceCaloriePolicyStopwatch?.ElapsedMilliseconds ?? 0,
+                enforceMarginPolicyStopwatch?.ElapsedMilliseconds ?? 0);
         }
 
         _isLoadingData = false;
@@ -1289,6 +1403,94 @@
         ContextService.CurrentServer.MarginMin = ContextService.CurrentServerData.MarginMin;
         ContextService.CurrentServer.MarginDefault = ContextService.CurrentServerData.MarginDefault;
         ContextService.CurrentServer.MarginMax = ContextService.CurrentServerData.MarginMax;
+    }
+
+    private static ServerDataGraphMetrics BuildServerDataGraphMetrics(Server? server)
+    {
+        if (server is null)
+        {
+            return ServerDataGraphMetrics.Empty;
+        }
+
+        return new ServerDataGraphMetrics
+        {
+            Skills = server.Skills.Count,
+            Talents = server.Skills.Sum(skill => skill.Talents.Count),
+            CraftingTables = server.CraftingTables.Count,
+            CraftingTablePluginModules = server.CraftingTables.Sum(table => table.PluginModules.Count),
+            PluginModules = server.PluginModules.Count,
+            Recipes = server.Recipes.Count,
+            RecipeElements = server.Recipes.Sum(recipe => recipe.Elements.Count),
+            ItemOrTags = server.ItemOrTags.Count,
+            AssociatedItems = server.ItemOrTags.Sum(itemOrTag => itemOrTag.AssociatedItems.Count),
+            AssociatedTags = server.ItemOrTags.Sum(itemOrTag => itemOrTag.AssociatedTags.Count),
+        };
+    }
+
+    private static DataContextGraphMetrics BuildDataContextGraphMetrics(DataContext? dataContext)
+    {
+        if (dataContext is null)
+        {
+            return DataContextGraphMetrics.Empty;
+        }
+
+        return new DataContextGraphMetrics
+        {
+            UserSkills = dataContext.UserSkills.Count,
+            UserTalents = dataContext.UserTalents.Count,
+            UserCraftingTables = dataContext.UserCraftingTables.Count,
+            UserCraftingTableSkilledPluginModules = dataContext.UserCraftingTables.Sum(table => table.SkilledPluginModules.Count),
+            UserRecipes = dataContext.UserRecipes.Count,
+            UserElements = dataContext.UserElements.Count,
+            UserPrices = dataContext.UserPrices.Count,
+            UserMargins = dataContext.UserMargins.Count,
+            UserSettings = dataContext.UserSettings.Count,
+        };
+    }
+
+    private static int GetConfiguredProfessionsCount(DataContext? dataContext)
+    {
+        return dataContext?.UserSkills.Count(userSkill => userSkill.Skill is not null) ?? 0;
+    }
+
+    private static bool ShouldCollapseSellGroupsOnRefresh(DataContext? dataContext)
+    {
+        return GetConfiguredProfessionsCount(dataContext) > SellGroupCollapseThreshold;
+    }
+
+    private async Task ConfigureItemsToSellGroupBehaviorAsync()
+    {
+        if (_collapseSellGroupsOnNextRender && _itemsToSellTableRef is not null)
+        {
+            _itemsToSellTableRef.CollapseAllGroups();
+            _collapseSellGroupsOnNextRender = false;
+        }
+
+        if (_groupLimiterInteropUnavailable)
+        {
+            return;
+        }
+
+        var shouldEnableGroupOpenLimit = !_isLoadingData
+                                         && _selectedDataContext is not null
+                                         && ContextService.CurrentServerData is not null
+                                         && ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.configure", ItemsToSellTableDomId, shouldEnableGroupOpenLimit, SellGroupMaxOpenGroups);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore transient disconnections while the circuit tears down/reconnects.
+        }
+        catch (JSException ex)
+        {
+            _groupLimiterInteropUnavailable = true;
+            _logger?.LogWarning(
+                ex,
+                "PriceCalculator group limiter interop unavailable. Disabling JS limiter behavior for this circuit.");
+        }
     }
 
     private string GetCalorieCostTooltip()
@@ -1706,6 +1908,14 @@
         _dataContextNameCts?.Dispose();
         _calculateDebounceCts?.Cancel();
         _calculateDebounceCts?.Dispose();
+        try
+        {
+            _ = JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.dispose", ItemsToSellTableDomId);
+        }
+        catch
+        {
+            // The JS runtime can be unavailable during teardown.
+        }
         ContextService.OnContextChanged -= OnContextChanged;
     }
 
@@ -2761,6 +2971,12 @@
 
     private async Task ExecuteCalculationOnce(CalculateTriggerOrigin origin, string caller)
     {
+        var isMetricsEnabled = await AppSettingsService.IsPriceCalculatorMetricsEnabledAsync();
+        var totalStopwatch = isMetricsEnabled ? Stopwatch.StartNew() : null;
+        var serviceCalculateStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var refreshDisplayCacheStopwatch = isMetricsEnabled ? new Stopwatch() : null;
+        var displayCacheMetrics = DisplayCacheRefreshMetrics.Empty;
+
         System.Threading.Interlocked.Increment(ref _activeCalculations);
         StateHasChanged();
 
@@ -2769,10 +2985,42 @@
             _lastCalculationOrigin = origin;
             _lastCalculationCaller = caller;
 
+            serviceCalculateStopwatch?.Start();
             _lastCalculationMetrics = await PriceCalculatorService.Calculate(_selectedDataContext!, $"{origin}:{caller}");
-            RefreshCategorizedDisplayCaches();
+            serviceCalculateStopwatch?.Stop();
+
+            refreshDisplayCacheStopwatch?.Start();
+            displayCacheMetrics = RefreshCategorizedDisplayCaches(isMetricsEnabled);
+            refreshDisplayCacheStopwatch?.Stop();
             _hasPendingManualCalculation = false;
             _calculationError = null;
+
+            if (isMetricsEnabled)
+            {
+                totalStopwatch?.Stop();
+
+                _logger?.LogInformation(
+                    "PriceCalculator calculation pipeline metrics. trigger={TriggerOrigin} caller={Caller} totalMs={TotalMs} serviceCalculateMs={ServiceCalculateMs} displayCacheRefreshMs={DisplayCacheRefreshMs} itemsToBuy={ItemsToBuy} itemsToSell={ItemsToSell} autoCalculatedSellIds={AutoCalculatedSellIds} userElementsByElementId={UserElementsByElementId}",
+                    origin,
+                    caller,
+                    totalStopwatch?.ElapsedMilliseconds ?? 0,
+                    serviceCalculateStopwatch?.ElapsedMilliseconds ?? 0,
+                    refreshDisplayCacheStopwatch?.ElapsedMilliseconds ?? 0,
+                    displayCacheMetrics.ItemsToBuyCount,
+                    displayCacheMetrics.ItemsToSellCount,
+                    displayCacheMetrics.AutoCalculatedSellCount,
+                    displayCacheMetrics.UserElementsByElementIdCount);
+
+                _logger?.LogInformation(
+                    "PriceCalculator display cache refresh details. trigger={TriggerOrigin} caller={Caller} totalMs={TotalMs} categorizeForDisplayMs={CategorizeForDisplayMs} categorizeForAutoSellMs={CategorizeForAutoSellMs} autoSellIdProjectionMs={AutoSellIdProjectionMs} userElementsIndexMs={UserElementsIndexMs}",
+                    origin,
+                    caller,
+                    displayCacheMetrics.TotalMilliseconds,
+                    displayCacheMetrics.CategorizeForDisplayMilliseconds,
+                    displayCacheMetrics.CategorizeForAutoSellMilliseconds,
+                    displayCacheMetrics.AutoSellIdProjectionMilliseconds,
+                    displayCacheMetrics.UserElementsIndexMilliseconds);
+            }
         }
         catch (Exception ex)
         {
@@ -2794,24 +3042,65 @@
         }
     }
 
-    private void RefreshCategorizedDisplayCaches()
+    private DisplayCacheRefreshMetrics RefreshCategorizedDisplayCaches(bool includeMetrics = false)
     {
+        var totalStopwatch = includeMetrics ? Stopwatch.StartNew() : null;
+        var categorizeForDisplayStopwatch = includeMetrics ? new Stopwatch() : null;
+        var categorizeForAutoSellStopwatch = includeMetrics ? new Stopwatch() : null;
+        var autoSellIdProjectionStopwatch = includeMetrics ? new Stopwatch() : null;
+        var userElementsIndexStopwatch = includeMetrics ? new Stopwatch() : null;
+
         if (_selectedDataContext is null)
         {
             _itemsToBuyDisplay = [];
             _itemsToSellDisplay = [];
             _autoCalculatedSellItemIds = [];
             _userElementsByElementId = [];
-            return;
+
+            totalStopwatch?.Stop();
+            return new DisplayCacheRefreshMetrics
+            {
+                TotalMilliseconds = totalStopwatch?.ElapsedMilliseconds ?? 0,
+                CategorizeForDisplayMilliseconds = categorizeForDisplayStopwatch?.ElapsedMilliseconds ?? 0,
+                CategorizeForAutoSellMilliseconds = categorizeForAutoSellStopwatch?.ElapsedMilliseconds ?? 0,
+                AutoSellIdProjectionMilliseconds = autoSellIdProjectionStopwatch?.ElapsedMilliseconds ?? 0,
+                UserElementsIndexMilliseconds = userElementsIndexStopwatch?.ElapsedMilliseconds ?? 0
+            };
         }
 
+        categorizeForDisplayStopwatch?.Start();
         var categorizedForDisplay = PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext);
+        categorizeForDisplayStopwatch?.Stop();
         _itemsToBuyDisplay = categorizedForDisplay.ToBuy;
         _itemsToSellDisplay = categorizedForDisplay.ToSell;
-        _autoCalculatedSellItemIds = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext).ToSell.Select(i => i.Id).ToHashSet();
+
+        categorizeForAutoSellStopwatch?.Start();
+        var categorizedForAutoSell = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext);
+        categorizeForAutoSellStopwatch?.Stop();
+
+        autoSellIdProjectionStopwatch?.Start();
+        _autoCalculatedSellItemIds = categorizedForAutoSell.ToSell.Select(i => i.Id).ToHashSet();
+        autoSellIdProjectionStopwatch?.Stop();
+
+        userElementsIndexStopwatch?.Start();
         _userElementsByElementId = _selectedDataContext.UserElements
             .GroupBy(ue => ue.ElementId)
             .ToDictionary(g => g.Key, g => g.First());
+        userElementsIndexStopwatch?.Stop();
+
+        totalStopwatch?.Stop();
+        return new DisplayCacheRefreshMetrics
+        {
+            TotalMilliseconds = totalStopwatch?.ElapsedMilliseconds ?? 0,
+            CategorizeForDisplayMilliseconds = categorizeForDisplayStopwatch?.ElapsedMilliseconds ?? 0,
+            CategorizeForAutoSellMilliseconds = categorizeForAutoSellStopwatch?.ElapsedMilliseconds ?? 0,
+            AutoSellIdProjectionMilliseconds = autoSellIdProjectionStopwatch?.ElapsedMilliseconds ?? 0,
+            UserElementsIndexMilliseconds = userElementsIndexStopwatch?.ElapsedMilliseconds ?? 0,
+            ItemsToBuyCount = _itemsToBuyDisplay.Count,
+            ItemsToSellCount = _itemsToSellDisplay.Count,
+            AutoCalculatedSellCount = _autoCalculatedSellItemIds.Count,
+            UserElementsByElementIdCount = _userElementsByElementId.Count
+        };
     }
 
     private string GetStatusLabel()
