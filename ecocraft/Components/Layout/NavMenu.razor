@@ -10,12 +10,9 @@
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.ShoppingList")">
         <MudNavLink IconColor="Color.Primary" Href="shopping-list" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.Cart">@LocalizationService.GetTranslation("NavMenu.ShoppingList")</MudNavLink>
     </MudTooltip>
-    @if (!IsLoadingUserAndServer && ContextService.CurrentUserServer is not null)
-    {
-        <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.EconomyViewer")">
-            <MudNavLink IconColor="Color.Primary" Href="economy-viewer" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QueryStats">@LocalizationService.GetTranslation("NavMenu.EconomyViewer")</MudNavLink>
-        </MudTooltip>
-    }
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.EconomyViewer")">
+        <MudNavLink IconColor="Color.Primary" Href="economy-viewer" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QueryStats">@LocalizationService.GetTranslation("NavMenu.EconomyViewer")</MudNavLink>
+    </MudTooltip>
 
     @if (!IsLoadingUserAndServer && (ContextService.CurrentServer?.HasVideoUploader ?? false))
     {

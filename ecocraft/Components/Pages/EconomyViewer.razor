@@ -1,6 +1,5 @@
 @page "/economy-viewer"
 @implements IDisposable
-@using System.Globalization
 @using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
@@ -9,6 +8,7 @@
 @inject ContextService ContextService
 @inject ServerDbService ServerDbService
 @inject EconomyViewerService EconomyViewerService
+@inject EconomyViewerDisplayService EconomyViewerDisplayService
 @inject LocalizationService LocalizationService
 @inject LocalStorageService LocalStorageService
 @inject ISnackbar Snackbar
@@ -186,7 +186,7 @@
                                     </MudTh>
                                     <MudTh>
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                            <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(GetSpreadSortValue)">
+                                            <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => EconomyViewerDisplayService.GetSpreadSortValue(row, _showSpreadAsPercent))">
                                                 @LocalizationService.GetTranslation("EconomyViewer.Columns.Spread")
                                             </MudTableSortLabel>
                                             <MudIconButton Color="Color.Primary"
@@ -227,14 +227,14 @@
                                             </MudStack>
                                         </MudStack>
                                     </MudTd>
-                                    <MudTd>@FormatDecimal(context.PriceMin)</MudTd>
-                                    <MudTd>@FormatDecimal(context.PriceAverage)</MudTd>
-                                    <MudTd>@FormatDecimal(context.PriceMax)</MudTd>
-                                    <MudTd>@FormatDecimal(context.MarginMin)</MudTd>
-                                    <MudTd>@FormatDecimal(context.MarginAverage)</MudTd>
-                                    <MudTd>@FormatDecimal(context.MarginMax)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceMin)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceAverage)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceMax)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginMin)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginAverage)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginMax)</MudTd>
                                     <MudTd>@context.ConfiguredPlayersCount</MudTd>
-                                    <MudTd>@FormatSpread(context)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatSpread(context, _showSpreadAsPercent)</MudTd>
                                     @if (_groupBy is EconomyGroupBy.Player && context.UserServerId is Guid userServerId)
                                     {
                                         <MudTd>
@@ -291,8 +291,8 @@
                                                         </MudTd>
                                                         @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
                                                         {
-                                                            <MudTd>@FormatDecimal(playerDetail.ConfiguredPrice)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.ConfiguredMargin)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.ConfiguredPrice)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.ConfiguredMargin)</MudTd>
                                                         }
                                                         @if (_groupBy is EconomyGroupBy.Item)
                                                         {
@@ -300,14 +300,14 @@
                                                         }
                                                         @if (_groupBy is EconomyGroupBy.Skill)
                                                         {
-                                                            <MudTd>@FormatDecimal(playerDetail.PriceMin)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.PriceAverage)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.PriceMax)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.MarginMin)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.MarginAverage)</MudTd>
-                                                            <MudTd>@FormatDecimal(playerDetail.MarginMax)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceMin)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceAverage)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceMax)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginMin)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginAverage)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginMax)</MudTd>
                                                             <MudTd>@playerDetail.ConfiguredContextsCount</MudTd>
-                                                            <MudTd>@FormatPlayerDetailSpread(playerDetail)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatSpread(playerDetail, _showSpreadAsPercent)</MudTd>
                                                         }
                                                         @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
                                                         {
@@ -339,12 +339,12 @@
                     </MudPaper>
                 </MudStack>
 
-            @if (_isDrilldownOpen)
-            {
-                <div class="economy-drilldown-overlay" @onclick="CloseDrilldown">
-                    <div class="economy-drilldown-modal-wrapper" @onclick:stopPropagation="true">
-                        <MudPaper Class="economy-drilldown-modal pa-4" Elevation="12">
-                            <MudStack Spacing="3">
+            <EcoOverlayModal IsOpen="_isDrilldownOpen"
+                             OverlayClass="economy-drilldown-overlay"
+                             WrapperClass="economy-drilldown-modal-wrapper"
+                             PaperClass="economy-drilldown-modal pa-4"
+                             OnClose="CloseDrilldown">
+                <MudStack Spacing="3">
                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Title")</MudText>
                             <MudIconButton Icon="@Icons.Material.Filled.Close"
@@ -352,7 +352,7 @@
                                            OnClick="CloseDrilldown"/>
                         </MudStack>
 
-                        @if (_isLoadingDrilldown)
+                        @if (_isLoadingDrilldown && _drilldown is null)
                         {
                             <MudStack AlignItems="AlignItems.Center" Class="py-4">
                                 <MudProgressCircular Color="Color.Tertiary" Indeterminate="true"/>
@@ -468,8 +468,8 @@
                                     <MudTd>@context.PlayerName</MudTd>
                                     <MudTd>@context.Summary.DataContextName</MudTd>
                                     <MudTd>@context.Summary.ConfiguredItemCount</MudTd>
-                                    <MudTd>@FormatDecimal(context.Summary.AveragePrice)</MudTd>
-                                    <MudTd>@FormatDecimal(context.Summary.AverageMargin)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Summary.AveragePrice)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Summary.AverageMargin)</MudTd>
                                     <MudTd>@context.Summary.RecipeCount</MudTd>
                                     <MudTd>@context.Summary.SkillCount</MudTd>
                                 </RowTemplate>
@@ -537,7 +537,7 @@
                                                                 }
                                                             </MudStack>
                                                         </MudTd>
-                                                        <MudTd>@FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
                                                     </RowTemplate>
                                                     <NoRecordsContent>
                                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
@@ -606,7 +606,7 @@
                                                                 }
                                                             </MudStack>
                                                         </MudTd>
-                                                        <MudTd>@FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
                                                     </RowTemplate>
                                                     <NoRecordsContent>
                                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
@@ -712,13 +712,13 @@
                                             </MudStack>
                                         </MudStack>
                                     </MudTd>
-                                    <MudTd>@FormatDecimal(context.Player1Value)</MudTd>
-                                    <MudTd>@FormatDecimal(context.Player2Value)</MudTd>
-                                    <MudTd>@FormatSignedDecimal(context.DeltaAbs)</MudTd>
-                                    <MudTd>@FormatSignedPercent(context.DeltaPct)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Player1Value)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Player2Value)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatSignedDecimal(context.DeltaAbs)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatSignedPercent(context.DeltaPct)</MudTd>
                                     <MudTd>
-                                        <MudTooltip Text="@GetComparisonStatusTooltip(context)">
-                                            <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Outlined" Size="Size.Small">
+                                        <MudTooltip Text="@EconomyViewerDisplayService.GetComparisonStatusTooltip(context.Status, _drilldown?.Player1Name, _drilldown?.Player2Name)">
+                                            <MudChip T="string" Color="@EconomyViewerDisplayService.GetStatusColor(context.Status)" Variant="Variant.Outlined" Size="Size.Small">
                                                 @LocalizationService.GetTranslation($"EconomyViewer.Status.{context.Status}")
                                             </MudChip>
                                         </MudTooltip>
@@ -733,34 +733,28 @@
                                 </MudTable>
                             </MudStack>
                         }
-                            </MudStack>
-                        </MudPaper>
-                    </div>
-                </div>
-            }
+                </MudStack>
+            </EcoOverlayModal>
 
-            @if (_isHelpModalOpen)
-            {
-                <div class="economy-help-overlay" @onclick="CloseHelpModal">
-                    <div class="economy-help-modal-wrapper" @onclick:stopPropagation="true">
-                        <MudPaper Class="economy-help-modal pa-4" Elevation="12">
-                            <MudStack Spacing="2">
-                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Help.Title")</MudText>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                                   Color="Color.Default"
-                                                   OnClick="CloseHelpModal"/>
-                                </MudStack>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line1")</MudText>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line2")</MudText>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line3")</MudText>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line4")</MudText>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line5")</MudText>
-                            </MudStack>
-                        </MudPaper>
-                    </div>
-                </div>
-            }
+            <EcoOverlayModal IsOpen="_isHelpModalOpen"
+                             OverlayClass="economy-help-overlay"
+                             WrapperClass="economy-help-modal-wrapper"
+                             PaperClass="economy-help-modal pa-4"
+                             OnClose="CloseHelpModal">
+                <MudStack Spacing="2">
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Help.Title")</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                       Color="Color.Default"
+                                       OnClick="CloseHelpModal"/>
+                    </MudStack>
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line1")</MudText>
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line2")</MudText>
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line3")</MudText>
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line4")</MudText>
+                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line5")</MudText>
+                </MudStack>
+            </EcoOverlayModal>
     }
 </MudContainer>
 
@@ -1503,20 +1497,20 @@
             new DrilldownOptionComparisonRow
             {
                 OptionTranslationKey = "PriceCalculator.ApplyMarginBetweenSkills.ApplyMarginBetweenSkills",
-                Player1Value = FormatBooleanSetting(player1Summary?.ApplyMarginBetweenSkills),
-                Player2Value = FormatBooleanSetting(player2Summary?.ApplyMarginBetweenSkills)
+                Player1Value = EconomyViewerDisplayService.FormatBooleanSetting(player1Summary?.ApplyMarginBetweenSkills),
+                Player2Value = EconomyViewerDisplayService.FormatBooleanSetting(player2Summary?.ApplyMarginBetweenSkills)
             },
             new DrilldownOptionComparisonRow
             {
                 OptionTranslationKey = "PriceCalculator.MarginType.MarginType",
-                Player1Value = FormatMarginTypeSetting(player1Summary?.MarginType),
-                Player2Value = FormatMarginTypeSetting(player2Summary?.MarginType)
+                Player1Value = EconomyViewerDisplayService.FormatMarginTypeSetting(player1Summary?.MarginType),
+                Player2Value = EconomyViewerDisplayService.FormatMarginTypeSetting(player2Summary?.MarginType)
             },
             new DrilldownOptionComparisonRow
             {
                 OptionTranslationKey = "PriceCalculator.CalorieCost.CalorieCost",
-                Player1Value = FormatCalorieCostPer1000Setting(player1Summary?.CalorieCost),
-                Player2Value = FormatCalorieCostPer1000Setting(player2Summary?.CalorieCost)
+                Player1Value = EconomyViewerDisplayService.FormatCalorieCostPer1000Setting(player1Summary?.CalorieCost),
+                Player2Value = EconomyViewerDisplayService.FormatCalorieCostPer1000Setting(player2Summary?.CalorieCost)
             }
         ];
     }
@@ -1701,106 +1695,6 @@
         await LoadDrilldownAsync();
     }
 
-    private static string FormatDecimal(decimal? value)
-    {
-        return value is null
-            ? "-"
-            : Math.Round(value.Value, 2, MidpointRounding.AwayFromZero).ToString("0.##", CultureInfo.CurrentUICulture);
-    }
-
-    private static string FormatSignedDecimal(decimal? value)
-    {
-        if (value is null)
-        {
-            return "-";
-        }
-
-        var rounded = Math.Round(value.Value, 2, MidpointRounding.AwayFromZero);
-        return rounded.ToString("+0.##;-0.##;0", CultureInfo.CurrentUICulture);
-    }
-
-    private static string FormatSignedPercent(decimal? value)
-    {
-        if (value is null)
-        {
-            return "-";
-        }
-
-        var rounded = Math.Round(value.Value, 2, MidpointRounding.AwayFromZero);
-        return rounded.ToString("+0.##;-0.##;0", CultureInfo.CurrentUICulture) + " %";
-    }
-
-    private string FormatSpread(EconomyGlobalRow row)
-    {
-        if (!_showSpreadAsPercent)
-        {
-            return FormatDecimal(row.Spread);
-        }
-
-        var spreadPercent = GetSpreadPercentValue(row);
-        if (spreadPercent is null)
-        {
-            return "-";
-        }
-
-        var rounded = Math.Round(spreadPercent.Value, 2, MidpointRounding.AwayFromZero);
-        return rounded.ToString("0.##", CultureInfo.CurrentUICulture) + " %";
-    }
-
-    private string FormatPlayerDetailSpread(EconomyGlobalPlayerDetailRow row)
-    {
-        if (!_showSpreadAsPercent)
-        {
-            return FormatDecimal(row.Spread);
-        }
-
-        var spreadPercent = GetSpreadPercentValue(row);
-        if (spreadPercent is null)
-        {
-            return "-";
-        }
-
-        var rounded = Math.Round(spreadPercent.Value, 2, MidpointRounding.AwayFromZero);
-        return rounded.ToString("0.##", CultureInfo.CurrentUICulture) + " %";
-    }
-
-    private string FormatBooleanSetting(bool? value)
-    {
-        if (value is null)
-        {
-            return "-";
-        }
-
-        return LocalizationService.GetTranslation(value.Value
-            ? "EconomyViewer.Drilldown.Values.Enabled"
-            : "EconomyViewer.Drilldown.Values.Disabled");
-    }
-
-    private string FormatMarginTypeSetting(MarginType? marginType)
-    {
-        if (marginType is null)
-        {
-            return "-";
-        }
-
-        return LocalizationService.GetTranslation(marginType.Value switch
-        {
-            MarginType.MarkUp => "PriceCalculator.MarginType.MarkUp",
-            MarginType.GrossMargin => "PriceCalculator.MarginType.GrossMargin",
-            _ => marginType.Value.ToString()
-        });
-    }
-
-    private static string FormatCalorieCostPer1000Setting(decimal? calorieCost)
-    {
-        if (calorieCost is null)
-        {
-            return "-";
-        }
-
-        return $"{FormatDecimal(calorieCost)} / 1000 cal";
-    }
-
     private sealed class DrilldownContextDisplayRow
     {
         public string RoleTranslationKey { get; init; } = string.Empty;
@@ -1814,76 +1708,6 @@
         public string OptionTranslationKey { get; init; } = string.Empty;
         public string Player2Value { get; init; } = "-";
         public string Player1Value { get; init; } = "-";
-    }
-
-    private object GetSpreadSortValue(EconomyGlobalRow row)
-    {
-        if (!_showSpreadAsPercent)
-        {
-            return row.Spread ?? decimal.MaxValue;
-        }
-
-        return GetSpreadPercentValue(row) ?? decimal.MaxValue;
-    }
-
-    private static decimal? GetSpreadPercentValue(EconomyGlobalRow row)
-    {
-        if (row.Spread is null || row.PriceMin is null)
-        {
-            return null;
-        }
-
-        if (row.Spread == 0)
-        {
-            return 0;
-        }
-
-        if (row.PriceMin == 0)
-        {
-            return null;
-        }
-
-        return row.Spread.Value / row.PriceMin.Value * 100m;
-    }
-
-    private static decimal? GetSpreadPercentValue(EconomyGlobalPlayerDetailRow row)
-    {
-        if (row.Spread is null || row.PriceMin is null)
-        {
-            return null;
-        }
-
-        if (row.Spread == 0)
-        {
-            return 0;
-        }
-
-        if (row.PriceMin == 0)
-        {
-            return null;
-        }
-
-        return row.Spread.Value / row.PriceMin.Value * 100m;
-    }
-
-    private static Color GetStatusColor(string status)
-    {
-        return status switch
-        {
-            "Higher" => Color.Warning,
-            "Lower" => Color.Success,
-            "Same" => Color.Info,
-            "OnlyPlayer1" => Color.Primary,
-            "OnlyPlayer2" => Color.Secondary,
-            _ => Color.Default
-        };
-    }
-
-    private string GetComparisonStatusTooltip(EconomyPlayerComparisonRow row)
-    {
-        var player1Name = _drilldown?.Player1Name ?? LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player1");
-        var player2Name = _drilldown?.Player2Name ?? LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player2");
-        return LocalizationService.GetTranslation($"EconomyViewer.Drilldown.StatusTooltip.{row.Status}", player1Name, player2Name);
     }
 
     private IHasIconName? GetGlobalRowIcon(EconomyGlobalRow row)
@@ -2018,4 +1842,3 @@
         ContextService.OnContextChanged -= OnContextChanged;
     }
 }
-
