@@ -1,9 +1,12 @@
 ﻿@using ecocraft.Models
+@implements IDisposable
+@using System.Diagnostics
 @using ecocraft.Services
 @using ecocraft.Components.Utils
 @using ecocraft.Extensions
 @using ecocraft.Services.DbServices
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
@@ -11,6 +14,7 @@
 @inject UserPriceDbService UserPriceDbService
 @inject UserRecipeDbService UserRecipeDbService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
+@inject ILogger<RecipeDialog> Logger
 
 <MudDialog Style="min-height: 500px;" Class="pb-4">
     <TitleContent>
@@ -30,7 +34,7 @@
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
 
                             @{
-                                var pluginModule = Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.PluginModule;
+                                var pluginModule = _currentUserCraftingTable?.PluginModule;
 
                                 @if (pluginModule is not null)
                                 {
@@ -39,7 +43,7 @@
                                             <EcoIcon Item="@pluginModule" Size="32" Class="mt-1"/>
                                         </MudTooltip>
 
-                                        @foreach (var skilledPluginModule in Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.SkilledPluginModules)
+                                        @foreach (var skilledPluginModule in _currentUserCraftingTable?.SkilledPluginModules ?? [])
                                         {
                                             <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
                                                 <EcoIcon Item="@skilledPluginModule" Size="24" Class="mt-1"/>
@@ -57,11 +61,13 @@
                         <MudText Style="color: #888">@LocalizationService.GetTranslation("Skill")</MudText>
                         @if (Recipe.Skill is not null)
                         {
+                            var currentSkillLevel = _currentUserSkill?.Level ?? 1;
+
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                 <EcoIcon Item="@Recipe.Skill" />
                                 <MudText>@LocalizationService.GetTranslation(Recipe.Skill)</MudText>
                                 <MudText>@(Recipe.SkillLevel)</MudText>
-                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @(Recipe.Skill.GetCurrentUserSkill(DataContext)!.Level) -> @(Math.Round(100 - Recipe.Skill.GetLevelLaborReducePercent(Recipe.Skill.GetCurrentUserSkill(DataContext).Level) * 100)) %)</MudText>
+                                <MudText Color="Color.Warning">(@LocalizationService.GetTranslation("RecipeDialog.Level") @currentSkillLevel -> @(Math.Round(100 - Recipe.Skill.GetLevelLaborReducePercent(currentSkillLevel) * 100)) %)</MudText>
                             </MudStack>
                         }
                         else
@@ -119,9 +125,10 @@
                             <!-- unit price -->
                             <MudTd Class="px-1">
                                 @{
-                                    var canContributePrice = !context.Element.ItemOrTag.IsTag && PriceCalculatorService.GetCategorizedItemOrTags(DataContext).ToBuy.Contains(context.Element.ItemOrTag) && !context.IsReintegrated;
+                                    var contextUserPrice = context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!;
+                                    var canContributePrice = CanContributePrice(context);
 
-                                    <MudTooltip Disabled="@(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.Price is not null && canContributePrice)"
+                                    <MudTooltip Disabled="@(contextUserPrice.Price is not null && canContributePrice)"
                                                 Text="@(LocalizationService.GetTranslation(canContributePrice
                                                         ? "PriceCalculator.PriceTooltip.isItemEmptyPrice"
                                                         : "PriceCalculator.PriceTooltip.isAutoCalculatedPrice") + (context.IsMarginPrice ? " " + LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.IsMarginPrice") : ""))">
@@ -139,10 +146,10 @@
                                                              Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                                                              Min="context.Element.ItemOrTag.MinPrice"
                                                              Max="context.Element.ItemOrTag.MaxPrice"
-                                                             Adornment="@(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!.Price is not null && canContributePrice ? Adornment.None : Adornment.End)"
+                                                             Adornment="@(contextUserPrice.Price is not null && canContributePrice ? Adornment.None : Adornment.End)"
                                                              AdornmentIcon="@(!canContributePrice ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
                                                              AdornmentColor="@(!canContributePrice ? Color.Default : Color.Warning)"
-                                                             ValueChanged="@(value => UpdatePrice(context.Element.ItemOrTag.GetCurrentUserPrice(DataContext)!, value))"/>
+                                                             ValueChanged="@(value => UpdatePrice(contextUserPrice, value))"/>
                                             <MudText Color="Color.Primary">$/u</MudText>
                                         </MudStack>
                                     </MudTooltip>
@@ -202,7 +209,7 @@
                                 <MudTd Class="px-1">
                                     <MudStack Row Spacing="1">
                                         <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
-                                            @Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.CraftMinuteFee
+                                            @(_currentUserCraftingTable?.CraftMinuteFee ?? 0)
                                         </MudText>
                                         <MudText Color="Color.Primary">
                                             $/min
@@ -241,7 +248,7 @@
                                 <MudTd Class="px-1">
                                     <MudStack Row Spacing="1">
                                         <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
-                                            @((DataContext.UserSettings.First().CalorieCost / 1000).ToString("0.#####"))
+                                            @(((_currentUserSetting?.CalorieCost ?? 0) / 1000).ToString("0.#####"))
                                         </MudText>
                                         <MudText Color="Color.Primary">
                                             $/cal
@@ -335,8 +342,8 @@
                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                  Adornment="Adornment.End"
                                                  AdornmentText="% "
-                                                 Min="@(Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? Decimal.MinValue : 0)"
-                                                 Max="@(Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? Decimal.MaxValue : 100)"
+                                                 Min="@((_currentUserRecipe?.LockShare ?? false) ? Decimal.MinValue : 0)"
+                                                 Max="@((_currentUserRecipe?.LockShare ?? false) ? Decimal.MaxValue : 100)"
                                                  Variant="Variant.Outlined"
                                                  Step="@(0.1m)"
                                                  Value="@(context.Share * 100)"
@@ -392,7 +399,7 @@
                                         <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.UnlockTooltip")">
                                             <MudIconButton Size="Size.Small"
                                                            Class="ml-3"
-                                                           Icon="@(Recipe.GetCurrentUserRecipe(DataContext).LockShare ? MDIIcons.Filled.LockOff : MDIIcons.Filled.Lock)"
+                                                           Icon="@((_currentUserRecipe?.LockShare ?? false) ? MDIIcons.Filled.LockOff : MDIIcons.Filled.Lock)"
                                                            OnClick="@(() => ToggleLock())"/>
                                         </MudTooltip>
                                     }
@@ -411,8 +418,8 @@
                     <MudText>Crafted by quantity:</MudText>
                     <MudTooltip Text="If you create only 1 unit of a recipe, the game still consumes a whole number of ingredients. Choose the quantity of products you will usually craft to obtain a more precise output price.">
                         <MudToggleGroup T="int"
-                                        Value="@Recipe.GetCurrentUserRecipe(DataContext)!.RoundFactor"
-                                        ValueChanged="@(v => RoundFactorChange(v, Recipe.GetCurrentUserRecipe(DataContext)))">
+                                        Value="@(_currentUserRecipe?.RoundFactor ?? 0)"
+                                        ValueChanged="RoundFactorChange">
                             <MudToggleItem Value="0"><MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.Infinity"/></MudToggleItem>
                             <MudToggleItem Value="100">100</MudToggleItem>
                             <MudToggleItem Value="10">10</MudToggleItem>
@@ -437,6 +444,134 @@
     [Parameter]
     public Func<string, Task>? RecalculateRequested { get; set; }
 
+    private const int PriceSaveDebounceMs = 250;
+    private readonly Dictionary<Guid, CancellationTokenSource> _priceSaveDebounceByUserPriceId = [];
+    private readonly Dictionary<Guid, decimal?> _lastPersistedPriceByUserPriceId = [];
+
+    private Dictionary<Guid, UserElement> _userElementsByElementId = [];
+    private List<UserElement> _ingredientUserElements = [];
+    private List<UserElement> _productUserElements = [];
+    private HashSet<Guid> _buyItemOrTagIds = [];
+
+    private UserRecipe? _currentUserRecipe;
+    private UserCraftingTable? _currentUserCraftingTable;
+    private UserSkill? _currentUserSkill;
+    private UserSetting? _currentUserSetting;
+
+    private Stopwatch? _renderStopwatch;
+    private bool _awaitingRenderMetrics;
+
+    protected override void OnParametersSet()
+    {
+        RefreshComputedState(trackRenderMetrics: true);
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_awaitingRenderMetrics && _renderStopwatch is not null)
+        {
+            _awaitingRenderMetrics = false;
+            _renderStopwatch.Stop();
+
+            Logger.LogInformation(
+                "RecipeDialog render metrics. renderMs={RenderMs}",
+                _renderStopwatch.ElapsedMilliseconds);
+
+            _renderStopwatch = null;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        foreach (var cts in _priceSaveDebounceByUserPriceId.Values)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+
+        _priceSaveDebounceByUserPriceId.Clear();
+        _awaitingRenderMetrics = false;
+        _renderStopwatch = null;
+    }
+
+    private void RefreshComputedState(bool trackRenderMetrics = false)
+    {
+        _currentUserRecipe = Recipe.GetCurrentUserRecipe(DataContext);
+        _currentUserCraftingTable = Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext);
+        _currentUserSkill = Recipe.Skill?.GetCurrentUserSkill(DataContext);
+        _currentUserSetting = DataContext.UserSettings.FirstOrDefault();
+
+        _userElementsByElementId = DataContext.UserElements
+            .GroupBy(ue => ue.ElementId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        _ingredientUserElements = Recipe.Elements
+            .Where(e => e.IsIngredient() || (e.IsProduct() && GetUserElement(e).IsReintegrated))
+            .OrderBy(e => !e.IsIngredient())
+            .ThenBy(e => e.Index)
+            .Select(GetUserElement)
+            .ToList();
+
+        _productUserElements = Recipe.Elements
+            .Where(e => e.IsProduct() && !GetUserElement(e).IsReintegrated)
+            .OrderBy(e => e.Index)
+            .Select(GetUserElement)
+            .ToList();
+
+        _buyItemOrTagIds = PriceCalculatorService.GetCategorizedItemOrTags(DataContext)
+            .ToBuy
+            .Select(itemOrTag => itemOrTag.Id)
+            .ToHashSet();
+
+        var existingUserPriceIds = DataContext.UserPrices.Select(up => up.Id).ToHashSet();
+        foreach (var userPrice in DataContext.UserPrices)
+        {
+            _lastPersistedPriceByUserPriceId[userPrice.Id] = userPrice.Price;
+        }
+
+        foreach (var staleUserPriceId in _lastPersistedPriceByUserPriceId.Keys.Except(existingUserPriceIds).ToList())
+        {
+            _lastPersistedPriceByUserPriceId.Remove(staleUserPriceId);
+        }
+
+        if (trackRenderMetrics)
+        {
+            _renderStopwatch = Stopwatch.StartNew();
+            _awaitingRenderMetrics = true;
+        }
+    }
+
+    private UserElement GetUserElement(Element element)
+    {
+        if (_userElementsByElementId.TryGetValue(element.Id, out var userElement))
+        {
+            return userElement;
+        }
+
+        throw new InvalidOperationException($"Missing UserElement for Element {element.Id} in RecipeDialog.");
+    }
+
+    private bool CanContributePrice(UserElement userElement)
+    {
+        return !userElement.Element.ItemOrTag.IsTag
+               && !userElement.IsReintegrated
+               && _buyItemOrTagIds.Contains(userElement.Element.ItemOrTagId);
+    }
+
+    private async Task PersistWithMetricsAsync(string operation, Func<EcoCraftDbContext, Task> persistAction)
+    {
+        var saveStopwatch = Stopwatch.StartNew();
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, persistAction);
+        saveStopwatch.Stop();
+
+        Logger.LogInformation(
+            "RecipeDialog save metrics. operation={Operation} saveMs={SaveMs}",
+            operation,
+            saveStopwatch.ElapsedMilliseconds);
+    }
+
     private async Task ChangeReintegrate(UserElement userElement, bool value)
     {
         if (userElement.IsReintegrated == value)
@@ -452,7 +587,7 @@
             userPrice.PrimaryUserElement = null;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await PersistWithMetricsAsync(nameof(ChangeReintegrate), context =>
         {
             UserElementDbService.UpdateAll(context, userElement);
             UserPriceDbService.UpdateAll(context, userPrice);
@@ -470,27 +605,68 @@
         }
 
         userPrice.Price = value;
+        var userPriceId = userPrice.Id;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        if (_priceSaveDebounceByUserPriceId.TryGetValue(userPriceId, out var existingDebounceCts))
         {
-            UserPriceDbService.UpdateAll(context, userPrice);
+            existingDebounceCts.Cancel();
+            existingDebounceCts.Dispose();
+        }
+
+        var currentDebounceCts = new CancellationTokenSource();
+        _priceSaveDebounceByUserPriceId[userPriceId] = currentDebounceCts;
+
+        try
+        {
+            await Task.Delay(PriceSaveDebounceMs, currentDebounceCts.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+        finally
+        {
+            if (ReferenceEquals(_priceSaveDebounceByUserPriceId.GetValueOrDefault(userPriceId), currentDebounceCts))
+            {
+                _priceSaveDebounceByUserPriceId.Remove(userPriceId);
+            }
+
+            currentDebounceCts.Dispose();
+        }
+
+        if (_lastPersistedPriceByUserPriceId.TryGetValue(userPriceId, out var persistedPrice) && persistedPrice == value)
+        {
+            return;
+        }
+
+        await PersistWithMetricsAsync(nameof(UpdatePrice), context =>
+        {
+            UserPriceDbService.UpdatePrice(context, userPrice);
             return Task.CompletedTask;
         });
+
+        _lastPersistedPriceByUserPriceId[userPriceId] = value;
 
         await RecalculateFromDialog(nameof(UpdatePrice));
     }
 
     private async Task ToggleLock()
     {
-        var userRecipe = Recipe.GetCurrentUserRecipe(DataContext)!;
+        var userRecipe = _currentUserRecipe;
+        if (userRecipe is null)
+        {
+            return;
+        }
+
         userRecipe.LockShare = !userRecipe.LockShare;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await PersistWithMetricsAsync(nameof(ToggleLock), context =>
         {
             UserRecipeDbService.UpdateAll(context, userRecipe);
             return Task.CompletedTask;
         });
 
+        RefreshComputedState(trackRenderMetrics: true);
         StateHasChanged();
     }
 
@@ -506,12 +682,12 @@
 
     private decimal GetLaborPrice()
     {
-        return Recipe.Labor.GetDynamicValue(DataContext) * DataContext.UserSettings.First().CalorieCost / 1000;
+        return Recipe.Labor.GetDynamicValue(DataContext) * (_currentUserSetting?.CalorieCost ?? 0) / 1000;
     }
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext)!.CraftMinuteFee;
+        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.CraftMinuteFee ?? 0);
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
@@ -524,8 +700,14 @@
         return $"{(minutes > 0 ? $"{minutes}min" : "")}{(seconds > 0 ? $" {seconds}s" : "")}{(totalSeconds < 1 ? $"{milliseconds}ms" : "")}";
     }
 
-    private async Task RoundFactorChange(int value, UserRecipe userRecipe)
+    private async Task RoundFactorChange(int value)
     {
+        var userRecipe = _currentUserRecipe;
+        if (userRecipe is null)
+        {
+            return;
+        }
+
         if (userRecipe.RoundFactor == value)
         {
             return;
@@ -533,9 +715,9 @@
 
         userRecipe.RoundFactor = value;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await PersistWithMetricsAsync(nameof(RoundFactorChange), context =>
         {
-            UserRecipeDbService.UpdateAll(context, userRecipe);
+            UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
             return Task.CompletedTask;
         });
 
@@ -544,36 +726,32 @@
 
     private List<UserElement> GetIngredientUserElements()
     {
-        return Recipe.Elements.Where(e => e.IsIngredient() || (e.IsProduct() && e.GetCurrentUserElement(DataContext)!.IsReintegrated))
-                              .OrderBy(e => !e.IsIngredient())
-                              .ThenBy(e => e.Index)
-                              .Select(e => e.GetCurrentUserElement(DataContext)!)
-                              .ToList();
+        return _ingredientUserElements;
     }
 
     private List<UserElement> GetProductUserElements()
     {
-        return Recipe.Elements.Where(e => e.IsProduct() && !e.GetCurrentUserElement(DataContext)!.IsReintegrated)
-                              .OrderBy(e => e.Index)
-                              .Select(e => e.GetCurrentUserElement(DataContext)!)
-                              .ToList();
+        return _productUserElements;
     }
 
     private async Task UpdateShare(UserElement ue, decimal value)
     {
-        ue.Share = Recipe.GetCurrentUserRecipe(DataContext)!.LockShare ? value : Math.Clamp(value, 0, 1);
+        var userElements = GetProductUserElements();
+        var lockShare = _currentUserRecipe?.LockShare ?? false;
 
-        if (!Recipe.GetCurrentUserRecipe(DataContext)!.LockShare)
+        ue.Share = lockShare ? value : Math.Clamp(value, 0, 1);
+
+        if (!lockShare)
         {
-            var others = GetProductUserElements().Where(e => e != ue).ToList();
-            var remaining = 1 - GetProductUserElements().Sum(e => e.Share);
+            var others = userElements.Where(e => e != ue).ToList();
+            var remaining = 1 - userElements.Sum(e => e.Share);
 
             foreach (var other in others)
             {
                 other.Share += Math.Round(remaining / others.Count, 4);
             }
 
-            var remainingF = 1 - GetProductUserElements().Sum(e => e.Share);
+            var remainingF = 1 - userElements.Sum(e => e.Share);
 
             if (remainingF != 0)
             {
@@ -641,7 +819,7 @@
     private async Task SaveProductShares()
     {
         var userElements = GetProductUserElements();
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        await PersistWithMetricsAsync(nameof(SaveProductShares), context =>
         {
             foreach (var ue in userElements)
             {
@@ -653,14 +831,24 @@
 
     private async Task RecalculateFromDialog(string origin)
     {
+        var recalculateStopwatch = Stopwatch.StartNew();
         if (RecalculateRequested is not null)
         {
             await RecalculateRequested(origin);
-            StateHasChanged();
-            return;
+        }
+        else
+        {
+            await PriceCalculatorService.Calculate(DataContext, $"RecipeDialog:{origin}");
         }
 
-        await PriceCalculatorService.Calculate(DataContext, $"RecipeDialog:{origin}");
+        recalculateStopwatch.Stop();
+        Logger.LogInformation(
+            "RecipeDialog recalculate metrics. origin={Origin} recalculateRequestMs={RecalculateRequestMs} mode={Mode}",
+            origin,
+            recalculateStopwatch.ElapsedMilliseconds,
+            RecalculateRequested is not null ? "callback" : "local");
+
+        RefreshComputedState(trackRenderMetrics: true);
         StateHasChanged();
     }
 }
