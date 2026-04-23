@@ -325,7 +325,7 @@ public class PriceCalculatorService(
 
         try
         {
-            await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+            await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
             {
                 var calculationContext = new CalculationContext(dataContext);
                 var marginType = calculationContext.UserSetting.MarginType;
@@ -557,11 +557,26 @@ public class PriceCalculatorService(
                     .Where(calculationContext.HasUserElementChangedFromOriginal)
                     .ToList();
 
-                dirtyUserPrices = finalDirtyUserPriceIds.Count;
-                dirtyUserElements = finalDirtyUserElementIds.Count;
+                var existingDirtyUserPriceIds = await context.UserPrices
+                    .Where(up => finalDirtyUserPriceIds.Contains(up.Id))
+                    .Select(up => up.Id)
+                    .ToHashSetAsync();
+
+                var existingDirtyUserElementIds = await context.UserElements
+                    .Where(ue => finalDirtyUserElementIds.Contains(ue.Id))
+                    .Select(ue => ue.Id)
+                    .ToHashSetAsync();
+
+                dirtyUserPrices = existingDirtyUserPriceIds.Count;
+                dirtyUserElements = existingDirtyUserElementIds.Count;
 
                 foreach (var userPriceId in finalDirtyUserPriceIds)
                 {
+                    if (!existingDirtyUserPriceIds.Contains(userPriceId))
+                    {
+                        continue;
+                    }
+
                     if (calculationContext.UserPricesById.TryGetValue(userPriceId, out var userPrice))
                     {
                         userPriceDbService.UpdateCalculatedPrices(context, userPrice);
@@ -571,6 +586,11 @@ public class PriceCalculatorService(
 
                 foreach (var userElementId in finalDirtyUserElementIds)
                 {
+                    if (!existingDirtyUserElementIds.Contains(userElementId))
+                    {
+                        continue;
+                    }
+
                     if (calculationContext.UserElementsById.TryGetValue(userElementId, out var userElement))
                     {
                         userElementDbService.UpdateAll(context, userElement);
@@ -582,7 +602,7 @@ public class PriceCalculatorService(
                     persistStopwatch?.Stop();
                 }
 
-                return Task.CompletedTask;
+                return;
             });
         }
         catch (Exception ex)

@@ -531,7 +531,11 @@
                                 </HeaderContent>
                                 <RowTemplate>
                                     @{
-                                        var contextUserPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext);
+                                        var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                        if (contextUserPrice is null)
+                                        {
+                                            return;
+                                        }
                                     }
                                     <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
                                         <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
@@ -622,12 +626,21 @@
                                 <ChildRowContent>
                                     @if (_showDetailedTags)
                                     {
-                                        @foreach (var item in context.AssociatedItems)
+                                        var detailedAssociatedItems = context.AssociatedItems
+                                            .Where(item => item.GetCurrentUserPrice(_selectedDataContext) is not null)
+                                            .ToList();
+
+                                        @foreach (var item in detailedAssociatedItems)
                                         {
-                                            var contextUserPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext);
-                                            var itemUserPrice = item.GetMandatoryCurrentUserPrice(_selectedDataContext);
+                                            var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                            var itemUserPrice = item.GetCurrentUserPrice(_selectedDataContext);
+                                            if (contextUserPrice is null || itemUserPrice is null)
+                                            {
+                                                continue;
+                                            }
+
                                             <MudTr>
-                                                <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                <MudTd Class="@($"pt-0 pb-1 {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                         <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                                  Size="Size.Small"/>
@@ -638,7 +651,7 @@
                                                     </MudStack>
                                                 </MudTd>
 
-                                                <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                <MudTd Class="@($"pt-0 pb-1 {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     <MudStack Row Style="position: relative;" Spacing="0">
                                                         @{
                                                             var isAutoCalculatedPrice = _autoCalculatedSellItemIds.Contains(item.Id) && !itemUserPrice.OverrideIsBought;
@@ -690,7 +703,7 @@
                                                     </MudStack>
                                                 </MudTd>
 
-                                                <MudTd Class="@($"pa-0 {(itemUserPrice.OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                <MudTd Class="@($"pa-0 {(itemUserPrice.OverrideIsBought ? "border-l-1" : "")} {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     @if (itemUserPrice.OverrideIsBought)
                                                     {
                                                         <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
@@ -783,7 +796,11 @@
                                 </GroupHeaderTemplate>
                                 <RowTemplate>
                                     @{
-                                        var contextUserPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext);
+                                        var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                        if (contextUserPrice is null)
+                                        {
+                                            return;
+                                        }
                                         var relatedUserElements = context.Elements
                                             .Where(e => e.IsProduct())
                                             .Select(e => e.GetCurrentUserElement(_selectedDataContext))
@@ -913,7 +930,11 @@
                                         {
                                             @foreach (var userElement in relatedUserElements)
                                             {
-                                                var contextUserPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext);
+                                                var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                                if (contextUserPrice is null)
+                                                {
+                                                    continue;
+                                                }
                                                 var borderClass = relatedUserElements.Last() == userElement ? "" : "border-b-0";
 
                                                 <MudTr>
@@ -2859,7 +2880,12 @@
         return isHeavyContext ? 800 : 250;
     }
 
-    private int GetDebounceMsForTrigger(CalculateTriggerOrigin origin, bool bypassDebounce)
+    private static bool ShouldDebounceStructureChange(string caller)
+    {
+        return caller is nameof(IncreasePluginModule) or nameof(DecreasePluginModule);
+    }
+
+    private int GetDebounceMsForTrigger(CalculateTriggerOrigin origin, bool bypassDebounce, string caller)
     {
         if (bypassDebounce)
         {
@@ -2868,7 +2894,8 @@
 
         return origin switch
         {
-            CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput => GetAdaptiveInputDebounceMs(),
+            CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput or CalculateTriggerOrigin.SkillChange => GetAdaptiveInputDebounceMs(),
+            CalculateTriggerOrigin.StructureChange when ShouldDebounceStructureChange(caller) => GetAdaptiveInputDebounceMs(),
             _ => 0,
         };
     }
@@ -2890,7 +2917,16 @@
             return;
         }
 
-        var debounceMs = GetDebounceMsForTrigger(origin, bypassDebounce);
+        var debounceMs = GetDebounceMsForTrigger(origin, bypassDebounce, caller);
+
+        // Skill/recipe changes can remove/relink UserPrices before the calculation executes.
+        // Refresh display caches immediately to avoid rendering rows with stale ItemOrTag references.
+        if (origin is CalculateTriggerOrigin.SkillChange or CalculateTriggerOrigin.RecipeChange)
+        {
+            RefreshCategorizedDisplayCaches();
+            StateHasChanged();
+        }
+
         if (debounceMs > 0)
         {
             var currentDebounceCts = new CancellationTokenSource();
@@ -3018,6 +3054,31 @@
                     displayCacheMetrics.UserElementsIndexMilliseconds);
             }
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            var isRetryAttempt = caller.Contains("concurrency-retry", StringComparison.OrdinalIgnoreCase);
+
+            if (!isRetryAttempt)
+            {
+                _calculationError = null;
+                _logger?.LogWarning(
+                    ex,
+                    "PriceCalculator calculation hit optimistic concurrency. trigger={TriggerOrigin} caller={Caller}. Scheduling one immediate retry.",
+                    origin,
+                    caller);
+
+                await RequestCalculate(origin, force: true, bypassDebounce: true, caller: $"{caller}:concurrency-retry");
+            }
+            else
+            {
+                _calculationError = null;
+                _logger?.LogWarning(
+                    ex,
+                    "PriceCalculator calculation still hit optimistic concurrency after retry. Keeping UI alive and waiting for next recalculation trigger. trigger={TriggerOrigin} caller={Caller}",
+                    origin,
+                    caller);
+            }
+        }
         catch (Exception ex)
         {
             _calculationError = ex;
@@ -3067,15 +3128,22 @@
         categorizeForDisplayStopwatch?.Start();
         var categorizedForDisplay = PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext);
         categorizeForDisplayStopwatch?.Stop();
-        _itemsToBuyDisplay = categorizedForDisplay.ToBuy;
-        _itemsToSellDisplay = categorizedForDisplay.ToSell;
+        _itemsToBuyDisplay = categorizedForDisplay.ToBuy
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .ToList();
+        _itemsToSellDisplay = categorizedForDisplay.ToSell
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .ToList();
 
         categorizeForAutoSellStopwatch?.Start();
         var categorizedForAutoSell = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext);
         categorizeForAutoSellStopwatch?.Stop();
 
         autoSellIdProjectionStopwatch?.Start();
-        _autoCalculatedSellItemIds = categorizedForAutoSell.ToSell.Select(i => i.Id).ToHashSet();
+        _autoCalculatedSellItemIds = categorizedForAutoSell.ToSell
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .Select(i => i.Id)
+            .ToHashSet();
         autoSellIdProjectionStopwatch?.Stop();
 
         userElementsIndexStopwatch?.Start();
