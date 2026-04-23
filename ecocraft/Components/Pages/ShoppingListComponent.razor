@@ -1286,7 +1286,7 @@
         _ = RetrieveData();
     }
 
-    private async Task RetrieveData(DataContext? shoppingList = null)
+    private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)
     {
         if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
         {
@@ -1313,7 +1313,14 @@
 
         try
         {
-            var serverData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+            var serverDataSource = "cache";
+            var serverData = ContextService.CurrentServerData;
+            if (forceServerReload || serverData is null)
+            {
+                serverDataSource = "db";
+                serverData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+            }
+
             if (serverData is null)
             {
                 _selectedShoppingList = null;
@@ -1323,6 +1330,7 @@
             }
 
             ContextService.CurrentServerData = serverData;
+            Console.WriteLine($"[ShoppingList] RetrieveData serverDataSource={serverDataSource} forceServerReload={forceServerReload}");
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
