@@ -512,6 +512,7 @@
     private bool _isRecipeChoicePropagationEnabled;
     private bool _isGuidedAutoExpandEnabled;
     private bool _isGuidedRunActive;
+    private long _retrieveRequestSequence;
     private readonly Queue<Guid> _guidedRunQueue = new();
     private readonly HashSet<Guid> _guidedRunQueuedIds = [];
     private Guid? _guidedPendingParentRecipeId;
@@ -1288,6 +1289,7 @@
 
     private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)
     {
+        var requestId = System.Threading.Interlocked.Increment(ref _retrieveRequestSequence);
         if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
         {
             return;
@@ -1318,7 +1320,7 @@
             if (forceServerReload || serverData is null)
             {
                 serverDataSource = "db";
-                serverData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+                serverData = await ServerDbService.GetServerWithShoppingListData(ContextService.CurrentServer.Id);
             }
 
             if (serverData is null)
@@ -1330,7 +1332,7 @@
             }
 
             ContextService.CurrentServerData = serverData;
-            Console.WriteLine($"[ShoppingList] RetrieveData serverDataSource={serverDataSource} forceServerReload={forceServerReload}");
+            Console.WriteLine($"[ShoppingList] RetrieveData requestId={requestId} serverDataSource={serverDataSource} forceServerReload={forceServerReload}");
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
@@ -1343,7 +1345,7 @@
             }
             catch (Exception referenceEx)
             {
-                Console.WriteLine($"[ShoppingList] Failed to load reference data context {referenceDataContextId}: {referenceEx}");
+                Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load reference data context {referenceDataContextId}: {referenceEx}");
                 _referenceDataContext = null;
             }
 
@@ -1351,7 +1353,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ShoppingList] Failed to load shopping list {targetShoppingListId}: {ex}");
+            Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load shopping list {targetShoppingListId}: {ex}");
 
             var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
                 .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
@@ -1370,7 +1372,7 @@
                     }
                     catch (Exception fallbackEx)
                     {
-                        Console.WriteLine($"[ShoppingList] Failed to load fallback shopping list {fallbackId}: {fallbackEx}");
+                        Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load fallback shopping list {fallbackId}: {fallbackEx}");
                     }
                 }
             }

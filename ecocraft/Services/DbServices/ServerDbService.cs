@@ -143,10 +143,6 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.Include(u => u.Recipes)
 			.ThenInclude(r => r.LocalizedName)
 			.Include(u => u.Recipes)
-			.ThenInclude(r => r.Skill)
-			.Include(u => u.Recipes)
-			.ThenInclude(r => r.CraftingTable)
-			.Include(u => u.Recipes)
 			.ThenInclude(r => r.Elements)
 			.ThenInclude(e => e.Quantity)
 			.ThenInclude(dv => dv.Modifiers)
@@ -155,6 +151,54 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.ThenInclude(dv => dv.Modifiers)
 			.Include(u => u.Recipes)
 			.ThenInclude(r => r.Labor)
+			.ThenInclude(dv => dv.Modifiers)
+			// ItemOrTag
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.AssociatedItems)
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.AssociatedTags)
+			.Include(u => u.ItemOrTags)
+			.ThenInclude(s => s.LocalizedName)
+			.FirstAsync();
+	}
+
+	public async Task<Server> GetServerWithShoppingListData(Guid id)
+	{
+		await using var context = await factory.CreateDbContextAsync();
+		return await GetServerWithShoppingListData(id, context);
+	}
+
+	public async Task<Server> GetServerWithShoppingListData(Guid id, EcoCraftDbContext context)
+	{
+		return await context.Servers
+			.AsNoTrackingWithIdentityResolution()
+			.AsSplitQuery()
+			.Where(s => s.Id == id)
+			// Skills
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.LocalizedName)
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.Talents)
+			.ThenInclude(t => t.LocalizedName)
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.Talents)
+			.ThenInclude(t => t.LocalizedDescription)
+			// Crafting Tables
+			.Include(u => u.CraftingTables)
+			.ThenInclude(ct => ct.PluginModules)
+			.Include(u => u.CraftingTables)
+			.ThenInclude(s => s.LocalizedName)
+			// Plugin Modules (kept for DataContextDbService.Reconciliate compatibility)
+			.Include(u => u.PluginModules)
+			.ThenInclude(s => s.LocalizedName)
+			.Include(u => u.PluginModules)
+			.ThenInclude(s => s.Skill)
+			// Recipes (shopping list does not need CraftMinutes/Labor)
+			.Include(u => u.Recipes)
+			.ThenInclude(r => r.LocalizedName)
+			.Include(u => u.Recipes)
+			.ThenInclude(r => r.Elements)
+			.ThenInclude(e => e.Quantity)
 			.ThenInclude(dv => dv.Modifiers)
 			// ItemOrTag
 			.Include(u => u.ItemOrTags)

@@ -1018,8 +1018,12 @@
     }
 
     private readonly object _calculationQueueLock = new();
+    private readonly object _skillLevelSaveDebounceLock = new();
     private CancellationTokenSource? _dataContextNameCts;
     private CancellationTokenSource? _calculateDebounceCts;
+    private readonly Dictionary<Guid, CancellationTokenSource> _skillLevelSaveDebounceBySkillId = [];
+    private readonly Dictionary<Guid, int> _lastPersistedSkillLevelBySkillId = [];
+    private readonly Dictionary<Guid, int> _pendingSkillLevelBySkillId = [];
     private bool _queuedCalculation;
     private bool _calculationLoopRunning;
     private bool _hasPendingManualCalculation;
@@ -1028,6 +1032,8 @@
     private ILogger? _logger;
     private Stopwatch? _retrieveToRenderStopwatch;
     private bool _awaitingRetrieveRenderMetrics;
+    private long _retrieveRequestSequence;
+    private long _pendingRetrieveRequestIdForRenderMetrics;
     private List<ItemOrTag> _itemsToBuyDisplay = [];
     private List<ItemOrTag> _itemsToSellDisplay = [];
     private HashSet<Guid> _autoCalculatedSellItemIds = [];
@@ -1183,8 +1189,10 @@
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
     private bool _collapseSellGroupsOnNextRender;
     private bool _groupLimiterInteropUnavailable;
-    private const int SellGroupCollapseThreshold = 7;
+    private const int SellGroupCollapseThreshold = 5;
     private const int SellGroupMaxOpenGroups = 3;
+    private const int SkillChangeCalculationDebounceMs = 150;
+    private const int SkillLevelSaveDebounceMs = 150;
     private const string ItemsToSellTableDomId = "items-to-sell-table";
 
     protected override void OnInitialized()
@@ -1254,10 +1262,12 @@
             if (await AppSettingsService.IsPriceCalculatorMetricsEnabledAsync())
             {
                 _logger?.LogInformation(
-                    "PriceCalculator refresh end-to-end render completed. totalRefreshToRenderMs={TotalRefreshToRenderMs}",
+                    "PriceCalculator refresh end-to-end render completed. requestId={RequestId} totalRefreshToRenderMs={TotalRefreshToRenderMs}",
+                    _pendingRetrieveRequestIdForRenderMetrics,
                     _retrieveToRenderStopwatch.ElapsedMilliseconds);
             }
 
+            _pendingRetrieveRequestIdForRenderMetrics = 0;
             _retrieveToRenderStopwatch = null;
         }
 
@@ -1266,6 +1276,7 @@
 
     private async Task RetrieveData(DataContext? dataContext = null, bool forceServerReload = false)
     {
+        var retrieveRequestId = System.Threading.Interlocked.Increment(ref _retrieveRequestSequence);
         var isMetricsEnabled = await AppSettingsService.IsPriceCalculatorMetricsEnabledAsync();
         var totalStopwatch = isMetricsEnabled ? Stopwatch.StartNew() : null;
         var selectedDataContextStopwatch = isMetricsEnabled ? new Stopwatch() : null;
@@ -1285,6 +1296,7 @@
         var serverDataSource = "cache";
 
         _retrieveToRenderStopwatch = isMetricsEnabled ? Stopwatch.StartNew() : null;
+        _pendingRetrieveRequestIdForRenderMetrics = _retrieveToRenderStopwatch is null ? 0 : retrieveRequestId;
         _isLoadingData = true;
         StateHasChanged();
 
@@ -1341,7 +1353,8 @@
         {
             totalStopwatch?.Stop();
             _logger?.LogInformation(
-                "PriceCalculator refresh metrics. totalMs={TotalMs} selectDataContextMs={SelectDataContextMs} localStorageMs={LocalStorageMs} serverDataLoadMs={ServerDataLoadMs} policySyncMs={PolicySyncMs} dataContextLoadMs={DataContextLoadMs} policyEnforcementMs={PolicyEnforcementMs} calculateRequestMs={CalculateRequestMs} skills={UserSkills} recipes={UserRecipes} elements={UserElements} prices={UserPrices} itemOrTags={ItemOrTags} serverRecipes={ServerRecipes} serverDataSource={ServerDataSource}",
+                "PriceCalculator refresh metrics. requestId={RequestId} totalMs={TotalMs} selectDataContextMs={SelectDataContextMs} localStorageMs={LocalStorageMs} serverDataLoadMs={ServerDataLoadMs} policySyncMs={PolicySyncMs} dataContextLoadMs={DataContextLoadMs} policyEnforcementMs={PolicyEnforcementMs} calculateRequestMs={CalculateRequestMs} skills={UserSkills} recipes={UserRecipes} elements={UserElements} prices={UserPrices} itemOrTags={ItemOrTags} serverRecipes={ServerRecipes} serverDataSource={ServerDataSource}",
+                retrieveRequestId,
                 totalStopwatch?.ElapsedMilliseconds ?? 0,
                 selectedDataContextStopwatch?.ElapsedMilliseconds ?? 0,
                 localStorageStopwatch?.ElapsedMilliseconds ?? 0,
@@ -1359,7 +1372,8 @@
                 serverDataSource);
 
             _logger?.LogInformation(
-                "PriceCalculator refresh serverDataLoad details. totalMs={TotalMs} dbFetchMs={DbFetchMs} graphMetricsMs={GraphMetricsMs} serverDataSource={ServerDataSource} skills={Skills} talents={Talents} craftingTables={CraftingTables} craftingTablePluginModules={CraftingTablePluginModules} pluginModules={PluginModules} recipes={Recipes} recipeElements={RecipeElements} itemOrTags={ItemOrTags} associatedItems={AssociatedItems} associatedTags={AssociatedTags}",
+                "PriceCalculator refresh serverDataLoad details. requestId={RequestId} totalMs={TotalMs} dbFetchMs={DbFetchMs} graphMetricsMs={GraphMetricsMs} serverDataSource={ServerDataSource} skills={Skills} talents={Talents} craftingTables={CraftingTables} craftingTablePluginModules={CraftingTablePluginModules} pluginModules={PluginModules} recipes={Recipes} recipeElements={RecipeElements} itemOrTags={ItemOrTags} associatedItems={AssociatedItems} associatedTags={AssociatedTags}",
+                retrieveRequestId,
                 serverLoadStopwatch?.ElapsedMilliseconds ?? 0,
                 serverLoadDbStopwatch?.ElapsedMilliseconds ?? 0,
                 serverLoadGraphAnalysisStopwatch?.ElapsedMilliseconds ?? 0,
@@ -1376,7 +1390,8 @@
                 serverGraphMetrics.AssociatedTags);
 
             _logger?.LogInformation(
-                "PriceCalculator refresh dataContextLoad details. totalMs={TotalMs} graphMetricsMs={GraphMetricsMs} userSkills={UserSkills} userTalents={UserTalents} userCraftingTables={UserCraftingTables} userCraftingTableSkilledPluginModules={UserCraftingTableSkilledPluginModules} userRecipes={UserRecipes} userElements={UserElements} userPrices={UserPrices} userMargins={UserMargins} userSettings={UserSettings}",
+                "PriceCalculator refresh dataContextLoad details. requestId={RequestId} totalMs={TotalMs} graphMetricsMs={GraphMetricsMs} userSkills={UserSkills} userTalents={UserTalents} userCraftingTables={UserCraftingTables} userCraftingTableSkilledPluginModules={UserCraftingTableSkilledPluginModules} userRecipes={UserRecipes} userElements={UserElements} userPrices={UserPrices} userMargins={UserMargins} userSettings={UserSettings}",
+                retrieveRequestId,
                 dataContextLoadStopwatch?.ElapsedMilliseconds ?? 0,
                 dataContextGraphAnalysisStopwatch?.ElapsedMilliseconds ?? 0,
                 dataContextGraphMetrics.UserSkills,
@@ -1390,7 +1405,8 @@
                 dataContextGraphMetrics.UserSettings);
 
             _logger?.LogInformation(
-                "PriceCalculator refresh policyEnforcement details. totalMs={TotalMs} caloriePolicyMs={CaloriePolicyMs} marginPolicyMs={MarginPolicyMs}",
+                "PriceCalculator refresh policyEnforcement details. requestId={RequestId} totalMs={TotalMs} caloriePolicyMs={CaloriePolicyMs} marginPolicyMs={MarginPolicyMs}",
+                retrieveRequestId,
                 policyEnforcementStopwatch?.ElapsedMilliseconds ?? 0,
                 enforceCaloriePolicyStopwatch?.ElapsedMilliseconds ?? 0,
                 enforceMarginPolicyStopwatch?.ElapsedMilliseconds ?? 0);
@@ -1398,6 +1414,10 @@
 
         _isLoadingData = false;
         _awaitingRetrieveRenderMetrics = isMetricsEnabled && _retrieveToRenderStopwatch is not null;
+        if (!_awaitingRetrieveRenderMetrics)
+        {
+            _pendingRetrieveRequestIdForRenderMetrics = 0;
+        }
         StateHasChanged();
     }
 
@@ -1479,7 +1499,7 @@
 
     private static bool ShouldCollapseSellGroupsOnRefresh(DataContext? dataContext)
     {
-        return GetConfiguredProfessionsCount(dataContext) > SellGroupCollapseThreshold;
+        return GetConfiguredProfessionsCount(dataContext) >= SellGroupCollapseThreshold;
     }
 
     private async Task ConfigureItemsToSellGroupBehaviorAsync()
@@ -1932,6 +1952,17 @@
         _dataContextNameCts?.Dispose();
         _calculateDebounceCts?.Cancel();
         _calculateDebounceCts?.Dispose();
+        lock (_skillLevelSaveDebounceLock)
+        {
+            foreach (var cts in _skillLevelSaveDebounceBySkillId.Values)
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+            _skillLevelSaveDebounceBySkillId.Clear();
+            _pendingSkillLevelBySkillId.Clear();
+            _lastPersistedSkillLevelBySkillId.Clear();
+        }
         try
         {
             _ = JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.dispose", ItemsToSellTableDomId);
@@ -2322,33 +2353,133 @@
         await Calculate();
     }
 
-    private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
+    private Task OnLevelChanged(UserSkill userSkill, int newLevel)
     {
-        if (userSkill.Level == newLevel) return;
+        if (userSkill.Level == newLevel) return Task.CompletedTask;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        var previousLevel = userSkill.Level;
+        userSkill.Level = newLevel;
+        _ = PersistSkillLevelChangeDebounced(userSkill, previousLevel, newLevel);
+        return Task.CompletedTask;
+    }
+
+    private async Task PersistSkillLevelChangeDebounced(UserSkill userSkill, int previousLevel, int newLevel)
+    {
+        try
         {
-            var isIncrease = newLevel - userSkill.Level > 0;
-            userSkill.Level = newLevel;
-            UserSkillDbService.UpdateLevel(context, userSkill);
-
-            if (_selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes)
+            CancellationTokenSource currentDebounceCts;
+            lock (_skillLevelSaveDebounceLock)
             {
-                UserServerDataService.UserSkillLevelChange(context, _selectedDataContext!, ContextService.CurrentServerData!, userSkill, isIncrease);
-            }
-
-            if (!isIncrease)
-            {
-                foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext!) is not null && newLevel < t.Level))
+                if (!_lastPersistedSkillLevelBySkillId.ContainsKey(userSkill.Id))
                 {
-                    UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(_selectedDataContext!)!);
+                    _lastPersistedSkillLevelBySkillId[userSkill.Id] = previousLevel;
                 }
+
+                _pendingSkillLevelBySkillId[userSkill.Id] = newLevel;
+                currentDebounceCts = new CancellationTokenSource();
+
+                if (_skillLevelSaveDebounceBySkillId.TryGetValue(userSkill.Id, out var previousDebounceCts))
+                {
+                    previousDebounceCts.Cancel();
+                    previousDebounceCts.Dispose();
+                }
+
+                _skillLevelSaveDebounceBySkillId[userSkill.Id] = currentDebounceCts;
             }
 
-            return Task.CompletedTask;
-        });
+            try
+            {
+                await Task.Delay(SkillLevelSaveDebounceMs, currentDebounceCts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            finally
+            {
+                lock (_skillLevelSaveDebounceLock)
+                {
+                    if (_skillLevelSaveDebounceBySkillId.TryGetValue(userSkill.Id, out var trackedCts)
+                        && ReferenceEquals(trackedCts, currentDebounceCts))
+                    {
+                        _skillLevelSaveDebounceBySkillId.Remove(userSkill.Id);
+                    }
+                }
 
-        await Calculate();
+                currentDebounceCts.Dispose();
+            }
+
+            var selectedDataContext = _selectedDataContext;
+            var currentServerData = ContextService.CurrentServerData;
+            if (selectedDataContext is null || currentServerData is null)
+            {
+                return;
+            }
+
+            if (!selectedDataContext.UserSkills.Any(us => us.Id == userSkill.Id))
+            {
+                return;
+            }
+
+            int targetLevel;
+            int persistedLevel;
+            lock (_skillLevelSaveDebounceLock)
+            {
+                targetLevel = _pendingSkillLevelBySkillId.TryGetValue(userSkill.Id, out var pendingLevel)
+                    ? pendingLevel
+                    : newLevel;
+                persistedLevel = _lastPersistedSkillLevelBySkillId.TryGetValue(userSkill.Id, out var lastPersistedLevel)
+                    ? lastPersistedLevel
+                    : previousLevel;
+            }
+
+            if (targetLevel == persistedLevel)
+            {
+                lock (_skillLevelSaveDebounceLock)
+                {
+                    _pendingSkillLevelBySkillId.Remove(userSkill.Id);
+                }
+                return;
+            }
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+            {
+                var isIncrease = targetLevel > persistedLevel;
+                userSkill.Level = targetLevel;
+                UserSkillDbService.UpdateLevel(context, userSkill);
+
+                if (selectedDataContext.UserSettings.First().OnlyLevelAccessibleRecipes)
+                {
+                    UserServerDataService.UserSkillLevelChange(context, selectedDataContext, currentServerData, userSkill, isIncrease);
+                }
+
+                if (!isIncrease)
+                {
+                    foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(selectedDataContext) is not null && targetLevel < t.Level))
+                    {
+                        UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(selectedDataContext)!);
+                    }
+                }
+
+                return Task.CompletedTask;
+            });
+
+            lock (_skillLevelSaveDebounceLock)
+            {
+                _lastPersistedSkillLevelBySkillId[userSkill.Id] = targetLevel;
+                _pendingSkillLevelBySkillId.Remove(userSkill.Id);
+            }
+
+            await RequestCalculate(CalculateTriggerOrigin.SkillChange, caller: nameof(OnLevelChanged), bypassDebounce: true);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(
+                ex,
+                "PriceCalculator skill level save failed. skillId={SkillId} requestedLevel={RequestedLevel}",
+                userSkill.Id,
+                newLevel);
+        }
     }
 
     private async Task OnOptionDisplayChanged()
@@ -2883,7 +3014,7 @@
             return 250;
         }
 
-        var isHeavyContext = _selectedDataContext.UserSkills.Count >= 8 || _selectedDataContext.UserRecipes.Count >= 80;
+        var isHeavyContext = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
         return isHeavyContext ? 800 : 250;
     }
 
@@ -2901,7 +3032,8 @@
 
         return origin switch
         {
-            CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput or CalculateTriggerOrigin.SkillChange => GetAdaptiveInputDebounceMs(),
+            CalculateTriggerOrigin.SkillChange => SkillChangeCalculationDebounceMs,
+            CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput => GetAdaptiveInputDebounceMs(),
             CalculateTriggerOrigin.StructureChange when ShouldDebounceStructureChange(caller) => GetAdaptiveInputDebounceMs(),
             _ => 0,
         };
