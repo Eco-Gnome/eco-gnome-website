@@ -338,404 +338,16 @@
                         }
                     </MudPaper>
                 </MudStack>
-
-            <EcoOverlayModal IsOpen="_isDrilldownOpen"
-                             OverlayClass="economy-drilldown-overlay"
-                             WrapperClass="economy-drilldown-modal-wrapper"
-                             PaperClass="economy-drilldown-modal pa-4"
-                             OnClose="CloseDrilldown">
-                <MudStack Spacing="3">
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Title")</MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                           Color="Color.Default"
-                                           OnClick="CloseDrilldown"/>
-                        </MudStack>
-
-                        @if (_isLoadingDrilldown && _drilldown is null)
-                        {
-                            <MudStack AlignItems="AlignItems.Center" Class="py-4">
-                                <MudProgressCircular Color="Color.Tertiary" Indeterminate="true"/>
-                            </MudStack>
-                        }
-                        else if (_drilldown is null)
-                        {
-                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoData")</MudText>
-                        }
-                        else
-                        {
-                            <MudStack Spacing="2">
-                                <MudText Typo="Typo.caption">
-                                    @LocalizationService.GetTranslation("EconomyViewer.Drilldown.CompareHeader", _drilldown.Player1Name, _drilldown.Player2Name)
-                                </MudText>
-
-                                <MudGrid>
-                                <MudItem xs="12" md="6">
-                                    <MudSelect T="Guid?"
-                                               Value="_selectedPlayer1UserServerId"
-                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player1")"
-                                               Variant="Variant.Outlined"
-                                               ValueChanged="OnPlayer1ChangedInDrawer">
-                                        @foreach (var player in _availablePlayers)
-                                        {
-                                            <MudSelectItem T="Guid?"
-                                                           Value="@player.Id"
-                                                           Disabled="@(_selectedPlayer2UserServerId == player.Id)">
-                                                @player.GetPseudo()
-                                            </MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudSelect T="Guid?"
-                                               Value="_selectedPlayer2UserServerId"
-                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player2")"
-                                               Variant="Variant.Outlined"
-                                               ValueChanged="OnPlayer2ChangedInDrawer">
-                                        @foreach (var player in _availablePlayers)
-                                        {
-                                            <MudSelectItem T="Guid?"
-                                                           Value="@player.Id"
-                                                           Disabled="@(_selectedPlayer1UserServerId == player.Id)">
-                                                @player.GetPseudo()
-                                            </MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudSelect T="Guid?"
-                                               Value="_selectedPlayer1DataContextId"
-                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player1Context")"
-                                               Variant="Variant.Outlined"
-                                               ValueChanged="OnPlayer1ContextChanged">
-                                        @foreach (var context in _drilldown.Player1Contexts)
-                                        {
-                                            <MudSelectItem T="Guid?" Value="@context.Id">@context.Name</MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudSelect T="Guid?"
-                                               Value="_selectedPlayer2DataContextId"
-                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player2Context")"
-                                               Variant="Variant.Outlined"
-                                               ValueChanged="OnPlayer2ContextChanged">
-                                        @foreach (var context in _drilldown.Player2Contexts)
-                                        {
-                                            <MudSelectItem T="Guid?" Value="@context.Id">@context.Name</MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudItem>
-                                <MudItem xs="12">
-                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                        <MudSwitch T="bool"
-                                                   Value="_comparisonOnlyDifferences"
-                                                   ValueChanged="OnComparisonOnlyDifferencesChanged"
-                                                   Color="@(_comparisonOnlyDifferences ? Color.Primary : Color.Default)"
-                                                   Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.OnlyDifferences")"/>
-                                        <MudSwitch T="bool"
-                                                   Value="_comparisonOnlyCommon"
-                                                   ValueChanged="OnComparisonOnlyCommonChanged"
-                                                   Color="@(_comparisonOnlyCommon ? Color.Primary : Color.Default)"
-                                                   Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.OnlyCommon")"/>
-                                        <MudButton Variant="Variant.Outlined"
-                                                   Color="Color.Default"
-                                                   OnClick="ResetDrilldownFiltersAsync">
-                                            @LocalizationService.GetTranslation("EconomyViewer.Actions.ResetFilters")
-                                        </MudButton>
-                                    </MudStack>
-                                </MudItem>
-                                </MudGrid>
-
-                                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.ContextSummaries")</MudText>
-                                <MudTable Items="GetSelectedContextSummaries()" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Role")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Player")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Context")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.ConfiguredItems")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Recipes")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Skills")</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd>
-                                        <MudChip T="string" Color="@context.RoleColor" Variant="Variant.Outlined" Size="Size.Small">
-                                            @LocalizationService.GetTranslation(context.RoleTranslationKey)
-                                        </MudChip>
-                                    </MudTd>
-                                    <MudTd>@context.PlayerName</MudTd>
-                                    <MudTd>@context.Summary.DataContextName</MudTd>
-                                    <MudTd>@context.Summary.ConfiguredItemCount</MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Summary.AveragePrice)</MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Summary.AverageMargin)</MudTd>
-                                    <MudTd>@context.Summary.RecipeCount</MudTd>
-                                    <MudTd>@context.Summary.SkillCount</MudTd>
-                                </RowTemplate>
-                                </MudTable>
-
-                                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.CraftingTablesComparison")</MudText>
-                                <MudGrid>
-                                    <MudItem xs="12" md="6" Class="d-flex">
-                                        <MudPaper Class="pa-3 flex-grow-1">
-                                            <MudStack Spacing="1">
-                                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
-                                                        @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player1Badge")
-                                                    </MudChip>
-                                                    <MudText Typo="Typo.body2">@GetSelectedPlayer1ContextTitle()</MudText>
-                                                </MudStack>
-                                                <MudTable Items="GetSelectedPlayer1CraftingTableSummaries()"
-                                                          Dense="true"
-                                                          Hover="true"
-                                                          Class="mud-table-container-no-overflow-y">
-                                                    <HeaderContent>
-                                                        <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-                                                        <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                                        <MudTh>@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudTh>
-                                                    </HeaderContent>
-                                                    <RowTemplate>
-                                                        <MudTd>
-                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                                <EcoIcon Item="@GetCraftingTable(context.CraftingTableId)"
-                                                                         FallbackIcon="@Icons.Material.Filled.Handyman"
-                                                                         Size="24"/>
-                                                                <MudText Typo="Typo.body2">@GetCraftingTableLabel(context)</MudText>
-                                                            </MudStack>
-                                                        </MudTd>
-                                                        <MudTd>
-                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                                @if (context.PluginModuleId is Guid pluginModuleId)
-                                                                {
-                                                                    var pluginModule = GetPluginModule(pluginModuleId);
-                                                                    <MudTooltip Text="@(pluginModule?.GetTooltip(LocalizationService) ?? context.PluginModuleName ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                                        <EcoIcon Item="@pluginModule"
-                                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                                 Size="24"
-                                                                                 Class="mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NoModule")">
-                                                                        <EcoIcon Item="@((IHasIconName?)null)"
-                                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                                 Size="24"
-                                                                                 Class="mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-
-                                                                @foreach (var skilledPluginModuleId in context.SkilledPluginModuleIds)
-                                                                {
-                                                                    var skilledPluginModule = GetPluginModule(skilledPluginModuleId);
-                                                                    <MudTooltip Text="@(skilledPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                                        <EcoIcon Item="@skilledPluginModule"
-                                                                                 Size="24"
-                                                                                 Class="has-pluginmodule mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-                                                            </MudStack>
-                                                        </MudTd>
-                                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
-                                                    </RowTemplate>
-                                                    <NoRecordsContent>
-                                                        <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
-                                                    </NoRecordsContent>
-                                                </MudTable>
-                                            </MudStack>
-                                        </MudPaper>
-                                    </MudItem>
-                                    <MudItem xs="12" md="6" Class="d-flex">
-                                        <MudPaper Class="pa-3 flex-grow-1">
-                                            <MudStack Spacing="1">
-                                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Size="Size.Small">
-                                                        @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player2Badge")
-                                                    </MudChip>
-                                                    <MudText Typo="Typo.body2">@GetSelectedPlayer2ContextTitle()</MudText>
-                                                </MudStack>
-                                                <MudTable Items="GetSelectedPlayer2CraftingTableSummaries()"
-                                                          Dense="true"
-                                                          Hover="true"
-                                                          Class="mud-table-container-no-overflow-y">
-                                                    <HeaderContent>
-                                                        <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-                                                        <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                                        <MudTh>@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudTh>
-                                                    </HeaderContent>
-                                                    <RowTemplate>
-                                                        <MudTd>
-                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                                <EcoIcon Item="@GetCraftingTable(context.CraftingTableId)"
-                                                                         FallbackIcon="@Icons.Material.Filled.Handyman"
-                                                                         Size="24"/>
-                                                                <MudText Typo="Typo.body2">@GetCraftingTableLabel(context)</MudText>
-                                                            </MudStack>
-                                                        </MudTd>
-                                                        <MudTd>
-                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                                @if (context.PluginModuleId is Guid pluginModuleId)
-                                                                {
-                                                                    var pluginModule = GetPluginModule(pluginModuleId);
-                                                                    <MudTooltip Text="@(pluginModule?.GetTooltip(LocalizationService) ?? context.PluginModuleName ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                                        <EcoIcon Item="@pluginModule"
-                                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                                 Size="24"
-                                                                                 Class="mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NoModule")">
-                                                                        <EcoIcon Item="@((IHasIconName?)null)"
-                                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                                 Size="24"
-                                                                                 Class="mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-
-                                                                @foreach (var skilledPluginModuleId in context.SkilledPluginModuleIds)
-                                                                {
-                                                                    var skilledPluginModule = GetPluginModule(skilledPluginModuleId);
-                                                                    <MudTooltip Text="@(skilledPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                                        <EcoIcon Item="@skilledPluginModule"
-                                                                                 Size="24"
-                                                                                 Class="has-pluginmodule mt-1"/>
-                                                                    </MudTooltip>
-                                                                }
-                                                            </MudStack>
-                                                        </MudTd>
-                                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
-                                                    </RowTemplate>
-                                                    <NoRecordsContent>
-                                                        <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
-                                                    </NoRecordsContent>
-                                                </MudTable>
-                                            </MudStack>
-                                        </MudPaper>
-                                    </MudItem>
-                                </MudGrid>
-
-                                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.PriceOptionsComparison")</MudText>
-                                <MudTable Items="GetPriceOptionComparisonRows()" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Option")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Player1Value")</MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Player2Value")</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd>@LocalizationService.GetTranslation(context.OptionTranslationKey)</MudTd>
-                                    <MudTd>@context.Player1Value</MudTd>
-                                    <MudTd>@context.Player2Value</MudTd>
-                                </RowTemplate>
-                                </MudTable>
-
-                                <MudStack Row="true"
-                                          Wrap="Wrap.Wrap"
-                                          Justify="Justify.FlexStart"
-                                          AlignItems="AlignItems.Center"
-                                          Spacing="2"
-                                          Class="mt-2">
-                                    <div class="comparison-by-select-container">
-                                        <MudSelect T="EconomyComparisonEntity"
-                                                   Value="_comparisonBy"
-                                                   Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.CompareBy")"
-                                                   Variant="Variant.Outlined"
-                                                   FullWidth="true"
-                                                   Class="no-wrap-select"
-                                                   ValueChanged="OnComparisonByChanged">
-                                            <MudSelectItem T="EconomyComparisonEntity" Value="EconomyComparisonEntity.Item">@LocalizationService.GetTranslation("EconomyViewer.Groups.Item")</MudSelectItem>
-                                            <MudSelectItem T="EconomyComparisonEntity" Value="EconomyComparisonEntity.Recipe">@LocalizationService.GetTranslation("EconomyViewer.Groups.Recipe")</MudSelectItem>
-                                            <MudSelectItem T="EconomyComparisonEntity" Value="EconomyComparisonEntity.Skill">@LocalizationService.GetTranslation("EconomyViewer.Groups.Skill")</MudSelectItem>
-                                        </MudSelect>
-                                    </div>
-                                    <MudSwitch T="bool"
-                                               Value="_showComparisonIncompleteRows"
-                                               ValueChanged="OnShowComparisonIncompleteRowsChanged"
-                                               Color="@(_showComparisonIncompleteRows ? Color.Primary : Color.Default)"
-                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Filters.ShowIncompleteRows")"/>
-                                </MudStack>
-                                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.ComparisonTable")</MudText>
-                                <MudTable Items="_drilldown.ComparisonRows" Filter="new Func<EconomyPlayerComparisonRow, bool>(FilterComparisonRow)" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>
-                                        <MudStack Row AlignItems="AlignItems.Center">
-                                            <MudTableSortLabel InitialDirection="SortDirection.Ascending"
-                                                               SortBy="new Func<EconomyPlayerComparisonRow, object>(row => GetComparisonRowLabel(row))">
-                                                @LocalizationService.GetTranslation("EconomyViewer.Columns.Entity")
-                                            </MudTableSortLabel>
-                                            <MudTextField T="string"
-                                                          @bind-Value="_comparisonSearch"
-                                                          Immediate
-                                                          Placeholder="@LocalizationService.GetTranslation("Search")"
-                                                          Adornment="Adornment.Start"
-                                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                                          IconSize="Size.Medium"
-                                                          Class="mt-0" />
-                                        </MudStack>
-                                    </MudTh>
-                                    <MudTh>
-                                        <MudTableSortLabel SortBy="new Func<EconomyPlayerComparisonRow, object>(row => row.Player1Value ?? decimal.MaxValue)">
-                                            @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Player1Value")
-                                        </MudTableSortLabel>
-                                    </MudTh>
-                                    <MudTh>
-                                        <MudTableSortLabel SortBy="new Func<EconomyPlayerComparisonRow, object>(row => row.Player2Value ?? decimal.MaxValue)">
-                                            @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Player2Value")
-                                        </MudTableSortLabel>
-                                    </MudTh>
-                                    <MudTh>
-                                        <MudTableSortLabel SortBy="new Func<EconomyPlayerComparisonRow, object>(row => row.DeltaAbs ?? decimal.MaxValue)">
-                                            @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.DeltaAbs")
-                                        </MudTableSortLabel>
-                                    </MudTh>
-                                    <MudTh>
-                                        <MudTableSortLabel SortBy="new Func<EconomyPlayerComparisonRow, object>(row => row.DeltaPct ?? decimal.MaxValue)">
-                                            @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.DeltaPct")
-                                        </MudTableSortLabel>
-                                    </MudTh>
-                                    <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Status")</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd>
-                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                            <EcoIcon Item="@GetComparisonRowIcon(context)"
-                                                     FallbackIcon="@GetComparisonRowFallbackIcon(context)"
-                                                     Size="24"/>
-                                            <MudStack Spacing="0">
-                                                <MudText Typo="Typo.body2">@GetComparisonRowLabel(context)</MudText>
-                                                @if (!string.IsNullOrWhiteSpace(GetComparisonRowSubLabel(context)))
-                                                {
-                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@GetComparisonRowSubLabel(context)</MudText>
-                                                }
-                                            </MudStack>
-                                        </MudStack>
-                                    </MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Player1Value)</MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.Player2Value)</MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatSignedDecimal(context.DeltaAbs)</MudTd>
-                                    <MudTd>@EconomyViewerDisplayService.FormatSignedPercent(context.DeltaPct)</MudTd>
-                                    <MudTd>
-                                        <MudTooltip Text="@EconomyViewerDisplayService.GetComparisonStatusTooltip(context.Status, _drilldown?.Player1Name, _drilldown?.Player2Name)">
-                                            <MudChip T="string" Color="@EconomyViewerDisplayService.GetStatusColor(context.Status)" Variant="Variant.Outlined" Size="Size.Small">
-                                                @LocalizationService.GetTranslation($"EconomyViewer.Status.{context.Status}")
-                                            </MudChip>
-                                        </MudTooltip>
-                                    </MudTd>
-                                </RowTemplate>
-                                <NoRecordsContent>
-                                    <MudText Class="pa-4">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoComparisonData")</MudText>
-                                </NoRecordsContent>
-                                <PagerContent>
-                                    <MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
-                                </PagerContent>
-                                </MudTable>
-                            </MudStack>
-                        }
-                </MudStack>
-            </EcoOverlayModal>
-
+            <EconomyViewerDrilldownModal @ref="_drilldownModal"
+                                         ServerId="ContextService.CurrentServer.Id"
+                                         CurrentUserServerId="ContextService.CurrentUserServer.Id"
+                                         AvailablePlayers="_availablePlayers"
+                                         ItemsById="_itemsById"
+                                         RecipesById="_recipesById"
+                                         SkillsById="_skillsById"
+                                         CraftingTablesById="_craftingTablesById"
+                                         PluginModulesById="_pluginModulesById"
+                                         RecipeProductItemsByRecipeId="_recipeProductItemsByRecipeId"/>
             <EcoOverlayModal IsOpen="_isHelpModalOpen"
                              OverlayClass="economy-help-overlay"
                              WrapperClass="economy-help-modal-wrapper"
@@ -761,8 +373,6 @@
 @code {
     private bool _isLoadingPage = true;
     private bool _isLoadingGlobal;
-    private bool _isLoadingDrilldown;
-    private bool _isDrilldownOpen;
     private bool _isHelpModalOpen;
 
     private EconomyGroupBy _groupBy = EconomyGroupBy.Item;
@@ -772,25 +382,13 @@
     private Guid? _filterSkillId;
     private Guid? _globalFilterUserServerId;
 
-    private Guid? _selectedPlayer1UserServerId;
-    private Guid? _selectedPlayer2UserServerId;
-    private Guid? _selectedPlayer2DataContextId;
-    private Guid? _selectedPlayer1DataContextId;
-    private EconomyComparisonEntity _comparisonBy = EconomyComparisonEntity.Item;
-    private bool _comparisonOnlyDifferences;
-    private bool _comparisonOnlyCommon;
-    private bool _showComparisonIncompleteRows;
-    private string _comparisonSearch = string.Empty;
-
     private EconomyGlobalResult _globalResult = new();
-    private EconomyPlayerDetailResult? _drilldown;
     private readonly HashSet<string> _expandedGlobalRowKeys = [];
+    private EconomyViewerDrilldownModal? _drilldownModal;
 
     private List<ItemOrTag> _availableItems = [];
     private List<Recipe> _availableRecipes = [];
     private List<Skill> _availableSkills = [];
-    private List<CraftingTable> _availableCraftingTables = [];
-    private List<PluginModule> _availablePluginModules = [];
     private List<UserServer> _availablePlayers = [];
     private Dictionary<Guid, ItemOrTag> _itemsById = [];
     private Dictionary<Guid, Recipe> _recipesById = [];
@@ -799,9 +397,7 @@
     private Dictionary<Guid, PluginModule> _pluginModulesById = [];
     private Dictionary<Guid, ItemOrTag> _recipeProductItemsByRecipeId = [];
     private const string ShowIncompleteRowsStorageKey = "EconomyViewer.ShowIncompleteRows";
-    private const string ShowComparisonIncompleteRowsStorageKey = "EconomyViewer.ShowComparisonIncompleteRows";
     private const string ShowSpreadAsPercentStorageKey = "EconomyViewer.ShowSpreadAsPercent";
-    private const string DrilldownPlayer2UserServerIdStorageKey = "EconomyViewer.Drilldown.Player2UserServerId";
     private bool CanOpenDrilldown => _availablePlayers.Count > 1;
 
     protected override void OnInitialized()
@@ -832,10 +428,8 @@
         {
             _isLoadingPage = true;
             _showIncompleteRows = await LocalStorageService.GetItem(ShowIncompleteRowsStorageKey) == "True";
-            _showComparisonIncompleteRows = await LocalStorageService.GetItem(ShowComparisonIncompleteRowsStorageKey) == "True";
             _showSpreadAsPercent = await LocalStorageService.GetItem(ShowSpreadAsPercentStorageKey) == "True";
             await EnsureServerDataLoadedAsync();
-            await InitializeDefaultDrilldownPlayersAsync();
             await LoadGlobalAsync();
         }
         catch (Exception ex)
@@ -877,14 +471,6 @@
             .Where(s => s.Profession is not null)
             .ToList();
 
-        _availableCraftingTables = ContextService.CurrentServerData.CraftingTables
-            .OrderBy(LocalizationService.GetTranslation)
-            .ToList();
-
-        _availablePluginModules = ContextService.CurrentServerData.PluginModules
-            .OrderBy(LocalizationService.GetTranslation)
-            .ToList();
-
         _availablePlayers = ContextService.CurrentServer.UserServers
             .OrderBy(us => us.GetPseudo())
             .ToList();
@@ -892,8 +478,8 @@
         _itemsById = _availableItems.ToDictionary(i => i.Id);
         _recipesById = _availableRecipes.ToDictionary(r => r.Id);
         _skillsById = allSkills.ToDictionary(s => s.Id);
-        _craftingTablesById = _availableCraftingTables.ToDictionary(ct => ct.Id);
-        _pluginModulesById = _availablePluginModules.ToDictionary(pm => pm.Id);
+        _craftingTablesById = ContextService.CurrentServerData.CraftingTables.ToDictionary(ct => ct.Id);
+        _pluginModulesById = ContextService.CurrentServerData.PluginModules.ToDictionary(pm => pm.Id);
         _recipeProductItemsByRecipeId = _availableRecipes
             .Select(recipe => new
             {
@@ -902,65 +488,6 @@
             })
             .Where(x => x.ProductItem is not null)
             .ToDictionary(x => x.Id, x => x.ProductItem!);
-    }
-
-    private async Task InitializeDefaultDrilldownPlayersAsync()
-    {
-        if (ContextService.CurrentUserServer is null)
-        {
-            _selectedPlayer1UserServerId = null;
-            _selectedPlayer2UserServerId = null;
-            return;
-        }
-
-        _selectedPlayer1UserServerId = ContextService.CurrentUserServer.Id;
-
-        if (!CanOpenDrilldown)
-        {
-            _selectedPlayer2UserServerId = null;
-            _selectedPlayer1DataContextId = null;
-            _selectedPlayer2DataContextId = null;
-            _isDrilldownOpen = false;
-            return;
-        }
-
-        var storedPlayer2 = await LocalStorageService.GetItem(DrilldownPlayer2UserServerIdStorageKey);
-        var preferredPlayer2 = Guid.TryParse(storedPlayer2, out var player2UserServerId)
-            ? player2UserServerId
-            : (Guid?)null;
-
-        _selectedPlayer2UserServerId = ResolvePlayer2Selection(_selectedPlayer1UserServerId.Value, preferredPlayer2);
-        await PersistSelectedPlayer2Async(_selectedPlayer2UserServerId);
-    }
-
-    private Guid? ResolvePlayer2Selection(Guid player1UserServerId, Guid? preferredPlayer2UserServerId)
-    {
-        if (preferredPlayer2UserServerId is Guid preferredId
-            && preferredId != player1UserServerId
-            && _availablePlayers.Any(player => player.Id == preferredId))
-        {
-            return preferredId;
-        }
-
-        return GetFirstDifferentPlayerUserServerId(player1UserServerId);
-    }
-
-    private Guid? GetFirstDifferentPlayerUserServerId(Guid player1UserServerId)
-    {
-        return _availablePlayers
-            .Select(player => (Guid?)player.Id)
-            .FirstOrDefault(playerId => playerId != player1UserServerId);
-    }
-
-    private async Task PersistSelectedPlayer2Async(Guid? player2UserServerId)
-    {
-        if (player2UserServerId is null)
-        {
-            await LocalStorageService.RemoveItem(DrilldownPlayer2UserServerIdStorageKey);
-            return;
-        }
-
-        await LocalStorageService.AddItem(DrilldownPlayer2UserServerIdStorageKey, player2UserServerId.Value.ToString());
     }
 
     private string GetOpenDrilldownTooltip()
@@ -1019,87 +546,6 @@
                 _isLoadingGlobal = false;
                 StateHasChanged();
             }
-        }
-    }
-
-    private async Task LoadDrilldownAsync(bool showLoadingIndicator = true, bool comparisonRowsOnly = false)
-    {
-        if (!CanOpenDrilldown
-            || ContextService.CurrentServer is null
-            || ContextService.CurrentUserServer is null
-            || _selectedPlayer1UserServerId is null
-            || _selectedPlayer2UserServerId is null
-            || _selectedPlayer1UserServerId == _selectedPlayer2UserServerId)
-        {
-            return;
-        }
-
-        try
-        {
-            if (showLoadingIndicator)
-            {
-                _isLoadingDrilldown = true;
-                StateHasChanged();
-            }
-
-            var query = new EconomyPlayerDetailQuery
-            {
-                ServerId = ContextService.CurrentServer.Id,
-                RequestingUserServerId = ContextService.CurrentUserServer.Id,
-                Player1UserServerId = _selectedPlayer1UserServerId.Value,
-                Player2UserServerId = _selectedPlayer2UserServerId.Value,
-                Player1DataContextId = _selectedPlayer1DataContextId,
-                Player2DataContextId = _selectedPlayer2DataContextId,
-                ComparisonBy = _comparisonBy,
-                SortBy = EconomyComparisonSortBy.Entity,
-                SortDescending = false,
-                SearchText = string.Empty,
-                OnlyDifferences = false,
-                Page = 1,
-                PageSize = 0
-            };
-
-            var result = await EconomyViewerService.GetPlayerDetailAsync(query);
-
-            if (comparisonRowsOnly && _drilldown is not null)
-            {
-                _drilldown.ComparisonRows = result.ComparisonRows;
-                _drilldown.TotalComparisonCount = result.TotalComparisonCount;
-                _drilldown.Page = result.Page;
-                _drilldown.PageSize = result.PageSize;
-                _drilldown.GeneratedAtUtc = result.GeneratedAtUtc;
-            }
-            else
-            {
-                _drilldown = result;
-                _selectedPlayer1DataContextId = _drilldown.SelectedPlayer1DataContextId;
-                _selectedPlayer2DataContextId = _drilldown.SelectedPlayer2DataContextId;
-            }
-        }
-        catch (UnauthorizedAccessException)
-        {
-            Snackbar.Add(LocalizationService.GetTranslation("EconomyViewer.Errors.Unauthorized"), Severity.Error);
-            if (!comparisonRowsOnly)
-            {
-                _drilldown = null;
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"{LocalizationService.GetTranslation("EconomyViewer.Errors.LoadDrilldown")}: {ex.Message}", Severity.Error);
-            if (!comparisonRowsOnly)
-            {
-                _drilldown = null;
-            }
-        }
-        finally
-        {
-            if (showLoadingIndicator)
-            {
-                _isLoadingDrilldown = false;
-            }
-
-            StateHasChanged();
         }
     }
 
@@ -1245,12 +691,6 @@
         await LocalStorageService.AddItem(ShowIncompleteRowsStorageKey, value.ToString());
     }
 
-    private async Task OnShowComparisonIncompleteRowsChanged(bool value)
-    {
-        _showComparisonIncompleteRows = value;
-        await LocalStorageService.AddItem(ShowComparisonIncompleteRowsStorageKey, value.ToString());
-    }
-
     private async Task ToggleSpreadDisplayMode()
     {
         _showSpreadAsPercent = !_showSpreadAsPercent;
@@ -1268,122 +708,24 @@
                && row.Spread is not null;
     }
 
-    private bool FilterComparisonRow(EconomyPlayerComparisonRow row)
-    {
-        if (!_showComparisonIncompleteRows && IsNoDataComparisonRow(row))
-        {
-            return false;
-        }
-
-        if (_comparisonOnlyDifferences && !row.IsDifferent)
-        {
-            return false;
-        }
-
-        if (_comparisonOnlyCommon && !IsCommonComparisonRow(row))
-        {
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(_comparisonSearch))
-        {
-            return true;
-        }
-
-        var search = _comparisonSearch.Trim();
-
-        if (GetComparisonRowLabel(row).Contains(search, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        var subLabel = GetComparisonRowSubLabel(row);
-        return !string.IsNullOrWhiteSpace(subLabel) && subLabel.Contains(search, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private Task OnComparisonOnlyDifferencesChanged(bool value)
-    {
-        _comparisonOnlyDifferences = value;
-        if (value)
-        {
-            _comparisonOnlyCommon = false;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private Task OnComparisonOnlyCommonChanged(bool value)
-    {
-        _comparisonOnlyCommon = value;
-        if (value)
-        {
-            _comparisonOnlyDifferences = false;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private static bool IsCommonComparisonRow(EconomyPlayerComparisonRow row)
-    {
-        return row.Player1Value is not null && row.Player2Value is not null;
-    }
-
-    private static bool IsNoDataComparisonRow(EconomyPlayerComparisonRow row)
-    {
-        return string.Equals(row.Status, "NoData", StringComparison.Ordinal);
-    }
-
     private async Task OpenDefaultDrilldown()
     {
-        if (!CanOpenDrilldown)
+        if (_drilldownModal is null)
         {
             return;
         }
 
-        await InitializeDefaultDrilldownPlayersAsync();
-        if (_selectedPlayer1UserServerId is null || _selectedPlayer2UserServerId is null)
-        {
-            return;
-        }
-
-        _selectedPlayer1DataContextId = null;
-        _selectedPlayer2DataContextId = null;
-        _isDrilldownOpen = true;
-        await LoadDrilldownAsync();
+        await _drilldownModal.OpenDefaultDrilldownAsync();
     }
 
     private async Task OpenDrilldownFromPlayerRowAsync(Guid player2UserServerId)
     {
-        if (!CanOpenDrilldown || ContextService.CurrentUserServer is null)
+        if (_drilldownModal is null)
         {
             return;
         }
 
-        _selectedPlayer1UserServerId = ContextService.CurrentUserServer.Id;
-        if (_selectedPlayer1UserServerId == player2UserServerId)
-        {
-            _selectedPlayer2UserServerId = GetFirstDifferentPlayerUserServerId(_selectedPlayer1UserServerId.Value);
-        }
-        else
-        {
-            _selectedPlayer2UserServerId = player2UserServerId;
-        }
-
-        if (_selectedPlayer2UserServerId is null)
-        {
-            return;
-        }
-
-        await PersistSelectedPlayer2Async(_selectedPlayer2UserServerId);
-        _selectedPlayer1DataContextId = null;
-        _selectedPlayer2DataContextId = null;
-        _isDrilldownOpen = true;
-        await LoadDrilldownAsync();
-    }
-
-    private void CloseDrilldown()
-    {
-        _isDrilldownOpen = false;
+        await _drilldownModal.OpenDrilldownFromPlayerRowAsync(player2UserServerId);
     }
 
     private void OpenHelpModal()
@@ -1396,319 +738,6 @@
         _isHelpModalOpen = false;
     }
 
-    private async Task OnPlayer1ChangedInDrawer(Guid? value)
-    {
-        if (value is null)
-        {
-            return;
-        }
-
-        _selectedPlayer1UserServerId = value;
-        if (_selectedPlayer2UserServerId == value)
-        {
-            _selectedPlayer2UserServerId = GetFirstDifferentPlayerUserServerId(value.Value);
-        }
-
-        if (_selectedPlayer2UserServerId is null)
-        {
-            return;
-        }
-
-        await PersistSelectedPlayer2Async(_selectedPlayer2UserServerId);
-        _selectedPlayer1DataContextId = null;
-        _selectedPlayer2DataContextId = null;
-        await LoadDrilldownAsync();
-    }
-
-    private async Task OnPlayer2ChangedInDrawer(Guid? value)
-    {
-        if (value is null || _selectedPlayer1UserServerId is null || value == _selectedPlayer1UserServerId)
-        {
-            return;
-        }
-
-        _selectedPlayer2UserServerId = value;
-        await PersistSelectedPlayer2Async(value);
-        _selectedPlayer2DataContextId = null;
-        await LoadDrilldownAsync();
-    }
-
-    private async Task OnComparisonByChanged(EconomyComparisonEntity value)
-    {
-        _comparisonBy = value;
-        await LoadDrilldownAsync(showLoadingIndicator: false, comparisonRowsOnly: true);
-    }
-
-    private async Task OnPlayer2ContextChanged(Guid? value)
-    {
-        _selectedPlayer2DataContextId = value;
-        await LoadDrilldownAsync();
-    }
-
-    private async Task OnPlayer1ContextChanged(Guid? value)
-    {
-        _selectedPlayer1DataContextId = value;
-        await LoadDrilldownAsync();
-    }
-
-    private IEnumerable<DrilldownContextDisplayRow> GetSelectedContextSummaries()
-    {
-        if (_drilldown is null)
-        {
-            return [];
-        }
-
-        var rows = new List<DrilldownContextDisplayRow>();
-
-        var player1Summary = GetSelectedPlayer1ContextSummary();
-        if (player1Summary is not null)
-        {
-            rows.Add(new DrilldownContextDisplayRow
-            {
-                RoleTranslationKey = "EconomyViewer.Drilldown.Player1Badge",
-                PlayerName = _drilldown.Player1Name,
-                RoleColor = Color.Primary,
-                Summary = player1Summary
-            });
-        }
-
-        var player2Summary = GetSelectedPlayer2ContextSummary();
-        if (player2Summary is not null)
-        {
-            rows.Add(new DrilldownContextDisplayRow
-            {
-                RoleTranslationKey = "EconomyViewer.Drilldown.Player2Badge",
-                PlayerName = _drilldown.Player2Name,
-                RoleColor = Color.Secondary,
-                Summary = player2Summary
-            });
-        }
-
-        return rows;
-    }
-
-    private IEnumerable<DrilldownOptionComparisonRow> GetPriceOptionComparisonRows()
-    {
-        var player1Summary = GetSelectedPlayer1ContextSummary();
-        var player2Summary = GetSelectedPlayer2ContextSummary();
-
-        return
-        [
-            new DrilldownOptionComparisonRow
-            {
-                OptionTranslationKey = "PriceCalculator.ApplyMarginBetweenSkills.ApplyMarginBetweenSkills",
-                Player1Value = EconomyViewerDisplayService.FormatBooleanSetting(player1Summary?.ApplyMarginBetweenSkills),
-                Player2Value = EconomyViewerDisplayService.FormatBooleanSetting(player2Summary?.ApplyMarginBetweenSkills)
-            },
-            new DrilldownOptionComparisonRow
-            {
-                OptionTranslationKey = "PriceCalculator.MarginType.MarginType",
-                Player1Value = EconomyViewerDisplayService.FormatMarginTypeSetting(player1Summary?.MarginType),
-                Player2Value = EconomyViewerDisplayService.FormatMarginTypeSetting(player2Summary?.MarginType)
-            },
-            new DrilldownOptionComparisonRow
-            {
-                OptionTranslationKey = "PriceCalculator.CalorieCost.CalorieCost",
-                Player1Value = EconomyViewerDisplayService.FormatCalorieCostPer1000Setting(player1Summary?.CalorieCost),
-                Player2Value = EconomyViewerDisplayService.FormatCalorieCostPer1000Setting(player2Summary?.CalorieCost)
-            }
-        ];
-    }
-
-    private IEnumerable<EconomyPlayerCraftingTableSummary> GetSelectedPlayer2CraftingTableSummaries()
-    {
-        if (_drilldown is null)
-        {
-            return [];
-        }
-
-        var selectedPlayer2ContextId = _selectedPlayer2DataContextId ?? _drilldown.SelectedPlayer2DataContextId;
-        if (selectedPlayer2ContextId is null)
-        {
-            return [];
-        }
-
-        var filteredCraftingTableIds = GetCraftingTableIdsFilteredByComparisonToggles();
-
-        return _drilldown.Player2CraftingTableSummaries
-            .Where(summary => summary.DataContextId == selectedPlayer2ContextId.Value)
-            .Where(summary => filteredCraftingTableIds.Contains(summary.CraftingTableId))
-            .OrderBy(GetCraftingTableSortLabel)
-            .ToList();
-    }
-
-    private IEnumerable<EconomyPlayerCraftingTableSummary> GetSelectedPlayer1CraftingTableSummaries()
-    {
-        if (_drilldown is null)
-        {
-            return [];
-        }
-
-        var selectedPlayer1ContextId = _selectedPlayer1DataContextId ?? _drilldown.SelectedPlayer1DataContextId;
-        if (selectedPlayer1ContextId is null)
-        {
-            return [];
-        }
-
-        var filteredCraftingTableIds = GetCraftingTableIdsFilteredByComparisonToggles();
-
-        return _drilldown.Player1CraftingTableSummaries
-            .Where(summary => summary.DataContextId == selectedPlayer1ContextId.Value)
-            .Where(summary => filteredCraftingTableIds.Contains(summary.CraftingTableId))
-            .OrderBy(GetCraftingTableSortLabel)
-            .ToList();
-    }
-
-    private HashSet<Guid> GetCraftingTableIdsFilteredByComparisonToggles()
-    {
-        if (_drilldown is null)
-        {
-            return [];
-        }
-
-        var selectedPlayer1ContextId = _selectedPlayer1DataContextId ?? _drilldown.SelectedPlayer1DataContextId;
-        var selectedPlayer2ContextId = _selectedPlayer2DataContextId ?? _drilldown.SelectedPlayer2DataContextId;
-
-        var player1CraftingTableIds = selectedPlayer1ContextId is null
-            ? []
-            : _drilldown.Player1CraftingTableSummaries
-                .Where(summary => summary.DataContextId == selectedPlayer1ContextId.Value)
-                .Select(summary => summary.CraftingTableId)
-                .ToHashSet();
-
-        var player2CraftingTableIds = selectedPlayer2ContextId is null
-            ? []
-            : _drilldown.Player2CraftingTableSummaries
-                .Where(summary => summary.DataContextId == selectedPlayer2ContextId.Value)
-                .Select(summary => summary.CraftingTableId)
-                .ToHashSet();
-
-        if (_comparisonOnlyCommon)
-        {
-            player1CraftingTableIds.IntersectWith(player2CraftingTableIds);
-            return player1CraftingTableIds;
-        }
-
-        if (_comparisonOnlyDifferences)
-        {
-            player1CraftingTableIds.SymmetricExceptWith(player2CraftingTableIds);
-            return player1CraftingTableIds;
-        }
-
-        player1CraftingTableIds.UnionWith(player2CraftingTableIds);
-        return player1CraftingTableIds;
-    }
-
-    private string GetSelectedPlayer2ContextTitle()
-    {
-        if (_drilldown is null)
-        {
-            return "-";
-        }
-
-        var summary = GetSelectedPlayer2ContextSummary();
-        return summary is null
-            ? _drilldown.Player2Name
-            : $"{_drilldown.Player2Name} - {summary.DataContextName}";
-    }
-
-    private string GetSelectedPlayer1ContextTitle()
-    {
-        if (_drilldown is null)
-        {
-            return "-";
-        }
-
-        var summary = GetSelectedPlayer1ContextSummary();
-        return summary is null
-            ? _drilldown.Player1Name
-            : $"{_drilldown.Player1Name} - {summary.DataContextName}";
-    }
-
-    private string GetCraftingTableSortLabel(EconomyPlayerCraftingTableSummary summary)
-    {
-        if (_craftingTablesById.TryGetValue(summary.CraftingTableId, out var craftingTable))
-        {
-            return LocalizationService.GetTranslation(craftingTable);
-        }
-
-        return summary.CraftingTableName;
-    }
-
-    private string GetCraftingTableLabel(EconomyPlayerCraftingTableSummary summary)
-    {
-        return GetCraftingTableSortLabel(summary);
-    }
-
-    private CraftingTable? GetCraftingTable(Guid craftingTableId)
-    {
-        return _craftingTablesById.GetValueOrDefault(craftingTableId);
-    }
-
-    private PluginModule? GetPluginModule(Guid pluginModuleId)
-    {
-        return _pluginModulesById.GetValueOrDefault(pluginModuleId);
-    }
-
-    private EconomyPlayerContextSummary? GetSelectedPlayer2ContextSummary()
-    {
-        if (_drilldown is null)
-        {
-            return null;
-        }
-
-        var selectedPlayer2ContextId = _selectedPlayer2DataContextId ?? _drilldown.SelectedPlayer2DataContextId;
-        return ResolveContextSummary(_drilldown.Player2ContextSummaries, selectedPlayer2ContextId);
-    }
-
-    private EconomyPlayerContextSummary? GetSelectedPlayer1ContextSummary()
-    {
-        if (_drilldown is null)
-        {
-            return null;
-        }
-
-        var selectedPlayer1ContextId = _selectedPlayer1DataContextId ?? _drilldown.SelectedPlayer1DataContextId;
-        return ResolveContextSummary(_drilldown.Player1ContextSummaries, selectedPlayer1ContextId);
-    }
-
-    private static EconomyPlayerContextSummary? ResolveContextSummary(
-        List<EconomyPlayerContextSummary> summaries,
-        Guid? selectedContextId)
-    {
-        if (selectedContextId is null)
-        {
-            return null;
-        }
-
-        return summaries.FirstOrDefault(summary => summary.DataContextId == selectedContextId.Value);
-    }
-
-    private async Task ResetDrilldownFiltersAsync()
-    {
-        _comparisonBy = EconomyComparisonEntity.Item;
-        _comparisonOnlyDifferences = false;
-        _comparisonOnlyCommon = false;
-        _showComparisonIncompleteRows = false;
-        _comparisonSearch = string.Empty;
-        await LocalStorageService.AddItem(ShowComparisonIncompleteRowsStorageKey, bool.FalseString);
-        await LoadDrilldownAsync();
-    }
-
-    private sealed class DrilldownContextDisplayRow
-    {
-        public string RoleTranslationKey { get; init; } = string.Empty;
-        public string PlayerName { get; init; } = string.Empty;
-        public Color RoleColor { get; init; }
-        public EconomyPlayerContextSummary Summary { get; init; } = new();
-    }
-
-    private sealed class DrilldownOptionComparisonRow
-    {
-        public string OptionTranslationKey { get; init; } = string.Empty;
-        public string Player2Value { get; init; } = "-";
-        public string Player1Value { get; init; } = "-";
-    }
 
     private IHasIconName? GetGlobalRowIcon(EconomyGlobalRow row)
     {
@@ -1769,69 +798,6 @@
         return null;
     }
 
-    private IHasIconName? GetComparisonRowIcon(EconomyPlayerComparisonRow row)
-    {
-        if (row.ItemOrTagId is Guid itemId && _itemsById.TryGetValue(itemId, out var item))
-        {
-            return item;
-        }
-
-        if (row.RecipeId is Guid recipeId && _recipeProductItemsByRecipeId.TryGetValue(recipeId, out var recipeProductItem))
-        {
-            return recipeProductItem;
-        }
-
-        if (row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
-        {
-            return skill;
-        }
-
-        return null;
-    }
-
-    private string GetComparisonRowFallbackIcon(EconomyPlayerComparisonRow row)
-    {
-        if (row.RecipeId is not null) return Icons.Material.Filled.Science;
-        if (row.SkillId is not null) return Icons.Material.Filled.Handyman;
-        if (row.IsTag == true) return Icons.Material.Filled.Tag;
-        return Icons.Material.Filled.Inventory2;
-    }
-
-    private string GetComparisonRowLabel(EconomyPlayerComparisonRow row)
-    {
-        if (row.ItemOrTagId is Guid itemId && _itemsById.TryGetValue(itemId, out var item))
-        {
-            return LocalizationService.GetTranslation(item);
-        }
-
-        if (row.RecipeId is Guid recipeId && _recipesById.TryGetValue(recipeId, out var recipe))
-        {
-            return LocalizationService.GetTranslation(recipe);
-        }
-
-        if (row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
-        {
-            return LocalizationService.GetTranslation(skill);
-        }
-
-        return row.EntityName;
-    }
-
-    private string? GetComparisonRowSubLabel(EconomyPlayerComparisonRow row)
-    {
-        if (row.RecipeId is not null && row.SecondaryLabel is not null)
-        {
-            if (row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
-            {
-                return LocalizationService.GetTranslation(skill);
-            }
-
-            return row.SecondaryLabel;
-        }
-
-        return null;
-    }
-
     private void OnContextChanged()
     {
         _ = InitializeAndLoadAsync();
@@ -1842,3 +808,4 @@
         ContextService.OnContextChanged -= OnContextChanged;
     }
 }
+

@@ -1414,5 +1414,88 @@ public sealed class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> fa
             throw new UnauthorizedAccessException("This user is not a member of the selected server.");
         }
     }
+
+    public static Guid? ResolvePlayer2Selection(
+        Guid player1UserServerId,
+        Guid? preferredPlayer2UserServerId,
+        IEnumerable<UserServer> availablePlayers)
+    {
+        var players = availablePlayers as IList<UserServer> ?? availablePlayers.ToList();
+
+        if (preferredPlayer2UserServerId is Guid preferredId
+            && preferredId != player1UserServerId
+            && players.Any(player => player.Id == preferredId))
+        {
+            return preferredId;
+        }
+
+        return GetFirstDifferentPlayerUserServerId(player1UserServerId, players);
+    }
+
+    public static Guid? GetFirstDifferentPlayerUserServerId(Guid player1UserServerId, IEnumerable<UserServer> availablePlayers)
+    {
+        return availablePlayers
+            .Select(player => (Guid?)player.Id)
+            .FirstOrDefault(playerId => playerId != player1UserServerId);
+    }
+
+    public static EconomyPlayerContextSummary? ResolveContextSummary(
+        List<EconomyPlayerContextSummary> summaries,
+        Guid? selectedContextId)
+    {
+        if (selectedContextId is null)
+        {
+            return null;
+        }
+
+        return summaries.FirstOrDefault(summary => summary.DataContextId == selectedContextId.Value);
+    }
+
+    public static HashSet<Guid> GetCraftingTableIdsFilteredByComparisonToggles(
+        EconomyPlayerDetailResult drilldown,
+        Guid? selectedPlayer1ContextId,
+        Guid? selectedPlayer2ContextId,
+        bool comparisonOnlyDifferences,
+        bool comparisonOnlyCommon)
+    {
+        var player1CraftingTableIds = selectedPlayer1ContextId is null
+            ? []
+            : drilldown.Player1CraftingTableSummaries
+                .Where(summary => summary.DataContextId == selectedPlayer1ContextId.Value)
+                .Select(summary => summary.CraftingTableId)
+                .ToHashSet();
+
+        var player2CraftingTableIds = selectedPlayer2ContextId is null
+            ? []
+            : drilldown.Player2CraftingTableSummaries
+                .Where(summary => summary.DataContextId == selectedPlayer2ContextId.Value)
+                .Select(summary => summary.CraftingTableId)
+                .ToHashSet();
+
+        if (comparisonOnlyCommon)
+        {
+            player1CraftingTableIds.IntersectWith(player2CraftingTableIds);
+            return player1CraftingTableIds;
+        }
+
+        if (comparisonOnlyDifferences)
+        {
+            player1CraftingTableIds.SymmetricExceptWith(player2CraftingTableIds);
+            return player1CraftingTableIds;
+        }
+
+        player1CraftingTableIds.UnionWith(player2CraftingTableIds);
+        return player1CraftingTableIds;
+    }
+
+    public static bool IsCommonComparisonRow(EconomyPlayerComparisonRow row)
+    {
+        return row.Player1Value is not null && row.Player2Value is not null;
+    }
+
+    public static bool IsNoDataComparisonRow(EconomyPlayerComparisonRow row)
+    {
+        return string.Equals(row.Status, "NoData", StringComparison.Ordinal);
+    }
 }
 
