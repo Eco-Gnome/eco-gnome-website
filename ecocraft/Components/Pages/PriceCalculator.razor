@@ -993,7 +993,6 @@
         MarginInput,
         SettingsChange,
         ManualButton,
-        PolicyEnforcement,
         Unknown,
     }
 
@@ -1004,11 +1003,8 @@
     private bool _calculationLoopRunning;
     private bool _hasPendingManualCalculation;
     private CalculateTriggerOrigin _queuedCalculationOrigin = CalculateTriggerOrigin.Unknown;
-    private CalculateTriggerOrigin _lastCalculationOrigin = CalculateTriggerOrigin.Unknown;
     private string _queuedCalculationCaller = "Unknown";
-    private string _lastCalculationCaller = "Unknown";
     private ILogger? _logger;
-    private PriceCalculationMetrics? _lastCalculationMetrics;
     private Stopwatch? _retrieveToRenderStopwatch;
     private bool _awaitingRetrieveRenderMetrics;
     private List<ItemOrTag> _itemsToBuyDisplay = [];
@@ -2602,7 +2598,7 @@
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
 
         var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
-        var result = await dialog.Result;
+        await dialog.Result;
 
         RefreshCategorizedDisplayCaches();
         StateHasChanged();
@@ -2982,11 +2978,11 @@
 
         try
         {
-            _lastCalculationOrigin = origin;
-            _lastCalculationCaller = caller;
+            await EnforceServerCaloriePolicyIfNeeded();
+            await EnforceServerMarginPolicyIfNeeded();
 
             serviceCalculateStopwatch?.Start();
-            _lastCalculationMetrics = await PriceCalculatorService.Calculate(_selectedDataContext!, $"{origin}:{caller}");
+            await PriceCalculatorService.Calculate(_selectedDataContext!, $"{origin}:{caller}");
             serviceCalculateStopwatch?.Stop();
 
             refreshDisplayCacheStopwatch?.Start();

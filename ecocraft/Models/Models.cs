@@ -496,7 +496,7 @@ public class PluginModule: IHasLocalizedName, IHasIconName
 public class AppSetting
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
-    public bool PriceCalculatorMetricsEnabled { get; set; } = true;
+    public bool PriceCalculatorMetricsEnabled { get; set; } = false;
 }
 
 public class User

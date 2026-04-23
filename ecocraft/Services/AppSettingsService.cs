@@ -11,7 +11,7 @@ public class AppSettingsService(
 {
     private readonly SemaphoreSlim _syncLock = new(1, 1);
     private bool _isLoaded;
-    private bool _priceCalculatorMetricsEnabled = true;
+    private bool _priceCalculatorMetricsEnabled = false;
 
     public async Task<bool> IsPriceCalculatorMetricsEnabledAsync()
     {
