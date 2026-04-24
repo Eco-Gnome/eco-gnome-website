@@ -217,7 +217,7 @@
                                     <MudTable Items="@_selectedDataContext.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
                                               FixedHeader="true"
                                               Hover="true"
-                                              Class="mt-4"
+                                              Class="mt-4 mud-table-container-no-overflow-y"
                                               Dense="true">
                                         <HeaderContent>
                                             <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
@@ -1013,7 +1013,6 @@
     }
 
     private bool _isLoadingData;
-
     private DataContext? _selectedDataContext;
     private bool IsServerCalorieCostLocked => ContextService.CurrentServer?.IsCalorieCostLocked ?? false;
     private bool IsServerMarginLocked => ContextService.CurrentServer?.IsMarginLocked ?? false;

@@ -1,0 +1,815 @@
+@page "/economy-viewer"
+@implements IDisposable
+@using ecocraft.Extensions
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@inject ContextService ContextService
+@inject ServerDbService ServerDbService
+@inject EconomyViewerService EconomyViewerService
+@inject EconomyViewerDisplayService EconomyViewerDisplayService
+@inject LocalizationService LocalizationService
+@inject LocalStorageService LocalStorageService
+@inject ISnackbar Snackbar
+
+<PageTitle>@LocalizationService.GetTranslation("EconomyViewer.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
+    @if (_isLoadingPage)
+    {
+        <MudItem xs="12" Class="px-4 pt-4">
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true"/>
+            </MudStack>
+        </MudItem>
+    }
+    else if (ContextService.CurrentServer is null || ContextService.CurrentUserServer is null)
+    {
+        <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-4">
+            @LocalizationService.GetTranslation("EconomyViewer.ServerContextMissing")
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Spacing="2" Class="px-4 pt-4">
+                    <MudPaper Class="pa-3">
+                        <MudGrid>
+                            <MudItem xs="12" md="3">
+                                <MudSelect T="EconomyGroupBy"
+                                           Value="_groupBy"
+                                           Label="@LocalizationService.GetTranslation("EconomyViewer.Filters.GroupBy")"
+                                           Variant="Variant.Outlined"
+                                           ValueChanged="OnGroupByChanged">
+                                    <MudSelectItem T="EconomyGroupBy" Value="EconomyGroupBy.Item">@LocalizationService.GetTranslation("EconomyViewer.Groups.Item")</MudSelectItem>
+                                    <MudSelectItem T="EconomyGroupBy" Value="EconomyGroupBy.Recipe">@LocalizationService.GetTranslation("EconomyViewer.Groups.Recipe")</MudSelectItem>
+                                    <MudSelectItem T="EconomyGroupBy" Value="EconomyGroupBy.Skill">@LocalizationService.GetTranslation("EconomyViewer.Groups.Skill")</MudSelectItem>
+                                    <MudSelectItem T="EconomyGroupBy" Value="EconomyGroupBy.Player">@LocalizationService.GetTranslation("EconomyViewer.Groups.Player")</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudSelect T="Guid?"
+                                           Value="_globalFilterUserServerId"
+                                           Label="@LocalizationService.GetTranslation("EconomyViewer.Filters.Player")"
+                                           Variant="Variant.Outlined"
+                                           ValueChanged="OnGlobalPlayerFilterChanged">
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("EconomyViewer.Filters.AllPlayers")</MudSelectItem>
+                                    @foreach (var player in _availablePlayers)
+                                    {
+                                        <MudSelectItem T="Guid?" Value="@player.Id">@player.GetPseudo()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudSelect T="Guid?"
+                                           Value="_filterSkillId"
+                                           Label="@LocalizationService.GetTranslation("EconomyViewer.Filters.Skill")"
+                                           Variant="Variant.Outlined"
+                                           ValueChanged="OnGlobalSkillFilterChanged">
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("EconomyViewer.Filters.AllSkills")</MudSelectItem>
+                                    @foreach (var skill in _availableSkills)
+                                    {
+                                        <MudSelectItem T="Guid?" Value="@skill.Id">@LocalizationService.GetTranslation(skill)</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Default"
+                                               OnClick="ResetGlobalFilters">
+                                        @LocalizationService.GetTranslation("EconomyViewer.Actions.ResetFilters")
+                                    </MudButton>
+                                    <MudSwitch T="bool"
+                                               Value="_showIncompleteRows"
+                                               ValueChanged="OnShowIncompleteRowsChanged"
+                                               Color="@(_showIncompleteRows ? Color.Primary : Color.Default)"
+                                               Label="@LocalizationService.GetTranslation("EconomyViewer.Filters.ShowIncompleteRows")"/>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.GlobalViewTitle")</MudText>
+                                <MudChip T="string" Color="Color.Info" Variant="Variant.Text" Size="Size.Small">
+                                    @LocalizationService.GetTranslation("EconomyViewer.ReadOnlyChip")
+                                </MudChip>
+                                <MudChip T="string" Color="Color.Primary" Variant="Variant.Text">
+                                    @_globalResult.TotalCount
+                                </MudChip>
+                            </MudStack>
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudTooltip Text="@LocalizationService.GetTranslation("EconomyViewer.Actions.Help")">
+                                    <MudIconButton Icon="@Icons.Material.Filled.HelpOutline"
+                                                   Color="Color.Warning"
+                                                   Size="Size.Small"
+                                                   OnClick="OpenHelpModal"/>
+                                </MudTooltip>
+                                <MudTooltip Text="@GetOpenDrilldownTooltip()">
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Tertiary"
+                                               Disabled="@(!CanOpenDrilldown)"
+                                               OnClick="OpenDefaultDrilldown">
+                                        @LocalizationService.GetTranslation("EconomyViewer.Actions.OpenDrilldown")
+                                    </MudButton>
+                                </MudTooltip>
+                            </MudStack>
+                        </MudStack>
+
+                        @if (_isLoadingGlobal)
+                        {
+                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Class="py-6">
+                                <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <MudTable Items="_globalResult.Rows" Filter="new Func<EconomyGlobalRow, bool>(FilterGlobalRow)" Dense="true" Hover="true" Class="mt-3">
+                                <HeaderContent>
+                                    @if (ShouldShowGlobalExpansionColumn())
+                                    {
+                                        <MudTh Style="width: 36px;"></MudTh>
+                                    }
+                                    <MudTh>
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                                                               SortBy="new Func<EconomyGlobalRow, object>(row => GetGlobalRowLabel(row))">
+                                                @LocalizationService.GetTranslation("EconomyViewer.Columns.Entity")
+                                            </MudTableSortLabel>
+                                            <MudTextField T="string"
+                                                          @bind-Value="_searchText"
+                                                          Immediate
+                                                          Placeholder="@LocalizationService.GetTranslation("Search")"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                                          IconSize="Size.Medium"
+                                                          Class="mt-0" />
+                                        </MudStack>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.PriceMin ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMin")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.PriceAverage ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.PriceMax ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMax")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.MarginMin ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMin")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.MarginAverage ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.MarginMax ?? decimal.MaxValue)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMax")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => row.ConfiguredPlayersCount)">
+                                            @LocalizationService.GetTranslation("EconomyViewer.Columns.ConfiguredPlayers")
+                                        </MudTableSortLabel>
+                                    </MudTh>
+                                    <MudTh>
+                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudTableSortLabel SortBy="new Func<EconomyGlobalRow, object>(row => EconomyViewerDisplayService.GetSpreadSortValue(row, _showSpreadAsPercent))">
+                                                @LocalizationService.GetTranslation("EconomyViewer.Columns.Spread")
+                                            </MudTableSortLabel>
+                                            <MudIconButton Color="Color.Primary"
+                                                           Icon="@(_showSpreadAsPercent ? MDIIcons.Outline.PercentBox : MDIIcons.Outline.Numeric1Box)"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => ToggleSpreadDisplayMode())"/>
+                                        </MudStack>
+                                    </MudTh>
+                                    @if (_groupBy is EconomyGroupBy.Player)
+                                    {
+                                        <MudTh></MudTh>
+                                    }
+                                </HeaderContent>
+                                <RowTemplate>
+                                    @if (ShouldShowGlobalExpansionColumn())
+                                    {
+                                        <MudTd Style="width: 36px;">
+                                            @if (CanExpandGlobalRow(context))
+                                            {
+                                                <MudIconButton Icon="@(IsGlobalRowExpanded(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)"
+                                                               Size="Size.Small"
+                                                               Color="Color.Primary"
+                                                               OnClick="@(() => ToggleGlobalRowExpansion(context))"/>
+                                            }
+                                        </MudTd>
+                                    }
+                                    <MudTd>
+                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                            <EcoIcon Item="@GetGlobalRowIcon(context)"
+                                                     FallbackIcon="@GetGlobalRowFallbackIcon(context)"
+                                                     Size="24"/>
+                                            <MudStack Spacing="0">
+                                                <MudText Typo="Typo.body2">@GetGlobalRowLabel(context)</MudText>
+                                                @if (!string.IsNullOrWhiteSpace(GetGlobalRowSubLabel(context)))
+                                                {
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@GetGlobalRowSubLabel(context)</MudText>
+                                                }
+                                            </MudStack>
+                                        </MudStack>
+                                    </MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceMin)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceAverage)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.PriceMax)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginMin)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginAverage)</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.MarginMax)</MudTd>
+                                    <MudTd>@context.ConfiguredPlayersCount</MudTd>
+                                    <MudTd>@EconomyViewerDisplayService.FormatSpread(context, _showSpreadAsPercent)</MudTd>
+                                    @if (_groupBy is EconomyGroupBy.Player && context.UserServerId is Guid userServerId)
+                                    {
+                                        <MudTd>
+                                            <MudTooltip Text="@GetOpenDrilldownTooltip()">
+                                                <MudIconButton Icon="@Icons.Material.Filled.PersonSearch"
+                                                               Color="Color.Primary"
+                                                               Size="Size.Small"
+                                                               Disabled="@(!CanOpenDrilldown)"
+                                                               OnClick="@(async () => await OpenDrilldownFromPlayerRowAsync(userServerId))"/>
+                                            </MudTooltip>
+                                        </MudTd>
+                                    }
+                                </RowTemplate>
+                                <ChildRowContent>
+                                    @if (CanExpandGlobalRow(context) && IsGlobalRowExpanded(context))
+                                    {
+                                        <MudTr>
+                                            <MudTd colspan="@GetGlobalTableColumnCount()" Style="background-color: var(--mud-palette-surface); padding-top: 0 !important;">
+                                                <MudTable Items="GetGlobalRowPlayerDetails(context)" Dense="true" Hover="true" Elevation="0" Style="margin-left: 20px;">
+                                                    <HeaderContent>
+                                                        <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Groups.Player")</MudTh>
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Price")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Margin")</MudTh>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("Recipe")</MudTh>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Skill)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMin")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.PriceMax")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMin")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginAvg")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.MarginMax")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.ConfiguredContexts")</MudTh>
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Columns.Spread")</MudTh>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Context")</MudTh>
+                                                        }
+                                                        <MudTh></MudTh>
+                                                    </HeaderContent>
+                                                    <RowTemplate Context="playerDetail">
+                                                        <MudTd>
+                                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                                                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small"/>
+                                                                <MudText Typo="Typo.body2">@playerDetail.PlayerName</MudText>
+                                                            </MudStack>
+                                                        </MudTd>
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.ConfiguredPrice)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.ConfiguredMargin)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item)
+                                                        {
+                                                            <MudTd>@GetPrimaryRecipeLabel(playerDetail)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Skill)
+                                                        {
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceMin)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceAverage)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.PriceMax)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginMin)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginAverage)</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatDecimal(playerDetail.MarginMax)</MudTd>
+                                                            <MudTd>@playerDetail.ConfiguredContextsCount</MudTd>
+                                                            <MudTd>@EconomyViewerDisplayService.FormatSpread(playerDetail, _showSpreadAsPercent)</MudTd>
+                                                        }
+                                                        @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
+                                                        {
+                                                            <MudTd>@GetPlayerDetailContextLabel(playerDetail)</MudTd>
+                                                        }
+                                                        <MudTd>
+                                                            <MudTooltip Text="@GetOpenDrilldownTooltip()">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.PersonSearch"
+                                                                               Color="Color.Primary"
+                                                                               Size="Size.Small"
+                                                                               Disabled="@(!CanOpenDrilldown)"
+                                                                               OnClick="@(async () => await OpenDrilldownFromPlayerRowAsync(playerDetail.UserServerId))"/>
+                                                            </MudTooltip>
+                                                        </MudTd>
+                                                    </RowTemplate>
+                                                </MudTable>
+                                            </MudTd>
+                                        </MudTr>
+                                    }
+                                </ChildRowContent>
+                                <NoRecordsContent>
+                                    <MudText Class="pa-4">@LocalizationService.GetTranslation("EconomyViewer.NoGlobalData")</MudText>
+                                </NoRecordsContent>
+                                <PagerContent>
+                                    <MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+                                </PagerContent>
+                            </MudTable>
+                        }
+                    </MudPaper>
+                </MudStack>
+            <EconomyViewerDrilldownModal @ref="_drilldownModal"
+                                         ServerId="ContextService.CurrentServer.Id"
+                                         CurrentUserServerId="ContextService.CurrentUserServer.Id"
+                                         AvailablePlayers="_availablePlayers"
+                                         ItemsById="_itemsById"
+                                         RecipesById="_recipesById"
+                                         SkillsById="_skillsById"
+                                         CraftingTablesById="_craftingTablesById"
+                                         PluginModulesById="_pluginModulesById"
+                                         RecipeProductItemsByRecipeId="_recipeProductItemsByRecipeId"/>
+            @if (_isHelpModalOpen)
+            {
+                <div class="economy-help-overlay" @onclick="CloseHelpModal">
+                    <div class="economy-help-modal-wrapper" @onclick:stopPropagation="true">
+                        <div class="economy-help-modal">
+                            <MudPaper Class="pa-4">
+                                <MudStack Spacing="2">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Help.Title")</MudText>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       Color="Color.Default"
+                                                       OnClick="CloseHelpModal"/>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line1")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line2")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line3")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line4")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line5")</MudText>
+                                </MudStack>
+                            </MudPaper>
+                        </div>
+                    </div>
+                </div>
+            }
+    }
+</MudContainer>
+
+@code {
+    private bool _isLoadingPage = true;
+    private bool _isLoadingGlobal;
+    private bool _isHelpModalOpen;
+
+    private EconomyGroupBy _groupBy = EconomyGroupBy.Item;
+    private string _searchText = string.Empty;
+    private bool _showIncompleteRows;
+    private bool _showSpreadAsPercent;
+    private Guid? _filterSkillId;
+    private Guid? _globalFilterUserServerId;
+
+    private EconomyGlobalResult _globalResult = new();
+    private readonly HashSet<string> _expandedGlobalRowKeys = [];
+    private EconomyViewerDrilldownModal? _drilldownModal;
+
+    private List<ItemOrTag> _availableItems = [];
+    private List<Recipe> _availableRecipes = [];
+    private List<Skill> _availableSkills = [];
+    private List<UserServer> _availablePlayers = [];
+    private Dictionary<Guid, ItemOrTag> _itemsById = [];
+    private Dictionary<Guid, Recipe> _recipesById = [];
+    private Dictionary<Guid, Skill> _skillsById = [];
+    private Dictionary<Guid, CraftingTable> _craftingTablesById = [];
+    private Dictionary<Guid, PluginModule> _pluginModulesById = [];
+    private Dictionary<Guid, ItemOrTag> _recipeProductItemsByRecipeId = [];
+    private const string ShowIncompleteRowsStorageKey = "EconomyViewer.ShowIncompleteRows";
+    private const string ShowSpreadAsPercentStorageKey = "EconomyViewer.ShowSpreadAsPercent";
+    private bool CanOpenDrilldown => _availablePlayers.Count > 1;
+
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += OnContextChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await InitializeAndLoadAsync();
+    }
+
+    private async Task InitializeAndLoadAsync()
+    {
+        if (ContextService.CurrentServer is null || ContextService.CurrentUserServer is null)
+        {
+            _isLoadingPage = false;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            _isLoadingPage = true;
+            _showIncompleteRows = await LocalStorageService.GetItem(ShowIncompleteRowsStorageKey) == "True";
+            _showSpreadAsPercent = await LocalStorageService.GetItem(ShowSpreadAsPercentStorageKey) == "True";
+            await EnsureServerDataLoadedAsync();
+            await LoadGlobalAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"{LocalizationService.GetTranslation("EconomyViewer.Errors.LoadGlobal")}: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingPage = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EnsureServerDataLoadedAsync()
+    {
+        if (ContextService.CurrentServer is null)
+        {
+            return;
+        }
+
+        if (ContextService.CurrentServerData is null || ContextService.CurrentServerData.Id != ContextService.CurrentServer.Id)
+        {
+            ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+        }
+
+        _availableItems = ContextService.CurrentServerData.ItemOrTags
+            .OrderBy(LocalizationService.GetTranslation)
+            .ToList();
+
+        _availableRecipes = ContextService.CurrentServerData.Recipes
+            .OrderBy(LocalizationService.GetTranslation)
+            .ToList();
+
+        var allSkills = ContextService.CurrentServerData.Skills
+            .OrderBy(LocalizationService.GetTranslation)
+            .ToList();
+
+        _availableSkills = allSkills
+            .Where(s => s.Profession is not null)
+            .ToList();
+
+        _availablePlayers = ContextService.CurrentServer.UserServers
+            .OrderBy(us => us.GetPseudo())
+            .ToList();
+
+        _itemsById = _availableItems.ToDictionary(i => i.Id);
+        _recipesById = _availableRecipes.ToDictionary(r => r.Id);
+        _skillsById = allSkills.ToDictionary(s => s.Id);
+        _craftingTablesById = ContextService.CurrentServerData.CraftingTables.ToDictionary(ct => ct.Id);
+        _pluginModulesById = ContextService.CurrentServerData.PluginModules.ToDictionary(pm => pm.Id);
+        _recipeProductItemsByRecipeId = _availableRecipes
+            .Select(recipe => new
+            {
+                recipe.Id,
+                ProductItem = recipe.Elements.FirstOrDefault(e => e.IsProduct())?.ItemOrTag
+            })
+            .Where(x => x.ProductItem is not null)
+            .ToDictionary(x => x.Id, x => x.ProductItem!);
+    }
+
+    private string GetOpenDrilldownTooltip()
+    {
+        return CanOpenDrilldown
+            ? LocalizationService.GetTranslation("EconomyViewer.Actions.OpenDrilldown")
+            : LocalizationService.GetTranslation("EconomyViewer.Drilldown.AtLeastTwoPlayersRequired");
+    }
+
+    private async Task LoadGlobalAsync(bool showLoadingIndicator = true)
+    {
+        if (ContextService.CurrentServer is null || ContextService.CurrentUserServer is null)
+        {
+            return;
+        }
+
+        try
+        {
+            ResetGlobalRowExpansionState();
+
+            if (showLoadingIndicator)
+            {
+                _isLoadingGlobal = true;
+                StateHasChanged();
+            }
+
+            var query = new EconomyGlobalQuery
+            {
+                ServerId = ContextService.CurrentServer.Id,
+                GroupBy = _groupBy,
+                SearchText = string.Empty,
+                SkillId = _filterSkillId,
+                UserServerId = _globalFilterUserServerId,
+                SortBy = EconomyGlobalSortBy.Label,
+                SortDescending = false,
+                Page = 1,
+                PageSize = 0
+            };
+
+            _globalResult = await EconomyViewerService.GetGlobalAsync(query, ContextService.CurrentUserServer.Id);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("EconomyViewer.Errors.Unauthorized"), Severity.Error);
+            _globalResult = new EconomyGlobalResult();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"{LocalizationService.GetTranslation("EconomyViewer.Errors.LoadGlobal")}: {ex.Message}", Severity.Error);
+            _globalResult = new EconomyGlobalResult();
+        }
+        finally
+        {
+            if (showLoadingIndicator)
+            {
+                _isLoadingGlobal = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnGroupByChanged(EconomyGroupBy value)
+    {
+        _groupBy = value;
+        ResetGlobalRowExpansionState();
+
+        await LoadGlobalAsync();
+    }
+
+    private async Task OnGlobalPlayerFilterChanged(Guid? value)
+    {
+        _globalFilterUserServerId = value;
+        await LoadGlobalAsync();
+    }
+
+    private async Task OnGlobalSkillFilterChanged(Guid? value)
+    {
+        _filterSkillId = value;
+        await LoadGlobalAsync();
+    }
+
+    private async Task ResetGlobalFilters()
+    {
+        _groupBy = EconomyGroupBy.Item;
+        _searchText = string.Empty;
+        _showIncompleteRows = false;
+        _filterSkillId = null;
+        _globalFilterUserServerId = null;
+        await LocalStorageService.AddItem(ShowIncompleteRowsStorageKey, bool.FalseString);
+        await LoadGlobalAsync();
+    }
+
+    private bool FilterGlobalRow(EconomyGlobalRow row)
+    {
+        if (!_showIncompleteRows && !IsCompleteEconomyRow(row))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            return true;
+        }
+
+        var search = _searchText.Trim();
+
+        if (GetGlobalRowLabel(row).Contains(search, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var subLabel = GetGlobalRowSubLabel(row);
+        return !string.IsNullOrWhiteSpace(subLabel) && subLabel.Contains(search, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool ShouldShowGlobalExpansionColumn()
+    {
+        return _groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe or EconomyGroupBy.Skill;
+    }
+
+    private bool CanExpandGlobalRow(EconomyGlobalRow row)
+    {
+        return ShouldShowGlobalExpansionColumn() && row.PlayerDetails.Count > 0;
+    }
+
+    private bool IsGlobalRowExpanded(EconomyGlobalRow row)
+    {
+        return _expandedGlobalRowKeys.Contains(row.GroupKey);
+    }
+
+    private void ToggleGlobalRowExpansion(EconomyGlobalRow row)
+    {
+        if (!CanExpandGlobalRow(row))
+        {
+            return;
+        }
+
+        if (!_expandedGlobalRowKeys.Add(row.GroupKey))
+        {
+            _expandedGlobalRowKeys.Remove(row.GroupKey);
+        }
+    }
+
+    private void ResetGlobalRowExpansionState()
+    {
+        _expandedGlobalRowKeys.Clear();
+    }
+
+    private int GetGlobalTableColumnCount()
+    {
+        var count = 9;
+
+        if (ShouldShowGlobalExpansionColumn())
+        {
+            count++;
+        }
+
+        if (_groupBy is EconomyGroupBy.Player)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    private IEnumerable<EconomyGlobalPlayerDetailRow> GetGlobalRowPlayerDetails(EconomyGlobalRow row)
+    {
+        return row.PlayerDetails
+            .OrderBy(detail => detail.PlayerName)
+            .ThenByDescending(detail => detail.IsDefaultContext)
+            .ThenBy(detail => detail.DataContextName)
+            .ThenBy(detail => detail.DataContextId)
+            .ThenBy(detail => detail.UserServerId);
+    }
+
+    private static string GetPlayerDetailContextLabel(EconomyGlobalPlayerDetailRow detail)
+    {
+        return string.IsNullOrWhiteSpace(detail.DataContextName)
+            ? "-"
+            : detail.DataContextName;
+    }
+
+    private string GetPrimaryRecipeLabel(EconomyGlobalPlayerDetailRow detail)
+    {
+        if (detail.PrimaryRecipeId is Guid recipeId && _recipesById.TryGetValue(recipeId, out var recipe))
+        {
+            return LocalizationService.GetTranslation(recipe);
+        }
+
+        if (!string.IsNullOrWhiteSpace(detail.PrimaryRecipeName))
+        {
+            return detail.PrimaryRecipeName!;
+        }
+
+        return "-";
+    }
+
+    private async Task OnShowIncompleteRowsChanged(bool value)
+    {
+        _showIncompleteRows = value;
+        await LocalStorageService.AddItem(ShowIncompleteRowsStorageKey, value.ToString());
+    }
+
+    private async Task ToggleSpreadDisplayMode()
+    {
+        _showSpreadAsPercent = !_showSpreadAsPercent;
+        await LocalStorageService.AddItem(ShowSpreadAsPercentStorageKey, _showSpreadAsPercent.ToString());
+    }
+
+    private static bool IsCompleteEconomyRow(EconomyGlobalRow row)
+    {
+        return row.PriceMin is not null
+               && row.PriceAverage is not null
+               && row.PriceMax is not null
+               && row.MarginMin is not null
+               && row.MarginAverage is not null
+               && row.MarginMax is not null
+               && row.Spread is not null;
+    }
+
+    private async Task OpenDefaultDrilldown()
+    {
+        if (_drilldownModal is null)
+        {
+            return;
+        }
+
+        await _drilldownModal.OpenDefaultDrilldownAsync();
+    }
+
+    private async Task OpenDrilldownFromPlayerRowAsync(Guid player2UserServerId)
+    {
+        if (_drilldownModal is null)
+        {
+            return;
+        }
+
+        await _drilldownModal.OpenDrilldownFromPlayerRowAsync(player2UserServerId);
+    }
+
+    private void OpenHelpModal()
+    {
+        _isHelpModalOpen = true;
+    }
+
+    private void CloseHelpModal()
+    {
+        _isHelpModalOpen = false;
+    }
+
+
+    private IHasIconName? GetGlobalRowIcon(EconomyGlobalRow row)
+    {
+        if (row.ItemOrTagId is Guid itemId && _itemsById.TryGetValue(itemId, out var item))
+        {
+            return item;
+        }
+
+        if (row.RecipeId is Guid recipeId && _recipeProductItemsByRecipeId.TryGetValue(recipeId, out var recipeProductItem))
+        {
+            return recipeProductItem;
+        }
+
+        if (row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
+        {
+            return skill;
+        }
+
+        return null;
+    }
+
+    private string GetGlobalRowFallbackIcon(EconomyGlobalRow row)
+    {
+        if (row.UserServerId is not null) return Icons.Material.Filled.Person;
+        if (row.RecipeId is not null) return Icons.Material.Filled.Science;
+        if (row.SkillId is not null) return Icons.Material.Filled.Handyman;
+        if (row.IsTag == true) return Icons.Material.Filled.Tag;
+        return Icons.Material.Filled.Inventory2;
+    }
+
+    private string GetGlobalRowLabel(EconomyGlobalRow row)
+    {
+        if (row.ItemOrTagId is Guid itemId && _itemsById.TryGetValue(itemId, out var item))
+        {
+            return LocalizationService.GetTranslation(item);
+        }
+
+        if (row.RecipeId is Guid recipeId && _recipesById.TryGetValue(recipeId, out var recipe))
+        {
+            return LocalizationService.GetTranslation(recipe);
+        }
+
+        if (row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
+        {
+            return LocalizationService.GetTranslation(skill);
+        }
+
+        return row.Label;
+    }
+
+    private string? GetGlobalRowSubLabel(EconomyGlobalRow row)
+    {
+        if (row.RecipeId is not null && row.SkillId is Guid skillId && _skillsById.TryGetValue(skillId, out var skill))
+        {
+            return LocalizationService.GetTranslation(skill);
+        }
+
+        return null;
+    }
+
+    private void OnContextChanged()
+    {
+        _ = InitializeAndLoadAsync();
+    }
+
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= OnContextChanged;
+    }
+}
+

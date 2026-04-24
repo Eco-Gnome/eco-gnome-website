@@ -161,6 +161,18 @@
     white-space: wrap !important;
 }
 
+.comparison-by-select-container {
+    width: 220px;
+    flex: 0 0 220px;
+}
+
+@media (max-width: 600px) {
+    .comparison-by-select-container {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+}
+
 .recipe-table .mud-table-row > :first-child {
     max-width: 0;
     padding-left: 0 !important;
@@ -413,3 +425,4 @@
     width: 1px;
     height: 1px;
 }
+
