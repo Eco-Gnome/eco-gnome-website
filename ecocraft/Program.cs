@@ -84,11 +84,14 @@ builder.Services.AddScoped<ModUploadHistoryDbService>();
 builder.Services.AddScoped<ContextService>();
 builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
+builder.Services.AddScoped<IPriceCalculatorService, PriceCalculatorMetricsDecorator>();
+builder.Services.AddScoped<PriceCalculatorPageMetricsService>();
 builder.Services.AddScoped<ServerDataService>();
 builder.Services.AddScoped<UserServerDataService>();
 builder.Services.AddScoped<VideoUploadService>();
 builder.Services.AddScoped<ShoppingListService>();
 builder.Services.AddScoped<ShoppingListDataService>();
+builder.Services.AddScoped<ShoppingListMetricsService>();
 builder.Services.AddSingleton<AppSettingsService>();
 
 // Util Services

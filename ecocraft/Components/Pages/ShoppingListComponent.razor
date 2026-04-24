@@ -18,6 +18,7 @@
 @inject UserServerDataService UserServerDataService
 @inject ServerDbService ServerDbService
 @inject DataContextDbService DataContextDbService
+@inject ShoppingListMetricsService ShoppingListMetricsService
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
@@ -1332,7 +1333,7 @@
             }
 
             ContextService.CurrentServerData = serverData;
-            Console.WriteLine($"[ShoppingList] RetrieveData requestId={requestId} serverDataSource={serverDataSource} forceServerReload={forceServerReload}");
+            await ShoppingListMetricsService.LogRetrieveDataAsync(requestId, serverDataSource, forceServerReload);
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
@@ -1345,7 +1346,7 @@
             }
             catch (Exception referenceEx)
             {
-                Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load reference data context {referenceDataContextId}: {referenceEx}");
+                await ShoppingListMetricsService.LogReferenceDataContextLoadFailedAsync(requestId, referenceDataContextId, referenceEx);
                 _referenceDataContext = null;
             }
 
@@ -1353,7 +1354,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load shopping list {targetShoppingListId}: {ex}");
+            await ShoppingListMetricsService.LogShoppingListLoadFailedAsync(requestId, targetShoppingListId, ex);
 
             var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
                 .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
@@ -1372,7 +1373,7 @@
                     }
                     catch (Exception fallbackEx)
                     {
-                        Console.WriteLine($"[ShoppingList] requestId={requestId} failed to load fallback shopping list {fallbackId}: {fallbackEx}");
+                        await ShoppingListMetricsService.LogFallbackShoppingListLoadFailedAsync(requestId, fallbackId, fallbackEx);
                     }
                 }
             }

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using ecocraft.Models;
 using ecocraft.Services.DbServices;
 using Microsoft.EntityFrameworkCore;
@@ -32,8 +31,8 @@ public class PriceCalculatorService(
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
     LocalizationService localizationService,
-    AppSettingsService appSettingsService,
     ILogger<PriceCalculatorService> logger)
+    : IPriceCalculatorService
 {
     private sealed class CalculationContext(DataContext dataContext)
     {
@@ -306,12 +305,6 @@ public class PriceCalculatorService(
 
     public async Task<PriceCalculationMetrics> Calculate(DataContext dataContext, string triggerOrigin = "Unknown", bool debug = false)
     {
-        var isMetricsEnabled = await appSettingsService.IsPriceCalculatorMetricsEnabledAsync();
-        var totalStopwatch = isMetricsEnabled ? Stopwatch.StartNew() : null;
-        var resetStopwatch = isMetricsEnabled ? new Stopwatch() : null;
-        var computeStopwatch = isMetricsEnabled ? new Stopwatch() : null;
-        var persistStopwatch = isMetricsEnabled ? new Stopwatch() : null;
-
         var iterationCount = 0;
         var handledRecipes = 0;
         var deferredIngredientRecipes = 0;
@@ -330,10 +323,6 @@ public class PriceCalculatorService(
                 var calculationContext = new CalculationContext(dataContext);
                 var marginType = calculationContext.UserSetting.MarginType;
 
-                if (isMetricsEnabled)
-                {
-                    resetStopwatch?.Start();
-                }
                 var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
                 var itemOrTagsToSellIds = itemOrTagsToSell.Select(iot => iot.Id).ToHashSet();
 
@@ -356,15 +345,6 @@ public class PriceCalculatorService(
                     {
                         calculationContext.TrySetUserPrice(userPrice, userPrice.Price, null);
                     }
-                }
-                if (isMetricsEnabled)
-                {
-                    resetStopwatch?.Stop();
-                }
-
-                if (isMetricsEnabled)
-                {
-                    computeStopwatch?.Start();
                 }
                 var remainingUserRecipes = dataContext.UserRecipes.ToList();
                 int nbHandled;
@@ -541,15 +521,6 @@ public class PriceCalculatorService(
                         handledRecipes++;
                     }
                 } while (nbHandled > 0);
-                if (isMetricsEnabled)
-                {
-                    computeStopwatch?.Stop();
-                }
-
-                if (isMetricsEnabled)
-                {
-                    persistStopwatch?.Start();
-                }
                 var finalDirtyUserPriceIds = calculationContext.DirtyUserPriceIds
                     .Where(calculationContext.HasUserPriceChangedFromOriginal)
                     .ToList();
@@ -597,11 +568,6 @@ public class PriceCalculatorService(
                         dbUserElementUpdates++;
                     }
                 }
-                if (isMetricsEnabled)
-                {
-                    persistStopwatch?.Stop();
-                }
-
                 return;
             });
         }
@@ -616,11 +582,6 @@ public class PriceCalculatorService(
                 dataContext.UserElements.Count,
                 dataContext.UserPrices.Count);
             throw;
-        }
-
-        if (isMetricsEnabled)
-        {
-            totalStopwatch?.Stop();
         }
 
         var metrics = new PriceCalculationMetrics(
@@ -639,29 +600,10 @@ public class PriceCalculatorService(
             dirtyUserElements,
             dbUserPriceUpdates,
             dbUserElementUpdates,
-            resetStopwatch?.ElapsedMilliseconds ?? 0,
-            computeStopwatch?.ElapsedMilliseconds ?? 0,
-            persistStopwatch?.ElapsedMilliseconds ?? 0,
-            totalStopwatch?.ElapsedMilliseconds ?? 0);
-
-        if (isMetricsEnabled)
-        {
-            logger.LogInformation(
-                "Price calculation metrics. trigger={TriggerOrigin} totalMs={TotalMs} resetMs={ResetMs} computeMs={ComputeMs} persistMs={PersistMs} iterations={Iterations} handledRecipes={HandledRecipes} deferredIngredients={DeferredIngredients} deferredReintegrated={DeferredReintegrated} dirtyUserPrices={DirtyUserPrices} dirtyUserElements={DirtyUserElements} dbUserPriceUpdates={DbUserPriceUpdates} dbUserElementUpdates={DbUserElementUpdates}",
-                metrics.TriggerOrigin,
-                metrics.TotalMilliseconds,
-                metrics.ResetMilliseconds,
-                metrics.ComputeMilliseconds,
-                metrics.PersistMilliseconds,
-                metrics.IterationCount,
-                metrics.HandledRecipes,
-                metrics.DeferredIngredientRecipes,
-                metrics.DeferredReintegratedRecipes,
-                metrics.DirtyUserPrices,
-                metrics.DirtyUserElements,
-                metrics.DbUserPriceUpdates,
-                metrics.DbUserElementUpdates);
-        }
+            0,
+            0,
+            0,
+            0);
 
         return metrics;
     }

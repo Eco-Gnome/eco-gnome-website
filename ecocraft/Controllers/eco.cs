@@ -12,7 +12,7 @@ public class EcoController(
     UserPriceDbService userPriceDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
-    PriceCalculatorService priceCalculatorService,
+    IPriceCalculatorService priceCalculatorService,
     ItemOrTagDbService itemOrTagDbService,
     IDbContextFactory<EcoCraftDbContext> dbContextFactory
 ) : ControllerBase
