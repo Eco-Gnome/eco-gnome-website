@@ -118,20 +118,6 @@ namespace ecocraft.Migrations
                     b.ToTable("DataContext", (string)null);
                 });
 
-            modelBuilder.Entity("ecocraft.Models.AppSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("PriceCalculatorMetricsEnabled")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppSetting", (string)null);
-                });
-
             modelBuilder.Entity("ecocraft.Models.DynamicValue", b =>
                 {
                     b.Property<Guid>("Id")

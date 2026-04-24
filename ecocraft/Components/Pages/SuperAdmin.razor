@@ -289,7 +289,7 @@
     private List<ModUploadHistory> _modUploadHistories = [];
     private string _searchUser = "";
     private string _searchServer = "";
-    private bool _priceCalculatorMetricsEnabled = true;
+    private bool _priceCalculatorMetricsEnabled = false;
     private bool _isSavingPriceCalculatorMetrics;
 
     protected override void OnInitialized()
@@ -528,25 +528,15 @@
         _isSavingPriceCalculatorMetrics = true;
         StateHasChanged();
 
-        try
-        {
-            _priceCalculatorMetricsEnabled = await AppSettingsService.SetPriceCalculatorMetricsEnabledAsync(isEnabled);
-            Snackbar.Add(
-                LocalizationService.GetTranslation(
-                    _priceCalculatorMetricsEnabled
-                        ? "SuperAdmin.PerformancePanel.PriceCalculatorMetricsEnabled"
-                        : "SuperAdmin.PerformancePanel.PriceCalculatorMetricsDisabled"),
-                Severity.Success);
-        }
-        catch
-        {
-            _priceCalculatorMetricsEnabled = await AppSettingsService.IsPriceCalculatorMetricsEnabledAsync();
-            Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.PerformancePanel.SaveError"), Severity.Error);
-        }
-        finally
-        {
-            _isSavingPriceCalculatorMetrics = false;
-            StateHasChanged();
-        }
+        _priceCalculatorMetricsEnabled = await AppSettingsService.SetPriceCalculatorMetricsEnabledAsync(isEnabled);
+        Snackbar.Add(
+            LocalizationService.GetTranslation(
+                _priceCalculatorMetricsEnabled
+                    ? "SuperAdmin.PerformancePanel.PriceCalculatorMetricsEnabled"
+                    : "SuperAdmin.PerformancePanel.PriceCalculatorMetricsDisabled"),
+            Severity.Success);
+
+        _isSavingPriceCalculatorMetrics = false;
+        StateHasChanged();
     }
 }

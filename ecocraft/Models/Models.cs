@@ -492,13 +492,6 @@ public class PluginModule: IHasLocalizedName, IHasIconName
     }
 }
 
-// User Data
-public class AppSetting
-{
-    [Key] public Guid Id { get; set; } = Guid.NewGuid();
-    public bool PriceCalculatorMetricsEnabled { get; set; } = false;
-}
-
 public class User
 {
     [Key] public Guid Id { get; init; } = Guid.NewGuid();
