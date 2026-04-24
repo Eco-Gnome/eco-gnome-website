@@ -83,16 +83,20 @@ public class PriceCalculatorService(
         private static Dictionary<Guid, HashSet<Guid>> BuildProducerSkillsMap(DataContext dataContext)
         {
             var directProducerSkills = dataContext.UserElements
-                .Where(ue => ue.Element.IsProduct() && ue.UserRecipe.Recipe.SkillId is not null)
+                .Where(ue => ue.Element is not null && ue.Element.IsProduct() && ue.UserRecipe?.Recipe?.SkillId is not null)
                 .GroupBy(ue => ue.Element.ItemOrTagId)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(ue => ue.UserRecipe.Recipe.SkillId!.Value).ToHashSet()
+                    g => g
+                        .Select(ue => ue.UserRecipe?.Recipe?.SkillId)
+                        .Where(skillId => skillId is not null)
+                        .Select(skillId => skillId!.Value)
+                        .ToHashSet()
                 );
 
             var itemOrTags = dataContext.UserPrices
                 .Select(up => up.ItemOrTag)
-                .Concat(dataContext.UserElements.Select(ue => ue.Element.ItemOrTag))
+                .Concat(dataContext.UserElements.Where(ue => ue.Element is not null).Select(ue => ue.Element.ItemOrTag))
                 .DistinctBy(iot => iot.Id)
                 .ToList();
 
@@ -347,6 +351,7 @@ public class PriceCalculatorService(
                     }
                 }
                 var remainingUserRecipes = dataContext.UserRecipes.ToList();
+                var recipesWithMissingUserElements = new HashSet<Guid>();
                 int nbHandled;
 
                 do
@@ -358,12 +363,50 @@ public class PriceCalculatorService(
                     while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
                     {
                         var userRecipe = remainingUserRecipes[iterator];
+                        if (userRecipe.Recipe is null)
+                        {
+                            recipesWithMissingUserElements.Add(userRecipe.RecipeId);
+                            iterator++;
+                            deferredIngredientRecipes++;
+                            continue;
+                        }
+
                         if (debug) Console.WriteLine($"Check Recipe: {userRecipe.Recipe.Name}");
 
-                        var userElementIngredients = userRecipe.Recipe.Elements
+                        var ingredientElements = userRecipe.Recipe.Elements
                             .Where(e => e.IsIngredient())
-                            .Select(e => calculationContext.GetUserElement(e)!)
                             .ToList();
+
+                        var userElementIngredients = ingredientElements
+                            .Select(calculationContext.GetUserElement)
+                            .Where(ue => ue is not null)
+                            .Cast<UserElement>()
+                            .ToList();
+
+                        var productElements = userRecipe.Recipe.Elements
+                            .Where(e => e.IsProduct())
+                            .ToList();
+
+                        var userElementProducts = productElements
+                            .Select(calculationContext.GetUserElement)
+                            .Where(ue => ue is not null)
+                            .Cast<UserElement>()
+                            .ToList();
+
+                        if (userElementIngredients.Count != ingredientElements.Count || userElementProducts.Count != productElements.Count)
+                        {
+                            recipesWithMissingUserElements.Add(userRecipe.RecipeId);
+                            iterator++;
+                            deferredIngredientRecipes++;
+
+                            if (debug)
+                            {
+                                Console.WriteLine(
+                                    $"=> Recipe {userRecipe.Recipe.Name} has missing UserElements. ingredients={userElementIngredients.Count}/{ingredientElements.Count}, products={userElementProducts.Count}/{productElements.Count}");
+                            }
+
+                            continue;
+                        }
 
                         foreach (var ingredient in userElementIngredients.Where(ue => ue.Price is null).ToList())
                         {
@@ -413,11 +456,6 @@ public class PriceCalculatorService(
 
                             if (debug) Console.WriteLine($"=> Ingredient Tag (from Min) {ingredient.Element.ItemOrTag.Name}: {ingredient.Price}");
                         }
-
-                        var userElementProducts = userRecipe.Recipe.Elements
-                            .Where(e => e.IsProduct())
-                            .Select(e => calculationContext.GetUserElement(e)!)
-                            .ToList();
 
                         var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
 
@@ -521,6 +559,15 @@ public class PriceCalculatorService(
                         handledRecipes++;
                     }
                 } while (nbHandled > 0);
+
+                if (recipesWithMissingUserElements.Count > 0)
+                {
+                    logger.LogWarning(
+                        "Price calculation skipped recipes with missing UserElements. trigger={TriggerOrigin} missingRecipeCount={MissingRecipeCount} sampleRecipeIds={SampleRecipeIds}",
+                        triggerOrigin,
+                        recipesWithMissingUserElements.Count,
+                        string.Join(", ", recipesWithMissingUserElements.Take(10)));
+                }
                 var finalDirtyUserPriceIds = calculationContext.DirtyUserPriceIds
                     .Where(calculationContext.HasUserPriceChangedFromOriginal)
                     .ToList();

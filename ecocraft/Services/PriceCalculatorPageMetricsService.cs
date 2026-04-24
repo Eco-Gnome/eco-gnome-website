@@ -17,6 +17,12 @@ public class PriceCalculatorPageMetricsService(
         return new PriceCalculatorRefreshMetricsScope(requestId, isEnabled);
     }
 
+    public async Task<PriceCalculatorCalculationMetricsScope> CreateCalculationScopeAsync(string triggerOrigin, string caller)
+    {
+        var isEnabled = await appSettingsService.IsPriceCalculatorMetricsEnabledAsync();
+        return new PriceCalculatorCalculationMetricsScope(triggerOrigin, caller, isEnabled);
+    }
+
     public void LogRefreshRenderCompleted(long requestId, long totalRefreshToRenderMilliseconds)
     {
         logger.LogInformation(

@@ -2,63 +2,83 @@ using Microsoft.Extensions.Logging;
 
 namespace ecocraft.Services;
 
+public class ShoppingListMetricsScope(long requestId, bool isEnabled)
+{
+    public long RequestId { get; } = requestId;
+    public bool IsEnabled { get; } = isEnabled;
+}
+
 public class ShoppingListMetricsService(
     AppSettingsService appSettingsService,
     ILogger<ShoppingListMetricsService> logger)
 {
-    public async Task LogRetrieveDataAsync(long requestId, string serverDataSource, bool forceServerReload)
+    public async Task<ShoppingListMetricsScope> CreateScopeAsync(long requestId)
     {
-        if (!await appSettingsService.IsPriceCalculatorMetricsEnabledAsync())
+        var isEnabled = await appSettingsService.IsPriceCalculatorMetricsEnabledAsync();
+        return new ShoppingListMetricsScope(requestId, isEnabled);
+    }
+
+    public Task LogRetrieveDataAsync(ShoppingListMetricsScope scope, string serverDataSource, bool forceServerReload)
+    {
+        if (!scope.IsEnabled)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         logger.LogInformation(
             "ShoppingList retrieve data. requestId={RequestId} serverDataSource={ServerDataSource} forceServerReload={ForceServerReload}",
-            requestId,
+            scope.RequestId,
             serverDataSource,
             forceServerReload);
+
+        return Task.CompletedTask;
     }
 
-    public async Task LogReferenceDataContextLoadFailedAsync(long requestId, Guid? referenceDataContextId, Exception exception)
+    public Task LogReferenceDataContextLoadFailedAsync(ShoppingListMetricsScope scope, Guid? referenceDataContextId, Exception exception)
     {
-        if (!await appSettingsService.IsPriceCalculatorMetricsEnabledAsync())
+        if (!scope.IsEnabled)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         logger.LogWarning(
             exception,
             "ShoppingList failed to load reference data context. requestId={RequestId} referenceDataContextId={ReferenceDataContextId}",
-            requestId,
+            scope.RequestId,
             referenceDataContextId);
+
+        return Task.CompletedTask;
     }
 
-    public async Task LogShoppingListLoadFailedAsync(long requestId, Guid targetShoppingListId, Exception exception)
+    public Task LogShoppingListLoadFailedAsync(ShoppingListMetricsScope scope, Guid targetShoppingListId, Exception exception)
     {
-        if (!await appSettingsService.IsPriceCalculatorMetricsEnabledAsync())
+        if (!scope.IsEnabled)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         logger.LogWarning(
             exception,
             "ShoppingList failed to load selected list. requestId={RequestId} targetShoppingListId={TargetShoppingListId}",
-            requestId,
+            scope.RequestId,
             targetShoppingListId);
+
+        return Task.CompletedTask;
     }
 
-    public async Task LogFallbackShoppingListLoadFailedAsync(long requestId, Guid fallbackShoppingListId, Exception exception)
+    public Task LogFallbackShoppingListLoadFailedAsync(ShoppingListMetricsScope scope, Guid fallbackShoppingListId, Exception exception)
     {
-        if (!await appSettingsService.IsPriceCalculatorMetricsEnabledAsync())
+        if (!scope.IsEnabled)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         logger.LogWarning(
             exception,
             "ShoppingList failed to load fallback list. requestId={RequestId} fallbackShoppingListId={FallbackShoppingListId}",
-            requestId,
+            scope.RequestId,
             fallbackShoppingListId);
+
+        return Task.CompletedTask;
     }
 }

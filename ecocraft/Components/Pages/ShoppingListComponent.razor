@@ -1295,6 +1295,7 @@
         {
             return;
         }
+        var metricsScope = await ShoppingListMetricsService.CreateScopeAsync(requestId);
 
         if (_isGuidedRunActive)
         {
@@ -1333,7 +1334,7 @@
             }
 
             ContextService.CurrentServerData = serverData;
-            await ShoppingListMetricsService.LogRetrieveDataAsync(requestId, serverDataSource, forceServerReload);
+            await ShoppingListMetricsService.LogRetrieveDataAsync(metricsScope, serverDataSource, forceServerReload);
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
@@ -1346,7 +1347,7 @@
             }
             catch (Exception referenceEx)
             {
-                await ShoppingListMetricsService.LogReferenceDataContextLoadFailedAsync(requestId, referenceDataContextId, referenceEx);
+                await ShoppingListMetricsService.LogReferenceDataContextLoadFailedAsync(metricsScope, referenceDataContextId, referenceEx);
                 _referenceDataContext = null;
             }
 
@@ -1354,7 +1355,7 @@
         }
         catch (Exception ex)
         {
-            await ShoppingListMetricsService.LogShoppingListLoadFailedAsync(requestId, targetShoppingListId, ex);
+            await ShoppingListMetricsService.LogShoppingListLoadFailedAsync(metricsScope, targetShoppingListId, ex);
 
             var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
                 .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
@@ -1373,7 +1374,7 @@
                     }
                     catch (Exception fallbackEx)
                     {
-                        await ShoppingListMetricsService.LogFallbackShoppingListLoadFailedAsync(requestId, fallbackId, fallbackEx);
+                        await ShoppingListMetricsService.LogFallbackShoppingListLoadFailedAsync(metricsScope, fallbackId, fallbackEx);
                     }
                 }
             }
