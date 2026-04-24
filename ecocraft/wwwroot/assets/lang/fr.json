@@ -376,7 +376,7 @@
         "CalculationMode": {
             "Label": "Mode de calcul",
             "Tooltip": "Automatique par defaut. Utilisez Manuel pour un calcul explicite.",
-            "AutoSmart": "AutoSmart",
+            "AutoSmart": "Auto intelligent",
             "Manual": "Manuel",
             "CalculateNow": "Calculer"
         },

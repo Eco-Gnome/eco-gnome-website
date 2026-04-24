@@ -1,24 +1,6 @@
-function triggerFileDownload(fileName, base64Content) {
-    const link = document.createElement("a");
-    link.href = "data:application/octet-stream;base64," + base64Content;
-    link.download = fileName;
-    link.click();
-    link.remove();
-}
-
-function scrollElementIntoViewCenter(element) {
-    if (!element || typeof element.scrollIntoView !== "function") {
-        return;
-    }
-
-    element.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "nearest"
-    });
-}
-
 (function () {
+    "use strict";
+
     const instances = {};
 
     function isGroupHeaderRow(row) {
@@ -69,6 +51,7 @@ function scrollElementIntoViewCenter(element) {
         scrollContainer.scrollTop += delta;
     }
 
+    // Keep the clicked header at the same visual Y position while rows open/close.
     function keepAnchorStable(anchorElement, anchorTop) {
         if (!anchorElement) {
             return;
@@ -120,6 +103,7 @@ function scrollElementIntoViewCenter(element) {
         state.queue.push(button);
     }
 
+    // Queue policy: keep the most recently opened groups and close older ones when limit is reached.
     function enforceQueueLimit(state, currentButton) {
         pruneQueue(state);
 
