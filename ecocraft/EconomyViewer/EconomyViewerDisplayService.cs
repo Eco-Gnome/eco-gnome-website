@@ -4,7 +4,7 @@ using MudBlazor;
 
 namespace ecocraft.Services;
 
-public sealed class EconomyViewerDisplayService(LocalizationService localizationService)
+public class EconomyViewerDisplayService(LocalizationService localizationService)
 {
     public string FormatDecimal(decimal? value)
     {
@@ -140,7 +140,7 @@ public sealed class EconomyViewerDisplayService(LocalizationService localization
         return localizationService.GetTranslation($"EconomyViewer.Drilldown.StatusTooltip.{status}", player1DisplayName, player2DisplayName);
     }
 
-    private static decimal? GetSpreadPercentValue(EconomyGlobalRow row)
+    private decimal? GetSpreadPercentValue(EconomyGlobalRow row)
     {
         if (row.Spread is null || row.PriceMin is null)
         {
@@ -160,7 +160,7 @@ public sealed class EconomyViewerDisplayService(LocalizationService localization
         return row.Spread.Value / row.PriceMin.Value * 100m;
     }
 
-    private static decimal? GetSpreadPercentValue(EconomyGlobalPlayerDetailRow row)
+    private decimal? GetSpreadPercentValue(EconomyGlobalPlayerDetailRow row)
     {
         if (row.Spread is null || row.PriceMin is null)
         {
@@ -180,3 +180,4 @@ public sealed class EconomyViewerDisplayService(LocalizationService localization
         return row.Spread.Value / row.PriceMin.Value * 100m;
     }
 }
+

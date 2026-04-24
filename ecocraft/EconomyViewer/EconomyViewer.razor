@@ -4,7 +4,6 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
-@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject ServerDbService ServerDbService
 @inject EconomyViewerService EconomyViewerService
@@ -131,7 +130,7 @@
                                 <HeaderContent>
                                     @if (ShouldShowGlobalExpansionColumn())
                                     {
-                                        <MudTh Class="economy-global-expand-cell"></MudTh>
+                                        <MudTh Style="width: 36px;"></MudTh>
                                     }
                                     <MudTh>
                                         <MudStack Row AlignItems="AlignItems.Center">
@@ -203,7 +202,7 @@
                                 <RowTemplate>
                                     @if (ShouldShowGlobalExpansionColumn())
                                     {
-                                        <MudTd Class="economy-global-expand-cell">
+                                        <MudTd Style="width: 36px;">
                                             @if (CanExpandGlobalRow(context))
                                             {
                                                 <MudIconButton Icon="@(IsGlobalRowExpanded(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)"
@@ -252,8 +251,8 @@
                                     @if (CanExpandGlobalRow(context) && IsGlobalRowExpanded(context))
                                     {
                                         <MudTr>
-                                            <MudTd colspan="@GetGlobalTableColumnCount()" Class="economy-global-player-details-cell">
-                                                <MudTable Items="GetGlobalRowPlayerDetails(context)" Dense="true" Hover="true" Elevation="0" Class="economy-global-player-details-table">
+                                            <MudTd colspan="@GetGlobalTableColumnCount()" Style="background-color: var(--mud-palette-surface); padding-top: 0 !important;">
+                                                <MudTable Items="GetGlobalRowPlayerDetails(context)" Dense="true" Hover="true" Elevation="0" Style="margin-left: 20px;">
                                                     <HeaderContent>
                                                         <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Groups.Player")</MudTh>
                                                         @if (_groupBy is EconomyGroupBy.Item or EconomyGroupBy.Recipe)
@@ -348,25 +347,30 @@
                                          CraftingTablesById="_craftingTablesById"
                                          PluginModulesById="_pluginModulesById"
                                          RecipeProductItemsByRecipeId="_recipeProductItemsByRecipeId"/>
-            <EcoOverlayModal IsOpen="_isHelpModalOpen"
-                             OverlayClass="economy-help-overlay"
-                             WrapperClass="economy-help-modal-wrapper"
-                             PaperClass="economy-help-modal pa-4"
-                             OnClose="CloseHelpModal">
-                <MudStack Spacing="2">
-                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Help.Title")</MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                       Color="Color.Default"
-                                       OnClick="CloseHelpModal"/>
-                    </MudStack>
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line1")</MudText>
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line2")</MudText>
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line3")</MudText>
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line4")</MudText>
-                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line5")</MudText>
-                </MudStack>
-            </EcoOverlayModal>
+            @if (_isHelpModalOpen)
+            {
+                <div class="economy-help-overlay" @onclick="CloseHelpModal">
+                    <div class="economy-help-modal-wrapper" @onclick:stopPropagation="true">
+                        <div class="economy-help-modal">
+                            <MudPaper Class="pa-4">
+                                <MudStack Spacing="2">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Help.Title")</MudText>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       Color="Color.Default"
+                                                       OnClick="CloseHelpModal"/>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line1")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line2")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line3")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line4")</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EconomyViewer.Help.Line5")</MudText>
+                                </MudStack>
+                            </MudPaper>
+                        </div>
+                    </div>
+                </div>
+            }
     }
 </MudContainer>
 
@@ -610,7 +614,7 @@
 
     private bool CanExpandGlobalRow(EconomyGlobalRow row)
     {
-        return ShouldShowGlobalExpansionColumn() && row.PlayerDetails.Count > 1;
+        return ShouldShowGlobalExpansionColumn() && row.PlayerDetails.Count > 0;
     }
 
     private bool IsGlobalRowExpanded(EconomyGlobalRow row)

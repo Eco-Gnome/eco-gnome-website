@@ -52,7 +52,7 @@
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
-        "EconomyViewer": "Economy Viewer",
+        "EconomyViewer": "Analyse économique",
         "VideosUpload": "Upload de Vidéos",
         "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin",
@@ -409,41 +409,41 @@
         }
     },
     "EconomyViewer": {
-        "PageTitle": "Economy Viewer",
-        "ServerContextMissing": "Selectionnez un serveur avant d'ouvrir Economy Viewer.",
-        "ReadOnlyBanner": "Economy Viewer est strictement en lecture seule. Aucune configuration serveur ou joueur ne peut etre modifiee ici.",
+        "PageTitle": "Analyse économique",
+        "ServerContextMissing": "Sélectionnez un serveur avant d'ouvrir l'analyse économique.",
+        "ReadOnlyBanner": "L'analyse économique est strictement en lecture seule. Aucune configuration serveur ou joueur ne peut être modifiée ici.",
         "ReadOnlyChip": "Lecture seule",
         "GlobalViewTitle": "Vue globale serveur",
-        "NoGlobalData": "Aucune donnee disponible pour les filtres actuels.",
+        "NoGlobalData": "Aucune donnée disponible pour les filtres actuels.",
         "Groups": {
-            "Item": "Item",
+            "Item": "Article",
             "Recipe": "Recette",
-            "Skill": "Metier",
+            "Skill": "Métier",
             "Player": "Joueur"
         },
         "Filters": {
             "GroupBy": "Regrouper par",
             "Player": "Filtre joueur",
             "AllPlayers": "Tous les joueurs",
-            "MinSpread": "Spread minimum",
-            "Skill": "Filtre metier",
-            "AllSkills": "Tous les metiers",
-            "ShowIncompleteRows": "Afficher les lignes incompletes (-)",
+            "MinSpread": "Écart minimum",
+            "Skill": "Filtre métier",
+            "AllSkills": "Tous les métiers",
+            "ShowIncompleteRows": "Afficher les lignes incomplètes (-)",
             "SortBy": "Trier par",
-            "SortDescending": "Decroissant",
+            "SortDescending": "Décroissant",
             "SortDirectionHint": "Basculer le sens du tri",
             "SortDirectionAsc": "Croissant",
-            "SortDirectionDesc": "Decroissant",
+            "SortDirectionDesc": "Décroissant",
             "SortDirectionAZ": "A vers Z",
             "SortDirectionZA": "Z vers A"
         },
         "Actions": {
             "ApplyFilters": "Appliquer les filtres",
-            "ResetFilters": "Reinitialiser",
-            "Previous": "Precedent",
+            "ResetFilters": "Réinitialiser",
+            "Previous": "Précédent",
             "Next": "Suivant",
-            "OpenDrilldown": "Ouvrir le detail",
-            "Help": "Comment ca marche"
+            "OpenDrilldown": "Ouvrir le détail",
+            "Help": "Comment ça marche"
         },
         "Columns": {
             "Entity": "Nom",
@@ -455,81 +455,81 @@
             "MarginMin": "Marge min",
             "MarginAvg": "Marge moyenne",
             "MarginMax": "Marge max",
-            "ConfiguredPlayers": "Joueurs configures",
-            "ConfiguredContexts": "Contextes configures",
-            "Spread": "Spread"
+            "ConfiguredPlayers": "Joueurs configurés",
+            "ConfiguredContexts": "Contextes configurés",
+            "Spread": "Écart"
         },
         "Pagination": {
             "PageInfo": "Page {page} / {totalPages} ({totalRows} lignes)"
         },
         "Drilldown": {
-            "Title": "Detail joueur",
-            "NoData": "Aucune donnee joueur chargee.",
+            "Title": "Détail joueur",
+            "NoData": "Aucune donnée joueur chargée.",
             "CompareHeader": "Comparaison {player1} vs {player2}",
-            "Player1Badge": "Player 1",
-            "Player2Badge": "Player 2",
-            "Player1": "Player 1",
-            "Player2": "Player 2",
+            "Player1Badge": "Joueur 1",
+            "Player2Badge": "Joueur 2",
+            "Player1": "Joueur 1",
+            "Player2": "Joueur 2",
             "CompareBy": "Comparer par",
-            "Player1Context": "Contexte player 1",
-            "Player2Context": "Contexte player 2",
+            "Player1Context": "Contexte joueur 1",
+            "Player2Context": "Contexte joueur 2",
             "Search": "Recherche comparaison",
-            "OnlyDifferences": "Seulement les differences",
-            "OnlyCommon": "Seulement les elements en commun",
-            "ContextSummaries": "Contextes compares",
+            "OnlyDifferences": "Seulement les différences",
+            "OnlyCommon": "Seulement les éléments en commun",
+            "ContextSummaries": "Contextes comparés",
             "CraftingTablesComparison": "Comparaison des tables d'artisanat",
-            "NoCraftingTableData": "Aucune table d'artisanat configuree pour ce contexte.",
-            "PriceOptionsComparison": "Options Price Calculator comparees",
+            "NoCraftingTableData": "Aucune table d'artisanat configurée pour ce contexte.",
+            "PriceOptionsComparison": "Options du calculateur de prix comparées",
             "ComparisonTable": "Comparaison",
-            "NoComparisonData": "Aucune ligne de comparaison pour les filtres selectionnes.",
-            "AtLeastTwoPlayersRequired": "Au moins 2 joueurs sont requis pour ouvrir le drill-down.",
+            "NoComparisonData": "Aucune ligne de comparaison pour les filtres sélectionnés.",
+            "AtLeastTwoPlayersRequired": "Au moins 2 joueurs sont requis pour ouvrir le détail.",
             "StatusTooltip": {
-                "Higher": "{1} est plus eleve que {0} (calcule sur Player 2 - Player 1).",
-                "Lower": "{1} est plus bas que {0} (calcule sur Player 2 - Player 1).",
-                "Same": "{0} et {1} ont la meme valeur.",
+                "Higher": "{1} est plus élevé que {0} (calculé sur Joueur 2 - Joueur 1).",
+                "Lower": "{1} est plus bas que {0} (calculé sur Joueur 2 - Joueur 1).",
+                "Same": "{0} et {1} ont la même valeur.",
                 "OnlyPlayer1": "Valeur disponible uniquement pour {0}.",
                 "OnlyPlayer2": "Valeur disponible uniquement pour {1}.",
                 "NoData": "Aucune valeur pour {0} et {1}."
             },
             "Values": {
-                "Enabled": "Active",
-                "Disabled": "Desactive"
+                "Enabled": "Activé",
+                "Disabled": "Désactivé"
             },
             "Columns": {
-                "Role": "Role",
+                "Role": "Rôle",
                 "Player": "Joueur",
                 "Option": "Option",
                 "Context": "Contexte",
-                "ConfiguredItems": "Items configures",
+                "ConfiguredItems": "Articles configurés",
                 "Recipes": "Recettes",
-                "Skills": "Metiers",
-                "Player1Value": "Valeur player 1",
-                "Player2Value": "Valeur player 2",
+                "Skills": "Métiers",
+                "Player1Value": "Valeur joueur 1",
+                "Player2Value": "Valeur joueur 2",
                 "DeltaAbs": "Delta",
                 "DeltaPct": "Delta %",
                 "Status": "Statut"
             }
         },
         "Status": {
-            "Higher": "Plus eleve",
+            "Higher": "Plus élevé",
             "Lower": "Plus bas",
             "Same": "Identique",
-            "OnlyPlayer1": "Seulement player 1",
-            "OnlyPlayer2": "Seulement player 2",
-            "NoData": "Pas de donnee"
+            "OnlyPlayer1": "Seulement joueur 1",
+            "OnlyPlayer2": "Seulement joueur 2",
+            "NoData": "Pas de données"
         },
         "Errors": {
-            "Unauthorized": "Vous n'avez pas acces a ces donnees serveur.",
-            "LoadGlobal": "Echec du chargement des donnees globales",
-            "LoadDrilldown": "Echec du chargement du detail joueur"
+            "Unauthorized": "Vous n'avez pas accès à ces données serveur.",
+            "LoadGlobal": "Échec du chargement des données globales",
+            "LoadDrilldown": "Échec du chargement du détail joueur"
         },
         "Help": {
-            "Title": "Comment fonctionne Economy Viewer",
-            "Line1": "La vue globale agrege tous les contextes serveur hors shopping list.",
-            "Line2": "Utilise Regrouper par, Joueur et Metier pour reduire le scope.",
-            "Line3": "La recherche Nom filtre immediatement les lignes visibles du tableau.",
-            "Line4": "Le drill-down permet de comparer deux joueurs du serveur.",
-            "Line5": "Cette page est en lecture seule et n'ecrit aucune donnee."
+            "Title": "Comment fonctionne l'analyse économique",
+            "Line1": "La vue globale agrège tous les contextes serveur hors liste de courses.",
+            "Line2": "Utilise Regrouper par, Joueur et Métier pour réduire le périmètre.",
+            "Line3": "La recherche Nom filtre immédiatement les lignes visibles du tableau.",
+            "Line4": "Le détail permet de comparer deux joueurs du serveur.",
+            "Line5": "Cette page est en lecture seule et n'écrit aucune donnée."
         }
     },
     "Recipe": "Recette",
@@ -540,6 +540,3 @@
         "NewMargin": "Nouvelle marge"
     }
 }
-
-
-

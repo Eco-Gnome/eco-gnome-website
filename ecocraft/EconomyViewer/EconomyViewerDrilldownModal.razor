@@ -1,4 +1,3 @@
-@using ecocraft.Components.Utils
 @using ecocraft.Extensions
 @using ecocraft.Models
 @using ecocraft.Services
@@ -8,12 +7,13 @@
 @inject LocalStorageService LocalStorageService
 @inject ISnackbar Snackbar
 
-<EcoOverlayModal IsOpen="_isOpen"
-                 OverlayClass="economy-drilldown-overlay"
-                 WrapperClass="economy-drilldown-modal-wrapper"
-                 PaperClass="economy-drilldown-modal pa-4"
-                 OnClose="CloseDrilldown">
-    <MudStack Spacing="3">
+@if (_isOpen)
+{
+    <div class="economy-drilldown-overlay" @onclick="CloseDrilldown">
+        <div class="economy-drilldown-modal-wrapper" @onclick:stopPropagation="true">
+            <div class="economy-drilldown-modal">
+                <MudPaper Class="pa-4" Elevation="12">
+                    <MudStack Spacing="3">
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Title")</MudText>
             <MudIconButton Icon="@Icons.Material.Filled.Close"
@@ -72,26 +72,30 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudSelect T="Guid?"
-                                   Value="_selectedPlayer1DataContextId"
+                        <MudSelect T="EconomyPlayerContextOption?"
+                                   @key="_selectedPlayer1UserServerId"
+                                   Value="_selectedPlayer1ContextOption"
+                                   ToStringFunc="GetContextOptionLabel"
                                    Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player1Context")"
                                    Variant="Variant.Outlined"
                                    ValueChanged="OnPlayer1ContextChanged">
                             @foreach (var context in _drilldown.Player1Contexts)
                             {
-                                <MudSelectItem T="Guid?" Value="@context.Id">@context.Name</MudSelectItem>
+                                <MudSelectItem T="EconomyPlayerContextOption?" Value="@context">@context.Name</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudSelect T="Guid?"
-                                   Value="_selectedPlayer2DataContextId"
+                        <MudSelect T="EconomyPlayerContextOption?"
+                                   @key="_selectedPlayer2UserServerId"
+                                   Value="_selectedPlayer2ContextOption"
+                                   ToStringFunc="GetContextOptionLabel"
                                    Label="@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Player2Context")"
                                    Variant="Variant.Outlined"
                                    ValueChanged="OnPlayer2ContextChanged">
                             @foreach (var context in _drilldown.Player2Contexts)
                             {
-                                <MudSelectItem T="Guid?" Value="@context.Id">@context.Name</MudSelectItem>
+                                <MudSelectItem T="EconomyPlayerContextOption?" Value="@context">@context.Name</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
@@ -402,8 +406,12 @@
                 </MudTable>
             </MudStack>
         }
-    </MudStack>
-</EcoOverlayModal>
+                    </MudStack>
+                </MudPaper>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter] public Guid ServerId { get; set; }
@@ -427,6 +435,8 @@
     private Guid? _selectedPlayer2UserServerId;
     private Guid? _selectedPlayer2DataContextId;
     private Guid? _selectedPlayer1DataContextId;
+    private EconomyPlayerContextOption? _selectedPlayer1ContextOption;
+    private EconomyPlayerContextOption? _selectedPlayer2ContextOption;
     private EconomyComparisonEntity _comparisonBy = EconomyComparisonEntity.Item;
     private bool _comparisonOnlyDifferences;
     private bool _comparisonOnlyCommon;
@@ -452,6 +462,8 @@
 
         _selectedPlayer1DataContextId = null;
         _selectedPlayer2DataContextId = null;
+        _selectedPlayer1ContextOption = null;
+        _selectedPlayer2ContextOption = null;
         _isOpen = true;
         await LoadDrilldownAsync();
     }
@@ -483,6 +495,8 @@
         await PersistSelectedPlayer2Async(_selectedPlayer2UserServerId);
         _selectedPlayer1DataContextId = null;
         _selectedPlayer2DataContextId = null;
+        _selectedPlayer1ContextOption = null;
+        _selectedPlayer2ContextOption = null;
         _isOpen = true;
         await LoadDrilldownAsync();
     }
@@ -515,6 +529,8 @@
             _selectedPlayer2UserServerId = null;
             _selectedPlayer1DataContextId = null;
             _selectedPlayer2DataContextId = null;
+            _selectedPlayer1ContextOption = null;
+            _selectedPlayer2ContextOption = null;
             _isOpen = false;
             return;
         }
@@ -614,8 +630,10 @@
             else
             {
                 _drilldown = result;
-                _selectedPlayer1DataContextId = _drilldown.SelectedPlayer1DataContextId;
-                _selectedPlayer2DataContextId = _drilldown.SelectedPlayer2DataContextId;
+                _selectedPlayer1DataContextId = ResolveContextIdForSelect(_drilldown.Player1Contexts, _drilldown.SelectedPlayer1DataContextId);
+                _selectedPlayer2DataContextId = ResolveContextIdForSelect(_drilldown.Player2Contexts, _drilldown.SelectedPlayer2DataContextId);
+                _selectedPlayer1ContextOption = ResolveContextOptionForSelect(_drilldown.Player1Contexts, _selectedPlayer1DataContextId);
+                _selectedPlayer2ContextOption = ResolveContextOptionForSelect(_drilldown.Player2Contexts, _selectedPlayer2DataContextId);
             }
         }
         catch (UnauthorizedAccessException)
@@ -726,6 +744,8 @@
         await PersistSelectedPlayer2Async(_selectedPlayer2UserServerId);
         _selectedPlayer1DataContextId = null;
         _selectedPlayer2DataContextId = null;
+        _selectedPlayer1ContextOption = null;
+        _selectedPlayer2ContextOption = null;
         await LoadDrilldownAsync();
     }
 
@@ -739,6 +759,7 @@
         _selectedPlayer2UserServerId = value;
         await PersistSelectedPlayer2Async(value);
         _selectedPlayer2DataContextId = null;
+        _selectedPlayer2ContextOption = null;
         await LoadDrilldownAsync();
     }
 
@@ -748,15 +769,17 @@
         await LoadDrilldownAsync(showLoadingIndicator: false, comparisonRowsOnly: true);
     }
 
-    private async Task OnPlayer2ContextChanged(Guid? value)
+    private async Task OnPlayer2ContextChanged(EconomyPlayerContextOption? value)
     {
-        _selectedPlayer2DataContextId = value;
+        _selectedPlayer2ContextOption = value;
+        _selectedPlayer2DataContextId = value?.Id;
         await LoadDrilldownAsync();
     }
 
-    private async Task OnPlayer1ContextChanged(Guid? value)
+    private async Task OnPlayer1ContextChanged(EconomyPlayerContextOption? value)
     {
-        _selectedPlayer1DataContextId = value;
+        _selectedPlayer1ContextOption = value;
+        _selectedPlayer1DataContextId = value?.Id;
         await LoadDrilldownAsync();
     }
 
@@ -943,6 +966,36 @@
         return EconomyViewerService.ResolveContextSummary(_drilldown.Player1ContextSummaries, selectedPlayer1ContextId);
     }
 
+    private static Guid? ResolveContextIdForSelect(List<EconomyPlayerContextOption> contexts, Guid? preferredContextId)
+    {
+        if (contexts.Count == 0)
+        {
+            return null;
+        }
+
+        if (preferredContextId is Guid contextId && contexts.Any(context => context.Id == contextId))
+        {
+            return contextId;
+        }
+
+        return contexts[0].Id;
+    }
+
+    private static EconomyPlayerContextOption? ResolveContextOptionForSelect(List<EconomyPlayerContextOption> contexts, Guid? selectedContextId)
+    {
+        if (selectedContextId is null)
+        {
+            return null;
+        }
+
+        return contexts.FirstOrDefault(context => context.Id == selectedContextId.Value);
+    }
+
+    private static string GetContextOptionLabel(EconomyPlayerContextOption? contextOption)
+    {
+        return contextOption?.Name ?? string.Empty;
+    }
+
     private IHasIconName? GetComparisonRowIcon(EconomyPlayerComparisonRow row)
     {
         if (row.ItemOrTagId is Guid itemId && ItemsById.TryGetValue(itemId, out var item))
@@ -1006,7 +1059,7 @@
         return null;
     }
 
-    private sealed class DrilldownContextDisplayRow
+    private class DrilldownContextDisplayRow
     {
         public string RoleTranslationKey { get; init; } = string.Empty;
         public string PlayerName { get; init; } = string.Empty;
@@ -1014,7 +1067,7 @@
         public EconomyPlayerContextSummary Summary { get; init; } = new();
     }
 
-    private sealed class DrilldownOptionComparisonRow
+    private class DrilldownOptionComparisonRow
     {
         public string OptionTranslationKey { get; init; } = string.Empty;
         public string Player2Value { get; init; } = "-";
