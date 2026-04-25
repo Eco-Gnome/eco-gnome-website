@@ -50,8 +50,23 @@ public static class ShoppingListCoverageCalculator
         }
     }
 
-    private readonly record struct IngredientDemand(Guid IngredientElementId, Guid ItemOrTagId, decimal RequiredQuantity);
-    private readonly record struct ProductSupply(HashSet<Guid> SupportedIngredientItemOrTagIds, decimal QuantityPerCraft);
+    private readonly record struct IngredientDemand(Guid IngredientElementId, ItemOrTag ItemOrTag, decimal RequiredQuantity);
+    private readonly record struct ProductSupply(HashSet<Guid> SupportedIngredientElementIds, decimal QuantityPerCraft);
+
+    public static bool CanSupplyIngredient(ItemOrTag supply, ItemOrTag ingredient)
+    {
+        if (supply.Id == ingredient.Id)
+        {
+            return true;
+        }
+
+        if (supply.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.Id))
+        {
+            return true;
+        }
+
+        return supply.IsTag && supply.GetAssociatedItemsAndSelf().Any(iot => iot.Id == ingredient.Id);
+    }
 
     public static IngredientCoverageSnapshot ComputeCoverage(UserRecipe parentRecipe, DataContext shoppingList, IEnumerable<UserRecipe> children)
     {
@@ -60,7 +75,7 @@ public static class ShoppingListCoverageCalculator
             .OrderBy(e => e.Index)
             .Select(e => new IngredientDemand(
                 IngredientElementId: e.Id,
-                ItemOrTagId: e.ItemOrTag.Id,
+                ItemOrTag: e.ItemOrTag,
                 RequiredQuantity: Math.Abs(e.Quantity.GetDynamicValue(shoppingList) * parentRecipe.RoundFactor)))
             .ToList();
 
@@ -69,11 +84,7 @@ public static class ShoppingListCoverageCalculator
             return new IngredientCoverageSnapshot(new Dictionary<Guid, (decimal RequiredQuantity, decimal CoveredQuantity)>());
         }
 
-        var relevantIngredientItemIds = demands
-            .Select(d => d.ItemOrTagId)
-            .ToHashSet();
-
-        var supplies = BuildSuppliesFromUserRecipes(children, shoppingList, relevantIngredientItemIds);
+        var supplies = BuildSuppliesFromUserRecipes(children, shoppingList, demands);
         return ComputeCoverageSnapshot(demands, supplies, supplyMultiplier: 1m);
     }
 
@@ -92,7 +103,7 @@ public static class ShoppingListCoverageCalculator
                 e.IsIngredient() &&
                 childRecipe.Recipe.Elements.Any(product =>
                     product.IsProduct() &&
-                    product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == e.ItemOrTag.Id)))
+                    CanSupplyIngredient(product.ItemOrTag, e.ItemOrTag)))
             .OrderBy(e => e.Index)
             .ToList();
 
@@ -104,27 +115,23 @@ public static class ShoppingListCoverageCalculator
         var demands = matchingIngredients
             .Select(ingredient => new IngredientDemand(
                 IngredientElementId: ingredient.Id,
-                ItemOrTagId: ingredient.ItemOrTag.Id,
+                ItemOrTag: ingredient.ItemOrTag,
                 RequiredQuantity: Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList) * parentRecipe.RoundFactor)))
             .ToList();
-
-        var relevantIngredientItemIds = demands
-            .Select(d => d.ItemOrTagId)
-            .ToHashSet();
 
         var supplies = childRecipe.Recipe.Elements
             .Where(e => e.IsProduct())
             .Select(product =>
             {
-                var supportedIngredientIds = product.ItemOrTag.GetAssociatedTagsAndSelf()
-                    .Select(iot => iot.Id)
-                    .Where(id => relevantIngredientItemIds.Contains(id))
+                var supportedIngredientIds = demands
+                    .Where(demand => CanSupplyIngredient(product.ItemOrTag, demand.ItemOrTag))
+                    .Select(demand => demand.IngredientElementId)
                     .ToHashSet();
 
                 var quantityPerCraft = product.Quantity.GetDynamicValue(shoppingList);
                 return new ProductSupply(supportedIngredientIds, quantityPerCraft);
             })
-            .Where(supply => supply.QuantityPerCraft > Epsilon && supply.SupportedIngredientItemOrTagIds.Count > 0)
+            .Where(supply => supply.QuantityPerCraft > Epsilon && supply.SupportedIngredientElementIds.Count > 0)
             .ToList();
 
         if (supplies.Count == 0)
@@ -136,7 +143,7 @@ public static class ShoppingListCoverageCalculator
         foreach (var demand in demands)
         {
             var compatibleSupplyPerCraft = supplies
-                .Where(s => s.SupportedIngredientItemOrTagIds.Contains(demand.ItemOrTagId))
+                .Where(s => s.SupportedIngredientElementIds.Contains(demand.IngredientElementId))
                 .Sum(s => s.QuantityPerCraft);
 
             if (compatibleSupplyPerCraft <= Epsilon)
@@ -183,7 +190,7 @@ public static class ShoppingListCoverageCalculator
         return Math.Max(left, 1);
     }
 
-    private static List<ProductSupply> BuildSuppliesFromUserRecipes(IEnumerable<UserRecipe> children, DataContext shoppingList, HashSet<Guid> relevantIngredientItemIds)
+    private static List<ProductSupply> BuildSuppliesFromUserRecipes(IEnumerable<UserRecipe> children, DataContext shoppingList, IReadOnlyList<IngredientDemand> demands)
     {
         var supplies = new List<ProductSupply>();
 
@@ -191,9 +198,9 @@ public static class ShoppingListCoverageCalculator
         {
             foreach (var product in childRecipe.Recipe.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index))
             {
-                var supportedIngredientIds = product.ItemOrTag.GetAssociatedTagsAndSelf()
-                    .Select(iot => iot.Id)
-                    .Where(id => relevantIngredientItemIds.Contains(id))
+                var supportedIngredientIds = demands
+                    .Where(demand => CanSupplyIngredient(product.ItemOrTag, demand.ItemOrTag))
+                    .Select(demand => demand.IngredientElementId)
                     .ToHashSet();
 
                 if (supportedIngredientIds.Count == 0)
@@ -296,7 +303,7 @@ public static class ShoppingListCoverageCalculator
 
             for (var demandIndex = 0; demandIndex < demandCount; demandIndex++)
             {
-                if (!supply.SupportedIngredientItemOrTagIds.Contains(demands[demandIndex].ItemOrTagId))
+                if (!supply.SupportedIngredientElementIds.Contains(demands[demandIndex].IngredientElementId))
                 {
                     continue;
                 }

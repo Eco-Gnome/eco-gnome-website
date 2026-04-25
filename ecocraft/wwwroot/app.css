@@ -386,10 +386,49 @@
 }
 
 .shopping-list-ingredient-scroll {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+.shopping-list-tree {
+    overflow-x: hidden;
+}
+
+.shopping-list-tree .mud-treeview-item-label {
+    display: flex;
+    min-width: 0;
+}
+
+.shopping-list-tree .mud-treeview-item-label > * {
+    width: 100%;
+    min-width: 0;
+}
+
+.shopping-list-recipe-row {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.shopping-list-recipe-primary-product,
+.shopping-list-recipe-quantity {
+    flex: 0 0 auto;
+}
+
+.shopping-list-recipe-label {
+    flex: 0 1 190px;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+.shopping-list-recipe-label .mud-typography {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .shopping-list-ingredient-row {

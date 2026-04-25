@@ -459,6 +459,7 @@
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                             <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext).ToBuy)"
                                       Filter="new Func<ItemOrTag, bool>(FilterTagToBuy)"
+                                      Class="mud-table-container-no-overflow-y"
                                       Dense="true"
                                       Hover="true"
                                       Virtualize="false">
