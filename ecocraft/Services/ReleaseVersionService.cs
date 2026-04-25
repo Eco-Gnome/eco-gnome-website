@@ -13,6 +13,17 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.2",
+            "2026-04-25",
+            "Economy Viewer, Player Drill-down & Reliability Improvements",
+            """
+            - Economy Viewer: Added a new read-only Economy Viewer page to analyze server-wide economy data without changing player or server settings.
+            - Global Analytics: Added aggregated views by Item, Recipe, Skill, and Player with search, sortable min/avg/max price and margin metrics, configured players/contexts, and spread analysis.
+            - Deeper Visibility: Added expandable rows in global tables to inspect per-player context details and quickly identify where values diverge.
+            - Player Drill-down: Added side-by-side comparison between two players with context selection, Item/Recipe/Skill comparison modes, delta indicators, and clear status badges.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.1",
             "2026-04-17",
             "MudBlazor 9.3 Migration, Shopping List Guided Expansion & Stability Improvements",
@@ -144,6 +155,5 @@ public class ReleaseVersionService
             - Server Management: Export your server data using the [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod), and import custom recipes and settings.
             """
         ),
-
     ];
 }
