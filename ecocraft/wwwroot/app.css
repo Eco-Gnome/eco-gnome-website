@@ -395,9 +395,10 @@
 .shopping-list-ingredient-row {
     flex-wrap: nowrap;
     justify-content: flex-end;
-    column-gap: 4px;
-    width: max-content;
-    min-width: 100%;
+    gap: 4px;
+    width: 100%;
+    min-width: max-content;
+    box-sizing: border-box;
 }
 
 .shopping-list-choice-container {
