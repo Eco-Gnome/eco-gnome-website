@@ -1,0 +1,54 @@
+@page "/guide/server-management"
+@using ecocraft.Extensions
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<PageTitle>@LocalizationService.GetTranslation("ServerManagementGuide.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <MudStack Spacing="4">
+        <section class="guide-hero">
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.overline" Color="Color.Primary">@LocalizationService.GetTranslation("Guide.Eyebrow")</MudText>
+                <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("ServerManagementGuide.Title")</MudText>
+                <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("ServerManagementGuide.Intro")</MudText>
+                <MudStack Row Spacing="2" Class="flex-wrap">
+                    <MudButton Href="/guide" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.HelpOutline">
+                        @LocalizationService.GetTranslation("Guide.BackToGuide")
+                    </MudButton>
+                    <MudButton Href="/server-management" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AdminPanelSettings">
+                        @LocalizationService.GetTranslation("ServerManagementGuide.OpenTool")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </section>
+
+        <MudGrid>
+            @foreach (var guideSection in Sections)
+            {
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="0" Class="guide-panel pa-4">
+                        <MudStack Spacing="2">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@guideSection.Icon" Color="Color.Primary"/>
+                                <MudText Typo="Typo.h5">@LocalizationService.GetTranslation(guideSection.TitleKey)</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(guideSection.BodyKey)</MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudStack>
+</MudContainer>
+
+@code {
+    private static readonly GuideItem[] Sections =
+    [
+        new("ServerManagementGuide.Sections.Data.Title", "ServerManagementGuide.Sections.Data.Body", Icons.Material.Filled.CloudUpload),
+        new("ServerManagementGuide.Sections.PricePolicies.Title", "ServerManagementGuide.Sections.PricePolicies.Body", Icons.Material.Filled.PriceCheck),
+        new("ServerManagementGuide.Sections.Members.Title", "ServerManagementGuide.Sections.Members.Body", Icons.Material.Filled.Groups)
+    ];
+
+    private sealed record GuideItem(string TitleKey, string BodyKey, string Icon);
+}

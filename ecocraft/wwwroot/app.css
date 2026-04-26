@@ -265,8 +265,14 @@
 }
 
 .guide-step,
-.guide-detail {
+.guide-detail,
+.guide-profile,
+.guide-feature-card {
     height: 100%;
+}
+
+.guide-card-actions {
+    margin-top: auto;
 }
 
 .flex-wrap {

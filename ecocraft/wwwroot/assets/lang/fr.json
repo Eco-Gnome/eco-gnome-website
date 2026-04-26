@@ -51,7 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
-        "PriceCalculatorGuide": "Guide du calculateur",
+        "Guide": "Guide",
         "ShoppingList": "Liste de course",
         "EconomyViewer": "Analyse économique",
         "VideosUpload": "Upload de Vidéos",
@@ -416,6 +416,7 @@
         "Eyebrow": "Tutoriel",
         "Title": "Utiliser le calculateur de prix",
         "Intro": "Ce guide explique comment configurer Eco Gnome pour avoir des prix de vente cohérents : compétences, recettes, prix d'achat, coût des calories, coûts de table, marges, choix primary et réintégration.",
+        "BackToGuide": "Retour au guide",
         "BackToCalculator": "Retour au calculateur",
         "Summary": {
             "Title": "Le principe",
@@ -516,6 +517,181 @@
                     "Title": "Lier le serveur",
                     "Body": "Après enregistrement du serveur et liaison du joueur, le mod peut ouvrir Eco Gnome directement sur le bon serveur."
                 }
+            }
+        }
+    },
+    "Guide": {
+        "PageTitle": "Guide Eco Gnome",
+        "Eyebrow": "Guide",
+        "Title": "Découvrir Eco Gnome",
+        "Intro": "Eco Gnome regroupe des outils pour configurer votre serveur Eco, calculer des prix cohérents, préparer vos fabrications, analyser l'économie et synchroniser vos shops avec le mod optionnel.",
+        "BackToGuide": "Retour au guide",
+        "Start": {
+            "Title": "Par où commencer ?",
+            "Configure": "Choisissez ou rejoignez un serveur Eco Gnome pour charger les recettes et les données du jeu.",
+            "Calculate": "Créez des contextes pour séparer vos métiers, vos marges ou vos hypothèses de marché.",
+            "Prepare": "Utilisez le calculateur et la liste de course pour préparer vos prix et vos chaînes de production.",
+            "Analyze": "Comparez les prix du serveur avec l'analyse économique ou synchronisez vos shops avec le mod."
+        },
+        "Profiles": {
+            "Title": "Choisir le bon parcours",
+            "Seller": {
+                "Title": "Vendeur",
+                "Body": "Commencez par le calculateur de prix pour définir vos coûts, marges et prix de vente."
+            },
+            "Buyer": {
+                "Title": "Producteur",
+                "Body": "Utilisez la liste de course pour dérouler les recettes et identifier les ressources à préparer."
+            },
+            "Admin": {
+                "Title": "Admin serveur",
+                "Body": "Passez par la gestion serveur pour importer les données, gérer les membres et fixer les règles de prix."
+            },
+            "ModUser": {
+                "Title": "Utilisateur du mod",
+                "Body": "Liez votre serveur et vos shops pour synchroniser les prix depuis vos contextes Eco Gnome."
+            }
+        },
+        "Features": {
+            "PriceCalculator": {
+                "Title": "Calculateur de prix",
+                "Body": "Configurez vos compétences, recettes, coûts d'achat et marges pour obtenir des prix de vente cohérents.",
+                "Action": "Lire le guide",
+                "Points": {
+                    "Setup": "Configuration par contexte, métier, niveaux, talents et tables.",
+                    "Inputs": "Prix d'achat des ressources, items ou tags nécessaires.",
+                    "Outputs": "Prix de revient, marges, choix primary et prix de vente."
+                }
+            },
+            "ShoppingList": {
+                "Title": "Liste de course",
+                "Body": "Préparez une fabrication complète en déroulant les recettes nécessaires jusqu'aux ressources de base.",
+                "Action": "Lire le guide",
+                "Points": {
+                    "Tree": "Vue en arbre des recettes et ingrédients.",
+                    "AutoExpand": "Expansion automatique ou guidée des sous-recettes.",
+                    "Choices": "Choix manuel quand plusieurs recettes peuvent produire un ingrédient."
+                }
+            },
+            "EconomyViewer": {
+                "Title": "Analyse économique",
+                "Body": "Comparez les prix configurés par les joueurs et repérez les écarts sur le serveur.",
+                "Action": "Lire le guide",
+                "Points": {
+                    "Global": "Vue globale par item, recette, métier ou joueur.",
+                    "Filters": "Filtres par joueur, métier et lignes incomplètes.",
+                    "Drilldown": "Détail joueur contre joueur pour comprendre les écarts."
+                }
+            },
+            "ServerManagement": {
+                "Title": "Gestion serveur",
+                "Body": "Administrez les données du serveur, les membres et les règles de prix partagées.",
+                "Action": "Lire le guide",
+                "Points": {
+                    "Data": "Import ou copie des données de recettes et objets.",
+                    "Prices": "Prix min, défaut, max, coût des calories et marges serveur.",
+                    "Members": "Gestion des membres et des droits admin."
+                }
+            },
+            "EcoGnomeMod": {
+                "Title": "Mod Eco Gnome",
+                "Body": "Extension serveur optionnelle pour lier Eco Gnome au jeu et automatiser les shops.",
+                "Action": "Lire le guide",
+                "Points": {
+                    "Link": "Lien entre serveur de jeu, serveur Eco Gnome et joueur.",
+                    "Sync": "Synchronisation des prix d'achat et de vente.",
+                    "Shops": "Création automatique des offres à partir d'un contexte."
+                }
+            }
+        }
+    },
+    "ShoppingListGuide": {
+        "PageTitle": "Guide de la liste de course",
+        "Title": "Utiliser la liste de course",
+        "Intro": "La liste de course sert à préparer une fabrication complète : recettes à produire, sous-recettes, quantités, modules, talents et ressources finales à réunir.",
+        "OpenTool": "Ouvrir la liste de course",
+        "Workflow": {
+            "Title": "Parcours recommandé",
+            "Context": {
+                "Title": "1. Choisir une liste",
+                "Body": "Créez une liste par projet de fabrication pour isoler les quantités, recettes et choix de production."
+            },
+            "Setup": {
+                "Title": "2. Vérifier la configuration",
+                "Body": "Les compétences, talents, tables et modules influencent les quantités et le temps de fabrication."
+            },
+            "Recipes": {
+                "Title": "3. Ajouter les recettes",
+                "Body": "Ajoutez les produits à fabriquer. La vue en arbre affiche les ingrédients nécessaires et les quantités à produire."
+            },
+            "Expand": {
+                "Title": "4. Dérouler les ingrédients",
+                "Body": "Utilisez l'expansion automatique ou guidée pour transformer les ingrédients craftables en sous-recettes jusqu'aux ressources de base."
+            }
+        }
+    },
+    "EconomyViewerGuide": {
+        "PageTitle": "Guide de l'analyse économique",
+        "Title": "Lire l'analyse économique",
+        "Intro": "L'analyse économique est une vue lecture seule qui compare les prix configurés par les joueurs d'un serveur pour repérer les écarts, les prix manquants et les opportunités d'ajustement.",
+        "OpenTool": "Ouvrir l'analyse économique",
+        "Concepts": {
+            "ReadOnly": {
+                "Title": "Lecture seule",
+                "Body": "Aucun prix ni contexte n'est modifié depuis cette page. Elle sert uniquement à comparer les données existantes."
+            },
+            "Compare": {
+                "Title": "Comparer",
+                "Body": "Regroupez par item, recette, métier ou joueur pour identifier les prix minimum, moyens, maximum et les écarts."
+            },
+            "Drilldown": {
+                "Title": "Détail",
+                "Body": "Quand plusieurs joueurs sont configurés, ouvrez le détail pour comprendre d'où viennent les différences de prix."
+            }
+        }
+    },
+    "ServerManagementGuide": {
+        "PageTitle": "Guide de gestion serveur",
+        "Title": "Administrer un serveur",
+        "Intro": "La gestion serveur centralise les données utilisées par Eco Gnome : recettes, objets, tags, membres, politiques de prix et contraintes partagées.",
+        "OpenTool": "Ouvrir la gestion serveur",
+        "Sections": {
+            "Data": {
+                "Title": "Données serveur",
+                "Body": "Importez un fichier de données, copiez un serveur existant ou vérifiez les statistiques de recettes, items, tables et modules."
+            },
+            "PricePolicies": {
+                "Title": "Règles de prix",
+                "Body": "Définissez les prix minimum, par défaut ou maximum, ainsi que les politiques de coût des calories et de marge."
+            },
+            "Members": {
+                "Title": "Membres",
+                "Body": "Gérez les joueurs associés au serveur, leurs droits admin et l'accès aux outils de configuration."
+            }
+        }
+    },
+    "EcoGnomeModGuide": {
+        "PageTitle": "Guide du mod Eco Gnome",
+        "Title": "Utiliser le mod Eco Gnome",
+        "Intro": "Le mod Eco Gnome est optionnel. Installé sur le serveur de jeu, il permet de lier le serveur et les joueurs à Eco Gnome, puis de synchroniser ou créer les offres des shops depuis un contexte.",
+        "OpenRepository": "Voir le mod sur GitHub",
+        "Workflow": {
+            "Title": "Parcours recommandé",
+            "Install": {
+                "Title": "1. Installer le mod",
+                "Body": "L'installation se fait côté serveur Eco. Le mod donne accès aux commandes et actions nécessaires à la liaison."
+            },
+            "Link": {
+                "Title": "2. Lier serveur et joueur",
+                "Body": "Le serveur doit être enregistré dans Eco Gnome, puis le joueur doit être associé au bon compte et au bon serveur."
+            },
+            "Context": {
+                "Title": "3. Choisir un contexte",
+                "Body": "Les prix synchronisés viennent d'un contexte Eco Gnome. Préparez donc vos achats, ventes, primary et marges avant la synchronisation."
+            },
+            "Sync": {
+                "Title": "4. Synchroniser les shops",
+                "Body": "Le mod peut appliquer les prix d'achat, les prix de vente ou créer les offres du shop selon le besoin."
             }
         }
     },

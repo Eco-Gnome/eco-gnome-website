@@ -1,4 +1,5 @@
 @page "/price-calculator-guide"
+@page "/guide/price-calculator"
 @implements IDisposable
 @using ecocraft.Extensions
 @using ecocraft.Services
@@ -17,6 +18,12 @@
                         <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("PriceCalculatorGuide.Title")</MudText>
                         <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("PriceCalculatorGuide.Intro")</MudText>
                         <MudStack Row Spacing="2" Class="flex-wrap">
+                            <MudButton Href="/guide"
+                                       Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.HelpOutline">
+                                @LocalizationService.GetTranslation("PriceCalculatorGuide.BackToGuide")
+                            </MudButton>
                             <MudButton Href="/"
                                        Variant="Variant.Filled"
                                        Color="Color.Primary"

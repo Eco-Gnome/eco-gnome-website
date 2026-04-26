@@ -1,0 +1,63 @@
+@page "/guide/eco-gnome-mod"
+@using ecocraft.Extensions
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<PageTitle>@LocalizationService.GetTranslation("EcoGnomeModGuide.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <MudStack Spacing="4">
+        <section class="guide-hero">
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.overline" Color="Color.Primary">@LocalizationService.GetTranslation("Guide.Eyebrow")</MudText>
+                <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("EcoGnomeModGuide.Title")</MudText>
+                <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("EcoGnomeModGuide.Intro")</MudText>
+                <MudStack Row Spacing="2" Class="flex-wrap">
+                    <MudButton Href="/guide" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.HelpOutline">
+                        @LocalizationService.GetTranslation("Guide.BackToGuide")
+                    </MudButton>
+                    <MudButton Href="@RepositoryUrl" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.OpenInNew">
+                        @LocalizationService.GetTranslation("EcoGnomeModGuide.OpenRepository")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </section>
+
+        <MudPaper Elevation="0" Class="guide-panel pa-4">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@MDIIcons.Filled.TableOfContents" Color="Color.Primary"/>
+                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("EcoGnomeModGuide.Workflow.Title")</MudText>
+                </MudStack>
+                <MudGrid>
+                    @foreach (var step in Steps)
+                    {
+                        <MudItem xs="12" md="6" lg="3">
+                            <MudStack Spacing="1" Class="guide-step">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@step.Icon" Color="Color.Primary"/>
+                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(step.TitleKey)</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(step.BodyKey)</MudText>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudContainer>
+
+@code {
+    private const string RepositoryUrl = "https://github.com/Eco-Gnome/eco-gnome-mod";
+
+    private static readonly GuideItem[] Steps =
+    [
+        new("EcoGnomeModGuide.Workflow.Install.Title", "EcoGnomeModGuide.Workflow.Install.Body", MDIIcons.Filled.Puzzle),
+        new("EcoGnomeModGuide.Workflow.Link.Title", "EcoGnomeModGuide.Workflow.Link.Body", MDIIcons.Filled.Link),
+        new("EcoGnomeModGuide.Workflow.Context.Title", "EcoGnomeModGuide.Workflow.Context.Body", MDIIcons.Filled.Tab),
+        new("EcoGnomeModGuide.Workflow.Sync.Title", "EcoGnomeModGuide.Workflow.Sync.Body", MDIIcons.Filled.StoreCheck)
+    ];
+
+    private sealed record GuideItem(string TitleKey, string BodyKey, string Icon);
+}

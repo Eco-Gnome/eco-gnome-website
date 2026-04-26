@@ -1,0 +1,54 @@
+@page "/guide/economy-viewer"
+@using ecocraft.Extensions
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<PageTitle>@LocalizationService.GetTranslation("EconomyViewerGuide.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <MudStack Spacing="4">
+        <section class="guide-hero">
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.overline" Color="Color.Primary">@LocalizationService.GetTranslation("Guide.Eyebrow")</MudText>
+                <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("EconomyViewerGuide.Title")</MudText>
+                <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("EconomyViewerGuide.Intro")</MudText>
+                <MudStack Row Spacing="2" Class="flex-wrap">
+                    <MudButton Href="/guide" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.HelpOutline">
+                        @LocalizationService.GetTranslation("Guide.BackToGuide")
+                    </MudButton>
+                    <MudButton Href="/economy-viewer" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.QueryStats">
+                        @LocalizationService.GetTranslation("EconomyViewerGuide.OpenTool")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </section>
+
+        <MudGrid>
+            @foreach (var concept in Concepts)
+            {
+                <MudItem xs="12" md="4">
+                    <MudPaper Elevation="0" Class="guide-panel pa-4">
+                        <MudStack Spacing="2">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@concept.Icon" Color="Color.Primary"/>
+                                <MudText Typo="Typo.h5">@LocalizationService.GetTranslation(concept.TitleKey)</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(concept.BodyKey)</MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudStack>
+</MudContainer>
+
+@code {
+    private static readonly GuideItem[] Concepts =
+    [
+        new("EconomyViewerGuide.Concepts.ReadOnly.Title", "EconomyViewerGuide.Concepts.ReadOnly.Body", Icons.Material.Filled.Visibility),
+        new("EconomyViewerGuide.Concepts.Compare.Title", "EconomyViewerGuide.Concepts.Compare.Body", Icons.Material.Filled.CompareArrows),
+        new("EconomyViewerGuide.Concepts.Drilldown.Title", "EconomyViewerGuide.Concepts.Drilldown.Body", Icons.Material.Filled.PersonSearch)
+    ];
+
+    private sealed record GuideItem(string TitleKey, string BodyKey, string Icon);
+}

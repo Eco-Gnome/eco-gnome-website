@@ -51,7 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
-        "PriceCalculatorGuide": "Calculator Guide",
+        "Guide": "Guide",
         "ShoppingList": "Shopping List",
         "EconomyViewer": "Economy Viewer",
         "VideosUpload": "Videos Uploader",
@@ -426,6 +426,7 @@
         "Eyebrow": "Tutorial",
         "Title": "Use the price calculator",
         "Intro": "This guide explains how to configure Eco Gnome to get consistent sale prices: skills, recipes, buy prices, calorie cost, table costs, margins, primary choices, and reintegration.",
+        "BackToGuide": "Back to guide",
         "BackToCalculator": "Back to calculator",
         "Summary": {
             "Title": "The principle",
@@ -526,6 +527,181 @@
                     "Title": "Link the server",
                     "Body": "After server registration and player linking, the mod can open Eco Gnome directly on the right server."
                 }
+            }
+        }
+    },
+    "Guide": {
+        "PageTitle": "Eco Gnome Guide",
+        "Eyebrow": "Guide",
+        "Title": "Discover Eco Gnome",
+        "Intro": "Eco Gnome brings together tools to configure your Eco server, calculate consistent prices, prepare crafts, analyze the economy, and sync shops with the optional mod.",
+        "BackToGuide": "Back to guide",
+        "Start": {
+            "Title": "Where to start?",
+            "Configure": "Choose or join an Eco Gnome server to load recipes and game data.",
+            "Calculate": "Create contexts to separate professions, margins, or market assumptions.",
+            "Prepare": "Use the calculator and shopping list to prepare prices and production chains.",
+            "Analyze": "Compare server prices with Economy Viewer or sync your shops with the mod."
+        },
+        "Profiles": {
+            "Title": "Choose the right path",
+            "Seller": {
+                "Title": "Seller",
+                "Body": "Start with the price calculator to define costs, margins, and sale prices."
+            },
+            "Buyer": {
+                "Title": "Producer",
+                "Body": "Use the shopping list to expand recipes and identify the resources to prepare."
+            },
+            "Admin": {
+                "Title": "Server admin",
+                "Body": "Use server management to import data, manage members, and define shared price rules."
+            },
+            "ModUser": {
+                "Title": "Mod user",
+                "Body": "Link your server and shops to sync prices from your Eco Gnome contexts."
+            }
+        },
+        "Features": {
+            "PriceCalculator": {
+                "Title": "Price calculator",
+                "Body": "Configure skills, recipes, buy costs, and margins to get consistent sale prices.",
+                "Action": "Read guide",
+                "Points": {
+                    "Setup": "Setup by context, profession, levels, talents, and tables.",
+                    "Inputs": "Buy prices for required resources, items, or tags.",
+                    "Outputs": "Cost price, margins, primary choices, and sale price."
+                }
+            },
+            "ShoppingList": {
+                "Title": "Shopping list",
+                "Body": "Prepare a full craft by expanding required recipes down to raw resources.",
+                "Action": "Read guide",
+                "Points": {
+                    "Tree": "Recipe and ingredient tree view.",
+                    "AutoExpand": "Automatic or guided expansion of sub-recipes.",
+                    "Choices": "Manual choice when several recipes can produce an ingredient."
+                }
+            },
+            "EconomyViewer": {
+                "Title": "Economy Viewer",
+                "Body": "Compare prices configured by players and spot differences on the server.",
+                "Action": "Read guide",
+                "Points": {
+                    "Global": "Global view by item, recipe, skill, or player.",
+                    "Filters": "Filters by player, skill, and incomplete rows.",
+                    "Drilldown": "Player-to-player detail to understand spreads."
+                }
+            },
+            "ServerManagement": {
+                "Title": "Server management",
+                "Body": "Administer server data, members, and shared price rules.",
+                "Action": "Read guide",
+                "Points": {
+                    "Data": "Import or copy recipe and item data.",
+                    "Prices": "Min, default, max prices, calorie cost, and server margins.",
+                    "Members": "Member and admin permission management."
+                }
+            },
+            "EcoGnomeMod": {
+                "Title": "Eco Gnome mod",
+                "Body": "Optional server extension to connect Eco Gnome to the game and automate shops.",
+                "Action": "Read guide",
+                "Points": {
+                    "Link": "Link game server, Eco Gnome server, and player.",
+                    "Sync": "Sync buy and sell prices.",
+                    "Shops": "Automatically create offers from a context."
+                }
+            }
+        }
+    },
+    "ShoppingListGuide": {
+        "PageTitle": "Shopping List Guide",
+        "Title": "Use the shopping list",
+        "Intro": "The shopping list helps prepare a full craft: products to make, sub-recipes, quantities, modules, talents, and final resources to gather.",
+        "OpenTool": "Open shopping list",
+        "Workflow": {
+            "Title": "Recommended flow",
+            "Context": {
+                "Title": "1. Choose a list",
+                "Body": "Create one list per crafting project to isolate quantities, recipes, and production choices."
+            },
+            "Setup": {
+                "Title": "2. Check setup",
+                "Body": "Skills, talents, tables, and modules influence quantities and crafting time."
+            },
+            "Recipes": {
+                "Title": "3. Add recipes",
+                "Body": "Add the products to craft. The tree view shows required ingredients and quantities to produce."
+            },
+            "Expand": {
+                "Title": "4. Expand ingredients",
+                "Body": "Use automatic or guided expansion to turn craftable ingredients into sub-recipes down to raw resources."
+            }
+        }
+    },
+    "EconomyViewerGuide": {
+        "PageTitle": "Economy Viewer Guide",
+        "Title": "Read Economy Viewer",
+        "Intro": "Economy Viewer is a read-only view that compares prices configured by server players to spot spreads, missing prices, and adjustment opportunities.",
+        "OpenTool": "Open Economy Viewer",
+        "Concepts": {
+            "ReadOnly": {
+                "Title": "Read-only",
+                "Body": "No price or context is modified from this page. It is only used to compare existing data."
+            },
+            "Compare": {
+                "Title": "Compare",
+                "Body": "Group by item, recipe, skill, or player to identify minimum, average, maximum prices and spreads."
+            },
+            "Drilldown": {
+                "Title": "Drill-down",
+                "Body": "When several players are configured, open the detail view to understand where price differences come from."
+            }
+        }
+    },
+    "ServerManagementGuide": {
+        "PageTitle": "Server Management Guide",
+        "Title": "Administer a server",
+        "Intro": "Server management centralizes data used by Eco Gnome: recipes, items, tags, members, price policies, and shared constraints.",
+        "OpenTool": "Open server management",
+        "Sections": {
+            "Data": {
+                "Title": "Server data",
+                "Body": "Import a data file, copy an existing server, or check recipe, item, table, and module statistics."
+            },
+            "PricePolicies": {
+                "Title": "Price rules",
+                "Body": "Define minimum, default, or maximum prices, as well as calorie cost and margin policies."
+            },
+            "Members": {
+                "Title": "Members",
+                "Body": "Manage players linked to the server, their admin rights, and access to configuration tools."
+            }
+        }
+    },
+    "EcoGnomeModGuide": {
+        "PageTitle": "Eco Gnome Mod Guide",
+        "Title": "Use the Eco Gnome mod",
+        "Intro": "The Eco Gnome mod is optional. Installed on the game server, it links the server and players to Eco Gnome, then syncs or creates shop offers from a context.",
+        "OpenRepository": "View the mod on GitHub",
+        "Workflow": {
+            "Title": "Recommended flow",
+            "Install": {
+                "Title": "1. Install the mod",
+                "Body": "Installation happens on the Eco server. The mod exposes the commands and actions needed for linking."
+            },
+            "Link": {
+                "Title": "2. Link server and player",
+                "Body": "The server must be registered in Eco Gnome, then the player must be associated with the right account and server."
+            },
+            "Context": {
+                "Title": "3. Choose a context",
+                "Body": "Synced prices come from an Eco Gnome context. Prepare buy prices, sell prices, primary choices, and margins before syncing."
+            },
+            "Sync": {
+                "Title": "4. Sync shops",
+                "Body": "The mod can apply buy prices, sell prices, or create shop offers depending on the need."
             }
         }
     },

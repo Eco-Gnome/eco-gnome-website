@@ -1,0 +1,173 @@
+@page "/guide"
+@using ecocraft.Extensions
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<PageTitle>@LocalizationService.GetTranslation("Guide.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <MudStack Spacing="4">
+        <section class="guide-hero">
+            <MudGrid>
+                <MudItem xs="12" md="7">
+                    <MudStack Spacing="2">
+                        <MudText Typo="Typo.overline" Color="Color.Primary">@LocalizationService.GetTranslation("Guide.Eyebrow")</MudText>
+                        <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("Guide.Title")</MudText>
+                        <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("Guide.Intro")</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" md="5">
+                    <MudPaper Elevation="0" Class="guide-summary pa-4">
+                        <MudStack Spacing="2">
+                            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("Guide.Start.Title")</MudText>
+                            @foreach (var startKey in StartKeys)
+                            {
+                                <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                                    <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(startKey)</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </section>
+
+        <MudPaper Elevation="0" Class="guide-panel pa-4">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@MDIIcons.Filled.Compass" Color="Color.Primary"/>
+                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("Guide.Profiles.Title")</MudText>
+                </MudStack>
+                <MudGrid>
+                    @foreach (var profile in Profiles)
+                    {
+                        <MudItem xs="12" md="6" lg="3">
+                            <MudStack Spacing="1" Class="guide-profile">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@profile.Icon" Color="Color.Primary"/>
+                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(profile.TitleKey)</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(profile.BodyKey)</MudText>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+
+        <MudGrid>
+            @foreach (var feature in Features)
+            {
+                <MudItem xs="12" md="6" lg="4">
+                    <MudPaper Elevation="0" Class="guide-panel guide-feature-card pa-4">
+                        <MudStack Spacing="2" Class="h-100">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@feature.Icon" Color="Color.Primary"/>
+                                <MudText Typo="Typo.h5">@LocalizationService.GetTranslation(feature.TitleKey)</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(feature.BodyKey)</MudText>
+                            <MudStack Spacing="1">
+                                @foreach (var pointKey in feature.PointKeys)
+                                {
+                                    <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                                        <MudIcon Icon="@MDIIcons.Filled.Check" Color="Color.Success" Size="Size.Small"/>
+                                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(pointKey)</MudText>
+                                    </MudStack>
+                                }
+                            </MudStack>
+                            <MudStack Row Class="guide-card-actions">
+                                <MudButton Href="@feature.Href"
+                                           Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           EndIcon="@Icons.Material.Filled.ArrowForward">
+                                    @LocalizationService.GetTranslation(feature.ActionKey)
+                                </MudButton>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudStack>
+</MudContainer>
+
+@code {
+    private static readonly string[] StartKeys =
+    [
+        "Guide.Start.Configure",
+        "Guide.Start.Calculate",
+        "Guide.Start.Prepare",
+        "Guide.Start.Analyze"
+    ];
+
+    private static readonly GuideItem[] Profiles =
+    [
+        new("Guide.Profiles.Seller.Title", "Guide.Profiles.Seller.Body", Icons.Material.Filled.Balance),
+        new("Guide.Profiles.Buyer.Title", "Guide.Profiles.Buyer.Body", MDIIcons.Outline.Cart),
+        new("Guide.Profiles.Admin.Title", "Guide.Profiles.Admin.Body", Icons.Material.Filled.AdminPanelSettings),
+        new("Guide.Profiles.ModUser.Title", "Guide.Profiles.ModUser.Body", MDIIcons.Filled.Puzzle)
+    ];
+
+    private static readonly GuideFeature[] Features =
+    [
+        new(
+            "Guide.Features.PriceCalculator.Title",
+            "Guide.Features.PriceCalculator.Body",
+            [
+                "Guide.Features.PriceCalculator.Points.Setup",
+                "Guide.Features.PriceCalculator.Points.Inputs",
+                "Guide.Features.PriceCalculator.Points.Outputs"
+            ],
+            "Guide.Features.PriceCalculator.Action",
+            "guide/price-calculator",
+            Icons.Material.Filled.Balance),
+        new(
+            "Guide.Features.ShoppingList.Title",
+            "Guide.Features.ShoppingList.Body",
+            [
+                "Guide.Features.ShoppingList.Points.Tree",
+                "Guide.Features.ShoppingList.Points.AutoExpand",
+                "Guide.Features.ShoppingList.Points.Choices"
+            ],
+            "Guide.Features.ShoppingList.Action",
+            "guide/shopping-list",
+            MDIIcons.Outline.Cart),
+        new(
+            "Guide.Features.EconomyViewer.Title",
+            "Guide.Features.EconomyViewer.Body",
+            [
+                "Guide.Features.EconomyViewer.Points.Global",
+                "Guide.Features.EconomyViewer.Points.Filters",
+                "Guide.Features.EconomyViewer.Points.Drilldown"
+            ],
+            "Guide.Features.EconomyViewer.Action",
+            "guide/economy-viewer",
+            Icons.Material.Filled.QueryStats),
+        new(
+            "Guide.Features.ServerManagement.Title",
+            "Guide.Features.ServerManagement.Body",
+            [
+                "Guide.Features.ServerManagement.Points.Data",
+                "Guide.Features.ServerManagement.Points.Prices",
+                "Guide.Features.ServerManagement.Points.Members"
+            ],
+            "Guide.Features.ServerManagement.Action",
+            "guide/server-management",
+            Icons.Material.Filled.AdminPanelSettings),
+        new(
+            "Guide.Features.EcoGnomeMod.Title",
+            "Guide.Features.EcoGnomeMod.Body",
+            [
+                "Guide.Features.EcoGnomeMod.Points.Link",
+                "Guide.Features.EcoGnomeMod.Points.Sync",
+                "Guide.Features.EcoGnomeMod.Points.Shops"
+            ],
+            "Guide.Features.EcoGnomeMod.Action",
+            "guide/eco-gnome-mod",
+            MDIIcons.Filled.Puzzle)
+    ];
+
+    private sealed record GuideItem(string TitleKey, string BodyKey, string Icon);
+    private sealed record GuideFeature(string TitleKey, string BodyKey, string[] PointKeys, string ActionKey, string Href, string Icon);
+}
