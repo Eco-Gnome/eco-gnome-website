@@ -1,8 +1,9 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
+@using System.Globalization
 @inject ContextService ContextService
 
-<div style="@($"position: relative; height: {Size}px;")">
+<div style="@($"position: relative; width: {Size}px; min-width: {Size}px; height: {Size}px; flex: 0 0 {Size}px;")">
     @if (Item is not null)
     {
         <MudImage @key="GetIconName(Item)"
@@ -25,15 +26,13 @@
     @if (Number is not null)
     {
         <MudStack Style="@($"position: absolute; top: 0; left: 0; height: {Size}px; width: {Size}px;")" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
-            <MudText Class="@NumberClass" Typo="@NumberTypo" Color="NumberColor">@Math.Round((decimal)Number, 0, MidpointRounding.AwayFromZero)</MudText>
+            <MudText Class="@NumberClass" Typo="@NumberTypo" Color="NumberColor" Style="@GetNumberStyle()">@GetRoundedNumber()</MudText>
         </MudStack>
     }
 
     @if (ForegroundIcon is not null)
     {
-        <MudStack Style="@($"position: absolute; top: 0; left: 0; height: {Size}px; width: {Size}px;")" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
-            <MudIcon Style="@($"height: {Size}px; width: {Size}px;")" Icon="@ForegroundIcon" Color="ForegroundIconColor" />
-        </MudStack>
+        <MudIcon Style="@GetForegroundIconStyle()" Icon="@ForegroundIcon" Color="ForegroundIconColor" />
     }
 </div>
 
@@ -56,4 +55,30 @@
             Talent t => t.TalentGroupName,
             _ => item.Name
         };
+
+    private decimal GetRoundedNumber()
+        => Math.Round((decimal)Number!, 0, MidpointRounding.AwayFromZero);
+
+    private string GetNumberStyle()
+    {
+        var numberLength = GetRoundedNumber()
+            .ToString("0", CultureInfo.InvariantCulture)
+            .Length;
+        var baseFontSize = NumberTypo == Typo.h6 ? 20m : Size >= 32 ? 14m : 12m;
+        var maxFontSize = Size / (Math.Max(numberLength, 1) * 0.62m);
+        var fontSize = Math.Max(8m, Math.Min(baseFontSize, maxFontSize));
+
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"width: {Size}px; max-width: {Size}px; overflow: hidden; white-space: nowrap; text-align: center; font-size: {fontSize:0.##}px; line-height: 1;");
+    }
+
+    private string GetForegroundIconStyle()
+    {
+        var foregroundSize = Math.Clamp(Size * 0.45m, 14m, 22m);
+
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"position: absolute; top: 0; right: 0; width: {foregroundSize:0.##}px; height: {foregroundSize:0.##}px; pointer-events: none; filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));");
+    }
 }

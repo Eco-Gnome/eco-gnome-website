@@ -144,7 +144,7 @@
                                     <MudTable Items="@_selectedShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
                                               FixedHeader="true"
                                               Hover="true"
-                                              Class="mt-4"
+                                              Class="mt-4 mud-table-container-no-overflow-y"
                                               Dense="true">
                                         <HeaderContent>
                                             <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
@@ -250,7 +250,7 @@
                                 </MudExpansionPanel>
                             </MudExpansionPanels>
                         </MudItem>
-                        <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
+                        <MudItem md="6" lg="3" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                                 @{
                                     var aggregatedOutputs = ShoppingListService.GetAggregatedOutputs(_selectedShoppingList, _selectedShoppingList.GetRootShoppingListRecipes());
@@ -296,7 +296,7 @@
                                 }
                             </MudPaper>
                         </MudItem>
-                        <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
+                        <MudItem md="6" lg="6" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                                 <MudAutocomplete T="Recipe"
                                                  @ref="_recipeAutocompleteRef"
@@ -319,55 +319,47 @@
                                         </MudStack>
                                     </ItemTemplate>
                                 </MudAutocomplete>
-                                <MudTreeView Items="TreeItems">
+                                <MudTreeView Items="TreeItems" Class="shopping-list-tree">
                                     <ItemTemplate>
-                                        <MudTreeViewItem Items="@context.Children" Expanded="@context.Expanded">
+                                        <MudTreeViewItem @key="context.Value.Id" Items="@context.Children" Expanded="@context.Expanded">
                                             <BodyContent Context="other">
-                                                <MudStack Row Class="flex-grow-1" AlignItems="AlignItems.Center">
+                                                <MudStack Row Class="shopping-list-recipe-row" AlignItems="AlignItems.Center">
                                                     @{
-                                                        var firstProduct = context.Value.Recipe.Elements.First(e => e.IsProduct() && e.Index == 0);
+                                                        var orderedProducts = GetOrderedProductsForDisplay(context.Value).ToList();
+                                                        var firstProduct = orderedProducts.First();
                                                         var number = firstProduct.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
-                                                        var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
-                                                            .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Any(iot => iot.Id == firstProduct.ItemOrTag.Id))
-                                                            .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
 
                                                         <MudTooltip Text="@(number + " " + LocalizationService.GetTranslation(firstProduct.ItemOrTag))">
-                                                            <MudStack Row AlignItems="AlignItems.Center">
+                                                            <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-recipe-primary-product">
                                                                 <EcoIcon Size="48"
                                                                          Item="firstProduct.ItemOrTag"
                                                                          NumberTypo="Typo.h6"
                                                                          NumberClass="mb-n1 text-shadow-black"
-                                                                         ForegroundIconColor="Color.Dark"
-                                                                         ForegroundIcon="@(fullfills ? MDIIcons.Outline.CheckCircle : null)"
                                                                          Number="number"/>
                                                             </MudStack>
                                                         </MudTooltip>
                                                     }
-                                                    <MudStack Spacing="0" AlignItems="AlignItems.Start">
+                                                    <MudStack Spacing="0" AlignItems="AlignItems.Start" Class="shopping-list-recipe-label">
                                                         <MudStack Row AlignItems="AlignItems.Start">
                                                             <MudText>@LocalizationService.GetTranslation(context.Value.Recipe) @LocalizationService.GetTranslation("Recipe")</MudText>
                                                         </MudStack>
                                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                            @foreach (var product in context.Value.Recipe.Elements.Where(e => e.IsProduct() && e.Index > 0))
+                                                            @foreach (var product in orderedProducts.Skip(1))
                                                             {
-                                                                var fullfills = (context.Value.ParentUserRecipe?.Recipe.Elements
-                                                                    .Where(e => e.IsIngredient() && e.ItemOrTag.GetAssociatedItemsAndSelf().Any(iot => iot.Id == product.ItemOrTag.Id))
-                                                                    .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.ParentUserRecipe.RoundFactor)) ?? 0) >= number;
+                                                                var productNumber = product.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
 
                                                                 <MudTooltip Text="@LocalizationService.GetTranslation(product.ItemOrTag)">
                                                                     <MudStack Row AlignItems="AlignItems.Center">
                                                                         <EcoIcon Size="24"
                                                                                  Item="product.ItemOrTag"
                                                                                  NumberClass="mb-n1 tsb"
-                                                                                 Number="@(product.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor)"
-                                                                                 ForegroundIconColor="Color.Dark"
-                                                                                 ForegroundIcon="@(fullfills ? MDIIcons.Outline.CheckCircle : null)"/>
+                                                                                 Number="@productNumber"/>
                                                                     </MudStack>
                                                                 </MudTooltip>
                                                             }
                                                         </MudStack>
                                                     </MudStack>
-                                                    <MudStack AlignItems="AlignItems.Center" Row>
+                                                    <MudStack AlignItems="AlignItems.Center" Row Class="shopping-list-recipe-quantity">
                                                         <MudNumericField T="int"
                                                                          Value="context.Value.RoundFactor"
                                                                          ValueChanged="@(v => OnQuantityToCraftChanged(context.Value, v))"
@@ -382,15 +374,14 @@
                                                     </MudStack>
                                                     <div class="shopping-list-ingredient-scroll">
                                                         <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-ingredient-row">
+                                                            @{
+                                                                var ingredientCoverage = ShoppingListCoverageCalculator.ComputeCoverage(context.Value, _selectedShoppingList!, context.Value.ChildrenUserRecipes);
+                                                            }
                                                             @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
                                                             {
                                                                 var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
                                                                 var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
-                                                                var isFullfilled = context.Value.ChildrenUserRecipes
-                                                                    .Sum(ur => ur.Recipe.Elements
-                                                                        .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
-                                                                        .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(_selectedShoppingList) * ur.RoundFactor))
-                                                                    ) >= ingredientNumber;
+                                                                var isFullfilled = ingredientCoverage.IsFulfilled(ingredient);
                                                                 var isGuidedPendingChoice = IsGuidedRunPausedForIngredient(context.Value, ingredient);
                                                                 var isGuidedMutedChoice = IsGuidedRunPaused && !isGuidedPendingChoice;
 
@@ -404,8 +395,8 @@
                                                                                          NumberClass="mb-n1 text-shadow-black"
                                                                                          Number="ingredientNumber"
                                                                                          NumberColor="Color.Default"
-                                                                                         ForegroundIconColor="Color.Dark"
-                                                                                         ForegroundIcon="@(isFullfilled ? MDIIcons.Outline.CheckCircle : null)"/>
+                                                                                         ForegroundIconColor="Color.Success"
+                                                                                         ForegroundIcon="@(isFullfilled ? MDIIcons.Filled.CheckBold : null)"/>
                                                                             </MudStack>
                                                                         </MudLink>
                                                                     </MudTooltip>
@@ -427,11 +418,10 @@
                                                                             {
                                                                                 <span class="guided-choice-scroll-anchor" @ref="_guidedPendingChoiceAnchorRef"></span>
                                                                                 <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandTooltip")">
-                                                                                    <MudButton Variant="Variant.Outlined"
-                                                                                               Color="Color.Warning"
-                                                                                               Size="Size.Small"
-                                                                                               StartIcon="@MDIIcons.Filled.StopCircle"
-                                                                                               OnClick="StopGuidedAutoExpandRun"/>
+                                                                                    <MudIconButton Icon="@MDIIcons.Filled.StopCircle"
+                                                                                                   Color="Color.Warning"
+                                                                                                   Size="Size.Small"
+                                                                                                   OnClick="StopGuidedAutoExpandRun"/>
                                                                                 </MudTooltip>
                                                                             }
 
@@ -606,10 +596,11 @@
 
     private static decimal GetProducedQuantityForIngredient(UserRecipe parentRecipe, Element ingredient, DataContext shoppingList)
     {
-        return parentRecipe.ChildrenUserRecipes
-            .Sum(ur => ur.Recipe.Elements
-                .Where(e => e.IsProduct() && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id))
-                .Sum(e => Math.Abs(e.Quantity.GetDynamicValue(shoppingList) * ur.RoundFactor)));
+        return ShoppingListCoverageCalculator.GetCoveredQuantityForIngredient(
+            parentRecipe,
+            ingredient,
+            shoppingList,
+            parentRecipe.ChildrenUserRecipes);
     }
 
     private List<Recipe> GetPossibleRecipesForIngredient(Element ingredient)
@@ -622,7 +613,7 @@
         return ContextService.CurrentServerData.Recipes
             .Where(r => r.Elements.Any(e => e.IsProduct()
                 && !e.DefaultIsReintegrated
-                && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+                && ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, ingredient.ItemOrTag)))
             .ToList();
     }
 
@@ -637,7 +628,7 @@
         var matchingRecipeIds = _selectedShoppingList.UserRecipes
             .Where(ur => ur.Recipe.Elements.Any(e => e.IsProduct()
                 && !e.DefaultIsReintegrated
-                && e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+                && ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, ingredient.ItemOrTag)))
             .Select(ur => ur.RecipeId)
             .Where(recipeId => possibleRecipeIds.Contains(recipeId))
             .Distinct()
@@ -659,7 +650,7 @@
             var containsItemInBranch = current.Recipe.Elements.Any(e =>
                 e.IsProduct() &&
                 !e.DefaultIsReintegrated &&
-                e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id));
+                ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, ingredient.ItemOrTag));
             if (containsItemInBranch)
             {
                 return true;
@@ -673,11 +664,8 @@
 
     private async Task<UserRecipe> AddChildRecipeCore(EcoCraftDbContext context, UserRecipe userRecipe, Element element, decimal quantityGoal, Recipe recipe)
     {
-        var quantityToCraft = Math.Ceiling(quantityGoal / recipe.Elements.First(e =>
-            e.IsProduct() &&
-            !e.DefaultIsReintegrated &&
-            e.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == element.ItemOrTag.Id))
-            .Quantity.GetDynamicValue(_selectedShoppingList));
+        var matchingProduct = GetPreferredProductMatch(recipe, element);
+        var quantityToCraft = Math.Ceiling(quantityGoal / matchingProduct.Quantity.GetDynamicValue(_selectedShoppingList));
 
         return await ShoppingListDataService.AddUserRecipe(context, _selectedShoppingList!, recipe, userRecipe, (int)quantityToCraft, _referenceDataContext);
     }
@@ -760,6 +748,13 @@
 
         if (_isGuidedAutoExpandEnabled && IsIngredientAlreadyInBranch(context.Value, ingredient))
         {
+            // When guided mode is enabled and the ingredient is already present in the current branch,
+            // we still allow explicit manual choice for multi-option tags instead of doing nothing.
+            if (possibleRecipes.Count > 1)
+            {
+                ToggleAddChildren(context, ingredient);
+            }
+
             return;
         }
 
@@ -830,7 +825,7 @@
         return parentRecipe.ChildrenUserRecipes
             .Where(childRecipe => childRecipe.Recipe.Elements.Any(product =>
                 product.IsProduct() &&
-                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+                ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag)))
             .ToList();
     }
 
@@ -884,7 +879,7 @@
                 var canChosenRecipeCraftIngredient = chosenRecipe.Elements.Any(product =>
                     product.IsProduct() &&
                     !product.DefaultIsReintegrated &&
-                    product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id));
+                    ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag));
 
                 if (!canChosenRecipeCraftIngredient)
                 {
@@ -994,7 +989,7 @@
             .Where(ingredient => childRecipe.Recipe.Elements.Any(product =>
                 product.IsProduct() &&
                 !product.DefaultIsReintegrated &&
-                product.ItemOrTag.GetAssociatedTagsAndSelf().Any(iot => iot.Id == ingredient.ItemOrTag.Id)))
+                ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag)))
             .Select(ingredient => ingredient.Index)
             .DefaultIfEmpty(int.MaxValue)
             .Min();
@@ -1007,6 +1002,26 @@
         return parentRecipe.ChildrenUserRecipes
             .OrderBy(childRecipe => GetChildDisplayOrder(parentRecipe, childRecipe))
             .ThenBy(childRecipe => childRecipe.Recipe.Name);
+    }
+
+    private static IEnumerable<Element> GetOrderedProductsForDisplay(UserRecipe userRecipe)
+    {
+        return userRecipe.Recipe.Elements
+            .Where(e => e.IsProduct())
+            .OrderBy(e => e.ItemOrTag.IsTag ? 1 : 0)
+            .ThenBy(e => e.Index);
+    }
+
+    private static Element GetPreferredProductMatch(Recipe recipe, Element ingredient)
+    {
+        return recipe.Elements
+            .Where(e =>
+                e.IsProduct() &&
+                !e.DefaultIsReintegrated &&
+                ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, ingredient.ItemOrTag))
+            .OrderBy(e => e.ItemOrTag.IsTag ? 1 : 0)
+            .ThenBy(e => e.Index)
+            .First();
     }
 
     private ITreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
@@ -1277,7 +1292,7 @@
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
             ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, _selectedShoppingList!, userRecipe);
-            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList!.UserRecipes);
+            await ApplyAutoExpandForMissingIngredients(context, new[] { userRecipe });
         });
 
         Rebuild();

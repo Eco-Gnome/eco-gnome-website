@@ -161,6 +161,18 @@
     white-space: wrap !important;
 }
 
+.comparison-by-select-container {
+    width: 220px;
+    flex: 0 0 220px;
+}
+
+@media (max-width: 600px) {
+    .comparison-by-select-container {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+}
+
 .recipe-table .mud-table-row > :first-child {
     max-width: 0;
     padding-left: 0 !important;
@@ -374,18 +386,58 @@
 }
 
 .shopping-list-ingredient-scroll {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
 }
 
+.shopping-list-tree {
+    overflow-x: hidden;
+}
+
+.shopping-list-tree .mud-treeview-item-label {
+    display: flex;
+    min-width: 0;
+}
+
+.shopping-list-tree .mud-treeview-item-label > * {
+    width: 100%;
+    min-width: 0;
+}
+
+.shopping-list-recipe-row {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.shopping-list-recipe-primary-product,
+.shopping-list-recipe-quantity {
+    flex: 0 0 auto;
+}
+
+.shopping-list-recipe-label {
+    flex: 0 1 190px;
+    min-width: 120px;
+    overflow: hidden;
+}
+
+.shopping-list-recipe-label .mud-typography {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .shopping-list-ingredient-row {
     flex-wrap: nowrap;
     justify-content: flex-end;
-    column-gap: 4px;
-    width: max-content;
-    min-width: 100%;
+    gap: 4px;
+    width: 100%;
+    min-width: max-content;
+    box-sizing: border-box;
 }
 
 .shopping-list-choice-container {
@@ -413,3 +465,4 @@
     width: 1px;
     height: 1px;
 }
+

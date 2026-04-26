@@ -182,8 +182,7 @@ public class ContextService(
 
         if (searchedServer is not null)
         {
-            CurrentServer = searchedServer;
-            CurrentUserServer = CurrentUser!.UserServers.First(us => us.Server.Id == searchedServer.Id);
+            await ChangeServer(searchedServer);
         }
     }
 

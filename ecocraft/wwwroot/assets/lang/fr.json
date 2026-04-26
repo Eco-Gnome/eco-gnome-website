@@ -1,4 +1,4 @@
-{
+﻿{
     "Cancel": "Annuler",
     "CopyToClipboard": "Copier dans le presse-papiers",
     "CraftingTable": "Table d'artisanat",
@@ -52,6 +52,7 @@
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
+        "EconomyViewer": "Analyse économique",
         "VideosUpload": "Upload de Vidéos",
         "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin",
@@ -425,6 +426,130 @@
             "CantRemoveLastMargin": "Vous ne pouvez pas supprimer votre dernière marge",
             "PriceNotWellConfigured": "Ce prix n'est pas bien configuré",
             "PriceCopied": "Prix copié dans le presse-papiers"
+        }
+    },
+    "EconomyViewer": {
+        "PageTitle": "Analyse économique",
+        "ServerContextMissing": "Sélectionnez un serveur avant d'ouvrir l'analyse économique.",
+        "ReadOnlyBanner": "L'analyse économique est strictement en lecture seule. Aucune configuration serveur ou joueur ne peut être modifiée ici.",
+        "ReadOnlyChip": "Lecture seule",
+        "GlobalViewTitle": "Vue globale serveur",
+        "NoGlobalData": "Aucune donnée disponible pour les filtres actuels.",
+        "Groups": {
+            "Item": "Article",
+            "Recipe": "Recette",
+            "Skill": "Métier",
+            "Player": "Joueur"
+        },
+        "Filters": {
+            "GroupBy": "Regrouper par",
+            "Player": "Filtre joueur",
+            "AllPlayers": "Tous les joueurs",
+            "MinSpread": "Écart minimum",
+            "Skill": "Filtre métier",
+            "AllSkills": "Tous les métiers",
+            "ShowIncompleteRows": "Afficher les lignes incomplètes (-)",
+            "SortBy": "Trier par",
+            "SortDescending": "Décroissant",
+            "SortDirectionHint": "Basculer le sens du tri",
+            "SortDirectionAsc": "Croissant",
+            "SortDirectionDesc": "Décroissant",
+            "SortDirectionAZ": "A vers Z",
+            "SortDirectionZA": "Z vers A"
+        },
+        "Actions": {
+            "ApplyFilters": "Appliquer les filtres",
+            "ResetFilters": "Réinitialiser",
+            "Previous": "Précédent",
+            "Next": "Suivant",
+            "OpenDrilldown": "Ouvrir le détail",
+            "Help": "Comment ça marche"
+        },
+        "Columns": {
+            "Entity": "Nom",
+            "Price": "Prix",
+            "PriceMin": "Prix min",
+            "PriceAvg": "Prix moyen",
+            "PriceMax": "Prix max",
+            "Margin": "Marge",
+            "MarginMin": "Marge min",
+            "MarginAvg": "Marge moyenne",
+            "MarginMax": "Marge max",
+            "ConfiguredPlayers": "Joueurs configurés",
+            "ConfiguredContexts": "Contextes configurés",
+            "Spread": "Écart"
+        },
+        "Pagination": {
+            "PageInfo": "Page {page} / {totalPages} ({totalRows} lignes)"
+        },
+        "Drilldown": {
+            "Title": "Détail joueur",
+            "NoData": "Aucune donnée joueur chargée.",
+            "CompareHeader": "Comparaison {player1} vs {player2}",
+            "Player1Badge": "Joueur 1",
+            "Player2Badge": "Joueur 2",
+            "Player1": "Joueur 1",
+            "Player2": "Joueur 2",
+            "CompareBy": "Comparer par",
+            "Player1Context": "Contexte joueur 1",
+            "Player2Context": "Contexte joueur 2",
+            "Search": "Recherche comparaison",
+            "OnlyDifferences": "Seulement les différences",
+            "OnlyCommon": "Seulement les éléments en commun",
+            "ContextSummaries": "Contextes comparés",
+            "CraftingTablesComparison": "Comparaison des tables d'artisanat",
+            "NoCraftingTableData": "Aucune table d'artisanat configurée pour ce contexte.",
+            "PriceOptionsComparison": "Options du calculateur de prix comparées",
+            "ComparisonTable": "Comparaison",
+            "NoComparisonData": "Aucune ligne de comparaison pour les filtres sélectionnés.",
+            "AtLeastTwoPlayersRequired": "Au moins 2 joueurs sont requis pour ouvrir le détail.",
+            "StatusTooltip": {
+                "Higher": "{1} est plus élevé que {0} (calculé sur Joueur 2 - Joueur 1).",
+                "Lower": "{1} est plus bas que {0} (calculé sur Joueur 2 - Joueur 1).",
+                "Same": "{0} et {1} ont la même valeur.",
+                "OnlyPlayer1": "Valeur disponible uniquement pour {0}.",
+                "OnlyPlayer2": "Valeur disponible uniquement pour {1}.",
+                "NoData": "Aucune valeur pour {0} et {1}."
+            },
+            "Values": {
+                "Enabled": "Activé",
+                "Disabled": "Désactivé"
+            },
+            "Columns": {
+                "Role": "Rôle",
+                "Player": "Joueur",
+                "Option": "Option",
+                "Context": "Contexte",
+                "ConfiguredItems": "Articles configurés",
+                "Recipes": "Recettes",
+                "Skills": "Métiers",
+                "Player1Value": "Valeur joueur 1",
+                "Player2Value": "Valeur joueur 2",
+                "DeltaAbs": "Delta",
+                "DeltaPct": "Delta %",
+                "Status": "Statut"
+            }
+        },
+        "Status": {
+            "Higher": "Plus élevé",
+            "Lower": "Plus bas",
+            "Same": "Identique",
+            "OnlyPlayer1": "Seulement joueur 1",
+            "OnlyPlayer2": "Seulement joueur 2",
+            "NoData": "Pas de données"
+        },
+        "Errors": {
+            "Unauthorized": "Vous n'avez pas accès à ces données serveur.",
+            "LoadGlobal": "Échec du chargement des données globales",
+            "LoadDrilldown": "Échec du chargement du détail joueur"
+        },
+        "Help": {
+            "Title": "Comment fonctionne l'analyse économique",
+            "Line1": "La vue globale agrège tous les contextes serveur hors liste de courses.",
+            "Line2": "Utilise Regrouper par, Joueur et Métier pour réduire le périmètre.",
+            "Line3": "La recherche Nom filtre immédiatement les lignes visibles du tableau.",
+            "Line4": "Le détail permet de comparer deux joueurs du serveur.",
+            "Line5": "Cette page est en lecture seule et n'écrit aucune donnée."
         }
     },
     "Recipe": "Recette",
