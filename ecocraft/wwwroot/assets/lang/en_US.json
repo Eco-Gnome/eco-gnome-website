@@ -51,6 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Server Management",
         "NavCalculator": "Price Calculator",
+        "PriceCalculatorGuide": "Calculator Guide",
         "ShoppingList": "Shopping List",
         "EconomyViewer": "Economy Viewer",
         "VideosUpload": "Videos Uploader",
@@ -331,6 +332,7 @@
     "PriceCalculator": {
         "MagickFix": "Magick Fix (Try it before reset!)",
         "PageTitle": "Price Calculator",
+        "OpenGuide": "Guide",
         "ContextName": "Context Name",
         "AddDataContext": "Add new context",
         "LoadError": "An error occurred during the load. You can try to reset all your data to fix the error.",
@@ -417,6 +419,114 @@
             "CantRemoveLastMargin": "You can't remove your last margin",
             "PriceNotWellConfigured": "This price isn't well configured",
             "PriceCopied": "Price copied to clipboard"
+        }
+    },
+    "PriceCalculatorGuide": {
+        "PageTitle": "Price Calculator Guide",
+        "Eyebrow": "Tutorial",
+        "Title": "Use the price calculator",
+        "Intro": "This guide explains how to configure Eco Gnome to get consistent sale prices: skills, recipes, buy prices, calorie cost, table costs, margins, primary choices, and reintegration.",
+        "BackToCalculator": "Back to calculator",
+        "Summary": {
+            "Title": "The principle",
+            "Configure": "Declare what you can produce: skills, levels, talents, and crafting tables.",
+            "Inputs": "Fill what you buy: resources, items, or tags required by your recipes.",
+            "Outputs": "Fill what you sell: recipes, primary choices, and margins.",
+            "Advanced": "Advanced setup and calculation details: cost split, dynamic values, reintegration, crafted quantity, and price sources."
+        },
+        "Workflow": {
+            "Title": "Recommended flow",
+            "Context": {
+                "Title": "1. Choose a context",
+                "Body": "A context is a saved scenario. Use several contexts to compare professions, margins, levels, or market assumptions without overwriting your main configuration."
+            },
+            "Configure": {
+                "Title": "2. Configure the player",
+                "Body": "Add your skills, levels, talents, and tables. Eco Gnome adds related recipes and applies the reductions available on your server."
+            },
+            "BuyPrices": {
+                "Title": "3. Fill buy prices",
+                "Body": "Fill the prices of resources, items, or tags you buy. As long as a required price is missing, dependent recipes may stay without a calculated price."
+            },
+            "SellPrices": {
+                "Title": "4. Configure sales",
+                "Body": "Add the recipes you sell, choose the needed primary options, and apply the right margins. The resulting sale price can then be copied for the game."
+            }
+        },
+        "Concepts": {
+            "Context": {
+                "Title": "Contexts",
+                "Body": "A context isolates your whole calculator setup: skills, recipes, tables, margins, options, and prices. Changes are saved only for that context.",
+                "Example": "Example: create one context per profession to fully separate your setups, or a test context to try another case without changing your main configuration."
+            },
+            "Calories": {
+                "Title": "Cost per 1000 calories",
+                "Body": "Recipe labor is converted into money with this value. If it is too low, you undervalue your labor; if it is too high, every cost price increases.",
+                "Example": "Useful formula: food at $5 for 700 calories => 1000 * 5 / 700 = $7.14 per 1000 calories."
+            },
+            "CraftingTableCosts": {
+                "Title": "Table cost/min",
+                "Body": "Each crafting table can have a cost per minute. Eco Gnome adds this cost to the cost price of recipes crafted on that table, based on their crafting time.",
+                "Example": "Example: a table consumes 50 W and the fuel costs $5 for 80,000 W. The cost/min is 50 * 60 * 5 / 80,000 = $0.1875/min, to enter on the table."
+            },
+            "Margins": {
+                "Title": "Margins",
+                "Body": "A margin turns cost price into sale price. You can create several margins and choose which one applies to each sold product.",
+                "Example": "Mark-up: $100 cost + 20% = $120. Gross margin: the percentage represents profit as part of the final price."
+            },
+            "Primary": {
+                "Title": "Primary choices",
+                "Body": "Primary means priority choice. For a tag, the star forces the item used to represent that tag. For a product, the star forces the recipe used when several recipes produce the same item.",
+                "Example": "Example: a tag offers 3 items. Eco Gnome picks the cheapest one only if all 3 have a price. Otherwise, click the star to force the item to use, or fill the missing prices. The same rule applies when several recipes produce the same item."
+            },
+            "Reintegration": {
+                "Title": "Reintegration",
+                "Body": "Reintegration is used when one recipe product is not really sold, but reused or deducted from cost. It moves from product-to-sell behavior to a value included in cost.",
+                "Example": "Common cases: molds, barrels, containers, or recoverable elements reused in the production chain. Another example: sand can be crafted through mining recipes, but it is often gathered directly. By reintegrating it, it moves from items to sell to items to buy, letting you enter its price manually."
+            },
+            "ServerPrices": {
+                "Title": "Server prices",
+                "Body": "An admin can define minimum, default, or maximum prices. Eco Gnome applies them to relevant fields and indicates locked or bounded values.",
+                "Example": "If a price remains at min or max, check server price rules before changing your setup."
+            }
+        },
+        "RecipeDetails": {
+            "Title": "Read recipe details",
+            "Ingredients": {
+                "Title": "Ingredients",
+                "Body": "Each ingredient shows quantity, unit price, and total cost. An information icon usually points to the missing price blocking the calculation."
+            },
+            "Products": {
+                "Title": "Multiple products",
+                "Body": "When a recipe produces several items, choose how to split the cost: first product, equal split, quantity split, honest split, or manual input."
+            },
+            "DynamicValues": {
+                "Title": "Dynamic values",
+                "Body": "Skills, talents, and modules can modify quantities, time, or labor. Secondary values show the result after reductions."
+            },
+            "Rounding": {
+                "Title": "Crafted quantity",
+                "Body": "If Eco rounds consumed ingredients according to the crafted quantity, the crafted quantity selector gives a more realistic price."
+            }
+        },
+        "Mod": {
+            "Title": "Optional Eco Gnome mod",
+            "Body": "If the mod is installed on the game server and your Eco Gnome user is linked to that server, you can use your contexts to sync or create your in-game shop offers.",
+            "OpenRepository": "View the mod on GitHub",
+            "Features": {
+                "SyncPrices": {
+                    "Title": "Sync prices",
+                    "Body": "Applies buy and sell prices from an Eco Gnome context to the targeted shop, without recreating its whole setup."
+                },
+                "CreateShop": {
+                    "Title": "Create offers",
+                    "Body": "Automatically creates shop offers from a context, with the option to handle only buy offers or only sell offers."
+                },
+                "ServerLink": {
+                    "Title": "Link the server",
+                    "Body": "After server registration and player linking, the mod can open Eco Gnome directly on the right server."
+                }
+            }
         }
     },
     "EconomyViewer": {

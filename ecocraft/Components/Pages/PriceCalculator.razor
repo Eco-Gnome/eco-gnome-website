@@ -32,7 +32,7 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
     <MudGrid Style="height: auto">
         <MudItem xs="12" Class="px-4 pt-4">
-            <MudStack Row Spacing="3">
+            <MudStack Row Spacing="3" Class="flex-wrap">
                 @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
                 {
                     <MudButton Color="@(_selectedDataContext?.Id == dataContext.Id ? Color.Primary : Color.Default)"
@@ -54,6 +54,12 @@
                            Variant="Variant.Outlined"
                            OnClick="@(() => AddDataContext())">
                     @LocalizationService.GetTranslation("PriceCalculator.AddDataContext")
+                </MudButton>
+                <MudButton Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.HelpOutline"
+                           Variant="Variant.Text"
+                           Href="price-calculator-guide">
+                    @LocalizationService.GetTranslation("PriceCalculator.OpenGuide")
                 </MudButton>
             </MudStack>
         </MudItem>

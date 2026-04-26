@@ -250,6 +250,29 @@
     visibility: hidden;
 }
 
+.guide-hero {
+    padding: 28px;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 8px;
+    background: var(--mud-palette-background);
+}
+
+.guide-summary,
+.guide-panel {
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 8px;
+    background-color: var(--mud-palette-background);
+}
+
+.guide-step,
+.guide-detail {
+    height: 100%;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
 .app-bar .mud-toolbar {
     padding-left: 4px;
 }

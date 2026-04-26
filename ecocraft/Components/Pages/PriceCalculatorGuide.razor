@@ -1,0 +1,211 @@
+@page "/price-calculator-guide"
+@implements IDisposable
+@using ecocraft.Extensions
+@using ecocraft.Services
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<PageTitle>@LocalizationService.GetTranslation("PriceCalculatorGuide.PageTitle") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <MudStack Spacing="4">
+        <section class="guide-hero">
+            <MudGrid>
+                <MudItem xs="12" md="7">
+                    <MudStack Spacing="2">
+                        <MudText Typo="Typo.overline" Color="Color.Primary">@LocalizationService.GetTranslation("PriceCalculatorGuide.Eyebrow")</MudText>
+                        <MudText Typo="Typo.h3">@LocalizationService.GetTranslation("PriceCalculatorGuide.Title")</MudText>
+                        <MudText Typo="Typo.body1">@LocalizationService.GetTranslation("PriceCalculatorGuide.Intro")</MudText>
+                        <MudStack Row Spacing="2" Class="flex-wrap">
+                            <MudButton Href="/"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Balance">
+                                @LocalizationService.GetTranslation("PriceCalculatorGuide.BackToCalculator")
+                            </MudButton>
+                        </MudStack>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" md="5">
+                    <MudPaper Elevation="0" Class="guide-summary pa-4">
+                        <MudStack Spacing="2">
+                            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculatorGuide.Summary.Title")</MudText>
+                            @foreach (var summaryKey in SummaryKeys)
+                            {
+                                <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                                    <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(summaryKey)</MudText>
+                                </MudStack>
+                            }
+                            <MudDivider Class="my-1"/>
+                            <MudStack Row AlignItems="AlignItems.Start" Spacing="2">
+                                <MudIcon Icon="@MDIIcons.Filled.Cog" Color="Color.Primary" Size="Size.Small"/>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculatorGuide.Summary.Advanced")</MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </section>
+
+        <MudPaper Elevation="0" Class="guide-panel pa-4">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@MDIIcons.Filled.TableOfContents" Color="Color.Primary"/>
+                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("PriceCalculatorGuide.Workflow.Title")</MudText>
+                </MudStack>
+                <MudGrid>
+                    @foreach (var step in WorkflowSteps)
+                    {
+                        <MudItem xs="12" md="6" lg="3">
+                            <MudStack Spacing="1" Class="guide-step">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@step.Icon" Color="Color.Primary"/>
+                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(step.TitleKey)</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(step.BodyKey)</MudText>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+
+        <MudGrid>
+            @foreach (var concept in Concepts)
+            {
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="0" Class="guide-panel pa-4">
+                        <MudStack Spacing="2">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@concept.Icon" Color="Color.Primary"/>
+                                <MudText Typo="Typo.h5">@LocalizationService.GetTranslation(concept.TitleKey)</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(concept.BodyKey)</MudText>
+                            @if (!string.IsNullOrWhiteSpace(concept.ExampleKey))
+                            {
+                                <MudAlert Severity="Severity.Info" Variant="Variant.Text" Class="pa-0">
+                                    @LocalizationService.GetTranslation(concept.ExampleKey)
+                                </MudAlert>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+
+        <MudPaper Elevation="0" Class="guide-panel pa-4">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@MDIIcons.Filled.CalculatorVariant" Color="Color.Primary"/>
+                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("PriceCalculatorGuide.RecipeDetails.Title")</MudText>
+                </MudStack>
+                <MudGrid>
+                    @foreach (var detail in RecipeDetails)
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudStack Row AlignItems="AlignItems.Start" Spacing="2" Class="guide-detail">
+                                <MudIcon Icon="@detail.Icon" Color="Color.Secondary" Size="Size.Small"/>
+                                <MudStack Spacing="1">
+                                    <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation(detail.TitleKey)</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(detail.BodyKey)</MudText>
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Elevation="0" Class="guide-panel pa-4">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@MDIIcons.Filled.Puzzle" Color="Color.Primary"/>
+                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("PriceCalculatorGuide.Mod.Title")</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculatorGuide.Mod.Body")</MudText>
+                <MudGrid>
+                    @foreach (var feature in ModFeatures)
+                    {
+                        <MudItem xs="12" md="4">
+                            <MudStack Row AlignItems="AlignItems.Start" Spacing="2" Class="guide-detail">
+                                <MudIcon Icon="@feature.Icon" Color="Color.Secondary" Size="Size.Small"/>
+                                <MudStack Spacing="1">
+                                    <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation(feature.TitleKey)</MudText>
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(feature.BodyKey)</MudText>
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+                <MudStack Row Spacing="2" Class="flex-wrap">
+                    <MudButton Href="@EcoGnomeModRepositoryUrl"
+                               Target="_blank"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.OpenInNew">
+                        @LocalizationService.GetTranslation("PriceCalculatorGuide.Mod.OpenRepository")
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudContainer>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        ContextService.OnContextChanged -= StateHasChanged;
+    }
+
+    private static readonly string[] SummaryKeys =
+    [
+        "PriceCalculatorGuide.Summary.Configure",
+        "PriceCalculatorGuide.Summary.Inputs",
+        "PriceCalculatorGuide.Summary.Outputs"
+    ];
+
+    private static readonly GuideItem[] WorkflowSteps =
+    [
+        new("PriceCalculatorGuide.Workflow.Context.Title", "PriceCalculatorGuide.Workflow.Context.Body", MDIIcons.Filled.Tab),
+        new("PriceCalculatorGuide.Workflow.Configure.Title", "PriceCalculatorGuide.Workflow.Configure.Body", MDIIcons.Filled.Tune),
+        new("PriceCalculatorGuide.Workflow.BuyPrices.Title", "PriceCalculatorGuide.Workflow.BuyPrices.Body", MDIIcons.Filled.CurrencyUsd),
+        new("PriceCalculatorGuide.Workflow.SellPrices.Title", "PriceCalculatorGuide.Workflow.SellPrices.Body", MDIIcons.Filled.ContentCopy)
+    ];
+
+    private static readonly GuideConcept[] Concepts =
+    [
+        new("PriceCalculatorGuide.Concepts.Context.Title", "PriceCalculatorGuide.Concepts.Context.Body", "PriceCalculatorGuide.Concepts.Context.Example", MDIIcons.Filled.Tab),
+        new("PriceCalculatorGuide.Concepts.Calories.Title", "PriceCalculatorGuide.Concepts.Calories.Body", "PriceCalculatorGuide.Concepts.Calories.Example", MDIIcons.Filled.FoodForkDrink),
+        new("PriceCalculatorGuide.Concepts.CraftingTableCosts.Title", "PriceCalculatorGuide.Concepts.CraftingTableCosts.Body", "PriceCalculatorGuide.Concepts.CraftingTableCosts.Example", MDIIcons.Filled.CashClock),
+        new("PriceCalculatorGuide.Concepts.Margins.Title", "PriceCalculatorGuide.Concepts.Margins.Body", "PriceCalculatorGuide.Concepts.Margins.Example", MDIIcons.Filled.Percent),
+        new("PriceCalculatorGuide.Concepts.Primary.Title", "PriceCalculatorGuide.Concepts.Primary.Body", "PriceCalculatorGuide.Concepts.Primary.Example", Icons.Material.Filled.Star),
+        new("PriceCalculatorGuide.Concepts.Reintegration.Title", "PriceCalculatorGuide.Concepts.Reintegration.Body", "PriceCalculatorGuide.Concepts.Reintegration.Example", MDIIcons.Filled.ChevronDoubleLeft),
+        new("PriceCalculatorGuide.Concepts.ServerPrices.Title", "PriceCalculatorGuide.Concepts.ServerPrices.Body", "PriceCalculatorGuide.Concepts.ServerPrices.Example", Icons.Material.Filled.Lock)
+    ];
+
+    private static readonly GuideItem[] RecipeDetails =
+    [
+        new("PriceCalculatorGuide.RecipeDetails.Ingredients.Title", "PriceCalculatorGuide.RecipeDetails.Ingredients.Body", MDIIcons.Outline.Cart),
+        new("PriceCalculatorGuide.RecipeDetails.Products.Title", "PriceCalculatorGuide.RecipeDetails.Products.Body", MDIIcons.Filled.CallSplit),
+        new("PriceCalculatorGuide.RecipeDetails.DynamicValues.Title", "PriceCalculatorGuide.RecipeDetails.DynamicValues.Body", Icons.Material.Filled.AutoGraph),
+        new("PriceCalculatorGuide.RecipeDetails.Rounding.Title", "PriceCalculatorGuide.RecipeDetails.Rounding.Body", MDIIcons.Filled.ApproximatelyEqual)
+    ];
+
+    private const string EcoGnomeModRepositoryUrl = "https://github.com/Eco-Gnome/eco-gnome-mod";
+
+    private static readonly GuideItem[] ModFeatures =
+    [
+        new("PriceCalculatorGuide.Mod.Features.SyncPrices.Title", "PriceCalculatorGuide.Mod.Features.SyncPrices.Body", MDIIcons.Filled.CashSync),
+        new("PriceCalculatorGuide.Mod.Features.CreateShop.Title", "PriceCalculatorGuide.Mod.Features.CreateShop.Body", MDIIcons.Filled.StorePlus),
+        new("PriceCalculatorGuide.Mod.Features.ServerLink.Title", "PriceCalculatorGuide.Mod.Features.ServerLink.Body", MDIIcons.Filled.Link)
+    ];
+
+    private sealed record GuideItem(string TitleKey, string BodyKey, string Icon);
+    private sealed record GuideConcept(string TitleKey, string BodyKey, string ExampleKey, string Icon);
+}

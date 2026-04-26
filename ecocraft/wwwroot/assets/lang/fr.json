@@ -51,6 +51,7 @@
     "NavMenu": {
         "NavAdmin": "Gestion des serveurs",
         "NavCalculator": "Calculateur de prix",
+        "PriceCalculatorGuide": "Guide du calculateur",
         "ShoppingList": "Liste de course",
         "EconomyViewer": "Analyse économique",
         "VideosUpload": "Upload de Vidéos",
@@ -320,6 +321,8 @@
     },
     "PriceCalculator": {
         "MagickFix": "Correction Magique (A essayer avant de reset!)",
+        "PageTitle": "Calculateur de prix",
+        "OpenGuide": "Guide",
         "ContextName": "Nom du contexte",
         "AddDataContext": "Ajouter un nouveau contexte",
         "LoadError": "Une erreur s'est produite lors du chargement. Vous pouvez essayer de réinitialiser toutes vos données pour corriger l'erreur.",
@@ -406,6 +409,114 @@
             "CantRemoveLastMargin": "Vous ne pouvez pas supprimer votre dernière marge",
             "PriceNotWellConfigured": "Ce prix n'est pas bien configuré",
             "PriceCopied": "Prix copié dans le presse-papiers"
+        }
+    },
+    "PriceCalculatorGuide": {
+        "PageTitle": "Guide du calculateur de prix",
+        "Eyebrow": "Tutoriel",
+        "Title": "Utiliser le calculateur de prix",
+        "Intro": "Ce guide explique comment configurer Eco Gnome pour avoir des prix de vente cohérents : compétences, recettes, prix d'achat, coût des calories, coûts de table, marges, choix primary et réintégration.",
+        "BackToCalculator": "Retour au calculateur",
+        "Summary": {
+            "Title": "Le principe",
+            "Configure": "Déclarez ce que vous savez produire : compétences, niveaux, talents et tables.",
+            "Inputs": "Renseignez ce que vous achetez : ressources, items ou tags nécessaires aux recettes.",
+            "Outputs": "Renseignez ce que vous vendez : recettes, choix prioritaires et marges.",
+            "Advanced": "Configuration avancée et détail du calcul : répartition des coûts, valeurs dynamiques, réintégration, quantité craftée et sources des prix."
+        },
+        "Workflow": {
+            "Title": "Parcours recommandé",
+            "Context": {
+                "Title": "1. Choisir un contexte",
+                "Body": "Un contexte est un scénario sauvegardé. Utilisez-en plusieurs pour comparer des métiers, des marges, des niveaux ou des hypothèses de marché sans écraser votre configuration principale."
+            },
+            "Configure": {
+                "Title": "2. Configurer le joueur",
+                "Body": "Ajoutez vos compétences, niveaux, talents et tables. Eco Gnome ajoute les recettes concernées et applique les réductions disponibles sur votre serveur."
+            },
+            "BuyPrices": {
+                "Title": "3. Remplir les achats",
+                "Body": "Renseignez les prix des ressources, items ou tags que vous achetez. Tant qu'un prix requis manque, les recettes qui en dépendent peuvent rester sans prix calculé."
+            },
+            "SellPrices": {
+                "Title": "4. Configurer les ventes",
+                "Body": "Ajoutez les recettes que vous vendez, choisissez les primary nécessaires et appliquez les marges adaptées. Le prix de vente obtenu peut ensuite être copié pour le jeu."
+            }
+        },
+        "Concepts": {
+            "Context": {
+                "Title": "Contextes",
+                "Body": "Le contexte isole toute votre configuration de calcul : compétences, recettes, tables, marges, options et prix. Les changements sont sauvegardés pour ce contexte uniquement.",
+                "Example": "Exemple : créez un contexte par métier pour séparer entièrement vos configurations, ou un contexte de test pour essayer un autre cas sans modifier votre configuration principale."
+            },
+            "Calories": {
+                "Title": "Coût pour 1000 calories",
+                "Body": "Les calories dépensées pour une recette sont converties en argent avec cette valeur. Si elle est trop basse, vous sous-estimez le coût de votre fabrication ; si elle est trop haute, tous les prix de revient augmentent.",
+                "Example": "Formule utile : nourriture à 5 $ pour 700 calories => 1000 * 5 / 700 = 7,14 $ pour 1000 calories."
+            },
+            "CraftingTableCosts": {
+                "Title": "Coût/minute des tables",
+                "Body": "Chaque table de fabrication peut avoir un coût par minute. Eco Gnome ajoute ce coût au prix de revient des recettes fabriquées sur cette table, en fonction de leur temps de fabrication.",
+                "Example": "Exemple : une table consomme 50 W et le carburant coûte 5 $ pour 80 000 W. Le coût/minute est donc 50 * 60 * 5 / 80 000 = 0,1875 $/min, à renseigner sur la table."
+            },
+            "Margins": {
+                "Title": "Marges",
+                "Body": "La marge transforme le coût de revient en prix de vente. Vous pouvez créer plusieurs marges et choisir celle qui s'applique à chaque produit vendu.",
+                "Example": "Majoration : coût 100 $ + 20 % = 120 $. Marge brute : le pourcentage représente la part de bénéfice dans le prix final."
+            },
+            "Primary": {
+                "Title": "Choix primary",
+                "Body": "Primary signifie choix prioritaire. Pour un tag, l'étoile force l'item utilisé pour représenter ce tag. Pour un produit, l'étoile force la recette utilisée quand plusieurs recettes produisent le même item.",
+                "Example": "Exemple : un tag propose 3 items. Eco Gnome choisit le moins cher seulement si les 3 ont un prix. Sinon, cliquez sur l'étoile pour forcer l'item à utiliser, ou complétez les prix manquants. La même règle s'applique quand plusieurs recettes produisent le même item."
+            },
+            "Reintegration": {
+                "Title": "Réintégration",
+                "Body": "La réintégration sert quand un produit d'une recette n'est pas réellement vendu, mais réutilisé ou déduit du coût. Il passe alors du rôle de produit à vendre à une valeur prise en compte dans le coût.",
+                "Example": "Cas typiques : moules, barils, contenants ou éléments récupérables que vous réutilisez dans la chaîne de production. Autre exemple : le sable peut être fabriqué par des recettes du mineur, mais il est souvent récolté directement. En le réintégrant, il passe des items à vendre aux items à acheter, ce qui permet de saisir son prix manuellement."
+            },
+            "ServerPrices": {
+                "Title": "Prix serveur",
+                "Body": "Un administrateur peut définir des prix minimum, par défaut ou maximum. Eco Gnome les applique dans les champs concernés et signale les valeurs verrouillées ou bornées.",
+                "Example": "Si un prix reste au minimum ou au maximum, vérifiez les règles de prix serveur avant de corriger votre configuration."
+            }
+        },
+        "RecipeDetails": {
+            "Title": "Lire le détail d'une recette",
+            "Ingredients": {
+                "Title": "Ingrédients",
+                "Body": "Chaque ingrédient affiche sa quantité, son prix unitaire et son coût total. Une icône d'information indique souvent le prix manquant qui bloque le calcul."
+            },
+            "Products": {
+                "Title": "Produits multiples",
+                "Body": "Quand une recette produit plusieurs items, vous choisissez comment répartir le coût : premier produit, égalité, quantité, répartition honnête ou saisie manuelle."
+            },
+            "DynamicValues": {
+                "Title": "Valeurs dynamiques",
+                "Body": "Les compétences, talents et modules peuvent modifier les quantités, le temps ou les calories nécessaires. Les valeurs secondaires montrent le résultat après réduction."
+            },
+            "Rounding": {
+                "Title": "Quantité craftée",
+                "Body": "Si Eco arrondit les ingrédients consommés selon la quantité fabriquée, le sélecteur de quantité craftée permet d'obtenir un prix plus réaliste."
+            }
+        },
+        "Mod": {
+            "Title": "Mod Eco Gnome optionnel",
+            "Body": "Si le mod est installé sur le serveur de jeu et que votre utilisateur Eco Gnome est lié à ce serveur, vous pouvez utiliser vos contextes pour synchroniser ou créer les offres de vos shops in-game.",
+            "OpenRepository": "Voir le mod sur GitHub",
+            "Features": {
+                "SyncPrices": {
+                    "Title": "Synchroniser les prix",
+                    "Body": "Applique les prix d'achat et de vente d'un contexte Eco Gnome au shop ciblé, sans recréer toute sa configuration."
+                },
+                "CreateShop": {
+                    "Title": "Créer les offres",
+                    "Body": "Crée automatiquement les offres du shop à partir d'un contexte, avec la possibilité de gérer seulement l'achat ou seulement la vente."
+                },
+                "ServerLink": {
+                    "Title": "Lier le serveur",
+                    "Body": "Après enregistrement du serveur et liaison du joueur, le mod peut ouvrir Eco Gnome directement sur le bon serveur."
+                }
+            }
         }
     },
     "EconomyViewer": {
