@@ -1182,15 +1182,8 @@
                 var relatedElements = new List<Element>();
                 foreach (var element in itemOrTag.Elements)
                 {
-                    if (!element.IsProduct())
-                    {
-                        continue;
-                    }
-
-                    if (!_userElementsByElementId.TryGetValue(element.Id, out var userElement) || userElement.IsReintegrated)
-                    {
-                        continue;
-                    }
+                    if (!element.IsProduct()) continue;
+                    if (!_userElementsByElementId.TryGetValue(element.Id, out var userElement) || userElement.IsReintegrated) continue;
 
                     relatedElements.Add(element);
                 }
