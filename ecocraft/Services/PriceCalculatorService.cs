@@ -294,7 +294,7 @@ public class PriceCalculatorService(
                 var calculationContext = new CalculationContext(dataContext);
                 var marginType = calculationContext.UserSetting.MarginType;
 
-                var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
+            var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
                 var itemOrTagsToSellIds = itemOrTagsToSell.Select(iot => iot.Id).ToHashSet();
 
                 foreach (var userElement in dataContext.UserElements)
@@ -319,16 +319,16 @@ public class PriceCalculatorService(
                 }
                 var remainingUserRecipes = dataContext.UserRecipes.ToList();
                 var recipesWithMissingUserElements = new HashSet<Guid>();
-                int nbHandled;
+            int nbHandled;
 
-                do
+            do
+            {
+                nbHandled = 0;
+                int iterator = 0;
+
+                while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
                 {
-                    nbHandled = 0;
-                    int iterator = 0;
-
-                    while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
-                    {
-                        var userRecipe = remainingUserRecipes[iterator];
+                    var userRecipe = remainingUserRecipes[iterator];
                         if (userRecipe.Recipe is null)
                         {
                             recipesWithMissingUserElements.Add(userRecipe.RecipeId);
@@ -357,7 +357,7 @@ public class PriceCalculatorService(
                             .ToList();
 
                         if (userElementIngredients.Count != ingredientElements.Count || userElementProducts.Count != productElements.Count)
-                        {
+                    {
                             recipesWithMissingUserElements.Add(userRecipe.RecipeId);
                             iterator++;
 
@@ -373,7 +373,7 @@ public class PriceCalculatorService(
                             }
 
                             if (ingredientUserPrice.Price is not null)
-                            {
+                        {
                                 SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
                                 continue;
                             }
@@ -387,29 +387,29 @@ public class PriceCalculatorService(
                             {
                                 calculationContext.TrySetUserPrice(ingredientUserPrice, ingredientUserPrice.PrimaryUserPrice.Price, ingredientUserPrice.PrimaryUserPrice.MarginPrice);
                                 SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            var associatedItemsUserPrices = ingredient.Element.ItemOrTag.AssociatedItems
+                        var associatedItemsUserPrices = ingredient.Element.ItemOrTag.AssociatedItems
                                 .Select(calculationContext.GetUserPrice)
                                 .Where(up => up is not null)
                                 .Cast<UserPrice>()
-                                .ToList();
+                            .ToList();
 
                             if (associatedItemsUserPrices.Count == 0 || !associatedItemsUserPrices.All(up => up.Price is not null))
                             {
                                 continue;
                             }
 
-                            var cheapest = associatedItemsUserPrices.MinBy(up => up.Price)!;
+                        var cheapest = associatedItemsUserPrices.MinBy(up => up.Price)!;
                             calculationContext.TrySetUserPrice(ingredientUserPrice, cheapest.Price, cheapest.MarginPrice);
                             SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
-                        }
+                    }
 
-                        var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
+                    var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
 
-                        foreach (var reintegratedProduct in reintegratedProducts)
-                        {
+                    foreach (var reintegratedProduct in reintegratedProducts)
+                    {
                             var reintegratedUserPrice = calculationContext.GetUserPrice(reintegratedProduct.Element.ItemOrTag);
                             if (reintegratedUserPrice is null)
                             {
@@ -421,11 +421,11 @@ public class PriceCalculatorService(
                             {
                                 calculationContext.TrySetUserElementPrice(reintegratedProduct, reintegratedProduct.Price * -1, reintegratedProduct.IsMarginPrice);
                             }
-                        }
+                    }
 
-                        if (userElementIngredients.Any(ue => ue.Price is null))
-                        {
-                            iterator++;
+                    if (userElementIngredients.Any(ue => ue.Price is null))
+                    {
+                        iterator++;
 
                             continue;
                         }
@@ -435,22 +435,22 @@ public class PriceCalculatorService(
                         {
                             iterator++;
 
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        remainingUserRecipes.RemoveAt(iterator);
+                    remainingUserRecipes.RemoveAt(iterator);
 
                         var ingredientCostSum = -1 * userElementIngredients.Sum(ue => (ue.Price ?? 0m) * calculationContext.GetRoundFactorDynamicValue(ue.Element.Quantity));
                         ingredientCostSum += reintegratedProducts.Sum(ue => (ue.Price ?? 0m) * calculationContext.GetRoundFactorDynamicValue(ue.Element.Quantity));
                         ingredientCostSum += calculationContext.GetDynamicValue(userRecipe.Recipe.Labor) * calculationContext.UserSetting.CalorieCost / 1000;
 
                         if (calculationContext.UserCraftingTablesByCraftingTableId.TryGetValue(userRecipe.Recipe.CraftingTableId, out var currentUserCraftingTable))
-                        {
+                    {
                             ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * calculationContext.GetDynamicValue(userRecipe.Recipe.CraftMinutes);
-                        }
+                    }
 
-                        foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
-                        {
+                    foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
+                    {
                             var finalQuantity = calculationContext.GetRoundFactorDynamicValue(product.Element.Quantity);
                             if (finalQuantity == 0)
                             {
@@ -467,11 +467,11 @@ public class PriceCalculatorService(
                             }
 
                             if (productUserPrice.PrimaryUserElement == product)
-                            {
+                        {
                                 SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, marginType);
-                            }
+                        }
                             else if (productUserPrice.PrimaryUserElement is null)
-                            {
+                        {
                                 var relatedUserElements = product.Element.ItemOrTag.Elements
                                     .Where(e => e.IsProduct())
                                     .Select(calculationContext.GetUserElement)
@@ -480,15 +480,15 @@ public class PriceCalculatorService(
                                     .ToList();
 
                                 if (relatedUserElements.All(ue => ue.Price is not null))
-                                {
+                            {
                                     SetUserPriceWithMargin(calculationContext, productUserPrice, relatedUserElements.Min(ue => ue.Price), marginType);
-                                }
                             }
                         }
-
-                        nbHandled++;
                     }
-                } while (nbHandled > 0);
+
+                    nbHandled++;
+                }
+            } while (nbHandled > 0);
 
                 if (recipesWithMissingUserElements.Count > 0)
                 {
@@ -541,8 +541,8 @@ public class PriceCalculatorService(
                     }
                 }
                 return;
-            });
-        }
+        });
+    }
         catch (Exception ex)
         {
             logger.LogError(

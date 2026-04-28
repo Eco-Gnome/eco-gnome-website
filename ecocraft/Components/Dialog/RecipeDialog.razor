@@ -797,7 +797,7 @@
         if (RecalculateRequested is not null)
         {
             await RecalculateRequested(origin);
-        }
+}
         else
         {
             await PriceCalculatorService.Calculate(DataContext, $"RecipeDialog:{origin}");

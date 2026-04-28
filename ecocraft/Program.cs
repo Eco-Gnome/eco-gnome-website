@@ -52,7 +52,7 @@ builder.Services.AddDbContextFactory<EcoCraftDbContext>(options =>
                 .AddConsole()
                 .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
         }))
-);
+    );
 
 builder.Services.AddControllers();
 
