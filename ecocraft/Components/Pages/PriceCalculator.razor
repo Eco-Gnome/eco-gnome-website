@@ -8,7 +8,6 @@
 @using System.Globalization;
 @using ecocraft.Components.Utils
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.Extensions.Logging
 @inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
@@ -27,7 +26,6 @@
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
-@inject ILoggerFactory LoggerFactory
 
 <PageTitle>@LocalizationService.GetTranslation("PriceCalculator.PageTitle") - Eco Gnome</PageTitle>
 
@@ -1041,7 +1039,6 @@
     private bool _calculationLoopRunning;
     private bool _hasPendingManualCalculation;
     private CalculateTriggerOrigin _queuedCalculationOrigin = CalculateTriggerOrigin.Unknown;
-    private ILogger? _logger;
     private List<ItemOrTag> _itemsToBuyDisplay = [];
     private List<ItemOrTag> _itemsToSellDisplay = [];
     private HashSet<Guid> _autoCalculatedSellItemIds = [];
@@ -1169,7 +1166,6 @@
     protected override void OnInitialized()
     {
         ContextService.OnContextChanged += OnContextChanged;
-        _logger = LoggerFactory.CreateLogger("PriceCalculatorPage");
 
         _groupDefinitionToSell = new TableGroupDefinition<ItemOrTag>
         {
@@ -1317,12 +1313,9 @@
         {
             // Ignore transient disconnections while the circuit tears down/reconnects.
         }
-        catch (JSException ex)
+        catch (JSException)
         {
             _groupLimiterInteropUnavailable = true;
-            _logger?.LogWarning(
-                ex,
-                "PriceCalculator group limiter interop unavailable. Disabling JS limiter behavior for this circuit.");
         }
     }
 
@@ -2269,11 +2262,8 @@
         }
         catch (Exception ex)
         {
-            _logger?.LogError(
-                ex,
-                "PriceCalculator skill level save failed. skillId={SkillId} requestedLevel={RequestedLevel}",
-                userSkill.Id,
-                newLevel);
+            _calculationError = ex;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -2910,34 +2900,18 @@
                     _calculationError = null;
                     return;
                 }
-                catch (DbUpdateConcurrencyException ex) when (attempt == 0)
+                catch (DbUpdateConcurrencyException) when (attempt == 0)
                 {
                     _calculationError = null;
-                    _logger?.LogWarning(
-                        ex,
-                        "PriceCalculator calculation hit optimistic concurrency. trigger={TriggerOrigin}. Retrying once.",
-                        origin);
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
                     _calculationError = null;
-                    _logger?.LogWarning(
-                        ex,
-                        "PriceCalculator calculation still hit optimistic concurrency after retry. Keeping UI alive and waiting for next recalculation trigger. trigger={TriggerOrigin}",
-                        origin);
                     return;
                 }
                 catch (Exception ex)
                 {
                     _calculationError = ex;
-                    _logger?.LogError(
-                        ex,
-                        "PriceCalculator page calculation failed. trigger={TriggerOrigin} skills={UserSkills} recipes={UserRecipes} elements={UserElements} prices={UserPrices}",
-                        origin,
-                        _selectedDataContext?.UserSkills.Count ?? 0,
-                        _selectedDataContext?.UserRecipes.Count ?? 0,
-                        _selectedDataContext?.UserElements.Count ?? 0,
-                        _selectedDataContext?.UserPrices.Count ?? 0);
                     return;
                 }
             }
