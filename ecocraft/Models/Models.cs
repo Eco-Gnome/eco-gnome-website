@@ -16,6 +16,12 @@ public enum MarginType
     GrossMargin,
 }
 
+public enum CalculationMode
+{
+    AutoSmart,
+    Manual,
+}
+
 public interface ISLinkedToModifier;
 
 // Eco Data
@@ -176,12 +182,13 @@ public class DynamicValue
     public decimal GetRoundFactorDynamicValue(DataContext dataContext)
     {
         var roundFactor = (Recipe ?? Element?.Recipe)!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
+        var dynamicValue = GetDynamicValue(dataContext);
 
-        if (roundFactor == 0) return GetDynamicValue(dataContext);
+        if (roundFactor == 0) return dynamicValue;
 
-        return GetDynamicValue(dataContext) < 0
-            ? Math.Floor(GetDynamicValue(dataContext) * roundFactor) / roundFactor
-            : Math.Ceiling(GetDynamicValue(dataContext) * roundFactor) / roundFactor;
+        return dynamicValue < 0
+            ? Math.Floor(dynamicValue * roundFactor) / roundFactor
+            : Math.Ceiling(dynamicValue * roundFactor) / roundFactor;
     }
 
     public string GetMultiplierTooltip(DataContext dataContext, LocalizationService localizationService, string? baseValue = null)
@@ -308,12 +315,13 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
 
     public UserPrice GetMandatoryCurrentUserPrice(DataContext dataContext)
     {
-        if (UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id) is null)
+        var userPrice = UserPrices.FirstOrDefault(ur => ur.DataContextId == dataContext.Id);
+        if (userPrice is null)
         {
             throw new Exception(this.ToString());
         }
 
-        return UserPrices.First(ur => ur.DataContextId == dataContext.Id);
+        return userPrice;
     }
 
     public List<ItemOrTag> GetAssociatedItemsAndSelf()
@@ -484,7 +492,6 @@ public class PluginModule: IHasLocalizedName, IHasIconName
     }
 }
 
-// User Data
 public class User
 {
     [Key] public Guid Id { get; init; } = Guid.NewGuid();

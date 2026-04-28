@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @implements IDisposable
 @using ecocraft.Components.Dialog
 @using ecocraft.Extensions
@@ -55,22 +55,44 @@
                            OnClick="@(() => AddDataContext())">
                     @LocalizationService.GetTranslation("PriceCalculator.AddDataContext")
                 </MudButton>
+                <MudSpacer/>
+                @if (ShouldShowStatusIndicator)
+                {
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Style="min-width: 150px; justify-content: flex-end;">
+                        @if (_isLoadingData || IsCalculationInProgress)
+                        {
+                            <MudProgressCircular Size="Size.Small" Color="Color.Primary" Indeterminate="true"/>
+                        }
+                        else if (HasPendingManualCalculation)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning"/>
+                        }
+                        <MudText Typo="Typo.body2">@GetStatusLabel()</MudText>
+                    </MudStack>
+                }
+                @if (IsManualCalculationMode)
+                {
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@(_selectedDataContext is null || IsCalculationInProgress)"
+                               OnClick="@(async () => await RequestCalculate(CalculateTriggerOrigin.ManualButton, force: true, bypassDebounce: true))">
+                        @LocalizationService.GetTranslation("PriceCalculator.CalculationMode.CalculateNow")
+                    </MudButton>
+                }
             </MudStack>
         </MudItem>
 
-        @if (_isLoadingData)
-        {
-            <MudItem xs="12" Class="px-4 pt-4">
-                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                    <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" Class="ml-2"/>
-                </MudStack>
-            </MudItem>
-        }
-        else if (_selectedDataContext is not null && ContextService.CurrentServerData is not null)
+        @if (!_isLoadingData && _selectedDataContext is not null && ContextService.CurrentServerData is not null)
         {
             <ErrorBoundary>
                 <ChildContent>
-                    @{ if (_calculationError is not null) { throw _calculationError; } }
+                    @{
+                        if (_calculationError is not null)
+                        {
+                            throw _calculationError;
+                        }
+                    }
                     <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
                             <MudExpansionPanels MultiExpansion="true">
@@ -169,11 +191,15 @@
                                                                 <div class="talent-level-control">
                                                                     <div class="talent-icon-wrapper">
                                                                         <MudLink OnClick="() => IncreaseTalentLevel(talents)"
-                                                                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">+</MudLink>
+                                                                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
+                                                                            +
+                                                                        </MudLink>
                                                                         <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                                                                         <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
                                                                         <MudLink OnClick="() => DecreaseTalentLevel(talents)"
-                                                                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">-</MudLink>
+                                                                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
+                                                                            -
+                                                                        </MudLink>
                                                                     </div>
                                                                 </div>
                                                             }
@@ -368,7 +394,9 @@
                                             <MudButton Class="py-1"
                                                        StartIcon="@Icons.Material.Filled.Add"
                                                        tabindex="-1"
-                                                       OnClick="OnAddMargin">@LocalizationService.GetTranslation("PriceCalculator.AddMargin")</MudButton>
+                                                       OnClick="OnAddMargin">
+                                                @LocalizationService.GetTranslation("PriceCalculator.AddMargin")
+                                            </MudButton>
                                         </MudStack>
                                     }
                                 </MudExpansionPanel>
@@ -425,6 +453,22 @@
                                             </div>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CalculationMode.Tooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CalculationMode.Label")</MudText>
+                                            </MudTooltip>
+                                            <div class="flex-no-grow">
+                                                <MudSelect T="CalculationMode"
+                                                           Class="select-dense very-dense"
+                                                           Value="_calculationMode"
+                                                           Style="width: 110px"
+                                                           Variant="Variant.Outlined"
+                                                           ValueChanged="OnOptionCalculationModeChanged">
+                                                    <MudSelectItem Value="@CalculationMode.AutoSmart">@LocalizationService.GetTranslation("PriceCalculator.CalculationMode.AutoSmart")</MudSelectItem>
+                                                    <MudSelectItem Value="@CalculationMode.Manual">@LocalizationService.GetTranslation("PriceCalculator.CalculationMode.Manual")</MudSelectItem>
+                                                </MudSelect>
+                                            </div>
+                                        </MudStack>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@GetCalorieCostTooltip()">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CalorieCost.CalorieCost")</MudText>
                                             </MudTooltip>
@@ -457,7 +501,7 @@
 
                     <MudItem md="6" lg="4" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                            <MudTable Items="@(PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext).ToBuy)"
+                            <MudTable Items="@_itemsToBuyDisplay"
                                       Filter="new Func<ItemOrTag, bool>(FilterTagToBuy)"
                                       Class="mud-table-container-no-overflow-y"
                                       Dense="true"
@@ -493,6 +537,13 @@
                                     <MudTh Style="width: 0; padding: 0"></MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
+                                    @{
+                                        var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                        if (contextUserPrice is null)
+                                        {
+                                            return;
+                                        }
+                                    }
                                     <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")">
                                         <MudLink Color="Color.Default" OnClick="@(() => ShowItemOrTagDialog(context))">
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -510,12 +561,12 @@
                                                 }
                                             </MudStack>
                                         </MudLink>
-                                        @if (!_showDetailedTags && context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserPrice is not null)
+                                        @if (!_showDetailedTags && contextUserPrice.PrimaryUserPrice is not null)
                                         {
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="pl-6">
                                                 <MudIcon Size="Size.Small" Icon="@MDIIcons.Filled.ArrowUpLeft"/>
                                                 <MudText Typo="Typo.body2" Style="position: relative; top: 4px">
-                                                    @LocalizationService.GetTranslation(context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserPrice.ItemOrTag)
+                                                    @LocalizationService.GetTranslation(contextUserPrice.PrimaryUserPrice.ItemOrTag)
                                                 </MudText>
                                             </MudStack>
                                         }
@@ -523,10 +574,10 @@
                                     <MudTd Class="@(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")" Style="position: relative;">
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                             @{
-                                                var isTagEmptyPrice = context.IsTag && context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is null;
-                                                var isItemEmptyPrice = !context.IsTag && context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is null;
-                                                var isMinPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price == context.MinPrice && context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null;
-                                                var isMaxPrice = context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price == context.MaxPrice && !context.IsTag && context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null;
+                                                var isTagEmptyPrice = context.IsTag && contextUserPrice.Price is null;
+                                                var isItemEmptyPrice = !context.IsTag && contextUserPrice.Price is null;
+                                                var isMinPrice = contextUserPrice.Price == context.MinPrice && contextUserPrice.Price is not null;
+                                                var isMaxPrice = contextUserPrice.Price == context.MaxPrice && !context.IsTag && contextUserPrice.Price is not null;
 
                                                 <MudTooltip Disabled="@(!(isTagEmptyPrice || isItemEmptyPrice || isMinPrice || isMaxPrice))"
                                                             Text="@(isTagEmptyPrice
@@ -537,29 +588,29 @@
                                                                               ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
                                                                               : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
 
-                                                     <MudNumericField T="decimal?"
-                                                                      Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
-                                                                      Style="width: 111px;"
-                                                                      Disabled="@(context.IsTag)"
-                                                                      HideSpinButtons="@(context.IsTag)"
-                                                                      Value="context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price"
-                                                                      Immediate="true"
-                                                                      DebounceInterval="150"
-                                                                      Format="0.##"
-                                                                      Variant="Variant.Outlined"
-                                                                      Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-                                                                      Min="context.MinPrice"
-                                                                      Max="context.MaxPrice"
-                                                                     Adornment="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is null ? Adornment.End : Adornment.None)"
-                                                                     AdornmentIcon="@(context.IsTag ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
-                                                                     AdornmentColor="@(context.IsTag ? Color.Default : Color.Warning)"
-                                                                     ValueChanged="@(value => UpdatePriceCalculation(context.GetMandatoryCurrentUserPrice(_selectedDataContext), value))"/>
+                                                      <MudNumericField T="decimal?"
+                                                                       Class="@($"rectangle-input small-adornment {(context.IsTag ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
+                                                                       Style="width: 111px;"
+                                                                       Disabled="@(context.IsTag)"
+                                                                       HideSpinButtons="@(context.IsTag)"
+                                                                      Value="contextUserPrice.Price"
+                                                                       Immediate="true"
+                                                                      DebounceInterval="@GetAdaptiveInputDebounceMs()"
+                                                                       Format="0.##"
+                                                                       Variant="Variant.Outlined"
+                                                                       Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                                                       Min="context.MinPrice"
+                                                                       Max="context.MaxPrice"
+                                                                      Adornment="@(contextUserPrice.Price is null ? Adornment.End : Adornment.None)"
+                                                                      AdornmentIcon="@(context.IsTag ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
+                                                                      AdornmentColor="@(context.IsTag ? Color.Default : Color.Warning)"
+                                                                      ValueChanged="@(value => UpdatePriceCalculation(contextUserPrice, value))"/>
                                                 </MudTooltip>
-                                                @if (!context.IsTag && context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null)
+                                                @if (!context.IsTag && contextUserPrice.Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    tabindex="-1"
-                                                                   OnClick="() => CopyToClipboard(context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price)"
+                                                                   OnClick="() => CopyToClipboard(contextUserPrice.Price)"
                                                                    Size="Size.Small"/>
                                                 }
                                             }
@@ -567,13 +618,13 @@
                                     </MudTd>
 
                                     <MudTd Style="width: 0; padding: 0;"
-                                           Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(context.GetMandatoryCurrentUserPrice(_selectedDataContext).OverrideIsBought ? "border-l-1" : "")}")">
-                                        @if (context.GetMandatoryCurrentUserPrice(_selectedDataContext).OverrideIsBought)
+                                           Class="@($"{(context.AssociatedItems.Any() && _showDetailedTags ? "border-b-0" : "")} {(contextUserPrice.OverrideIsBought ? "border-l-1" : "")}")">
+                                        @if (contextUserPrice.OverrideIsBought)
                                         {
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                                 <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                tabindex="-1"
-                                                               OnClick="() => OverridePrice(false, context.GetMandatoryCurrentUserPrice(_selectedDataContext))"
+                                                               OnClick="() => OverridePrice(false, contextUserPrice)"
                                                                Size="Size.Small"/>
                                             </MudTooltip>
                                         }
@@ -582,10 +633,21 @@
                                 <ChildRowContent>
                                     @if (_showDetailedTags)
                                     {
-                                        @foreach (var item in context.AssociatedItems)
+                                        var detailedAssociatedItems = context.AssociatedItems
+                                            .Where(item => item.GetCurrentUserPrice(_selectedDataContext) is not null)
+                                            .ToList();
+
+                                        @foreach (var item in detailedAssociatedItems)
                                         {
+                                            var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                            var itemUserPrice = item.GetCurrentUserPrice(_selectedDataContext);
+                                            if (contextUserPrice is null || itemUserPrice is null)
+                                            {
+                                                continue;
+                                            }
+
                                             <MudTr>
-                                                <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                <MudTd Class="@($"pt-0 pb-1 {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                         <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                                  Size="Size.Small"/>
@@ -596,20 +658,20 @@
                                                     </MudStack>
                                                 </MudTd>
 
-                                                <MudTd Class="@($"pt-0 pb-1 {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                <MudTd Class="@($"pt-0 pb-1 {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
                                                     <MudStack Row Style="position: relative;" Spacing="0">
                                                         @{
-                                                            var isAutoCalculatedPrice = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext).ToSell.Contains(item) && !item.GetMandatoryCurrentUserPrice(_selectedDataContext).OverrideIsBought;
-                                                            var isEmptyPrice = !isAutoCalculatedPrice && item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is null;
-                                                            var isMinPrice = item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price == item.MinPrice && item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null;
-                                                            var isMaxPrice = item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price == item.MaxPrice && item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null;
+                                                            var isAutoCalculatedPrice = _autoCalculatedSellItemIds.Contains(item.Id) && !itemUserPrice.OverrideIsBought;
+                                                            var isEmptyPrice = !isAutoCalculatedPrice && itemUserPrice.Price is null;
+                                                            var isMinPrice = itemUserPrice.Price == item.MinPrice && itemUserPrice.Price is not null;
+                                                            var isMaxPrice = itemUserPrice.Price == item.MaxPrice && itemUserPrice.Price is not null;
 
-                                                            <MudTooltip Text="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserPrice == item.GetCurrentUserPrice(_selectedDataContext) ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteItem") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteItem"))">
+                                                            <MudTooltip Text="@(contextUserPrice.PrimaryUserPrice == itemUserPrice ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteItem") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteItem"))">
                                                                 <MudIconButton tabindex="-1"
                                                                                Color="Color.Primary"
-                                                                               Icon="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserPrice == item.GetCurrentUserPrice(_selectedDataContext) ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                               Icon="@(contextUserPrice.PrimaryUserPrice == itemUserPrice ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                                                Size="Size.Small"
-                                                                               OnClick="@(() => SetPrimaryUserPrice(context.GetMandatoryCurrentUserPrice(_selectedDataContext), item.GetMandatoryCurrentUserPrice(_selectedDataContext)))"/>
+                                                                               OnClick="@(() => SetPrimaryUserPrice(contextUserPrice, itemUserPrice))"/>
                                                             </MudTooltip>
                                                             <MudTooltip Disabled="@(!(isAutoCalculatedPrice || isEmptyPrice || isMinPrice || isMaxPrice))"
                                                                         Text="@(isAutoCalculatedPrice
@@ -619,42 +681,42 @@
                                                                                       : isMinPrice
                                                                                           ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
                                                                                           : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
-                                                                 <MudNumericField T="decimal?"
+                                                                <MudNumericField T="decimal?"
                                                                                  Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
                                                                                  Style="width: 85px;"
                                                                                  HideSpinButtons="@isAutoCalculatedPrice"
                                                                                  Format="0.##"
                                                                                  Disabled="@isAutoCalculatedPrice"
-                                                                                 Value="item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price"
+                                                                                 Value="itemUserPrice.Price"
                                                                                  Immediate="true"
-                                                                                 DebounceInterval="150"
+                                                                                 DebounceInterval="@GetAdaptiveInputDebounceMs()"
                                                                                  Min="item.MinPrice"
                                                                                  Max="item.MaxPrice"
                                                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
-                                                                                 ValueChanged="@(value => UpdatePriceCalculation(item.GetMandatoryCurrentUserPrice(_selectedDataContext), value))"
-                                                                                 Adornment="@(isAutoCalculatedPrice || item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is null ? Adornment.End : Adornment.None)"
+                                                                                 ValueChanged="@(value => UpdatePriceCalculation(itemUserPrice, value))"
+                                                                                 Adornment="@(isAutoCalculatedPrice || itemUserPrice.Price is null ? Adornment.End : Adornment.None)"
                                                                                  AdornmentIcon="@(isAutoCalculatedPrice ? MDIIcons.Filled.Calculator : MDIIcons.Outline.Information)"
                                                                                  AdornmentColor="@(isAutoCalculatedPrice ? Color.Default : Color.Warning)"
                                                                                  Variant="Variant.Outlined"/>
                                                             </MudTooltip>
-                                                            @if (!isAutoCalculatedPrice && item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null)
+                                                            @if (!isAutoCalculatedPrice && itemUserPrice.Price is not null)
                                                             {
                                                                 <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                                tabindex="-1"
-                                                                               OnClick="() => CopyToClipboard(item.GetMandatoryCurrentUserPrice(_selectedDataContext).Price)"
+                                                                               OnClick="() => CopyToClipboard(itemUserPrice.Price)"
                                                                                Size="Size.Small"/>
                                                             }
                                                         }
                                                     </MudStack>
                                                 </MudTd>
 
-                                                <MudTd Class="@($"pa-0 {(item.GetMandatoryCurrentUserPrice(_selectedDataContext).OverrideIsBought ? "border-l-1" : "")} {(context.AssociatedItems.Last() == item ? "" : "border-b-0")}")">
-                                                    @if (item.GetMandatoryCurrentUserPrice(_selectedDataContext).OverrideIsBought)
+                                                <MudTd Class="@($"pa-0 {(itemUserPrice.OverrideIsBought ? "border-l-1" : "")} {(detailedAssociatedItems.Last() == item ? "" : "border-b-0")}")">
+                                                    @if (itemUserPrice.OverrideIsBought)
                                                     {
                                                         <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CancelOverride")">
                                                             <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                                            tabindex="-1"
-                                                                           OnClick="() => OverridePrice(false, item.GetMandatoryCurrentUserPrice(_selectedDataContext))"
+                                                                           OnClick="() => OverridePrice(false, itemUserPrice)"
                                                                            Size="Size.Small"/>
                                                         </MudTooltip>
                                                     }
@@ -668,7 +730,9 @@
                     </MudItem>
                     <MudItem md="6" lg="5" Class="pa-2 d-flex flex-column">
                         <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                            <MudTable Items="@PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext).ToSell"
+                            <MudTable Items="@_itemsToSellDisplay"
+                                      @ref="_itemsToSellTableRef"
+                                      id="@ItemsToSellTableDomId"
                                       Filter="new Func<ItemOrTag, bool>(FilterItemToSell)"
                                       Class="mud-table-container-no-overflow-y recipe-table"
                                       Dense="true"
@@ -739,6 +803,12 @@
                                 </GroupHeaderTemplate>
                                 <RowTemplate>
                                     @{
+                                        var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                        if (contextUserPrice is null)
+                                        {
+                                            return;
+                                        }
+
                                         var relatedUserElements = context.Elements
                                             .Where(e => e.IsProduct())
                                             .Select(e => e.GetCurrentUserElement(_selectedDataContext))
@@ -754,7 +824,7 @@
                                                 <MudIconButton Size="Size.Small"
                                                                tabindex="-1"
                                                                Icon="@MDIIcons.Filled.ChevronDoubleLeft"
-                                                               OnClick="@(() => OverridePrice(true, context.GetMandatoryCurrentUserPrice(_selectedDataContext)))"/>
+                                                               OnClick="@(() => OverridePrice(true, contextUserPrice))"/>
                                             </MudTooltip>
                                         </MudTd>
 
@@ -781,7 +851,7 @@
 
                                         <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
-                                                <MudTooltip Disabled="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
+                                                <MudTooltip Disabled="@(contextUserPrice.Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
                                                     <MudNumericField T="decimal?"
                                                                      FullWidth="false"
                                                                      Class="mt-0 small-adornment flex-no-grow rectangle-input"
@@ -789,9 +859,9 @@
                                                                      HideSpinButtons="true"
                                                                      Format="0.##"
                                                                      Disabled="true"
-                                                                     Value="@context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price"
+                                                                     Value="@contextUserPrice.Price"
                                                                      Culture="CultureInfo.CurrentUICulture"
-                                                                     Adornment="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null ? Adornment.None : Adornment.End)"
+                                                                     Adornment="@(contextUserPrice.Price is not null ? Adornment.None : Adornment.End)"
                                                                      AdornmentIcon="@MDIIcons.Outline.Information"
                                                                      AdornmentColor="Color.Warning"
                                                                      Variant="Variant.Outlined"/>
@@ -800,8 +870,8 @@
                                                 <div class="margin-select-container">
                                                     <MudSelect T="UserMargin"
                                                                Adornment="Adornment.None"
-                                                               Value="context.GetMandatoryCurrentUserPrice(_selectedDataContext).UserMargin"
-                                                               ValueChanged="@(value => ChangeUserPriceMargin(context.GetMandatoryCurrentUserPrice(_selectedDataContext), value))"
+                                                               Value="contextUserPrice.UserMargin"
+                                                               ValueChanged="@(value => ChangeUserPriceMargin(contextUserPrice, value))"
                                                                ToStringFunc="GetUserMarginDisplayLabel"
                                                                Class="margin-select"
                                                                Dense="true"
@@ -818,7 +888,7 @@
                                                     </MudSelect>
                                                 </div>
                                                 @{
-                                                    var hasMarginPriceError = context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null && context.GetMandatoryCurrentUserPrice(_selectedDataContext).MarginPrice is null;
+                                                    var hasMarginPriceError = contextUserPrice.Price is not null && contextUserPrice.MarginPrice is null;
 
                                                     <MudTooltip Disabled="@(!hasMarginPriceError)"
                                                                 Text="@LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")">
@@ -829,19 +899,19 @@
                                                                          Format="0.##"
                                                                          Disabled="true"
                                                                          Culture="CultureInfo.CurrentUICulture"
-                                                                         Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
-                                                                         AdornmentIcon="@MDIIcons.Outline.Information"
-                                                                         AdornmentColor="Color.Warning"
-                                                                         Value="@context.GetMandatoryCurrentUserPrice(_selectedDataContext).MarginPrice"
-                                                                         Variant="Variant.Outlined"/>
+                                                                          Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
+                                                                          AdornmentIcon="@MDIIcons.Outline.Information"
+                                                                          AdornmentColor="Color.Warning"
+                                                                          Value="@contextUserPrice.MarginPrice"
+                                                                          Variant="Variant.Outlined"/>
                                                     </MudTooltip>
                                                 }
 
-                                                @if (context.GetMandatoryCurrentUserPrice(_selectedDataContext).Price is not null)
+                                                @if (contextUserPrice.Price is not null)
                                                 {
                                                     <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy"
                                                                    Size="Size.Small"
-                                                                   OnClick="@(() => CopyToClipboard(context.GetMandatoryCurrentUserPrice(_selectedDataContext).MarginPrice))"/>
+                                                                   OnClick="@(() => CopyToClipboard(contextUserPrice.MarginPrice))"/>
                                                 }
                                             </MudStack>
                                         </MudTd>
@@ -868,6 +938,12 @@
                                         {
                                             @foreach (var userElement in relatedUserElements)
                                             {
+                                                var contextUserPrice = context.GetCurrentUserPrice(_selectedDataContext);
+                                                if (contextUserPrice is null)
+                                                {
+                                                    continue;
+                                                }
+
                                                 var borderClass = relatedUserElements.Last() == userElement ? "" : "border-b-0";
 
                                                 <MudTr>
@@ -886,13 +962,13 @@
                                                     </MudTd>
                                                     <MudTd Class="@($"{borderClass} pt-0 pb-1")">
                                                         <MudStack Row>
-                                                            <MudTooltip Text="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserElement == userElement ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteRecipe") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteRecipe"))">
+                                                            <MudTooltip Text="@(contextUserPrice.PrimaryUserElement == userElement ? LocalizationService.GetTranslation("PriceCalculator.CancelFavoriteRecipe") : LocalizationService.GetTranslation("PriceCalculator.AddFavoriteRecipe"))">
                                                                 <MudIconButton tabindex="-1"
                                                                                Style="margin-right: -12px"
                                                                                Color="Color.Primary"
-                                                                               Icon="@(context.GetMandatoryCurrentUserPrice(_selectedDataContext).PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
+                                                                               Icon="@(contextUserPrice.PrimaryUserElement == userElement ? Icons.Material.Filled.Star : Icons.Material.Filled.StarOutline)"
                                                                                Size="Size.Small"
-                                                                               OnClick="@(() => SetPrimaryElement(context.GetMandatoryCurrentUserPrice(_selectedDataContext), userElement))"/>
+                                                                               OnClick="@(() => SetPrimaryElement(contextUserPrice, userElement))"/>
                                                             </MudTooltip>
                                                             <MudNumericField T="decimal?"
                                                                              Style="width: 75px"
@@ -936,9 +1012,40 @@
 </MudContainer>
 
 @code {
+
+    private enum CalculateTriggerOrigin
+    {
+        InitialLoad,
+        ContextSwitch,
+        SkillChange,
+        RecipeChange,
+        StructureChange,
+        PluginModuleChange,
+        PriceInput,
+        MarginInput,
+        SettingsChange,
+        ManualButton,
+        Unknown,
+    }
+
+    private readonly object _calculationQueueLock = new();
+    private readonly object _skillLevelSaveDebounceLock = new();
     private CancellationTokenSource? _dataContextNameCts;
+    private CancellationTokenSource? _calculateDebounceCts;
+    private readonly Dictionary<Guid, CancellationTokenSource> _skillLevelSaveDebounceBySkillId = [];
+    private readonly Dictionary<Guid, int> _lastPersistedSkillLevelBySkillId = [];
+    private readonly Dictionary<Guid, int> _pendingSkillLevelBySkillId = [];
+    private bool _queuedCalculation;
+    private bool _calculationLoopRunning;
+    private bool _hasPendingManualCalculation;
+    private CalculateTriggerOrigin _queuedCalculationOrigin = CalculateTriggerOrigin.Unknown;
+    private List<ItemOrTag> _itemsToBuyDisplay = [];
+    private List<ItemOrTag> _itemsToSellDisplay = [];
+    private HashSet<Guid> _autoCalculatedSellItemIds = [];
+    private Dictionary<Guid, UserElement> _userElementsByElementId = [];
 
     private bool _showDetailedTags;
+
     private bool ShowDetailedTags
     {
         set
@@ -949,6 +1056,7 @@
     }
 
     private bool _showDetailedRecipes;
+
     private bool ShowDetailedRecipes
     {
         set
@@ -959,6 +1067,7 @@
     }
 
     private bool _expandedSkills;
+
     private bool ExpandedSkills
     {
         get => _expandedSkills;
@@ -970,6 +1079,7 @@
     }
 
     private bool _expandedCraftingTables;
+
     private bool ExpandedCraftingTables
     {
         get => _expandedCraftingTables;
@@ -981,6 +1091,7 @@
     }
 
     private bool _expandedMargins;
+
     private bool ExpandedMargins
     {
         get => _expandedMargins;
@@ -992,6 +1103,7 @@
     }
 
     private bool _expandedOptions;
+
     private bool ExpandedOptions
     {
         get => _expandedOptions;
@@ -1003,6 +1115,7 @@
     }
 
     private bool _showMarginNames;
+
     private bool ShowMarginNames
     {
         get => _showMarginNames;
@@ -1014,6 +1127,13 @@
     }
 
     private bool _isLoadingData;
+    private int _activeCalculations;
+    private CalculationMode _calculationMode = CalculationMode.AutoSmart;
+    private bool IsCalculationInProgress => _activeCalculations > 0;
+    private bool IsManualCalculationMode => _calculationMode == CalculationMode.Manual;
+    private bool HasPendingManualCalculation => _hasPendingManualCalculation;
+    private bool ShouldShowStatusIndicator => _isLoadingData || IsCalculationInProgress || (IsManualCalculationMode && HasPendingManualCalculation);
+
     private DataContext? _selectedDataContext;
     private bool IsServerCalorieCostLocked => ContextService.CurrentServer?.IsCalorieCostLocked ?? false;
     private bool IsServerMarginLocked => ContextService.CurrentServer?.IsMarginLocked ?? false;
@@ -1021,6 +1141,7 @@
     private MudAutocomplete<Skill>? _skillAutocompleteRef;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
     private MudAutocomplete<CraftingTable>? _craftingTableAutocompleteRef;
+    private MudTable<ItemOrTag>? _itemsToSellTableRef;
     private Skill? _emptySkill;
     private Recipe? _emptyRecipe;
     private CraftingTable? _emptyCraftingTable;
@@ -1033,6 +1154,14 @@
     private string _searchItemToSell = "";
 
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
+    private bool _collapseSellGroupsOnNextRender;
+    private bool _groupLimiterInteropUnavailable;
+    private const int SellGroupCollapseThreshold = 5;
+    private const int SellGroupMaxOpenGroups = 3;
+    private const int SkillChangeCalculationDebounceMs = 150;
+    private const int SkillLevelSaveDebounceMs = 150;
+    private const string ItemsToSellTableDomId = "items-to-sell-table";
+    private const string CalculationModeStorageKeyPrefix = "PriceCalculatorCalculationMode";
 
     protected override void OnInitialized()
     {
@@ -1046,7 +1175,15 @@
             IsInitiallyExpanded = true,
             Selector = itemOrTag =>
             {
-                var relatedElements = itemOrTag.Elements.Where(element => element.GetCurrentUserElement(_selectedDataContext!) is not null && element.IsProduct() && !element.GetMandatoryCurrentUserElement(_selectedDataContext).IsReintegrated).ToList();
+                var relatedElements = new List<Element>();
+                foreach (var element in itemOrTag.Elements)
+                {
+                    if (!element.IsProduct()) continue;
+                    if (!_userElementsByElementId.TryGetValue(element.Id, out var userElement) || userElement.IsReintegrated) continue;
+
+                    relatedElements.Add(element);
+                }
+
                 var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
 
                 return bestRelatedElement?.Recipe.Skill;
@@ -1074,26 +1211,41 @@
             await RetrieveData(_selectedDataContext);
 
             StateHasChanged();
+            return;
         }
+
+        await ConfigureItemsToSellGroupBehaviorAsync();
     }
 
-    private async Task RetrieveData(DataContext? dataContext = null)
+    private async Task RetrieveData(DataContext? dataContext = null, bool forceServerReload = false)
     {
         _isLoadingData = true;
         StateHasChanged();
 
         _selectedDataContext = dataContext ?? ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
-        await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
 
-        ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+        await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
+        _calculationMode = await GetStoredCalculationModeAsync(_selectedDataContext.Id);
+
+        if (forceServerReload || ContextService.CurrentServerData is null)
+        {
+            ContextService.CurrentServerData = await ServerDbService.GetServerWithPriceCalculatorData(ContextService.CurrentServer!.Id);
+        }
+
         SyncCurrentServerCaloriePolicyFromServerData();
         SyncCurrentServerMarginPolicyFromServerData();
+
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
+        var shouldCollapseSellGroups = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+        _groupDefinitionToSell.IsInitiallyExpanded = !shouldCollapseSellGroups;
+        _collapseSellGroupsOnNextRender = shouldCollapseSellGroups;
+
         await EnforceServerCaloriePolicyIfNeeded();
         await EnforceServerMarginPolicyIfNeeded();
-        _isLoadingData = false;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.InitialLoad, force: true);
+
+        _isLoadingData = false;
         StateHasChanged();
     }
 
@@ -1123,6 +1275,48 @@
         ContextService.CurrentServer.MarginMin = ContextService.CurrentServerData.MarginMin;
         ContextService.CurrentServer.MarginDefault = ContextService.CurrentServerData.MarginDefault;
         ContextService.CurrentServer.MarginMax = ContextService.CurrentServerData.MarginMax;
+    }
+
+    private static int GetConfiguredProfessionsCount(DataContext? dataContext)
+    {
+        return dataContext?.UserSkills.Count(userSkill => userSkill.Skill is not null) ?? 0;
+    }
+
+    private static bool ShouldCollapseSellGroupsOnRefresh(DataContext? dataContext)
+    {
+        return GetConfiguredProfessionsCount(dataContext) >= SellGroupCollapseThreshold;
+    }
+
+    private async Task ConfigureItemsToSellGroupBehaviorAsync()
+    {
+        if (_collapseSellGroupsOnNextRender && _itemsToSellTableRef is not null)
+        {
+            _itemsToSellTableRef.CollapseAllGroups();
+            _collapseSellGroupsOnNextRender = false;
+        }
+
+        if (_groupLimiterInteropUnavailable)
+        {
+            return;
+        }
+
+        var shouldEnableGroupOpenLimit = !_isLoadingData
+                                         && _selectedDataContext is not null
+                                         && ContextService.CurrentServerData is not null
+                                         && ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.configure", ItemsToSellTableDomId, shouldEnableGroupOpenLimit, SellGroupMaxOpenGroups);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore transient disconnections while the circuit tears down/reconnects.
+        }
+        catch (JSException)
+        {
+            _groupLimiterInteropUnavailable = true;
+        }
     }
 
     private string GetCalorieCostTooltip()
@@ -1536,6 +1730,32 @@
 
     public void Dispose()
     {
+        _dataContextNameCts?.Cancel();
+        _dataContextNameCts?.Dispose();
+        _calculateDebounceCts?.Cancel();
+        _calculateDebounceCts?.Dispose();
+        lock (_skillLevelSaveDebounceLock)
+        {
+            foreach (var cts in _skillLevelSaveDebounceBySkillId.Values)
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+
+            _skillLevelSaveDebounceBySkillId.Clear();
+            _pendingSkillLevelBySkillId.Clear();
+            _lastPersistedSkillLevelBySkillId.Clear();
+        }
+
+        try
+        {
+            _ = JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.dispose", ItemsToSellTableDomId);
+        }
+        catch
+        {
+            // The JS runtime can be unavailable during teardown.
+        }
+
         ContextService.OnContextChanged -= OnContextChanged;
     }
 
@@ -1611,7 +1831,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task IncreaseTalentLevel(List<Talent> talents)
@@ -1659,7 +1879,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task DecreaseTalentLevel(List<Talent> talents)
@@ -1701,7 +1921,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
@@ -1782,6 +2002,7 @@
         });
 
         ContextService.CurrentUserServer!.DataContexts.Remove(dataContext);
+        await LocalStorageService.RemoveItem(GetCalculationModeStorageKey(dataContext.Id));
 
         if (_selectedDataContext?.Id == dataContext.Id)
         {
@@ -1810,7 +2031,7 @@
 
         _emptySkill = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
         await RefreshSkillAutocompleteAsync();
     }
 
@@ -1822,7 +2043,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task AddUserCraftingTable(CraftingTable? craftingTable)
@@ -1840,7 +2061,7 @@
 
         _emptyCraftingTable = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
         await RefreshCraftingTableAutocompleteAsync();
     }
 
@@ -1852,7 +2073,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
     }
 
     private async Task AddUserRecipe(Recipe? recipe)
@@ -1870,7 +2091,7 @@
 
         _emptyRecipe = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
         await RefreshRecipeAutocompleteAsync();
     }
 
@@ -1882,12 +2103,18 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
     {
-        userPrice.PrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
+        var newPrimaryUserElement = userPrice.PrimaryUserElement == userElement ? null : userElement;
+        if (userPrice.PrimaryUserElement?.Id == newPrimaryUserElement?.Id)
+        {
+            return;
+        }
+
+        userPrice.PrimaryUserElement = newPrimaryUserElement;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -1895,7 +2122,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task RemoveUserRecipes(List<UserRecipe> recipes)
@@ -1906,39 +2133,138 @@
             {
                 UserServerDataService.RemoveUserRecipe(context, recipe);
             }
+
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
     }
 
-    private async Task OnLevelChanged(UserSkill userSkill, int newLevel)
+    private Task OnLevelChanged(UserSkill userSkill, int newLevel)
     {
-        if (userSkill.Level == newLevel) return;
+        if (userSkill.Level == newLevel) return Task.CompletedTask;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        var previousLevel = userSkill.Level;
+        userSkill.Level = newLevel;
+        _ = PersistSkillLevelChangeDebounced(userSkill, previousLevel, newLevel);
+        return Task.CompletedTask;
+    }
+
+    private async Task PersistSkillLevelChangeDebounced(UserSkill userSkill, int previousLevel, int newLevel)
+    {
+        try
         {
-            var isIncrease = newLevel - userSkill.Level > 0;
-            userSkill.Level = newLevel;
-            UserSkillDbService.UpdateLevel(context, userSkill);
-
-            if (_selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes)
+            CancellationTokenSource currentDebounceCts;
+            lock (_skillLevelSaveDebounceLock)
             {
-                UserServerDataService.UserSkillLevelChange(context, _selectedDataContext!, ContextService.CurrentServerData!, userSkill, isIncrease);
-            }
-
-            if (!isIncrease)
-            {
-                foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(_selectedDataContext!) is not null && newLevel < t.Level))
+                if (!_lastPersistedSkillLevelBySkillId.ContainsKey(userSkill.Id))
                 {
-                    UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(_selectedDataContext!)!);
+                    _lastPersistedSkillLevelBySkillId[userSkill.Id] = previousLevel;
                 }
+
+                _pendingSkillLevelBySkillId[userSkill.Id] = newLevel;
+                currentDebounceCts = new CancellationTokenSource();
+
+                if (_skillLevelSaveDebounceBySkillId.TryGetValue(userSkill.Id, out var previousDebounceCts))
+                {
+                    previousDebounceCts.Cancel();
+                    previousDebounceCts.Dispose();
+                }
+
+                _skillLevelSaveDebounceBySkillId[userSkill.Id] = currentDebounceCts;
             }
 
-            return Task.CompletedTask;
-        });
+            try
+            {
+                await Task.Delay(SkillLevelSaveDebounceMs, currentDebounceCts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            finally
+            {
+                lock (_skillLevelSaveDebounceLock)
+                {
+                    if (_skillLevelSaveDebounceBySkillId.TryGetValue(userSkill.Id, out var trackedCts)
+                        && ReferenceEquals(trackedCts, currentDebounceCts))
+                    {
+                        _skillLevelSaveDebounceBySkillId.Remove(userSkill.Id);
+                    }
+                }
 
-        await Calculate();
+                currentDebounceCts.Dispose();
+            }
+
+            var selectedDataContext = _selectedDataContext;
+            var currentServerData = ContextService.CurrentServerData;
+            if (selectedDataContext is null || currentServerData is null)
+            {
+                return;
+            }
+
+            if (!selectedDataContext.UserSkills.Any(us => us.Id == userSkill.Id))
+            {
+                return;
+            }
+
+            int targetLevel;
+            int persistedLevel;
+            lock (_skillLevelSaveDebounceLock)
+            {
+                targetLevel = _pendingSkillLevelBySkillId.TryGetValue(userSkill.Id, out var pendingLevel)
+                    ? pendingLevel
+                    : newLevel;
+                persistedLevel = _lastPersistedSkillLevelBySkillId.TryGetValue(userSkill.Id, out var lastPersistedLevel)
+                    ? lastPersistedLevel
+                    : previousLevel;
+            }
+
+            if (targetLevel == persistedLevel)
+            {
+                lock (_skillLevelSaveDebounceLock)
+                {
+                    _pendingSkillLevelBySkillId.Remove(userSkill.Id);
+                }
+
+                return;
+            }
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+            {
+                var isIncrease = targetLevel > persistedLevel;
+                userSkill.Level = targetLevel;
+                UserSkillDbService.UpdateLevel(context, userSkill);
+
+                if (selectedDataContext.UserSettings.First().OnlyLevelAccessibleRecipes)
+                {
+                    UserServerDataService.UserSkillLevelChange(context, selectedDataContext, currentServerData, userSkill, isIncrease);
+                }
+
+                if (!isIncrease)
+                {
+                    foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(selectedDataContext) is not null && targetLevel < t.Level))
+                    {
+                        UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(selectedDataContext)!);
+                    }
+                }
+
+                return Task.CompletedTask;
+            });
+
+            lock (_skillLevelSaveDebounceLock)
+            {
+                _lastPersistedSkillLevelBySkillId[userSkill.Id] = targetLevel;
+                _pendingSkillLevelBySkillId.Remove(userSkill.Id);
+            }
+
+            await RequestCalculate(CalculateTriggerOrigin.SkillChange, bypassDebounce: true);
+        }
+        catch (Exception ex)
+        {
+            _calculationError = ex;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task OnOptionDisplayChanged()
@@ -1951,6 +2277,9 @@
             UserServerDataService.ToggleEmptyUserSkill(context, _selectedDataContext!, ContextService.CurrentServerData!, _selectedDataContext!.UserSettings.First().DisplayNonSkilledRecipes);
             return Task.CompletedTask;
         });
+
+        RefreshCategorizedDisplayCaches();
+        StateHasChanged();
     }
 
     private async Task OnOptionOnlyLevelChanged()
@@ -1964,7 +2293,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnOptionApplyMarginBetweenSkillsChanged()
@@ -1977,11 +2306,16 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnOptionMarginTypeChanged(MarginType marginType)
     {
+        if (_selectedDataContext!.UserSettings.First().MarginType == marginType)
+        {
+            return;
+        }
+
         _selectedDataContext!.UserSettings.First().MarginType = marginType;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -1990,7 +2324,27 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
+    }
+
+    private async Task OnOptionCalculationModeChanged(CalculationMode calculationMode)
+    {
+        if (_selectedDataContext is null || _calculationMode == calculationMode)
+        {
+            return;
+        }
+
+        _calculationMode = calculationMode;
+        await LocalStorageService.AddItem(GetCalculationModeStorageKey(_selectedDataContext.Id), calculationMode.ToString());
+
+        if (calculationMode == CalculationMode.AutoSmart && _hasPendingManualCalculation)
+        {
+            await RequestCalculate(CalculateTriggerOrigin.SettingsChange, force: true, bypassDebounce: true);
+        }
+        else
+        {
+            StateHasChanged();
+        }
     }
 
     private async Task UpdateCalorieCost(decimal calorieCost)
@@ -1999,7 +2353,7 @@
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.CalorieCost.LockedSnackbar"), Severity.Warning);
             await EnforceServerCaloriePolicyIfNeeded();
-            await Calculate();
+            await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
             return;
         }
 
@@ -2007,6 +2361,11 @@
         if (wasAdjusted)
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.CalorieCost.BoundedSnackbar"), Severity.Warning);
+        }
+
+        if (_selectedDataContext!.UserSettings.First().CalorieCost == boundedCalorieCost)
+        {
+            return;
         }
 
         _selectedDataContext!.UserSettings.First().CalorieCost = boundedCalorieCost;
@@ -2017,7 +2376,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
@@ -2026,7 +2385,7 @@
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Margin.LockedSnackbar"), Severity.Warning);
             await EnforceServerMarginPolicyIfNeeded();
-            await Calculate();
+            await RequestCalculate(CalculateTriggerOrigin.MarginInput);
             return;
         }
 
@@ -2034,6 +2393,11 @@
         if (wasAdjusted)
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Margin.BoundedSnackbar"), Severity.Warning);
+        }
+
+        if (userMargin.Margin == boundedMargin)
+        {
+            return;
         }
 
         userMargin.Margin = boundedMargin;
@@ -2044,11 +2408,16 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.MarginInput);
     }
 
     private async Task UpdateMarginName(UserMargin userMargin, string name)
     {
+        if (userMargin.Name == name)
+        {
+            return;
+        }
+
         userMargin.Name = name;
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -2066,7 +2435,7 @@
         });
 
         await EnforceServerMarginPolicyIfNeeded();
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnRemoveMargin(UserMargin userMargin)
@@ -2083,12 +2452,17 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin? userMargin)
     {
         if (userMargin is null)
+        {
+            return;
+        }
+
+        if (userPrice.UserMarginId == userMargin.Id)
         {
             return;
         }
@@ -2102,7 +2476,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.MarginInput);
     }
 
     private string GetUserMarginDisplayLabel(UserMargin? userMargin)
@@ -2123,6 +2497,11 @@
 
     private async Task UpdatePriceCalculation(UserPrice userPrice, decimal? value)
     {
+        if (userPrice.Price == value)
+        {
+            return;
+        }
+
         userPrice.Price = value;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -2131,7 +2510,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private Recipe ExtractBestRecipe(ItemOrTag itemOrTag, List<UserElement> userElements)
@@ -2152,12 +2531,14 @@
         {
             ["DataContext"] = _selectedDataContext,
             ["Recipe"] = recipe,
+            ["RecalculateRequested"] = new Func<string, Task>(RequestCalculateFromRecipeDialog),
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Large };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
 
         var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
-        var result = await dialog.Result;
+        await dialog.Result;
 
+        RefreshCategorizedDisplayCaches();
         StateHasChanged();
     }
 
@@ -2192,7 +2573,7 @@
         {
             ["CraftingTable"] = craftingTable,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
     }
 
@@ -2202,7 +2583,7 @@
         {
             ["Skill"] = skill,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<SkillDialog>(LocalizationService.GetTranslation(skill), parameters, options);
     }
 
@@ -2212,13 +2593,19 @@
         {
             ["ItemOrTag"] = itemOrTag,
         };
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<ItemOrTagDialog>(LocalizationService.GetTranslation(itemOrTag), parameters, options);
     }
 
     private async Task SetPrimaryUserPrice(UserPrice userPrice, UserPrice target)
     {
-        userPrice.PrimaryUserPrice = userPrice.PrimaryUserPrice == target ? null : target;
+        var newPrimaryUserPrice = userPrice.PrimaryUserPrice == target ? null : target;
+        if (userPrice.PrimaryUserPrice?.Id == newPrimaryUserPrice?.Id)
+        {
+            return;
+        }
+
+        userPrice.PrimaryUserPrice = newPrimaryUserPrice;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -2226,11 +2613,16 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, decimal value)
     {
+        if (userCraftingTable.CraftMinuteFee == value)
+        {
+            return;
+        }
+
         userCraftingTable.CraftMinuteFee = value;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -2239,11 +2631,16 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OverridePrice(bool value, UserPrice userPrice)
     {
+        if (userPrice.OverrideIsBought == value)
+        {
+            return;
+        }
+
         userPrice.OverrideIsBought = value;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
@@ -2252,7 +2649,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task CopyToClipboard(decimal? price)
@@ -2263,7 +2660,7 @@
             return;
         }
 
-        var text = Math.Round((double) price, 2, MidpointRounding.AwayFromZero).ToString("0.00");
+        var text = Math.Round((double)price, 2, MidpointRounding.AwayFromZero).ToString("0.00");
         await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
         Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.PriceCopied"), Severity.Success);
     }
@@ -2280,12 +2677,9 @@
         userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
         userCraftingTable.PluginModuleId = userCraftingTable.PluginModule.Id;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
-        });
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
     }
 
     private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
@@ -2308,12 +2702,9 @@
 
         userCraftingTable.SkilledPluginModules.Clear();
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
-        });
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
     }
 
     private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
@@ -2329,12 +2720,9 @@
             userCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
-        });
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
     }
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)
@@ -2362,26 +2750,253 @@
 
     private async Task OpenServerPricesDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth=true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         await DialogService.ShowAsync<ServerPricesDialog>("", options);
     }
 
     private Exception? _calculationError;
 
-    private async Task Calculate()
+    private int GetAdaptiveInputDebounceMs()
+    {
+        if (_selectedDataContext is null)
+        {
+            return 250;
+        }
+
+        var isHeavyContext = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+        return isHeavyContext ? 800 : 250;
+    }
+
+    private int GetDebounceMsForTrigger(CalculateTriggerOrigin origin, bool bypassDebounce)
+    {
+        if (bypassDebounce)
+        {
+            return 0;
+        }
+
+        return origin switch
+        {
+            CalculateTriggerOrigin.SkillChange => SkillChangeCalculationDebounceMs,
+            CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput => GetAdaptiveInputDebounceMs(),
+            CalculateTriggerOrigin.PluginModuleChange => GetAdaptiveInputDebounceMs(),
+            _ => 0,
+        };
+    }
+
+    private async Task RequestCalculate(CalculateTriggerOrigin origin, bool force = false, bool bypassDebounce = false)
+    {
+        if (_selectedDataContext is null)
+        {
+            return;
+        }
+
+        if (!force && IsManualCalculationMode)
+        {
+            _hasPendingManualCalculation = true;
+            _queuedCalculationOrigin = origin;
+            RefreshCategorizedDisplayCaches();
+            StateHasChanged();
+            return;
+        }
+
+        var debounceMs = GetDebounceMsForTrigger(origin, bypassDebounce);
+
+        // Skill/recipe changes can remove/relink UserPrices before the calculation executes.
+        // Refresh display caches immediately to avoid rendering rows with stale ItemOrTag references.
+        if (origin is CalculateTriggerOrigin.SkillChange or CalculateTriggerOrigin.RecipeChange)
+        {
+            RefreshCategorizedDisplayCaches();
+            StateHasChanged();
+        }
+
+        if (debounceMs > 0)
+        {
+            var currentDebounceCts = new CancellationTokenSource();
+            var previousDebounceCts = System.Threading.Interlocked.Exchange(ref _calculateDebounceCts, currentDebounceCts);
+            previousDebounceCts?.Cancel();
+            previousDebounceCts?.Dispose();
+
+            try
+            {
+                await Task.Delay(debounceMs, currentDebounceCts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            finally
+            {
+                if (ReferenceEquals(_calculateDebounceCts, currentDebounceCts))
+                {
+                    _calculateDebounceCts = null;
+                }
+
+                currentDebounceCts.Dispose();
+            }
+        }
+
+        lock (_calculationQueueLock)
+        {
+            if (_calculationLoopRunning)
+            {
+                _queuedCalculation = true;
+                _queuedCalculationOrigin = origin;
+                return;
+            }
+
+            _calculationLoopRunning = true;
+            _queuedCalculation = false;
+            _queuedCalculationOrigin = origin;
+        }
+
+        try
+        {
+            var currentOrigin = origin;
+
+            while (true)
+            {
+                await ExecuteCalculationOnce(currentOrigin);
+
+                lock (_calculationQueueLock)
+                {
+                    if (!_queuedCalculation)
+                    {
+                        _calculationLoopRunning = false;
+                        break;
+                    }
+
+                    _queuedCalculation = false;
+                    currentOrigin = _queuedCalculationOrigin;
+                }
+            }
+        }
+        finally
+        {
+            lock (_calculationQueueLock)
+            {
+                _calculationLoopRunning = false;
+            }
+        }
+    }
+
+    private async Task ExecuteCalculationOnce(CalculateTriggerOrigin origin)
+    {
+        System.Threading.Interlocked.Increment(ref _activeCalculations);
+        StateHasChanged();
+
+        try
+        {
+            for (var attempt = 0; attempt < 2; attempt++)
     {
         try
         {
+                    await EnforceServerCaloriePolicyIfNeeded();
             await EnforceServerMarginPolicyIfNeeded();
-            await PriceCalculatorService.Calculate(_selectedDataContext!);
+
+                    await PriceCalculatorService.Calculate(_selectedDataContext!, origin.ToString());
+
+                    RefreshCategorizedDisplayCaches();
+                    _hasPendingManualCalculation = false;
             _calculationError = null;
+                    return;
+                }
+                catch (DbUpdateConcurrencyException) when (attempt == 0)
+                {
+                    _calculationError = null;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    _calculationError = null;
+                    return;
         }
         catch (Exception ex)
         {
             _calculationError = ex;
+                    return;
+                }
+            }
+        }
+        finally
+        {
+            System.Threading.Interlocked.Decrement(ref _activeCalculations);
+            StateHasChanged();
+        }
         }
 
-        StateHasChanged();
+    private void RefreshCategorizedDisplayCaches()
+    {
+        if (_selectedDataContext is null)
+        {
+            _itemsToBuyDisplay = [];
+            _itemsToSellDisplay = [];
+            _autoCalculatedSellItemIds = [];
+            _userElementsByElementId = [];
+            return;
+        }
+
+        var categorizedForDisplay = PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext);
+        _itemsToBuyDisplay = categorizedForDisplay.ToBuy
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .ToList();
+        _itemsToSellDisplay = categorizedForDisplay.ToSell
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .ToList();
+
+        var categorizedForAutoSell = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext);
+
+        _autoCalculatedSellItemIds = categorizedForAutoSell.ToSell
+            .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+            .Select(i => i.Id)
+            .ToHashSet();
+
+        _userElementsByElementId = _selectedDataContext.UserElements
+            .GroupBy(ue => ue.ElementId)
+            .ToDictionary(g => g.Key, g => g.First());
+    }
+
+    private string GetStatusLabel()
+    {
+        if (_isLoadingData)
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.Status.Loading");
+        }
+
+        if (IsCalculationInProgress)
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.Status.Recalculating");
+        }
+
+        if (HasPendingManualCalculation)
+        {
+            return LocalizationService.GetTranslation("PriceCalculator.Status.RecalculationRequired");
+        }
+
+        return LocalizationService.GetTranslation("PriceCalculator.Status.Recalculating");
+    }
+
+    private async Task RequestCalculateFromRecipeDialog(string origin)
+    {
+        var triggerOrigin = origin switch
+        {
+            "UpdatePrice" => CalculateTriggerOrigin.PriceInput,
+            "RoundFactorChange" or "ChangeReintegrate" or "UpdateShare" or "Equality" or "Equilibrate" or "FirstOnly" or "Honest" => CalculateTriggerOrigin.RecipeChange,
+            _ => CalculateTriggerOrigin.RecipeChange,
+        };
+
+        await RequestCalculate(triggerOrigin);
+    }
+
+    private static string GetCalculationModeStorageKey(Guid dataContextId)
+    {
+        return $"{CalculationModeStorageKeyPrefix}:{dataContextId}";
+    }
+
+    private async Task<CalculationMode> GetStoredCalculationModeAsync(Guid dataContextId)
+    {
+        var storedValue = await LocalStorageService.GetItem(GetCalculationModeStorageKey(dataContextId));
+        return Enum.TryParse<CalculationMode>(storedValue, out var calculationMode)
+            ? calculationMode
+            : CalculationMode.AutoSmart;
     }
 
     private async Task RefreshSkillAutocompleteAsync()
@@ -2414,4 +3029,5 @@
             await _recipeAutocompleteRef.ClearAsync();
         }
     }
+
 }

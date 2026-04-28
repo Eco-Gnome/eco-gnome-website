@@ -322,6 +322,11 @@
         "MagickFix": "Correction Magique (A essayer avant de reset!)",
         "ContextName": "Nom du contexte",
         "AddDataContext": "Ajouter un nouveau contexte",
+        "Status": {
+            "Loading": "Chargement...",
+            "Recalculating": "Recalcul...",
+            "RecalculationRequired": "Recalcul requis"
+        },
         "LoadError": "Une erreur s'est produite lors du chargement. Vous pouvez essayer de réinitialiser toutes vos données pour corriger l'erreur.",
         "Reset": "Réinitialiser",
         "Skills": "Compétences",
@@ -360,6 +365,13 @@
             "MarginType": "Type de calcul de la marge",
             "MarkUp": "Majoration",
             "GrossMargin": "Marge brute"
+        },
+        "CalculationMode": {
+            "Label": "Mode de calcul",
+            "Tooltip": "Automatique par defaut. Utilisez Manuel pour un calcul explicite.",
+            "AutoSmart": "Auto intelligent",
+            "Manual": "Manuel",
+            "CalculateNow": "Calculer"
         },
         "CalorieCost": {
             "Tooltip": "Le coût de la nourriture que vous mangez, pour 1000 calories dépensées dans un métier. Si vous n'achetez que des salades qui apportent 700cal pour 5$, alors le coût pour 1000 calories est de 1000 * 5 / 700 = 7,14$",
