@@ -295,14 +295,6 @@
             "Title": "Users",
             "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Action"
-        },
-        "PerformancePanel": {
-            "Title": "Performance Settings",
-            "PriceCalculatorMetricsLabel": "Price calculator metrics logging",
-            "PriceCalculatorMetricsDescription": "Enable or disable detailed performance metrics for price calculator and page refresh logs.",
-            "PriceCalculatorMetricsEnabled": "Price calculator metrics enabled.",
-            "PriceCalculatorMetricsDisabled": "Price calculator metrics disabled.",
-            "SaveError": "Unable to save performance settings."
         }
     },
     "TagName": "Tag name",

@@ -18,7 +18,6 @@
 @inject UserServerDataService UserServerDataService
 @inject ServerDbService ServerDbService
 @inject DataContextDbService DataContextDbService
-@inject ShoppingListMetricsService ShoppingListMetricsService
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
@@ -503,7 +502,6 @@
     private bool _isRecipeChoicePropagationEnabled;
     private bool _isGuidedAutoExpandEnabled;
     private bool _isGuidedRunActive;
-    private long _retrieveRequestSequence;
     private readonly Queue<Guid> _guidedRunQueue = new();
     private readonly HashSet<Guid> _guidedRunQueuedIds = [];
     private Guid? _guidedPendingParentRecipeId;
@@ -1305,12 +1303,10 @@
 
     private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)
     {
-        var requestId = System.Threading.Interlocked.Increment(ref _retrieveRequestSequence);
         if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
         {
             return;
         }
-        var metricsScope = await ShoppingListMetricsService.CreateScopeAsync(requestId);
 
         if (_isGuidedRunActive)
         {
@@ -1332,11 +1328,9 @@
 
         try
         {
-            var serverDataSource = "cache";
             var serverData = ContextService.CurrentServerData;
             if (forceServerReload || serverData is null)
             {
-                serverDataSource = "db";
                 serverData = await ServerDbService.GetServerWithShoppingListData(ContextService.CurrentServer.Id);
             }
 
@@ -1349,7 +1343,6 @@
             }
 
             ContextService.CurrentServerData = serverData;
-            await ShoppingListMetricsService.LogRetrieveDataAsync(metricsScope, serverDataSource, forceServerReload);
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
@@ -1360,18 +1353,15 @@
                     ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, serverData)
                     : null;
             }
-            catch (Exception referenceEx)
+            catch (Exception)
             {
-                await ShoppingListMetricsService.LogReferenceDataContextLoadFailedAsync(metricsScope, referenceDataContextId, referenceEx);
                 _referenceDataContext = null;
             }
 
             RebuildTree();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            await ShoppingListMetricsService.LogShoppingListLoadFailedAsync(metricsScope, targetShoppingListId, ex);
-
             var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
                 .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
                 .Select(d => d.Id)
@@ -1387,9 +1377,9 @@
                         _selectedShoppingList = await DataContextDbService.GetDataContextWithData(fallbackId, ContextService.CurrentServerData);
                         break;
                     }
-                    catch (Exception fallbackEx)
+                    catch (Exception)
                     {
-                        await ShoppingListMetricsService.LogFallbackShoppingListLoadFailedAsync(metricsScope, fallbackId, fallbackEx);
+                        continue;
                     }
                 }
             }

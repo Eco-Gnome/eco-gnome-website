@@ -6,7 +6,6 @@
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
 @using System.Globalization;
-@using System.Diagnostics
 @using ecocraft.Components.Utils
 @using Microsoft.EntityFrameworkCore
 @using System.Runtime.CompilerServices
@@ -23,7 +22,6 @@
 @inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserMarginDbService UserMarginDbService
 @inject IPriceCalculatorService PriceCalculatorService
-@inject PriceCalculatorPageMetricsService PriceCalculatorPageMetricsService
 @inject LocalizationService LocalizationService
 @inject DataContextDbService DataContextDbService
 @inject ISnackbar Snackbar
@@ -1045,10 +1043,6 @@
     private CalculateTriggerOrigin _queuedCalculationOrigin = CalculateTriggerOrigin.Unknown;
     private string _queuedCalculationCaller = "Unknown";
     private ILogger? _logger;
-    private Stopwatch? _retrieveToRenderStopwatch;
-    private bool _awaitingRetrieveRenderMetrics;
-    private long _retrieveRequestSequence;
-    private long _pendingRetrieveRequestIdForRenderMetrics;
     private List<ItemOrTag> _itemsToBuyDisplay = [];
     private List<ItemOrTag> _itemsToSellDisplay = [];
     private HashSet<Guid> _autoCalculatedSellItemIds = [];
@@ -1230,99 +1224,37 @@
             return;
         }
 
-        if (_awaitingRetrieveRenderMetrics && _retrieveToRenderStopwatch is not null)
-        {
-            _awaitingRetrieveRenderMetrics = false;
-            _retrieveToRenderStopwatch.Stop();
-
-            if (await PriceCalculatorPageMetricsService.IsEnabledAsync())
-            {
-                PriceCalculatorPageMetricsService.LogRefreshRenderCompleted(
-                    _pendingRetrieveRequestIdForRenderMetrics,
-                    _retrieveToRenderStopwatch.ElapsedMilliseconds);
-            }
-
-            _pendingRetrieveRequestIdForRenderMetrics = 0;
-            _retrieveToRenderStopwatch = null;
-        }
-
         await ConfigureItemsToSellGroupBehaviorAsync();
     }
 
     private async Task RetrieveData(DataContext? dataContext = null, bool forceServerReload = false)
     {
-        var retrieveRequestId = System.Threading.Interlocked.Increment(ref _retrieveRequestSequence);
-        var refreshMetrics = await PriceCalculatorPageMetricsService.CreateRefreshScopeAsync(retrieveRequestId);
-
-        _retrieveToRenderStopwatch = refreshMetrics.IsEnabled ? Stopwatch.StartNew() : null;
-        _pendingRetrieveRequestIdForRenderMetrics = _retrieveToRenderStopwatch is null ? 0 : retrieveRequestId;
         _isLoadingData = true;
         StateHasChanged();
 
-        refreshMetrics.SelectDataContextStopwatch?.Start();
         _selectedDataContext = dataContext ?? ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
-        refreshMetrics.SelectDataContextStopwatch?.Stop();
 
-        refreshMetrics.LocalStorageStopwatch?.Start();
         await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
-        refreshMetrics.LocalStorageStopwatch?.Stop();
 
-        refreshMetrics.ServerDataLoadStopwatch?.Start();
-        refreshMetrics.ServerDataLoadDbFetchStopwatch?.Start();
         if (forceServerReload || ContextService.CurrentServerData is null)
         {
-            refreshMetrics.ServerDataSource = "db";
             ContextService.CurrentServerData = await ServerDbService.GetServerWithPriceCalculatorData(ContextService.CurrentServer!.Id);
         }
 
-        refreshMetrics.ServerDataLoadDbFetchStopwatch?.Stop();
-        refreshMetrics.ServerDataLoadGraphMetricsStopwatch?.Start();
-        refreshMetrics.ServerDataGraph = PriceCalculatorMetricsGraphUtils.BuildServerDataGraphMetrics(ContextService.CurrentServerData);
-        refreshMetrics.ServerDataLoadGraphMetricsStopwatch?.Stop();
-        refreshMetrics.ServerDataLoadStopwatch?.Stop();
-
-        refreshMetrics.PolicySyncStopwatch?.Start();
         SyncCurrentServerCaloriePolicyFromServerData();
         SyncCurrentServerMarginPolicyFromServerData();
-        refreshMetrics.PolicySyncStopwatch?.Stop();
 
-        refreshMetrics.DataContextLoadStopwatch?.Start();
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
-        refreshMetrics.DataContextLoadStopwatch?.Stop();
         var shouldCollapseSellGroups = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
         _groupDefinitionToSell.IsInitiallyExpanded = !shouldCollapseSellGroups;
         _collapseSellGroupsOnNextRender = shouldCollapseSellGroups;
-        refreshMetrics.DataContextGraphMetricsStopwatch?.Start();
-        refreshMetrics.DataContextGraph = PriceCalculatorMetricsGraphUtils.BuildDataContextGraphMetrics(_selectedDataContext);
-        refreshMetrics.DataContextGraphMetricsStopwatch?.Stop();
 
-        refreshMetrics.PolicyEnforcementStopwatch?.Start();
-        refreshMetrics.CaloriePolicyStopwatch?.Start();
         await EnforceServerCaloriePolicyIfNeeded();
-        refreshMetrics.CaloriePolicyStopwatch?.Stop();
-        refreshMetrics.MarginPolicyStopwatch?.Start();
         await EnforceServerMarginPolicyIfNeeded();
-        refreshMetrics.MarginPolicyStopwatch?.Stop();
-        refreshMetrics.PolicyEnforcementStopwatch?.Stop();
 
-        refreshMetrics.CalculateRequestStopwatch?.Start();
         await Calculate(force: true);
-        refreshMetrics.CalculateRequestStopwatch?.Stop();
-
-        if (refreshMetrics.IsEnabled)
-        {
-            refreshMetrics.TotalStopwatch?.Stop();
-            PriceCalculatorPageMetricsService.LogRefreshMetrics(
-                refreshMetrics.ToRefreshMetrics(_selectedDataContext!, ContextService.CurrentServerData));
-        }
 
         _isLoadingData = false;
-        _awaitingRetrieveRenderMetrics = refreshMetrics.IsEnabled && _retrieveToRenderStopwatch is not null;
-        if (!_awaitingRetrieveRenderMetrics)
-        {
-            _pendingRetrieveRequestIdForRenderMetrics = 0;
-        }
-
         StateHasChanged();
     }
 
@@ -3000,8 +2932,6 @@
 
     private async Task ExecuteCalculationOnce(CalculateTriggerOrigin origin, string caller)
     {
-        var metricsScope = await PriceCalculatorPageMetricsService.CreateCalculationScopeAsync(origin.ToString(), caller);
-
         System.Threading.Interlocked.Increment(ref _activeCalculations);
         StateHasChanged();
 
@@ -3010,21 +2940,11 @@
             await EnforceServerCaloriePolicyIfNeeded();
             await EnforceServerMarginPolicyIfNeeded();
 
-            metricsScope.ServiceCalculateStopwatch?.Start();
             await PriceCalculatorService.Calculate(_selectedDataContext!, $"{origin}:{caller}");
-            metricsScope.ServiceCalculateStopwatch?.Stop();
 
-            metricsScope.DisplayCacheRefreshStopwatch?.Start();
-            metricsScope.DisplayCacheMetrics = RefreshCategorizedDisplayCaches(metricsScope.IsEnabled);
-            metricsScope.DisplayCacheRefreshStopwatch?.Stop();
+            RefreshCategorizedDisplayCaches();
             _hasPendingManualCalculation = false;
             _calculationError = null;
-
-            if (metricsScope.IsEnabled)
-            {
-                metricsScope.TotalStopwatch?.Stop();
-                PriceCalculatorPageMetricsService.LogCalculationPipelineMetrics(metricsScope.ToCalculationPipelineMetrics());
-            }
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -3071,24 +2991,18 @@
         }
     }
 
-    private PriceCalculatorDisplayCacheRefreshMetrics RefreshCategorizedDisplayCaches(bool includeMetrics = false)
+    private void RefreshCategorizedDisplayCaches()
     {
-        var metricsScope = new PriceCalculatorDisplayCacheMetricsScope(includeMetrics);
-
         if (_selectedDataContext is null)
         {
             _itemsToBuyDisplay = [];
             _itemsToSellDisplay = [];
             _autoCalculatedSellItemIds = [];
             _userElementsByElementId = [];
-
-            metricsScope.TotalStopwatch?.Stop();
-            return metricsScope.ToMetrics(0, 0, 0, 0);
+            return;
         }
 
-        metricsScope.CategorizeForDisplayStopwatch?.Start();
         var categorizedForDisplay = PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext);
-        metricsScope.CategorizeForDisplayStopwatch?.Stop();
         _itemsToBuyDisplay = categorizedForDisplay.ToBuy
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
             .ToList();
@@ -3096,29 +3010,16 @@
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
             .ToList();
 
-        metricsScope.CategorizeForAutoSellStopwatch?.Start();
         var categorizedForAutoSell = PriceCalculatorService.GetCategorizedItemOrTags(_selectedDataContext);
-        metricsScope.CategorizeForAutoSellStopwatch?.Stop();
 
-        metricsScope.AutoSellIdProjectionStopwatch?.Start();
         _autoCalculatedSellItemIds = categorizedForAutoSell.ToSell
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
             .Select(i => i.Id)
             .ToHashSet();
-        metricsScope.AutoSellIdProjectionStopwatch?.Stop();
 
-        metricsScope.UserElementsIndexStopwatch?.Start();
         _userElementsByElementId = _selectedDataContext.UserElements
             .GroupBy(ue => ue.ElementId)
             .ToDictionary(g => g.Key, g => g.First());
-        metricsScope.UserElementsIndexStopwatch?.Stop();
-
-        metricsScope.TotalStopwatch?.Stop();
-        return metricsScope.ToMetrics(
-            _itemsToBuyDisplay.Count,
-            _itemsToSellDisplay.Count,
-            _autoCalculatedSellItemIds.Count,
-            _userElementsByElementId.Count);
     }
 
     private string GetStatusLabel()

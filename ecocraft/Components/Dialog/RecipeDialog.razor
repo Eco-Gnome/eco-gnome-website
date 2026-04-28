@@ -1,12 +1,10 @@
 ﻿@using ecocraft.Models
 @implements IDisposable
-@using System.Diagnostics
 @using ecocraft.Services
 @using ecocraft.Components.Utils
 @using ecocraft.Extensions
 @using ecocraft.Services.DbServices
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.Extensions.Logging
 @inject UserServerDataService UserServerDataService
 @inject IPriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
@@ -14,7 +12,6 @@
 @inject UserPriceDbService UserPriceDbService
 @inject UserRecipeDbService UserRecipeDbService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
-@inject ILogger<RecipeDialog> Logger
 
 <MudDialog Style="min-height: 500px;" Class="pb-4">
     <TitleContent>
@@ -458,29 +455,9 @@
     private UserSkill? _currentUserSkill;
     private UserSetting? _currentUserSetting;
 
-    private Stopwatch? _renderStopwatch;
-    private bool _awaitingRenderMetrics;
-
     protected override void OnParametersSet()
     {
-        RefreshComputedState(trackRenderMetrics: true);
-    }
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_awaitingRenderMetrics && _renderStopwatch is not null)
-        {
-            _awaitingRenderMetrics = false;
-            _renderStopwatch.Stop();
-
-            Logger.LogInformation(
-                "RecipeDialog render metrics. renderMs={RenderMs}",
-                _renderStopwatch.ElapsedMilliseconds);
-
-            _renderStopwatch = null;
-        }
-
-        return Task.CompletedTask;
+        RefreshComputedState();
     }
 
     public void Dispose()
@@ -492,11 +469,9 @@
         }
 
         _priceSaveDebounceByUserPriceId.Clear();
-        _awaitingRenderMetrics = false;
-        _renderStopwatch = null;
     }
 
-    private void RefreshComputedState(bool trackRenderMetrics = false)
+    private void RefreshComputedState()
     {
         _currentUserRecipe = Recipe.GetCurrentUserRecipe(DataContext);
         _currentUserCraftingTable = Recipe.CraftingTable.GetCurrentUserCraftingTable(DataContext);
@@ -536,11 +511,6 @@
             _lastPersistedPriceByUserPriceId.Remove(staleUserPriceId);
         }
 
-        if (trackRenderMetrics)
-        {
-            _renderStopwatch = Stopwatch.StartNew();
-            _awaitingRenderMetrics = true;
-        }
     }
 
     private UserElement GetUserElement(Element element)
@@ -560,16 +530,9 @@
                && _buyItemOrTagIds.Contains(userElement.Element.ItemOrTagId);
     }
 
-    private async Task PersistWithMetricsAsync(string operation, Func<EcoCraftDbContext, Task> persistAction)
+    private async Task PersistAsync(Func<EcoCraftDbContext, Task> persistAction)
     {
-        var saveStopwatch = Stopwatch.StartNew();
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, persistAction);
-        saveStopwatch.Stop();
-
-        Logger.LogInformation(
-            "RecipeDialog save metrics. operation={Operation} saveMs={SaveMs}",
-            operation,
-            saveStopwatch.ElapsedMilliseconds);
     }
 
     private async Task ChangeReintegrate(UserElement userElement, bool value)
@@ -587,7 +550,7 @@
             userPrice.PrimaryUserElement = null;
         }
 
-        await PersistWithMetricsAsync(nameof(ChangeReintegrate), context =>
+        await PersistAsync(context =>
         {
             UserElementDbService.UpdateAll(context, userElement);
             UserPriceDbService.UpdateAll(context, userPrice);
@@ -639,7 +602,7 @@
             return;
         }
 
-        await PersistWithMetricsAsync(nameof(UpdatePrice), context =>
+        await PersistAsync(context =>
         {
             UserPriceDbService.UpdatePrice(context, userPrice);
             return Task.CompletedTask;
@@ -660,13 +623,13 @@
 
         userRecipe.LockShare = !userRecipe.LockShare;
 
-        await PersistWithMetricsAsync(nameof(ToggleLock), context =>
+        await PersistAsync(context =>
         {
             UserRecipeDbService.UpdateAll(context, userRecipe);
             return Task.CompletedTask;
         });
 
-        RefreshComputedState(trackRenderMetrics: true);
+        RefreshComputedState();
         StateHasChanged();
     }
 
@@ -715,7 +678,7 @@
 
         userRecipe.RoundFactor = value;
 
-        await PersistWithMetricsAsync(nameof(RoundFactorChange), context =>
+        await PersistAsync(context =>
         {
             UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
             return Task.CompletedTask;
@@ -819,7 +782,7 @@
     private async Task SaveProductShares()
     {
         var userElements = GetProductUserElements();
-        await PersistWithMetricsAsync(nameof(SaveProductShares), context =>
+        await PersistAsync(context =>
         {
             foreach (var ue in userElements)
             {
@@ -831,7 +794,6 @@
 
     private async Task RecalculateFromDialog(string origin)
     {
-        var recalculateStopwatch = Stopwatch.StartNew();
         if (RecalculateRequested is not null)
         {
             await RecalculateRequested(origin);
@@ -841,14 +803,7 @@
             await PriceCalculatorService.Calculate(DataContext, $"RecipeDialog:{origin}");
         }
 
-        recalculateStopwatch.Stop();
-        Logger.LogInformation(
-            "RecipeDialog recalculate metrics. origin={Origin} recalculateRequestMs={RecalculateRequestMs} mode={Mode}",
-            origin,
-            recalculateStopwatch.ElapsedMilliseconds,
-            RecalculateRequested is not null ? "callback" : "local");
-
-        RefreshComputedState(trackRenderMetrics: true);
+        RefreshComputedState();
         StateHasChanged();
     }
 }

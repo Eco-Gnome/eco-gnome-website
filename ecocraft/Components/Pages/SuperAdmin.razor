@@ -12,7 +12,6 @@
 @inject UserServerDbService UserServerDbService
 @inject ServerDbService ServerDbService
 @inject ModUploadHistoryDbService ModUploadHistoryDbService
-@inject AppSettingsService AppSettingsService
 @inject ISnackbar Snackbar
 @inject LocalizationService LocalizationService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
@@ -256,29 +255,6 @@
                 </PagerContent>
             </MudTable>
         </MudItem>
-        <MudItem lg="6" md="12">
-            <MudPaper Elevation="1" Class="pa-4" Style="height: 430px;">
-                <MudStack Spacing="3">
-                    <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.PerformancePanel.Title")</MudText>
-                    <MudDivider />
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudStack Spacing="1">
-                            <MudText Typo="Typo.subtitle1">@LocalizationService.GetTranslation("SuperAdmin.PerformancePanel.PriceCalculatorMetricsLabel")</MudText>
-                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("SuperAdmin.PerformancePanel.PriceCalculatorMetricsDescription")</MudText>
-                        </MudStack>
-                        <MudSwitch T="bool"
-                                   Color="Color.Primary"
-                                   Value="_priceCalculatorMetricsEnabled"
-                                   ValueChanged="TogglePriceCalculatorMetrics"
-                                   Disabled="_isSavingPriceCalculatorMetrics" />
-                    </MudStack>
-                    @if (_isSavingPriceCalculatorMetrics)
-                    {
-                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
-                    }
-                </MudStack>
-            </MudPaper>
-        </MudItem>
     </MudGrid>
 </MudContainer>
 
@@ -289,8 +265,6 @@
     private List<ModUploadHistory> _modUploadHistories = [];
     private string _searchUser = "";
     private string _searchServer = "";
-    private bool _priceCalculatorMetricsEnabled = false;
-    private bool _isSavingPriceCalculatorMetrics;
 
     protected override void OnInitialized()
     {
@@ -309,8 +283,7 @@
             await Task.WhenAll(
                 RetrieveUsers(),
                 RetrieveServers(),
-                RetrieveModUploadHistories(),
-                RetrieveAppSettings()
+                RetrieveModUploadHistories()
             );
             StateHasChanged();
         }
@@ -348,11 +321,6 @@
 
     private async Task RetrieveServers() {
         _servers = await ServerDbService.GetAllAsync();
-    }
-
-    private async Task RetrieveAppSettings()
-    {
-        _priceCalculatorMetricsEnabled = await AppSettingsService.IsPriceCalculatorMetricsEnabledAsync();
     }
 
     public void Dispose()
@@ -518,25 +486,4 @@
         }
     }
 
-    private async Task TogglePriceCalculatorMetrics(bool isEnabled)
-    {
-        if (_priceCalculatorMetricsEnabled == isEnabled)
-        {
-            return;
-        }
-
-        _isSavingPriceCalculatorMetrics = true;
-        StateHasChanged();
-
-        _priceCalculatorMetricsEnabled = await AppSettingsService.SetPriceCalculatorMetricsEnabledAsync(isEnabled);
-        Snackbar.Add(
-            LocalizationService.GetTranslation(
-                _priceCalculatorMetricsEnabled
-                    ? "SuperAdmin.PerformancePanel.PriceCalculatorMetricsEnabled"
-                    : "SuperAdmin.PerformancePanel.PriceCalculatorMetricsDisabled"),
-            Severity.Success);
-
-        _isSavingPriceCalculatorMetrics = false;
-        StateHasChanged();
-    }
 }

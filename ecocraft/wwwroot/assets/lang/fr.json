@@ -285,14 +285,6 @@
             "Title": "Utilisateurs",
             "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Action"
-        },
-        "PerformancePanel": {
-            "Title": "Parametres de performance",
-            "PriceCalculatorMetricsLabel": "Logs metriques du price calculator",
-            "PriceCalculatorMetricsDescription": "Active ou desactive les logs de performance detailles pour le price calculator et le refresh de page.",
-            "PriceCalculatorMetricsEnabled": "Metriques du price calculator activees.",
-            "PriceCalculatorMetricsDisabled": "Metriques du price calculator desactivees.",
-            "SaveError": "Impossible de sauvegarder les parametres de performance."
         }
     },
     "TagName": "Nom du tag",
