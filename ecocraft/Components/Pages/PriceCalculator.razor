@@ -21,7 +21,7 @@
 @inject UserTalentDbService UserTalentDbService
 @inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserMarginDbService UserMarginDbService
-@inject IPriceCalculatorService PriceCalculatorService
+@inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
 @inject DataContextDbService DataContextDbService
 @inject ISnackbar Snackbar
@@ -462,7 +462,7 @@
                 <div class="flex-no-grow">
                     <MudSelect T="CalculationMode"
                                Class="select-dense very-dense"
-                               Value="_selectedDataContext.UserSettings.First().CalculationMode"
+                               Value="_calculationMode"
                                Style="width: 110px"
                                Variant="Variant.Outlined"
                                ValueChanged="OnOptionCalculationModeChanged">
@@ -1132,8 +1132,9 @@
 
     private bool _isLoadingData;
     private int _activeCalculations;
+    private CalculationMode _calculationMode = CalculationMode.AutoSmart;
     private bool IsCalculationInProgress => _activeCalculations > 0;
-    private bool IsManualCalculationMode => _selectedDataContext?.UserSettings.FirstOrDefault()?.CalculationMode == CalculationMode.Manual;
+    private bool IsManualCalculationMode => _calculationMode == CalculationMode.Manual;
     private bool HasPendingManualCalculation => _hasPendingManualCalculation;
     private bool ShouldShowStatusIndicator => _isLoadingData || IsCalculationInProgress || (IsManualCalculationMode && HasPendingManualCalculation);
 
@@ -1164,6 +1165,7 @@
     private const int SkillChangeCalculationDebounceMs = 150;
     private const int SkillLevelSaveDebounceMs = 150;
     private const string ItemsToSellTableDomId = "items-to-sell-table";
+    private const string CalculationModeStorageKeyPrefix = "PriceCalculatorCalculationMode";
 
     protected override void OnInitialized()
     {
@@ -1235,6 +1237,7 @@
         _selectedDataContext = dataContext ?? ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
 
         await LocalStorageService.AddItem("DataContextId", _selectedDataContext.Id.ToString());
+        _calculationMode = await GetStoredCalculationModeAsync(_selectedDataContext.Id);
 
         if (forceServerReload || ContextService.CurrentServerData is null)
         {
@@ -2014,6 +2017,7 @@
         });
 
         ContextService.CurrentUserServer!.DataContexts.Remove(dataContext);
+        await LocalStorageService.RemoveItem(GetCalculationModeStorageKey(dataContext.Id));
 
         if (_selectedDataContext?.Id == dataContext.Id)
         {
@@ -2343,19 +2347,13 @@
 
     private async Task OnOptionCalculationModeChanged(CalculationMode calculationMode)
     {
-        var userSetting = _selectedDataContext!.UserSettings.First();
-        if (userSetting.CalculationMode == calculationMode)
+        if (_selectedDataContext is null || _calculationMode == calculationMode)
         {
             return;
         }
 
-        userSetting.CalculationMode = calculationMode;
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            UserSettingDbService.UpdateAll(context, userSetting);
-            return Task.CompletedTask;
-        });
+        _calculationMode = calculationMode;
+        await LocalStorageService.AddItem(GetCalculationModeStorageKey(_selectedDataContext.Id), calculationMode.ToString());
 
         if (calculationMode == CalculationMode.AutoSmart && _hasPendingManualCalculation)
         {
@@ -2792,7 +2790,7 @@
             nameof(AddUserCraftingTable) or nameof(RemoveUserCraftingTable) or nameof(IncreasePluginModule) or nameof(DecreasePluginModule) or nameof(ToggleSkilledPluginModule) => CalculateTriggerOrigin.StructureChange,
             nameof(UpdatePriceCalculation) or nameof(SetPrimaryElement) or nameof(SetPrimaryUserPrice) or nameof(OverridePrice) => CalculateTriggerOrigin.PriceInput,
             nameof(UpdateMargin) or nameof(ChangeUserPriceMargin) => CalculateTriggerOrigin.MarginInput,
-            nameof(OnOptionOnlyLevelChanged) or nameof(OnOptionApplyMarginBetweenSkillsChanged) or nameof(OnOptionMarginTypeChanged) or nameof(UpdateCalorieCost) or nameof(UpdateCraftMinuteFee) or nameof(OnAddMargin) or nameof(OnRemoveMargin) or nameof(OnOptionCalculationModeChanged) => CalculateTriggerOrigin.SettingsChange,
+            nameof(OnOptionOnlyLevelChanged) or nameof(OnOptionApplyMarginBetweenSkillsChanged) or nameof(OnOptionMarginTypeChanged) or nameof(UpdateCalorieCost) or nameof(UpdateCraftMinuteFee) or nameof(OnAddMargin) or nameof(OnRemoveMargin) => CalculateTriggerOrigin.SettingsChange,
             _ => CalculateTriggerOrigin.Unknown,
         };
     }
@@ -3052,6 +3050,19 @@
         };
 
         await RequestCalculate(triggerOrigin, caller: $"RecipeDialog:{origin}");
+    }
+
+    private static string GetCalculationModeStorageKey(Guid dataContextId)
+    {
+        return $"{CalculationModeStorageKeyPrefix}:{dataContextId}";
+    }
+
+    private async Task<CalculationMode> GetStoredCalculationModeAsync(Guid dataContextId)
+    {
+        var storedValue = await LocalStorageService.GetItem(GetCalculationModeStorageKey(dataContextId));
+        return Enum.TryParse<CalculationMode>(storedValue, out var calculationMode)
+            ? calculationMode
+            : CalculationMode.AutoSmart;
     }
 
     private async Task RefreshSkillAutocompleteAsync()

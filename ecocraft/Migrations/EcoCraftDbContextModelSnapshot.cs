@@ -880,9 +880,6 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("CalorieCost")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("CalculationMode")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");
 

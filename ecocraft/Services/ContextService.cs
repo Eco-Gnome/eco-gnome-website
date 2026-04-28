@@ -239,7 +239,6 @@ public class ContextService(
         var userSetting = new UserSetting
         {
             DataContext = dataContext,
-            CalculationMode = CalculationMode.AutoSmart,
             CalorieCost = userServer.Server.IsCalorieCostLocked
                 ? userServer.Server.LockedCalorieCost ?? userServer.Server.CalorieCostDefault ?? 0
                 : userServer.Server.CalorieCostDefault ?? 0

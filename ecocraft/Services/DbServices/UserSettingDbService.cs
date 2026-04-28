@@ -48,7 +48,6 @@ public class UserSettingDbService(IDbContextFactory<EcoCraftDbContext> factory) 
 			Id = userSetting.Id,
 			DataContextId = userSetting.DataContext.Id,
 			MarginType = userSetting.MarginType,
-			CalculationMode = userSetting.CalculationMode,
 			CalorieCost = userSetting.CalorieCost,
 			DisplayNonSkilledRecipes = userSetting.DisplayNonSkilledRecipes,
 			OnlyLevelAccessibleRecipes = userSetting.OnlyLevelAccessibleRecipes,

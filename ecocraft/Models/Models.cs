@@ -559,7 +559,6 @@ public class UserSetting
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
 
     public MarginType MarginType { get; set; } = MarginType.MarkUp;
-    public CalculationMode CalculationMode { get; set; } = CalculationMode.AutoSmart;
     public decimal CalorieCost { get; set; } = 0;
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;

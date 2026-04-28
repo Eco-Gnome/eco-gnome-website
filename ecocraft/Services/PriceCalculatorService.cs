@@ -11,7 +11,6 @@ public class PriceCalculatorService(
     UserPriceDbService userPriceDbService,
     LocalizationService localizationService,
     ILogger<PriceCalculatorService> logger)
-    : IPriceCalculatorService
 {
     private sealed class CalculationContext(DataContext dataContext)
     {

@@ -83,7 +83,7 @@ builder.Services.AddScoped<ModUploadHistoryDbService>();
 // Business Services
 builder.Services.AddScoped<ContextService>();
 builder.Services.AddScoped<ImportDataService>();
-builder.Services.AddScoped<IPriceCalculatorService, PriceCalculatorService>();
+builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
 builder.Services.AddScoped<UserServerDataService>();
 builder.Services.AddScoped<VideoUploadService>();
