@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @implements IDisposable
 @using ecocraft.Components.Dialog
 @using ecocraft.Extensions
@@ -8,7 +8,6 @@
 @using System.Globalization;
 @using ecocraft.Components.Utils
 @using Microsoft.EntityFrameworkCore
-@using System.Runtime.CompilerServices
 @using Microsoft.Extensions.Logging
 @inject IDialogService DialogService
 @inject ContextService ContextService
@@ -1023,6 +1022,7 @@
         SkillChange,
         RecipeChange,
         StructureChange,
+        PluginModuleChange,
         PriceInput,
         MarginInput,
         SettingsChange,
@@ -1041,7 +1041,6 @@
     private bool _calculationLoopRunning;
     private bool _hasPendingManualCalculation;
     private CalculateTriggerOrigin _queuedCalculationOrigin = CalculateTriggerOrigin.Unknown;
-    private string _queuedCalculationCaller = "Unknown";
     private ILogger? _logger;
     private List<ItemOrTag> _itemsToBuyDisplay = [];
     private List<ItemOrTag> _itemsToSellDisplay = [];
@@ -1255,7 +1254,7 @@
         await EnforceServerCaloriePolicyIfNeeded();
         await EnforceServerMarginPolicyIfNeeded();
 
-        await Calculate(force: true);
+        await RequestCalculate(CalculateTriggerOrigin.InitialLoad, force: true);
 
         _isLoadingData = false;
         StateHasChanged();
@@ -1846,7 +1845,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task IncreaseTalentLevel(List<Talent> talents)
@@ -1894,7 +1893,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task DecreaseTalentLevel(List<Talent> talents)
@@ -1936,7 +1935,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
@@ -2046,7 +2045,7 @@
 
         _emptySkill = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
         await RefreshSkillAutocompleteAsync();
     }
 
@@ -2058,7 +2057,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
     }
 
     private async Task AddUserCraftingTable(CraftingTable? craftingTable)
@@ -2076,7 +2075,7 @@
 
         _emptyCraftingTable = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
         await RefreshCraftingTableAutocompleteAsync();
     }
 
@@ -2088,7 +2087,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
     }
 
     private async Task AddUserRecipe(Recipe? recipe)
@@ -2106,7 +2105,7 @@
 
         _emptyRecipe = null;
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
         await RefreshRecipeAutocompleteAsync();
     }
 
@@ -2118,7 +2117,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
     }
 
     private async Task SetPrimaryElement(UserPrice userPrice, UserElement userElement)
@@ -2137,7 +2136,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task RemoveUserRecipes(List<UserRecipe> recipes)
@@ -2152,7 +2151,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.RecipeChange);
     }
 
     private Task OnLevelChanged(UserSkill userSkill, int newLevel)
@@ -2273,7 +2272,7 @@
                 _pendingSkillLevelBySkillId.Remove(userSkill.Id);
             }
 
-            await RequestCalculate(CalculateTriggerOrigin.SkillChange, caller: nameof(OnLevelChanged), bypassDebounce: true);
+            await RequestCalculate(CalculateTriggerOrigin.SkillChange, bypassDebounce: true);
         }
         catch (Exception ex)
         {
@@ -2311,7 +2310,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnOptionApplyMarginBetweenSkillsChanged()
@@ -2324,7 +2323,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnOptionMarginTypeChanged(MarginType marginType)
@@ -2342,7 +2341,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnOptionCalculationModeChanged(CalculationMode calculationMode)
@@ -2371,7 +2370,7 @@
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.CalorieCost.LockedSnackbar"), Severity.Warning);
             await EnforceServerCaloriePolicyIfNeeded();
-            await Calculate();
+            await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
             return;
         }
 
@@ -2394,7 +2393,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task UpdateMargin(UserMargin userMargin, decimal margin)
@@ -2403,7 +2402,7 @@
         {
             Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Margin.LockedSnackbar"), Severity.Warning);
             await EnforceServerMarginPolicyIfNeeded();
-            await Calculate();
+            await RequestCalculate(CalculateTriggerOrigin.MarginInput);
             return;
         }
 
@@ -2426,7 +2425,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.MarginInput);
     }
 
     private async Task UpdateMarginName(UserMargin userMargin, string name)
@@ -2453,7 +2452,7 @@
         });
 
         await EnforceServerMarginPolicyIfNeeded();
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OnRemoveMargin(UserMargin userMargin)
@@ -2470,7 +2469,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task ChangeUserPriceMargin(UserPrice userPrice, UserMargin? userMargin)
@@ -2494,7 +2493,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.MarginInput);
     }
 
     private string GetUserMarginDisplayLabel(UserMargin? userMargin)
@@ -2528,7 +2527,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private Recipe ExtractBestRecipe(ItemOrTag itemOrTag, List<UserElement> userElements)
@@ -2631,7 +2630,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task UpdateCraftMinuteFee(UserCraftingTable userCraftingTable, decimal value)
@@ -2649,7 +2648,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
     private async Task OverridePrice(bool value, UserPrice userPrice)
@@ -2667,7 +2666,7 @@
             return Task.CompletedTask;
         });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
     private async Task CopyToClipboard(decimal? price)
@@ -2697,7 +2696,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
     }
 
     private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
@@ -2722,7 +2721,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
     }
 
     private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
@@ -2740,7 +2739,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
-        await Calculate();
+        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
     }
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)
@@ -2774,27 +2773,6 @@
 
     private Exception? _calculationError;
 
-    private async Task Calculate(bool force = false, [CallerMemberName] string origin = "Unknown")
-    {
-        await RequestCalculate(MapTriggerOrigin(origin), force, caller: origin);
-    }
-
-    private static CalculateTriggerOrigin MapTriggerOrigin(string origin)
-    {
-        return origin switch
-        {
-            nameof(RetrieveData) => CalculateTriggerOrigin.InitialLoad,
-            nameof(SelectDataContext) => CalculateTriggerOrigin.ContextSwitch,
-            nameof(AddUserSkill) or nameof(RemoveUserSkill) or nameof(OnLevelChanged) or nameof(ToggleBinaryTalent) or nameof(IncreaseTalentLevel) or nameof(DecreaseTalentLevel) => CalculateTriggerOrigin.SkillChange,
-            nameof(AddUserRecipe) or nameof(RemoveUserRecipe) or nameof(RemoveUserRecipes) => CalculateTriggerOrigin.RecipeChange,
-            nameof(AddUserCraftingTable) or nameof(RemoveUserCraftingTable) or nameof(IncreasePluginModule) or nameof(DecreasePluginModule) or nameof(ToggleSkilledPluginModule) => CalculateTriggerOrigin.StructureChange,
-            nameof(UpdatePriceCalculation) or nameof(SetPrimaryElement) or nameof(SetPrimaryUserPrice) or nameof(OverridePrice) => CalculateTriggerOrigin.PriceInput,
-            nameof(UpdateMargin) or nameof(ChangeUserPriceMargin) => CalculateTriggerOrigin.MarginInput,
-            nameof(OnOptionOnlyLevelChanged) or nameof(OnOptionApplyMarginBetweenSkillsChanged) or nameof(OnOptionMarginTypeChanged) or nameof(UpdateCalorieCost) or nameof(UpdateCraftMinuteFee) or nameof(OnAddMargin) or nameof(OnRemoveMargin) => CalculateTriggerOrigin.SettingsChange,
-            _ => CalculateTriggerOrigin.Unknown,
-        };
-    }
-
     private int GetAdaptiveInputDebounceMs()
     {
         if (_selectedDataContext is null)
@@ -2806,12 +2784,7 @@
         return isHeavyContext ? 800 : 250;
     }
 
-    private static bool ShouldDebounceStructureChange(string caller)
-    {
-        return caller is nameof(IncreasePluginModule) or nameof(DecreasePluginModule);
-    }
-
-    private int GetDebounceMsForTrigger(CalculateTriggerOrigin origin, bool bypassDebounce, string caller)
+    private int GetDebounceMsForTrigger(CalculateTriggerOrigin origin, bool bypassDebounce)
     {
         if (bypassDebounce)
         {
@@ -2822,12 +2795,12 @@
         {
             CalculateTriggerOrigin.SkillChange => SkillChangeCalculationDebounceMs,
             CalculateTriggerOrigin.PriceInput or CalculateTriggerOrigin.MarginInput => GetAdaptiveInputDebounceMs(),
-            CalculateTriggerOrigin.StructureChange when ShouldDebounceStructureChange(caller) => GetAdaptiveInputDebounceMs(),
+            CalculateTriggerOrigin.PluginModuleChange => GetAdaptiveInputDebounceMs(),
             _ => 0,
         };
     }
 
-    private async Task RequestCalculate(CalculateTriggerOrigin origin, bool force = false, bool bypassDebounce = false, string caller = "Unknown")
+    private async Task RequestCalculate(CalculateTriggerOrigin origin, bool force = false, bool bypassDebounce = false)
     {
         if (_selectedDataContext is null)
         {
@@ -2838,13 +2811,12 @@
         {
             _hasPendingManualCalculation = true;
             _queuedCalculationOrigin = origin;
-            _queuedCalculationCaller = caller;
             RefreshCategorizedDisplayCaches();
             StateHasChanged();
             return;
         }
 
-        var debounceMs = GetDebounceMsForTrigger(origin, bypassDebounce, caller);
+        var debounceMs = GetDebounceMsForTrigger(origin, bypassDebounce);
 
         // Skill/recipe changes can remove/relink UserPrices before the calculation executes.
         // Refresh display caches immediately to avoid rendering rows with stale ItemOrTag references.
@@ -2886,24 +2858,21 @@
             {
                 _queuedCalculation = true;
                 _queuedCalculationOrigin = origin;
-                _queuedCalculationCaller = caller;
                 return;
             }
 
             _calculationLoopRunning = true;
             _queuedCalculation = false;
             _queuedCalculationOrigin = origin;
-            _queuedCalculationCaller = caller;
         }
 
         try
         {
             var currentOrigin = origin;
-            var currentCaller = caller;
 
             while (true)
             {
-                await ExecuteCalculationOnce(currentOrigin, currentCaller);
+                await ExecuteCalculationOnce(currentOrigin);
 
                 lock (_calculationQueueLock)
                 {
@@ -2915,7 +2884,6 @@
 
                     _queuedCalculation = false;
                     currentOrigin = _queuedCalculationOrigin;
-                    currentCaller = _queuedCalculationCaller;
                 }
             }
         }
@@ -2928,59 +2896,58 @@
         }
     }
 
-    private async Task ExecuteCalculationOnce(CalculateTriggerOrigin origin, string caller)
+    private async Task ExecuteCalculationOnce(CalculateTriggerOrigin origin)
     {
         System.Threading.Interlocked.Increment(ref _activeCalculations);
         StateHasChanged();
 
         try
         {
-            await EnforceServerCaloriePolicyIfNeeded();
-            await EnforceServerMarginPolicyIfNeeded();
-
-            await PriceCalculatorService.Calculate(_selectedDataContext!, $"{origin}:{caller}");
-
-            RefreshCategorizedDisplayCaches();
-            _hasPendingManualCalculation = false;
-            _calculationError = null;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            var isRetryAttempt = caller.Contains("concurrency-retry", StringComparison.OrdinalIgnoreCase);
-
-            if (!isRetryAttempt)
+            for (var attempt = 0; attempt < 2; attempt++)
             {
-                _calculationError = null;
-                _logger?.LogWarning(
-                    ex,
-                    "PriceCalculator calculation hit optimistic concurrency. trigger={TriggerOrigin} caller={Caller}. Scheduling one immediate retry.",
-                    origin,
-                    caller);
+                try
+                {
+                    await EnforceServerCaloriePolicyIfNeeded();
+                    await EnforceServerMarginPolicyIfNeeded();
 
-                await RequestCalculate(origin, force: true, bypassDebounce: true, caller: $"{caller}:concurrency-retry");
+                    await PriceCalculatorService.Calculate(_selectedDataContext!, origin.ToString());
+
+                    RefreshCategorizedDisplayCaches();
+                    _hasPendingManualCalculation = false;
+                    _calculationError = null;
+                    return;
+                }
+                catch (DbUpdateConcurrencyException ex) when (attempt == 0)
+                {
+                    _calculationError = null;
+                    _logger?.LogWarning(
+                        ex,
+                        "PriceCalculator calculation hit optimistic concurrency. trigger={TriggerOrigin}. Retrying once.",
+                        origin);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    _calculationError = null;
+                    _logger?.LogWarning(
+                        ex,
+                        "PriceCalculator calculation still hit optimistic concurrency after retry. Keeping UI alive and waiting for next recalculation trigger. trigger={TriggerOrigin}",
+                        origin);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _calculationError = ex;
+                    _logger?.LogError(
+                        ex,
+                        "PriceCalculator page calculation failed. trigger={TriggerOrigin} skills={UserSkills} recipes={UserRecipes} elements={UserElements} prices={UserPrices}",
+                        origin,
+                        _selectedDataContext?.UserSkills.Count ?? 0,
+                        _selectedDataContext?.UserRecipes.Count ?? 0,
+                        _selectedDataContext?.UserElements.Count ?? 0,
+                        _selectedDataContext?.UserPrices.Count ?? 0);
+                    return;
+                }
             }
-            else
-            {
-                _calculationError = null;
-                _logger?.LogWarning(
-                    ex,
-                    "PriceCalculator calculation still hit optimistic concurrency after retry. Keeping UI alive and waiting for next recalculation trigger. trigger={TriggerOrigin} caller={Caller}",
-                    origin,
-                    caller);
-            }
-        }
-        catch (Exception ex)
-        {
-            _calculationError = ex;
-            _logger?.LogError(
-                ex,
-                "PriceCalculator page calculation failed. trigger={TriggerOrigin} caller={Caller} skills={UserSkills} recipes={UserRecipes} elements={UserElements} prices={UserPrices}",
-                origin,
-                caller,
-                _selectedDataContext?.UserSkills.Count ?? 0,
-                _selectedDataContext?.UserRecipes.Count ?? 0,
-                _selectedDataContext?.UserElements.Count ?? 0,
-                _selectedDataContext?.UserPrices.Count ?? 0);
         }
         finally
         {
@@ -3049,7 +3016,7 @@
             _ => CalculateTriggerOrigin.RecipeChange,
         };
 
-        await RequestCalculate(triggerOrigin, caller: $"RecipeDialog:{origin}");
+        await RequestCalculate(triggerOrigin);
     }
 
     private static string GetCalculationModeStorageKey(Guid dataContextId)
