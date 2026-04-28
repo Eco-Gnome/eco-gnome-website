@@ -26,7 +26,7 @@ public partial class ImportDataService
             ImportTalents(context, dbSkill, newSkill.Talents);
         }
 
-        foreach (var dbSkill in Skills.Where(dbSkill => !nameOccurence.TryGetValue(dbSkill.Name, out _)))
+        foreach (var dbSkill in Skills.Where(dbSkill => !nameOccurence.TryGetValue(dbSkill.Name, out _)).ToList())
         {
             DeleteSkill(context, dbSkill);
         }
@@ -74,7 +74,7 @@ public partial class ImportDataService
             }
         }
 
-        foreach (var dbTalent in skill.Talents.Where(dbTalent => !nameOccurence.TryGetValue(dbTalent.Name, out _)))
+        foreach (var dbTalent in skill.Talents.Where(dbTalent => !nameOccurence.TryGetValue(dbTalent.Name, out _)).ToList())
         {
             DeleteTalent(context, dbTalent);
         }
@@ -95,7 +95,7 @@ public partial class ImportDataService
                 ImportPluginModule(context, server, item);
             }
 
-            foreach (var dbPluginModule in PluginModules.Where(dbPluginModule => !nameOccurence.TryGetValue(dbPluginModule.Name, out _)))
+            foreach (var dbPluginModule in PluginModules.Where(dbPluginModule => !nameOccurence.TryGetValue(dbPluginModule.Name, out _)).ToList())
             {
                 DeletePluginModule(context, dbPluginModule);
             }
@@ -116,7 +116,7 @@ public partial class ImportDataService
                 errorNames.Add(item.Name);
             }
 
-            foreach (var dbCraftingTable in CraftingTables.Where(dbCraftingTable => !nameOccurence.TryGetValue(dbCraftingTable.Name, out _)))
+            foreach (var dbCraftingTable in CraftingTables.Where(dbCraftingTable => !nameOccurence.TryGetValue(dbCraftingTable.Name, out _)).ToList())
             {
                 DeleteCraftingTable(context, dbCraftingTable);
             }
@@ -132,7 +132,7 @@ public partial class ImportDataService
                 ImportItem(context, server, item);
             }
 
-            foreach (var dbItem in ItemOrTags.Where(iot => !iot.IsTag))
+            foreach (var dbItem in ItemOrTags.Where(iot => !iot.IsTag).ToList())
             {
                 if (!nameOccurence.TryGetValue(dbItem.Name, out _))
                 {
@@ -238,7 +238,7 @@ public partial class ImportDataService
                 .ToList()!;
         }
 
-        foreach (var dbTag in ItemOrTags.Where(iot => iot.IsTag))
+        foreach (var dbTag in ItemOrTags.Where(iot => iot.IsTag).ToList())
         {
             if (!nameOccurence.TryGetValue(dbTag.Name, out _))
             {
@@ -388,7 +388,7 @@ public partial class ImportDataService
             }
         }
 
-        foreach (var dbRecipe in Recipes.Where(dbRecipe => !nameOccurence.TryGetValue(dbRecipe.Name, out _)))
+        foreach (var dbRecipe in Recipes.Where(dbRecipe => !nameOccurence.TryGetValue(dbRecipe.Name, out _)).ToList())
         {
             DeleteRecipe(context, dbRecipe);
         }
@@ -448,7 +448,7 @@ public partial class ImportDataService
             }
         }
 
-        foreach (var dbModifier in dynamicValue.Modifiers.Where(dbModifier => !nameOccurence.TryGetValue(GetModifierName(dbModifier), out _)))
+        foreach (var dbModifier in dynamicValue.Modifiers.Where(dbModifier => !nameOccurence.TryGetValue(GetModifierName(dbModifier), out _)).ToList())
         {
             DeleteModifier(context, dbModifier);
         }
