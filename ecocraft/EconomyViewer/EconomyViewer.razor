@@ -11,6 +11,7 @@
 @inject LocalizationService LocalizationService
 @inject LocalStorageService LocalStorageService
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <PageTitle>@LocalizationService.GetTranslation("EconomyViewer.PageTitle") - Eco Gnome</PageTitle>
 
@@ -425,6 +426,12 @@
         {
             _isLoadingPage = false;
             StateHasChanged();
+            return;
+        }
+
+        if (ContextService.CurrentServer.IsDefault)
+        {
+            Navigation.NavigateTo("/", replace: true);
             return;
         }
 

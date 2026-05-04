@@ -381,8 +381,6 @@ FodyWeavers.xsd
 /ecocraft/tmp
 /ecocraft/Exports
 /ecocraft/wwwroot/assets/
-/ecocraft/wwwroot/videos/
-/ecocraft/ffmpeg.exe
 
 # Docker
 /pgdata

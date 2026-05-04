@@ -99,7 +99,7 @@
                                 <MudStack Row Spacing="1">
                                     @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorBaseValue(DataContext), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                    @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
+                                    @if (context.Element.Quantity.HasDynamicEffect(DataContext))
                                     {
                                         <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                             <MudStack Row Spacing="1">
@@ -302,7 +302,7 @@
                             <MudStack Row Spacing="1">
                                 @(Math.Abs(Math.Round(context.Element.Quantity.GetBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
+                                @if (context.Element.Quantity.HasDynamicEffect(DataContext))
                                 {
                                     <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                         <MudStack Row Spacing="1">

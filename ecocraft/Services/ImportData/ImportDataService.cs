@@ -14,7 +14,7 @@ public partial class ImportDataService(
     ServerDbService serverDbService,
     ServerDataService serverDataService)
 {
-    private const int SupportedVersion = 2;
+    private const int SupportedVersion = 3;
 
     private List<Skill> Skills { get; set; } = [];
     private List<PluginModule> PluginModules { get; set; } = [];
@@ -45,6 +45,7 @@ public partial class ImportDataService(
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new LanguageCodeDictionaryConverter());
+            options.Converters.Add(new JsonStringEnumConverter());
 
             ImportDataDto? importedData;
 

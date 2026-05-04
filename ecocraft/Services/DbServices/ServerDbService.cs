@@ -75,6 +75,9 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.Include(u => u.Skills)
 			.ThenInclude(s => s.Talents)
 			.ThenInclude(t => t.LocalizedDescription)
+			.Include(u => u.Skills)
+			.ThenInclude(s => s.Talents)
+			.ThenInclude(t => t.Bonuses)
 			// Crafting Tables
 			.Include(u => u.CraftingTables)
 			.ThenInclude(ct => ct.PluginModules)
@@ -263,7 +266,6 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    Name = server.Name,
 		    EcoServerId = server.EcoServerId,
 		    IsDefault = server.IsDefault,
-		    HasVideoUploader = server.HasVideoUploader,
 		    IsCalorieCostLocked = server.IsCalorieCostLocked,
 		    LockedCalorieCost = server.LockedCalorieCost,
 		    CalorieCostMin = server.CalorieCostMin,
@@ -321,14 +323,6 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.JoinCode).IsModified = true;
-    }
-
-    public void UpdateHasVideoUploader(EcoCraftDbContext context, Server server)
-    {
-	    var stub = new Server { Id = server.Id, HasVideoUploader = server.HasVideoUploader };
-	    var entry = context.Entry(stub);
-	    entry.State = EntityState.Unchanged;
-	    entry.Property(x => x.HasVideoUploader).IsModified = true;
     }
 
     public void UpdateCalorieCostPolicy(EcoCraftDbContext context, Server server)

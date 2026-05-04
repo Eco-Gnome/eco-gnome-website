@@ -170,7 +170,7 @@
                                                         var talent = talents.First();
                                                         var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
                                                         var currentReduction = userTalent is null ? 0m : talent.GetReductionPercentForLevel(userTalent.Level);
-                                                        var showReductionPercent = talent.Cap is not null || (talent.Value != 1m && talent.Value != 0m);
+                                                        var showReductionPercent = talent.HasReductionDisplay();
                                                         var description = LocalizationService.GetTranslation(talent.LocalizedDescription);
                                                         var tooltipTitle = showReductionPercent
                                                             ? $"{LocalizationService.GetTranslation(talent)} [{currentReduction.ToString("0.##")}%]"

@@ -53,7 +53,6 @@
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
         "EconomyViewer": "Analyse économique",
-        "VideosUpload": "Upload de Vidéos",
         "NavGraph": "Vue graphique [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Code source",
@@ -78,6 +77,7 @@
         "TotalReductionTooltip": "avec une réduction totale de {pourcent}% due à : ",
         "SkillReductionTooltip": "Compétence {compétences} {niveau de compétence} -> {pourcentage}%",
         "TalentReductionTooltip": "Talent {talentName} -> {pourcentage}%",
+        "TalentAdditiveTooltip": "Talent {talentName} -> {valeur}",
         "ModuleReductionTooltip": "Module {nom du module} -> {pourcentage}%",
         "ReintegratedToolTip": {
             "False": "Cessez de déduire cet élément du prix de revient. Cela augmentera mathématiquement le prix des autres produits.",

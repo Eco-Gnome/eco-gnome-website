@@ -126,6 +126,29 @@ public class DynamicValue
         return Modifiers.Count > 0;
     }
 
+    public bool HasDynamicEffect(DataContext dataContext)
+    {
+        return GetDynamicValue(dataContext) != BaseValue;
+    }
+
+    public TalentBonusAction? GetTalentAction()
+    {
+        if (LaborRecipes.Count > 0) return TalentBonusAction.LaborCost;
+        if (CraftMinutesRecipes.Count > 0) return TalentBonusAction.CraftTime;
+        var element = QuantityElements.FirstOrDefault();
+        if (element is null) return null;
+        return element.IsIngredient() ? TalentBonusAction.ResourceCost : TalentBonusAction.Yield;
+    }
+
+    private IEnumerable<TalentBonus> GetMatchingBonuses(Modifier modifier)
+    {
+        var talent = modifier.Talent;
+        if (talent is null) return [];
+        var action = GetTalentAction();
+        if (action is null) return [];
+        return talent.Bonuses.Where(b => b.Action == action.Value);
+    }
+
     public decimal GetMultiplier(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
     {
         var multiplier = 1m;
@@ -154,8 +177,15 @@ public class DynamicValue
                             ? calculationContext.GetUserTalent(modifier.TalentId.Value, dataContext)
                             : dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
                         : null;
-                    var talent = modifier.Talent ?? userTalent?.Talent;
-                    multiplier *= userTalent is not null && talent is not null ? talent.GetMultiplierForLevel(userTalent.Level) : 1m;
+                    if (userTalent is null) break;
+
+                    foreach (var bonus in GetMatchingBonuses(modifier))
+                    {
+                        if (bonus.EffectType is TalentBonusEffectType.Multiplicative or TalentBonusEffectType.CappedMultiplicative)
+                        {
+                            multiplier *= Talent.GetBonusMultiplier(bonus, userTalent.Level);
+                        }
+                    }
                     break;
                 }
                 case "Skill":
@@ -179,6 +209,31 @@ public class DynamicValue
         return multiplier;
     }
 
+    private decimal GetAdditive(DataContext dataContext)
+    {
+        var additive = 0m;
+
+        foreach (var modifier in Modifiers)
+        {
+            if (modifier.DynamicType != "Talent") continue;
+
+            var userTalent = modifier.TalentId is not null
+                ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
+                : null;
+            if (userTalent is null) continue;
+
+            foreach (var bonus in GetMatchingBonuses(modifier))
+            {
+                if (bonus.EffectType == TalentBonusEffectType.Additive)
+                {
+                    additive += BaseValue < 0 ? -bonus.Value : bonus.Value;
+                }
+            }
+        }
+
+        return additive;
+    }
+
     public decimal GetBaseValue()
     {
         return BaseValue;
@@ -199,7 +254,7 @@ public class DynamicValue
             return cachedValue;
         }
 
-        var dynamicValue = BaseValue * GetMultiplier(dataContext, calculationContext);
+        var dynamicValue = BaseValue * GetMultiplier(dataContext, calculationContext) + GetAdditive(dataContext);
         if (dynamicValueCache is not null)
         {
             dynamicValueCache[Id] = dynamicValue;
@@ -281,15 +336,42 @@ public class DynamicValue
                         ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
                         : null;
                     var talent = modifier.Talent ?? userTalent?.Talent;
-                    multiplier = userTalent is not null && talent is not null ? talent.GetMultiplierForLevel(userTalent.Level) : 1m;
+                    if (userTalent is null || talent is null) break;
 
-                    if (multiplier != 1m)
+                    foreach (var bonus in GetMatchingBonuses(modifier))
                     {
-                        tooltip.Add(localizationService.GetTranslation(
-                            "RecipeDialog.TalentReductionTooltip",
-                            localizationService.GetTranslation(talent),
-                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
-                        ));
+                        switch (bonus.EffectType)
+                        {
+                            case TalentBonusEffectType.Multiplicative:
+                            case TalentBonusEffectType.CappedMultiplicative:
+                            {
+                                var bonusMultiplier = Talent.GetBonusMultiplier(bonus, userTalent.Level);
+                                multiplier *= bonusMultiplier;
+
+                                if (bonusMultiplier != 1m)
+                                {
+                                    tooltip.Add(localizationService.GetTranslation(
+                                        "RecipeDialog.TalentReductionTooltip",
+                                        localizationService.GetTranslation(talent),
+                                        Math.Round(100 - bonusMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                                    ));
+                                }
+                                break;
+                            }
+                            case TalentBonusEffectType.Additive:
+                            {
+                                if (bonus.Value == 0m) break;
+                                var addedValue = BaseValue < 0 ? -bonus.Value : bonus.Value;
+                                var rounded = Math.Round(addedValue, 2, MidpointRounding.AwayFromZero);
+                                var formatted = (rounded > 0 ? "+" : "") + rounded.ToString("0.##");
+                                tooltip.Add(localizationService.GetTranslation(
+                                    "RecipeDialog.TalentAdditiveTooltip",
+                                    localizationService.GetTranslation(talent),
+                                    formatted
+                                ));
+                                break;
+                            }
+                        }
                     }
                     break;
                 }
@@ -314,12 +396,16 @@ public class DynamicValue
             totalMultiplier *= multiplier;
         }
 
-        var beginning = localizationService.GetTranslation(
-            "RecipeDialog.TotalReductionTooltip",
-            Math.Round(100 - totalMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
-        );
+        if (totalMultiplier != 1m)
+        {
+            var prefix = localizationService.GetTranslation(
+                "RecipeDialog.TotalReductionTooltip",
+                Math.Round(100 - totalMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+            );
+            return baseValue + " " + prefix + string.Join(", ", tooltip);
+        }
 
-        return baseValue + " " + beginning + string.Join(", ", tooltip);
+        return string.Join(", ", tooltip);
     }
 }
 
@@ -357,6 +443,19 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public decimal? MinPrice { get; set; }
     public decimal? DefaultPrice { get; set; }
     public decimal? MaxPrice { get; set; }
+    public decimal? FuelCalories { get; set; }
+    public decimal? FuelConsumptionPerSecond { get; set; }
+    public string[]? AcceptedFuelTags { get; set; }
+    public decimal? FoodCalories { get; set; }
+    public decimal? FoodCarbs { get; set; }
+    public decimal? FoodProtein { get; set; }
+    public decimal? FoodFat { get; set; }
+    public decimal? FoodVitamins { get; set; }
+    public string? HousingRoomCategory { get; set; }
+    public decimal? HousingBaseValue { get; set; }
+    public string? HousingTypeForRoomLimit { get; set; }
+    public decimal? HousingDiminishingReturnMultiplier { get; set; }
+    public decimal? HousingDiminishingMultiplierAcrossFullProperty { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -433,6 +532,35 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
     }
 }
 
+public enum TalentBonusAction
+{
+    ResourceCost = 0,
+    LaborCost = 1,
+    CraftTime = 2,
+    Yield = 3,
+}
+
+public enum TalentBonusEffectType
+{
+    Multiplicative = 0,
+    CappedMultiplicative = 1,
+    Additive = 2,
+    Override = 3,
+}
+
+public class TalentBonus
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("Talent")] public Guid TalentId { get; set; }
+    public TalentBonusAction Action { get; set; }
+    public TalentBonusEffectType EffectType { get; set; }
+    public decimal Value { get; set; }
+    public decimal? Cap { get; set; }
+    public string[]? ItemTags { get; set; }
+
+    public Talent Talent { get; set; }
+}
+
 public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
@@ -440,8 +568,6 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("LocalizedDescription")] public Guid? LocalizedDescriptionId { get; set; }
     public string TalentGroupName { get; set; }
-    public decimal Value { get; set; }
-    public decimal? Cap { get; set; }
     public int Level { get; set; }
     public int MaxLevel { get; set; }
     [ForeignKey("Skill")] public Guid SkillId { get; set; }
@@ -451,27 +577,50 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     public Skill Skill { get; set; }
     public List<Modifier> Modifiers { get; set; } = [];
     public List<UserTalent> UserTalents { get; set; } = [];
+    public List<TalentBonus> Bonuses { get; set; } = [];
 
     public UserTalent? GetCurrentUserTalent(DataContext dataContext)
     {
         return dataContext.UserTalents.FirstOrDefault(ur => ur.TalentId == Id);
     }
 
-    public decimal GetMultiplierForLevel(int level)
+    public static decimal GetBonusMultiplier(TalentBonus bonus, int level)
     {
-        if (MaxLevel <= 1 || Cap is null)
+        switch (bonus.EffectType)
         {
-            return Value;
+            case TalentBonusEffectType.Multiplicative:
+                return bonus.Value;
+            case TalentBonusEffectType.CappedMultiplicative:
+            {
+                var multiplier = 1m + (bonus.Value - 1m) * level;
+                if (bonus.Cap is null) return multiplier;
+                if (bonus.Value < 1m) return Math.Max(multiplier, bonus.Cap.Value);
+                if (bonus.Value > 1m) return Math.Min(multiplier, bonus.Cap.Value);
+                return multiplier;
+            }
+            default:
+                return 1m;
         }
+    }
 
-        var clampedLevel = Math.Clamp(level, 1, MaxLevel);
-        var step = ((decimal)Cap - Value) / (MaxLevel - 1);
-        return Value + step * (clampedLevel - 1);
+    private TalentBonus? GetReductionBonus()
+    {
+        return Bonuses.FirstOrDefault(b =>
+            b.EffectType == TalentBonusEffectType.CappedMultiplicative
+            || (b.EffectType == TalentBonusEffectType.Multiplicative && b.Value != 1m && b.Value != 0m));
+    }
+
+    public bool HasReductionDisplay()
+    {
+        return GetReductionBonus() is not null;
     }
 
     public decimal GetReductionPercentForLevel(int level)
     {
-        return Math.Round((1 - GetMultiplierForLevel(level)) * 100, 1, MidpointRounding.AwayFromZero);
+        var bonus = GetReductionBonus();
+        if (bonus is null) return 0m;
+
+        return Math.Round((1 - GetBonusMultiplier(bonus, level)) * 100, 1, MidpointRounding.AwayFromZero);
     }
 }
 
@@ -786,7 +935,6 @@ public class Server
     public string Name { get; set; }
     public string? EcoServerId { get; set; }
     public bool IsDefault { get; set; }
-    public bool HasVideoUploader { get; set; } = false;
     public bool IsCalorieCostLocked { get; set; } = false;
     public decimal? LockedCalorieCost { get; set; }
     public decimal? CalorieCostMin { get; set; }

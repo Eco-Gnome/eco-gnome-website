@@ -53,7 +53,6 @@
         "NavCalculator": "Price Calculator",
         "ShoppingList": "Shopping List",
         "EconomyViewer": "Economy Viewer",
-        "VideosUpload": "Videos Uploader",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
         "SourceCode": "Source Code",
@@ -78,6 +77,7 @@
         "TotalReductionTooltip": "with total reduction of {percent}% due to: ",
         "SkillReductionTooltip": "Skill {skill} {skillLevel} -> {percent}%",
         "TalentReductionTooltip": "Talent {talentName} -> {percent}%",
+        "TalentAdditiveTooltip": "Talent {talentName} -> {value}",
         "ModuleReductionTooltip": "Module {moduleName} -> {percent}%",
         "ReintegratedToolTip": {
             "False": "Stop deducting this item from the cost price. This will mathematically increase the price of other products.",
@@ -251,8 +251,6 @@
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
-        "SettingsCol": "Settings",
-        "HasVideoUploader": "Can Upload Videos",
         "IdCol": "Id",
         "CopySecretId": "Copy Secret Id",
         "ServerTable": {

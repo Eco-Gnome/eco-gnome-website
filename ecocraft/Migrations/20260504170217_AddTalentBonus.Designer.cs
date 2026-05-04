@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecocraft.Models;
@@ -11,9 +12,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260504170217_AddTalentBonus")]
+    partial class AddTalentBonus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,47 +186,8 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.PrimitiveCollection<string[]>("AcceptedFuelTags")
-                        .HasColumnType("text[]");
-
                     b.Property<decimal?>("DefaultPrice")
                         .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FoodCalories")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FoodCarbs")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FoodFat")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FoodProtein")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FoodVitamins")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FuelCalories")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("FuelConsumptionPerSecond")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("HousingBaseValue")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("HousingDiminishingMultiplierAcrossFullProperty")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("HousingDiminishingReturnMultiplier")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("HousingRoomCategory")
-                        .HasColumnType("text");
-
-                    b.Property<string>("HousingTypeForRoomLimit")
-                        .HasColumnType("text");
 
                     b.Property<bool>("IsTag")
                         .HasColumnType("boolean");
@@ -554,6 +518,9 @@ namespace ecocraft.Migrations
 
                     b.Property<string>("EcoServerId")
                         .HasColumnType("text");
+
+                    b.Property<bool>("HasVideoUploader")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsCalorieCostLocked")
                         .HasColumnType("boolean");
