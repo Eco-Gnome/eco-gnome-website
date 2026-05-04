@@ -126,7 +126,7 @@ public class DynamicValue
         return Modifiers.Count > 0;
     }
 
-    public decimal GetMultiplier(DataContext dataContext)
+    public decimal GetMultiplier(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
     {
         var multiplier = 1m;
 
@@ -135,20 +135,41 @@ public class DynamicValue
             switch (modifier.DynamicType)
             {
                 case "Module":
-                    multiplier *= (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed")?.GetPercent(modifier.Skill) ?? 1m;
+                {
+                    var recipe = Recipe ?? Element?.Recipe;
+                    var userCraftingTable = recipe is not null
+                        ? calculationContext is not null
+                            ? calculationContext.GetUserCraftingTable(recipe, dataContext)
+                            : recipe.CraftingTable.GetCurrentUserCraftingTable(dataContext)
+                        : null;
+                    multiplier *= userCraftingTable
+                        ?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed")
+                        ?.GetPercent(modifier.Skill) ?? 1m;
                     break;
+                }
                 case "Talent":
                 {
                     var userTalent = modifier.TalentId is not null
-                        ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
+                        ? calculationContext is not null
+                            ? calculationContext.GetUserTalent(modifier.TalentId.Value, dataContext)
+                            : dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
                         : null;
                     var talent = modifier.Talent ?? userTalent?.Talent;
                     multiplier *= userTalent is not null && talent is not null ? talent.GetMultiplierForLevel(userTalent.Level) : 1m;
                     break;
                 }
                 case "Skill":
-                    multiplier *= modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
+                {
+                    var userSkill = modifier.Skill is not null
+                        ? calculationContext is not null
+                            ? calculationContext.GetUserSkill(modifier.Skill, dataContext)
+                            : modifier.Skill.GetCurrentUserSkill(dataContext)
+                        : null;
+                    multiplier *= modifier.Skill is not null && userSkill is not null
+                        ? modifier.Skill.GetLevelLaborReducePercent(userSkill.Level)
+                        : 1m;
                     break;
+                }
                 /*case "Layer":
 
                     break;*/
@@ -163,32 +184,69 @@ public class DynamicValue
         return BaseValue;
     }
 
-    public decimal GetRoundFactorBaseValue(DataContext dataContext)
+    public decimal GetRoundFactorBaseValue(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
     {
-        var roundFactor = (Recipe ?? Element?.Recipe)!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
+        var roundFactor = GetRoundFactor(dataContext, calculationContext);
 
-        if (roundFactor == 0) return BaseValue;
-
-        return BaseValue < 0
-            ? Math.Floor(BaseValue * roundFactor) / roundFactor
-            : Math.Ceiling(BaseValue * roundFactor) / roundFactor;
+        return ApplyRoundFactor(BaseValue, roundFactor);
     }
 
-    public decimal GetDynamicValue(DataContext dataContext)
+    public decimal GetDynamicValue(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
     {
-        return BaseValue * GetMultiplier(dataContext);
+        var dynamicValueCache = calculationContext?.DynamicValueCache;
+        if (dynamicValueCache is not null && dynamicValueCache.TryGetValue(Id, out var cachedValue))
+        {
+            return cachedValue;
+        }
+
+        var dynamicValue = BaseValue * GetMultiplier(dataContext, calculationContext);
+        if (dynamicValueCache is not null)
+        {
+            dynamicValueCache[Id] = dynamicValue;
+        }
+
+        return dynamicValue;
     }
 
-    public decimal GetRoundFactorDynamicValue(DataContext dataContext)
+    public decimal GetRoundFactorDynamicValue(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
     {
-        var roundFactor = (Recipe ?? Element?.Recipe)!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
-        var dynamicValue = GetDynamicValue(dataContext);
+        var roundDynamicValueCache = calculationContext?.RoundDynamicValueCache;
+        if (roundDynamicValueCache is not null && roundDynamicValueCache.TryGetValue(Id, out var cachedValue))
+        {
+            return cachedValue;
+        }
 
-        if (roundFactor == 0) return dynamicValue;
+        var roundFactor = GetRoundFactor(dataContext, calculationContext);
+        var dynamicValue = GetDynamicValue(dataContext, calculationContext);
+        var roundDynamicValue = ApplyRoundFactor(dynamicValue, roundFactor);
 
-        return dynamicValue < 0
-            ? Math.Floor(dynamicValue * roundFactor) / roundFactor
-            : Math.Ceiling(dynamicValue * roundFactor) / roundFactor;
+        if (roundDynamicValueCache is not null)
+        {
+            roundDynamicValueCache[Id] = roundDynamicValue;
+        }
+
+        return roundDynamicValue;
+    }
+
+    private int GetRoundFactor(DataContext dataContext, DynamicValueCalculationContext? calculationContext)
+    {
+        var recipe = Recipe ?? Element?.Recipe;
+
+        if (calculationContext is not null)
+        {
+            return recipe is not null ? calculationContext.GetRoundFactor(recipe, dataContext) : 0;
+        }
+
+        return recipe!.GetCurrentUserRecipe(dataContext)!.RoundFactor;
+    }
+
+    internal static decimal ApplyRoundFactor(decimal value, int roundFactor)
+    {
+        if (roundFactor == 0) return value;
+
+        return value < 0
+            ? Math.Floor(value * roundFactor) / roundFactor
+            : Math.Ceiling(value * roundFactor) / roundFactor;
     }
 
     public string GetMultiplierTooltip(DataContext dataContext, LocalizationService localizationService, string? baseValue = null)

@@ -52,11 +52,24 @@ public class PriceCalculatorService(
 
         public Dictionary<Guid, UserCraftingTable> UserCraftingTablesByCraftingTableId { get; } =
             dataContext.UserCraftingTables.GroupBy(uct => uct.CraftingTableId).ToDictionary(g => g.Key, g => g.First());
+
         public Dictionary<Guid, HashSet<Guid>> ProducerSkillsByItemOrTagId { get; } = BuildProducerSkillsMap(dataContext);
-        public Dictionary<Guid, decimal> DynamicValueCache { get; } = [];
-        public Dictionary<Guid, decimal> RoundDynamicValueCache { get; } = [];
+        private Dictionary<Guid, decimal> DynamicValueCache { get; } = [];
+        private Dictionary<Guid, decimal> RoundDynamicValueCache { get; } = [];
+        private DynamicValueCalculationContext? _dynamicValueCalculationContext;
         public HashSet<Guid> DirtyUserPriceIds { get; } = [];
         public HashSet<Guid> DirtyUserElementIds { get; } = [];
+
+        public DynamicValueCalculationContext DynamicValueCalculationContext =>
+            _dynamicValueCalculationContext ??= new DynamicValueCalculationContext
+            {
+                UserSkillsBySkillId = UserSkillsBySkillId,
+                UserTalentsByTalentId = UserTalentsByTalentId,
+                UserCraftingTablesByCraftingTableId = UserCraftingTablesByCraftingTableId,
+                UserRecipesByRecipeId = UserRecipesByRecipeId,
+                DynamicValueCache = DynamicValueCache,
+                RoundDynamicValueCache = RoundDynamicValueCache,
+            };
 
         private static Dictionary<Guid, HashSet<Guid>> BuildProducerSkillsMap(DataContext dataContext)
         {
@@ -161,82 +174,6 @@ public class PriceCalculatorService(
             return userElement.Price != original.Price || userElement.IsMarginPrice != original.IsMarginPrice;
         }
 
-        public decimal GetDynamicValue(DynamicValue dynamicValue)
-        {
-            if (DynamicValueCache.TryGetValue(dynamicValue.Id, out var cachedValue))
-            {
-                return cachedValue;
-            }
-
-            var multiplier = 1m;
-
-            foreach (var modifier in dynamicValue.Modifiers)
-            {
-                switch (modifier.DynamicType)
-                {
-                    case "Module":
-                    {
-                        var recipe = dynamicValue.Recipe ?? dynamicValue.Element?.Recipe;
-                        if (recipe is not null && UserCraftingTablesByCraftingTableId.TryGetValue(recipe.CraftingTableId, out var userCraftingTable))
-                        {
-                            var bestPluginModule = userCraftingTable.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed");
-                            multiplier *= bestPluginModule?.GetPercent(modifier.Skill) ?? 1m;
-                        }
-                        break;
-                    }
-                    case "Talent":
-                    {
-                        if (modifier.TalentId is Guid talentId && UserTalentsByTalentId.TryGetValue(talentId, out var userTalent))
-                        {
-                            var talent = modifier.Talent ?? userTalent.Talent;
-                            multiplier *= talent.GetMultiplierForLevel(userTalent.Level);
-                        }
-                        break;
-                    }
-                    case "Skill":
-                    {
-                        if (modifier.Skill is not null && UserSkillsBySkillId.TryGetValue(modifier.Skill.Id, out var userSkill))
-                        {
-                            multiplier *= modifier.Skill.GetLevelLaborReducePercent(userSkill.Level);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            var dynamicComputedValue = dynamicValue.BaseValue * multiplier;
-            DynamicValueCache[dynamicValue.Id] = dynamicComputedValue;
-            return dynamicComputedValue;
-        }
-
-        public decimal GetRoundFactorDynamicValue(DynamicValue dynamicValue)
-        {
-            if (RoundDynamicValueCache.TryGetValue(dynamicValue.Id, out var cachedValue))
-            {
-                return cachedValue;
-            }
-
-            var roundFactor = 0;
-            var recipe = dynamicValue.Recipe ?? dynamicValue.Element?.Recipe;
-            if (recipe is not null && UserRecipesByRecipeId.TryGetValue(recipe.Id, out var userRecipe))
-            {
-                roundFactor = userRecipe.RoundFactor;
-            }
-
-            var dynamicComputedValue = GetDynamicValue(dynamicValue);
-            if (roundFactor == 0)
-            {
-                RoundDynamicValueCache[dynamicValue.Id] = dynamicComputedValue;
-                return dynamicComputedValue;
-            }
-
-            var roundedValue = dynamicComputedValue < 0
-                ? Math.Floor(dynamicComputedValue * roundFactor) / roundFactor
-                : Math.Ceiling(dynamicComputedValue * roundFactor) / roundFactor;
-
-            RoundDynamicValueCache[dynamicValue.Id] = roundedValue;
-            return roundedValue;
-        }
     }
 
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags(DataContext dataContext)
@@ -292,9 +229,10 @@ public class PriceCalculatorService(
             await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
             {
                 var calculationContext = new CalculationContext(dataContext);
+                var dynamicValueCalculationContext = calculationContext.DynamicValueCalculationContext;
                 var marginType = calculationContext.UserSetting.MarginType;
 
-            var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
+                var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
                 var itemOrTagsToSellIds = itemOrTagsToSell.Select(iot => iot.Id).ToHashSet();
 
                 foreach (var userElement in dataContext.UserElements)
@@ -319,16 +257,16 @@ public class PriceCalculatorService(
                 }
                 var remainingUserRecipes = dataContext.UserRecipes.ToList();
                 var recipesWithMissingUserElements = new HashSet<Guid>();
-            int nbHandled;
+                int nbHandled;
 
-            do
-            {
-                nbHandled = 0;
-                int iterator = 0;
-
-                while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
+                do
                 {
-                    var userRecipe = remainingUserRecipes[iterator];
+                    nbHandled = 0;
+                    int iterator = 0;
+
+                    while (remainingUserRecipes.Count > 0 && iterator < remainingUserRecipes.Count)
+                    {
+                        var userRecipe = remainingUserRecipes[iterator];
                         if (userRecipe.Recipe is null)
                         {
                             recipesWithMissingUserElements.Add(userRecipe.RecipeId);
@@ -357,10 +295,9 @@ public class PriceCalculatorService(
                             .ToList();
 
                         if (userElementIngredients.Count != ingredientElements.Count || userElementProducts.Count != productElements.Count)
-                    {
+                        {
                             recipesWithMissingUserElements.Add(userRecipe.RecipeId);
                             iterator++;
-
                             continue;
                         }
 
@@ -373,7 +310,7 @@ public class PriceCalculatorService(
                             }
 
                             if (ingredientUserPrice.Price is not null)
-                        {
+                            {
                                 SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
                                 continue;
                             }
@@ -387,29 +324,29 @@ public class PriceCalculatorService(
                             {
                                 calculationContext.TrySetUserPrice(ingredientUserPrice, ingredientUserPrice.PrimaryUserPrice.Price, ingredientUserPrice.PrimaryUserPrice.MarginPrice);
                                 SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
-                            continue;
-                        }
+                                continue;
+                            }
 
-                        var associatedItemsUserPrices = ingredient.Element.ItemOrTag.AssociatedItems
+                            var associatedItemsUserPrices = ingredient.Element.ItemOrTag.AssociatedItems
                                 .Select(calculationContext.GetUserPrice)
                                 .Where(up => up is not null)
                                 .Cast<UserPrice>()
-                            .ToList();
+                                .ToList();
 
                             if (associatedItemsUserPrices.Count == 0 || !associatedItemsUserPrices.All(up => up.Price is not null))
                             {
                                 continue;
                             }
 
-                        var cheapest = associatedItemsUserPrices.MinBy(up => up.Price)!;
+                            var cheapest = associatedItemsUserPrices.MinBy(up => up.Price)!;
                             calculationContext.TrySetUserPrice(ingredientUserPrice, cheapest.Price, cheapest.MarginPrice);
                             SetPriceOrMarginPrice(calculationContext, ingredient, ingredientUserPrice, userRecipe);
-                    }
+                        }
 
-                    var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
+                        var reintegratedProducts = userElementProducts.Where(ue => ue.IsReintegrated).ToList();
 
-                    foreach (var reintegratedProduct in reintegratedProducts)
-                    {
+                        foreach (var reintegratedProduct in reintegratedProducts)
+                        {
                             var reintegratedUserPrice = calculationContext.GetUserPrice(reintegratedProduct.Element.ItemOrTag);
                             if (reintegratedUserPrice is null)
                             {
@@ -421,12 +358,11 @@ public class PriceCalculatorService(
                             {
                                 calculationContext.TrySetUserElementPrice(reintegratedProduct, reintegratedProduct.Price * -1, reintegratedProduct.IsMarginPrice);
                             }
-                    }
+                        }
 
-                    if (userElementIngredients.Any(ue => ue.Price is null))
-                    {
-                        iterator++;
-
+                        if (userElementIngredients.Any(ue => ue.Price is null))
+                        {
+                            iterator++;
                             continue;
                         }
 
@@ -434,24 +370,30 @@ public class PriceCalculatorService(
                             calculationContext.GetUserPrice(ue.Element.ItemOrTag) is { Price: null }))
                         {
                             iterator++;
+                            continue;
+                        }
 
-                        continue;
-                    }
+                        remainingUserRecipes.RemoveAt(iterator);
 
-                    remainingUserRecipes.RemoveAt(iterator);
+                        var ingredientCostSum = -1 * userElementIngredients.Sum(ue =>
+                            (ue.Price ?? 0m) * ue.Element.Quantity.GetRoundFactorDynamicValue(dataContext, dynamicValueCalculationContext));
+                        ingredientCostSum += reintegratedProducts.Sum(ue =>
+                            (ue.Price ?? 0m) * ue.Element.Quantity.GetRoundFactorDynamicValue(dataContext, dynamicValueCalculationContext));
 
-                        var ingredientCostSum = -1 * userElementIngredients.Sum(ue => (ue.Price ?? 0m) * calculationContext.GetRoundFactorDynamicValue(ue.Element.Quantity));
-                        ingredientCostSum += reintegratedProducts.Sum(ue => (ue.Price ?? 0m) * calculationContext.GetRoundFactorDynamicValue(ue.Element.Quantity));
-                        ingredientCostSum += calculationContext.GetDynamicValue(userRecipe.Recipe.Labor) * calculationContext.UserSetting.CalorieCost / 1000;
+                        var laborCost = userRecipe.Recipe.Labor.GetDynamicValue(dataContext, dynamicValueCalculationContext)
+                                        * calculationContext.UserSetting.CalorieCost
+                                        / 1000;
+                        ingredientCostSum += laborCost;
 
                         if (calculationContext.UserCraftingTablesByCraftingTableId.TryGetValue(userRecipe.Recipe.CraftingTableId, out var currentUserCraftingTable))
-                    {
-                            ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * calculationContext.GetDynamicValue(userRecipe.Recipe.CraftMinutes);
-                    }
+                        {
+                            var craftMinutes = userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext, dynamicValueCalculationContext);
+                            ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * craftMinutes;
+                        }
 
-                    foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
-                    {
-                            var finalQuantity = calculationContext.GetRoundFactorDynamicValue(product.Element.Quantity);
+                        foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
+                        {
+                            var finalQuantity = product.Element.Quantity.GetRoundFactorDynamicValue(dataContext, dynamicValueCalculationContext);
                             if (finalQuantity == 0)
                             {
                                 continue;
@@ -467,11 +409,11 @@ public class PriceCalculatorService(
                             }
 
                             if (productUserPrice.PrimaryUserElement == product)
-                        {
+                            {
                                 SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, marginType);
-                        }
+                            }
                             else if (productUserPrice.PrimaryUserElement is null)
-                        {
+                            {
                                 var relatedUserElements = product.Element.ItemOrTag.Elements
                                     .Where(e => e.IsProduct())
                                     .Select(calculationContext.GetUserElement)
@@ -480,15 +422,15 @@ public class PriceCalculatorService(
                                     .ToList();
 
                                 if (relatedUserElements.All(ue => ue.Price is not null))
-                            {
+                                {
                                     SetUserPriceWithMargin(calculationContext, productUserPrice, relatedUserElements.Min(ue => ue.Price), marginType);
+                                }
                             }
                         }
-                    }
 
-                    nbHandled++;
-                }
-            } while (nbHandled > 0);
+                        nbHandled++;
+                    }
+                } while (nbHandled > 0);
 
                 if (recipesWithMissingUserElements.Count > 0)
                 {
