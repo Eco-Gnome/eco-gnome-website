@@ -12,7 +12,7 @@ public class PriceCalculatorService(
     LocalizationService localizationService,
     ILogger<PriceCalculatorService> logger)
 {
-    private sealed class CalculationContext(DataContext dataContext)
+    private class CalculationContext(DataContext dataContext)
     {
         public UserSetting UserSetting { get; } = dataContext.UserSettings.First();
 
