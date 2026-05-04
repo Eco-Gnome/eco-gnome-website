@@ -1229,7 +1229,7 @@
 
         if (forceServerReload || ContextService.CurrentServerData is null)
         {
-            ContextService.CurrentServerData = await ServerDbService.GetServerWithPriceCalculatorData(ContextService.CurrentServer!.Id);
+            ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
         }
 
         SyncCurrentServerCaloriePolicyFromServerData();
