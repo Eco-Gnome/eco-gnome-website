@@ -483,8 +483,8 @@ public class PriceCalculatorService(
                     }
                 }
                 return;
-        });
-    }
+            });
+        }
         catch (Exception ex)
         {
             logger.LogError(
