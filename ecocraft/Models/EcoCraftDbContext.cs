@@ -82,6 +82,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 	public DbSet<ItemOrTag> ItemOrTags { get; set; }
 	public DbSet<Skill> Skills { get; set; }
 	public DbSet<Talent> Talents { get; set; }
+	public DbSet<TalentBonus> TalentBonuses { get; set; }
 	public DbSet<DynamicValue> DynamicValues { get; set; }
 	public DbSet<Modifier> Modifiers { get; set; }
 	public DbSet<CraftingTable> CraftingTables { get; set; }
@@ -268,6 +269,16 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.HasOne(s => s.Skill)
 			.WithMany(lt => lt.Talents)
 			.HasForeignKey(s => s.SkillId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// TalentBonus
+		modelBuilder.Entity<TalentBonus>()
+			.ToTable("TalentBonus");
+
+		modelBuilder.Entity<TalentBonus>()
+			.HasOne(tb => tb.Talent)
+			.WithMany(t => t.Bonuses)
+			.HasForeignKey(tb => tb.TalentId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// CraftingTable

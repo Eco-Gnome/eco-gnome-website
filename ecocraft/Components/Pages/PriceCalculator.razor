@@ -133,7 +133,8 @@
                                     <MudTable Items="_selectedDataContext.UserSkills.Where(us => us.Skill is not null)"
                                               Hover="true"
                                               Dense="true"
-                                              Class="mt-4">
+                                              Class="mt-4"
+                                              RowClassFunc="(_, i) => OddIndexRowClass(i)">
                                         <HeaderContent>
                                             <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
                                             <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
@@ -170,7 +171,7 @@
                                                         var talent = talents.First();
                                                         var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
                                                         var currentReduction = userTalent is null ? 0m : talent.GetReductionPercentForLevel(userTalent.Level);
-                                                        var showReductionPercent = talent.Cap is not null || (talent.Value != 1m && talent.Value != 0m);
+                                                        var showReductionPercent = talent.HasReductionDisplay();
                                                         var description = LocalizationService.GetTranslation(talent.LocalizedDescription);
                                                         var tooltipTitle = showReductionPercent
                                                             ? $"{LocalizationService.GetTranslation(talent)} [{currentReduction.ToString("0.##")}%]"
@@ -245,7 +246,8 @@
                                               FixedHeader="true"
                                               Hover="true"
                                               Class="mt-4 mud-table-container-no-overflow-y"
-                                              Dense="true">
+                                              Dense="true"
+                                              RowClassFunc="(_, i) => OddIndexRowClass(i)">
                                         <HeaderContent>
                                             <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
                                             <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
@@ -340,26 +342,32 @@
                                                   FixedHeader="true"
                                                   Hover="true"
                                                   Class="mt-4"
-                                                  Dense="true">
+                                                  Dense="true"
+                                                  RowClassFunc="(_, i) => OddIndexRowClass(i)">
                                             <HeaderContent>
-                                                <MudTh>
+                                                <MudTh Class="px-1">
                                                     <MudText>@LocalizationService.GetTranslation("Name")</MudText>
                                                 </MudTh>
-                                                <MudTh>
+                                                <MudTh Class="px-1">
                                                     <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.MarginPercent.Tooltip")">
                                                         <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.MarginPercent.MarginPercent")</MudText>
                                                     </MudTooltip>
                                                 </MudTh>
-                                                <MudTh></MudTh>
+                                                <MudTh Class="px-1">
+                                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.Rounding.Tooltip")">
+                                                        <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.Rounding.Rounding")</MudText>
+                                                    </MudTooltip>
+                                                </MudTh>
+                                                <MudTh Class="px-1"></MudTh>
                                             </HeaderContent>
                                             <RowTemplate>
-                                                <MudTd Class="py-1">
+                                                <MudTd Class="py-1 px-1">
                                                     <MudTextField Value="context.Name"
                                                                   Typo="Typo.body2"
                                                                   Style="border-bottom-color: gray"
                                                                   ValueChanged="@((string v) => UpdateMarginName(context, v))"/>
                                                 </MudTd>
-                                                <MudTd Class="py-1">
+                                                <MudTd Class="py-1 px-1">
                                                     <MudTooltip Disabled="@(!ShouldShowMarginPolicyIndicator(context))" Text="@GetMarginPolicyIndicatorTooltip(context)">
                                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                                             <MudNumericField T="decimal"
@@ -381,7 +389,20 @@
                                                         </MudStack>
                                                     </MudTooltip>
                                                 </MudTd>
-                                                <MudTd Class="py-1" Style="text-align: right;">
+                                                <MudTd Class="py-1 px-1">
+                                                    <MudSelect T="RoundingMode"
+                                                               Class="select-dense very-dense"
+                                                               Style="width: 80px"
+                                                               Value="context.Rounding"
+                                                               Variant="Variant.Outlined"
+                                                               ValueChanged="@(v => UpdateMarginRounding(context, v))">
+                                                        <MudSelectItem Value="@RoundingMode.None">@LocalizationService.GetTranslation("PriceCalculator.Rounding.None")</MudSelectItem>
+                                                        <MudSelectItem Value="@RoundingMode.Up">@LocalizationService.GetTranslation("PriceCalculator.Rounding.Up")</MudSelectItem>
+                                                        <MudSelectItem Value="@RoundingMode.Down">@LocalizationService.GetTranslation("PriceCalculator.Rounding.Down")</MudSelectItem>
+                                                        <MudSelectItem Value="@RoundingMode.Marketing">@LocalizationService.GetTranslation("PriceCalculator.Rounding.Marketing")</MudSelectItem>
+                                                    </MudSelect>
+                                                </MudTd>
+                                                <MudTd Class="py-1 px-1" Style="text-align: right;">
                                                     <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.RemoveMargin")" Class="flex">
                                                         <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                                                        tabindex="-1"
@@ -415,6 +436,12 @@
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.NonSkilled")</MudText>
                                             </MudTooltip>
                                             <MudCheckBox T="bool" Value="_selectedDataContext.UserSettings.First().DisplayNonSkilledRecipes" Variant="Variant.Outlined" ValueChanged="OnOptionDisplayChanged"/>
+                                        </MudStack>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.HideBlueprints.Tooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.HideBlueprints.HideBlueprints")</MudText>
+                                            </MudTooltip>
+                                            <MudCheckBox T="bool" Value="_hideBlueprints" Variant="Variant.Outlined" ValueChanged="OnHideBlueprintsChanged"/>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.Tooltip")">
@@ -507,7 +534,8 @@
                                       Class="mud-table-container-no-overflow-y"
                                       Dense="true"
                                       Hover="true"
-                                      Virtualize="false">
+                                      Virtualize="false"
+                                      RowClassFunc="(_, i) => OddIndexRowClass(i)">
                                 <ToolBarContent>
                                     <MudStack Row>
                                         <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.ItemsToBuy")</MudText>
@@ -735,6 +763,7 @@
                                       @ref="_itemsToSellTableRef"
                                       id="@ItemsToSellTableDomId"
                                       Filter="new Func<ItemOrTag, bool>(FilterItemToSell)"
+                                      RowClassFunc="GetSellRowClass"
                                       Class="mud-table-container-no-overflow-y recipe-table"
                                       Dense="true"
                                       GroupBy="_groupDefinitionToSell"
@@ -814,7 +843,7 @@
                                         var relatedUserElements = context.Elements
                                             .Where(e => e.IsProduct())
                                             .Select(e => e.GetCurrentUserElement(_selectedDataContext))
-                                            .Where(ue => ue is not null && !ue.IsReintegrated)
+                                            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
                                             .ToList();
 
                                         var bestRecipe = ExtractBestRecipe(context, relatedUserElements!);
@@ -830,15 +859,20 @@
                                             </MudTooltip>
                                         </MudTd>
 
-                                        <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
+                                        <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")"
+                                               Style="white-space: nowrap; overflow: hidden; max-width: 280px">
                                             <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                 <MudTooltip Text="@LocalizationService.GetTranslation(bestRecipeHasShare ? "PriceCalculator.RecipeTooltipWithShare" : "PriceCalculator.RecipeTooltip")">
                                                     <MudLink Color="Color.Default" OnClick="@(() => ShowRecipeDialog(bestRecipe))">
                                                         <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                             <EcoIcon Item="@context"/>
-                                                            <MudText Typo="Typo.body2" Class="pt-1 ">
+                                                            <MudText Typo="Typo.body2" Class="pt-1 recipe-name-ellipsis">
                                                                 @LocalizationService.GetTranslation(context)
                                                             </MudText>
+                                                            @if (bestRecipe?.IsBlueprint == true)
+                                                            {
+                                                                <img src="/assets/eco-icons/BlueprintItem_FG.png" alt="Blueprint" style="width: 24px; height: 24px;"/>
+                                                            }
                                                             @if (!_showDetailedRecipes && relatedUserElements.Count > 1)
                                                             {
                                                                 <MudText Typo="Typo.body2" Class="pt-1">
@@ -933,7 +967,7 @@
                                         var relatedUserElements = context.Elements
                                             .Where(e => e.IsProduct())
                                             .Select(e => e.GetCurrentUserElement(_selectedDataContext))
-                                            .Where(ue => ue is not null && !ue.IsReintegrated)
+                                            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
                                             .ToList();
 
                                         @if (relatedUserElements.Count > 1)
@@ -954,12 +988,16 @@
                                                     <MudTd Class="@($"{borderClass} pa-0 border-r-1")"></MudTd>
                                                     <MudTd Class="@($"{borderClass} pt-0 pb-1")"
                                                            Style="white-space: nowrap; overflow: hidden; max-width: 280px">
-                                                        <MudStack Row Spacing="1">
+                                                        <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBottom"
                                                                      Size="Size.Small"/>
-                                                            <MudLink Color="Color.Default" Class="pt-1 " Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
+                                                            <MudLink Color="Color.Default" Class="pt-1 recipe-name-ellipsis" Typo="Typo.body2" OnClick="@(() => ShowRecipeDialog(userElement.Element.Recipe))">
                                                                 @LocalizationService.GetTranslation(userElement.Element.Recipe) @LocalizationService.GetTranslation("Recipe")
                                                             </MudLink>
+                                                            @if (userElement.Element.Recipe.IsBlueprint)
+                                                            {
+                                                                <img src="/assets/eco-icons/BlueprintItem_FG.png" alt="Blueprint" style="width: 24px; height: 24px;"/>
+                                                            }
                                                         </MudStack>
                                                     </MudTd>
                                                     <MudTd Class="@($"{borderClass} pt-0 pb-1")">
@@ -1045,6 +1083,7 @@
     private List<ItemOrTag> _itemsToSellDisplay = [];
     private HashSet<Guid> _autoCalculatedSellItemIds = [];
     private Dictionary<Guid, UserElement> _userElementsByElementId = [];
+    private Dictionary<Guid, int> _sellRowBucketIndices = [];
 
     private bool _showDetailedTags;
 
@@ -1066,6 +1105,16 @@
             _showDetailedRecipes = value;
             _ = LocalStorageService.AddItem("ShowDetailedRecipes", value.ToString());
         }
+    }
+
+    private bool _hideBlueprints;
+
+    private async Task OnHideBlueprintsChanged(bool value)
+    {
+        _hideBlueprints = value;
+        await LocalStorageService.AddItem("HideBlueprints", value.ToString());
+        RefreshCategorizedDisplayCaches();
+        StateHasChanged();
     }
 
     private bool _expandedSkills;
@@ -1158,6 +1207,7 @@
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
     private Dictionary<object, bool>? _preSellSearchSnapshot;
     private bool _sellSearchPending;
+    private bool _expandFirstSellGroupsOnNextRender;
     private static readonly object NoSkillKey = new();
     private const int SkillChangeCalculationDebounceMs = 150;
     private const int SkillLevelSaveDebounceMs = 150;
@@ -1175,21 +1225,7 @@
             Indentation = true,
             Expandable = true,
             IsInitiallyExpanded = false,
-            Selector = itemOrTag =>
-            {
-                var relatedElements = new List<Element>();
-                foreach (var element in itemOrTag.Elements)
-                {
-                    if (!element.IsProduct()) continue;
-                    if (!_userElementsByElementId.TryGetValue(element.Id, out var userElement) || userElement.IsReintegrated) continue;
-
-                    relatedElements.Add(element);
-                }
-
-                var bestRelatedElement = relatedElements.Find(element => element.Index == 0) ?? relatedElements.FirstOrDefault();
-
-                return bestRelatedElement?.Recipe.Skill;
-            }
+            Selector = itemOrTag => GetBestRelatedElement(itemOrTag)?.Recipe.Skill
         };
     }
 
@@ -1199,6 +1235,7 @@
         {
             _showDetailedTags = await LocalStorageService.GetItem("ShowDetailedTags") != "False";
             _showDetailedRecipes = await LocalStorageService.GetItem("ShowDetailedRecipes") != "False";
+            _hideBlueprints = await LocalStorageService.GetItem("HideBlueprints") == "True";
             _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
             _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
             _expandedMargins = await LocalStorageService.GetItem("ExpandedMargins") != "False";
@@ -1212,10 +1249,15 @@
 
             await RetrieveData(_selectedDataContext);
 
-            foreach (var row in SellGroupRows.Take(3)) SetSellGroupExpanded(row, true);
-
             StateHasChanged();
             return;
+        }
+
+        if (_expandFirstSellGroupsOnNextRender && SellGroupRows.Any())
+        {
+            _expandFirstSellGroupsOnNextRender = false;
+            foreach (var row in SellGroupRows.Take(3)) SetSellGroupExpanded(row, true);
+            StateHasChanged();
         }
 
         if (_sellSearchPending)
@@ -1253,6 +1295,7 @@
         await RequestCalculate(CalculateTriggerOrigin.InitialLoad, force: true);
 
         _isLoadingData = false;
+        _expandFirstSellGroupsOnNextRender = true;
         StateHasChanged();
     }
 
@@ -2368,6 +2411,21 @@
         await RequestCalculate(CalculateTriggerOrigin.MarginInput);
     }
 
+    private async Task UpdateMarginRounding(UserMargin userMargin, RoundingMode rounding)
+    {
+        if (userMargin.Rounding == rounding) return;
+
+        userMargin.Rounding = rounding;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserMarginDbService.UpdateAll(context, userMargin);
+            return Task.CompletedTask;
+        });
+
+        await RequestCalculate(CalculateTriggerOrigin.MarginInput);
+    }
+
     private async Task UpdateMarginName(UserMargin userMargin, string name)
     {
         if (userMargin.Name == name)
@@ -2485,6 +2543,57 @@
                 SetSellGroupExpanded(row, was);
             }
         }
+    }
+
+    private static string OddIndexRowClass(int index) => index % 2 == 1 ? "row-odd" : "";
+
+    private Element? GetBestRelatedElement(ItemOrTag itemOrTag)
+    {
+        Element? best = null;
+        Element? first = null;
+        foreach (var element in itemOrTag.Elements)
+        {
+            if (!element.IsProduct()) continue;
+            if (!_userElementsByElementId.TryGetValue(element.Id, out var ue) || ue.IsReintegrated) continue;
+            if (_hideBlueprints && element.Recipe.IsBlueprint) continue;
+            first ??= element;
+            if (element.Index == 0) { best = element; break; }
+        }
+        return best ?? first;
+    }
+
+    private string GetSellRowClass(ItemOrTag item, int index)
+    {
+        var classes = new List<string>();
+        if (_sellRowBucketIndices.TryGetValue(item.Id, out var bucket) && bucket % 2 == 1)
+        {
+            classes.Add("row-odd");
+        }
+
+        var element = GetBestRelatedElement(item);
+        var family = element?.Recipe.FamilyName ?? "";
+        if (!string.IsNullOrEmpty(family))
+        {
+            var skill = element?.Recipe.Skill;
+
+            bool SameFamilyAt(int otherIndex)
+            {
+                if (otherIndex < 0 || otherIndex >= _itemsToSellDisplay.Count) return false;
+                var otherEl = GetBestRelatedElement(_itemsToSellDisplay[otherIndex]);
+                return otherEl?.Recipe.Skill == skill && (otherEl?.Recipe.FamilyName ?? "") == family;
+            }
+
+            var prevSame = SameFamilyAt(index - 1);
+            var nextSame = SameFamilyAt(index + 1);
+            if (prevSame || nextSame)
+            {
+                classes.Add("sell-row-family-member");
+                if (!prevSame) classes.Add("sell-row-family-top");
+                if (!nextSame) classes.Add("sell-row-family-bottom");
+            }
+        }
+
+        return string.Join(" ", classes);
     }
 
     private string SearchItemToSell
@@ -2958,6 +3067,43 @@
         _userElementsByElementId = _selectedDataContext.UserElements
             .GroupBy(ue => ue.ElementId)
             .ToDictionary(g => g.Key, g => g.First());
+
+        if (_hideBlueprints)
+        {
+            _itemsToSellDisplay = _itemsToSellDisplay
+                .Where(item => item.Elements.Any(e =>
+                    e.IsProduct()
+                    && _userElementsByElementId.TryGetValue(e.Id, out var ue)
+                    && !ue.IsReintegrated
+                    && !e.Recipe.IsBlueprint))
+                .ToList();
+        }
+
+        _itemsToSellDisplay = _itemsToSellDisplay
+            .Select(item => (Item: item, Element: GetBestRelatedElement(item)))
+            .OrderBy(x => x.Element?.Recipe.Skill?.Name ?? "")
+            .ThenBy(x => string.IsNullOrEmpty(x.Element?.Recipe.FamilyName)
+                ? LocalizationService.GetTranslation(x.Item)
+                : x.Element!.Recipe.FamilyName)
+            .ThenBy(x => LocalizationService.GetTranslation(x.Item))
+            .Select(x => x.Item)
+            .ToList();
+
+        _sellRowBucketIndices.Clear();
+        var bucket = -1;
+        Skill? prevSkill = null;
+        var prevFamily = "";
+        foreach (var item in _itemsToSellDisplay)
+        {
+            var element = GetBestRelatedElement(item);
+            var skill = element?.Recipe.Skill;
+            var family = element?.Recipe.FamilyName ?? "";
+            var continuation = !string.IsNullOrEmpty(family) && skill == prevSkill && family == prevFamily;
+            if (!continuation) bucket++;
+            _sellRowBucketIndices[item.Id] = bucket;
+            prevSkill = skill;
+            prevFamily = family;
+        }
     }
 
     private string GetStatusLabel()

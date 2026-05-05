@@ -49,7 +49,7 @@ builder.Services.AddDbContextFactory<EcoCraftDbContext>(options =>
         {
             bd
                 .AddConsole()
-                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Warning);
+                .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Error);
         }))
     );
 
@@ -85,7 +85,6 @@ builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
 builder.Services.AddScoped<UserServerDataService>();
-builder.Services.AddScoped<VideoUploadService>();
 builder.Services.AddScoped<ShoppingListService>();
 builder.Services.AddScoped<ShoppingListDataService>();
 builder.Services.AddScoped<EconomyViewerService>();

@@ -18,6 +18,10 @@
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             <EcoIcon Item="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(Recipe)</MudText>
+            @if (Recipe.IsBlueprint)
+            {
+                <img src="/assets/eco-icons/BlueprintItem_FG.png" alt="Blueprint" style="width: 24px; height: 24px;"/>
+            }
         </MudStack>
     </TitleContent>
     <DialogContent>
@@ -99,7 +103,7 @@
                                 <MudStack Row Spacing="1">
                                     @(Math.Abs(Math.Round(context.Element.Quantity.GetRoundFactorBaseValue(DataContext), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                    @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
+                                    @if (context.Element.Quantity.HasDynamicEffect(DataContext))
                                     {
                                         <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                             <MudStack Row Spacing="1">
@@ -302,7 +306,7 @@
                             <MudStack Row Spacing="1">
                                 @(Math.Abs(Math.Round(context.Element.Quantity.GetBaseValue(), 2, MidpointRounding.AwayFromZero)).ToString("0.##"))
 
-                                @if (context.Element.Quantity.GetMultiplier(DataContext) != 1)
+                                @if (context.Element.Quantity.HasDynamicEffect(DataContext))
                                 {
                                     <MudTooltip Text="@context.Element.Quantity.GetMultiplierTooltip(DataContext, LocalizationService)">
                                         <MudStack Row Spacing="1">

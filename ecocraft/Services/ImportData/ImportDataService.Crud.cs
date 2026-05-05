@@ -39,7 +39,7 @@ public partial class ImportDataService
         context.Skills.Remove(skill);
     }
 
-    private Talent ImportTalent(EcoCraftDbContext context, Skill skill, string name, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value, decimal? cap)
+    private Talent ImportTalent(EcoCraftDbContext context, Skill skill, string name, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, List<TalentBonusDto> bonuses)
     {
         var talent = new Talent
         {
@@ -50,16 +50,16 @@ public partial class ImportDataService
             TalentGroupName = talentGroupName,
             Level = level,
             MaxLevel = maxLevel,
-            Value = value,
-            Cap = cap,
         };
 
         context.Talents.Add(talent);
 
+        ReplaceTalentBonuses(context, talent, bonuses);
+
         return talent;
     }
 
-    private void RefreshTalent(EcoCraftDbContext context, Talent talent, Skill skill, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, decimal value, decimal? cap)
+    private void RefreshTalent(EcoCraftDbContext context, Talent talent, Skill skill, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, List<TalentBonusDto> bonuses)
     {
         talent.Skill = skill;
         talent.LocalizedName = localizedName;
@@ -67,10 +67,35 @@ public partial class ImportDataService
         talent.TalentGroupName = talentGroupName;
         talent.Level = level;
         talent.MaxLevel = maxLevel;
-        talent.Value = value;
-        talent.Cap = cap;
 
         context.Talents.Update(talent);
+
+        ReplaceTalentBonuses(context, talent, bonuses);
+    }
+
+    private void ReplaceTalentBonuses(EcoCraftDbContext context, Talent talent, List<TalentBonusDto> bonuses)
+    {
+        foreach (var existing in talent.Bonuses.ToList())
+        {
+            context.TalentBonuses.Remove(existing);
+        }
+        talent.Bonuses.Clear();
+
+        foreach (var bonusDto in bonuses)
+        {
+            var bonus = new TalentBonus
+            {
+                Talent = talent,
+                Action = bonusDto.Action,
+                EffectType = bonusDto.EffectType,
+                Value = bonusDto.Value,
+                Cap = bonusDto.Cap,
+                ItemTags = bonusDto.ItemTags,
+            };
+
+            talent.Bonuses.Add(bonus);
+            context.TalentBonuses.Add(bonus);
+        }
     }
 
     private void DeleteTalent(EcoCraftDbContext context, Talent talent)
@@ -173,6 +198,25 @@ public partial class ImportDataService
     {
         ItemOrTags.Remove(itemOrTag);
         context.ItemOrTags.Remove(itemOrTag);
+    }
+
+    private static void ApplyExportedItemFields(ItemOrTag dbItem, ItemDto item)
+    {
+        dbItem.FuelCalories = item.FuelCalories;
+        dbItem.FuelConsumptionPerSecond = item.FuelConsumptionPerSecond;
+        dbItem.AcceptedFuelTags = item.AcceptedFuelTags;
+
+        dbItem.FoodCalories = item.Food?.Calories;
+        dbItem.FoodCarbs = item.Food?.Carbs;
+        dbItem.FoodProtein = item.Food?.Protein;
+        dbItem.FoodFat = item.Food?.Fat;
+        dbItem.FoodVitamins = item.Food?.Vitamins;
+
+        dbItem.HousingRoomCategory = item.Housing?.RoomCategory;
+        dbItem.HousingBaseValue = item.Housing?.BaseValue;
+        dbItem.HousingTypeForRoomLimit = item.Housing?.TypeForRoomLimit;
+        dbItem.HousingDiminishingReturnMultiplier = item.Housing?.DiminishingReturnMultiplier;
+        dbItem.HousingDiminishingMultiplierAcrossFullProperty = item.Housing?.DiminishingMultiplierAcrossFullProperty;
     }
 
     private Recipe ImportRecipe(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, string familyName, Skill? skill, int requiredSkillLevel, bool isBlueprint, bool isDefault, CraftingTable craftingTable)

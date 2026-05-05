@@ -10,16 +10,13 @@
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.ShoppingList")">
         <MudNavLink IconColor="Color.Primary" Href="shopping-list" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.Cart">@LocalizationService.GetTranslation("NavMenu.ShoppingList")</MudNavLink>
     </MudTooltip>
-    <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.EconomyViewer")">
-        <MudNavLink IconColor="Color.Primary" Href="economy-viewer" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QueryStats">@LocalizationService.GetTranslation("NavMenu.EconomyViewer")</MudNavLink>
-    </MudTooltip>
-
-    @if (!IsLoadingUserAndServer && (ContextService.CurrentServer?.HasVideoUploader ?? false))
+    @if (!IsLoadingUserAndServer && ContextService.CurrentServer is { IsDefault: false })
     {
-        <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.VideosUpload")">
-            <MudNavLink IconColor="Color.Primary" Href="videos-upload" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Outline.VideoPlus">@LocalizationService.GetTranslation("NavMenu.VideosUpload")</MudNavLink>
+        <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.EconomyViewer")">
+            <MudNavLink IconColor="Color.Primary" Href="economy-viewer" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QueryStats">@LocalizationService.GetTranslation("NavMenu.EconomyViewer")</MudNavLink>
         </MudTooltip>
     }
+
     <!--<MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>
     </MudTooltip>-->

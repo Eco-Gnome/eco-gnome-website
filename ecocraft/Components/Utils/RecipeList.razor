@@ -19,6 +19,10 @@
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
                     <EcoIcon Item="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+                    @if (context.IsBlueprint)
+                    {
+                        <img src="/assets/eco-icons/BlueprintItem_FG.png" alt="Blueprint" style="width: 24px; height: 24px;"/>
+                    }
                 </MudStack>
             </MudLink>
         </MudTh>

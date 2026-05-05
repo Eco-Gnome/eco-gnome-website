@@ -31,10 +31,18 @@ public partial class ImportDataService
     {
         public required Dictionary<LanguageCode, string> LocalizedDescription { get; init; }
         public required string TalentGroupName { get; init; }
-        public required decimal Value { get; init; }
-        public decimal? Cap { get; init; }
         public required int Level { get; init; }
         public required int MaxLevel { get; init; }
+        public List<TalentBonusDto> Bonuses { get; init; } = [];
+    }
+
+    private class TalentBonusDto
+    {
+        public required TalentBonusAction Action { get; init; }
+        public required TalentBonusEffectType EffectType { get; init; }
+        public required decimal Value { get; init; }
+        public decimal? Cap { get; init; }
+        public string[]? ItemTags { get; init; }
     }
 
     private class ItemDto : EcoItemDto
@@ -46,6 +54,29 @@ public partial class ImportDataService
         public decimal? PluginModuleSkillPercent { get; set; }
         public bool? IsCraftingTable { get; set; }
         public List<string>? CraftingTablePluginModules { get; set; }
+        public decimal? FuelCalories { get; set; }
+        public decimal? FuelConsumptionPerSecond { get; set; }
+        public string[]? AcceptedFuelTags { get; set; }
+        public FoodDto? Food { get; set; }
+        public HousingDto? Housing { get; set; }
+    }
+
+    private class FoodDto
+    {
+        public decimal Calories { get; set; }
+        public decimal Carbs { get; set; }
+        public decimal Protein { get; set; }
+        public decimal Fat { get; set; }
+        public decimal Vitamins { get; set; }
+    }
+
+    private class HousingDto
+    {
+        public string? RoomCategory { get; set; }
+        public decimal BaseValue { get; set; }
+        public string? TypeForRoomLimit { get; set; }
+        public decimal DiminishingReturnMultiplier { get; set; }
+        public decimal DiminishingMultiplierAcrossFullProperty { get; set; }
     }
 
     private class TagDto : EcoItemDto
@@ -126,8 +157,19 @@ public partial class ImportDataService
             TalentGroupName = talent.TalentGroupName,
             Level = talent.Level,
             MaxLevel = talent.MaxLevel,
-            Value = talent.Value,
-            Cap = talent.Cap,
+            Bonuses = talent.Bonuses.Select(TalentBonusToDto).ToList(),
+        };
+    }
+
+    private static TalentBonusDto TalentBonusToDto(TalentBonus bonus)
+    {
+        return new TalentBonusDto
+        {
+            Action = bonus.Action,
+            EffectType = bonus.EffectType,
+            Value = bonus.Value,
+            Cap = bonus.Cap,
+            ItemTags = bonus.ItemTags,
         };
     }
 
@@ -139,6 +181,25 @@ public partial class ImportDataService
             LocalizedName = LocalizedFieldToDto(item.LocalizedName),
             IsCraftingTable = false,
             IsPluginModule = false,
+            FuelCalories = item.FuelCalories,
+            FuelConsumptionPerSecond = item.FuelConsumptionPerSecond,
+            AcceptedFuelTags = item.AcceptedFuelTags,
+            Food = item.FoodCalories is null ? null : new FoodDto
+            {
+                Calories = item.FoodCalories.Value,
+                Carbs = item.FoodCarbs ?? 0,
+                Protein = item.FoodProtein ?? 0,
+                Fat = item.FoodFat ?? 0,
+                Vitamins = item.FoodVitamins ?? 0,
+            },
+            Housing = item.HousingBaseValue is null ? null : new HousingDto
+            {
+                RoomCategory = item.HousingRoomCategory,
+                BaseValue = item.HousingBaseValue.Value,
+                TypeForRoomLimit = item.HousingTypeForRoomLimit,
+                DiminishingReturnMultiplier = item.HousingDiminishingReturnMultiplier ?? 1,
+                DiminishingMultiplierAcrossFullProperty = item.HousingDiminishingMultiplierAcrossFullProperty ?? 1,
+            },
         };
 
         var associatedCraftingTable = craftingTables.FirstOrDefault(c => c.Name == item.Name);

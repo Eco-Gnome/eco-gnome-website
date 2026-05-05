@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecocraft.Models;
@@ -11,9 +12,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260504205606_AddItemFuelConsumption")]
+    partial class AddItemFuelConsumption
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -555,6 +558,9 @@ namespace ecocraft.Migrations
                     b.Property<string>("EcoServerId")
                         .HasColumnType("text");
 
+                    b.Property<bool>("HasVideoUploader")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsCalorieCostLocked")
                         .HasColumnType("boolean");
 
@@ -813,9 +819,6 @@ namespace ecocraft.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("Rounding")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

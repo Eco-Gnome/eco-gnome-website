@@ -51,7 +51,6 @@ public class ContextService(
         {
             server.UserServers = serverWithUsers.UserServers;
             server.EcoServerId = serverWithUsers.EcoServerId;
-            server.HasVideoUploader = serverWithUsers.HasVideoUploader;
             server.IsCalorieCostLocked = serverWithUsers.IsCalorieCostLocked;
             server.LockedCalorieCost = serverWithUsers.LockedCalorieCost;
             server.CalorieCostMin = serverWithUsers.CalorieCostMin;

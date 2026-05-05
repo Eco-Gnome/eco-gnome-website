@@ -278,7 +278,7 @@
         "NoModule": "Nessun modulo",
         "MarginPercent": {
             "Tooltip": "La percentuale di margine che verrà applicata al suo prezzo di vendita. Verifichi l'opzione 'Tipo di calcolo del margine' per i dettagli del calcolo.",
-            "MarginPercent": "Percentuale di margine"
+            "MarginPercent": "Percentuale"
         },
         "AddMargin": "Aggiungi margine",
         "RemoveMargin": "Rimuovere il margine",

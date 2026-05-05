@@ -63,7 +63,6 @@ public class TalentDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			Name = talent.Name,
 			LocalizedNameId = talent.LocalizedName.Id,
 			TalentGroupName = talent.TalentGroupName,
-			Value = talent.Value,
 			Level = talent.Level,
 			SkillId = talent.Skill.Id,
 		};

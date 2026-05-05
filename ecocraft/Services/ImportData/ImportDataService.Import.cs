@@ -53,8 +53,7 @@ public partial class ImportDataService
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
-                    newTalent.Value,
-                    newTalent.Cap
+                    newTalent.Bonuses
                 );
             }
             else
@@ -68,8 +67,7 @@ public partial class ImportDataService
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
-                    newTalent.Value,
-                    newTalent.Cap
+                    newTalent.Bonuses
                 );
             }
         }
@@ -129,7 +127,8 @@ public partial class ImportDataService
             {
                 nameOccurence.Add(item.Name, 1);
 
-                ImportItem(context, server, item);
+                var dbItem = ImportItem(context, server, item);
+                ApplyExportedItemFields(dbItem, item);
             }
 
             foreach (var dbItem in ItemOrTags.Where(iot => !iot.IsTag).ToList())
