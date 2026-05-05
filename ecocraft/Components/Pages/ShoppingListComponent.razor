@@ -1301,7 +1301,7 @@
         _ = RetrieveData();
     }
 
-    private async Task RetrieveData(DataContext? shoppingList = null)
+    private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)
     {
         if (ContextService.CurrentUserServer is null || ContextService.CurrentServer is null)
         {
@@ -1328,7 +1328,12 @@
 
         try
         {
-            var serverData = await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+            var serverData = ContextService.CurrentServerData;
+            if (forceServerReload || serverData is null)
+            {
+                serverData = await ServerDbService.GetServerWithShoppingListData(ContextService.CurrentServer.Id);
+            }
+
             if (serverData is null)
             {
                 _selectedShoppingList = null;
@@ -1348,18 +1353,15 @@
                     ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, serverData)
                     : null;
             }
-            catch (Exception referenceEx)
+            catch (Exception)
             {
-                Console.WriteLine($"[ShoppingList] Failed to load reference data context {referenceDataContextId}: {referenceEx}");
                 _referenceDataContext = null;
             }
 
             RebuildTree();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[ShoppingList] Failed to load shopping list {targetShoppingListId}: {ex}");
-
             var fallbackShoppingListIds = ContextService.CurrentUserServer.DataContexts
                 .Where(d => d.IsShoppingList && d.Id != targetShoppingListId)
                 .Select(d => d.Id)
@@ -1375,9 +1377,9 @@
                         _selectedShoppingList = await DataContextDbService.GetDataContextWithData(fallbackId, ContextService.CurrentServerData);
                         break;
                     }
-                    catch (Exception fallbackEx)
+                    catch (Exception)
                     {
-                        Console.WriteLine($"[ShoppingList] Failed to load fallback shopping list {fallbackId}: {fallbackEx}");
+                        continue;
                     }
                 }
             }

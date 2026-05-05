@@ -387,3 +387,4 @@ FodyWeavers.xsd
 # Docker
 /pgdata
 /dumps
+Trace-*.json

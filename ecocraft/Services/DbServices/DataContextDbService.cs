@@ -36,6 +36,7 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 		var dataContext = await context.DataContexts
 			.AsNoTrackingWithIdentityResolution()
+			.AsSplitQuery()
 			.Where(s => s.Id == id)
 			// User Skills
 			.Include(s => s.UserSkills)
