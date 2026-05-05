@@ -1249,10 +1249,15 @@
 
             await RetrieveData(_selectedDataContext);
 
-            foreach (var row in SellGroupRows.Take(3)) SetSellGroupExpanded(row, true);
-
             StateHasChanged();
             return;
+        }
+
+        if (_expandFirstSellGroupsOnNextRender && SellGroupRows.Any())
+        {
+            _expandFirstSellGroupsOnNextRender = false;
+            foreach (var row in SellGroupRows.Take(3)) SetSellGroupExpanded(row, true);
+            StateHasChanged();
         }
 
         if (_sellSearchPending)
@@ -1290,6 +1295,7 @@
         await RequestCalculate(CalculateTriggerOrigin.InitialLoad, force: true);
 
         _isLoadingData = false;
+        _expandFirstSellGroupsOnNextRender = true;
         StateHasChanged();
     }
 
