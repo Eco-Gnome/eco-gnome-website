@@ -340,13 +340,25 @@
         "NoModule": "Pas de module",
         "MarginPercent": {
             "Tooltip": "Le pourcentage de marge qui sera appliqué sur votre prix de vente. Vérifiez l'option d'infobulle 'Type de calcul de la marge' pour les détails du calcul.",
-            "MarginPercent": "Pourcentage de marge"
+            "MarginPercent": "Pourcentage"
+        },
+        "Rounding": {
+            "Tooltip": "Arrondit les prix margés pour un affichage en boutique plus propre. Paliers : 1-2$ → 0.25, 2-5$ → 0.5, 5-100$ → 1, 100-1000$ → 10, 1000$+ → 100. En dessous de 1$, aucun arrondi. Marketing arrondit au supérieur puis retire 0.01 (ex. 4,99$, 99,99$) — sauf dans le palier 0.25 où la grille reste intacte.",
+            "Rounding": "Arrondi",
+            "None": "Aucun",
+            "Up": "Au supérieur",
+            "Down": "À l'inférieur",
+            "Marketing": "Marketing"
         },
         "AddMargin": "Ajouter une marge",
         "RemoveMargin": "Supprimer la marge",
         "NonSkilled": {
             "Tooltip": "Déverrouillez la liste des recettes non qualifiées dans le sélecteur de recettes.",
             "NonSkilled": "Afficher les recettes non qualifiées"
+        },
+        "HideBlueprints": {
+            "Tooltip": "Masquer les recettes blueprint dans les items à vendre.",
+            "HideBlueprints": "Masquer les blueprints"
         },
         "LevelAccessible": {
             "Tooltip": "N'affichez que les recettes autorisées par vos niveaux de compétences.",

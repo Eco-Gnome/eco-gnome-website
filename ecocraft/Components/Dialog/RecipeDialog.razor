@@ -18,6 +18,10 @@
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             <EcoIcon Item="@Recipe.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="64" />
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(Recipe)</MudText>
+            @if (Recipe.IsBlueprint)
+            {
+                <img src="/assets/eco-icons/BlueprintItem_FG.png" alt="Blueprint" style="width: 24px; height: 24px;"/>
+            }
         </MudStack>
     </TitleContent>
     <DialogContent>

@@ -278,7 +278,7 @@
         "NoModule": "No module",
         "MarginPercent": {
             "Tooltip": "The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.",
-            "MarginPercent": "Margin Percent"
+            "MarginPercent": "Percent"
         },
         "AddMargin": "Add margin",
         "RemoveMargin": "Remove margin",

@@ -22,6 +22,14 @@ public enum CalculationMode
     Manual,
 }
 
+public enum RoundingMode
+{
+    None,
+    Up,
+    Down,
+    Marketing,
+}
+
 public interface ISLinkedToModifier;
 
 // Eco Data
@@ -781,6 +789,7 @@ public class UserMargin
     public string Name { get; set; } = "";
 
     public decimal Margin { get; set; } = 0;
+    public RoundingMode Rounding { get; set; } = RoundingMode.None;
 
     public DataContext DataContext { get; set; }
     public List<UserPrice> UserPrices { get; set; } = [];

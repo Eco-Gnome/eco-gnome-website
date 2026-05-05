@@ -278,7 +278,7 @@
         "NoModule": "Sin módulo",
         "MarginPercent": {
             "Tooltip": "El porcentaje de margen que se aplicará sobre su precio de venta. Compruebe la opción \"Tipo de cálculo del margen\" para conocer los detalles del cálculo.",
-            "MarginPercent": "Porcentaje de margen"
+            "MarginPercent": "Porcentaje"
         },
         "AddMargin": "Añadir margen",
         "RemoveMargin": "Eliminar margen",

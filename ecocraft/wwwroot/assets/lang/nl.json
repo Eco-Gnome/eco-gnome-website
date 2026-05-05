@@ -208,7 +208,7 @@
         "NoModule": "Geen module",
         "MarginPercent": {
             "Tooltip": "Het margepercentage dat zal worden toegepast op uw verkoopprijs. Bekijk de tooltipoptie \"Margeberekeningstype\" voor meer informatie over de berekening.",
-            "MarginPercent": "Marge Percentage"
+            "MarginPercent": "Percentage"
         },
         "AddMargin": "Marge toevoegen",
         "RemoveMargin": "Marge verwijderen",

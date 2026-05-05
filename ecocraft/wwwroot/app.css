@@ -466,3 +466,23 @@
     height: 1px;
 }
 
+.row-odd > td {
+    background-color: rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.03);
+}
+
+.sell-row-family-member > td {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.sell-row-family-member:not(.sell-row-family-bottom) > td {
+    border-bottom: none !important;
+}
+
+.recipe-name-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+

@@ -349,13 +349,25 @@
         "NoModule": "No module",
         "MarginPercent": {
             "Tooltip": "The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.",
-            "MarginPercent": "Margin Percent"
+            "MarginPercent": "Percent"
+        },
+        "Rounding": {
+            "Tooltip": "Round margin prices to clean values for in-store display. Steps: $1-$2 → 0.25, $2-$5 → 0.5, $5-$100 → 1, $100-$1000 → 10, $1000+ → 100. Below $1 stays unchanged. Marketing rounds up then subtracts 0.01 (e.g. $4.99, $99.99) — except in the 0.25 tier where the grid is kept as-is.",
+            "Rounding": "Rounding",
+            "None": "None",
+            "Up": "Round up",
+            "Down": "Round down",
+            "Marketing": "Marketing"
         },
         "AddMargin": "Add margin",
         "RemoveMargin": "Remove margin",
         "NonSkilled": {
             "Tooltip": "Unlock the list of non-skilled recipes in the recipe selector.",
             "NonSkilled": "Display non-skilled recipes"
+        },
+        "HideBlueprints": {
+            "Tooltip": "Hide blueprint recipes from the items to sell.",
+            "HideBlueprints": "Hide blueprints"
         },
         "LevelAccessible": {
             "Tooltip": "Only display recipes that are allowed by your skills levels.",

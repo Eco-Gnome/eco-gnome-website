@@ -526,9 +526,41 @@ public class PriceCalculatorService(
                     break;
                 }
             }
+
+            if (marginPrice is not null && userPrice.UserMargin.Rounding != RoundingMode.None)
+            {
+                marginPrice = SmartRound(marginPrice.Value, userPrice.UserMargin.Rounding);
+            }
         }
 
         calculationContext.TrySetUserPrice(userPrice, basePrice, marginPrice);
+    }
+
+    // Below 1$ → no rounding. Above:
+    //   < 2$    → step 0.25 (marketing keeps the .25 grid as-is, .99 trick doesn't apply here)
+    //   < 5$    → step 0.5
+    //   < 100$  → step 1
+    //   < 1000$ → step 10
+    //   ≥ 1000$ → step 100
+    // Up = ceiling, Down = floor, Marketing = ceiling then -0.01 (except the 0.25 tier).
+    private static decimal SmartRound(decimal value, RoundingMode mode)
+    {
+        if (value < 1m) return value;
+
+        decimal step;
+        bool marketingTrick;
+        if (value < 2m) { step = 0.25m; marketingTrick = false; }
+        else if (value < 5m) { step = 0.5m; marketingTrick = true; }
+        else if (value < 100m) { step = 1m; marketingTrick = true; }
+        else if (value < 1000m) { step = 10m; marketingTrick = true; }
+        else { step = 100m; marketingTrick = true; }
+
+        var divided = value / step;
+        if (mode == RoundingMode.Down) return Math.Floor(divided) * step;
+
+        var rounded = Math.Ceiling(divided) * step;
+        if (mode == RoundingMode.Marketing && marketingTrick) rounded -= 0.01m;
+        return rounded;
     }
 
     private static void SetPriceOrMarginPrice(CalculationContext calculationContext, UserElement ingredient, UserPrice userPrice, UserRecipe userRecipe)
