@@ -6,6 +6,7 @@
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
 @using System.Globalization;
+@using System.Reflection;
 @using ecocraft.Components.Utils
 @using Microsoft.EntityFrameworkCore
 @inject IDialogService DialogService
@@ -774,9 +775,10 @@
                                     </MudTh>
                                     <MudTh Class="pl-4">
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                            <MudTextField @bind-Value="_searchItemToSell"
+                                            <MudTextField @bind-Value="SearchItemToSell"
                                                           Clearable
                                                           Immediate
+                                                          DebounceInterval="300"
                                                           Placeholder="@LocalizationService.GetTranslation("PriceCalculator.ProductItems")"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -1154,12 +1156,12 @@
     private string _searchItemToSell = "";
 
     private TableGroupDefinition<ItemOrTag> _groupDefinitionToSell;
-    private bool _collapseSellGroupsOnNextRender;
-    private bool _groupLimiterInteropUnavailable;
-    private const int SellGroupCollapseThreshold = 5;
-    private const int SellGroupMaxOpenGroups = 3;
+    private Dictionary<object, bool>? _preSellSearchSnapshot;
+    private bool _sellSearchPending;
+    private static readonly object NoSkillKey = new();
     private const int SkillChangeCalculationDebounceMs = 150;
     private const int SkillLevelSaveDebounceMs = 150;
+    private const int SellSearchExpandAllThreshold = 100;
     private const string ItemsToSellTableDomId = "items-to-sell-table";
     private const string CalculationModeStorageKeyPrefix = "PriceCalculatorCalculationMode";
 
@@ -1172,7 +1174,7 @@
             GroupName = "Temporary",
             Indentation = true,
             Expandable = true,
-            IsInitiallyExpanded = true,
+            IsInitiallyExpanded = false,
             Selector = itemOrTag =>
             {
                 var relatedElements = new List<Element>();
@@ -1210,11 +1212,18 @@
 
             await RetrieveData(_selectedDataContext);
 
+            foreach (var row in SellGroupRows.Take(3)) SetSellGroupExpanded(row, true);
+
             StateHasChanged();
             return;
         }
 
-        await ConfigureItemsToSellGroupBehaviorAsync();
+        if (_sellSearchPending)
+        {
+            _sellSearchPending = false;
+            ApplySellSearchExpansion();
+            StateHasChanged();
+        }
     }
 
     private async Task RetrieveData(DataContext? dataContext = null, bool forceServerReload = false)
@@ -1236,9 +1245,6 @@
         SyncCurrentServerMarginPolicyFromServerData();
 
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
-        var shouldCollapseSellGroups = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
-        _groupDefinitionToSell.IsInitiallyExpanded = !shouldCollapseSellGroups;
-        _collapseSellGroupsOnNextRender = shouldCollapseSellGroups;
 
         await EnforceServerCaloriePolicyIfNeeded();
         await EnforceServerMarginPolicyIfNeeded();
@@ -1277,47 +1283,6 @@
         ContextService.CurrentServer.MarginMax = ContextService.CurrentServerData.MarginMax;
     }
 
-    private static int GetConfiguredProfessionsCount(DataContext? dataContext)
-    {
-        return dataContext?.UserSkills.Count(userSkill => userSkill.Skill is not null) ?? 0;
-    }
-
-    private static bool ShouldCollapseSellGroupsOnRefresh(DataContext? dataContext)
-    {
-        return GetConfiguredProfessionsCount(dataContext) >= SellGroupCollapseThreshold;
-    }
-
-    private async Task ConfigureItemsToSellGroupBehaviorAsync()
-    {
-        if (_collapseSellGroupsOnNextRender && _itemsToSellTableRef is not null)
-        {
-            _itemsToSellTableRef.CollapseAllGroups();
-            _collapseSellGroupsOnNextRender = false;
-        }
-
-        if (_groupLimiterInteropUnavailable)
-        {
-            return;
-        }
-
-        var shouldEnableGroupOpenLimit = !_isLoadingData
-                                         && _selectedDataContext is not null
-                                         && ContextService.CurrentServerData is not null
-                                         && ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
-
-        try
-        {
-            await JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.configure", ItemsToSellTableDomId, shouldEnableGroupOpenLimit, SellGroupMaxOpenGroups);
-        }
-        catch (JSDisconnectedException)
-        {
-            // Ignore transient disconnections while the circuit tears down/reconnects.
-        }
-        catch (JSException)
-        {
-            _groupLimiterInteropUnavailable = true;
-        }
-    }
 
     private string GetCalorieCostTooltip()
     {
@@ -1745,15 +1710,6 @@
             _skillLevelSaveDebounceBySkillId.Clear();
             _pendingSkillLevelBySkillId.Clear();
             _lastPersistedSkillLevelBySkillId.Clear();
-        }
-
-        try
-        {
-            _ = JsRuntime.InvokeVoidAsync("ecoPriceCalculatorGroupLimiter.dispose", ItemsToSellTableDomId);
-        }
-        catch
-        {
-            // The JS runtime can be unavailable during teardown.
         }
 
         ContextService.OnContextChanged -= OnContextChanged;
@@ -2513,6 +2469,55 @@
         await RequestCalculate(CalculateTriggerOrigin.PriceInput);
     }
 
+    private static readonly PropertyInfo SellGroupExpandedProp = typeof(MudTableGroupRow<ItemOrTag>).GetProperty(nameof(MudTableGroupRow<ItemOrTag>.Expanded))!;
+    private IEnumerable<MudTableGroupRow<ItemOrTag>> SellGroupRows => _itemsToSellTableRef?.Context.GroupRows.Where(gr => gr.GroupDefinition == _groupDefinitionToSell) ?? [];
+    private static object SellGroupKey(MudTableGroupRow<ItemOrTag> row) => row.Items?.Key is Skill skill ? skill.Id : NoSkillKey;
+    private static void SetSellGroupExpanded(MudTableGroupRow<ItemOrTag> row, bool value) => SellGroupExpandedProp.SetValue(row, value);
+
+    private void RestoreSellGroupsToSnapshot()
+    {
+        if (_preSellSearchSnapshot is not { } snapshot) return;
+        foreach (var row in SellGroupRows)
+        {
+            if (snapshot.TryGetValue(SellGroupKey(row), out var was) && row.Expanded != was)
+            {
+                SetSellGroupExpanded(row, was);
+            }
+        }
+    }
+
+    private string SearchItemToSell
+    {
+        get => _searchItemToSell;
+        set
+        {
+            if (_searchItemToSell == value) return;
+            var wasActive = !string.IsNullOrEmpty(_searchItemToSell);
+            _searchItemToSell = value ?? "";
+            if (!wasActive && !string.IsNullOrEmpty(_searchItemToSell))
+            {
+                _preSellSearchSnapshot = SellGroupRows.ToDictionary(SellGroupKey, gr => gr.Expanded);
+            }
+            ApplySellSearchExpansion();
+            _sellSearchPending = true;
+        }
+    }
+
+    private void ApplySellSearchExpansion()
+    {
+        var isActive = !string.IsNullOrEmpty(_searchItemToSell);
+        if (isActive && _itemsToSellDisplay.Count(FilterItemToSell) < SellSearchExpandAllThreshold)
+        {
+            _itemsToSellTableRef?.ExpandAllGroups();
+        }
+        else
+        {
+            _itemsToSellTableRef?.CollapseAllGroups();
+            RestoreSellGroupsToSnapshot();
+            if (!isActive) _preSellSearchSnapshot = null;
+        }
+    }
+
     private Recipe ExtractBestRecipe(ItemOrTag itemOrTag, List<UserElement> userElements)
     {
         if (itemOrTag.GetCurrentUserPrice(_selectedDataContext!)?.PrimaryUserElement is not null)
@@ -2763,7 +2768,8 @@
             return 250;
         }
 
-        var isHeavyContext = ShouldCollapseSellGroupsOnRefresh(_selectedDataContext);
+        var configuredProfessions = _selectedDataContext.UserSkills.Count(userSkill => userSkill.Skill is not null);
+        var isHeavyContext = configuredProfessions >= 5 && _selectedDataContext.UserRecipes.Count >= 30;
         return isHeavyContext ? 800 : 250;
     }
 

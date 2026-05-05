@@ -368,8 +368,8 @@
         },
         "CalculationMode": {
             "Label": "Mode de calcul",
-            "Tooltip": "Automatique par defaut. Utilisez Manuel pour un calcul explicite.",
-            "AutoSmart": "Auto intelligent",
+            "Tooltip": "Automatique par defaut. Utilisez Manuel pour un calcul explicite (pour des raisons de performance).",
+            "AutoSmart": "Auto",
             "Manual": "Manuel",
             "CalculateNow": "Calculer"
         },

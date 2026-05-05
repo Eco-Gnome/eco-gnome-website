@@ -379,8 +379,8 @@
         },
         "CalculationMode": {
             "Label": "Calculation mode",
-            "Tooltip": "Automatic by default. Use Manual if you want explicit calculation.",
-            "AutoSmart": "AutoSmart",
+            "Tooltip": "Automatic by default. Use Manual if you want explicit calculation (for performance reasons).",
+            "AutoSmart": "Auto",
             "Manual": "Manual",
             "CalculateNow": "Calculate"
         },
