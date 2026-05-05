@@ -1222,6 +1222,7 @@
         {
             _sellSearchPending = false;
             ApplySellSearchExpansion();
+            if (string.IsNullOrEmpty(_searchItemToSell)) _preSellSearchSnapshot = null;
             StateHasChanged();
         }
     }
@@ -2514,7 +2515,6 @@
         {
             _itemsToSellTableRef?.CollapseAllGroups();
             RestoreSellGroupsToSnapshot();
-            if (!isActive) _preSellSearchSnapshot = null;
         }
     }
 
