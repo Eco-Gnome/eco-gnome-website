@@ -13,6 +13,21 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.3",
+            "2026-05-05",
+            "Price Calculator UX Overhaul, Smart Rounding & Blueprint Awareness",
+            """
+            - Items-to-Sell Collapse: To improve performance on large datasets, skill groups beyond the third are now collapsed by default. Searching auto-expands all groups when results are narrow and restores the previous layout when the search is cleared.
+            - Recipe Families: Items belonging to the same recipe family (e.g. the wood variants of Composite Lumber) are now sorted side-by-side within their skill group, with a subtle visual grouping (no internal separator, tighter padding) to help scanning.
+            - Zebra Striping: Added alternating row backgrounds on Skills, Crafting Tables, Margins, Items-to-Buy and Items-to-Sell tables, with families counted as a single block so neighbouring families read as distinct units.
+            - Blueprint Icon: Blueprint recipes are now flagged with a small icon next to their name in items-to-sell rows, the recipe dialog title, and the "Produced by"/"Used in" lists.
+            - Hide Blueprints Option: New checkbox in the Options panel to filter blueprint recipes out of the items-to-sell display.
+            - Smart Margin Rounding: Each user margin can be configured with a Rounding mode (None / Round up / Round down / Marketing) that snaps margin prices to clean values for in-store display. Steps: $1-$2 → 0.25, $2-$5 → 0.5, $5-$100 → 1, $100-$1000 → 10, $1000+ → 100. Marketing applies the classic ".99" trick on the upper tiers.
+            - Calculate Optimisation: Reduced price calculation time on large data contexts.
+            - Stability: Fixed a deletion regression during data import, hardened talent yield handling, and hydrated server members on initial context load.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.2",
             "2026-04-25",
             "Economy Viewer, Player Drill-down & Reliability Improvements",
