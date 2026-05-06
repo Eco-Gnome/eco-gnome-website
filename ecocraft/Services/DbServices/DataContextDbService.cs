@@ -229,6 +229,14 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		entry.Property(x => x.Name).IsModified = true;
 	}
 
+	public void UpdateIsDefault(EcoCraftDbContext context, DataContext dataContext)
+	{
+		var stub = new DataContext { Id = dataContext.Id, IsDefault = dataContext.IsDefault };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.IsDefault).IsModified = true;
+	}
+
 	public void Destroy(EcoCraftDbContext context, DataContext dataContext)
 	{
 		var entity = new DataContext { Id = dataContext.Id };

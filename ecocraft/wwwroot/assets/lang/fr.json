@@ -311,7 +311,12 @@
     "DataContext": {
         "DefaultContext": "Contexte par défaut",
         "NewContext": "Nouveau contexte",
-        "DeletionConfirmation": "Êtes-vous sûr de vouloir supprimer le contexte \"{nom du contexte}\" ? Cette action ne peut pas être annulée."
+        "DeletionConfirmation": "Êtes-vous sûr de vouloir supprimer le contexte \"{nom du contexte}\" ? Cette action ne peut pas être annulée.",
+        "Rename": "Renommer",
+        "Duplicate": "Dupliquer",
+        "Delete": "Supprimer",
+        "SetAsDefault": "Définir par défaut",
+        "CopySuffix": " (copie)"
     },
     "DevFeature": {
         "1": "Cette fonctionnalité est en cours de développement ! Partagez vos",

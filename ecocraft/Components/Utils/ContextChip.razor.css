@@ -1,0 +1,9 @@
+.context-chip-menu ::deep .mud-icon-button {
+    padding: 4px;
+    margin-left: 4px;
+    color: inherit;
+}
+
+.context-chip-menu ::deep .mud-icon-button svg {
+    fill: currentColor;
+}

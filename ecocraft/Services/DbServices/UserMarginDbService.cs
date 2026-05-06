@@ -50,6 +50,7 @@ public class UserMarginDbService(IDbContextFactory<EcoCraftDbContext> factory) :
 			DataContextId = userMargin.DataContext.Id,
 			Name = userMargin.Name,
 			Margin = userMargin.Margin,
+			Rounding = userMargin.Rounding,
 		};
 	}
 

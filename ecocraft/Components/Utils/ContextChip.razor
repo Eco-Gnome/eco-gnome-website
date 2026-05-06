@@ -1,0 +1,165 @@
+@using ecocraft.Extensions
+@using ecocraft.Models
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudButton Color="@(IsSelected ? Color.Primary : Color.Default)"
+           Variant="Variant.Filled"
+           OnClick="HandleSelectClick">
+    @if (DataContext.IsDefault)
+    {
+        <MudIcon Icon="@MDIIcons.Filled.Star" Size="Size.Small" Class="mr-1" />
+    }
+    @if (_isRenaming)
+    {
+        <span @onclick:stopPropagation="true" @onclick:preventDefault="true">
+            <MudTextField T="string"
+                          @ref="_renameField"
+                          @bind-Value="_renameValue"
+                          Variant="Variant.Text"
+                          Margin="Margin.Dense"
+                          Style="min-width: 120px;"
+                          Immediate="true"
+                          OnKeyDown="OnRenameKeyDown"
+                          OnBlur="@(_ => OnRenameBlur())"/>
+        </span>
+        <span class="context-chip-menu" style="display: inline-flex; align-items: center;"
+              @onmousedown:preventDefault="true">
+            <MudIconButton Icon="@MDIIcons.Filled.Check"
+                           Size="Size.Small"
+                           Color="Color.Inherit"
+                           Class="pa-0 ml-1"
+                           OnClick="CommitRenameAsync" />
+        </span>
+    }
+    else
+    {
+        @DataContext.Name
+        <span class="context-chip-menu" style="display: inline-flex; align-items: center;">
+            <MudMenu Icon="@MDIIcons.Filled.DotsVertical"
+                     Size="Size.Small"
+                     IconColor="Color.Inherit"
+                     Dense="true"
+                     AnchorOrigin="Origin.BottomRight"
+                     TransformOrigin="Origin.TopRight">
+                @if (CanRename)
+                {
+                    <MudMenuItem Icon="@MDIIcons.Filled.Rename" OnClick="StartRename">
+                        @LocalizationService.GetTranslation("DataContext.Rename")
+                    </MudMenuItem>
+                }
+                @if (CanDuplicate)
+                {
+                    <MudMenuItem Icon="@MDIIcons.Filled.ContentDuplicate" OnClick="HandleDuplicate">
+                        @LocalizationService.GetTranslation("DataContext.Duplicate")
+                    </MudMenuItem>
+                }
+                @if (CanSetDefault)
+                {
+                    <MudMenuItem Icon="@MDIIcons.Filled.Star" OnClick="HandleSetDefault">
+                        @LocalizationService.GetTranslation("DataContext.SetAsDefault")
+                    </MudMenuItem>
+                }
+                @if (CanDelete)
+                {
+                    <MudMenuItem Icon="@MDIIcons.Filled.Close" OnClick="HandleDelete">
+                        @LocalizationService.GetTranslation("DataContext.Delete")
+                    </MudMenuItem>
+                }
+            </MudMenu>
+        </span>
+    }
+</MudButton>
+
+@code {
+    [Parameter, EditorRequired] public DataContext DataContext { get; set; } = null!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public bool CanRename { get; set; } = true;
+    [Parameter] public bool CanDuplicate { get; set; } = true;
+    [Parameter] public bool CanDelete { get; set; } = true;
+    [Parameter] public bool CanSetDefault { get; set; } = false;
+    [Parameter] public bool StartInRenameMode { get; set; } = false;
+
+    [Parameter] public EventCallback OnSelect { get; set; }
+    [Parameter] public EventCallback<string> OnRename { get; set; }
+    [Parameter] public EventCallback OnDuplicate { get; set; }
+    [Parameter] public EventCallback OnSetDefault { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private bool _isRenaming;
+    private string _renameValue = "";
+    private MudTextField<string>? _renameField;
+    private bool _autoFocusPending;
+    private bool _consumedStartInRenameMode;
+
+    protected override void OnParametersSet()
+    {
+        if (StartInRenameMode && !_consumedStartInRenameMode && !_isRenaming)
+        {
+            _consumedStartInRenameMode = true;
+            _renameValue = DataContext.Name;
+            _isRenaming = true;
+            _autoFocusPending = true;
+        }
+    }
+
+    private async Task HandleSelectClick()
+    {
+        if (_isRenaming) return;
+        await OnSelect.InvokeAsync();
+    }
+
+    private void StartRename()
+    {
+        _renameValue = DataContext.Name;
+        _isRenaming = true;
+        _autoFocusPending = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_autoFocusPending && _renameField is not null)
+        {
+            _autoFocusPending = false;
+            await _renameField.FocusAsync();
+            await _renameField.SelectAsync();
+        }
+    }
+
+    private async Task CommitRenameAsync()
+    {
+        if (!_isRenaming) return;
+
+        var trimmed = _renameValue?.Trim() ?? "";
+
+        _isRenaming = false;
+        _renameValue = "";
+
+        if (string.IsNullOrEmpty(trimmed) || trimmed == DataContext.Name) return;
+
+        await OnRename.InvokeAsync(trimmed);
+    }
+
+    private void OnRenameBlur()
+    {
+        if (!_isRenaming) return;
+        _isRenaming = false;
+        _renameValue = "";
+    }
+
+    private void CancelRename()
+    {
+        _isRenaming = false;
+        _renameValue = "";
+    }
+
+    private async Task OnRenameKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await CommitRenameAsync();
+        else if (e.Key == "Escape") CancelRename();
+    }
+
+    private async Task HandleDuplicate()  => await OnDuplicate.InvokeAsync();
+    private async Task HandleSetDefault() => await OnSetDefault.InvokeAsync();
+    private async Task HandleDelete()     => await OnDelete.InvokeAsync();
+}
