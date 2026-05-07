@@ -1,6 +1,9 @@
 ﻿using ecocraft.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Npgsql;
+using System.Data;
 
 class DataMigrator
 {
@@ -39,6 +42,23 @@ class DataMigrator
         // OPTIONNEL : désactiver la détection auto pour un peu de perf
         pg.ChangeTracker.AutoDetectChangesEnabled = false;
         pg.Database.SetCommandTimeout(0);
+
+        // Tuning session PG pour bulk-load (one-shot, on assume une migration en maintenance)
+        await pg.Database.ExecuteSqlRawAsync(@"
+            SET synchronous_commit = OFF;
+            SET work_mem = '256MB';
+            SET maintenance_work_mem = '1GB';
+            SET temp_buffers = '256MB';
+        ");
+
+        // Désactive les triggers FK pour la session => pas de vérif par ligne pendant les COPY.
+        // Safe ici car on copie en ordre topologique (parents avant enfants).
+        Console.WriteLine("Désactivation des triggers FK pour la session...");
+        await pg.Database.ExecuteSqlRawAsync("SET session_replication_role = 'replica';");
+
+        // Capture + drop des index secondaires (on garde les PK et les index qui backent une contrainte)
+        Console.WriteLine("Drop des index secondaires (recréés en bulk après les COPYs)...");
+        var droppedIndexes = await DropSecondaryIndexes(pg);
 
         // Ordre important pour respecter les FK
         await CopyTable<Server>(sqlite, pg);             // Parent de quasi tout
@@ -79,7 +99,104 @@ class DataMigrator
 
         await CopyTable<ModUploadHistory>(sqlite, pg);   // FK User, Server
 
+        // Nettoyage des doublons qui violeraient les contraintes uniques modernes
+        // (la prod SQLite peut contenir des données qui n'auraient pas dû passer après les nouvelles migrations).
+        Console.WriteLine("Nettoyage des doublons sur les contraintes uniques...");
+        await DeduplicateData(pg);
+
+        // Recrée les index en bulk (sort + build B-tree) - bien plus rapide que les updates par ligne
+        Console.WriteLine("Recréation des index secondaires en bulk...");
+        await RecreateIndexes(pg, droppedIndexes);
+
+        // Réactive les triggers FK
+        Console.WriteLine("Réactivation des triggers FK...");
+        await pg.Database.ExecuteSqlRawAsync("SET session_replication_role = 'origin';");
+
+        // Met à jour les stats du planner sur la nouvelle data
+        Console.WriteLine("ANALYZE de la base...");
+        await pg.Database.ExecuteSqlRawAsync("ANALYZE;");
+
         Console.WriteLine("Migration terminée. Tu peux respirer.");
+    }
+
+    private static async Task DeduplicateData(EcoCraftDbContext pg)
+    {
+        // UserServer : la migration AddUniqueIndexUserServer (avril 2026) a ajouté un unique
+        // sur (UserId, ServerId) côté PG, mais les anciennes données SQLite peuvent encore
+        // contenir des doublons. On garde le UserServer avec l'Id minimum et on rebranche
+        // les DataContext qui pointaient vers les doublons.
+        var rerouted = await pg.Database.ExecuteSqlRawAsync(@"
+            WITH dups AS (
+                SELECT
+                    ""Id"",
+                    FIRST_VALUE(""Id"") OVER (PARTITION BY ""UserId"", ""ServerId"" ORDER BY ""Id"") AS keep_id,
+                    ROW_NUMBER() OVER (PARTITION BY ""UserId"", ""ServerId"" ORDER BY ""Id"") AS rn
+                FROM ""UserServer""
+            )
+            UPDATE ""DataContext"" dc
+            SET ""UserServerId"" = d.keep_id
+            FROM dups d
+            WHERE dc.""UserServerId"" = d.""Id"" AND d.rn > 1;
+        ");
+        if (rerouted > 0)
+            Console.WriteLine($"  {rerouted} DataContext re-routés vers le UserServer canonique.");
+
+        var deleted = await pg.Database.ExecuteSqlRawAsync(@"
+            DELETE FROM ""UserServer""
+            WHERE ""Id"" IN (
+                SELECT ""Id"" FROM (
+                    SELECT ""Id"", ROW_NUMBER() OVER (PARTITION BY ""UserId"", ""ServerId"" ORDER BY ""Id"") AS rn
+                    FROM ""UserServer""
+                ) t WHERE rn > 1
+            );
+        ");
+        if (deleted > 0)
+            Console.WriteLine($"  {deleted} UserServer doublons supprimés.");
+        else
+            Console.WriteLine("  Pas de doublon UserServer.");
+    }
+
+    private static async Task<List<string>> DropSecondaryIndexes(EcoCraftDbContext pg)
+    {
+        // Capture le DDL de tous les index non-PK et qui ne backent pas une contrainte (unique, exclusion).
+        // Ceux-ci seront supprimés pendant le bulk-load et recréés à la fin.
+        var ddls = await pg.Database.SqlQueryRaw<string>(@"
+            SELECT pg_get_indexdef(i.indexrelid) AS ""Value""
+            FROM pg_index i
+            JOIN pg_class c ON c.oid = i.indexrelid
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'public'
+              AND NOT i.indisprimary
+              AND NOT EXISTS (
+                  SELECT 1 FROM pg_constraint con WHERE con.conindid = i.indexrelid
+              )
+        ").ToListAsync();
+
+        foreach (var ddl in ddls)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                ddl,
+                @"INDEX\s+""?([^""\s]+)""?\s+ON",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!match.Success) continue;
+
+            var indexName = match.Groups[1].Value;
+            await pg.Database.ExecuteSqlRawAsync($"DROP INDEX IF EXISTS \"{indexName}\"");
+            Console.WriteLine($"  - drop index {indexName}");
+        }
+
+        Console.WriteLine($"  {ddls.Count} index secondaires capturés et droppés.");
+        return ddls;
+    }
+
+    private static async Task RecreateIndexes(EcoCraftDbContext pg, List<string> ddls)
+    {
+        foreach (var ddl in ddls)
+        {
+            await pg.Database.ExecuteSqlRawAsync(ddl);
+            Console.WriteLine($"  + {ddl.Substring(0, Math.Min(80, ddl.Length))}...");
+        }
+        Console.WriteLine($"  {ddls.Count} index recréés.");
     }
 
     private static async Task CopyTable<T>(EcoCraftDbContext sqlite, EcoCraftDbContext pg)
@@ -101,13 +218,8 @@ class DataMigrator
             return;
         }
 
-        Console.WriteLine($"[COPY] {typeof(T).Name} : {total} lignes...");
+        Console.WriteLine($"[COPY] {typeof(T).Name} : {total} lignes via Npgsql binary COPY...");
 
-        const int batchSize = 5000;
-        var batch = new List<T>(batchSize);
-        var copied = 0;
-
-        // Optionnel : si la classe a une propriété Id, on ordonne dessus
         var idProp = typeof(T).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
         IQueryable<T> query = srcSet;
         if (idProp != null)
@@ -115,34 +227,106 @@ class DataMigrator
             query = query.OrderBy(e => EF.Property<object>(e, "Id"));
         }
 
-        await foreach (var entity in query.AsAsyncEnumerable())
-        {
-            FixDateTimes(entity);
-            batch.Add(entity);
-
-            if (batch.Count >= batchSize)
-            {
-                await dstSet.AddRangeAsync(batch);
-                await pg.SaveChangesAsync();
-                pg.ChangeTracker.Clear();
-
-                copied += batch.Count;
-                Console.WriteLine($"    -> {copied}/{total}");
-                batch.Clear();
-            }
-        }
-
-        if (batch.Count > 0)
-        {
-            await dstSet.AddRangeAsync(batch);
-            await pg.SaveChangesAsync();
-            pg.ChangeTracker.Clear();
-
-            copied += batch.Count;
-            Console.WriteLine($"    -> {copied}/{total}");
-        }
+        var copied = await BulkCopyAsync(pg, query.AsAsyncEnumerable(), total);
 
         Console.WriteLine($"[DONE] {typeof(T).Name} : {copied} lignes copiées.");
+    }
+
+    private static async Task<long> BulkCopyAsync<T>(EcoCraftDbContext pg, IAsyncEnumerable<T> source, long total)
+        where T : class
+    {
+        var entityType = pg.Model.FindEntityType(typeof(T))
+            ?? throw new InvalidOperationException($"Entité EF introuvable pour {typeof(T).Name}");
+
+        var tableName = entityType.GetTableName()!;
+        var schema = entityType.GetSchema();
+        var qualifiedTable = string.IsNullOrEmpty(schema)
+            ? $"\"{tableName}\""
+            : $"\"{schema}\".\"{tableName}\"";
+
+        // On ne prend que les propriétés mappées en colonne réelle (pas les owned/shadow particuliers)
+        var properties = entityType.GetProperties()
+            .Where(p => !string.IsNullOrEmpty(p.GetColumnName()))
+            .ToList();
+
+        var columnList = string.Join(",", properties.Select(p => $"\"{p.GetColumnName()}\""));
+        var copyCommand = $"COPY {qualifiedTable} ({columnList}) FROM STDIN (FORMAT BINARY)";
+
+        // Pré-construit un writer par colonne pour éviter le switch dans la boucle
+        var writers = properties.Select(BuildColumnWriter).ToArray();
+
+        var pgConn = (NpgsqlConnection)pg.Database.GetDbConnection();
+        if (pgConn.State != ConnectionState.Open)
+            await pgConn.OpenAsync();
+
+        long copied = 0;
+        await using (var writer = await pgConn.BeginBinaryImportAsync(copyCommand))
+        {
+            // Le Complete final peut prendre plusieurs minutes sur 1M+ lignes
+            writer.Timeout = TimeSpan.FromHours(2);
+            await foreach (var entity in source)
+            {
+                FixDateTimes(entity);
+                await writer.StartRowAsync();
+                for (var i = 0; i < properties.Count; i++)
+                {
+                    var value = properties[i].PropertyInfo?.GetValue(entity)
+                                ?? properties[i].FieldInfo?.GetValue(entity);
+                    await writers[i](writer, value);
+                }
+                copied++;
+                if (copied % 50000 == 0)
+                    Console.WriteLine($"    -> {copied}/{total}");
+            }
+            if (total >= 100000)
+                Console.WriteLine($"    -> {copied}/{total} (flush + commit PG en cours, ça peut prendre quelques minutes sur les grosses tables)...");
+            await writer.CompleteAsync();
+        }
+
+        return copied;
+    }
+
+    private static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(IEnumerable<T> source)
+    {
+        foreach (var item in source)
+        {
+            yield return item;
+        }
+        await Task.CompletedTask;
+    }
+
+    private static Func<NpgsqlBinaryImporter, object?, ValueTask> BuildColumnWriter(IProperty prop)
+    {
+        var clrType = Nullable.GetUnderlyingType(prop.ClrType) ?? prop.ClrType;
+
+        if (clrType.IsEnum)
+        {
+            return async (w, v) =>
+            {
+                if (v is null) await w.WriteNullAsync();
+                else await w.WriteAsync(Convert.ToInt32(v));
+            };
+        }
+
+        if (clrType == typeof(Guid)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((Guid)v); };
+        if (clrType == typeof(string)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((string)v); };
+        if (clrType == typeof(bool)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((bool)v); };
+        if (clrType == typeof(int)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((int)v); };
+        if (clrType == typeof(long)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((long)v); };
+        if (clrType == typeof(short)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((short)v); };
+        if (clrType == typeof(byte)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((byte)v); };
+        if (clrType == typeof(decimal)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((decimal)v); };
+        if (clrType == typeof(double)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((double)v); };
+        if (clrType == typeof(float)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((float)v); };
+        if (clrType == typeof(DateTime)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((DateTime)v); };
+        if (clrType == typeof(DateTimeOffset)) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((DateTimeOffset)v); };
+        if (clrType == typeof(string[])) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((string[])v); };
+        if (clrType == typeof(decimal[])) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((decimal[])v); };
+        if (clrType == typeof(int[])) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((int[])v); };
+        if (clrType == typeof(byte[])) return async (w, v) => { if (v is null) await w.WriteNullAsync(); else await w.WriteAsync((byte[])v); };
+
+        throw new NotSupportedException(
+            $"Type CLR non géré pour COPY binaire : {clrType.FullName} (colonne {prop.DeclaringType.ClrType.Name}.{prop.Name})");
     }
 
     private static void FixDateTimes(object entity)
@@ -234,14 +418,7 @@ class DataMigrator
                 throw new InvalidOperationException("Impossible de résoudre les dépendances ParentUserRecipeId.");
             }
 
-            foreach (var entity in batch)
-            {
-                FixDateTimes(entity);
-            }
-
-            await dstSet.AddRangeAsync(batch);
-            await pg.SaveChangesAsync();
-            pg.ChangeTracker.Clear();
+            await BulkCopyAsync(pg, ToAsyncEnumerable(batch), batch.Count);
 
             foreach (var ur in batch)
             {
@@ -303,14 +480,7 @@ class DataMigrator
                 throw new InvalidOperationException("Impossible de résoudre les dépendances PrimaryUserPriceId.");
             }
 
-            foreach (var entity in batch)
-            {
-                FixDateTimes(entity);
-            }
-
-            await dstSet.AddRangeAsync(batch);
-            await pg.SaveChangesAsync();
-            pg.ChangeTracker.Clear();
+            await BulkCopyAsync(pg, ToAsyncEnumerable(batch), batch.Count);
 
             foreach (var up in batch)
             {
@@ -334,98 +504,176 @@ class DataMigrator
             return;
         }
 
-        // Lire les colonnes de la table
+        // Lire les colonnes de la table SQLite
         var columns = new List<string>();
+        await sqlite.Database.OpenConnectionAsync();
         using (var cmd = sqlite.Database.GetDbConnection().CreateCommand())
         {
-            await sqlite.Database.OpenConnectionAsync();
             cmd.CommandText = $"PRAGMA table_info(\"{tableName}\")";
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                columns.Add(reader.GetString(1)); // colonne "name"
+                columns.Add(reader.GetString(1));
             }
         }
 
         var columnList = string.Join(", ", columns.Select(c => $"\"{c}\""));
+        var copyCommand = $"COPY \"{tableName}\" ({columnList}) FROM STDIN (FORMAT BINARY)";
 
-        // Lire toutes les lignes depuis SQLite
-        var rows = new List<object[]>();
-        using (var cmd = sqlite.Database.GetDbConnection().CreateCommand())
+        Console.WriteLine($"[COPY] {tableName} : {countResult} lignes via Npgsql binary COPY...");
+
+        var pgConn = (NpgsqlConnection)pg.Database.GetDbConnection();
+        if (pgConn.State != ConnectionState.Open)
+            await pgConn.OpenAsync();
+
+        long copied = 0;
+        await using (var writer = await pgConn.BeginBinaryImportAsync(copyCommand))
         {
+            writer.Timeout = TimeSpan.FromHours(2);
+
+            using var cmd = sqlite.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = $"SELECT {columnList} FROM \"{tableName}\"";
             using var reader = await cmd.ExecuteReaderAsync();
+
             while (await reader.ReadAsync())
             {
-                var values = new object[reader.FieldCount];
-                reader.GetValues(values);
-                // SQLite stocke les GUIDs en texte, PostgreSQL attend des uuid
-                for (var i = 0; i < values.Length; i++)
+                await writer.StartRowAsync();
+                for (var i = 0; i < columns.Count; i++)
                 {
-                    if (values[i] is string s && Guid.TryParse(s, out var guid))
-                        values[i] = guid;
+                    if (await reader.IsDBNullAsync(i))
+                    {
+                        await writer.WriteNullAsync();
+                        continue;
+                    }
+                    var v = reader.GetValue(i);
+                    // SQLite stocke les Guid comme TEXT - on parse vers Guid pour uuid PG
+                    if (v is string s && Guid.TryParse(s, out var g))
+                        await writer.WriteAsync(g);
+                    else if (v is long l)
+                        await writer.WriteAsync(l);
+                    else if (v is int ii)
+                        await writer.WriteAsync(ii);
+                    else if (v is bool b)
+                        await writer.WriteAsync(b);
+                    else if (v is double d)
+                        await writer.WriteAsync(d);
+                    else if (v is decimal dec)
+                        await writer.WriteAsync(dec);
+                    else if (v is string str)
+                        await writer.WriteAsync(str);
+                    else
+                        throw new NotSupportedException(
+                            $"Type SQLite non géré pour {tableName}.{columns[i]}: {v.GetType().FullName}");
                 }
-                rows.Add(values);
-            }
-        }
-
-        Console.WriteLine($"[COPY] {tableName} : {rows.Count} lignes...");
-
-        // Insérer par batch dans PostgreSQL
-        const int batchSize = 5000;
-        var inserted = 0;
-
-        foreach (var batch in rows.Chunk(batchSize))
-        {
-            var allParams = new List<object>();
-            var valuesClauses = new List<string>();
-
-            for (var r = 0; r < batch.Length; r++)
-            {
-                var row = batch[r];
-                var offset = r * columns.Count;
-                var paramList = string.Join(", ", Enumerable.Range(0, columns.Count).Select(i => $"{{{offset + i}}}"));
-                valuesClauses.Add($"({paramList})");
-                allParams.AddRange(row);
+                copied++;
+                if (copied % 50000 == 0)
+                    Console.WriteLine($"    -> {copied}/{countResult}");
             }
 
-            var sql = $"INSERT INTO \"{tableName}\" ({columnList}) VALUES {string.Join(", ", valuesClauses)}";
-            await pg.Database.ExecuteSqlRawAsync(sql, allParams.ToArray());
-
-            inserted += batch.Length;
-            Console.WriteLine($"    -> {inserted}/{rows.Count}");
+            await writer.CompleteAsync();
         }
 
-        Console.WriteLine($"[DONE] {tableName} : {inserted} lignes copiées.");
+        Console.WriteLine($"[DONE] {tableName} : {copied} lignes copiées.");
     }
 
     private static async Task PatchSqliteSchema(EcoCraftDbContext sqlite)
     {
-        var alterCommands = new (string table, string column, string type, string? defaultValue)[]
-        {
-            ("Server", "CalorieCostDefault", "REAL", null),
-            ("Server", "CalorieCostMax", "REAL", null),
-            ("Server", "CalorieCostMin", "REAL", null),
-            ("Server", "IsCalorieCostLocked", "INTEGER", "0"),
-            ("Server", "LockedCalorieCost", "REAL", null),
-            ("Talent", "Cap", "REAL", null),
-        };
+        await sqlite.Database.OpenConnectionAsync();
 
-        foreach (var (table, column, type, defaultValue) in alterCommands)
+        foreach (var entityType in sqlite.Model.GetEntityTypes())
         {
-            try
+            var tableName = entityType.GetTableName();
+            if (string.IsNullOrEmpty(tableName))
+                continue;
+
+            // Vérifier que la table existe en SQLite (sinon on saute - elle sera créée vide côté PG)
+            if (!await TableExists(sqlite, tableName))
             {
-                var defaultClause = defaultValue != null ? $" DEFAULT {defaultValue}" : "";
-                await sqlite.Database.ExecuteSqlRawAsync(
-                    $"ALTER TABLE \"{table}\" ADD COLUMN \"{column}\" {type}{defaultClause}");
-                Console.WriteLine($"  + {table}.{column} ajouté");
+                Console.WriteLine($"  ! table {tableName} absente de SQLite (normal si nouvelle table)");
+                continue;
             }
-            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 1)
+
+            var existingColumns = await GetSqliteColumns(sqlite, tableName);
+
+            foreach (var prop in entityType.GetProperties())
             {
-                // La colonne existe deja, on ignore
-                Console.WriteLine($"  ~ {table}.{column} existe déjà");
+                var columnName = prop.GetColumnName();
+                if (string.IsNullOrEmpty(columnName) || existingColumns.Contains(columnName))
+                    continue;
+
+                var sqliteType = MapClrTypeToSqlite(prop.ClrType);
+                var (defaultClause, notNull) = BuildColumnDefault(prop);
+
+                try
+                {
+                    await sqlite.Database.ExecuteSqlRawAsync(
+                        $"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqliteType}{notNull}{defaultClause}");
+                    Console.WriteLine($"  + {tableName}.{columnName} ({sqliteType}) ajouté");
+                }
+                catch (Microsoft.Data.Sqlite.SqliteException ex)
+                {
+                    Console.WriteLine($"  ! {tableName}.{columnName} : {ex.Message}");
+                }
             }
         }
+    }
+
+    private static async Task<bool> TableExists(EcoCraftDbContext sqlite, string tableName)
+    {
+        using var cmd = sqlite.Database.GetDbConnection().CreateCommand();
+        cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=$name";
+        var p = cmd.CreateParameter();
+        p.ParameterName = "$name";
+        p.Value = tableName;
+        cmd.Parameters.Add(p);
+        var result = await cmd.ExecuteScalarAsync();
+        return result != null;
+    }
+
+    private static async Task<HashSet<string>> GetSqliteColumns(EcoCraftDbContext sqlite, string tableName)
+    {
+        var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using var cmd = sqlite.Database.GetDbConnection().CreateCommand();
+        cmd.CommandText = $"PRAGMA table_info(\"{tableName}\")";
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            columns.Add(reader.GetString(1));
+        }
+        return columns;
+    }
+
+    private static string MapClrTypeToSqlite(Type clrType)
+    {
+        var t = Nullable.GetUnderlyingType(clrType) ?? clrType;
+        if (t.IsEnum) return "INTEGER";
+        if (t == typeof(bool) || t == typeof(int) || t == typeof(long) || t == typeof(short) || t == typeof(byte)) return "INTEGER";
+        if (t == typeof(float) || t == typeof(double) || t == typeof(decimal)) return "REAL";
+        if (t == typeof(byte[])) return "BLOB";
+        // string, Guid, DateTime, DateTimeOffset, TimeSpan, arrays JSON, etc. -> TEXT
+        return "TEXT";
+    }
+
+    private static (string defaultClause, string notNull) BuildColumnDefault(IProperty prop)
+    {
+        // SQLite ALTER ADD COLUMN exige une DEFAULT pour les colonnes NOT NULL.
+        // Le modèle EF actuel impose la nullabilité ; on respecte ça mais on tolère
+        // l'ajout même quand la colonne est déclarée NOT NULL côté EF, en fournissant
+        // un DEFAULT compatible avec le type.
+        if (prop.IsNullable)
+            return ("", "");
+
+        var t = Nullable.GetUnderlyingType(prop.ClrType) ?? prop.ClrType;
+        string defaultLiteral;
+        if (t.IsEnum) defaultLiteral = "0";
+        else if (t == typeof(bool)) defaultLiteral = "0";
+        else if (t == typeof(int) || t == typeof(long) || t == typeof(short) || t == typeof(byte)) defaultLiteral = "0";
+        else if (t == typeof(float) || t == typeof(double) || t == typeof(decimal)) defaultLiteral = "0";
+        else if (t == typeof(Guid)) defaultLiteral = "'00000000-0000-0000-0000-000000000000'";
+        else if (t == typeof(DateTime) || t == typeof(DateTimeOffset)) defaultLiteral = "'1970-01-01T00:00:00Z'";
+        else defaultLiteral = "''";
+
+        return ($" DEFAULT {defaultLiteral}", " NOT NULL");
     }
 
 }
