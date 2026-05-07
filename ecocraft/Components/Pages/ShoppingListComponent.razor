@@ -31,15 +31,18 @@
                 <MudStack Row Spacing="3">
                     @foreach (var shoppingList in ContextService.CurrentUserServer!.DataContexts.Where(d => d.IsShoppingList))
                     {
-                        <MudButton Color="@(_selectedShoppingList?.Id == shoppingList.Id ? Color.Primary : Color.Default)"
-                                   Variant="Variant.Filled"
-                                   OnClick="@(() => SelectShoppingList(shoppingList))">
-                            @shoppingList.Name
-                            <MudIconButton Icon="@MDIIcons.Filled.Close"
-                                           Size="Size.Medium"
-                                           Class="pa-0 ml-2"
-                                           OnClick="@(() => DeleteShoppingList(shoppingList))"/>
-                        </MudButton>
+                        <ContextChip @key="shoppingList.Id"
+                                     DataContext="shoppingList"
+                                     IsSelected="_selectedShoppingList?.Id == shoppingList.Id"
+                                     CanDelete="true"
+                                     CanRename="true"
+                                     CanDuplicate="true"
+                                     CanSetDefault="false"
+                                     StartInRenameMode="@(_pendingRenameShoppingListId == shoppingList.Id)"
+                                     OnSelect="@(() => SelectShoppingList(shoppingList))"
+                                     OnRename="@(newName => RenameShoppingList(shoppingList, newName))"
+                                     OnDuplicate="@(() => DuplicateShoppingList(shoppingList))"
+                                     OnDelete="@(() => DeleteShoppingList(shoppingList))" />
                     }
                     <MudButton Color="Color.Tertiary"
                                EndIcon="@MDIIcons.Filled.Plus"
@@ -211,13 +214,6 @@
                                 </MudExpansionPanel>
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
                                     <MudStack Class="pa-3">
-                                        <MudTextField T="string"
-                                                      Value="_selectedShoppingList.Name"
-                                                      Typo="Typo.body2"
-                                                      Immediate
-                                                      Label="@LocalizationService.GetTranslation("ShoppingList.NameLabel")"
-                                                      Style="border-bottom-color: gray"
-                                                      ValueChanged="@(v => UpdateShoppingListName(v))"/>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutoExpandTooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.AutoExpandLabel")</MudText>
@@ -1411,16 +1407,27 @@
         StateHasChanged();
     }
 
-    private async Task UpdateShoppingListName(string name)
+    private Guid? _pendingRenameShoppingListId;
+
+    private async Task RenameShoppingList(DataContext shoppingList, string newName)
     {
-        _selectedShoppingList!.Name = name;
+        shoppingList.Name = newName;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            DataContextDbService.UpdateName(context, _selectedShoppingList);
+            DataContextDbService.UpdateName(context, shoppingList);
             return Task.CompletedTask;
         });
 
+        _pendingRenameShoppingListId = null;
+        StateHasChanged();
+    }
+
+    private async Task DuplicateShoppingList(DataContext source)
+    {
+        var copy = await ContextService.DuplicateDataContext(source);
+        _pendingRenameShoppingListId = copy.Id;
+        await SelectShoppingList(copy);
         StateHasChanged();
     }
 

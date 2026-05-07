@@ -12,6 +12,12 @@ public class ContextService(
     DataContextDbService dataContextDbService,
     UserMarginDbService userMarginDbService,
     UserSettingDbService userSettingDbService,
+    UserSkillDbService userSkillDbService,
+    UserTalentDbService userTalentDbService,
+    UserCraftingTableDbService userCraftingTableDbService,
+    UserPriceDbService userPriceDbService,
+    UserRecipeDbService userRecipeDbService,
+    UserElementDbService userElementDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
     UserServerDbService userServerDbService)
@@ -267,6 +273,226 @@ public class ContextService(
         userServer.DataContexts.Add(dataContext);
 
         return dataContext;
+    }
+
+    public async Task<DataContext> DuplicateDataContext(DataContext source)
+    {
+        if (CurrentServerData is null)
+        {
+            throw new InvalidOperationException("CurrentServerData is not initialized.");
+        }
+
+        var src = await dataContextDbService.GetDataContextWithData(source.Id, CurrentServerData);
+
+        var newCtx = new DataContext
+        {
+            Id = Guid.NewGuid(),
+            UserServer = source.UserServer,
+            UserServerId = source.UserServerId,
+            Name = src.Name + localizationService.GetTranslation("DataContext.CopySuffix"),
+            IsDefault = false,
+            IsShoppingList = src.IsShoppingList,
+        };
+
+        var newSkills = new Dictionary<Guid, UserSkill>();
+        var newTalents = new Dictionary<Guid, UserTalent>();
+        var newTables = new Dictionary<Guid, UserCraftingTable>();
+        var newSettings = new Dictionary<Guid, UserSetting>();
+        var newMargins = new Dictionary<Guid, UserMargin>();
+        var newRecipes = new Dictionary<Guid, UserRecipe>();
+        var newElements = new Dictionary<Guid, UserElement>();
+        var newPrices = new Dictionary<Guid, UserPrice>();
+
+        foreach (var us in src.UserSkills)
+        {
+            newSkills[us.Id] = new UserSkill
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                Skill = us.Skill,
+                Level = us.Level,
+            };
+        }
+
+        foreach (var ut in src.UserTalents)
+        {
+            newTalents[ut.Id] = new UserTalent
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                Talent = ut.Talent,
+                Level = ut.Level,
+            };
+        }
+
+        foreach (var uct in src.UserCraftingTables)
+        {
+            newTables[uct.Id] = new UserCraftingTable
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                CraftingTable = uct.CraftingTable,
+                PluginModule = uct.PluginModule,
+                CraftMinuteFee = uct.CraftMinuteFee,
+                SkilledPluginModules = uct.SkilledPluginModules.ToList(),
+            };
+        }
+
+        foreach (var us in src.UserSettings)
+        {
+            newSettings[us.Id] = new UserSetting
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                MarginType = us.MarginType,
+                CalorieCost = us.CalorieCost,
+                DisplayNonSkilledRecipes = us.DisplayNonSkilledRecipes,
+                OnlyLevelAccessibleRecipes = us.OnlyLevelAccessibleRecipes,
+                ApplyMarginBetweenSkills = us.ApplyMarginBetweenSkills,
+            };
+        }
+
+        foreach (var um in src.UserMargins)
+        {
+            newMargins[um.Id] = new UserMargin
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                Name = um.Name,
+                Margin = um.Margin,
+                Rounding = um.Rounding,
+            };
+        }
+
+        foreach (var ur in src.UserRecipes)
+        {
+            newRecipes[ur.Id] = new UserRecipe
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                Recipe = ur.Recipe,
+                RoundFactor = ur.RoundFactor,
+                LockShare = ur.LockShare,
+            };
+        }
+
+        foreach (var ue in src.UserElements)
+        {
+            if (!newRecipes.TryGetValue(ue.UserRecipeId, out var newRecipe))
+            {
+                continue;
+            }
+
+            newElements[ue.Id] = new UserElement
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                Element = ue.Element,
+                Price = ue.Price,
+                IsMarginPrice = ue.IsMarginPrice,
+                Share = ue.Share,
+                IsReintegrated = ue.IsReintegrated,
+                UserRecipe = newRecipe,
+            };
+        }
+
+        foreach (var up in src.UserPrices)
+        {
+            newPrices[up.Id] = new UserPrice
+            {
+                Id = Guid.NewGuid(),
+                DataContext = newCtx,
+                ItemOrTag = up.ItemOrTag,
+                Price = up.Price,
+                MarginPrice = up.MarginPrice,
+                OverrideIsBought = up.OverrideIsBought,
+            };
+        }
+
+        // Rewire intra-context FKs once all dictionaries are populated.
+        foreach (var ur in src.UserRecipes)
+        {
+            if (ur.ParentUserRecipeId is Guid parentId
+                && newRecipes.TryGetValue(parentId, out var newParent)
+                && newRecipes.TryGetValue(ur.Id, out var newUr))
+            {
+                newUr.ParentUserRecipe = newParent;
+                newUr.ParentUserRecipeId = newParent.Id;
+            }
+        }
+
+        foreach (var up in src.UserPrices)
+        {
+            if (!newPrices.TryGetValue(up.Id, out var newUp)) continue;
+
+            if (up.PrimaryUserElementId is Guid peId
+                && newElements.TryGetValue(peId, out var newPe))
+            {
+                newUp.PrimaryUserElement = newPe;
+                newUp.PrimaryUserElementId = newPe.Id;
+            }
+            if (up.PrimaryUserPriceId is Guid ppId
+                && newPrices.TryGetValue(ppId, out var newPp))
+            {
+                newUp.PrimaryUserPrice = newPp;
+                newUp.PrimaryUserPriceId = newPp.Id;
+            }
+            if (up.UserMarginId is Guid umId
+                && newMargins.TryGetValue(umId, out var newUm))
+            {
+                newUp.UserMargin = newUm;
+                newUp.UserMarginId = newUm.Id;
+            }
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            dataContextDbService.Create(context, newCtx);
+            foreach (var s in newSkills.Values)    userSkillDbService.Create(context, s);
+            foreach (var t in newTalents.Values)   userTalentDbService.Create(context, t);
+            foreach (var ct in newTables.Values)   userCraftingTableDbService.Create(context, ct);
+            foreach (var st in newSettings.Values) userSettingDbService.Create(context, st);
+            foreach (var m in newMargins.Values)   userMarginDbService.Create(context, m);
+            foreach (var r in newRecipes.Values)   userRecipeDbService.Create(context, r);
+            foreach (var e in newElements.Values)  userElementDbService.Create(context, e);
+            foreach (var p in newPrices.Values)    userPriceDbService.Create(context, p);
+            return Task.CompletedTask;
+        });
+
+        var tablesNeedingPluginModules = newTables.Values
+            .Where(t => t.SkilledPluginModules.Count > 0)
+            .ToList();
+        if (tablesNeedingPluginModules.Count > 0)
+        {
+            await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+            {
+                foreach (var ct in tablesNeedingPluginModules)
+                {
+                    await userCraftingTableDbService.UpdateAllAsync(context, ct);
+                }
+            });
+        }
+
+        CurrentUserServer!.DataContexts.Add(newCtx);
+        return newCtx;
+    }
+
+    public async Task SetDefaultDataContext(DataContext target)
+    {
+        if (target.IsDefault || target.IsShoppingList) return;
+
+        var previousDefault = CurrentUserServer!.DataContexts.FirstOrDefault(d => d.IsDefault && d.Id != target.Id);
+
+        target.IsDefault = true;
+        if (previousDefault is not null) previousDefault.IsDefault = false;
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            dataContextDbService.UpdateIsDefault(context, target);
+            if (previousDefault is not null)
+                dataContextDbService.UpdateIsDefault(context, previousDefault);
+            return Task.CompletedTask;
+        });
     }
 
 	public async Task LeaveServer(UserServer userServerToLeave)

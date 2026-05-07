@@ -319,7 +319,12 @@
     "DataContext": {
         "DefaultContext": "Default Context",
         "NewContext": "New Context",
-        "DeletionConfirmation": "Are you sure you want to delete the context “{contextName}”? This action cannot be undone."
+        "DeletionConfirmation": "Are you sure you want to delete the context “{contextName}”? This action cannot be undone.",
+        "Rename": "Rename",
+        "Duplicate": "Duplicate",
+        "Delete": "Delete",
+        "SetAsDefault": "Set as default",
+        "CopySuffix": " (copy)"
     },
     "DevFeature": {
         "1": "This feature is in development ! Give us",

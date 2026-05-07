@@ -36,19 +36,19 @@
             <MudStack Row Spacing="3">
                 @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
                 {
-                    <MudButton Color="@(_selectedDataContext?.Id == dataContext.Id ? Color.Primary : Color.Default)"
-                               Variant="Variant.Filled"
-                               OnClick="@(() => SelectDataContext(dataContext))">
-                        @dataContext.Name
-                        @if (!dataContext.IsDefault)
-                        {
-                            <MudIconButton Icon="@MDIIcons.Filled.Close"
-                                           Size="Size.Medium"
-                                           Class="pa-0 ml-2"
-                                           OnClick="@(() => DeleteDataContext(dataContext))"/>
-                        }
-
-                    </MudButton>
+                    <ContextChip @key="dataContext.Id"
+                                 DataContext="dataContext"
+                                 IsSelected="_selectedDataContext?.Id == dataContext.Id"
+                                 CanDelete="!dataContext.IsDefault"
+                                 CanRename="true"
+                                 CanDuplicate="true"
+                                 CanSetDefault="!dataContext.IsDefault"
+                                 StartInRenameMode="@(_pendingRenameContextId == dataContext.Id)"
+                                 OnSelect="@(() => SelectDataContext(dataContext))"
+                                 OnRename="@(newName => RenameDataContext(dataContext, newName))"
+                                 OnDuplicate="@(() => DuplicateDataContext(dataContext))"
+                                 OnSetDefault="@(() => SetDefaultDataContextHandler(dataContext))"
+                                 OnDelete="@(() => DeleteDataContext(dataContext))" />
                 }
                 <MudButton Color="Color.Tertiary"
                            EndIcon="@MDIIcons.Filled.Plus"
@@ -425,12 +425,6 @@
 
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
                                     <MudStack Spacing="1" Class="pa-2">
-                                        <MudTextField T="string"
-                                                      Label="@LocalizationService.GetTranslation("PriceCalculator.ContextName")"
-                                                      Variant="Variant.Filled"
-                                                      Immediate
-                                                      Value="@_selectedDataContext!.Name"
-                                                      ValueChanged="@(v => UpdateDataContextValues(v))"/>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.Tooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.NonSkilled.NonSkilled")</MudText>
@@ -1070,8 +1064,8 @@
 
     private readonly object _calculationQueueLock = new();
     private readonly object _skillLevelSaveDebounceLock = new();
-    private CancellationTokenSource? _dataContextNameCts;
     private CancellationTokenSource? _calculateDebounceCts;
+    private Guid? _pendingRenameContextId;
     private readonly Dictionary<Guid, CancellationTokenSource> _skillLevelSaveDebounceBySkillId = [];
     private readonly Dictionary<Guid, int> _lastPersistedSkillLevelBySkillId = [];
     private readonly Dictionary<Guid, int> _pendingSkillLevelBySkillId = [];
@@ -1739,8 +1733,6 @@
 
     public void Dispose()
     {
-        _dataContextNameCts?.Cancel();
-        _dataContextNameCts?.Dispose();
         _calculateDebounceCts?.Cancel();
         _calculateDebounceCts?.Dispose();
         lock (_skillLevelSaveDebounceLock)
@@ -2014,6 +2006,32 @@
     {
         DataContext dataContext = await ContextService.AddDataContext(ContextService.CurrentUserServer!);
         await RetrieveData(dataContext);
+    }
+
+    private async Task RenameDataContext(DataContext dataContext, string newName)
+    {
+        dataContext.Name = newName;
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            DataContextDbService.UpdateName(context, dataContext);
+            return Task.CompletedTask;
+        });
+        _pendingRenameContextId = null;
+        StateHasChanged();
+    }
+
+    private async Task DuplicateDataContext(DataContext source)
+    {
+        var copy = await ContextService.DuplicateDataContext(source);
+        _pendingRenameContextId = copy.Id;
+        await RetrieveData(copy);
+        StateHasChanged();
+    }
+
+    private async Task SetDefaultDataContextHandler(DataContext target)
+    {
+        await ContextService.SetDefaultDataContext(target);
+        StateHasChanged();
     }
 
     private async Task AddUserSkill(Skill? skill)
@@ -2654,31 +2672,6 @@
 
         RefreshCategorizedDisplayCaches();
         StateHasChanged();
-    }
-
-    private async Task UpdateDataContextValues(string name)
-    {
-        _selectedDataContext!.Name = name;
-        ContextService.CurrentUserServer!.DataContexts.First(d => d.Id == _selectedDataContext.Id).Name = name;
-
-        _dataContextNameCts?.Cancel();
-        _dataContextNameCts = new CancellationTokenSource();
-        var token = _dataContextNameCts.Token;
-
-        try
-        {
-            await Task.Delay(300, token);
-        }
-        catch (TaskCanceledException)
-        {
-            return;
-        }
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            DataContextDbService.UpdateName(context, _selectedDataContext);
-            return Task.CompletedTask;
-        });
     }
 
     private async Task ShowCraftingTableDialog(CraftingTable craftingTable)
