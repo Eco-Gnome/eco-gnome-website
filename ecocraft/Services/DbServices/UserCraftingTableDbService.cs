@@ -79,10 +79,21 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
 		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
 
-		existing.SkilledPluginModules.Clear();
-		foreach (var pm in userCraftingTable.SkilledPluginModules)
+		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the
+		// just-cleared join entries in Deleted state; re-adding the same tracked instance
+		// does not revert it, so the previously persisted modules silently get DELETEd
+		// while only newly-attached stubs INSERT.
+		var desiredIds = userCraftingTable.SkilledPluginModules.Select(pm => pm.Id).ToHashSet();
+
+		foreach (var pm in existing.SkilledPluginModules.Where(pm => !desiredIds.Contains(pm.Id)).ToList())
 		{
-			existing.SkilledPluginModules.Add(GetTrackedPluginModule(context, pm.Id));
+			existing.SkilledPluginModules.Remove(pm);
+		}
+
+		var existingIds = existing.SkilledPluginModules.Select(pm => pm.Id).ToHashSet();
+		foreach (var pmId in desiredIds.Where(id => !existingIds.Contains(id)))
+		{
+			existing.SkilledPluginModules.Add(GetTrackedPluginModule(context, pmId));
 		}
 	}
 
