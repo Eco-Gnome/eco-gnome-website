@@ -834,13 +834,9 @@
                                             return;
                                         }
 
-                                        var relatedUserElements = context.Elements
-                                            .Where(e => e.IsProduct())
-                                            .Select(e => e.GetCurrentUserElement(_selectedDataContext))
-                                            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
-                                            .ToList();
+                                        var relatedUserElements = GetRelatedProductUserElements(context);
 
-                                        var bestRecipe = ExtractBestRecipe(context, relatedUserElements!);
+                                        var bestRecipe = ExtractBestRecipe(context, relatedUserElements);
                                         var bestRecipeHasShare = bestRecipe?.Elements.Count(e => e.IsProduct()) > 1;
 
                                         <MudTd Style="width: 0; padding: 0; vertical-align: top; padding-top: 9px;"
@@ -958,11 +954,7 @@
                                 <ChildRowContent>
                                     @if (_showDetailedRecipes)
                                     {
-                                        var relatedUserElements = context.Elements
-                                            .Where(e => e.IsProduct())
-                                            .Select(e => e.GetCurrentUserElement(_selectedDataContext))
-                                            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
-                                            .ToList();
+                                        var relatedUserElements = GetRelatedProductUserElements(context);
 
                                         @if (relatedUserElements.Count > 1)
                                         {
@@ -2834,25 +2826,101 @@
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)
     {
-        return FilterItemOrTag(itemOrTag, _searchTagToBuy, _selectedTagToBuy);
+        return FilterItemToBuy(itemOrTag, _searchTagToBuy, _selectedTagToBuy);
     }
 
     private bool FilterItemToSell(ItemOrTag itemOrTag)
     {
-        return FilterItemOrTag(itemOrTag, _searchItemToSell, _selectedItemToSell);
+        return FilterSellItemOrRecipe(itemOrTag, _searchItemToSell, _selectedItemToSell);
     }
 
-    private bool FilterItemOrTag(ItemOrTag itemOrTag, string search, ItemOrTag? specificTag = null)
+    private bool FilterItemToBuy(ItemOrTag itemOrTag, string search, ItemOrTag? specificTag = null)
     {
-        if (specificTag is not null && !itemOrTag.AssociatedTags.Contains(specificTag))
+        if (!MatchesSpecificTag(itemOrTag, specificTag))
+        {
             return false;
+        }
+
         if (string.IsNullOrWhiteSpace(search))
+        {
             return true;
-        if (itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+        }
+
+        if (MatchesItemOrTag(itemOrTag, search))
+        {
             return true;
-        if (LocalizationService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase))
+        }
+
+        if (itemOrTag.GetCurrentUserPrice(_selectedDataContext!)?.PrimaryUserPrice?.ItemOrTag is { } primaryItemOrTag
+            && MatchesItemOrTag(primaryItemOrTag, search))
+        {
             return true;
-        return false;
+        }
+
+        return itemOrTag.AssociatedItems
+            .Where(item => item.GetCurrentUserPrice(_selectedDataContext!) is not null)
+            .Any(item => MatchesItemOrTag(item, search));
+    }
+
+    private bool FilterSellItemOrRecipe(ItemOrTag itemOrTag, string search, ItemOrTag? specificTag = null)
+    {
+        if (!MatchesSpecificTag(itemOrTag, specificTag))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return true;
+        }
+
+        if (MatchesItemOrTag(itemOrTag, search))
+        {
+            return true;
+        }
+
+        return GetRelatedProductUserElements(itemOrTag)
+            .Any(userElement => MatchesRecipe(userElement.Element.Recipe, search));
+    }
+
+    private bool MatchesSpecificTag(ItemOrTag itemOrTag, ItemOrTag? specificTag)
+    {
+        return specificTag is null || itemOrTag.AssociatedTags.Contains(specificTag);
+    }
+
+    private bool MatchesItemOrTag(ItemOrTag itemOrTag, string search)
+    {
+        return itemOrTag.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+               || LocalizationService.GetTranslation(itemOrTag).Contains(search, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesRecipe(Recipe recipe, string search)
+    {
+        if (recipe.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || recipe.FamilyName.Contains(search, StringComparison.OrdinalIgnoreCase)
+            || LocalizationService.GetTranslation(recipe).Contains(search, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return recipe.Skill is not null
+               && (recipe.Skill.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+                   || LocalizationService.GetTranslation(recipe.Skill).Contains(search, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private List<UserElement> GetRelatedProductUserElements(ItemOrTag itemOrTag)
+    {
+        if (_selectedDataContext is null)
+        {
+            return [];
+        }
+
+        return itemOrTag.Elements
+            .Where(e => e.IsProduct())
+            .Select(e => e.GetCurrentUserElement(_selectedDataContext))
+            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
+            .Cast<UserElement>()
+            .ToList();
     }
 
     private async Task OpenServerPricesDialog()
