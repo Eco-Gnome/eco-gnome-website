@@ -3594,10 +3594,32 @@
         }
 
         var categorizedForDisplay = PriceCalculatorService.GetCategorizedItemOrTagsForDisplay(_selectedDataContext);
-        _fuelAssociatedItemsByGroupTagId = PriceCalculatorService.GetFuelAssociatedItemsByGroupTagIdForDisplay(_selectedDataContext);
-        _fuelItemsDisplay = PriceCalculatorService.GetFuelItemOrTagsForDisplay(_selectedDataContext)
+        var fuelAssociatedItemsByGroupTagId = PriceCalculatorService.GetFuelAssociatedItemsByGroupTagIdForDisplay(_selectedDataContext);
+        var fuelItemsForDisplay = PriceCalculatorService.GetFuelItemOrTagsForDisplay(_selectedDataContext)
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
             .ToList();
+
+        var displayedFuelGroupTagIds = fuelItemsForDisplay
+            .Where(itemOrTag => itemOrTag.IsTag)
+            .Select(itemOrTag => itemOrTag.Id)
+            .ToHashSet();
+
+        _fuelAssociatedItemsByGroupTagId = fuelAssociatedItemsByGroupTagId
+            .Where(group => displayedFuelGroupTagIds.Contains(group.Key))
+            .ToDictionary(
+                group => group.Key,
+                group => group.Value
+                    .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
+                    .ToList());
+
+        _fuelAssociatedItemsByGroupTagId = _fuelAssociatedItemsByGroupTagId
+            .Where(group => group.Value.Count > 0)
+            .ToDictionary(group => group.Key, group => group.Value);
+
+        _fuelItemsDisplay = fuelItemsForDisplay
+            .Where(itemOrTag => !itemOrTag.IsTag || _fuelAssociatedItemsByGroupTagId.ContainsKey(itemOrTag.Id))
+            .ToList();
+
         _fuelItemCount = _fuelItemsDisplay
             .Where(itemOrTag => !itemOrTag.IsTag)
             .Select(itemOrTag => itemOrTag.Id)
@@ -3607,16 +3629,8 @@
             .Distinct()
             .Count();
 
-        var fuelItemOrTagIds = _fuelItemsDisplay
-            .Select(itemOrTag => itemOrTag.Id)
-            .Concat(_fuelAssociatedItemsByGroupTagId.Values
-                .SelectMany(associatedItems => associatedItems)
-                .Select(itemOrTag => itemOrTag.Id))
-            .ToHashSet();
-
         _itemsToBuyDisplay = categorizedForDisplay.ToBuy
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)
-            .Where(itemOrTag => !fuelItemOrTagIds.Contains(itemOrTag.Id))
             .ToList();
         _itemsToSellDisplay = categorizedForDisplay.ToSell
             .Where(itemOrTag => itemOrTag.GetCurrentUserPrice(_selectedDataContext) is not null)

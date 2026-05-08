@@ -329,6 +329,9 @@ public class UserServerDataService(
         }
 
         var itemOrTagAssociated = userElement.Element.ItemOrTag;
+        var requiredFuelItemOrTagIds = GetRequiredFuelItemOrTags(userElement.DataContext)
+            .Select(item => item.Id)
+            .ToHashSet();
 
         userElementDbService.Destroy(context, userElement);
         userElement.Element.UserElements.Remove(userElement);
@@ -336,7 +339,8 @@ public class UserServerDataService(
         userElement.DataContext.UserElements.Remove(userElement);
 
         // Remove the UserPrice of the related itemOrTag, and it's associated items, if no other related Elements have a UserElement
-        if (itemOrTagAssociated.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null))
+        if (itemOrTagAssociated.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null)
+            && !requiredFuelItemOrTagIds.Contains(itemOrTagAssociated.Id))
         {
             var itemOrTagAssociatedUserPrice = itemOrTagAssociated.GetCurrentUserPrice(userElement.DataContext);
 
@@ -346,7 +350,8 @@ public class UserServerDataService(
 
                 foreach (var itemOrTag in itemOrTagAssociated.AssociatedItems)
                 {
-                    if (itemOrTag.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null))
+                    if (itemOrTag.GetAssociatedTagsAndSelf().SelectMany(i => i.Elements).All(e => e.GetCurrentUserElement(userElement.DataContext) is null)
+                        && !requiredFuelItemOrTagIds.Contains(itemOrTag.Id))
                     {
                         var itemOrTagUserPrice = itemOrTag.GetCurrentUserPrice(userElement.DataContext);
 
@@ -360,7 +365,7 @@ public class UserServerDataService(
         }
     }
 
-    public void EnsureCraftingTableFuelUserPrices(EcoCraftDbContext context, DataContext dataContext)
+    private List<ItemOrTag> GetRequiredFuelItemOrTags(DataContext dataContext)
     {
         var fuelItemsAndAcceptedTags = dataContext.UserCraftingTables
             .SelectMany(uct => craftingTableFuelCostService.GetEligibleFuelItemsAndTags(uct.CraftingTable))
@@ -376,7 +381,15 @@ public class UserServerDataService(
             .Where(groupTag => groupTag is not null)
             .Cast<ItemOrTag>();
 
-        foreach (var fuelItem in fuelItemsAndAcceptedTags.Concat(fuelGroupingTags).DistinctBy(item => item.Id))
+        return fuelItemsAndAcceptedTags
+            .Concat(fuelGroupingTags)
+            .DistinctBy(item => item.Id)
+            .ToList();
+    }
+
+    public void EnsureCraftingTableFuelUserPrices(EcoCraftDbContext context, DataContext dataContext)
+    {
+        foreach (var fuelItem in GetRequiredFuelItemOrTags(dataContext))
         {
             AddUserPriceIfNotExists(context, dataContext, fuelItem);
         }
