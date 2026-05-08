@@ -219,6 +219,9 @@
                                                 <MudText Color="Color.Primary" Typo="Typo.body2">
                                                     @LocalizationService.GetTranslation(_currentUserCraftingTable.FuelItem)
                                                 </MudText>
+                                                <MudTooltip Text="@GetFuelTooltip(_currentUserCraftingTable.FuelItem)">
+                                                    <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="d-flex align-center"/>
+                                                </MudTooltip>
                                             }
                                             else
                                             {
@@ -259,11 +262,11 @@
                                     <MudText>@LocalizationService.GetTranslation("RecipeDialog.Labor")</MudText>
                                 </MudTd>
                                 <MudTd Class="px-1">
-                                    <MudStack Row Spacing="1">
-                                        <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">
                                             @(((_currentUserSetting?.CalorieCost ?? 0) / 1000).ToString("0.#####"))
                                         </MudText>
-                                        <MudText Color="Color.Primary">
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">
                                             $/cal
                                         </MudText>
                                     </MudStack>
@@ -667,6 +670,26 @@
     private decimal GetCraftMinutePrice()
     {
         return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.CraftMinuteFee ?? 0);
+    }
+
+    private string GetFuelTooltip(ItemOrTag fuelItem)
+    {
+        var craftMinuteFee = _currentUserCraftingTable is null
+            ? 0m
+            : CraftingTableFuelCostService.CalculateCraftMinuteFee(
+                DataContext,
+                new UserCraftingTable
+                {
+                    CraftingTable = _currentUserCraftingTable.CraftingTable,
+                    FuelItem = fuelItem,
+                });
+
+        return $"{LocalizationService.GetTranslation(fuelItem)} - {LocalizationService.GetTranslation("PriceCalculator.Fuel.CostPerMinute")}: {FormatDecimal(craftMinuteFee)}";
+    }
+
+    private static string FormatDecimal(decimal value)
+    {
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)
