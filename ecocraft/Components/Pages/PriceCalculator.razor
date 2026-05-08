@@ -3354,21 +3354,6 @@
                    || LocalizationService.GetTranslation(recipe.Skill).Contains(search, StringComparison.OrdinalIgnoreCase));
     }
 
-    private List<UserElement> GetRelatedProductUserElements(ItemOrTag itemOrTag)
-    {
-        if (_selectedDataContext is null)
-        {
-            return [];
-        }
-
-        return itemOrTag.Elements
-            .Where(e => e.IsProduct())
-            .Select(e => e.GetCurrentUserElement(_selectedDataContext))
-            .Where(ue => ue is not null && !ue.IsReintegrated && (!_hideBlueprints || !ue.Element.Recipe.IsBlueprint))
-            .Cast<UserElement>()
-            .ToList();
-    }
-
     private string FormatFuelEnergy(UserPrice userPrice)
     {
         var fuelItem = GetFuelEnergySourceItem(userPrice);
