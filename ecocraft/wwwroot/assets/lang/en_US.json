@@ -35,7 +35,10 @@
         "ServerPrices": "Server prices",
         "MinPrice": "Minimum",
         "DefaultPrice": "Default",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Energy",
+        "EnergyConsumption": "Energy consumption",
+        "EnergyGeneration": "Energy generation"
     },
     "JoinCode": "Join code",
     "Language": "Language",
@@ -71,6 +74,7 @@
         "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "Fuel": "Fuel",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
@@ -418,6 +422,15 @@
             "Tooltip": "The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...",
             "CostMin": "Cost/min"
         },
+        "Fuel": {
+            "Fuel": "Fuel",
+            "NoFuel": "No fuel",
+            "CostPerMinute": "Cost/min",
+            "Energy": "Energy",
+            "CostPer1000Energy": "Cost / 1000 energy",
+            "SelectFuel": "Select fuel",
+            "CalculatedCostPerMinuteTooltip": "Calculated from table consumption, fuel energy and fuel price."
+        },
         "NoModule": "No module",
         "MarginPercent": {
             "Tooltip": "The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.",
@@ -483,7 +496,9 @@
             "BoundedSnackbar": "Value adjusted to fit server boundaries."
         },
         "ItemsToBuy": "Items to buy",
+        "Fuels": "Fuels",
         "IngredientSearch": "Ingredient Items Or Tags",
+        "FuelSearch": "Fuel Items Or Tags",
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
@@ -598,13 +613,15 @@
             },
             "Values": {
                 "Enabled": "Enabled",
-                "Disabled": "Disabled"
+                "Disabled": "Disabled",
+                "NoFuel": "No fuel"
             },
             "Columns": {
                 "Role": "Role",
                 "Player": "Player",
                 "Option": "Option",
                 "Context": "Context",
+                "Fuel": "Fuel",
                 "ConfiguredItems": "Configured items",
                 "Recipes": "Recipes",
                 "Skills": "Skills",

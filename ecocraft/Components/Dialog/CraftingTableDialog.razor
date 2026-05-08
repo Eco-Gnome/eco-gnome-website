@@ -2,6 +2,7 @@
 @using ecocraft.Services
 @using ecocraft.Components.Utils
 @inject LocalizationService LocalizationService
+@inject CraftingTableFuelCostService CraftingTableFuelCostService
 
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
@@ -11,8 +12,32 @@
         </MudStack>
     </TitleContent>
     <DialogContent>
-        <MudStack>
-            <MudText>@LocalizationService.GetTranslation("RelatedRecipes")</MudText>
+        <MudStack Spacing="4">
+            @{
+                var craftingTableItem = CraftingTableFuelCostService.GetCraftingTableItem(CraftingTable);
+            }
+            @if (craftingTableItem is not null && HasEnergyData(craftingTableItem))
+            {
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ItemOrTagDialog.Energy")</MudText>
+                    <MudStack Row Spacing="18">
+                        @if (craftingTableItem.FuelConsumptionPerSecond is not null)
+                        {
+                            <MudText>
+                                @LocalizationService.GetTranslation("ItemOrTagDialog.EnergyConsumption"): @FormatEnergyValue(craftingTableItem.FuelConsumptionPerSecond)
+                            </MudText>
+                        }
+                        @if (craftingTableItem.FuelCalories is not null)
+                        {
+                            <MudText>
+                                @LocalizationService.GetTranslation("ItemOrTagDialog.EnergyGeneration"): @FormatEnergyValue(craftingTableItem.FuelCalories)
+                            </MudText>
+                        }
+                    </MudStack>
+                </MudStack>
+            }
+
+            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("RelatedRecipes")</MudText>
             <RecipeList Recipes="@CraftingTable.Recipes"/>
         </MudStack>
     </DialogContent>
@@ -24,4 +49,14 @@
 
     [Parameter]
     public required CraftingTable CraftingTable { get; set; }
+
+    private static bool HasEnergyData(ItemOrTag itemOrTag)
+    {
+        return itemOrTag.FuelConsumptionPerSecond is not null || itemOrTag.FuelCalories is not null;
+    }
+
+    private static string FormatEnergyValue(decimal? value)
+    {
+        return value is null ? "-" : Math.Round(value.Value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
+    }
 }

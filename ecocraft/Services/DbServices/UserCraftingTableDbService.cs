@@ -16,6 +16,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		return await context.UserCraftingTables
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.FuelItem)
 			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
@@ -32,6 +33,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.Where(s => s.DataContextId == dataContext.Id)
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.FuelItem)
 			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
@@ -56,6 +58,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			DataContextId = userCraftingTable.DataContext.Id,
 			CraftingTableId = userCraftingTable.CraftingTable.Id,
 			PluginModuleId = userCraftingTable.PluginModule?.Id,
+			FuelItemId = userCraftingTable.FuelItem?.Id ?? userCraftingTable.FuelItemId,
 			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
 		};
 	}
@@ -77,6 +80,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.FirstAsync(uct => uct.Id == userCraftingTable.Id);
 
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
+		existing.FuelItemId = userCraftingTable.FuelItem?.Id ?? userCraftingTable.FuelItemId;
 		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
 
 		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the
@@ -114,6 +118,20 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		var stub = new UserCraftingTable { Id = userCraftingTable.Id, CraftMinuteFee = userCraftingTable.CraftMinuteFee };
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+	}
+
+	public void UpdateFuelItem(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	{
+		var stub = new UserCraftingTable
+		{
+			Id = userCraftingTable.Id,
+			FuelItemId = userCraftingTable.FuelItemId,
+			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+		};
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.FuelItemId).IsModified = true;
 		entry.Property(x => x.CraftMinuteFee).IsModified = true;
 	}
 

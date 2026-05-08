@@ -746,6 +746,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("FuelItemId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("PluginModuleId")
                         .HasColumnType("uuid");
 
@@ -754,6 +757,8 @@ namespace ecocraft.Migrations
                     b.HasIndex("CraftingTableId");
 
                     b.HasIndex("DataContextId");
+
+                    b.HasIndex("FuelItemId");
 
                     b.HasIndex("PluginModuleId");
 
@@ -1348,9 +1353,16 @@ namespace ecocraft.Migrations
                         .HasForeignKey("PluginModuleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("ecocraft.Models.ItemOrTag", "FuelItem")
+                        .WithMany()
+                        .HasForeignKey("FuelItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("CraftingTable");
 
                     b.Navigation("DataContext");
+
+                    b.Navigation("FuelItem");
 
                     b.Navigation("PluginModule");
                 });

@@ -43,6 +43,8 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			.Include(s => s.UserTalents)
 			.Include(s => s.UserCraftingTables)
 			.ThenInclude(s => s.SkilledPluginModules)
+			.Include(s => s.UserCraftingTables)
+			.ThenInclude(s => s.FuelItem)
 			.Include(s => s.UserSettings)
 			.Include(s => s.UserPrices)
 			.Include(s => s.UserRecipes)
@@ -124,6 +126,16 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			{
 				uct.PluginModule = null;
 				uct.PluginModuleId = null;
+			}
+
+			if (uct.FuelItemId is Guid fuelItemId && itemOrTags.TryGetValue(fuelItemId, out var fuelItem) && !fuelItem.IsTag)
+			{
+				uct.FuelItem = fuelItem;
+			}
+			else
+			{
+				uct.FuelItem = null;
+				uct.FuelItemId = null;
 			}
 
 			uct.SkilledPluginModules = uct.SkilledPluginModules

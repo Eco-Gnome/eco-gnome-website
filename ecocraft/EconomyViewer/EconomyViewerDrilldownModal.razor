@@ -166,7 +166,7 @@
                                     <HeaderContent>
                                         <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
                                         <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                        <MudTh>@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudTh>
+                                        <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Fuel")</MudTh>
                                     </HeaderContent>
                                     <RowTemplate>
                                         <MudTd>
@@ -210,7 +210,7 @@
                                                 }
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                        <MudTd>@GetFuelSummaryContent(context)</MudTd>
                                     </RowTemplate>
                                     <NoRecordsContent>
                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
@@ -235,7 +235,7 @@
                                     <HeaderContent>
                                         <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
                                         <MudTh>@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                        <MudTh>@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudTh>
+                                        <MudTh>@LocalizationService.GetTranslation("EconomyViewer.Drilldown.Columns.Fuel")</MudTh>
                                     </HeaderContent>
                                     <RowTemplate>
                                         <MudTd>
@@ -279,7 +279,7 @@
                                                 }
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                        <MudTd>@GetFuelSummaryContent(context)</MudTd>
                                     </RowTemplate>
                                     <NoRecordsContent>
                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
@@ -579,6 +579,45 @@
     {
         return PluginModulesById.GetValueOrDefault(pluginModuleId);
     }
+
+    private RenderFragment GetFuelSummaryContent(EconomyPlayerCraftingTableSummary summary) => builder =>
+    {
+        var sequence = 0;
+        var fuelItem = summary.FuelItemId is Guid fuelItemId
+            ? ItemsById.GetValueOrDefault(fuelItemId)
+            : null;
+
+        builder.OpenComponent<MudStack>(sequence++);
+        builder.AddAttribute(sequence++, "Row", true);
+        builder.AddAttribute(sequence++, "AlignItems", AlignItems.Center);
+        builder.AddAttribute(sequence++, "Spacing", 1);
+        builder.AddAttribute(sequence++, "ChildContent", (RenderFragment)(childBuilder =>
+        {
+            var childSequence = 0;
+            if (fuelItem is null)
+            {
+                childBuilder.OpenComponent<MudText>(childSequence++);
+                childBuilder.AddAttribute(childSequence++, "Typo", Typo.body2);
+                childBuilder.AddAttribute(childSequence++, "Color", Color.Secondary);
+                childBuilder.AddAttribute(childSequence++, "ChildContent", (RenderFragment)(textBuilder =>
+                    textBuilder.AddContent(0, LocalizationService.GetTranslation("EconomyViewer.Drilldown.Values.NoFuel"))));
+                childBuilder.CloseComponent();
+                return;
+            }
+
+            childBuilder.OpenComponent<EcoIcon>(childSequence++);
+            childBuilder.AddAttribute(childSequence++, "Item", fuelItem);
+            childBuilder.AddAttribute(childSequence++, "Size", 24);
+            childBuilder.CloseComponent();
+
+            childBuilder.OpenComponent<MudText>(childSequence++);
+            childBuilder.AddAttribute(childSequence++, "Typo", Typo.body2);
+            childBuilder.AddAttribute(childSequence++, "ChildContent", (RenderFragment)(textBuilder =>
+                textBuilder.AddContent(0, EconomyViewerDisplayService.FormatDecimal(summary.FuelPrice))));
+            childBuilder.CloseComponent();
+        }));
+        builder.CloseComponent();
+    };
 
     private async Task LoadDrilldownAsync(bool showLoadingIndicator = true, bool comparisonRowsOnly = false)
     {

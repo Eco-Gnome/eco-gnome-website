@@ -415,6 +415,13 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.IsRequired(false);
 
 		modelBuilder.Entity<UserCraftingTable>()
+			.HasOne(uct => uct.FuelItem)
+			.WithMany()
+			.HasForeignKey(uct => uct.FuelItemId)
+			.OnDelete(DeleteBehavior.SetNull)
+			.IsRequired(false);
+
+		modelBuilder.Entity<UserCraftingTable>()
 			.HasMany(uct => uct.SkilledPluginModules)
 			.WithMany(pm => pm.UserCraftingTables)
 			.UsingEntity(

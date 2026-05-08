@@ -35,7 +35,10 @@
         "ServerPrices": "Prix du serveur",
         "MinPrice": "Minimum",
         "DefaultPrice": "Par défaut",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Énergie",
+        "EnergyConsumption": "Consommation énergétique",
+        "EnergyGeneration": "Génération d'énergie"
     },
     "JoinCode": "Code de participation",
     "Language": "Langue",
@@ -71,6 +74,7 @@
         "ReductionOf": "Réduction des",
         "AdditionalCosts": "Coûts supplémentaires",
         "CraftTime": "Temps de fabrication",
+        "Fuel": "Carburant",
         "CraftTimeReductionTooltip": "{valeur initiale} avec {pourcentage}% de réduction grâce au module de mise à niveau {nom du module de mise à niveau}",
         "Dynamic": "dynamique",
         "Labor": "Main-d'œuvre",
@@ -410,6 +414,15 @@
             "Tooltip": "Le coût lié à cette table d'artisanat pour chaque minute d'artisanat. Représente la consommation de carburant, le remplacement des pièces, les frais d'artisanat éventuels...",
             "CostMin": "Coût/min"
         },
+        "Fuel": {
+            "Fuel": "Carburant",
+            "NoFuel": "Aucun carburant",
+            "CostPerMinute": "Coût/min",
+            "Energy": "Énergie",
+            "CostPer1000Energy": "Coût / 1000 énergie",
+            "SelectFuel": "Sélectionner un carburant",
+            "CalculatedCostPerMinuteTooltip": "Calculé à partir de la consommation de la table, de l'énergie du carburant et de son prix."
+        },
         "NoModule": "Pas de module",
         "MarginPercent": {
             "Tooltip": "Le pourcentage de marge qui sera appliqué sur votre prix de vente. Vérifiez l'option d'infobulle 'Type de calcul de la marge' pour les détails du calcul.",
@@ -475,7 +488,9 @@
             "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
         },
         "ItemsToBuy": "Articles à acheter",
+        "Fuels": "Carburants",
         "IngredientSearch": "Ingrédients ou étiquettes",
+        "FuelSearch": "Carburants ou étiquettes",
         "BuyPrice": "Prix d'achat",
         "PriceTooltip": {
             "isTagEmptyPrice": "Cette valeur sera le prix minimum des articles associés (si toutes les valeurs sont définies !), à moins que vous ne choisissiez un article spécifique en cliquant sur une étoile.",
@@ -590,13 +605,15 @@
             },
             "Values": {
                 "Enabled": "Activé",
-                "Disabled": "Désactivé"
+                "Disabled": "Désactivé",
+                "NoFuel": "Aucun carburant"
             },
             "Columns": {
                 "Role": "Rôle",
                 "Player": "Joueur",
                 "Option": "Option",
                 "Context": "Contexte",
+                "Fuel": "Carburant",
                 "ConfiguredItems": "Articles configurés",
                 "Recipes": "Recettes",
                 "Skills": "Métiers",

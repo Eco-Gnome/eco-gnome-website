@@ -804,8 +804,32 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
             .Where(uct => contextIds.Contains(uct.DataContextId))
             .Include(uct => uct.CraftingTable)
             .Include(uct => uct.PluginModule)
+            .Include(uct => uct.FuelItem)
             .Include(uct => uct.SkilledPluginModules)
             .ToListAsync();
+
+        var fuelItemIds = userCraftingTables
+            .Where(uct => uct.FuelItemId is not null)
+            .Select(uct => uct.FuelItemId!.Value)
+            .Distinct()
+            .ToList();
+
+        var fuelPrices = await context.UserPrices
+            .AsNoTracking()
+            .Where(up => contextIds.Contains(up.DataContextId) && fuelItemIds.Contains(up.ItemOrTagId))
+            .Select(up => new
+            {
+                up.DataContextId,
+                up.ItemOrTagId,
+                up.Price
+            })
+            .ToListAsync();
+
+        var fuelPriceByContextAndItem = fuelPrices
+            .GroupBy(fuelPrice => (fuelPrice.DataContextId, fuelPrice.ItemOrTagId))
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().Price);
 
         return userCraftingTables.Select(uct => new EconomyPlayerCraftingTableSummary
             {
@@ -815,7 +839,13 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
                 PluginModuleId = uct.PluginModuleId,
                 PluginModuleName = uct.PluginModule?.Name,
                 SkilledPluginModuleIds = uct.SkilledPluginModules.Select(pm => pm.Id).ToList(),
-                CraftMinuteFee = uct.CraftMinuteFee
+                CraftMinuteFee = uct.CraftMinuteFee,
+                FuelItemId = uct.FuelItemId,
+                FuelItemName = uct.FuelItem?.Name,
+                FuelPrice = uct.FuelItemId is Guid fuelItemId
+                            && fuelPriceByContextAndItem.TryGetValue((uct.DataContextId, fuelItemId), out var fuelPrice)
+                    ? fuelPrice
+                    : null
             })
             .ToList();
     }

@@ -12,7 +12,8 @@ public class UserServerDataService(
     UserPriceDbService userPriceDbService,
     UserElementDbService userElementDbService,
     UserMarginDbService userMarginDbService,
-    LocalizationService localizationService)
+    LocalizationService localizationService,
+    CraftingTableFuelCostService craftingTableFuelCostService)
 {
     public void AddUserSkill(EcoCraftDbContext context, DataContext dataContext, Server server, Skill? skill, bool onlyLevelAccessibleRecipes, bool addRecipes = true)
     {
@@ -218,6 +219,7 @@ public class UserServerDataService(
         userCraftingTableDbService.Create(context, userCraftingTable);
         dataContext.UserCraftingTables.Add(userCraftingTable);
         craftingTable.UserCraftingTables.Add(userCraftingTable);
+        EnsureCraftingTableFuelUserPrices(context, dataContext);
 
         // If the crafting table is added by user, we add all recipes related to the crafting table and to skills
         if (addedByUser)
@@ -311,10 +313,7 @@ public class UserServerDataService(
 
         foreach (var itemOrTag in element.ItemOrTag.GetAssociatedItemsAndSelf())
         {
-            if (itemOrTag.GetCurrentUserPrice(dataContext) is null)
-            {
-                AddUserPrice(context, dataContext, itemOrTag);
-            }
+            AddUserPriceIfNotExists(context, dataContext, itemOrTag);
         }
     }
 
@@ -361,7 +360,41 @@ public class UserServerDataService(
         }
     }
 
-    private void AddUserPrice(EcoCraftDbContext context, DataContext dataContext, ItemOrTag itemOrTag)
+    public void EnsureCraftingTableFuelUserPrices(EcoCraftDbContext context, DataContext dataContext)
+    {
+        var fuelItemsAndAcceptedTags = dataContext.UserCraftingTables
+            .SelectMany(uct => craftingTableFuelCostService.GetEligibleFuelItemsAndTags(uct.CraftingTable))
+            .DistinctBy(item => item.Id)
+            .ToList();
+
+        var fuelItems = fuelItemsAndAcceptedTags
+            .Where(item => !item.IsTag)
+            .ToList();
+
+        var fuelGroupingTags = fuelItems
+            .Select(fuelItem => craftingTableFuelCostService.GetFuelGroupingTag(fuelItem, fuelItems))
+            .Where(groupTag => groupTag is not null)
+            .Cast<ItemOrTag>();
+
+        foreach (var fuelItem in fuelItemsAndAcceptedTags.Concat(fuelGroupingTags).DistinctBy(item => item.Id))
+        {
+            AddUserPriceIfNotExists(context, dataContext, fuelItem);
+        }
+    }
+
+    public UserPrice AddUserPriceIfNotExists(EcoCraftDbContext context, DataContext dataContext, ItemOrTag itemOrTag)
+    {
+        var existingUserPrice = dataContext.UserPrices.FirstOrDefault(up => up.ItemOrTagId == itemOrTag.Id)
+                                ?? itemOrTag.GetCurrentUserPrice(dataContext);
+        if (existingUserPrice is not null)
+        {
+            return existingUserPrice;
+        }
+
+        return AddUserPrice(context, dataContext, itemOrTag);
+    }
+
+    private UserPrice AddUserPrice(EcoCraftDbContext context, DataContext dataContext, ItemOrTag itemOrTag)
     {
         var userMargin = dataContext.UserMargins.First();
 
@@ -381,6 +414,7 @@ public class UserServerDataService(
         dataContext.UserPrices.Add(userPrice);
         itemOrTag.UserPrices.Add(userPrice);
         userMargin.UserPrices.Add(userPrice);
+        return userPrice;
     }
 
     private void RemoveUserPrice(EcoCraftDbContext context, UserPrice userPrice)
