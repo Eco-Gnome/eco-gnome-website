@@ -374,6 +374,10 @@
             "Tooltip": "Hide blueprint recipes from the items to sell.",
             "HideBlueprints": "Hide blueprints"
         },
+        "HideFlavourVariants": {
+            "Tooltip": "Skip flavour-variant recipes (e.g. Birch/Oak/Hardwood/Softwood versions of the same item) so only the canonical recipe of each family is priced. A flavour is only skipped when its family has a canonical sibling — items producible only via flavour recipes are kept.",
+            "HideFlavourVariants": "Hide flavour variants"
+        },
         "LevelAccessible": {
             "Tooltip": "Only display recipes that are allowed by your skills levels.",
             "LevelAccessible": "Only level-accessible recipes"

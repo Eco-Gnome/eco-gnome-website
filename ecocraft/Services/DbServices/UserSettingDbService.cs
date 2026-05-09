@@ -52,6 +52,7 @@ public class UserSettingDbService(IDbContextFactory<EcoCraftDbContext> factory) 
 			DisplayNonSkilledRecipes = userSetting.DisplayNonSkilledRecipes,
 			OnlyLevelAccessibleRecipes = userSetting.OnlyLevelAccessibleRecipes,
 			ApplyMarginBetweenSkills = userSetting.ApplyMarginBetweenSkills,
+			HideFlavourVariants = userSetting.HideFlavourVariants,
 		};
 	}
 

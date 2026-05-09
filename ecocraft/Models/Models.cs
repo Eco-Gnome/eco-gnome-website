@@ -778,6 +778,7 @@ public class UserSetting
     public bool DisplayNonSkilledRecipes { get; set; } = false;
     public bool OnlyLevelAccessibleRecipes { get; set; } = false;
     public bool ApplyMarginBetweenSkills { get; set; } = true;
+    public bool HideFlavourVariants { get; set; } = false;
 
     public DataContext DataContext { get; set; }
 }
