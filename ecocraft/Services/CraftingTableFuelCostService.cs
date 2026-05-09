@@ -9,8 +9,6 @@ namespace ecocraft.Services;
 /// </summary>
 public class CraftingTableFuelCostService
 {
-    private const decimal MaxBroadFuelTagCoverageRatio = 0.8m;
-
     public ItemOrTag? GetCraftingTableItem(CraftingTable craftingTable)
     {
         var server = GetServer(craftingTable);
@@ -131,16 +129,12 @@ public class CraftingTableFuelCostService
                     MatchingFuelRatio = associatedItemCount == 0
                         ? 0m
                         : (decimal)matchingFuelCount / associatedItemCount,
-                    GroupingCoverageRatio = eligibleFuelItemCount == 0
-                        ? 0m
-                        : (decimal)matchingFuelCount / eligibleFuelItemCount
                 };
             })
             .Where(candidate => candidate.MatchingFuelCount > 1
                                 && (candidate.MatchingFuelCount < eligibleFuelItemCount || eligibleFuelItemCount <= 2)
                                 && candidate.AssociatedItemCount > 0
-                                && candidate.MatchingFuelRatio == 1m
-                                && (candidate.GroupingCoverageRatio <= MaxBroadFuelTagCoverageRatio || eligibleFuelItemCount <= 2))
+                                && candidate.MatchingFuelRatio == 1m)
             .OrderByDescending(candidate => candidate.MatchingFuelRatio)
             .ThenByDescending(candidate => candidate.MatchingFuelCount)
             .ThenBy(candidate => candidate.Tag.Name)
