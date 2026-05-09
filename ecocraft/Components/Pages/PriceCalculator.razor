@@ -836,6 +836,11 @@
 
                                         var relatedUserElements = GetRelatedProductUserElements(context);
 
+                                        if (relatedUserElements.Count == 0)
+                                        {
+                                            return;
+                                        }
+
                                         var bestRecipe = ExtractBestRecipe(context, relatedUserElements);
                                         var bestRecipeHasShare = bestRecipe?.Elements.Count(e => e.IsProduct()) > 1;
 
@@ -1199,6 +1204,7 @@
     private const int SkillLevelSaveDebounceMs = 150;
     private const int SellSearchExpandAllThreshold = 100;
     private const string ItemsToSellTableDomId = "items-to-sell-table";
+    private DotNetObjectReference<PriceCalculator>? _konamiRef;
     private const string CalculationModeStorageKeyPrefix = "PriceCalculatorCalculationMode";
 
     protected override void OnInitialized()
@@ -1219,6 +1225,9 @@
     {
         if (firstRender)
         {
+            _konamiRef = DotNetObjectReference.Create(this);
+            await JsRuntime.InvokeVoidAsync("konamiCode.register", _konamiRef);
+
             _showDetailedTags = await LocalStorageService.GetItem("ShowDetailedTags") != "False";
             _showDetailedRecipes = await LocalStorageService.GetItem("ShowDetailedRecipes") != "False";
             _hideBlueprints = await LocalStorageService.GetItem("HideBlueprints") == "True";
@@ -1741,6 +1750,63 @@
         }
 
         ContextService.OnContextChanged -= OnContextChanged;
+
+        if (_konamiRef is not null)
+        {
+            try { _ = JsRuntime.InvokeVoidAsync("konamiCode.unregister", _konamiRef).AsTask(); } catch { }
+            _konamiRef.Dispose();
+            _konamiRef = null;
+        }
+    }
+
+    [JSInvokable]
+    public async Task KonamiFillItemsToBuy()
+    {
+        if (_selectedDataContext is null) return;
+
+        var random = new Random();
+        var targets = new HashSet<UserPrice>();
+
+        foreach (var itemOrTag in _itemsToBuyDisplay)
+        {
+            if (itemOrTag.IsTag)
+            {
+                foreach (var associatedItem in itemOrTag.AssociatedItems)
+                {
+                    var associatedUserPrice = associatedItem.GetCurrentUserPrice(_selectedDataContext);
+                    if (associatedUserPrice is not null) targets.Add(associatedUserPrice);
+                }
+            }
+            else
+            {
+                var userPrice = itemOrTag.GetCurrentUserPrice(_selectedDataContext);
+                if (userPrice is not null) targets.Add(userPrice);
+            }
+        }
+
+        var changed = new List<UserPrice>(targets.Count);
+        foreach (var userPrice in targets)
+        {
+            decimal newValue = random.Next(1, 10);
+            if (userPrice.Price == newValue) continue;
+            userPrice.Price = newValue;
+            changed.Add(userPrice);
+        }
+
+        if (changed.Count == 0) return;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var userPrice in changed)
+            {
+                UserPriceDbService.UpdatePrice(context, userPrice);
+            }
+            return Task.CompletedTask;
+        });
+
+        await RequestCalculate(CalculateTriggerOrigin.PriceInput);
+
+        StateHasChanged();
     }
 
     private Task<IEnumerable<Skill>> SearchSkills(string value, CancellationToken token)
