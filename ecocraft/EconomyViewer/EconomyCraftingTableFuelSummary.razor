@@ -1,0 +1,27 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@inject EconomyViewerDisplayService EconomyViewerDisplayService
+@inject LocalizationService LocalizationService
+
+<MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+    @if (FuelItem is null)
+    {
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            @LocalizationService.GetTranslation("EconomyViewer.Drilldown.Values.NoFuel")
+        </MudText>
+    }
+    else
+    {
+        <EcoIcon Item="@FuelItem" Size="24"/>
+        <MudText Typo="Typo.body2">@EconomyViewerDisplayService.FormatDecimal(Summary.FuelPrice)</MudText>
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired] public EconomyPlayerCraftingTableSummary Summary { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyDictionary<Guid, ItemOrTag> ItemsById { get; set; } = null!;
+
+    private ItemOrTag? FuelItem => Summary.FuelItemId is Guid fuelItemId
+        ? ItemsById.GetValueOrDefault(fuelItemId)
+        : null;
+}

@@ -58,7 +58,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			DataContextId = userCraftingTable.DataContext.Id,
 			CraftingTableId = userCraftingTable.CraftingTable.Id,
 			PluginModuleId = userCraftingTable.PluginModule?.Id,
-			FuelItemId = userCraftingTable.FuelItem?.Id ?? userCraftingTable.FuelItemId,
+			FuelItemId = userCraftingTable.FuelItem?.Id,
 			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
 		};
 	}
@@ -80,7 +80,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.FirstAsync(uct => uct.Id == userCraftingTable.Id);
 
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
-		existing.FuelItemId = userCraftingTable.FuelItem?.Id ?? userCraftingTable.FuelItemId;
+		existing.FuelItemId = userCraftingTable.FuelItem?.Id;
 		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
 
 		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the

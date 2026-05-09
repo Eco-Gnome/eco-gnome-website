@@ -2,6 +2,11 @@ using ecocraft.Models;
 
 namespace ecocraft.Services;
 
+/// <summary>
+/// Centralizes crafting-table fuel rules derived from Eco server data.
+/// The price calculator uses it for cost/minute, and shopping-list flows can reuse the same
+/// consumption calculation to determine how much fuel must be bought for a crafting plan.
+/// </summary>
 public class CraftingTableFuelCostService
 {
     private const decimal MaxBroadFuelTagCoverageRatio = 0.8m;
@@ -145,11 +150,9 @@ public class CraftingTableFuelCostService
 
     public decimal CalculateCraftMinuteFee(DataContext dataContext, UserCraftingTable userCraftingTable)
     {
-        var craftingTableItem = GetCraftingTableItem(userCraftingTable.CraftingTable);
         var fuelItem = userCraftingTable.FuelItem;
 
-        if (craftingTableItem?.FuelConsumptionPerSecond is not > 0
-            || fuelItem?.FuelCalories is not > 0
+        if (fuelItem?.FuelCalories is not > 0
             || !IsEligibleFuel(userCraftingTable.CraftingTable, fuelItem))
         {
             return 0m;
@@ -161,7 +164,26 @@ public class CraftingTableFuelCostService
             return 0m;
         }
 
-        return craftingTableItem.FuelConsumptionPerSecond.Value * 60m * fuelPrice.Value / fuelItem.FuelCalories.Value;
+        return CalculateFuelQuantityForCraftMinutes(userCraftingTable.CraftingTable, fuelItem, 1m) * fuelPrice.Value;
+    }
+
+    /// <summary>
+    /// Returns the number of fuel items consumed for a craft duration.
+    /// This keeps quantity calculation independent from prices so it can be reused by shopping lists.
+    /// </summary>
+    public decimal CalculateFuelQuantityForCraftMinutes(CraftingTable craftingTable, ItemOrTag fuelItem, decimal craftMinutes)
+    {
+        var craftingTableItem = GetCraftingTableItem(craftingTable);
+
+        if (craftMinutes <= 0
+            || fuelItem.FuelCalories is not > 0
+            || craftingTableItem?.FuelConsumptionPerSecond is not > 0)
+        {
+            return 0m;
+        }
+
+        var energyConsumed = craftingTableItem.FuelConsumptionPerSecond.Value * 60m * craftMinutes;
+        return energyConsumed / fuelItem.FuelCalories.Value;
     }
 
     public bool IsEligibleFuel(CraftingTable craftingTable, ItemOrTag fuelItem)

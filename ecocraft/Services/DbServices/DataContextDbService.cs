@@ -64,8 +64,10 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		server.CraftingTables.ForEach(s => s.UserCraftingTables.Clear());
 		server.PluginModules.ForEach(s => s.UserCraftingTables.Clear());
 		server.ItemOrTags.ForEach(s => s.UserPrices.Clear());
+		server.ItemOrTags.ForEach(s => s.UserCraftingTables.Clear());
 		server.Recipes.ForEach(s => s.UserRecipes.Clear());
 		server.Recipes.SelectMany(s => s.Elements).ToList().ForEach(s => s.UserElements.Clear());
+		dataContext.UserMargins.ForEach(um => um.UserPrices.Clear());
 
 		var skills = server.Skills.ToDictionary(s => s.Id);
 		var talents = server.Skills.SelectMany(s => s.Talents).ToDictionary(s => s.Id);
@@ -74,6 +76,7 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		var itemOrTags = server.ItemOrTags.ToDictionary(s => s.Id);
 		var recipes = server.Recipes.ToDictionary(s => s.Id);
 		var elements = server.Recipes.SelectMany(s => s.Elements).ToDictionary(s => s.Id);
+		var userMargins = dataContext.UserMargins.ToDictionary(um => um.Id);
 		var userRecipes = dataContext.UserRecipes.ToDictionary(ur => ur.Id);
 
 
@@ -131,6 +134,7 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			if (uct.FuelItemId is Guid fuelItemId && itemOrTags.TryGetValue(fuelItemId, out var fuelItem) && !fuelItem.IsTag)
 			{
 				uct.FuelItem = fuelItem;
+				uct.FuelItem.UserCraftingTables.Add(uct);
 			}
 			else
 			{
@@ -155,6 +159,18 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 			up.ItemOrTag = itemOrTag;
 			up.ItemOrTag.UserPrices.Add(up);
+
+			up.DataContext = dataContext;
+			if (up.UserMarginId is Guid userMarginId && userMargins.TryGetValue(userMarginId, out var userMargin))
+			{
+				up.UserMargin = userMargin;
+				up.UserMargin.UserPrices.Add(up);
+			}
+			else
+			{
+				up.UserMargin = null;
+				up.UserMarginId = null;
+			}
 		});
 
 		dataContext.UserRecipes.ToList().ForEach(ur =>
@@ -194,8 +210,35 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			ue.DataContext = dataContext;
 			ue.Element = element;
 			ue.UserRecipe = userRecipe;
+			ue.UserPricesPrimaryOf.Clear();
 			ue.Element.UserElements.Add(ue);
 			userRecipe.UserElements.Add(ue);
+		});
+
+		var userElements = dataContext.UserElements.ToDictionary(ue => ue.Id);
+		var userPrices = dataContext.UserPrices.ToDictionary(up => up.Id);
+		dataContext.UserPrices.ForEach(up =>
+		{
+			if (up.PrimaryUserPriceId is Guid primaryUserPriceId && userPrices.TryGetValue(primaryUserPriceId, out var primaryUserPrice))
+			{
+				up.PrimaryUserPrice = primaryUserPrice;
+			}
+			else
+			{
+				up.PrimaryUserPrice = null;
+				up.PrimaryUserPriceId = null;
+			}
+
+			if (up.PrimaryUserElementId is Guid primaryUserElementId && userElements.TryGetValue(primaryUserElementId, out var primaryUserElement))
+			{
+				up.PrimaryUserElement = primaryUserElement;
+				up.PrimaryUserElement.UserPricesPrimaryOf.Add(up);
+			}
+			else
+			{
+				up.PrimaryUserElement = null;
+				up.PrimaryUserElementId = null;
+			}
 		});
 	}
 

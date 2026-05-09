@@ -470,6 +470,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
     public List<UserPrice> UserPrices { get; set; } = [];
+    public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
 

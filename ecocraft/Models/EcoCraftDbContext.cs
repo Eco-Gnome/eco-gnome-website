@@ -416,7 +416,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 
 		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(uct => uct.FuelItem)
-			.WithMany()
+			.WithMany(iot => iot.UserCraftingTables)
 			.HasForeignKey(uct => uct.FuelItemId)
 			.OnDelete(DeleteBehavior.SetNull)
 			.IsRequired(false);

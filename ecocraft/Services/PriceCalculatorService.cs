@@ -490,6 +490,8 @@ public class PriceCalculatorService(
                     }
                 } while (nbHandled > 0);
 
+                CalculateFuelTagPrices(calculationContext, dataContext);
+
                 if (recipesWithMissingUserElements.Count > 0)
                 {
                     logger.LogWarning(
@@ -575,6 +577,41 @@ public class PriceCalculatorService(
                 dataContext.UserElements.Count,
                 dataContext.UserPrices.Count);
             throw;
+        }
+    }
+
+    private void CalculateFuelTagPrices(CalculationContext calculationContext, DataContext dataContext)
+    {
+        foreach (var fuelGroup in GetFuelItemGroupsForDisplay(dataContext).Where(group => group.Tag is not null))
+        {
+            var tagUserPrice = calculationContext.GetUserPrice(fuelGroup.Tag!);
+            if (tagUserPrice is null || tagUserPrice.OverrideIsBought)
+            {
+                continue;
+            }
+
+            if (tagUserPrice.PrimaryUserPrice?.Price is not null)
+            {
+                calculationContext.TrySetUserPrice(tagUserPrice, tagUserPrice.PrimaryUserPrice.Price, tagUserPrice.PrimaryUserPrice.MarginPrice);
+                continue;
+            }
+
+            var associatedFuelPrices = fuelGroup.Items
+                .Select(calculationContext.GetUserPrice)
+                .Where(userPrice => userPrice?.ItemOrTag.FuelCalories is > 0)
+                .Cast<UserPrice>()
+                .ToList();
+
+            if (associatedFuelPrices.Count != fuelGroup.Items.Count
+                || associatedFuelPrices.Any(userPrice => userPrice.Price is null))
+            {
+                calculationContext.TrySetUserPrice(tagUserPrice, null, null);
+                continue;
+            }
+
+            var cheapestFuel = associatedFuelPrices
+                .MinBy(userPrice => userPrice.Price!.Value / userPrice.ItemOrTag.FuelCalories!.Value)!;
+            calculationContext.TrySetUserPrice(tagUserPrice, cheapestFuel.Price, cheapestFuel.MarginPrice);
         }
     }
 

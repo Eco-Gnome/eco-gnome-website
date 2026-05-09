@@ -1354,7 +1354,7 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ecocraft.Models.ItemOrTag", "FuelItem")
-                        .WithMany()
+                        .WithMany("UserCraftingTables")
                         .HasForeignKey("FuelItemId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -1583,6 +1583,8 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.ItemOrTag", b =>
                 {
                     b.Navigation("Elements");
+
+                    b.Navigation("UserCraftingTables");
 
                     b.Navigation("UserPrices");
                 });

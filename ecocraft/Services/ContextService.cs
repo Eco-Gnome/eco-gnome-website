@@ -334,7 +334,6 @@ public class ContextService(
                 CraftingTable = uct.CraftingTable,
                 PluginModule = uct.PluginModule,
                 FuelItem = uct.FuelItem,
-                FuelItemId = uct.FuelItemId,
                 CraftMinuteFee = uct.CraftMinuteFee,
                 SkilledPluginModules = uct.SkilledPluginModules.ToList(),
             };
