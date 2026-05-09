@@ -150,10 +150,25 @@ public class UserServerDataService(
 
     public void RecalculateUserRecipes(EcoCraftDbContext context, DataContext dataContext, Server server)
     {
+        var hideFlavourVariants = dataContext.UserSettings.First().HideFlavourVariants;
+
+        // Only skip a flavour when the family has a canonical sibling — otherwise items
+        // producible only via flavour recipes (e.g. ParticipationTrophy) would vanish.
+        var familiesWithDefault = hideFlavourVariants
+            ? server.Recipes.Where(r => r.IsDefault).Select(r => r.FamilyName).ToHashSet()
+            : new HashSet<string>();
+
+        bool IsFlavourSkippable(Recipe r) =>
+            hideFlavourVariants && !r.IsDefault && familiesWithDefault.Contains(r.FamilyName);
+
         // We remove all recipes that does not meet the requirements
         foreach (var userRecipe in dataContext.UserRecipes.ToList())
         {
             if (userRecipe.Recipe.Skill is not null && userRecipe.Recipe.SkillLevel > dataContext.UserSkills.First(us => us.Skill == userRecipe.Recipe.Skill).Level)
+            {
+                RemoveUserRecipe(context, userRecipe);
+            }
+            else if (IsFlavourSkippable(userRecipe.Recipe))
             {
                 RemoveUserRecipe(context, userRecipe);
             }
@@ -172,7 +187,7 @@ public class UserServerDataService(
                 recipesToAdd = recipesToAdd.Where(r => r.SkillLevel <= userSkill.Level).ToList();
             }
 
-            recipesToAdd = recipesToAdd.Where(r => !selectedRecipes.Contains(r)).ToList();
+            recipesToAdd = recipesToAdd.Where(r => !selectedRecipes.Contains(r) && !IsFlavourSkippable(r)).ToList();
 
             foreach (var recipe in recipesToAdd)
             {

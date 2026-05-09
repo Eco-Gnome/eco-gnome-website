@@ -438,6 +438,12 @@
                                             <MudCheckBox T="bool" Value="_hideBlueprints" Variant="Variant.Outlined" ValueChanged="OnHideBlueprintsChanged"/>
                                         </MudStack>
                                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.HideFlavourVariants.Tooltip")">
+                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.HideFlavourVariants.HideFlavourVariants")</MudText>
+                                            </MudTooltip>
+                                            <MudCheckBox T="bool" Value="_selectedDataContext.UserSettings.First().HideFlavourVariants" Variant="Variant.Outlined" ValueChanged="OnOptionHideFlavourVariantsChanged"/>
+                                        </MudStack>
+                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                                             <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.Tooltip")">
                                                 <MudText Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.LevelAccessible.LevelAccessible")</MudText>
                                             </MudTooltip>
@@ -2295,6 +2301,20 @@
     private async Task OnOptionOnlyLevelChanged()
     {
         _selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes = !_selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserSettingDbService.UpdateAll(context, _selectedDataContext!.UserSettings.First());
+            UserServerDataService.RecalculateUserRecipes(context, _selectedDataContext!, ContextService.CurrentServerData!);
+            return Task.CompletedTask;
+        });
+
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
+    }
+
+    private async Task OnOptionHideFlavourVariantsChanged()
+    {
+        _selectedDataContext!.UserSettings.First().HideFlavourVariants = !_selectedDataContext!.UserSettings.First().HideFlavourVariants;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
