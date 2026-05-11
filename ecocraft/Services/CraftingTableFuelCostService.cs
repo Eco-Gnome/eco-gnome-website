@@ -142,9 +142,9 @@ public class CraftingTableFuelCostService
             .FirstOrDefault();
     }
 
-    public decimal CalculateCraftMinuteFee(DataContext dataContext, UserCraftingTable userCraftingTable)
+    public decimal CalculateFuelCraftMinuteFee(DataContext dataContext, UserCraftingTable userCraftingTable)
     {
-        var fuelItem = userCraftingTable.FuelItem;
+        var fuelItem = ResolveFuelItem(userCraftingTable);
 
         if (fuelItem?.FuelCalories is not > 0
             || !IsEligibleFuel(userCraftingTable.CraftingTable, fuelItem))
@@ -158,7 +158,16 @@ public class CraftingTableFuelCostService
             return 0m;
         }
 
-        return CalculateFuelQuantityForCraftMinutes(userCraftingTable.CraftingTable, fuelItem, 1m) * fuelPrice.Value;
+        var craftingTableItem = GetCraftingTableItem(userCraftingTable.CraftingTable);
+        return CalculateFuelCraftMinuteFee(
+            craftingTableItem?.FuelConsumptionPerSecond,
+            fuelItem.FuelCalories,
+            fuelPrice.Value);
+    }
+
+    public decimal CalculateTotalCraftMinuteFee(DataContext dataContext, UserCraftingTable userCraftingTable)
+    {
+        return Math.Max(0m, userCraftingTable.AdditionalCraftMinuteFee) + CalculateFuelCraftMinuteFee(dataContext, userCraftingTable);
     }
 
     /// <summary>
@@ -180,6 +189,18 @@ public class CraftingTableFuelCostService
         return energyConsumed / fuelItem.FuelCalories.Value;
     }
 
+    public static decimal CalculateFuelCraftMinuteFee(decimal? fuelConsumptionPerSecond, decimal? fuelCalories, decimal? fuelPrice)
+    {
+        if (fuelConsumptionPerSecond is not > 0
+            || fuelCalories is not > 0
+            || fuelPrice is not > 0)
+        {
+            return 0m;
+        }
+
+        return fuelConsumptionPerSecond.Value * 60m / fuelCalories.Value * fuelPrice.Value;
+    }
+
     public bool IsEligibleFuel(CraftingTable craftingTable, ItemOrTag fuelItem)
     {
         return GetEligibleFuelItems(craftingTable).Any(item => item.Id == fuelItem.Id);
@@ -195,4 +216,15 @@ public class CraftingTableFuelCostService
         return craftingTableItem?.AcceptedFuelTags?.ToHashSet(StringComparer.Ordinal) ?? [];
     }
 
+    private ItemOrTag? ResolveFuelItem(UserCraftingTable userCraftingTable)
+    {
+        if (userCraftingTable.FuelItem is not null)
+        {
+            return userCraftingTable.FuelItem;
+        }
+
+        return userCraftingTable.FuelItemId is Guid fuelItemId
+            ? GetEligibleFuelItems(userCraftingTable.CraftingTable).FirstOrDefault(item => item.Id == fuelItemId)
+            : null;
+    }
 }

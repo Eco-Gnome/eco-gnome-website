@@ -284,7 +284,7 @@ public class PriceCalculatorService(
 
                 foreach (var userCraftingTable in dataContext.UserCraftingTables)
                 {
-                    var craftMinuteFee = craftingTableFuelCostService.CalculateCraftMinuteFee(dataContext, userCraftingTable);
+                    var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, userCraftingTable);
                     calculationContext.TrySetUserCraftingTableFee(userCraftingTable, craftMinuteFee);
                 }
 
@@ -443,7 +443,7 @@ public class PriceCalculatorService(
 
                         if (calculationContext.UserCraftingTablesByCraftingTableId.TryGetValue(userRecipe.Recipe.CraftingTableId, out var currentUserCraftingTable))
                         {
-                            var craftMinuteFee = craftingTableFuelCostService.CalculateCraftMinuteFee(dataContext, currentUserCraftingTable);
+                            var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, currentUserCraftingTable);
                             calculationContext.TrySetUserCraftingTableFee(currentUserCraftingTable, craftMinuteFee);
                             var craftMinutes = userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext, dynamicValueCalculationContext);
                             ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * craftMinutes;

@@ -410,9 +410,17 @@
         "AddSkill": "Ajouter une compétence",
         "CraftingTables": "Tables d'artisanat",
         "AddCraftingTable": "Ajouter une table d'artisanat",
+        "CraftingTableAdvancedConfiguration": "Configuration avancée",
         "CostMin": {
             "Tooltip": "Le coût lié à cette table d'artisanat pour chaque minute d'artisanat. Représente la consommation de carburant, le remplacement des pièces, les frais d'artisanat éventuels...",
             "CostMin": "Coût/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Coût/min additionnel",
+            "AdditionalTooltip": "Coût additionnel par minute de craft. Permet de prendre en compte par exemple le coût de location, les taxes ou lois, et le remplacement des pièces d'usure.",
+            "Detail": "Additionnel : {value} | Carburant : {value} | Total : {value}",
+            "Total": "Coût/min total",
+            "TotalTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}. Le détail se configure dans la fenêtre de détail de la table d'artisanat."
         },
         "Fuel": {
             "Fuel": "Carburant",
@@ -590,6 +598,7 @@
             "OnlyCommon": "Seulement les éléments en commun",
             "ContextSummaries": "Contextes comparés",
             "CraftingTablesComparison": "Comparaison des tables d'artisanat",
+            "CraftMinuteFeeTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}.",
             "NoCraftingTableData": "Aucune table d'artisanat configurée pour ce contexte.",
             "PriceOptionsComparison": "Options du calculateur de prix comparées",
             "ComparisonTable": "Comparaison",

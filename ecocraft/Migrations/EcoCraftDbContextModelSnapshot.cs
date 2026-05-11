@@ -737,6 +737,9 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("AdditionalCraftMinuteFee")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("CraftMinuteFee")
                         .HasColumnType("numeric");
 

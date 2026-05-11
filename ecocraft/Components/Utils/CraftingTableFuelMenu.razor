@@ -24,6 +24,9 @@
                 else
                 {
                     <EcoIcon Item="@SelectedFuelItem"/>
+                    <MudText Color="Color.Primary" Typo="Typo.body2" Class="fuel-menu-selected-cost">
+                        @FormatCraftMinuteFeeWithUnit(SelectedFuelItem!)
+                    </MudText>
                 }
                 <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Small" Class="fuel-menu-caret"/>
             </MudButton>
@@ -109,7 +112,7 @@
             : LocalizationService.GetTranslation(fuelItem);
         var craftMinuteFee = fuelItem is null
             ? 0m
-            : CraftingTableFuelCostService.CalculateCraftMinuteFee(
+            : CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(
                 DataContext,
                 new UserCraftingTable
                 {
@@ -122,7 +125,7 @@
 
     private string FormatCraftMinuteFee(ItemOrTag fuelItem)
     {
-        return FormatDecimal(CalculateCraftMinuteFee(fuelItem));
+        return FormatDecimal(CalculateFuelCraftMinuteFee(fuelItem));
     }
 
     private string FormatCraftMinuteFeeLabel(ItemOrTag fuelItem)
@@ -130,9 +133,14 @@
         return $"{LocalizationService.GetTranslation("PriceCalculator.Fuel.CostPerMinute")}: {FormatCraftMinuteFee(fuelItem)}";
     }
 
-    private decimal CalculateCraftMinuteFee(ItemOrTag fuelItem)
+    private string FormatCraftMinuteFeeWithUnit(ItemOrTag fuelItem)
     {
-        return CraftingTableFuelCostService.CalculateCraftMinuteFee(
+        return $"{FormatCraftMinuteFee(fuelItem)} $/min";
+    }
+
+    private decimal CalculateFuelCraftMinuteFee(ItemOrTag fuelItem)
+    {
+        return CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(
             DataContext,
             new UserCraftingTable
             {

@@ -1,13 +1,14 @@
-﻿@using ecocraft.Models
+@using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
+@using ecocraft.Extensions
 @inject LocalizationService LocalizationService
 @inject CraftingTableFuelCostService CraftingTableFuelCostService
 
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-            <EcoIcon Item="@CraftingTable" Size="64" />
+            <EcoIcon Item="@CraftingTable" Size="64"/>
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(CraftingTable)</MudText>
         </MudStack>
     </TitleContent>
@@ -37,18 +38,149 @@
                 </MudStack>
             }
 
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.CraftingTableAdvancedConfiguration")</MudText>
+                <MudStack Spacing="1">
+                    <MudText Style="color: #888">@LocalizationService.GetTranslation("Upgrade")</MudText>
+                    @if (CraftingTable.PluginModules.Count > 0)
+                    {
+                        <CraftingTablePluginModuleControl UserCraftingTable="UserCraftingTable"
+                                                          IncreaseRequested="IncreasePluginModule"
+                                                          DecreaseRequested="DecreasePluginModule"
+                                                          SkilledPluginModuleToggled="ToggleSkilledPluginModule"/>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
+                    }
+                </MudStack>
+
+                <MudPaper Elevation="0" Class="mud-background">
+                    <MudStack Spacing="0">
+                        <MudText Class="px-2 py-1">@LocalizationService.GetTranslation("RecipeDialog.AdditionalCosts")</MudText>
+                        <MudDivider/>
+                        <MudTable Items="@AdditionalCostRows"
+                                  Dense="true"
+                                  Hover="false"
+                                  Elevation="0"
+                                  Class="crafting-table-additional-cost-table">
+                            <HeaderContent>
+                                <MudTh Class="crafting-table-uniform-column">@LocalizationService.GetTranslation("PriceCalculator.Fuel.Fuel")</MudTh>
+                                <MudTh Class="crafting-table-uniform-column">
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.CraftMinuteFee.AdditionalTooltip")">
+                                        <MudText Typo="Typo.body2" Class="tooltip-text">@LocalizationService.GetTranslation("PriceCalculator.CraftMinuteFee.Additional")</MudText>
+                                    </MudTooltip>
+                                </MudTh>
+                                <MudTh Class="crafting-table-uniform-column">
+                                    <MudText Typo="Typo.body2" Align="Align.Right">@LocalizationService.GetTranslation("PriceCalculator.CraftMinuteFee.Total")</MudText>
+                                </MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Class="crafting-table-additional-cost-cell">
+                                    @if (CraftingTableFuelCostService.HasFuelConsumption(CraftingTable))
+                                    {
+                                        <CraftingTableFuelMenu UserCraftingTable="UserCraftingTable"
+                                                                DataContext="DataContext"
+                                                                EligibleFuelItems="EligibleFuelItems"
+                                                                FuelChanged="UpdateFuel"/>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">@LocalizationService.GetTranslation("PriceCalculator.Fuel.NoFuel")</MudText>
+                                    }
+                                </MudTd>
+                                <MudTd Class="crafting-table-additional-cost-cell">
+                                    <div class="crafting-table-additional-cost-value">
+                                        <MudNumericField T="decimal"
+                                                         Class="rectangle-input small-adornment-with-spin"
+                                                         Style="width: 80px;"
+                                                         Value="UserCraftingTable.AdditionalCraftMinuteFee"
+                                                         ValueChanged="UpdateAdditionalCraftMinuteFee"
+                                                         Immediate="true"
+                                                         DebounceInterval="300"
+                                                         Min="0"
+                                                         Format="0.##"
+                                                         Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                         Variant="Variant.Outlined"/>
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">$/min</MudText>
+                                    </div>
+                                </MudTd>
+                                <MudTd Class="crafting-table-additional-cost-cell" Style="text-align: right;">
+                                    <div class="crafting-table-additional-cost-total">
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">@FormatDecimal(GetTotalCraftMinuteFee())</MudText>
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">$/min</MudText>
+                                    </div>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudStack>
+                </MudPaper>
+            </MudStack>
+
             <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("RelatedRecipes")</MudText>
-            <RecipeList Recipes="@CraftingTable.Recipes"/>
+            <RecipeList Recipes="@CraftingTable.Recipes" Class="crafting-table-related-recipes-table" UniformColumns="true"/>
         </MudStack>
     </DialogContent>
 </MudDialog>
 
 
 @code {
-    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter, EditorRequired] public required DataContext DataContext { get; set; }
+    [Parameter, EditorRequired] public required UserCraftingTable UserCraftingTable { get; set; }
+    [Parameter] public Func<Guid?, Task>? FuelChanged { get; set; }
+    [Parameter] public Func<decimal, Task>? AdditionalCraftMinuteFeeChanged { get; set; }
+    [Parameter] public Func<List<PluginModule>, Task>? IncreasePluginModuleRequested { get; set; }
+    [Parameter] public Func<List<PluginModule>, Task>? DecreasePluginModuleRequested { get; set; }
+    [Parameter] public Func<PluginModule, Task>? SkilledPluginModuleToggled { get; set; }
 
-    [Parameter]
-    public required CraftingTable CraftingTable { get; set; }
+    private static readonly IReadOnlyList<int> AdditionalCostRows = [0];
+    private CraftingTable CraftingTable => UserCraftingTable.CraftingTable;
+    private IReadOnlyList<ItemOrTag> EligibleFuelItems => CraftingTableFuelCostService.GetEligibleFuelItems(CraftingTable);
+
+    private async Task UpdateFuel(Guid? fuelItemId)
+    {
+        if (FuelChanged is not null)
+        {
+            await FuelChanged(fuelItemId);
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateAdditionalCraftMinuteFee(decimal additionalCraftMinuteFee)
+    {
+        if (AdditionalCraftMinuteFeeChanged is not null)
+        {
+            await AdditionalCraftMinuteFeeChanged(additionalCraftMinuteFee);
+            StateHasChanged();
+        }
+    }
+
+    private async Task IncreasePluginModule(List<PluginModule> pluginModules)
+    {
+        if (IncreasePluginModuleRequested is not null)
+        {
+            await IncreasePluginModuleRequested(pluginModules);
+            StateHasChanged();
+        }
+    }
+
+    private async Task DecreasePluginModule(List<PluginModule> pluginModules)
+    {
+        if (DecreasePluginModuleRequested is not null)
+        {
+            await DecreasePluginModuleRequested(pluginModules);
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleSkilledPluginModule(PluginModule pluginModule)
+    {
+        if (SkilledPluginModuleToggled is not null)
+        {
+            await SkilledPluginModuleToggled(pluginModule);
+            StateHasChanged();
+        }
+    }
 
     private static bool HasEnergyData(ItemOrTag itemOrTag)
     {
@@ -58,5 +190,15 @@
     private static string FormatEnergyValue(decimal? value)
     {
         return value is null ? "-" : Math.Round(value.Value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
+    }
+
+    private decimal GetTotalCraftMinuteFee()
+    {
+        return CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(DataContext, UserCraftingTable);
+    }
+
+    private static string FormatDecimal(decimal value)
+    {
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
     }
 }

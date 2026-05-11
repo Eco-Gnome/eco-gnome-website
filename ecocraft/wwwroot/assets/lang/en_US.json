@@ -418,9 +418,17 @@
         "AddSkill": "Add skill",
         "CraftingTables": "Crafting tables",
         "AddCraftingTable": "Add crafting table",
+        "CraftingTableAdvancedConfiguration": "Advanced configuration",
         "CostMin": {
             "Tooltip": "The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...",
             "CostMin": "Cost/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Additional cost/min",
+            "AdditionalTooltip": "Additional cost per crafting minute. Use it to include costs such as table rental, taxes or laws, and Parts replacement.",
+            "Detail": "Additional: {value} | Fuel: {value} | Total: {value}",
+            "Total": "Total cost/min",
+            "TotalTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}. Configure the details in the crafting table detail window."
         },
         "Fuel": {
             "Fuel": "Fuel",
@@ -598,6 +606,7 @@
             "OnlyCommon": "Only common elements",
             "ContextSummaries": "Compared contexts",
             "CraftingTablesComparison": "Crafting tables comparison",
+            "CraftMinuteFeeTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}.",
             "NoCraftingTableData": "No crafting table configured for this context.",
             "PriceOptionsComparison": "Compared Price Calculator options",
             "ComparisonTable": "Comparison",

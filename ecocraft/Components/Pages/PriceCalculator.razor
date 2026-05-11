@@ -252,12 +252,12 @@
                                         <HeaderContent>
                                             <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
                                             <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                            <MudTh Class="p-0 pl-1">@LocalizationService.GetTranslation("PriceCalculator.Fuel.Fuel")</MudTh>
+                                            <MudTh Class="p-0 pl-1">@LocalizationService.GetTranslation("PriceCalculator.CostMin.CostMin")</MudTh>
                                             <MudTh Class="px-1"></MudTh>
                                         </HeaderContent>
                                         <RowTemplate>
                                             <MudTd Class="pa-1 crafting-table-config-cell">
-                                                <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context.CraftingTable))">
+                                                <MudLink Color="Color.Default" OnClick="@(() => ShowCraftingTableDialog(context))">
                                                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="crafting-table-config-stack">
                                                         <EcoIcon Item="@context.CraftingTable"/>
                                                         <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
@@ -265,61 +265,27 @@
                                                 </MudLink>
                                             </MudTd>
                                             <MudTd Class="pa-1 crafting-table-config-cell">
-                                                @if (context.CraftingTable.PluginModules.Count > 0)
-                                                {
-                                                    var genericPluginModules = context.CraftingTable.PluginModules
-                                                        .Where(p => p.Skill is null)
-                                                        .OrderByDescending(pm => pm.Percent)
-                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-                                                        .ToList();
-
-                                                    var skilledPluginModules = context.CraftingTable.PluginModules
-                                                        .Where(p => p.Skill is not null)
-                                                        .OrderByDescending(pm => pm.SkillPercent)
-                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-                                                        .ToList();
-
-                                                    var currentPluginModuleId = context.PluginModuleId;
-                                                    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
-
-                                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="crafting-table-config-stack">
-                                                        <MudIconButton Icon="@MDIIcons.Filled.Minus"
-                                                                       Size="Size.Small"
-                                                                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
-                                                                       OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
-                                                        <MudTooltip Text="@(context.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                            <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel"/>
-                                                        </MudTooltip>
-                                                        @if (!shouldDisableIncrease)
-                                                        {
-                                                            <MudIconButton Icon="@MDIIcons.Filled.Plus"
-                                                                           Size="Size.Small"
-                                                                           Disabled="shouldDisableIncrease"
-                                                                           OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
-                                                        }
-
-                                                        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
-                                                        {
-                                                            @foreach (var skilledPluginModule in skilledPluginModules)
-                                                            {
-                                                                <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
-                                                                    <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
-                                                                        <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(context.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
-                                                                    </MudTooltip>
-                                                                </MudLink>
-                                                            }
-                                                        }
-                                                    </MudStack>
-                                                }
+                                                <CraftingTablePluginModuleControl UserCraftingTable="context"
+                                                                                  Class="crafting-table-config-stack"
+                                                                                  IncreaseRequested="@(pluginModules => IncreasePluginModule(context, pluginModules))"
+                                                                                  DecreaseRequested="@(pluginModules => DecreasePluginModule(context, pluginModules))"
+                                                                                  SkilledPluginModuleToggled="@(pluginModule => ToggleSkilledPluginModule(context, pluginModule))"/>
                                             </MudTd>
                                             <MudTd Class="px-1 crafting-table-config-cell">
-                                                @if (CraftingTableFuelCostService.HasFuelConsumption(context.CraftingTable))
-                                                {
-                                                    <CraftingTableFuelMenu UserCraftingTable="context"
-                                                                            DataContext="_selectedDataContext"
-                                                                            EligibleFuelItems="GetEligibleFuelItems(context)"
-                                                                            FuelChanged="@(fuelItemId => UpdateCraftingTableFuel(context, fuelItemId))"/>
-                                                }
+                                                <MudTooltip Text="@GetCraftMinuteFeeConfigurationTooltip(context)">
+                                                    <MudNumericField T="decimal"
+                                                                     Class="rectangle-input small-adornment"
+                                                                     Style="width: 75px;"
+                                                                     Value="@GetCraftMinuteFeeConfigurationValue(context)"
+                                                                     Disabled="true"
+                                                                     HideSpinButtons="true"
+                                                                     Format="0.##"
+                                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                                     Adornment="Adornment.End"
+                                                                     AdornmentIcon="@MDIIcons.Filled.Calculator"
+                                                                     AdornmentColor="Color.Default"
+                                                                     Variant="Variant.Outlined"/>
+                                                </MudTooltip>
                                             </MudTd>
                                             <MudTd Class="px-1">
                                                 <MudIconButton Icon="@Icons.Material.Filled.Clear"
@@ -2841,14 +2807,24 @@
         StateHasChanged();
     }
 
-    private async Task ShowCraftingTableDialog(CraftingTable craftingTable)
+    private async Task ShowCraftingTableDialog(UserCraftingTable userCraftingTable)
     {
         var parameters = new DialogParameters
         {
-            ["CraftingTable"] = craftingTable,
+            ["DataContext"] = _selectedDataContext!,
+            ["UserCraftingTable"] = userCraftingTable,
+            ["FuelChanged"] = new Func<Guid?, Task>(fuelItemId => UpdateCraftingTableFuel(userCraftingTable, fuelItemId)),
+            ["AdditionalCraftMinuteFeeChanged"] = new Func<decimal, Task>(value => UpdateCraftingTableAdditionalCraftMinuteFee(userCraftingTable, value)),
+            ["IncreasePluginModuleRequested"] = new Func<List<PluginModule>, Task>(pluginModules => IncreasePluginModule(userCraftingTable, pluginModules)),
+            ["DecreasePluginModuleRequested"] = new Func<List<PluginModule>, Task>(pluginModules => DecreasePluginModule(userCraftingTable, pluginModules)),
+            ["SkilledPluginModuleToggled"] = new Func<PluginModule, Task>(pluginModule => ToggleSkilledPluginModule(userCraftingTable, pluginModule)),
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
-        await DialogService.ShowAsync<CraftingTableDialog>(LocalizationService.GetTranslation(craftingTable), parameters, options);
+        var dialog = await DialogService.ShowAsync<CraftingTableDialog>(LocalizationService.GetTranslation(userCraftingTable.CraftingTable), parameters, options);
+        await dialog.Result;
+
+        RefreshCategorizedDisplayCaches();
+        StateHasChanged();
     }
 
     private async Task ShowSkillDialog(Skill skill)
@@ -2919,7 +2895,7 @@
             });
         }
 
-        userCraftingTable.CraftMinuteFee = CraftingTableFuelCostService.CalculateCraftMinuteFee(_selectedDataContext!, userCraftingTable);
+        userCraftingTable.CraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -2930,9 +2906,50 @@
         await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
     }
 
-    private IReadOnlyList<ItemOrTag> GetEligibleFuelItems(UserCraftingTable userCraftingTable)
+    private async Task UpdateCraftingTableAdditionalCraftMinuteFee(UserCraftingTable userCraftingTable, decimal additionalCraftMinuteFee)
     {
-        return CraftingTableFuelCostService.GetEligibleFuelItems(userCraftingTable.CraftingTable);
+        additionalCraftMinuteFee = Math.Max(0m, additionalCraftMinuteFee);
+        if (userCraftingTable.AdditionalCraftMinuteFee == additionalCraftMinuteFee)
+        {
+            return;
+        }
+
+        userCraftingTable.AdditionalCraftMinuteFee = additionalCraftMinuteFee;
+        userCraftingTable.CraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserCraftingTableDbService.UpdateAdditionalCraftMinuteFee(context, userCraftingTable);
+            return Task.CompletedTask;
+        });
+
+        await RequestCalculate(CalculateTriggerOrigin.SettingsChange);
+    }
+
+    private string GetCraftMinuteFeeConfigurationTooltip(UserCraftingTable userCraftingTable)
+    {
+        var fuelCraftMinuteFee = _selectedDataContext is null
+            ? 0m
+            : CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(_selectedDataContext, userCraftingTable);
+        var totalCraftMinuteFee = GetCraftMinuteFeeConfigurationValue(userCraftingTable);
+
+        return LocalizationService.GetTranslation(
+            "PriceCalculator.CraftMinuteFee.TotalTooltip",
+            FormatCraftMinuteFee(userCraftingTable.AdditionalCraftMinuteFee),
+            FormatCraftMinuteFee(fuelCraftMinuteFee),
+            FormatCraftMinuteFee(totalCraftMinuteFee));
+    }
+
+    private decimal GetCraftMinuteFeeConfigurationValue(UserCraftingTable userCraftingTable)
+    {
+        return _selectedDataContext is null
+            ? userCraftingTable.CraftMinuteFee
+            : CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext, userCraftingTable);
+    }
+
+    private static string FormatCraftMinuteFee(decimal value)
+    {
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
     }
 
     private async Task EnsureCraftingTableFuelUserPricesIfNeeded()

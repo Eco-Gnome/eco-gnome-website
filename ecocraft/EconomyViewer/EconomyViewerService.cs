@@ -805,14 +805,49 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
             .Include(uct => uct.CraftingTable)
             .Include(uct => uct.PluginModule)
             .Include(uct => uct.FuelItem)
+            .ThenInclude(fuelItem => fuelItem!.LocalizedName)
             .Include(uct => uct.SkilledPluginModules)
             .ToListAsync();
 
         var fuelItemIds = userCraftingTables
-            .Where(uct => uct.FuelItemId is not null)
-            .Select(uct => uct.FuelItemId!.Value)
+            .Where(uct => uct.FuelItem is not null)
+            .Select(uct => uct.FuelItem!.Id)
             .Distinct()
             .ToList();
+        var fuelPriceByContextAndItem = await GetFuelPricesByContextAndItemAsync(context, contextIds, fuelItemIds);
+        var craftingTableFuelConsumptionByServerAndName = await GetCraftingTableFuelConsumptionByServerAndNameAsync(context, userCraftingTables);
+
+        return userCraftingTables.Select(uct =>
+            {
+                var additionalCraftMinuteFee = Math.Max(0m, uct.AdditionalCraftMinuteFee);
+                var fuelCraftMinuteFee = CalculateFuelCraftMinuteFee(uct, fuelPriceByContextAndItem, craftingTableFuelConsumptionByServerAndName);
+
+                return new EconomyPlayerCraftingTableSummary
+                {
+                    DataContextId = uct.DataContextId,
+                    CraftingTableId = uct.CraftingTableId,
+                    CraftingTableName = uct.CraftingTable.Name,
+                    PluginModuleId = uct.PluginModuleId,
+                    PluginModuleName = uct.PluginModule?.Name,
+                    SkilledPluginModuleIds = uct.SkilledPluginModules.Select(pm => pm.Id).ToList(),
+                    FuelItem = uct.FuelItem,
+                    AdditionalCraftMinuteFee = additionalCraftMinuteFee,
+                    FuelCraftMinuteFee = fuelCraftMinuteFee,
+                    CraftMinuteFee = additionalCraftMinuteFee + fuelCraftMinuteFee
+                };
+            })
+            .ToList();
+    }
+
+    private static async Task<Dictionary<(Guid DataContextId, Guid FuelItemId), decimal?>> GetFuelPricesByContextAndItemAsync(
+        EcoCraftDbContext context,
+        IReadOnlyCollection<Guid> contextIds,
+        IReadOnlyCollection<Guid> fuelItemIds)
+    {
+        if (contextIds.Count == 0 || fuelItemIds.Count == 0)
+        {
+            return [];
+        }
 
         var fuelPrices = await context.UserPrices
             .AsNoTracking()
@@ -820,34 +855,79 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
             .Select(up => new
             {
                 up.DataContextId,
-                up.ItemOrTagId,
+                FuelItemId = up.ItemOrTagId,
                 up.Price
             })
             .ToListAsync();
 
-        var fuelPriceByContextAndItem = fuelPrices
-            .GroupBy(fuelPrice => (fuelPrice.DataContextId, fuelPrice.ItemOrTagId))
+        return fuelPrices
+            .GroupBy(fuelPrice => (fuelPrice.DataContextId, fuelPrice.FuelItemId))
             .ToDictionary(
                 group => group.Key,
                 group => group.First().Price);
+    }
 
-        return userCraftingTables.Select(uct => new EconomyPlayerCraftingTableSummary
+    private static async Task<Dictionary<(Guid ServerId, string CraftingTableName), decimal?>> GetCraftingTableFuelConsumptionByServerAndNameAsync(
+        EcoCraftDbContext context,
+        IReadOnlyCollection<UserCraftingTable> userCraftingTables)
+    {
+        var craftingTableKeys = userCraftingTables
+            .Select(uct => new
             {
-                DataContextId = uct.DataContextId,
-                CraftingTableId = uct.CraftingTableId,
-                CraftingTableName = uct.CraftingTable.Name,
-                PluginModuleId = uct.PluginModuleId,
-                PluginModuleName = uct.PluginModule?.Name,
-                SkilledPluginModuleIds = uct.SkilledPluginModules.Select(pm => pm.Id).ToList(),
-                CraftMinuteFee = uct.CraftMinuteFee,
-                FuelItemId = uct.FuelItemId,
-                FuelItemName = uct.FuelItem?.Name,
-                FuelPrice = uct.FuelItemId is Guid fuelItemId
-                            && fuelPriceByContextAndItem.TryGetValue((uct.DataContextId, fuelItemId), out var fuelPrice)
-                    ? fuelPrice
-                    : null
+                uct.CraftingTable.ServerId,
+                uct.CraftingTable.Name
             })
+            .Distinct()
             .ToList();
+
+        if (craftingTableKeys.Count == 0)
+        {
+            return [];
+        }
+
+        var serverIds = craftingTableKeys.Select(key => key.ServerId).Distinct().ToList();
+        var craftingTableNames = craftingTableKeys.Select(key => key.Name).Distinct().ToList();
+        var craftingTableItems = await context.ItemOrTags
+            .AsNoTracking()
+            .Where(item => !item.IsTag
+                           && serverIds.Contains(item.ServerId)
+                           && craftingTableNames.Contains(item.Name))
+            .Select(item => new
+            {
+                item.ServerId,
+                CraftingTableName = item.Name,
+                item.FuelConsumptionPerSecond
+            })
+            .ToListAsync();
+
+        return craftingTableItems
+            .GroupBy(item => (item.ServerId, item.CraftingTableName))
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().FuelConsumptionPerSecond);
+    }
+
+    private static decimal CalculateFuelCraftMinuteFee(
+        UserCraftingTable userCraftingTable,
+        IReadOnlyDictionary<(Guid DataContextId, Guid FuelItemId), decimal?> fuelPriceByContextAndItem,
+        IReadOnlyDictionary<(Guid ServerId, string CraftingTableName), decimal?> craftingTableFuelConsumptionByServerAndName)
+    {
+        var fuelItem = userCraftingTable.FuelItem;
+        if (fuelItem?.FuelCalories is not > 0
+            || !fuelPriceByContextAndItem.TryGetValue((userCraftingTable.DataContextId, fuelItem.Id), out var fuelPrice)
+            || fuelPrice is null
+            || !craftingTableFuelConsumptionByServerAndName.TryGetValue(
+                (userCraftingTable.CraftingTable.ServerId, userCraftingTable.CraftingTable.Name),
+                out var fuelConsumptionPerSecond)
+            || fuelConsumptionPerSecond is not > 0)
+        {
+            return 0m;
+        }
+
+        return CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(
+            fuelConsumptionPerSecond,
+            fuelItem.FuelCalories,
+            fuelPrice);
     }
 
     private async Task<List<EconomyPlayerComparisonRow>> BuildComparisonRowsAsync(

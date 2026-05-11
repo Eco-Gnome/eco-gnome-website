@@ -151,10 +151,10 @@ public class EconomyPlayerCraftingTableSummary
     public Guid? PluginModuleId { get; set; }
     public string? PluginModuleName { get; set; }
     public List<Guid> SkilledPluginModuleIds { get; set; } = [];
+    public ItemOrTag? FuelItem { get; set; }
+    public decimal AdditionalCraftMinuteFee { get; set; }
+    public decimal FuelCraftMinuteFee { get; set; }
     public decimal CraftMinuteFee { get; set; }
-    public Guid? FuelItemId { get; set; }
-    public string? FuelItemName { get; set; }
-    public decimal? FuelPrice { get; set; }
 }
 
 public class EconomyPlayerComparisonRow

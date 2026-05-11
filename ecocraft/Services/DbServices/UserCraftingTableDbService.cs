@@ -59,6 +59,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			CraftingTableId = userCraftingTable.CraftingTable.Id,
 			PluginModuleId = userCraftingTable.PluginModule?.Id,
 			FuelItemId = userCraftingTable.FuelItem?.Id,
+			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
 			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
 		};
 	}
@@ -81,6 +82,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
 		existing.FuelItemId = userCraftingTable.FuelItem?.Id;
+		existing.AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee;
 		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
 
 		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the
@@ -118,6 +120,20 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		var stub = new UserCraftingTable { Id = userCraftingTable.Id, CraftMinuteFee = userCraftingTable.CraftMinuteFee };
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+	}
+
+	public void UpdateAdditionalCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	{
+		var stub = new UserCraftingTable
+		{
+			Id = userCraftingTable.Id,
+			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
+			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+		};
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.AdditionalCraftMinuteFee).IsModified = true;
 		entry.Property(x => x.CraftMinuteFee).IsModified = true;
 	}
 

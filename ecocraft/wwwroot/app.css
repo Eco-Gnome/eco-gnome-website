@@ -89,6 +89,46 @@
     min-height: 36px;
 }
 
+.crafting-table-additional-cost-table .mud-table-container {
+    overflow: visible;
+}
+
+.crafting-table-additional-cost-table .mud-table-root {
+    background-color: transparent;
+    table-layout: fixed;
+}
+
+.crafting-table-related-recipes-table .mud-table-root {
+    table-layout: fixed;
+}
+
+.crafting-table-uniform-column,
+.recipe-list-uniform-column {
+    width: 33.3333%;
+}
+
+.crafting-table-additional-cost-table .mud-table-cell {
+    padding: 6px 12px !important;
+}
+
+.crafting-table-additional-cost-cell {
+    vertical-align: middle !important;
+}
+
+.crafting-table-additional-cost-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.crafting-table-additional-cost-total {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
 .fuel-menu-activator {
     min-width: 0 !important;
     width: auto;
@@ -98,7 +138,11 @@
 
 .fuel-menu-activator .mud-button-label {
     align-items: center;
-    gap: 2px;
+    gap: 4px;
+}
+
+.fuel-menu-selected-cost {
+    white-space: nowrap;
 }
 
 .fuel-menu-caret {
