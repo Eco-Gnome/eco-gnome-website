@@ -65,13 +65,17 @@ public partial class ImportDataService
     private string GetModifierName(Modifier modifier) => $"{modifier.DynamicType}:{modifier.Skill?.Name ?? modifier.Talent?.Name}";
     private string GetModifierName(ModifierDto modifier) => $"{modifier.DynamicType}:{modifier.Item}";
 
-    private static LocalizedField TranslationsToLocalizedField(Server server,
+    private static LocalizedField TranslationsToLocalizedField(EcoCraftDbContext context, Server server,
         Dictionary<LanguageCode, string> translations, LocalizedField? localizedField = null)
     {
-        localizedField ??= new LocalizedField
+        if (localizedField is null)
         {
-            Server = server
-        };
+            // Track the new row as Added right away. Otherwise a later context.X.Update(parent) call
+            // would walk the graph and tag this untracked-but-keyed entity as Modified, producing
+            // an UPDATE on a row that doesn't exist in the DB (0 rows affected -> concurrency error).
+            localizedField = new LocalizedField { Server = server };
+            context.Add(localizedField);
+        }
 
         foreach (var translation in translations)
         {

@@ -49,7 +49,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 	}
 
 	// Explicit type dispatch — keeps the mapping visible and avoids reflection. Extend when
-	// a new User* entity joins the codebase.
+	// a new entity joins the codebase that needs cascade-safe deletion.
 	private async Task DispatchDeleteAsync(Type type, HashSet<Guid> ids)
 	{
 		if (type == typeof(UserSkill))
@@ -66,6 +66,26 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			await UserPrices.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(UserMargin))
 			await UserMargins.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(Skill))
+			await Skills.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(Talent))
+			await Talents.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(TalentBonus))
+			await TalentBonuses.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(PluginModule))
+			await PluginModules.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(CraftingTable))
+			await CraftingTables.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(ItemOrTag))
+			await ItemOrTags.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(Recipe))
+			await Recipes.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(Element))
+			await Elements.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(DynamicValue))
+			await DynamicValues.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(Modifier))
+			await Modifiers.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else
 			throw new InvalidOperationException($"No QueueDelete handler registered for {type.Name}. Add it to DispatchDeleteAsync.");
 	}

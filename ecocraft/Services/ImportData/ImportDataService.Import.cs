@@ -16,11 +16,11 @@ public partial class ImportDataService
 
             if (dbSkill is null)
             {
-                dbSkill = ImportSkill(context, server, newSkill.Name, TranslationsToLocalizedField(server, newSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
+                dbSkill = ImportSkill(context, server, newSkill.Name, TranslationsToLocalizedField(context, server, newSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
             }
             else
             {
-                RefreshSkill(context, dbSkill, TranslationsToLocalizedField(server, newSkill.LocalizedName, dbSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
+                RefreshSkill(context, dbSkill, TranslationsToLocalizedField(context, server, newSkill.LocalizedName, dbSkill.LocalizedName), newSkill.Profession, newSkill.MaxLevel, newSkill.LaborReducePercent);
             }
 
             ImportTalents(context, dbSkill, newSkill.Talents);
@@ -48,8 +48,8 @@ public partial class ImportDataService
                     context,
                     skill,
                     newTalent.Name,
-                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName),
-                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription),
+                    TranslationsToLocalizedField(context, skill.Server, newTalent.LocalizedName),
+                    TranslationsToLocalizedField(context, skill.Server, newTalent.LocalizedDescription),
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
@@ -62,8 +62,8 @@ public partial class ImportDataService
                     context,
                     dbTalent,
                     skill,
-                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName),
-                    TranslationsToLocalizedField(skill.Server, newTalent.LocalizedDescription, dbTalent.LocalizedDescription),
+                    TranslationsToLocalizedField(context, skill.Server, newTalent.LocalizedName, dbTalent.LocalizedName),
+                    TranslationsToLocalizedField(context, skill.Server, newTalent.LocalizedDescription, dbTalent.LocalizedDescription),
                     newTalent.TalentGroupName,
                     newTalent.Level,
                     newTalent.MaxLevel,
@@ -158,11 +158,11 @@ public partial class ImportDataService
 
         if (dbPluginModule is null)
         {
-            ImportPluginModule(context, server, pluginModule.Name, TranslationsToLocalizedField(server, pluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
+            ImportPluginModule(context, server, pluginModule.Name, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
         }
         else
         {
-            RefreshPluginModule(context, dbPluginModule, TranslationsToLocalizedField(server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
+            RefreshPluginModule(context, dbPluginModule, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
         }
     }
 
@@ -183,7 +183,7 @@ public partial class ImportDataService
                     context,
                     server,
                     craftingTable.Name,
-                    TranslationsToLocalizedField(server, craftingTable.LocalizedName),
+                    TranslationsToLocalizedField(context, server, craftingTable.LocalizedName),
                     pluginModules
                 );
             }
@@ -192,7 +192,7 @@ public partial class ImportDataService
                 RefreshCraftingTable(
                     context,
                     dbCraftingTable,
-                    TranslationsToLocalizedField(server, craftingTable.LocalizedName, dbCraftingTable.LocalizedName),
+                    TranslationsToLocalizedField(context, server, craftingTable.LocalizedName, dbCraftingTable.LocalizedName),
                     pluginModules
                 );
             }
@@ -211,11 +211,11 @@ public partial class ImportDataService
 
         if (dbItem is null)
         {
-            dbItem = ImportItemOrTag(context, server, item.Name, TranslationsToLocalizedField(server, item.LocalizedName), isTag);
+            dbItem = ImportItemOrTag(context, server, item.Name, TranslationsToLocalizedField(context, server, item.LocalizedName), isTag);
         }
         else
         {
-            RefreshItemOrTag(context, dbItem, TranslationsToLocalizedField(server, item.LocalizedName, dbItem.LocalizedName), isTag);
+            RefreshItemOrTag(context, dbItem, TranslationsToLocalizedField(context, server, item.LocalizedName, dbItem.LocalizedName), isTag);
         }
 
         return dbItem;
@@ -231,10 +231,34 @@ public partial class ImportDataService
 
             var dbTag = ImportItem(context, server, tag, true);
 
-            dbTag.AssociatedItems = tag.AssociatedItems
+            // Diff the M:M instead of bulk-replacing the navigation collection. A bulk reassignment
+            // emits per-row DELETE/INSERT on the join table, and any join row that was already
+            // removed (e.g. by an earlier cascade in the same SaveChanges batch) makes one of those
+            // DELETEs return 0 rows -> DbUpdateConcurrencyException.
+            var newAssociatedItems = tag.AssociatedItems
                 .Select(i => ItemOrTags.FirstOrDefault(iot => iot.Name == i))
                 .Where(e => e is not null)
-                .ToList()!;
+                .Cast<ItemOrTag>()
+                .ToList();
+
+            var newAssociatedSet = new HashSet<ItemOrTag>(newAssociatedItems);
+            var oldAssociatedSet = new HashSet<ItemOrTag>(dbTag.AssociatedItems);
+
+            foreach (var item in dbTag.AssociatedItems.ToList())
+            {
+                if (!newAssociatedSet.Contains(item))
+                {
+                    dbTag.AssociatedItems.Remove(item);
+                }
+            }
+
+            foreach (var item in newAssociatedItems)
+            {
+                if (!oldAssociatedSet.Contains(item))
+                {
+                    dbTag.AssociatedItems.Add(item);
+                }
+            }
         }
 
         foreach (var dbTag in ItemOrTags.Where(iot => iot.IsTag).ToList())
@@ -284,7 +308,7 @@ public partial class ImportDataService
                         context,
                         server,
                         recipe.Name,
-                        TranslationsToLocalizedField(server, recipe.LocalizedName),
+                        TranslationsToLocalizedField(context, server, recipe.LocalizedName),
                         recipe.FamilyName,
                         dbSkill,
                         recipe.RequiredSkillLevel,
@@ -298,7 +322,7 @@ public partial class ImportDataService
                     RefreshRecipe(
                         context,
                         dbRecipe,
-                        TranslationsToLocalizedField(server, recipe.LocalizedName, dbRecipe.LocalizedName),
+                        TranslationsToLocalizedField(context, server, recipe.LocalizedName, dbRecipe.LocalizedName),
                         recipe.FamilyName,
                         dbSkill,
                         recipe.RequiredSkillLevel,
@@ -322,8 +346,13 @@ public partial class ImportDataService
                     recipe.Products[i].Index = i;
                 }
 
-                var dbElements = dbRecipe.Elements;
-                dbRecipe.Elements = [];
+                // Snapshot the existing elements; do NOT reassign dbRecipe.Elements.
+                // Reassigning a navigation collection whose FK is required+cascade triggers EF
+                // to mark every old child as Deleted in the tracker, which then races against
+                // the cascade chain at SaveChanges. Instead we diff the collection ourselves
+                // and route deletions through DeleteElement (which uses QueueDelete).
+                var dbElements = dbRecipe.Elements.ToList();
+                var matchedElements = new HashSet<Element>();
 
                 foreach (var element in recipe.Ingredients.Concat(recipe.Products))
                 {
@@ -340,8 +369,19 @@ public partial class ImportDataService
 
                     // element.Quantity * e.Quantity > 0 ensures "element" and "e" are both ingredients or products (You can have an itemOrTag both in ingredient and product => molds,
                     // so we need to be sure dbElement is the correct-retrieved element)
+                    // Null guards on e.ItemOrTag / e.Quantity: pre-existing rows can have a dangling
+                    // FK to an ItemOrTag from a different server (so it won't be in serverWithData.ItemOrTags
+                    // and identity-resolution can't populate the nav). Skipping them here means they
+                    // won't match anything new, so the orphan-cleanup loop below will delete them.
+                    // Cast to object? to bypass non-nullable annotation — the navs are declared
+                    // non-null in the model, but at runtime they really can be null (orphan FK,
+                    // unloaded cross-server reference) and we'd crash with NRE without these checks.
                     var dbElement = dbElements.FirstOrDefault(e =>
-                        e.ItemOrTag.Name == element.ItemOrTag && element.Quantity.BaseValue * e.Quantity.BaseValue > 0);
+                        !matchedElements.Contains(e)
+                        && (object?)e.ItemOrTag is not null
+                        && (object?)e.Quantity is not null
+                        && e.ItemOrTag.Name == element.ItemOrTag
+                        && element.Quantity.BaseValue * e.Quantity.BaseValue > 0);
 
                     // Specific for BarrelItem, still need to figure a way to auto calculate this
                     var specificBarrel = element is { ItemOrTag: "BarrelItem", Quantity.BaseValue: > 0, Index: > 0 };
@@ -358,6 +398,7 @@ public partial class ImportDataService
                     }
                     else
                     {
+                        matchedElements.Add(dbElement);
                         RefreshElement(
                             context,
                             dbElement,
@@ -366,11 +407,14 @@ public partial class ImportDataService
                             element.Index,
                             specificBarrel || (element.Quantity.BaseValue > 0 && recipe.Ingredients.FirstOrDefault(e => e.ItemOrTag == element.ItemOrTag) is not null)
                         );
-
-                        dbRecipe.Elements.Add(dbElement);
                     }
 
                     dbElement.Quantity = ImportDynamicValue(context, server, dbElement.Quantity, element.Quantity);
+                }
+
+                foreach (var orphanElement in dbElements.Where(e => !matchedElements.Contains(e)))
+                {
+                    DeleteElement(context, orphanElement);
                 }
 
                 var productsToEdit = dbRecipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index).ToList();

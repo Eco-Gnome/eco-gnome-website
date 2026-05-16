@@ -1,10 +1,25 @@
 ﻿using ecocraft.Models;
 using ICSharpCode.Decompiler.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services.ImportData;
 
 public partial class ImportDataService
 {
+    // Detach the entity from EF's change tracker, then queue a SQL DELETE for after SaveChanges.
+    // Detach prevents EF from emitting an UPDATE/DELETE for the entity inside SaveChanges, which
+    // would otherwise race against the DB-level cascade triggered by the queued delete and throw
+    // DbUpdateConcurrencyException on 0 rows affected. See EcoCraftDbContext.ContextSaveAsync.
+    private static void DetachAndQueueDelete<T>(EcoCraftDbContext context, T entity, Guid id) where T : class
+    {
+        var entry = context.Entry(entity);
+        if (entry.State != EntityState.Detached)
+        {
+            entry.State = EntityState.Detached;
+        }
+        context.QueueDelete<T>(id);
+    }
+
     private Skill ImportSkill(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, string? profession, int maxLevel, decimal[] laborReducePercent)
     {
         var skill = new Skill
@@ -36,7 +51,7 @@ public partial class ImportDataService
     private void DeleteSkill(EcoCraftDbContext context, Skill skill)
     {
         Skills.Remove(skill);
-        context.Skills.Remove(skill);
+        DetachAndQueueDelete(context, skill, skill.Id);
     }
 
     private Talent ImportTalent(EcoCraftDbContext context, Skill skill, string name, LocalizedField localizedName, LocalizedField localizedDescription, string talentGroupName, int level, int maxLevel, List<TalentBonusDto> bonuses)
@@ -77,7 +92,7 @@ public partial class ImportDataService
     {
         foreach (var existing in talent.Bonuses.ToList())
         {
-            context.TalentBonuses.Remove(existing);
+            DetachAndQueueDelete(context, existing, existing.Id);
         }
         talent.Bonuses.Clear();
 
@@ -101,7 +116,7 @@ public partial class ImportDataService
     private void DeleteTalent(EcoCraftDbContext context, Talent talent)
     {
         talent.Skill.Talents.Remove(talent);
-        context.Talents.Remove(talent);
+        DetachAndQueueDelete(context, talent, talent.Id);
     }
 
     private PluginModule ImportPluginModule(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, PluginType pluginType, decimal percent, Skill? skill, decimal? skillPercent)
@@ -137,7 +152,7 @@ public partial class ImportDataService
     private void DeletePluginModule(EcoCraftDbContext context, PluginModule pluginModule)
     {
         PluginModules.Remove(pluginModule);
-        context.PluginModules.Remove(pluginModule);
+        DetachAndQueueDelete(context, pluginModule, pluginModule.Id);
     }
 
     private CraftingTable ImportCraftingTable(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, List<PluginModule> pluginModules)
@@ -159,7 +174,26 @@ public partial class ImportDataService
     private void RefreshCraftingTable(EcoCraftDbContext context, CraftingTable craftingTable, LocalizedField localizedName, List<PluginModule> pluginModules)
     {
         craftingTable.LocalizedName = localizedName;
-        craftingTable.PluginModules = pluginModules;
+
+        // Diff the M:M instead of bulk-replacing the collection: see ImportTags for full rationale.
+        var newPluginModuleSet = new HashSet<PluginModule>(pluginModules);
+        var oldPluginModuleSet = new HashSet<PluginModule>(craftingTable.PluginModules);
+
+        foreach (var pluginModule in craftingTable.PluginModules.ToList())
+        {
+            if (!newPluginModuleSet.Contains(pluginModule))
+            {
+                craftingTable.PluginModules.Remove(pluginModule);
+            }
+        }
+
+        foreach (var pluginModule in pluginModules)
+        {
+            if (!oldPluginModuleSet.Contains(pluginModule))
+            {
+                craftingTable.PluginModules.Add(pluginModule);
+            }
+        }
 
         context.CraftingTables.Update(craftingTable);
     }
@@ -167,7 +201,7 @@ public partial class ImportDataService
     private void DeleteCraftingTable(EcoCraftDbContext context, CraftingTable craftingTable)
     {
         CraftingTables.Remove(craftingTable);
-        context.CraftingTables.Remove(craftingTable);
+        DetachAndQueueDelete(context, craftingTable, craftingTable.Id);
     }
 
     private ItemOrTag ImportItemOrTag(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, bool isTag)
@@ -197,7 +231,7 @@ public partial class ImportDataService
     private void DeleteItemOrTag(EcoCraftDbContext context, ItemOrTag itemOrTag)
     {
         ItemOrTags.Remove(itemOrTag);
-        context.ItemOrTags.Remove(itemOrTag);
+        DetachAndQueueDelete(context, itemOrTag, itemOrTag.Id);
     }
 
     private static void ApplyExportedItemFields(ItemOrTag dbItem, ItemDto item)
@@ -256,7 +290,7 @@ public partial class ImportDataService
     private void DeleteRecipe(EcoCraftDbContext context, Recipe recipe)
     {
         Recipes.Remove(recipe);
-        context.Recipes.Remove(recipe);
+        DetachAndQueueDelete(context, recipe, recipe.Id);
     }
 
     private DynamicValue ImportDynamicValue(EcoCraftDbContext context, decimal baseValue, Server server)
@@ -280,7 +314,7 @@ public partial class ImportDataService
 
     private void DeleteDynamicValue(EcoCraftDbContext context, DynamicValue dynamicValue)
     {
-        context.DynamicValues.Remove(dynamicValue);
+        DetachAndQueueDelete(context, dynamicValue, dynamicValue.Id);
     }
 
     private Modifier ImportModifier(EcoCraftDbContext context, DynamicValue dynamicValue, string dynamicType, string valueType, ISLinkedToModifier iSLinkedToModifier)
@@ -330,7 +364,7 @@ public partial class ImportDataService
     private void DeleteModifier(EcoCraftDbContext context, Modifier modifier)
     {
         modifier.DynamicValue.Modifiers.Remove(modifier);
-        context.Modifiers.Remove(modifier);
+        DetachAndQueueDelete(context, modifier, modifier.Id);
     }
 
     private Element ImportElement(EcoCraftDbContext context, Recipe recipe, ItemOrTag itemOrTag, int index, bool shouldReintegrate)
@@ -363,6 +397,6 @@ public partial class ImportDataService
     private void DeleteElement(EcoCraftDbContext context, Element element)
     {
         element.Recipe.Elements.Remove(element);
-        context.Elements.Remove(element);
+        DetachAndQueueDelete(context, element, element.Id);
     }
 }
