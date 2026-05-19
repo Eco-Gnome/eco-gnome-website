@@ -111,13 +111,15 @@ public class UserServerDataService(
 
     public void RemoveUserMargin(EcoCraftDbContext context, UserMargin userMargin)
     {
-        var replacementMargin = userMargin.DataContext.UserMargins.First();
+        var replacementMargin = userMargin.DataContext.UserMargins.First(um => um != userMargin);
 
-        foreach (var userPrice in userMargin.DataContext.UserPrices.Where(up => up.UserMargin == userMargin))
+        foreach (var userPrice in userMargin.DataContext.UserPrices.Where(up => up.UserMargin == userMargin).ToList())
         {
             userPrice.UserMargin = replacementMargin;
-            userPriceDbService.UpdateAll(context, userPrice);
+            userPrice.UserMarginId = replacementMargin.Id;
+            userPriceDbService.UpdateUserMargin(context, userPrice);
             replacementMargin.UserPrices.Add(userPrice);
+            userMargin.UserPrices.Remove(userPrice);
         }
 
         userMarginDbService.Destroy(context, userMargin);
