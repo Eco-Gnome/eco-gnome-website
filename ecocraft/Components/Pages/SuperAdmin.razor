@@ -1,6 +1,7 @@
-﻿@page "/super-admin"
+@page "/super-admin"
 @implements IDisposable
 @inject IJSRuntime JsRuntime
+@using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
@@ -13,6 +14,7 @@
 @inject ServerDbService ServerDbService
 @inject ModUploadHistoryDbService ModUploadHistoryDbService
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @inject LocalizationService LocalizationService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
@@ -25,199 +27,307 @@
     }
 
     <MudGrid>
-        <MudItem lg="6" md="12">
-            <MudTable Items="_users"
-                      Filter="new Func<User, bool>(SearchUser)"
-                      Virtualize="false"
-                      FixedHeader="true"
-                      Height="430px"
-                      Dense="true"
-                      Hover="true">
-                <HeaderContent>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ServersCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.CanUploadModCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.SuperAdminCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ActionCol")</MudTh>
-                </HeaderContent>
-                <ToolBarContent>
-                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-                        <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title")</MudText>
-                        <MudStack Style="width: 200px">
-                            <MudTextField @bind-Value="_searchUser"
-                                          Immediate
-                                          Placeholder="Search"
-                                          Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                          IconSize="Size.Small"
-                                          Class="mt-0"/>
-                        </MudStack>
-                    </MudStack>
-                </ToolBarContent>
-                <RowTemplate>
-                    <MudTd>
-                        <MudTooltip Text="@context.Id.ToString()">
-                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
-                        </MudTooltip>
-                        <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.CopySecretId")">
-                            <MudIconButton Icon="@Icons.Material.Outlined.FileCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.SecretId.ToString()))"/>
-                        </MudTooltip>
-                    </MudTd>
-                    <MudTd>
-                        @context.Pseudo
-                    </MudTd>
-                    <MudTd>
-                        <MudTooltip Text="@context.CreationDateTime.ToString()">
-                            <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
-                        </MudTooltip>
-                    </MudTd>
-                    <MudTd>
-                        <MudStack Row Spacing="0" Justify="Justify.Center" Class="gap-0">
-                            @context.UserServers.Count
-                            <MudTooltip Class="mr-4" Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServers")>
-                                <MudIcon Icon="@Icons.Material.Outlined.Dataset" Size="Size.Small"/>
-                            </MudTooltip>
-                            @context.UserServers.Count(us => us.IsAdmin)
-                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.HowMuchIsAdmin")>
-                                <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" Size="Size.Small"/>
-                            </MudTooltip>
-                        </MudStack>
-                    </MudTd>
-                    <MudTd>
-                        <MudIconButton Size="Size.Small"
-                                       Icon="@(context.CanUploadMod ? MDIIcons.Filled.Upload : MDIIcons.Filled.UploadOff)"
-                                       Color="@(context.CanUploadMod ? Color.Primary : Color.Default)"
-                                       OnClick="() => ToggleCanUploadMod(context)"/>
-                    </MudTd>
-                    <MudTd>
-                        <MudTooltip Text="@(context.SuperAdmin ? @LocalizationService.GetTranslation("SuperAdmin.UserTable.DemoteUser") : @LocalizationService.GetTranslation("SuperAdmin.UserTable.PromoteUser"))">
-                            <MudIconButton Color="@(context.SuperAdmin ? Color.Tertiary : Color.Default)"
-                                           Icon="@(context.SuperAdmin ? MDIIcons.Filled.Bank : MDIIcons.Filled.BankOff)"
-                                           Size="Size.Small"
-                                           OnClick="@(() => ToggleSuperAdmin(context))"/>
-                        </MudTooltip>
-                    </MudTd>
-                    <MudTd>
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.DeleteUser")>
-                                <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
-                                               Color="Color.Error"
-                                               Size="Size.Small"
-                                               OnClick="@(() => DeleteUser(context))"/>
-                            </MudTooltip>
-                        </MudStack>
-                    </MudTd>
-                </RowTemplate>
-                <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
-                </PagerContent>
-            </MudTable>
+        <MudItem xs="12">
+            <MudText Typo="Typo.h4" Class="mb-2">@LocalizationService.GetTranslation("SuperAdmin.Dashboard.Title")</MudText>
         </MudItem>
-        <MudItem lg="6" md="12">
-            <MudTable Items="_servers"
-                      Filter="new Func<Server, bool>(SearchServer)"
-                      Virtualize="false"
-                      FixedHeader="true"
-                      Height="430px"
-                      Dense="true"
-                      Hover="true">
-                <HeaderContent>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.ServerNameCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.DataCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ActionCol")</MudTh>
-                </HeaderContent>
-                <ToolBarContent>
-                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
-                        <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.Title")</MudText>
-                        <MudStack Style="width: 200px">
-                            <MudTextField @bind-Value="_searchServer"
-                                          Immediate
-                                          Placeholder="Search"
-                                          Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                          IconSize="Size.Small"
-                                          Class="mt-0"/>
-                        </MudStack>
+
+        <MudItem xs="12">
+            <div class="super-admin-kpi-row">
+                @foreach (var kpi in GetKpis())
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               Color="@kpi.Color"
+                               FullWidth
+                               Class="@($"super-admin-kpi-card {(kpi.IsActive ? "super-admin-kpi-card-active" : string.Empty)}")"
+                               OnClick="@(() => kpi.OnClick?.Invoke())">
+                        <div class="super-admin-kpi-content">
+                            <MudIcon Icon="@kpi.Icon" Size="Size.Small" Class="super-admin-kpi-icon"/>
+                            <MudText Typo="Typo.subtitle2" Class="super-admin-kpi-value">@kpi.Value</MudText>
+                            <MudText Typo="Typo.caption" Class="super-admin-kpi-label">@LocalizationService.GetTranslation(kpi.TitleKey)</MudText>
+                        </div>
+                    </MudButton>
+                }
+            </div>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Style="height: 100%">
+                <MudText Typo="Typo.h5" Class="mb-3">@LocalizationService.GetTranslation("SuperAdmin.Health.Title")</MudText>
+                @{
+                    var healthIssues = GetHealthIssues();
+                }
+                @if (healthIssues.Count == 0)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+                        @LocalizationService.GetTranslation("SuperAdmin.Health.NoIssues")
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudStack Spacing="2" Class="super-admin-health-list">
+                        @foreach (var issue in healthIssues)
+                        {
+                            <MudAlert Severity="@issue.Severity" Variant="Variant.Outlined" Icon="@issue.Icon">
+                                <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(issue.MessageKey, issue.Server?.Name ?? LocalizationService.GetTranslation("SuperAdmin.Health.GlobalScope"), StaleImportDays.ToString())</MudText>
+                                    @if (issue.Server is not null)
+                                    {
+                                        <MudButton Size="Size.Small" Variant="Variant.Text" OnClick="@(() => SelectHealthIssue(issue))">
+                                            @LocalizationService.GetTranslation("SuperAdmin.Health.OpenServer")
+                                        </MudButton>
+                                    }
+                                </MudStack>
+                            </MudAlert>
+                        }
                     </MudStack>
-                </ToolBarContent>
-                <RowTemplate>
-                    <MudTd>
-                        <MudTooltip Text="@context.Id.ToString()">
-                            <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
-                        </MudTooltip>
-                    </MudTd>
-                    <MudTd>@(context.IsDefault ? "[Default]" : "") @context.Name</MudTd>
-                    <MudTd>
-                        <MudTooltip Text="@context.CreationDateTime.ToString()">
-                            <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
-                        </MudTooltip>
-                    </MudTd>
-                    <MudTd>
-                        <MudIconButton Size="Size.Small" Color="Color.Default" Icon="@(context.IsEmpty ? MDIIcons.Outline.Battery : MDIIcons.Filled.BatteryHigh)"/>
-                    </MudTd>
-                    <MudTd>
-                        @context.UserServers.Count
-                    </MudTd>
-                    <MudTd>
-                        @(string.Join(", ", context.UserServers.Where(us => us.IsAdmin).Select(us => us.GetPseudo())))
-                    </MudTd>
-                    <MudTd>
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
-                                <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? MDIIcons.Filled.Shield : MDIIcons.Filled.ShieldOff)"
-                                               Size="Size.Small"
-                                               Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
-                                               OnClick="@(() => ToggleSelfAdmin(context))"/>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem lg="6" md="12">
+            <div class="super-admin-user-table">
+                <MudTable Items="_users"
+                          Filter="new Func<User, bool>(SearchUser)"
+                          Virtualize="false"
+                          FixedHeader="true"
+                          Height="430px"
+                          Dense="true"
+                          Hover="true">
+                    <ColGroup>
+                        <col style="width: 104px;" />
+                        <col />
+                        <col style="width: 64px;" />
+                        <col style="width: 56px;" />
+                        <col style="width: 52px;" />
+                        <col style="width: 64px;" />
+                        <col style="width: 64px;" />
+                        <col style="width: 76px;" />
+                    </ColGroup>
+                    <HeaderContent>
+                        <MudTh Class="super-admin-user-id-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Pseudo)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.CreationDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-count-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.UserServers.Count)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServersCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-admin-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.UserServers.Count(us => us.IsAdmin))">@LocalizationService.GetTranslation("SuperAdmin.UserTable.AdminServersCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-mod-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.CanUploadMod)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.CanUploadModCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-super-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.SuperAdmin)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.SuperAdminCol")</MudTableSortLabel></MudTh>
+                        <MudTh>@LocalizationService.GetTranslation("SuperAdmin.UserTable.ActionCol")</MudTh>
+                    </HeaderContent>
+                    <ToolBarContent>
+                        <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                            <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title")</MudText>
+                            <MudStack Style="width: 200px">
+                                <MudTextField @bind-Value="_searchUser"
+                                              Immediate
+                                              Placeholder="@LocalizationService.GetTranslation("Search")"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Class="mt-0"/>
+                            </MudStack>
+                        </MudStack>
+                    </ToolBarContent>
+                    <RowTemplate>
+                        <MudTd Class="super-admin-user-id-col">
+                            <MudTooltip Text="@context.Id.ToString()">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
                             </MudTooltip>
-                            <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
-                                <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
-                                               Color="@(context.IsDefault ? Color.Warning : Color.Default)"
-                                               Size="Size.Small"
-                                               OnClick="@(() => ToggleDefault(context))"/>
+                            <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.CopySecretId")">
+                                <MudIconButton Icon="@Icons.Material.Outlined.FileCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.SecretId.ToString()))"/>
                             </MudTooltip>
-                            @if (!context.IsDefault)
-                            {
-                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.ServerTable.DeleteServer")>
+                        </MudTd>
+                        <MudTd>
+                            @context.Pseudo
+                        </MudTd>
+                        <MudTd Class="super-admin-user-date-col">
+                            <MudTooltip Text="@context.CreationDateTime.ToString()">
+                                <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
+                            </MudTooltip>
+                        </MudTd>
+                        <MudTd Class="super-admin-user-count-col">
+                            <MudStack Row Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="gap-0">
+                                @context.UserServers.Count
+                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServers")>
+                                    <MudIcon Icon="@Icons.Material.Outlined.Dataset" Size="Size.Small"/>
+                                </MudTooltip>
+                            </MudStack>
+                        </MudTd>
+                        <MudTd Class="super-admin-user-admin-col">
+                            <MudStack Row Spacing="0" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="gap-0">
+                                @context.UserServers.Count(us => us.IsAdmin)
+                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.HowMuchIsAdmin")>
+                                    <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" Size="Size.Small"/>
+                                </MudTooltip>
+                            </MudStack>
+                        </MudTd>
+                        <MudTd Class="super-admin-user-mod-col">
+                            <MudIconButton Size="Size.Small"
+                                           Icon="@(context.CanUploadMod ? MDIIcons.Filled.Upload : MDIIcons.Filled.UploadOff)"
+                                           Color="@(context.CanUploadMod ? Color.Primary : Color.Default)"
+                                           OnClick="() => ToggleCanUploadMod(context)"/>
+                        </MudTd>
+                        <MudTd Class="super-admin-user-super-col">
+                            <MudTooltip Text="@(context.SuperAdmin ? @LocalizationService.GetTranslation("SuperAdmin.UserTable.DemoteUser") : @LocalizationService.GetTranslation("SuperAdmin.UserTable.PromoteUser"))">
+                                <MudIconButton Color="@(context.SuperAdmin ? Color.Tertiary : Color.Default)"
+                                               Icon="@(context.SuperAdmin ? MDIIcons.Filled.Bank : MDIIcons.Filled.BankOff)"
+                                               Size="Size.Small"
+                                               OnClick="@(() => ToggleSuperAdmin(context))"/>
+                            </MudTooltip>
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.UserTable.DeleteUser")>
                                     <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
                                                    Color="Color.Error"
                                                    Size="Size.Small"
-                                                   OnClick="@(() => DeleteServer(context))"/>
+                                                   OnClick="@(() => DeleteUser(context))"/>
                                 </MudTooltip>
-                            }
-                        </MudStack>
-                    </MudTd>
-                </RowTemplate>
-                <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
-                </PagerContent>
-            </MudTable>
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
+                    </PagerContent>
+                </MudTable>
+            </div>
         </MudItem>
         <MudItem lg="6" md="12">
+            <div class="super-admin-server-table">
+                <MudTable Items="_servers"
+                          Filter="new Func<Server, bool>(SearchServer)"
+                          Virtualize="false"
+                          FixedHeader="true"
+                          Height="430px"
+                          Dense="true"
+                          Hover="true">
+                    <ColGroup>
+                        <col style="width: 68px;" />
+                        <col />
+                        <col style="width: 64px;" />
+                        <col style="width: 44px;" />
+                        <col style="width: 44px;" />
+                        <col style="width: 64px;" />
+                        <col style="width: 170px;" />
+                        <col style="width: 168px;" />
+                    </ColGroup>
+                    <HeaderContent>
+                        <MudTh><MudTableSortLabel SortBy="new Func<Server, object>(s => s.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<Server, object>(s => s.Name)">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.ServerNameCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-server-date-col"><MudTableSortLabel SortBy="new Func<Server, object>(s => s.CreationDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-server-compact-col"><MudTableSortLabel SortBy="new Func<Server, object>(s => s.IsEmpty)">@LocalizationService.GetTranslation("SuperAdmin.DataCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-server-compact-col"><MudTableSortLabel SortBy="new Func<Server, object>(s => s.EcoServerId ?? string.Empty)">Eco</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-server-players-col"><MudTableSortLabel SortBy="new Func<Server, object>(s => s.UserServers.Count)">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol")</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<Server, object>(s => GetAdminNames(s))">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol")</MudTableSortLabel></MudTh>
+                        <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ActionCol")</MudTh>
+                    </HeaderContent>
+                    <ToolBarContent>
+                        <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                            <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ServerTable.Title")</MudText>
+                            <MudStack Style="width: 200px">
+                                <MudTextField @bind-Value="_searchServer"
+                                              Immediate
+                                              Placeholder="@LocalizationService.GetTranslation("Search")"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Class="mt-0"/>
+                            </MudStack>
+                        </MudStack>
+                    </ToolBarContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudTooltip Text="@context.Id.ToString()">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" OnClick="@(() => CopyToClipboard(context.Id.ToString()))"/>
+                            </MudTooltip>
+                        </MudTd>
+                        <MudTd>@(context.IsDefault ? "[Default]" : "") @context.Name</MudTd>
+                        <MudTd Class="super-admin-server-date-col">
+                            <MudTooltip Text="@context.CreationDateTime.ToString()">
+                                <MudIcon Icon="@Icons.Material.Outlined.CalendarMonth" Size="Size.Small"/>
+                            </MudTooltip>
+                        </MudTd>
+                        <MudTd Class="super-admin-server-compact-col">
+                            <MudIconButton Size="Size.Small" Color="Color.Default" Icon="@(context.IsEmpty ? MDIIcons.Outline.Battery : MDIIcons.Filled.BatteryHigh)"/>
+                        </MudTd>
+                        <MudTd Class="super-admin-server-compact-col">
+                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(context.EcoServerId) ? Icons.Material.Filled.LinkOff : Icons.Material.Filled.Link)" Size="Size.Small" Color="@(string.IsNullOrWhiteSpace(context.EcoServerId) ? Color.Default : Color.Success)"/>
+                        </MudTd>
+                        <MudTd Class="super-admin-server-players-col">
+                            @context.UserServers.Count
+                        </MudTd>
+                        <MudTd>
+                            @GetAdminNames(context)
+                        </MudTd>
+                        <MudTd>
+                            <MudStack Row AlignItems="AlignItems.Center">
+                                <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Open")">
+                                    <MudIconButton Icon="@MDIIcons.Outline.Information"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   OnClick="@(() => SelectServer(context))"/>
+                                </MudTooltip>
+                                <MudTooltip Text="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DemoteAdmin") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.PromoteAdmin"))">
+                                    <MudIconButton Icon="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? MDIIcons.Filled.Shield : MDIIcons.Filled.ShieldOff)"
+                                                   Size="Size.Small"
+                                                   Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
+                                                   OnClick="@(() => ToggleSelfAdmin(context))"/>
+                                </MudTooltip>
+                                <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
+                                    <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
+                                                   Color="@(context.IsDefault ? Color.Warning : Color.Default)"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => ToggleDefault(context))"/>
+                                </MudTooltip>
+                                @if (!context.IsDefault)
+                                {
+                                    <MudTooltip Text=@LocalizationService.GetTranslation("SuperAdmin.ServerTable.DeleteServer")>
+                                        <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                                       Color="Color.Error"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => DeleteServer(context))"/>
+                                    </MudTooltip>
+                                }
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }"/>
+                    </PagerContent>
+                </MudTable>
+            </div>
+        </MudItem>
+        <MudItem lg="8" md="12">
             <MudTable Items="@_modUploadHistories"
+                      Filter="new Func<ModUploadHistory, bool>(SearchModUploadHistory)"
                       Virtualize="false"
                       FixedHeader="true"
                       Height="430px"
                       Dense="true"
                       Hover="true">
                 <HeaderContent>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileNameCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileSha1Col")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.ServerCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.IconsCountCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTh>
-                    <MudTh>@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.UserCol")</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.FileName)">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileNameCol")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.FileHash)">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.FileSha1Col")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.Server != null ? h.Server.Name : string.Empty)">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.ServerCol")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.IconsCount)">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.IconsCountCol")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.UploadDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<ModUploadHistory, object>(h => h.User.Pseudo)">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.UserCol")</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <ToolBarContent>
-                    <MudStack Row Justify="Justify.SpaceBetween" Style="width: 100%">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Style="width: 100%">
                         <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ModHistoryTable.Title")</MudText>
-                        <ModUploader OnSuccessModUpload="RetrieveModUploadHistories" />
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudStack Style="width: 200px">
+                                <MudTextField @bind-Value="_searchModUpload"
+                                              Immediate
+                                              Placeholder="@LocalizationService.GetTranslation("Search")"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Class="mt-0"/>
+                            </MudStack>
+                            <ModUploader OnSuccessModUpload="RetrieveModUploadHistories" />
+                        </MudStack>
                     </MudStack>
                 </ToolBarContent>
                 <RowTemplate>
@@ -250,12 +360,28 @@
 </MudContainer>
 
 @code {
+    private const int StaleImportDays = 30;
+    private const int RecentUploadDays = 7;
+    private const string FilterAll = "";
+    private const string BooleanFilterYes = "yes";
+    private const string ServerDataEmpty = "empty";
+    private const string ServerEcoLinked = "linked";
+    private const string ServerImportNever = "never";
+    private const string ServerImportStale = "stale";
+    private const string ModRecentUpload = "recent";
+
     private bool _isLoading;
     private List<User> _users = [];
     private List<Server> _servers = [];
     private List<ModUploadHistory> _modUploadHistories = [];
-    private string _searchUser = "";
-    private string _searchServer = "";
+    private string _searchUser = FilterAll;
+    private string _searchServer = FilterAll;
+    private string _searchModUpload = FilterAll;
+    private string _userModUploadFilter = FilterAll;
+    private string _serverDataFilter = FilterAll;
+    private string _serverEcoFilter = FilterAll;
+    private string _serverImportFilter = FilterAll;
+    private string _modRecentFilter = FilterAll;
 
     protected override void OnInitialized()
     {
@@ -366,6 +492,39 @@
 
     private bool SearchUser(User user)
     {
+        if (!UserMatchesTextSearch(user))
+            return false;
+        if (!MatchesBooleanFilter(user.CanUploadMod, _userModUploadFilter))
+            return false;
+        return true;
+    }
+
+    private bool SearchServer(Server server)
+    {
+        if (!ServerMatchesTextSearch(server))
+            return false;
+        if (_serverDataFilter == ServerDataEmpty && !server.IsEmpty)
+            return false;
+        if (_serverEcoFilter == ServerEcoLinked && string.IsNullOrWhiteSpace(server.EcoServerId))
+            return false;
+        if (_serverImportFilter == ServerImportNever && server.LastDataUploadTime is not null)
+            return false;
+        if (_serverImportFilter == ServerImportStale && !IsStaleImport(server))
+            return false;
+        return true;
+    }
+
+    private bool SearchModUploadHistory(ModUploadHistory history)
+    {
+        if (!ModUploadMatchesTextSearch(history))
+            return false;
+        if (_modRecentFilter == ModRecentUpload && !IsRecentUpload(history))
+            return false;
+        return true;
+    }
+
+    private bool UserMatchesTextSearch(User user)
+    {
         if (string.IsNullOrWhiteSpace(_searchUser))
             return true;
         if (user.Pseudo.Contains(_searchUser, StringComparison.OrdinalIgnoreCase))
@@ -375,7 +534,7 @@
         return false;
     }
 
-    private bool SearchServer(Server server)
+    private bool ServerMatchesTextSearch(Server server)
     {
         if (string.IsNullOrWhiteSpace(_searchServer))
             return true;
@@ -383,9 +542,33 @@
             return true;
         if (server.Id.ToString().Contains(_searchServer, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (server.UserServers.Where(us => us.IsAdmin).Select(us => us.User.Pseudo).Any(p => p.Contains(_searchServer, StringComparison.OrdinalIgnoreCase)))
+        if (!string.IsNullOrWhiteSpace(server.EcoServerId) && server.EcoServerId.Contains(_searchServer, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (server.UserServers.Where(us => us.IsAdmin).Select(us => us.GetPseudo()).Any(p => p.Contains(_searchServer, StringComparison.OrdinalIgnoreCase)))
             return true;
         return false;
+    }
+
+    private bool ModUploadMatchesTextSearch(ModUploadHistory history)
+    {
+        if (string.IsNullOrWhiteSpace(_searchModUpload))
+            return true;
+        if (history.FileName.Contains(_searchModUpload, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (history.FileHash.Contains(_searchModUpload, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (history.User.Pseudo.Contains(_searchModUpload, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (history.Server?.Name.Contains(_searchModUpload, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+        if (history.Id.ToString().Contains(_searchModUpload, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private static bool MatchesBooleanFilter(bool value, string filter)
+    {
+        return filter != BooleanFilterYes || value;
     }
 
     private async Task DeleteUser(User user)
@@ -466,4 +649,127 @@
         }
     }
 
+    private List<KpiCard> GetKpis()
+    {
+        return
+        [
+            new KpiCard("SuperAdmin.Dashboard.Users", _users.Count.ToString(), Icons.Material.Filled.People, Color.Primary, ClearUserKpiFilters),
+            new KpiCard("SuperAdmin.Dashboard.Servers", _servers.Count.ToString(), Icons.Material.Filled.Storage, Color.Primary, ClearServerKpiFilters),
+            new KpiCard("SuperAdmin.Dashboard.EmptyServers", _servers.Count(s => s.IsEmpty).ToString(), MDIIcons.Outline.Battery, Color.Warning, () => ToggleServerKpiFilter(dataFilter: ServerDataEmpty), IsServerKpiFilterActive(dataFilter: ServerDataEmpty)),
+            new KpiCard("SuperAdmin.Dashboard.LinkedServers", _servers.Count(s => !string.IsNullOrWhiteSpace(s.EcoServerId)).ToString(), Icons.Material.Filled.Link, Color.Success, () => ToggleServerKpiFilter(ecoFilter: ServerEcoLinked), IsServerKpiFilterActive(ecoFilter: ServerEcoLinked)),
+            new KpiCard("SuperAdmin.Dashboard.NeverImported", _servers.Count(s => s.LastDataUploadTime is null).ToString(), MDIIcons.Filled.CloudOff, Color.Warning, () => ToggleServerKpiFilter(importFilter: ServerImportNever), IsServerKpiFilterActive(importFilter: ServerImportNever)),
+            new KpiCard("SuperAdmin.Dashboard.StaleImports", _servers.Count(IsStaleImport).ToString(), MDIIcons.Filled.Update, Color.Warning, () => ToggleServerKpiFilter(importFilter: ServerImportStale), IsServerKpiFilterActive(importFilter: ServerImportStale)),
+            new KpiCard("SuperAdmin.Dashboard.ModUploaders", _users.Count(u => u.CanUploadMod).ToString(), Icons.Material.Filled.CloudUpload, Color.Tertiary, ToggleUserModUploadFilter, _userModUploadFilter == BooleanFilterYes),
+            new KpiCard("SuperAdmin.Dashboard.RecentUploads", _modUploadHistories.Count(IsRecentUpload).ToString(), Icons.Material.Filled.History, Color.Info, ToggleRecentModUploadFilter, _modRecentFilter == ModRecentUpload)
+        ];
+    }
+
+    private void ClearUserKpiFilters()
+    {
+        _userModUploadFilter = FilterAll;
+    }
+
+    private void ClearServerKpiFilters()
+    {
+        _serverDataFilter = FilterAll;
+        _serverEcoFilter = FilterAll;
+        _serverImportFilter = FilterAll;
+    }
+
+    private void SetServerKpiFilter(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
+    {
+        _serverDataFilter = dataFilter;
+        _serverEcoFilter = ecoFilter;
+        _serverImportFilter = importFilter;
+    }
+
+    private void ToggleUserModUploadFilter()
+    {
+        _userModUploadFilter = _userModUploadFilter == BooleanFilterYes ? FilterAll : BooleanFilterYes;
+    }
+
+    private void ToggleRecentModUploadFilter()
+    {
+        _modRecentFilter = _modRecentFilter == ModRecentUpload ? FilterAll : ModRecentUpload;
+    }
+
+    private void ToggleServerKpiFilter(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
+    {
+        if (IsServerKpiFilterActive(dataFilter, ecoFilter, importFilter))
+        {
+            ClearServerKpiFilters();
+            return;
+        }
+
+        SetServerKpiFilter(dataFilter, ecoFilter, importFilter);
+    }
+
+    private bool IsServerKpiFilterActive(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
+    {
+        return _serverDataFilter == dataFilter
+               && _serverEcoFilter == ecoFilter
+               && _serverImportFilter == importFilter
+               && (dataFilter != FilterAll || ecoFilter != FilterAll || importFilter != FilterAll);
+    }
+
+    private List<ServerHealthIssue> GetHealthIssues()
+    {
+        var issues = new List<ServerHealthIssue>();
+
+        issues.AddRange(_servers
+            .Where(s => !s.UserServers.Any(us => us.IsAdmin))
+            .Select(s => new ServerHealthIssue("SuperAdmin.Health.ServerWithoutAdmin", Severity.Error, Icons.Material.Filled.AdminPanelSettings, s)));
+
+        issues.AddRange(_servers
+            .Where(IsStaleImport)
+            .Select(s => new ServerHealthIssue("SuperAdmin.Health.StaleImport", Severity.Warning, MDIIcons.Filled.Update, s)));
+
+        return issues
+            .OrderByDescending(i => i.Severity)
+            .ThenBy(i => i.Server?.Name)
+            .ToList();
+    }
+
+    private static bool IsStaleImport(Server server)
+    {
+        return server.LastDataUploadTime is { } lastUpload
+               && lastUpload < DateTimeOffset.UtcNow.AddDays(-StaleImportDays);
+    }
+
+    private static bool IsRecentUpload(ModUploadHistory history)
+    {
+        return history.UploadDateTime >= DateTimeOffset.UtcNow.AddDays(-RecentUploadDays);
+    }
+
+    private async Task SelectServer(Server server)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Server"] = server,
+            ["StaleImportDays"] = StaleImportDays,
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+        await DialogService.ShowAsync<SuperAdminServerDetailDialog>(server.Name, parameters, options);
+    }
+
+    private async Task SelectHealthIssue(ServerHealthIssue issue)
+    {
+        if (issue.Server is null) return;
+        await SelectServer(issue.Server);
+    }
+
+    private string GetAdminNames(Server server)
+    {
+        var admins = server.UserServers
+            .Where(us => us.IsAdmin)
+            .Select(us => us.GetPseudo())
+            .OrderBy(pseudo => pseudo)
+            .ToList();
+
+        return admins.Count == 0 ? "-" : string.Join(", ", admins);
+    }
+
+    private record KpiCard(string TitleKey, string Value, string Icon, Color Color, Action? OnClick = null, bool IsActive = false);
+
+    private record ServerHealthIssue(string MessageKey, Severity Severity, string Icon, Server? Server = null);
 }
