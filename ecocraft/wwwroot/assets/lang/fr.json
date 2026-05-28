@@ -237,6 +237,10 @@
     "SuperAdmin": {
         "ModUpload": "Télécharger le fichier mod",
         "ActionCol": "Action",
+        "Boolean": {
+            "Yes": "Oui",
+            "No": "Non"
+        },
         "ConfirmServerDeletion": "Etes-vous sûr de vouloir supprimer le serveur {serveur} ?",
         "ConfirmSuperAdminPromote": "Êtes-vous sûr de vouloir promouvoir cet utilisateur au rang de super administrateur ?",
         "ConfirmSuperAdminDemote": "Êtes-vous sûr de vouloir rétrograder cet utilisateur de Super Admin ?",
@@ -244,7 +248,52 @@
         "ConfirmUserDeletion": "Êtes-vous sûr de vouloir supprimer l'utilisateur {utilisateur} ?",
         "CreationDateCol": "Date de création",
         "DataCol": "Données",
+        "Dashboard": {
+            "Title": "Vue d'administration",
+            "Users": "Utilisateurs",
+            "Servers": "Serveurs",
+            "EmptyServers": "Serveurs vides",
+            "LinkedServers": "Serveurs liés Eco",
+            "NeverImported": "Jamais importés",
+            "StaleImports": "Imports obsolètes",
+            "ModUploaders": "Uploaders de mods",
+            "RecentUploads": "Uploads récents"
+        },
+        "Filters": {
+            "Users": {
+                "WithoutServer": "Sans serveur",
+                "AdminSomewhere": "Admin quelque part"
+            },
+            "Servers": {
+                "Empty": "Vide",
+                "WithData": "Avec données",
+                "Default": "Par défaut",
+                "LinkedEco": "Lié Eco",
+                "UnlinkedEco": "Non lié Eco",
+                "NeverImported": "Jamais importé",
+                "StaleImport": "Import obsolète",
+                "WithoutAdmin": "Sans admin"
+            },
+            "Mods": {
+                "Global": "Global",
+                "ServerScoped": "Lié à un serveur"
+            }
+        },
+        "Health": {
+            "Title": "Santé des serveurs",
+            "NoIssues": "Aucun problème actif détecté.",
+            "OpenServer": "Ouvrir",
+            "GlobalScope": "Global",
+            "MultipleDefaultServers": "{server} est marqué comme serveur par défaut alors qu'un autre serveur par défaut existe.",
+            "ServerWithoutAdmin": "{server} n'a aucun administrateur serveur.",
+            "EmptyServer": "{server} n'a aucune donnée serveur importée.",
+            "NeverImported": "{server} n'a jamais importé de données serveur.",
+            "StaleImport": "Les données de {server} datent de plus de {days} jours.",
+            "UnlinkedEco": "{server} n'est pas lié à un id de serveur Eco.",
+            "RecentModUpload": "Upload récent d'icônes de mod pour {server}."
+        },
         "IdCol": "Id",
+        "CopySecretId": "Copier l'id secret",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Supprimer le serveur",
@@ -256,6 +305,23 @@
             "Title": "Serveurs",
             "UnsetDefault": "Supprimer des serveurs par défaut"
         },
+        "ServerDetail": {
+            "Title": "Détails du serveur",
+            "Close": "Fermer",
+            "Open": "Ouvrir les détails du serveur",
+            "Default": "Serveur par défaut",
+            "DataStatusLabel": "État des données",
+            "EcoServerId": "Id du serveur Eco",
+            "LastDataUpload": "Dernier import de données",
+            "DataStatus": {
+                "Empty": "Vide",
+                "NeverImported": "Jamais importé",
+                "Stale": "Obsolète",
+                "Fresh": "À jour"
+            }
+        },
+        "SnackbarCantEdit": "Vous ne pouvez pas vous modifier à partir de cette page.",
+        "SnackbarCopy": "Id copié dans le presse-papiers",
         "SnackBar": {
             "CantDeleteYourself": "Vous ne pouvez pas vous supprimer de cette page.",
             "SnackbarCantEdit": "Vous ne pouvez pas vous modifier à partir de cette page.",
@@ -278,6 +344,8 @@
             "DemoteUser": "Rétrograder l'utilisateur de Super Admin",
             "HowMuchIsAdmin": "Nombre de serveurs sur lesquels l'utilisateur est administrateur",
             "JoinedServers": "Serveurs rejoints",
+            "JoinedServersCol": "Rejoints",
+            "AdminServersCol": "Admin",
             "PromoteUser": "Promouvoir l'utilisateur au rang de super administrateur",
             "PseudoCol": "Pseudo",
             "SuperAdminCol": "Super Admin",

@@ -1,0 +1,181 @@
+.super-admin-kpi-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-card {
+    flex: 0 1 142px;
+    width: 142px;
+    max-width: 142px;
+    min-height: 58px;
+    padding: 6px 9px !important;
+    justify-content: flex-start;
+    position: relative;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-card .mud-button-label {
+    width: 100%;
+    min-width: 0;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-card-active {
+    border-width: 2px;
+    background-color: color-mix(in srgb, currentColor 10%, transparent);
+    box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-card-active::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-content {
+    display: grid;
+    grid-template-columns: 18px auto minmax(0, 1fr);
+    column-gap: 6px;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-icon {
+    justify-self: center;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-value {
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-label {
+    min-width: 0;
+    text-align: left;
+}
+
+.super-admin-kpi-row ::deep .super-admin-kpi-label {
+    display: -webkit-box;
+    overflow: hidden;
+    line-height: 1.15;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.super-admin-health-list {
+    max-height: 210px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-id-col {
+    width: 104px;
+    min-width: 104px;
+    max-width: 104px;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    text-align: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.super-admin-user-table ::deep .super-admin-user-date-col,
+.super-admin-user-table ::deep .super-admin-user-count-col,
+.super-admin-user-table ::deep .super-admin-user-admin-col,
+.super-admin-user-table ::deep .super-admin-user-mod-col,
+.super-admin-user-table ::deep .super-admin-user-super-col {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.super-admin-user-table ::deep .super-admin-user-date-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-count-col {
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-admin-col {
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-mod-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-super-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-date-col .mud-table-sort-label,
+.super-admin-user-table ::deep .super-admin-user-count-col .mud-table-sort-label,
+.super-admin-user-table ::deep .super-admin-user-admin-col .mud-table-sort-label,
+.super-admin-user-table ::deep .super-admin-user-mod-col .mud-table-sort-label,
+.super-admin-user-table ::deep .super-admin-user-super-col .mud-table-sort-label {
+    justify-content: center;
+    font-size: 0.75rem;
+    line-height: 1.1;
+}
+
+.super-admin-user-table ::deep .super-admin-user-id-col .mud-icon-button {
+    padding: 4px;
+}
+
+.super-admin-server-table ::deep .super-admin-server-date-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.super-admin-server-table ::deep .super-admin-server-compact-col {
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.super-admin-server-table ::deep .super-admin-server-players-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.super-admin-server-table ::deep .super-admin-server-date-col .mud-table-sort-label,
+.super-admin-server-table ::deep .super-admin-server-compact-col .mud-table-sort-label,
+.super-admin-server-table ::deep .super-admin-server-players-col .mud-table-sort-label {
+    justify-content: center;
+    font-size: 0.75rem;
+    line-height: 1.1;
+}

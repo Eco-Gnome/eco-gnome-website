@@ -244,6 +244,10 @@
     "SuperAdmin": {
         "ModUpload": "Upload mod file",
         "ActionCol": "Action",
+        "Boolean": {
+            "Yes": "Yes",
+            "No": "No"
+        },
         "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
         "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
         "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",
@@ -251,6 +255,50 @@
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
+        "Dashboard": {
+            "Title": "Administration overview",
+            "Users": "Users",
+            "Servers": "Servers",
+            "EmptyServers": "Empty servers",
+            "LinkedServers": "Eco-linked servers",
+            "NeverImported": "Never imported",
+            "StaleImports": "Stale imports",
+            "ModUploaders": "Mod uploaders",
+            "RecentUploads": "Recent uploads"
+        },
+        "Filters": {
+            "Users": {
+                "WithoutServer": "Without server",
+                "AdminSomewhere": "Admin somewhere"
+            },
+            "Servers": {
+                "Empty": "Empty",
+                "WithData": "With data",
+                "Default": "Default",
+                "LinkedEco": "Eco linked",
+                "UnlinkedEco": "Eco unlinked",
+                "NeverImported": "Never imported",
+                "StaleImport": "Stale import",
+                "WithoutAdmin": "Without admin"
+            },
+            "Mods": {
+                "Global": "Global",
+                "ServerScoped": "Server scoped"
+            }
+        },
+        "Health": {
+            "Title": "Server health",
+            "NoIssues": "No active issue detected.",
+            "OpenServer": "Open",
+            "GlobalScope": "Global",
+            "MultipleDefaultServers": "{server} is marked as default while another default server exists.",
+            "ServerWithoutAdmin": "{server} has no server admin.",
+            "EmptyServer": "{server} has no imported server data.",
+            "NeverImported": "{server} has never imported server data.",
+            "StaleImport": "{server} data is older than {days} days.",
+            "UnlinkedEco": "{server} is not linked to an Eco server id.",
+            "RecentModUpload": "Recent mod icon upload for {server}."
+        },
         "IdCol": "Id",
         "CopySecretId": "Copy Secret Id",
         "ServerTable": {
@@ -264,6 +312,23 @@
             "Title": "Servers",
             "UnsetDefault": "Remove from default servers"
         },
+        "ServerDetail": {
+            "Title": "Server details",
+            "Close": "Close",
+            "Open": "Open server details",
+            "Default": "Default server",
+            "DataStatusLabel": "Data status",
+            "EcoServerId": "Eco server id",
+            "LastDataUpload": "Last data upload",
+            "DataStatus": {
+                "Empty": "Empty",
+                "NeverImported": "Never imported",
+                "Stale": "Stale",
+                "Fresh": "Fresh"
+            }
+        },
+        "SnackbarCantEdit": "You can't edit yourself from this page.",
+        "SnackbarCopy": "Id copied to clipboard",
         "SnackBar": {
             "CantDeleteYourself": "You can't delete yourself from this page.",
             "SnackbarCantEdit": "You can't edit yourself from this page.",
@@ -286,6 +351,8 @@
             "DemoteUser": "Demote user from Super Admin",
             "HowMuchIsAdmin": "Number of servers the user is admin on",
             "JoinedServers": "Joined Servers",
+            "JoinedServersCol": "Joined",
+            "AdminServersCol": "Admin",
             "PromoteUser": "Promote user to Super Admin",
             "PseudoCol": "Pseudo",
             "SuperAdminCol": "Super Admin",
