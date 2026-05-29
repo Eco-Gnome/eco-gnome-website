@@ -2908,7 +2908,6 @@
 
     private async Task UpdateCraftingTableAdditionalCraftMinuteFee(UserCraftingTable userCraftingTable, decimal additionalCraftMinuteFee)
     {
-        additionalCraftMinuteFee = Math.Max(0m, additionalCraftMinuteFee);
         if (userCraftingTable.AdditionalCraftMinuteFee == additionalCraftMinuteFee)
         {
             return;

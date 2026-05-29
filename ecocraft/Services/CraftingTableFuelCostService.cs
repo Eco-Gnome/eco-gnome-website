@@ -167,7 +167,7 @@ public class CraftingTableFuelCostService
 
     public decimal CalculateTotalCraftMinuteFee(DataContext dataContext, UserCraftingTable userCraftingTable)
     {
-        return Math.Max(0m, userCraftingTable.AdditionalCraftMinuteFee) + CalculateFuelCraftMinuteFee(dataContext, userCraftingTable);
+        return userCraftingTable.AdditionalCraftMinuteFee + CalculateFuelCraftMinuteFee(dataContext, userCraftingTable);
     }
 
     /// <summary>

@@ -819,7 +819,7 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
 
         return userCraftingTables.Select(uct =>
             {
-                var additionalCraftMinuteFee = Math.Max(0m, uct.AdditionalCraftMinuteFee);
+                var additionalCraftMinuteFee = uct.AdditionalCraftMinuteFee;
                 var fuelCraftMinuteFee = CalculateFuelCraftMinuteFee(uct, fuelPriceByContextAndItem, craftingTableFuelConsumptionByServerAndName);
 
                 return new EconomyPlayerCraftingTableSummary
