@@ -805,7 +805,7 @@ public class UserCraftingTable
     [ForeignKey("FuelItem")] public Guid? FuelItemId { get; set; }
 
     public decimal AdditionalCraftMinuteFee { get; set; } = 0;
-    public decimal CraftMinuteFee { get; set; } = 0;
+    public decimal TotalCraftMinuteFee { get; set; } = 0;
 
     public DataContext DataContext { get; set; }
     public CraftingTable CraftingTable { get; set; }

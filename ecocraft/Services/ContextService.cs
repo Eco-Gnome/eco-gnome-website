@@ -335,7 +335,7 @@ public class ContextService(
                 PluginModule = uct.PluginModule,
                 FuelItem = uct.FuelItem,
                 AdditionalCraftMinuteFee = uct.AdditionalCraftMinuteFee,
-                CraftMinuteFee = uct.CraftMinuteFee,
+                TotalCraftMinuteFee = uct.TotalCraftMinuteFee,
                 SkilledPluginModules = uct.SkilledPluginModules.ToList(),
             };
         }

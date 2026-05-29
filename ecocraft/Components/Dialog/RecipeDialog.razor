@@ -213,7 +213,7 @@
                                     {
                                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                             <MudText Color="Color.Primary" Typo="Typo.body2">
-                                                @FormatDecimal(_currentUserCraftingTable.CraftMinuteFee)
+                                                @FormatDecimal(_currentUserCraftingTable.TotalCraftMinuteFee)
                                             </MudText>
                                             <MudText Color="Color.Primary" Typo="Typo.body2">$/min</MudText>
                                             <MudTooltip Text="@GetCraftMinuteFeeTooltip()">
@@ -659,7 +659,7 @@
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.CraftMinuteFee ?? 0);
+        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.TotalCraftMinuteFee ?? 0);
     }
 
     private string GetCraftMinuteFeeTooltip()
@@ -674,7 +674,7 @@
             "PriceCalculator.CraftMinuteFee.Detail",
             FormatDecimal(_currentUserCraftingTable.AdditionalCraftMinuteFee),
             FormatDecimal(fuelCraftMinuteFee),
-            FormatDecimal(_currentUserCraftingTable.CraftMinuteFee));
+            FormatDecimal(_currentUserCraftingTable.TotalCraftMinuteFee));
     }
 
     private static string FormatDecimal(decimal value)

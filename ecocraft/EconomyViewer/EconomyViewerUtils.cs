@@ -154,7 +154,7 @@ public class EconomyPlayerCraftingTableSummary
     public ItemOrTag? FuelItem { get; set; }
     public decimal AdditionalCraftMinuteFee { get; set; }
     public decimal FuelCraftMinuteFee { get; set; }
-    public decimal CraftMinuteFee { get; set; }
+    public decimal TotalCraftMinuteFee { get; set; }
 }
 
 public class EconomyPlayerComparisonRow

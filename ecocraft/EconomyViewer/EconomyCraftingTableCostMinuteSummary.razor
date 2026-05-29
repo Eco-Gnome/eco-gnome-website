@@ -8,7 +8,7 @@
     <MudNumericField T="decimal"
                      Class="rectangle-input small-adornment"
                      Style="width: 80px;"
-                     Value="Summary.CraftMinuteFee"
+                     Value="Summary.TotalCraftMinuteFee"
                      Disabled="true"
                      HideSpinButtons="true"
                      Format="0.##"
@@ -28,7 +28,7 @@
             "EconomyViewer.Drilldown.CraftMinuteFeeTooltip",
             EconomyViewerDisplayService.FormatDecimal(Summary.AdditionalCraftMinuteFee),
             FormatFuelCraftMinuteFee(),
-            EconomyViewerDisplayService.FormatDecimal(Summary.CraftMinuteFee));
+            EconomyViewerDisplayService.FormatDecimal(Summary.TotalCraftMinuteFee));
     }
 
     private string FormatFuelCraftMinuteFee()

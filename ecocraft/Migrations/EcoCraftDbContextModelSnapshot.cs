@@ -740,7 +740,7 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("AdditionalCraftMinuteFee")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("CraftMinuteFee")
+                    b.Property<decimal>("TotalCraftMinuteFee")
                         .HasColumnType("numeric");
 
                     b.Property<Guid>("CraftingTableId")

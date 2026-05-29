@@ -60,7 +60,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			PluginModuleId = userCraftingTable.PluginModule?.Id,
 			FuelItemId = userCraftingTable.FuelItem?.Id,
 			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
-			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
 		};
 	}
 
@@ -83,7 +83,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
 		existing.FuelItemId = userCraftingTable.FuelItem?.Id;
 		existing.AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee;
-		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
+		existing.TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee;
 
 		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the
 		// just-cleared join entries in Deleted state; re-adding the same tracked instance
@@ -115,12 +115,12 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		return context.PluginModules.Attach(new PluginModule { Id = pluginModuleId }).Entity;
 	}
 
-	public void UpdateCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	public void UpdateTotalCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
 	{
-		var stub = new UserCraftingTable { Id = userCraftingTable.Id, CraftMinuteFee = userCraftingTable.CraftMinuteFee };
+		var stub = new UserCraftingTable { Id = userCraftingTable.Id, TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee };
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
-		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
 	}
 
 	public void UpdateAdditionalCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
@@ -129,12 +129,12 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		{
 			Id = userCraftingTable.Id,
 			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
-			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
 		};
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.AdditionalCraftMinuteFee).IsModified = true;
-		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
 	}
 
 	public void UpdateFuelItem(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
@@ -143,12 +143,12 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		{
 			Id = userCraftingTable.Id,
 			FuelItemId = userCraftingTable.FuelItemId,
-			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
 		};
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.FuelItemId).IsModified = true;
-		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
 	}
 
 	public void Destroy(EcoCraftDbContext context, UserCraftingTable userCraftingTable)

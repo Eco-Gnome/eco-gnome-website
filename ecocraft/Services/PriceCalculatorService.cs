@@ -61,7 +61,7 @@ public class PriceCalculatorService(
         public Dictionary<Guid, decimal> OriginalUserCraftingTableFeesById { get; } =
             dataContext.UserCraftingTables
                 .GroupBy(uct => uct.Id)
-                .ToDictionary(g => g.Key, g => g.First().CraftMinuteFee);
+                .ToDictionary(g => g.Key, g => g.First().TotalCraftMinuteFee);
 
         public Dictionary<Guid, HashSet<Guid>> ProducerSkillsByItemOrTagId { get; } = BuildProducerSkillsMap(dataContext);
         private Dictionary<Guid, decimal> DynamicValueCache { get; } = [];
@@ -187,12 +187,12 @@ public class PriceCalculatorService(
 
         public bool TrySetUserCraftingTableFee(UserCraftingTable userCraftingTable, decimal craftMinuteFee)
         {
-            if (userCraftingTable.CraftMinuteFee == craftMinuteFee)
+            if (userCraftingTable.TotalCraftMinuteFee == craftMinuteFee)
             {
                 return false;
             }
 
-            userCraftingTable.CraftMinuteFee = craftMinuteFee;
+            userCraftingTable.TotalCraftMinuteFee = craftMinuteFee;
             DirtyUserCraftingTableIds.Add(userCraftingTable.Id);
             return true;
         }
@@ -205,7 +205,7 @@ public class PriceCalculatorService(
                 return false;
             }
 
-            return userCraftingTable.CraftMinuteFee != original;
+            return userCraftingTable.TotalCraftMinuteFee != original;
         }
 
     }
@@ -446,7 +446,7 @@ public class PriceCalculatorService(
                             var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, currentUserCraftingTable);
                             calculationContext.TrySetUserCraftingTableFee(currentUserCraftingTable, craftMinuteFee);
                             var craftMinutes = userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext, dynamicValueCalculationContext);
-                            ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * craftMinutes;
+                            ingredientCostSum += currentUserCraftingTable.TotalCraftMinuteFee * craftMinutes;
                         }
 
                         foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
@@ -560,7 +560,7 @@ public class PriceCalculatorService(
 
                     if (calculationContext.UserCraftingTablesById.TryGetValue(userCraftingTableId, out var userCraftingTable))
                     {
-                        userCraftingTableDbService.UpdateCraftMinuteFee(context, userCraftingTable);
+                        userCraftingTableDbService.UpdateTotalCraftMinuteFee(context, userCraftingTable);
                     }
                 }
                 return;

@@ -181,7 +181,7 @@ namespace ecocraft.Services
                 FuelItem = fuelItem,
                 FuelItemId = fuelItem?.Id,
                 AdditionalCraftMinuteFee = sourceUserCraftingTable?.AdditionalCraftMinuteFee ?? 0m,
-                CraftMinuteFee = sourceUserCraftingTable?.CraftMinuteFee ?? 0m,
+                TotalCraftMinuteFee = sourceUserCraftingTable?.TotalCraftMinuteFee ?? 0m,
                 DataContext = shoppingList,
                 DataContextId = shoppingList.Id,
             };

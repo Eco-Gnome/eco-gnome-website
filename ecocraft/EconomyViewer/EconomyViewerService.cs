@@ -833,7 +833,7 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
                     FuelItem = uct.FuelItem,
                     AdditionalCraftMinuteFee = additionalCraftMinuteFee,
                     FuelCraftMinuteFee = fuelCraftMinuteFee,
-                    CraftMinuteFee = additionalCraftMinuteFee + fuelCraftMinuteFee
+                    TotalCraftMinuteFee = additionalCraftMinuteFee + fuelCraftMinuteFee
                 };
             })
             .ToList();

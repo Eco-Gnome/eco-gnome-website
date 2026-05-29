@@ -2895,7 +2895,7 @@
             });
         }
 
-        userCraftingTable.CraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
+        userCraftingTable.TotalCraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -2914,7 +2914,7 @@
         }
 
         userCraftingTable.AdditionalCraftMinuteFee = additionalCraftMinuteFee;
-        userCraftingTable.CraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
+        userCraftingTable.TotalCraftMinuteFee = CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext!, userCraftingTable);
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
@@ -2942,7 +2942,7 @@
     private decimal GetCraftMinuteFeeConfigurationValue(UserCraftingTable userCraftingTable)
     {
         return _selectedDataContext is null
-            ? userCraftingTable.CraftMinuteFee
+            ? userCraftingTable.TotalCraftMinuteFee
             : CraftingTableFuelCostService.CalculateTotalCraftMinuteFee(_selectedDataContext, userCraftingTable);
     }
 
