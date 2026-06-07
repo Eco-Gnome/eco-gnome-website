@@ -13,6 +13,18 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.4",
+            "2026-06-07",
+            "Crafting Table Fuel Costs, Super Admin Improvements & Fixes",
+            """
+            - Crafting Table Fuel: Crafting tables that burn fuel now derive their cost per minute from the fuel itself. Pick the fuel item used on each table and Eco Gnome computes the cost from the table's fuel consumption and the fuel's calories, instead of a fixed manual value.
+            - Fuel Selection: Eligible fuels are listed per crafting table and grouped by their accepted fuel tag, with the cheapest fuel automatically used for a group. The matching fuel items are surfaced in the Price Calculator so their prices feed into crafting costs.
+            - Additional Fee: You can still add a manual fee on top of the fuel cost; the total cost per minute combines both.
+            - Super Admin: Improved the super admin dashboard layout and filters, and added a per-server detail view.
+            - Fixes: Fixed Price Calculator table search, fuel element alignment in the recipe dialog, fuel grouping edge cases, and several data hydration and persistence issues.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.3",
             "2026-05-05",
             "Price Calculator UX Overhaul, Smart Rounding & Blueprint Awareness",
