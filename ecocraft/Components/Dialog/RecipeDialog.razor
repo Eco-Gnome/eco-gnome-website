@@ -8,6 +8,7 @@
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 @inject LocalizationService LocalizationService
+@inject CraftingTableFuelCostService CraftingTableFuelCostService
 @inject UserElementDbService UserElementDbService
 @inject UserPriceDbService UserPriceDbService
 @inject UserRecipeDbService UserRecipeDbService
@@ -208,14 +209,18 @@
                                     <MudText>@LocalizationService.GetTranslation("RecipeDialog.CraftTime")</MudText>
                                 </MudTd>
                                 <MudTd Class="px-1">
-                                    <MudStack Row Spacing="1">
-                                        <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
-                                            @(_currentUserCraftingTable?.CraftMinuteFee ?? 0)
-                                        </MudText>
-                                        <MudText Color="Color.Primary">
-                                            $/min
-                                        </MudText>
-                                    </MudStack>
+                                    @if (_currentUserCraftingTable is not null)
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudText Color="Color.Primary" Typo="Typo.body2">
+                                                @FormatDecimal(_currentUserCraftingTable.TotalCraftMinuteFee)
+                                            </MudText>
+                                            <MudText Color="Color.Primary" Typo="Typo.body2">$/min</MudText>
+                                            <MudTooltip Text="@GetCraftMinuteFeeTooltip()">
+                                                <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="d-flex align-center"/>
+                                            </MudTooltip>
+                                        </MudStack>
+                                    }
                                 </MudTd>
                                 <MudTd Class="pl-1 pr-2">
                                     <MudStack Row Justify="Justify.FlexEnd">
@@ -247,11 +252,11 @@
                                     <MudText>@LocalizationService.GetTranslation("RecipeDialog.Labor")</MudText>
                                 </MudTd>
                                 <MudTd Class="px-1">
-                                    <MudStack Row Spacing="1">
-                                        <MudText Color="Color.Primary" Class="pr-2" Style="width: 90px; text-align: end;">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">
                                             @(((_currentUserSetting?.CalorieCost ?? 0) / 1000).ToString("0.#####"))
                                         </MudText>
-                                        <MudText Color="Color.Primary">
+                                        <MudText Color="Color.Primary" Typo="Typo.body2">
                                             $/cal
                                         </MudText>
                                     </MudStack>
@@ -654,7 +659,27 @@
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.CraftMinuteFee ?? 0);
+        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.TotalCraftMinuteFee ?? 0);
+    }
+
+    private string GetCraftMinuteFeeTooltip()
+    {
+        if (_currentUserCraftingTable is null)
+        {
+            return string.Empty;
+        }
+
+        var fuelCraftMinuteFee = CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(DataContext, _currentUserCraftingTable);
+        return LocalizationService.GetTranslation(
+            "PriceCalculator.CraftMinuteFee.Detail",
+            FormatDecimal(_currentUserCraftingTable.AdditionalCraftMinuteFee),
+            FormatDecimal(fuelCraftMinuteFee),
+            FormatDecimal(_currentUserCraftingTable.TotalCraftMinuteFee));
+    }
+
+    private static string FormatDecimal(decimal value)
+    {
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
     }
 
     public string GetFormatedCraftTime(decimal craftMinutes)

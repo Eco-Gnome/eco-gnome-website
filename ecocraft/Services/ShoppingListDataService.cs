@@ -170,6 +170,7 @@ namespace ecocraft.Services
             var pluginModule = sourceUserCraftingTable?.PluginModuleId is Guid pluginModuleId
                 ? craftingTable.PluginModules.FirstOrDefault(pm => pm.Id == pluginModuleId)
                 : null;
+            var fuelItem = sourceUserCraftingTable?.FuelItem;
 
             var userCraftingTable = new UserCraftingTable
             {
@@ -177,6 +178,10 @@ namespace ecocraft.Services
                 CraftingTableId = craftingTable.Id,
                 PluginModule = pluginModule,
                 PluginModuleId = pluginModule?.Id,
+                FuelItem = fuelItem,
+                FuelItemId = fuelItem?.Id,
+                AdditionalCraftMinuteFee = sourceUserCraftingTable?.AdditionalCraftMinuteFee ?? 0m,
+                TotalCraftMinuteFee = sourceUserCraftingTable?.TotalCraftMinuteFee ?? 0m,
                 DataContext = shoppingList,
                 DataContextId = shoppingList.Id,
             };

@@ -35,7 +35,10 @@
         "ServerPrices": "Server prices",
         "MinPrice": "Minimum",
         "DefaultPrice": "Default",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Energy",
+        "EnergyConsumption": "Energy consumption",
+        "EnergyGeneration": "Energy generation"
     },
     "JoinCode": "Join code",
     "Language": "Language",
@@ -71,6 +74,7 @@
         "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "Fuel": "Fuel",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
@@ -430,9 +434,26 @@
         "AddSkill": "Add skill",
         "CraftingTables": "Crafting tables",
         "AddCraftingTable": "Add crafting table",
+        "CraftingTableAdvancedConfiguration": "Advanced configuration",
         "CostMin": {
             "Tooltip": "The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...",
             "CostMin": "Cost/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Additional cost/min",
+            "AdditionalTooltip": "Additional cost per crafting minute. Use it to include costs such as table rental, taxes or laws, and Parts replacement.",
+            "Detail": "Additional: {value} | Fuel: {value} | Total: {value}",
+            "Total": "Total cost/min",
+            "TotalTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}. Configure the details in the crafting table detail window."
+        },
+        "Fuel": {
+            "Fuel": "Fuel",
+            "NoFuel": "No fuel",
+            "CostPerMinute": "Cost/min",
+            "Energy": "Energy",
+            "CostPer1000Energy": "Cost / 1000 energy",
+            "SelectFuel": "Select fuel",
+            "CalculatedCostPerMinuteTooltip": "Calculated from table consumption, fuel energy and fuel price."
         },
         "NoModule": "No module",
         "MarginPercent": {
@@ -499,7 +520,9 @@
             "BoundedSnackbar": "Value adjusted to fit server boundaries."
         },
         "ItemsToBuy": "Items to buy",
+        "Fuels": "Fuels",
         "IngredientSearch": "Ingredient Items Or Tags",
+        "FuelSearch": "Fuel Items Or Tags",
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
@@ -599,6 +622,7 @@
             "OnlyCommon": "Only common elements",
             "ContextSummaries": "Compared contexts",
             "CraftingTablesComparison": "Crafting tables comparison",
+            "CraftMinuteFeeTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}.",
             "NoCraftingTableData": "No crafting table configured for this context.",
             "PriceOptionsComparison": "Compared Price Calculator options",
             "ComparisonTable": "Comparison",
@@ -614,13 +638,15 @@
             },
             "Values": {
                 "Enabled": "Enabled",
-                "Disabled": "Disabled"
+                "Disabled": "Disabled",
+                "NoFuel": "No fuel"
             },
             "Columns": {
                 "Role": "Role",
                 "Player": "Player",
                 "Option": "Option",
                 "Context": "Context",
+                "Fuel": "Fuel",
                 "ConfiguredItems": "Configured items",
                 "Recipes": "Recipes",
                 "Skills": "Skills",

@@ -6,14 +6,15 @@
 
 <MudTable Items="@Recipes"
           Dense="true"
-          Hover="true">
+          Hover="true"
+          Class="@Class">
     <HeaderContent>
-        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r))">@LocalizationService.GetTranslation("RecipeList.RecipeName")</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.Skill))">@LocalizationService.GetTranslation("Skill")</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.CraftingTable))">@LocalizationService.GetTranslation("CraftingTable")</MudTableSortLabel></MudTh>
+        <MudTh Class="@ColumnClass"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r))">@LocalizationService.GetTranslation("RecipeList.RecipeName")</MudTableSortLabel></MudTh>
+        <MudTh Class="@ColumnClass"><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.Skill))">@LocalizationService.GetTranslation("Skill")</MudTableSortLabel></MudTh>
+        <MudTh Class="@ColumnClass"><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.CraftingTable))">@LocalizationService.GetTranslation("CraftingTable")</MudTableSortLabel></MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTh>
+        <MudTh Class="@ColumnClass">
             <MudLink Color="Color.Default" Underline="Underline.None" OnClick="@(() => ToggleDetails(context))">
                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
@@ -26,13 +27,13 @@
                 </MudStack>
             </MudLink>
         </MudTh>
-        <MudTh>
+        <MudTh Class="@ColumnClass">
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                 <EcoIcon Item="@context.Skill" Size="32" />
                 <MudText Typo="Typo.body2">@(context.Skill is not null ? LocalizationService.GetTranslation(context.Skill) : "")</MudText>
             </MudStack>
         </MudTh>
-        <MudTh>
+        <MudTh Class="@ColumnClass">
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                 <EcoIcon Item="@context.CraftingTable" Size="32" />
                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
@@ -82,7 +83,11 @@
 
 @code {
     [Parameter] public List<Recipe> Recipes { get; set; } = [];
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool UniformColumns { get; set; }
+
     private List<Recipe> _openedDetails = [];
+    private string? ColumnClass => UniformColumns ? "recipe-list-uniform-column" : null;
 
     private void ToggleDetails(Recipe recipe)
     {

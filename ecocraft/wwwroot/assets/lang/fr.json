@@ -35,7 +35,10 @@
         "ServerPrices": "Prix du serveur",
         "MinPrice": "Minimum",
         "DefaultPrice": "Par défaut",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Énergie",
+        "EnergyConsumption": "Consommation énergétique",
+        "EnergyGeneration": "Génération d'énergie"
     },
     "JoinCode": "Code de participation",
     "Language": "Langue",
@@ -71,6 +74,7 @@
         "ReductionOf": "Réduction des",
         "AdditionalCosts": "Coûts supplémentaires",
         "CraftTime": "Temps de fabrication",
+        "Fuel": "Carburant",
         "CraftTimeReductionTooltip": "{valeur initiale} avec {pourcentage}% de réduction grâce au module de mise à niveau {nom du module de mise à niveau}",
         "Dynamic": "dynamique",
         "Labor": "Main-d'œuvre",
@@ -422,9 +426,26 @@
         "AddSkill": "Ajouter une compétence",
         "CraftingTables": "Tables d'artisanat",
         "AddCraftingTable": "Ajouter une table d'artisanat",
+        "CraftingTableAdvancedConfiguration": "Configuration avancée",
         "CostMin": {
             "Tooltip": "Le coût lié à cette table d'artisanat pour chaque minute d'artisanat. Représente la consommation de carburant, le remplacement des pièces, les frais d'artisanat éventuels...",
             "CostMin": "Coût/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Coût/min additionnel",
+            "AdditionalTooltip": "Coût additionnel par minute de craft. Permet de prendre en compte par exemple le coût de location, les taxes ou lois, et le remplacement des pièces d'usure.",
+            "Detail": "Additionnel : {value} | Carburant : {value} | Total : {value}",
+            "Total": "Coût/min total",
+            "TotalTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}. Le détail se configure dans la fenêtre de détail de la table d'artisanat."
+        },
+        "Fuel": {
+            "Fuel": "Carburant",
+            "NoFuel": "Aucun carburant",
+            "CostPerMinute": "Coût/min",
+            "Energy": "Énergie",
+            "CostPer1000Energy": "Coût / 1000 énergie",
+            "SelectFuel": "Sélectionner un carburant",
+            "CalculatedCostPerMinuteTooltip": "Calculé à partir de la consommation de la table, de l'énergie du carburant et de son prix."
         },
         "NoModule": "Pas de module",
         "MarginPercent": {
@@ -491,7 +512,9 @@
             "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
         },
         "ItemsToBuy": "Articles à acheter",
+        "Fuels": "Carburants",
         "IngredientSearch": "Ingrédients ou étiquettes",
+        "FuelSearch": "Carburants ou étiquettes",
         "BuyPrice": "Prix d'achat",
         "PriceTooltip": {
             "isTagEmptyPrice": "Cette valeur sera le prix minimum des articles associés (si toutes les valeurs sont définies !), à moins que vous ne choisissiez un article spécifique en cliquant sur une étoile.",
@@ -591,6 +614,7 @@
             "OnlyCommon": "Seulement les éléments en commun",
             "ContextSummaries": "Contextes comparés",
             "CraftingTablesComparison": "Comparaison des tables d'artisanat",
+            "CraftMinuteFeeTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}.",
             "NoCraftingTableData": "Aucune table d'artisanat configurée pour ce contexte.",
             "PriceOptionsComparison": "Options du calculateur de prix comparées",
             "ComparisonTable": "Comparaison",
@@ -606,13 +630,15 @@
             },
             "Values": {
                 "Enabled": "Activé",
-                "Disabled": "Désactivé"
+                "Disabled": "Désactivé",
+                "NoFuel": "Aucun carburant"
             },
             "Columns": {
                 "Role": "Rôle",
                 "Player": "Joueur",
                 "Option": "Option",
                 "Context": "Contexte",
+                "Fuel": "Carburant",
                 "ConfiguredItems": "Articles configurés",
                 "Recipes": "Recettes",
                 "Skills": "Métiers",

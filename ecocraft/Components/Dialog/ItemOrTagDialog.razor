@@ -14,6 +14,27 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="12">
+            @if (HasEnergyData(ItemOrTag))
+            {
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ItemOrTagDialog.Energy")</MudText>
+                    <MudStack Row Spacing="18">
+                        @if (ItemOrTag.FuelConsumptionPerSecond is not null)
+                        {
+                            <MudText>
+                                @LocalizationService.GetTranslation("ItemOrTagDialog.EnergyConsumption"): @FormatEnergyValue(ItemOrTag.FuelConsumptionPerSecond)
+                            </MudText>
+                        }
+                        @if (ItemOrTag.FuelCalories is not null)
+                        {
+                            <MudText>
+                                @LocalizationService.GetTranslation("ItemOrTagDialog.EnergyGeneration"): @FormatEnergyValue(ItemOrTag.FuelCalories)
+                            </MudText>
+                        }
+                    </MudStack>
+                </MudStack>
+            }
+
             @if (ItemOrTag.MinPrice is not null || ItemOrTag.DefaultPrice is not null || ItemOrTag.MaxPrice is not null)
             {
                 <MudStack Spacing="1">
@@ -67,4 +88,14 @@
 
     [Parameter]
     public ItemOrTag ItemOrTag { get; set; }
+
+    private static bool HasEnergyData(ItemOrTag itemOrTag)
+    {
+        return itemOrTag.FuelConsumptionPerSecond is not null || itemOrTag.FuelCalories is not null;
+    }
+
+    private static string FormatEnergyValue(decimal? value)
+    {
+        return value is null ? "-" : Math.Round(value.Value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
+    }
 }

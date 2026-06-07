@@ -470,6 +470,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
     public List<UserPrice> UserPrices { get; set; } = [];
+    public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
 
@@ -801,12 +802,15 @@ public class UserCraftingTable
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
+    [ForeignKey("FuelItem")] public Guid? FuelItemId { get; set; }
 
-    public decimal CraftMinuteFee { get; set; } = 0;
+    public decimal AdditionalCraftMinuteFee { get; set; } = 0;
+    public decimal TotalCraftMinuteFee { get; set; } = 0;
 
     public DataContext DataContext { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public PluginModule? PluginModule { get; set; }
+    public ItemOrTag? FuelItem { get; set; }
     public List<PluginModule> SkilledPluginModules { get; set; } = [];
 
     public PluginModule? GetBestPluginModule(Skill? skill, bool requireSpeed = false)
