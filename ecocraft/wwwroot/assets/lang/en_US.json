@@ -93,8 +93,13 @@
             "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
             "HonestTooltip": "Grant 80% to first product and split the rest equally.",
             "UnlockTooltip": "Disables automatic balancing, allowing manual editing of all values, including going above or below a total of 100%.",
+            "AdminLockSwitch": "Lock and apply to all players",
             "AdminLockTooltip": "Lock this recipe's distribution for the whole server. While locked, the current shares and reintegration are imposed on every player and overwrite their own settings.",
             "AdminLockedTooltip": "This distribution is locked by the server administrator and cannot be changed."
+        },
+        "Price": {
+            "ClampedMax": "Price capped at the server maximum ({max} $).",
+            "ClampedMin": "Price raised to the server minimum ({min} $)."
         },
         "Static": "static",
         "TotalCost": "Total cost:",
@@ -179,8 +184,14 @@
             "Min": "Min price",
             "Min.Tooltip": "Clear min prices",
             "Default": "Default price",
-            "Default.Tooltip": "Clear default prices",
-            "ConfigureRecipe": "Configure the recipe distribution (share / reintegration) for this item"
+            "Default.Tooltip": "Clear default prices"
+        },
+        "Recipes": {
+            "Title": "Multi-output recipes",
+            "Locked": "Locked",
+            "LockedTooltip": "The output distribution of this recipe is locked for all players.",
+            "Configure": "Configure the output distribution (share / reintegration)",
+            "OpenError": "Unable to open the recipe configuration"
         },
         "Members": {
             "DemoteAdmin": "Demote Admin",
