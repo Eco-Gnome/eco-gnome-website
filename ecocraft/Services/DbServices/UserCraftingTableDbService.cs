@@ -72,9 +72,18 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 
 	public async Task UpdateAllAsync(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
 	{
-		var existing = await context.UserCraftingTables
-			.Include(uct => uct.SkilledPluginModules)
-			.FirstAsync(uct => uct.Id == userCraftingTable.Id);
+		// A freshly Create()'d UCT is Added but not yet persisted: querying the DB with
+		// FirstAsync would throw "Sequence contains no elements". In that case we operate
+		// on the tracked Added instance instead (its SkilledPluginModules collection is
+		// empty, so the delta logic below simply inserts every desired module).
+		var addedEntity = context.ChangeTracker.Entries<UserCraftingTable>()
+			.FirstOrDefault(e => e.State == EntityState.Added && e.Entity.Id == userCraftingTable.Id)
+			?.Entity;
+
+		var existing = addedEntity
+			?? await context.UserCraftingTables
+				.Include(uct => uct.SkilledPluginModules)
+				.FirstAsync(uct => uct.Id == userCraftingTable.Id);
 
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
 		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
