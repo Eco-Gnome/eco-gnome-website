@@ -253,11 +253,10 @@
             "Users": "Utilisateurs",
             "Servers": "Serveurs",
             "EmptyServers": "Serveurs vides",
+            "ServersWithoutPlayers": "Sans joueurs",
             "LinkedServers": "Serveurs liés Eco",
-            "NeverImported": "Jamais importés",
             "StaleImports": "Imports obsolètes",
-            "ModUploaders": "Uploaders de mods",
-            "RecentUploads": "Uploads récents"
+            "ModUploaders": "Uploaders de mods"
         },
         "Filters": {
             "Users": {

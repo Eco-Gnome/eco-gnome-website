@@ -50,7 +50,7 @@
             </div>
         </MudItem>
 
-        <MudItem xs="12">
+        <MudItem xs="12" lg="4">
             <MudPaper Class="pa-4" Style="height: 100%">
                 <MudText Typo="Typo.h5" Class="mb-3">@LocalizationService.GetTranslation("SuperAdmin.Health.Title")</MudText>
                 @{
@@ -363,14 +363,12 @@
 
 @code {
     private const int StaleImportDays = 30;
-    private const int RecentUploadDays = 7;
     private const string FilterAll = "";
     private const string BooleanFilterYes = "yes";
     private const string ServerDataEmpty = "empty";
+    private const string ServerNoPlayers = "noplayers";
     private const string ServerEcoLinked = "linked";
-    private const string ServerImportNever = "never";
     private const string ServerImportStale = "stale";
-    private const string ModRecentUpload = "recent";
 
     private bool _isLoading;
     private List<User> _users = [];
@@ -381,9 +379,9 @@
     private string _searchModUpload = FilterAll;
     private string _userModUploadFilter = FilterAll;
     private string _serverDataFilter = FilterAll;
+    private string _serverPlayersFilter = FilterAll;
     private string _serverEcoFilter = FilterAll;
     private string _serverImportFilter = FilterAll;
-    private string _modRecentFilter = FilterAll;
 
     protected override void OnInitialized()
     {
@@ -508,9 +506,9 @@
             return false;
         if (_serverDataFilter == ServerDataEmpty && !server.IsEmpty)
             return false;
-        if (_serverEcoFilter == ServerEcoLinked && string.IsNullOrWhiteSpace(server.EcoServerId))
+        if (_serverPlayersFilter == ServerNoPlayers && server.UserServers.Count != 0)
             return false;
-        if (_serverImportFilter == ServerImportNever && server.LastDataUploadTime is not null)
+        if (_serverEcoFilter == ServerEcoLinked && string.IsNullOrWhiteSpace(server.EcoServerId))
             return false;
         if (_serverImportFilter == ServerImportStale && !IsStaleImport(server))
             return false;
@@ -520,8 +518,6 @@
     private bool SearchModUploadHistory(ModUploadHistory history)
     {
         if (!ModUploadMatchesTextSearch(history))
-            return false;
-        if (_modRecentFilter == ModRecentUpload && !IsRecentUpload(history))
             return false;
         return true;
     }
@@ -659,11 +655,10 @@
             new KpiCard("SuperAdmin.Dashboard.Users", _users.Count.ToString(), Icons.Material.Filled.People, Color.Primary, ClearUserKpiFilters),
             new KpiCard("SuperAdmin.Dashboard.Servers", _servers.Count.ToString(), Icons.Material.Filled.Storage, Color.Primary, ClearServerKpiFilters),
             new KpiCard("SuperAdmin.Dashboard.EmptyServers", _servers.Count(s => s.IsEmpty).ToString(), MDIIcons.Outline.Battery, Color.Warning, () => ToggleServerKpiFilter(dataFilter: ServerDataEmpty), IsServerKpiFilterActive(dataFilter: ServerDataEmpty)),
+            new KpiCard("SuperAdmin.Dashboard.ServersWithoutPlayers", _servers.Count(s => s.UserServers.Count == 0).ToString(), Icons.Material.Filled.PersonOff, Color.Warning, () => ToggleServerKpiFilter(playersFilter: ServerNoPlayers), IsServerKpiFilterActive(playersFilter: ServerNoPlayers)),
             new KpiCard("SuperAdmin.Dashboard.LinkedServers", _servers.Count(s => !string.IsNullOrWhiteSpace(s.EcoServerId)).ToString(), Icons.Material.Filled.Link, Color.Success, () => ToggleServerKpiFilter(ecoFilter: ServerEcoLinked), IsServerKpiFilterActive(ecoFilter: ServerEcoLinked)),
-            new KpiCard("SuperAdmin.Dashboard.NeverImported", _servers.Count(s => s.LastDataUploadTime is null).ToString(), MDIIcons.Filled.CloudOff, Color.Warning, () => ToggleServerKpiFilter(importFilter: ServerImportNever), IsServerKpiFilterActive(importFilter: ServerImportNever)),
             new KpiCard("SuperAdmin.Dashboard.StaleImports", _servers.Count(IsStaleImport).ToString(), MDIIcons.Filled.Update, Color.Warning, () => ToggleServerKpiFilter(importFilter: ServerImportStale), IsServerKpiFilterActive(importFilter: ServerImportStale)),
-            new KpiCard("SuperAdmin.Dashboard.ModUploaders", _users.Count(u => u.CanUploadMod).ToString(), Icons.Material.Filled.CloudUpload, Color.Tertiary, ToggleUserModUploadFilter, _userModUploadFilter == BooleanFilterYes),
-            new KpiCard("SuperAdmin.Dashboard.RecentUploads", _modUploadHistories.Count(IsRecentUpload).ToString(), Icons.Material.Filled.History, Color.Info, ToggleRecentModUploadFilter, _modRecentFilter == ModRecentUpload)
+            new KpiCard("SuperAdmin.Dashboard.ModUploaders", _users.Count(u => u.CanUploadMod).ToString(), Icons.Material.Filled.CloudUpload, Color.Tertiary, ToggleUserModUploadFilter, _userModUploadFilter == BooleanFilterYes)
         ];
     }
 
@@ -675,13 +670,15 @@
     private void ClearServerKpiFilters()
     {
         _serverDataFilter = FilterAll;
+        _serverPlayersFilter = FilterAll;
         _serverEcoFilter = FilterAll;
         _serverImportFilter = FilterAll;
     }
 
-    private void SetServerKpiFilter(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
+    private void SetServerKpiFilter(string dataFilter = FilterAll, string playersFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
     {
         _serverDataFilter = dataFilter;
+        _serverPlayersFilter = playersFilter;
         _serverEcoFilter = ecoFilter;
         _serverImportFilter = importFilter;
     }
@@ -691,28 +688,24 @@
         _userModUploadFilter = _userModUploadFilter == BooleanFilterYes ? FilterAll : BooleanFilterYes;
     }
 
-    private void ToggleRecentModUploadFilter()
+    private void ToggleServerKpiFilter(string dataFilter = FilterAll, string playersFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
     {
-        _modRecentFilter = _modRecentFilter == ModRecentUpload ? FilterAll : ModRecentUpload;
-    }
-
-    private void ToggleServerKpiFilter(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
-    {
-        if (IsServerKpiFilterActive(dataFilter, ecoFilter, importFilter))
+        if (IsServerKpiFilterActive(dataFilter, playersFilter, ecoFilter, importFilter))
         {
             ClearServerKpiFilters();
             return;
         }
 
-        SetServerKpiFilter(dataFilter, ecoFilter, importFilter);
+        SetServerKpiFilter(dataFilter, playersFilter, ecoFilter, importFilter);
     }
 
-    private bool IsServerKpiFilterActive(string dataFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
+    private bool IsServerKpiFilterActive(string dataFilter = FilterAll, string playersFilter = FilterAll, string ecoFilter = FilterAll, string importFilter = FilterAll)
     {
         return _serverDataFilter == dataFilter
+               && _serverPlayersFilter == playersFilter
                && _serverEcoFilter == ecoFilter
                && _serverImportFilter == importFilter
-               && (dataFilter != FilterAll || ecoFilter != FilterAll || importFilter != FilterAll);
+               && (dataFilter != FilterAll || playersFilter != FilterAll || ecoFilter != FilterAll || importFilter != FilterAll);
     }
 
     private List<ServerHealthIssue> GetHealthIssues()
@@ -737,11 +730,6 @@
     {
         return server.LastDataUploadTime is { } lastUpload
                && lastUpload < DateTimeOffset.UtcNow.AddDays(-StaleImportDays);
-    }
-
-    private static bool IsRecentUpload(ModUploadHistory history)
-    {
-        return history.UploadDateTime >= DateTimeOffset.UtcNow.AddDays(-RecentUploadDays);
     }
 
     private async Task SelectServer(Server server)

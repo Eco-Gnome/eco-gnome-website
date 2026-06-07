@@ -260,11 +260,10 @@
             "Users": "Users",
             "Servers": "Servers",
             "EmptyServers": "Empty servers",
+            "ServersWithoutPlayers": "No players",
             "LinkedServers": "Eco-linked servers",
-            "NeverImported": "Never imported",
             "StaleImports": "Stale imports",
-            "ModUploaders": "Mod uploaders",
-            "RecentUploads": "Recent uploads"
+            "ModUploaders": "Mod uploaders"
         },
         "Filters": {
             "Users": {
