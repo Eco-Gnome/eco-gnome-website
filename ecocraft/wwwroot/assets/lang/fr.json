@@ -92,7 +92,9 @@
             "EquilibrateTooltip": "Répartir par quantité entre les produits.",
             "FirstOnlyTooltip": "Accorder 100 % au premier produit et zéro aux autres. Choisissez cette option si vous considérez les autres produits comme des déchets.",
             "HonestTooltip": "Accorder 80 % au premier produit et répartir le reste de manière égale.",
-            "UnlockTooltip": "Désactive l'équilibrage automatique et permet l'édition manuelle de toutes les valeurs, y compris le dépassement d'un total de 100 %."
+            "UnlockTooltip": "Désactive l'équilibrage automatique et permet l'édition manuelle de toutes les valeurs, y compris le dépassement d'un total de 100 %.",
+            "AdminLockTooltip": "Verrouille la répartition de cette recette pour tout le serveur. Une fois verrouillée, les parts et la réintégration actuelles sont imposées à tous les joueurs et écrasent leurs propres réglages.",
+            "AdminLockedTooltip": "Cette répartition est verrouillée par l'administrateur du serveur et ne peut pas être modifiée."
         },
         "Static": "statique",
         "TotalCost": "Coût total :",
@@ -171,7 +173,8 @@
             "Min": "Prix min",
             "Min.Tooltip": "Effacer les prix min",
             "Default": "Prix par défaut",
-            "Default.Tooltip": "Effacer les prix par défaut"
+            "Default.Tooltip": "Effacer les prix par défaut",
+            "ConfigureRecipe": "Configurer la répartition de recette (parts / réintégration) pour cet item"
         },
         "Members": {
             "DemoteAdmin": "Rétrograder l'administrateur",

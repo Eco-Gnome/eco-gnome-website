@@ -12,6 +12,8 @@
 @inject UserElementDbService UserElementDbService
 @inject UserPriceDbService UserPriceDbService
 @inject UserRecipeDbService UserRecipeDbService
+@inject RecipeDbService RecipeDbService
+@inject ElementDbService ElementDbService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <MudDialog Style="min-height: 500px;" Class="pb-4">
@@ -138,8 +140,8 @@
                                             <MudNumericField T="decimal?"
                                                              Class="rectangle-input small-adornment"
                                                              Style="@($"width: 90px; color: var({(context.IsMarginPrice ? "--mud-palette-tertiary" : "--mud-palette-primary")})")"
-                                                             Disabled="@(!canContributePrice)"
-                                                             HideSpinButtons="@(!canContributePrice)"
+                                                             Disabled="@(!canContributePrice || AdminServerMode)"
+                                                             HideSpinButtons="@(!canContributePrice || AdminServerMode)"
                                                              Value="@context.Price"
                                                              Immediate="true"
                                                              DebounceInterval="150"
@@ -174,6 +176,7 @@
                                     <MudTooltip Text="@(!context.IsReintegrated ? LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.True") : LocalizationService.GetTranslation("RecipeDialog.ReintegratedToolTip.False"))">
                                         <MudIconButton Icon="@MDIIcons.Filled.ChevronDoubleRight"
                                                        Size="Size.Small"
+                                                       Disabled="@IsAdminLockedForPlayer"
                                                        OnClick="@(() => ChangeReintegrate(context, !context.IsReintegrated))"/>
                                     </MudTooltip>
                                 }
@@ -302,6 +305,7 @@
                                     <MudIconButton Size="Size.Small"
                                                    tabindex="-1"
                                                    Icon="@MDIIcons.Filled.ChevronDoubleLeft"
+                                                   Disabled="@IsAdminLockedForPlayer"
                                                    OnClick="@(() => ChangeReintegrate(context, !context.IsReintegrated))"/>
                                 </MudTooltip>
                             }
@@ -341,19 +345,29 @@
                         <MudTd Class="px-1">
                             @if (GetProductUserElements().Count > 1)
                             {
-                                <MudNumericField T="decimal"
-                                                 Class="rectangle-input"
-                                                 Style="width: 90px; color: var(--mud-palette-primary)"
-                                                 Format="0.##"
-                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                 Adornment="Adornment.End"
-                                                 AdornmentText="% "
-                                                 Min="@((_currentUserRecipe?.LockShare ?? false) ? Decimal.MinValue : 0)"
-                                                 Max="@((_currentUserRecipe?.LockShare ?? false) ? Decimal.MaxValue : 100)"
-                                                 Variant="Variant.Outlined"
-                                                 Step="@(0.1m)"
-                                                 Value="@(context.Share * 100)"
-                                                 ValueChanged="@(v => UpdateShare(context, v / 100))"/>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudNumericField T="decimal"
+                                                     Class="rectangle-input"
+                                                     Style="width: 90px; color: var(--mud-palette-primary)"
+                                                     Format="0.##"
+                                                     Disabled="@IsAdminLockedForPlayer"
+                                                     HideSpinButtons="@IsAdminLockedForPlayer"
+                                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                     Adornment="Adornment.End"
+                                                     AdornmentText="% "
+                                                     Min="@(IsShareFreeForm ? Decimal.MinValue : 0)"
+                                                     Max="@(IsShareFreeForm ? Decimal.MaxValue : 100)"
+                                                     Variant="Variant.Outlined"
+                                                     Step="@(0.1m)"
+                                                     Value="@(context.Share * 100)"
+                                                     ValueChanged="@(v => UpdateShare(context, v / 100))"/>
+                                    @if (IsAdminLockedForPlayer)
+                                    {
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.AdminLockedTooltip")">
+                                            <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="d-flex align-center"/>
+                                        </MudTooltip>
+                                    }
+                                </MudStack>
                             }
                         </MudTd>
                         <!-- price -->
@@ -375,39 +389,55 @@
                                 <MudStack Row Spacing="0" Style="min-height: 24px">
                                     @if (GetProductUserElements().Count > 1)
                                     {
-                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.HonestTooltip")">
-                                            <MudIconButton Size="Size.Small"
-                                                           Icon="@MDIIcons.Filled.ChartPie"
-                                                           OnClick="@(() => Honest())"/>
-                                        </MudTooltip>
-                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnlyTooltip")">
-                                            <MudIconButton Size="Size.Small"
-                                                           Icon="@MDIIcons.Filled.Numeric1Box"
-                                                           OnClick="@(() => FirstOnly())"/>
-                                        </MudTooltip>
-                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EqualityTooltip")">
-                                            <MudIconButton Size="Size.Small"
-                                                           Icon="@MDIIcons.Filled.EqualBox"
-                                                           OnClick="@(() => Equality())"/>
-                                        </MudTooltip>
-
-                                        var firstQuantity = GetProductUserElements().First().Element.Quantity;
-
-                                        @if (GetProductUserElements().Any(ue => ue.Element.Quantity != firstQuantity))
+                                        @if (!IsAdminLockedForPlayer)
                                         {
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EquilibrateTooltip")">
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.HonestTooltip")">
                                                 <MudIconButton Size="Size.Small"
-                                                               Icon="@MDIIcons.Filled.Equalizer"
-                                                               OnClick="@(() => Equilibrate())"/>
+                                                               Icon="@MDIIcons.Filled.ChartPie"
+                                                               OnClick="@(() => Honest())"/>
                                             </MudTooltip>
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.FirstOnlyTooltip")">
+                                                <MudIconButton Size="Size.Small"
+                                                               Icon="@MDIIcons.Filled.Numeric1Box"
+                                                               OnClick="@(() => FirstOnly())"/>
+                                            </MudTooltip>
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EqualityTooltip")">
+                                                <MudIconButton Size="Size.Small"
+                                                               Icon="@MDIIcons.Filled.EqualBox"
+                                                               OnClick="@(() => Equality())"/>
+                                            </MudTooltip>
+
+                                            var firstQuantity = GetProductUserElements().First().Element.Quantity;
+
+                                            @if (GetProductUserElements().Any(ue => ue.Element.Quantity != firstQuantity))
+                                            {
+                                                <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.EquilibrateTooltip")">
+                                                    <MudIconButton Size="Size.Small"
+                                                                   Icon="@MDIIcons.Filled.Equalizer"
+                                                                   OnClick="@(() => Equilibrate())"/>
+                                                </MudTooltip>
+                                            }
                                         }
 
-                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.UnlockTooltip")">
-                                            <MudIconButton Size="Size.Small"
-                                                           Class="ml-3"
-                                                           Icon="@((_currentUserRecipe?.LockShare ?? false) ? MDIIcons.Filled.LockOff : MDIIcons.Filled.Lock)"
-                                                           OnClick="@(() => ToggleLock())"/>
-                                        </MudTooltip>
+                                        @if (AdminServerMode)
+                                        {
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.AdminLockTooltip")">
+                                                <MudIconButton Size="Size.Small"
+                                                               Class="ml-3"
+                                                               Color="@(Recipe.IsShareLocked ? Color.Warning : Color.Default)"
+                                                               Icon="@(Recipe.IsShareLocked ? MDIIcons.Filled.Lock : MDIIcons.Filled.LockOff)"
+                                                               OnClick="@(() => ToggleAdminLock())"/>
+                                            </MudTooltip>
+                                        }
+                                        else if (!Recipe.IsShareLocked)
+                                        {
+                                            <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.Share.UnlockTooltip")">
+                                                <MudIconButton Size="Size.Small"
+                                                               Class="ml-3"
+                                                               Icon="@((_currentUserRecipe?.LockShare ?? false) ? MDIIcons.Filled.LockOff : MDIIcons.Filled.Lock)"
+                                                               OnClick="@(() => ToggleLock())"/>
+                                            </MudTooltip>
+                                        }
                                     }
                                 </MudStack>
                             </MudTd>
@@ -418,7 +448,7 @@
                 </MudItem>
             </MudGrid>
 
-            @if (Recipe.Elements.Any(e => Math.Truncate(e.Quantity.GetBaseValue()) != e.Quantity.GetBaseValue() || Math.Truncate(e.Quantity.GetDynamicValue(DataContext)) != e.Quantity.GetDynamicValue(DataContext)))
+            @if (!AdminServerMode && Recipe.Elements.Any(e => Math.Truncate(e.Quantity.GetBaseValue()) != e.Quantity.GetBaseValue() || Math.Truncate(e.Quantity.GetDynamicValue(DataContext)) != e.Quantity.GetDynamicValue(DataContext)))
             {
                 <MudStack Row Class="mt-n6" AlignItems="AlignItems.Center">
                     <MudText>Crafted by quantity:</MudText>
@@ -449,6 +479,19 @@
 
     [Parameter]
     public Func<string, Task>? RecalculateRequested { get; set; }
+
+    // When true, the dialog is opened from the server admin page: share/reintegration edits
+    // are written to the server-level Element defaults (and pushed to every player when the
+    // recipe is admin-locked) instead of being a per-player preference.
+    [Parameter]
+    public bool AdminServerMode { get; set; }
+
+    // Editing is free-form (no auto-rebalance to 100%) when the distribution is locked.
+    // Admin lock (Recipe.IsShareLocked) drives it in admin mode; the per-player LockShare otherwise.
+    private bool IsShareFreeForm => AdminServerMode ? Recipe.IsShareLocked : (_currentUserRecipe?.LockShare ?? false);
+
+    // A normal player viewing a recipe whose distribution is locked by the server admin: read-only.
+    private bool IsAdminLockedForPlayer => !AdminServerMode && Recipe.IsShareLocked;
 
     private const int PriceSaveDebounceMs = 250;
     private readonly Dictionary<Guid, CancellationTokenSource> _priceSaveDebounceByUserPriceId = [];
@@ -642,6 +685,72 @@
         StateHasChanged();
     }
 
+    // Admin: toggle the server-level lock of this recipe's output distribution.
+    // When enabling, the current distribution is frozen onto every player of the server.
+    private async Task ToggleAdminLock()
+    {
+        Recipe.IsShareLocked = !Recipe.IsShareLocked;
+
+        await PersistAsync(context =>
+        {
+            RecipeDbService.UpdateShareLock(context, Recipe);
+            return Task.CompletedTask;
+        });
+
+        if (Recipe.IsShareLocked)
+        {
+            await PersistAdminOutputConfig();
+        }
+
+        RefreshComputedState();
+        StateHasChanged();
+    }
+
+    // Admin: write the current output Share / IsReintegrated of every product onto the
+    // server-level Element defaults, and push them to all players when the recipe is locked.
+    private async Task PersistAdminOutputConfig()
+    {
+        var outputElements = Recipe.Elements.Where(e => e.IsProduct()).ToList();
+
+        foreach (var element in outputElements)
+        {
+            var userElement = GetUserElement(element);
+            element.DefaultShare = userElement.Share;
+            element.DefaultIsReintegrated = userElement.IsReintegrated;
+        }
+
+        await PersistAsync(context =>
+        {
+            foreach (var element in outputElements)
+            {
+                ElementDbService.UpdateDefaultShareConfig(context, element);
+            }
+            return Task.CompletedTask;
+        });
+
+        if (Recipe.IsShareLocked)
+        {
+            await PushOutputConfigToAllPlayers(outputElements);
+        }
+    }
+
+    // Admin: overwrite every player's UserElement for these outputs with the server defaults.
+    // ElementId is globally unique to this server, so no extra server filter is needed.
+    private async Task PushOutputConfigToAllPlayers(List<Element> outputElements)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            foreach (var element in outputElements)
+            {
+                await context.UserElements
+                    .Where(ue => ue.ElementId == element.Id)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(x => x.Share, element.DefaultShare)
+                        .SetProperty(x => x.IsReintegrated, element.DefaultIsReintegrated));
+            }
+        });
+    }
+
     private decimal ElementSum(List<UserElement> userElements, bool reverseDeduction = false, bool withReduction = true)
     {
         var ingredientCostSum = userElements.Sum(ue => ue.Price
@@ -729,7 +838,7 @@
     private async Task UpdateShare(UserElement ue, decimal value)
     {
         var userElements = GetProductUserElements();
-        var lockShare = _currentUserRecipe?.LockShare ?? false;
+        var lockShare = IsShareFreeForm;
 
         ue.Share = lockShare ? value : Math.Clamp(value, 0, 1);
 
@@ -819,6 +928,11 @@
             }
             return Task.CompletedTask;
         });
+
+        if (AdminServerMode)
+        {
+            await PersistAdminOutputConfig();
+        }
     }
 
     private async Task RecalculateFromDialog(string origin)

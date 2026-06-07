@@ -2,6 +2,7 @@
 @implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Extensions
+@using ecocraft.Components.Dialog
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
 @using ecocraft.Services.DbServices
@@ -17,6 +18,10 @@
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JsRuntime
+@inject IDialogService DialogService
+@inject DataContextDbService DataContextDbService
+@inject UserServerDataService UserServerDataService
+@inject PriceCalculatorService PriceCalculatorService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
@@ -487,7 +492,41 @@
 						else
 						{
 							<MudTd>
-								<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+								<MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+									<MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
+									@{
+										var producingRecipes = GetRecipesProducingItem(context);
+									}
+									@if (producingRecipes.Count == 1)
+									{
+										<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.ConfigureRecipe")">
+											<MudIconButton Icon="@Icons.Material.Filled.Tune"
+											               Size="Size.Small"
+											               Color="Color.Primary"
+											               OnClick="@(() => OpenRecipeConfig(producingRecipes[0]))"/>
+										</MudTooltip>
+									}
+									else if (producingRecipes.Count > 1)
+									{
+										<MudMenu Dense="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+											<ActivatorContent Context="menuActivator">
+												<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Items.ConfigureRecipe")">
+													<MudIconButton Icon="@Icons.Material.Filled.Tune"
+													               Size="Size.Small"
+													               Color="Color.Primary"/>
+												</MudTooltip>
+											</ActivatorContent>
+											<ChildContent>
+												@foreach (var producingRecipe in producingRecipes)
+												{
+													<MudMenuItem OnClick="@(() => OpenRecipeConfig(producingRecipe))">
+														@LocalizationService.GetTranslation(producingRecipe)
+													</MudMenuItem>
+												}
+											</ChildContent>
+										</MudMenu>
+									}
+								</MudStack>
 							</MudTd>
 							<MudTd>
 								<MudNumericField T="decimal?"
@@ -557,6 +596,7 @@
 	private Server? _copyServer;
 	private ItemOrTag? _selectedTag;
 	private List<(string, decimal)> _stats = [];
+	private Dictionary<Guid, List<Recipe>> _recipesByProducedItemId = new();
 	private readonly ItemOrTag _calorieCostPolicyRow = new()
 	{
 		Name = "__calorie_cost_policy_row__",
@@ -689,6 +729,86 @@
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ContextService.CurrentServerData.Recipes.SelectMany(r => r.Elements).Count()));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ContextService.CurrentServerData.ItemOrTags.Count(i => !i.IsTag)));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ContextService.CurrentServerData.ItemOrTags.Count(i => i.IsTag)));
+
+		BuildRecipesByProducedItem();
+	}
+
+	// Lookup item -> recipes that produce it, built once per server-data load to keep the
+	// item-table rendering cheap (the per-row action queries this map instead of scanning recipes).
+	private void BuildRecipesByProducedItem()
+	{
+		_recipesByProducedItemId = new Dictionary<Guid, List<Recipe>>();
+
+		if (ContextService.CurrentServerData is null)
+		{
+			return;
+		}
+
+		foreach (var recipe in ContextService.CurrentServerData.Recipes)
+		{
+			foreach (var element in recipe.Elements.Where(e => e.IsProduct()))
+			{
+				if (!_recipesByProducedItemId.TryGetValue(element.ItemOrTagId, out var recipes))
+				{
+					recipes = [];
+					_recipesByProducedItemId[element.ItemOrTagId] = recipes;
+				}
+
+				if (!recipes.Contains(recipe))
+				{
+					recipes.Add(recipe);
+				}
+			}
+		}
+
+		foreach (var recipes in _recipesByProducedItemId.Values)
+		{
+			recipes.Sort((a, b) => string.Compare(
+				LocalizationService.GetTranslation(a),
+				LocalizationService.GetTranslation(b),
+				StringComparison.CurrentCultureIgnoreCase));
+		}
+	}
+
+	private List<Recipe> GetRecipesProducingItem(ItemOrTag item)
+	{
+		return _recipesByProducedItemId.GetValueOrDefault(item.Id) ?? [];
+	}
+
+	// Opens the shared RecipeDialog in admin mode for a server recipe. The admin's default
+	// DataContext is used as the live preview/calculation context; the recipe is provisioned
+	// into it if absent. Edits target the server-level Element defaults / Recipe lock.
+	private async Task OpenRecipeConfig(Recipe recipe)
+	{
+		var adminDataContext = ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
+		adminDataContext = await DataContextDbService.GetDataContextWithData(adminDataContext.Id, ContextService.CurrentServerData!);
+
+		if (recipe.GetCurrentUserRecipe(adminDataContext) is null)
+		{
+			await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+			{
+				UserServerDataService.AddUserRecipe(context, adminDataContext, ContextService.CurrentServerData!, recipe);
+				return Task.CompletedTask;
+			});
+
+			adminDataContext = await DataContextDbService.GetDataContextWithData(adminDataContext.Id, ContextService.CurrentServerData!);
+		}
+
+		await PriceCalculatorService.Calculate(adminDataContext, "ServerManagement:OpenRecipeConfig");
+
+		var parameters = new DialogParameters
+		{
+			["DataContext"] = adminDataContext,
+			["Recipe"] = recipe,
+			["AdminServerMode"] = true,
+			["RecalculateRequested"] = new Func<string, Task>(origin => PriceCalculatorService.Calculate(adminDataContext, $"ServerManagement:{origin}")),
+		};
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
+
+		var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
+		await dialog.Result;
+
+		await RefreshItemsTableAsync();
 	}
 
 	private async Task OnCalorieLockChangedAsync(bool value)

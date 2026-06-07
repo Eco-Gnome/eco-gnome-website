@@ -71,6 +71,10 @@ public class PriceCalculatorService(
         public HashSet<Guid> DirtyUserElementIds { get; } = [];
         public HashSet<Guid> DirtyUserCraftingTableIds { get; } = [];
 
+        // Real (unclamped) per-unit output cost, kept so the margin can be computed
+        // on the real price even when the stored cost is clamped to the item min/max bounds.
+        public Dictionary<Guid, decimal?> RealProductPriceByUserElementId { get; } = [];
+
         public DynamicValueCalculationContext DynamicValueCalculationContext =>
             _dynamicValueCalculationContext ??= new DynamicValueCalculationContext
             {
@@ -457,8 +461,13 @@ public class PriceCalculatorService(
                                 continue;
                             }
 
-                            var computedProductPrice = ingredientCostSum * product.Share / finalQuantity;
-                            calculationContext.TrySetUserElementPrice(product, computedProductPrice, product.IsMarginPrice);
+                            // Real (unclamped) output cost. The stored cost is clamped to the
+                            // produced item min/max bounds, but the margin must be computed on the
+                            // real price (then clamped in turn) — see issue #84.
+                            var realProductPrice = ingredientCostSum * product.Share / finalQuantity;
+                            var clampedProductPrice = ClampToItemBounds(realProductPrice, product.Element.ItemOrTag);
+                            calculationContext.RealProductPriceByUserElementId[product.Id] = realProductPrice;
+                            calculationContext.TrySetUserElementPrice(product, clampedProductPrice, product.IsMarginPrice);
 
                             var productUserPrice = calculationContext.GetUserPrice(product.Element.ItemOrTag);
                             if (productUserPrice is null || productUserPrice.OverrideIsBought || productUserPrice.Price is not null)
@@ -468,7 +477,7 @@ public class PriceCalculatorService(
 
                             if (productUserPrice.PrimaryUserElement == product)
                             {
-                                SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, marginType);
+                                SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, realProductPrice, product.Element.ItemOrTag, marginType);
                             }
                             else if (productUserPrice.PrimaryUserElement is null)
                             {
@@ -481,7 +490,11 @@ public class PriceCalculatorService(
 
                                 if (relatedUserElements.All(ue => ue.Price is not null))
                                 {
-                                    SetUserPriceWithMargin(calculationContext, productUserPrice, relatedUserElements.Min(ue => ue.Price), marginType);
+                                    // Clamping shares the same bounds for every producer of this item, so the
+                                    // cheapest stored (clamped) cost is also the cheapest real cost.
+                                    var cheapest = relatedUserElements.OrderBy(ue => ue.Price).First();
+                                    var cheapestRealPrice = calculationContext.RealProductPriceByUserElementId.GetValueOrDefault(cheapest.Id) ?? cheapest.Price;
+                                    SetUserPriceWithMargin(calculationContext, productUserPrice, cheapest.Price, cheapestRealPrice, product.Element.ItemOrTag, marginType);
                                 }
                             }
                         }
@@ -647,11 +660,14 @@ public class PriceCalculatorService(
 
     private sealed record FuelItemGroup(ItemOrTag? Tag, List<ItemOrTag> Items);
 
-    private static void SetUserPriceWithMargin(CalculationContext calculationContext, UserPrice userPrice, decimal? basePrice, MarginType marginType)
+    // storedPrice is the cost stored on the UserPrice (already clamped to the item bounds).
+    // marginBasePrice is the real, unclamped cost the margin is computed from; the resulting
+    // margin is then clamped to the same item bounds (issue #84).
+    private static void SetUserPriceWithMargin(CalculationContext calculationContext, UserPrice userPrice, decimal? storedPrice, decimal? marginBasePrice, ItemOrTag clampItemOrTag, MarginType marginType)
     {
         decimal? marginPrice;
 
-        if (basePrice is null || userPrice.UserMargin is null)
+        if (marginBasePrice is null || userPrice.UserMargin is null)
         {
             marginPrice = null;
         }
@@ -662,17 +678,22 @@ public class PriceCalculatorService(
             switch (marginType)
             {
                 case MarginType.MarkUp:
-                    marginPrice = basePrice * (1 + userPrice.UserMargin.Margin / 100);
+                    marginPrice = marginBasePrice * (1 + userPrice.UserMargin.Margin / 100);
                     break;
                 case MarginType.GrossMargin:
                 {
                     var divisionFactor = 1 - userPrice.UserMargin.Margin / 100;
                     if (divisionFactor > 0)
                     {
-                        marginPrice = basePrice / divisionFactor;
+                        marginPrice = marginBasePrice / divisionFactor;
                     }
                     break;
                 }
+            }
+
+            if (marginPrice is not null)
+            {
+                marginPrice = ClampToItemBounds(marginPrice.Value, clampItemOrTag);
             }
 
             if (marginPrice is not null && userPrice.UserMargin.Rounding != RoundingMode.None)
@@ -681,7 +702,23 @@ public class PriceCalculatorService(
             }
         }
 
-        calculationContext.TrySetUserPrice(userPrice, basePrice, marginPrice);
+        calculationContext.TrySetUserPrice(userPrice, storedPrice, marginPrice);
+    }
+
+    // Bounds a price to the item min/max defined by the server admin. No-op when a bound is null.
+    private static decimal ClampToItemBounds(decimal price, ItemOrTag itemOrTag)
+    {
+        if (itemOrTag.MinPrice is not null && price < itemOrTag.MinPrice.Value)
+        {
+            price = itemOrTag.MinPrice.Value;
+        }
+
+        if (itemOrTag.MaxPrice is not null && price > itemOrTag.MaxPrice.Value)
+        {
+            price = itemOrTag.MaxPrice.Value;
+        }
+
+        return price;
     }
 
     // Below 1$ → no rounding. Above:
