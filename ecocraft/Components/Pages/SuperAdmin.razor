@@ -64,7 +64,8 @@
                 }
                 else
                 {
-                    <MudStack Spacing="2" Class="super-admin-health-list">
+                    <div class="super-admin-health-list">
+                        <MudStack Spacing="2">
                         @foreach (var issue in healthIssues)
                         {
                             <MudAlert Severity="@issue.Severity" Variant="Variant.Outlined" Icon="@issue.Icon">
@@ -79,12 +80,13 @@
                                 </MudStack>
                             </MudAlert>
                         }
-                    </MudStack>
+                        </MudStack>
+                    </div>
                 }
             </MudPaper>
         </MudItem>
 
-        <MudItem lg="6" md="12">
+        <MudItem xs="12" lg="6">
             <div class="super-admin-user-table">
                 <MudTable Items="_users"
                           Filter="new Func<User, bool>(SearchUser)"
@@ -191,7 +193,7 @@
                 </MudTable>
             </div>
         </MudItem>
-        <MudItem lg="6" md="12">
+        <MudItem xs="12" lg="6">
             <div class="super-admin-server-table">
                 <MudTable Items="_servers"
                           Filter="new Func<Server, bool>(SearchServer)"
@@ -296,7 +298,7 @@
                 </MudTable>
             </div>
         </MudItem>
-        <MudItem lg="8" md="12">
+        <MudItem xs="12" lg="8">
             <MudTable Items="@_modUploadHistories"
                       Filter="new Func<ModUploadHistory, bool>(SearchModUploadHistory)"
                       Virtualize="false"
@@ -388,6 +390,7 @@
         if (ContextService.CurrentUser == null || !ContextService.CurrentUser.SuperAdmin)
         {
             Navigation.NavigateTo("/");
+            return;
         }
 
         ContextService.OnContextChanged += StateHasChanged;
