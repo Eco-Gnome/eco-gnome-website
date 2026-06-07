@@ -248,6 +248,23 @@
             "Yes": "Yes",
             "No": "No"
         },
+        "BulkActions": {
+            "Title": "Bulk actions",
+            "TargetLabel": "Target",
+            "TargetServers": "Servers",
+            "TargetUsers": "Players",
+            "FiltersLabel": "Filters",
+            "FilterNoServer": "Without server",
+            "FilterNoPlayers": "Without players",
+            "FilterNoAdmin": "Without admin",
+            "FilterNoData": "Without data",
+            "FilterStaleData": "Data not updated for (days)",
+            "MatchCount": "{count} item(s) affected",
+            "Delete": "Delete",
+            "Confirm": "You are about to delete {count} item(s). Continue?",
+            "Success": "{count} item(s) deleted.",
+            "Error": "Bulk deletion failed"
+        },
         "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
         "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
         "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",

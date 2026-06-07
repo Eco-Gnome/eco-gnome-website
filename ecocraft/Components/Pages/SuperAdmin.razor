@@ -86,6 +86,55 @@
             </MudPaper>
         </MudItem>
 
+        <MudItem xs="12" lg="8">
+            <MudPaper Class="pa-4" Style="height: 100%">
+                <MudText Typo="Typo.h5" Class="mb-3">@LocalizationService.GetTranslation("SuperAdmin.BulkActions.Title")</MudText>
+                <MudStack Spacing="3">
+                    <MudSelect T="BulkTarget"
+                               Value="_bulkTarget"
+                               ValueChanged="OnBulkTargetChanged"
+                               Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.TargetLabel")"
+                               Variant="Variant.Outlined"
+                               Dense="true"
+                               Style="max-width: 320px">
+                        <MudSelectItem T="BulkTarget" Value="BulkTarget.Servers">@LocalizationService.GetTranslation("SuperAdmin.BulkActions.TargetServers")</MudSelectItem>
+                        <MudSelectItem T="BulkTarget" Value="BulkTarget.Users">@LocalizationService.GetTranslation("SuperAdmin.BulkActions.TargetUsers")</MudSelectItem>
+                    </MudSelect>
+
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Class="mb-1">@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FiltersLabel")</MudText>
+                        @if (_bulkTarget == BulkTarget.Servers)
+                        {
+                            <MudStack Spacing="0">
+                                <MudCheckBox T="bool" @bind-Value="_fNoPlayers" Dense="true" Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FilterNoPlayers")"/>
+                                <MudCheckBox T="bool" @bind-Value="_fNoAdmin" Dense="true" Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FilterNoAdmin")"/>
+                                <MudCheckBox T="bool" @bind-Value="_fNoData" Dense="true" Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FilterNoData")"/>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudCheckBox T="bool" @bind-Value="_fStaleData" Dense="true" Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FilterStaleData")"/>
+                                    <MudNumericField T="int" @bind-Value="_bulkDays" Min="1" Disabled="@(!_fStaleData)" Variant="Variant.Outlined" Margin="Margin.Dense" Style="width: 90px"/>
+                                </MudStack>
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <MudCheckBox T="bool" @bind-Value="_fNoServer" Dense="true" Label="@LocalizationService.GetTranslation("SuperAdmin.BulkActions.FilterNoServer")"/>
+                        }
+                    </div>
+
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("SuperAdmin.BulkActions.MatchCount", GetBulkMatchCount().ToString())</MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.DeleteForever"
+                                   Disabled="@(!HasBulkFilter() || GetBulkMatchCount() == 0)"
+                                   OnClick="ExecuteBulkDelete">
+                            @LocalizationService.GetTranslation("SuperAdmin.BulkActions.Delete")
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
         <MudItem xs="12" lg="6">
             <div class="super-admin-user-table">
                 <MudTable Items="_users"
@@ -383,6 +432,14 @@
     private string _serverEcoFilter = FilterAll;
     private string _serverImportFilter = FilterAll;
 
+    private BulkTarget _bulkTarget = BulkTarget.Servers;
+    private bool _fNoPlayers;
+    private bool _fNoAdmin;
+    private bool _fNoData;
+    private bool _fStaleData;
+    private bool _fNoServer;
+    private int _bulkDays = StaleImportDays;
+
     protected override void OnInitialized()
     {
         if (ContextService.CurrentUser == null || !ContextService.CurrentUser.SuperAdmin)
@@ -648,6 +705,103 @@
         }
     }
 
+    private void OnBulkTargetChanged(BulkTarget target)
+    {
+        _bulkTarget = target;
+        _fNoPlayers = false;
+        _fNoAdmin = false;
+        _fNoData = false;
+        _fStaleData = false;
+        _fNoServer = false;
+    }
+
+    private bool HasBulkFilter()
+    {
+        return _bulkTarget == BulkTarget.Servers
+            ? _fNoPlayers || _fNoAdmin || _fNoData || _fStaleData
+            : _fNoServer;
+    }
+
+    private List<Guid> GetBulkTargetIds()
+    {
+        if (!HasBulkFilter())
+        {
+            return [];
+        }
+
+        if (_bulkTarget == BulkTarget.Servers)
+        {
+            var staleThreshold = DateTimeOffset.UtcNow.AddDays(-_bulkDays);
+
+            return _servers
+                .Where(s => !s.IsDefault)
+                .Where(s => !_fNoPlayers || s.UserServers.Count == 0)
+                .Where(s => !_fNoAdmin || !s.UserServers.Any(us => us.IsAdmin))
+                .Where(s => !_fNoData || s.IsEmpty)
+                .Where(s => !_fStaleData || (s.LastDataUploadTime ?? s.CreationDateTime) < staleThreshold)
+                .Select(s => s.Id)
+                .ToList();
+        }
+
+        var currentUserId = ContextService.CurrentUser?.Id;
+
+        return _users
+            .Where(u => !u.SuperAdmin && u.Id != currentUserId)
+            .Where(u => !_fNoServer || u.UserServers.Count == 0)
+            .Select(u => u.Id)
+            .ToList();
+    }
+
+    private int GetBulkMatchCount()
+    {
+        return GetBulkTargetIds().Count;
+    }
+
+    private async Task ExecuteBulkDelete()
+    {
+        var ids = GetBulkTargetIds();
+
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("SuperAdmin.BulkActions.Confirm", ids.Count.ToString()));
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            if (_bulkTarget == BulkTarget.Servers)
+            {
+                await ContextService.DeleteServersAsSuperAdmin(ids);
+            }
+            else
+            {
+                await ContextService.DeleteUsersAsSuperAdmin(ids);
+            }
+
+            Snackbar.Add(LocalizationService.GetTranslation("SuperAdmin.BulkActions.Success", ids.Count.ToString()), Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"{LocalizationService.GetTranslation("SuperAdmin.BulkActions.Error")}: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            await RetrieveUsers();
+            await RetrieveServers();
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
     private List<KpiCard> GetKpis()
     {
         return
@@ -758,6 +912,12 @@
             .ToList();
 
         return admins.Count == 0 ? "-" : string.Join(", ", admins);
+    }
+
+    private enum BulkTarget
+    {
+        Servers,
+        Users
     }
 
     private record KpiCard(string TitleKey, string Value, string Icon, Color Color, Action? OnClick = null, bool IsActive = false);

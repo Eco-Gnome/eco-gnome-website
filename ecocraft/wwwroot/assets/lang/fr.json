@@ -241,6 +241,23 @@
             "Yes": "Oui",
             "No": "Non"
         },
+        "BulkActions": {
+            "Title": "Actions groupées",
+            "TargetLabel": "Cible",
+            "TargetServers": "Serveurs",
+            "TargetUsers": "Joueurs",
+            "FiltersLabel": "Filtres",
+            "FilterNoServer": "Sans serveur",
+            "FilterNoPlayers": "Sans joueurs",
+            "FilterNoAdmin": "Sans admin",
+            "FilterNoData": "Sans data",
+            "FilterStaleData": "Data non mise à jour depuis (jours)",
+            "MatchCount": "{count} élément(s) concerné(s)",
+            "Delete": "Supprimer",
+            "Confirm": "Vous allez supprimer {count} élément(s). Continuer ?",
+            "Success": "{count} élément(s) supprimé(s).",
+            "Error": "Échec de la suppression groupée"
+        },
         "ConfirmServerDeletion": "Etes-vous sûr de vouloir supprimer le serveur {serveur} ?",
         "ConfirmSuperAdminPromote": "Êtes-vous sûr de vouloir promouvoir cet utilisateur au rang de super administrateur ?",
         "ConfirmSuperAdminDemote": "Êtes-vous sûr de vouloir rétrograder cet utilisateur de Super Admin ?",
