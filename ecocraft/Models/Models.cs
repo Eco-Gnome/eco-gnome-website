@@ -47,6 +47,7 @@ public class Recipe: IHasLocalizedName
     [ForeignKey("DynamicValue")] public Guid LaborId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
+    public bool IsShareLocked { get; set; } = false;
 
     public LocalizedField LocalizedName { get; set; }
     public DynamicValue CraftMinutes { get; set; }

@@ -495,6 +495,9 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsShareLocked")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("LaborId")
                         .HasColumnType("uuid");
 

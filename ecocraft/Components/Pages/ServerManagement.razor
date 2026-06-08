@@ -2,6 +2,7 @@
 @implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Extensions
+@using ecocraft.Components.Dialog
 @using ecocraft.Services
 @using ecocraft.Services.ImportData
 @using ecocraft.Services.DbServices
@@ -17,6 +18,10 @@
 @inject LocalizationService LocalizationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JsRuntime
+@inject IDialogService DialogService
+@inject DataContextDbService DataContextDbService
+@inject UserServerDataService UserServerDataService
+@inject PriceCalculatorService PriceCalculatorService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
@@ -529,6 +534,48 @@
 					</PagerContent>
 				</MudTable>
 			</MudItem>
+			<MudItem lg="4" md="12">
+				<MudTable Items="@GetConfigurableRecipes()"
+				          Filter="new Func<Recipe, bool>(FilterRecipe)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="400px"
+				          Dense="true"
+				          Hover="true">
+					<HeaderContent>
+						<MudTh>
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudText>@LocalizationService.GetTranslation("ServerManagement.Recipes.Title")</MudText>
+								<MudTextField @bind-Value="_searchRecipe" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+							</MudStack>
+						</MudTh>
+						<MudTh Style="text-align:center">@LocalizationService.GetTranslation("ServerManagement.Recipes.Locked")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>
+							<MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+								<EcoIcon Item="@GetRecipeMainProduct(context)"/>
+								<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Recipes.Configure")">
+									<MudLink Color="Color.Default" Typo="Typo.body2" OnClick="@(() => OpenRecipeConfig(context))">
+										@LocalizationService.GetTranslation(context)
+									</MudLink>
+								</MudTooltip>
+							</MudStack>
+						</MudTd>
+						<MudTd Style="text-align:center">
+							@if (context.IsShareLocked)
+							{
+								<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.Recipes.LockedTooltip")">
+									<MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Warning" Size="Size.Small"/>
+								</MudTooltip>
+							}
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudItem>
 		}
 	</MudGrid>
 </MudContainer>
@@ -557,6 +604,8 @@
 	private Server? _copyServer;
 	private ItemOrTag? _selectedTag;
 	private List<(string, decimal)> _stats = [];
+	private string _searchRecipe = "";
+	private List<Recipe> _configurableRecipes = [];
 	private readonly ItemOrTag _calorieCostPolicyRow = new()
 	{
 		Name = "__calorie_cost_policy_row__",
@@ -689,6 +738,88 @@
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Elements"), ContextService.CurrentServerData.Recipes.SelectMany(r => r.Elements).Count()));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Items"), ContextService.CurrentServerData.ItemOrTags.Count(i => !i.IsTag)));
 		_stats.Add((LocalizationService.GetTranslation("ServerManagement.ServerSettings.Tags"), ContextService.CurrentServerData.ItemOrTags.Count(i => i.IsTag)));
+
+		BuildConfigurableRecipes();
+	}
+
+	// A recipe is "configurable" for issue #85 when it has several outputs: only then do the
+	// output share and reintegration matter. Built once per server-data load.
+	private void BuildConfigurableRecipes()
+	{
+		_configurableRecipes = ContextService.CurrentServerData is null
+			? []
+			: ContextService.CurrentServerData.Recipes
+				.Where(r => r.Elements.Count(e => e.IsProduct()) > 1)
+				.OrderBy(r => LocalizationService.GetTranslation(r), StringComparer.CurrentCultureIgnoreCase)
+				.ToList();
+	}
+
+	private List<Recipe> GetConfigurableRecipes()
+	{
+		return _configurableRecipes;
+	}
+
+	private ItemOrTag? GetRecipeMainProduct(Recipe recipe)
+	{
+		return recipe.Elements
+			.Where(e => e.IsProduct())
+			.OrderBy(e => e.Index)
+			.FirstOrDefault()?.ItemOrTag;
+	}
+
+	private bool FilterRecipe(Recipe recipe)
+	{
+		if (string.IsNullOrWhiteSpace(_searchRecipe))
+		{
+			return true;
+		}
+
+		return recipe.Name.Contains(_searchRecipe, StringComparison.OrdinalIgnoreCase)
+		       || LocalizationService.GetTranslation(recipe).Contains(_searchRecipe, StringComparison.OrdinalIgnoreCase);
+	}
+
+	// Opens the shared RecipeDialog in admin mode for a server recipe. The admin's default
+	// DataContext is used as the live preview/calculation context; the recipe is provisioned
+	// into it if absent. Edits target the server-level Element defaults / Recipe lock.
+	private async Task OpenRecipeConfig(Recipe recipe)
+	{
+		try
+		{
+			var adminDataContext = ContextService.CurrentUserServer!.DataContexts.First(d => d.IsDefault);
+			adminDataContext = await DataContextDbService.GetDataContextWithData(adminDataContext.Id, ContextService.CurrentServerData!);
+
+			if (recipe.GetCurrentUserRecipe(adminDataContext) is null)
+			{
+				await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+				{
+					UserServerDataService.AddUserRecipe(context, adminDataContext, ContextService.CurrentServerData!, recipe);
+					return Task.CompletedTask;
+				});
+
+				adminDataContext = await DataContextDbService.GetDataContextWithData(adminDataContext.Id, ContextService.CurrentServerData!);
+			}
+
+			await PriceCalculatorService.Calculate(adminDataContext, "ServerManagement:OpenRecipeConfig");
+
+			var parameters = new DialogParameters
+			{
+				["DataContext"] = adminDataContext,
+				["Recipe"] = recipe,
+				["AdminServerMode"] = true,
+				["RecalculateRequested"] = new Func<string, Task>(origin => PriceCalculatorService.Calculate(adminDataContext, $"ServerManagement:{origin}")),
+			};
+			var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
+
+			var dialog = await DialogService.ShowAsync<RecipeDialog>(LocalizationService.GetTranslation(recipe), parameters, options);
+			await dialog.Result;
+
+			await RefreshItemsTableAsync();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+			Snackbar.Add($"{LocalizationService.GetTranslation("ServerManagement.Recipes.OpenError")}: {ex.Message}", Severity.Error);
+		}
 	}
 
 	private async Task OnCalorieLockChangedAsync(bool value)

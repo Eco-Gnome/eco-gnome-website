@@ -81,6 +81,7 @@ public class RecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			LaborId = recipe.Labor.Id,
 			CraftingTableId = recipe.CraftingTable.Id,
 			ServerId = recipe.Server.Id,
+			IsShareLocked = recipe.IsShareLocked,
 		};
 	}
 
@@ -92,6 +93,14 @@ public class RecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	public void UpdateAll(EcoCraftDbContext context, Recipe recipe)
 	{
 		context.Attach(CloneForDb(recipe)).State = EntityState.Modified;
+	}
+
+	public void UpdateShareLock(EcoCraftDbContext context, Recipe recipe)
+	{
+		var stub = new Recipe { Id = recipe.Id, IsShareLocked = recipe.IsShareLocked };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.IsShareLocked).IsModified = true;
 	}
 
 	public void Destroy(EcoCraftDbContext context, Recipe recipe)

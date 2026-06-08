@@ -890,17 +890,27 @@
 
                                         <MudTd Class="@(relatedUserElements.Count > 1 && _showDetailedRecipes ? "border-b-0" : "")">
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
-                                                <MudTooltip Disabled="@(contextUserPrice.Price is not null)" Text="@LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")">
+                                                @{
+                                                    var isCostMinPrice = contextUserPrice.Price is not null && contextUserPrice.Price == context.MinPrice;
+                                                    var isCostMaxPrice = contextUserPrice.Price is not null && !context.IsTag && contextUserPrice.Price == context.MaxPrice;
+                                                    var showCostInfo = contextUserPrice.Price is null || isCostMinPrice || isCostMaxPrice;
+                                                }
+                                                <MudTooltip Disabled="@(!showCostInfo)"
+                                                            Text="@(contextUserPrice.Price is null
+                                                                    ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isAutoCalculatedPrice")
+                                                                    : isCostMinPrice
+                                                                        ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
+                                                                        : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
                                                     <MudNumericField T="decimal?"
                                                                      FullWidth="false"
-                                                                     Class="mt-0 small-adornment flex-no-grow rectangle-input"
+                                                                     Class="@($"mt-0 small-adornment flex-no-grow rectangle-input {(isCostMinPrice ? "min-price" : isCostMaxPrice ? "max-price" : "")}")"
                                                                      Style="width: 101px;"
                                                                      HideSpinButtons="true"
                                                                      Format="0.##"
                                                                      Disabled="true"
                                                                      Value="@contextUserPrice.Price"
                                                                      Culture="CultureInfo.CurrentUICulture"
-                                                                     Adornment="@(contextUserPrice.Price is not null ? Adornment.None : Adornment.End)"
+                                                                     Adornment="@(showCostInfo ? Adornment.End : Adornment.None)"
                                                                      AdornmentIcon="@MDIIcons.Outline.Information"
                                                                      AdornmentColor="Color.Warning"
                                                                      Variant="Variant.Outlined"/>
@@ -928,17 +938,24 @@
                                                 </div>
                                                 @{
                                                     var hasMarginPriceError = contextUserPrice.Price is not null && contextUserPrice.MarginPrice is null;
+                                                    var isMarginMinPrice = contextUserPrice.MarginPrice is not null && contextUserPrice.MarginPrice == context.MinPrice;
+                                                    var isMarginMaxPrice = contextUserPrice.MarginPrice is not null && !context.IsTag && contextUserPrice.MarginPrice == context.MaxPrice;
+                                                    var showMarginInfo = hasMarginPriceError || isMarginMinPrice || isMarginMaxPrice;
 
-                                                    <MudTooltip Disabled="@(!hasMarginPriceError)"
-                                                                Text="@LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")">
+                                                    <MudTooltip Disabled="@(!showMarginInfo)"
+                                                                Text="@(hasMarginPriceError
+                                                                        ? LocalizationService.GetTranslation("PriceCalculator.MarginTooltip")
+                                                                        : isMarginMinPrice
+                                                                            ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
+                                                                            : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
                                                         <MudNumericField T="decimal?"
-                                                                         Class="mt-0 small-adornment flex-no-grow rectangle-input margin-price"
+                                                                         Class="@($"mt-0 small-adornment flex-no-grow rectangle-input margin-price {(isMarginMinPrice ? "min-price" : isMarginMaxPrice ? "max-price" : "")}")"
                                                                          Style="width: 85px"
                                                                          HideSpinButtons="true"
                                                                          Format="0.##"
                                                                          Disabled="true"
                                                                          Culture="CultureInfo.CurrentUICulture"
-                                                                         Adornment="@(hasMarginPriceError ? Adornment.End : Adornment.None)"
+                                                                         Adornment="@(showMarginInfo ? Adornment.End : Adornment.None)"
                                                                          AdornmentIcon="@MDIIcons.Outline.Information"
                                                                          AdornmentColor="Color.Warning"
                                                                          Value="@contextUserPrice.MarginPrice"
