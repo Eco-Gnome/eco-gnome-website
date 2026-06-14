@@ -259,7 +259,7 @@
                         <col style="width: 44px;" />
                         <col style="width: 64px;" />
                         <col style="width: 170px;" />
-                        <col style="width: 168px;" />
+                        <col style="width: 204px;" />
                     </ColGroup>
                     <HeaderContent>
                         <MudTh><MudTableSortLabel SortBy="new Func<Server, object>(s => s.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
@@ -322,6 +322,12 @@
                                                    Size="Size.Small"
                                                    Color="@(ContextService.CurrentUser!.UserServers.FirstOrDefault(us => us.ServerId == context.Id)?.IsAdmin ?? false ? Color.Tertiary : Color.Default)"
                                                    OnClick="@(() => ToggleSelfAdmin(context))"/>
+                                </MudTooltip>
+                                <MudTooltip Text="@(context.IsAutomationPlannerEnabled ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DisableAutomationPlanner") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.EnableAutomationPlanner"))">
+                                    <MudIconButton Icon="@MDIIcons.Filled.Factory"
+                                                   Color="@(context.IsAutomationPlannerEnabled ? Color.Tertiary : Color.Default)"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => ToggleAutomationPlanner(context))"/>
                                 </MudTooltip>
                                 <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
                                     <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
@@ -525,6 +531,26 @@
                 StateHasChanged();
             }
         }
+    }
+
+    private async Task ToggleAutomationPlanner(Server server)
+    {
+        server.IsAutomationPlannerEnabled = !server.IsAutomationPlannerEnabled;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            ServerDbService.UpdateIsAutomationPlannerEnabled(context, server);
+            return Task.CompletedTask;
+        });
+
+        // Si on modifie le serveur courant, rafraîchir le contexte pour que le bouton apparaisse/disparaisse.
+        if (ContextService.CurrentServer?.Id == server.Id)
+        {
+            ContextService.CurrentServer.IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled;
+            ContextService.InvokeContextChanged();
+        }
+
+        StateHasChanged();
     }
 
     private async Task ToggleDefault(Server server)

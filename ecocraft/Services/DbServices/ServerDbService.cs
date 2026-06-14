@@ -283,6 +283,7 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    LastDataUploadTime = server.LastDataUploadTime,
 		    JoinCode = server.JoinCode,
 		    ApiKey = server.ApiKey,
+		    IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled,
 	    };
     }
 
@@ -374,6 +375,14 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.IsDefault).IsModified = true;
+    }
+
+    public void UpdateIsAutomationPlannerEnabled(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server { Id = server.Id, IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.IsAutomationPlannerEnabled).IsModified = true;
     }
 
     public void Destroy(EcoCraftDbContext context, Server server)

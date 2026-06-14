@@ -70,6 +70,7 @@ public class ContextService(
             server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
+            server.IsAutomationPlannerEnabled = serverWithUsers.IsAutomationPlannerEnabled;
         }
 
         // Force pages to reload server-scoped data instead of reusing previous server cache.

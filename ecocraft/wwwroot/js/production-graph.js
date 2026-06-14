@@ -4,13 +4,18 @@
 window.ecoProductionGraph = (function () {
     const instances = {};
 
-    function buildNodes(data) {
+    function buildNodes(data, positions) {
         return data.nodes.map(function (n) {
+            const p = positions[n.id] || { x: 0, y: 0 };
             const common = {
                 id: n.id,
                 label: n.label,
                 image: n.image,
                 brokenImage: data.fallbackImage,
+                // Positions calculées par le layout de Sugiyama : on fige le placement initial
+                // sans contraindre le déplacement manuel (physique désactivée plus bas).
+                x: p.x,
+                y: p.y,
                 shapeProperties: { useBorderWithImage: true },
                 font: { color: '#ffffff', size: 15, multi: false, vadjust: 4 },
             };
@@ -90,24 +95,17 @@ window.ecoProductionGraph = (function () {
         dispose(containerId);
 
         const mode = initialMode || 'quantity';
-        const nodes = new vis.DataSet(buildNodes(data));
+        const positions = window.ecoSugiyama
+            ? window.ecoSugiyama.layout(data.nodes, data.edges)
+            : {};
+        const nodes = new vis.DataSet(buildNodes(data, positions));
         const edges = new vis.DataSet(buildEdges(data, mode));
 
         const options = {
-            layout: {
-                hierarchical: {
-                    enabled: true,
-                    direction: 'LR',
-                    sortMethod: 'directed',
-                    shakeTowards: 'leaves',
-                    levelSeparation: 260,
-                    nodeSpacing: 170,
-                    treeSpacing: 220,
-                    blockShifting: true,
-                    edgeMinimization: true,
-                    parentCentralization: true,
-                },
-            },
+            // Placement assuré par notre layout de Sugiyama (positions x/y fournies aux nœuds) :
+            // le layout hiérarchique de vis-network est désactivé, la physique aussi, ce qui laisse
+            // les nœuds librement déplaçables en X et Y.
+            layout: { hierarchical: { enabled: false } },
             physics: { enabled: false },
             interaction: {
                 dragNodes: true,
@@ -130,15 +128,6 @@ window.ecoProductionGraph = (function () {
         instances[containerId] = { network: network, nodes: nodes, edges: edges, data: data, mode: mode };
 
         network.once('afterDrawing', function () {
-            // Le layout hiérarchique ne sert qu'au placement initial : on fige les positions
-            // calculées puis on le désactive, ce qui libère le déplacement des nœuds en X et Y
-            // (sinon vis-network les contraint à leur colonne et seul l'axe Y est déplaçable).
-            const positions = network.getPositions();
-            network.setOptions({ layout: { hierarchical: { enabled: false } } });
-            const updates = Object.keys(positions).map(function (id) {
-                return { id: id, x: positions[id].x, y: positions[id].y };
-            });
-            nodes.update(updates);
             network.fit({ animation: false });
         });
     }

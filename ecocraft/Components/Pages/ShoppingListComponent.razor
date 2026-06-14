@@ -295,14 +295,28 @@
                         </MudItem>
                         <MudItem md="6" lg="6" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                                <MudStack Row Justify="Justify.FlexEnd" Class="mb-2">
-                                    <MudButton Variant="Variant.Outlined"
-                                               Color="Color.Tertiary"
-                                               StartIcon="@MDIIcons.Filled.Factory"
-                                               Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
-                                               OnClick="OpenAutomationGraph">
-                                        @LocalizationService.GetTranslation("ShoppingList.AutomationButton")
-                                    </MudButton>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                    <MudAutocomplete T="Recipe"
+                                                     @ref="_recipeAutocompleteRef"
+                                                     Value="_emptyRecipe"
+                                                     Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
+                                                     SearchFunc="SearchRecipes"
+                                                     ValueChanged="AddShoppingListRecipe"
+                                                     CoerceText="false"
+                                                     Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
+                                                     Class="auto-complete-input flex-grow-1"
+                                                     Dense="true"
+                                                     MaxItems="null"
+                                                     Variant="Variant.Outlined"
+                                                     AnchorOrigin="Origin.BottomLeft"
+                                                     TransformOrigin="Origin.TopLeft">
+                                        <ItemTemplate>
+                                            <MudStack Row Class="pl-2" Spacing="2">
+                                                <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
+                                                <MudText>@LocalizationService.GetTranslation(context)</MudText>
+                                            </MudStack>
+                                        </ItemTemplate>
+                                    </MudAutocomplete>
                                     <MudButton Variant="Variant.Outlined"
                                                Color="Color.Tertiary"
                                                StartIcon="@MDIIcons.Filled.Sitemap"
@@ -310,28 +324,17 @@
                                                OnClick="OpenProductionChainGraph">
                                         @LocalizationService.GetTranslation("ShoppingList.VisualizeProductionChain")
                                     </MudButton>
+                                    @if (ContextService.CurrentServer?.IsAutomationPlannerEnabled == true)
+                                    {
+                                        <MudButton Variant="Variant.Outlined"
+                                                   Color="Color.Tertiary"
+                                                   StartIcon="@MDIIcons.Filled.Factory"
+                                                   Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                                   OnClick="OpenAutomationGraph">
+                                            @LocalizationService.GetTranslation("ShoppingList.AutomationButton")
+                                        </MudButton>
+                                    }
                                 </MudStack>
-                                <MudAutocomplete T="Recipe"
-                                                 @ref="_recipeAutocompleteRef"
-                                                 Value="_emptyRecipe"
-                                                 Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
-                                                 SearchFunc="SearchRecipes"
-                                                 ValueChanged="AddShoppingListRecipe"
-                                                 CoerceText="false"
-                                                 Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
-                                                 Class="auto-complete-input"
-                                                 Dense="true"
-                                                 MaxItems="null"
-                                                 Variant="Variant.Outlined"
-                                                 AnchorOrigin="Origin.BottomLeft"
-                                                 TransformOrigin="Origin.TopLeft">
-                                    <ItemTemplate>
-                                        <MudStack Row Class="pl-2" Spacing="2">
-                                            <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
-                                            <MudText>@LocalizationService.GetTranslation(context)</MudText>
-                                        </MudStack>
-                                    </ItemTemplate>
-                                </MudAutocomplete>
                                 <MudTreeView Items="TreeItems" Class="shopping-list-tree">
                                     <ItemTemplate>
                                         <MudTreeViewItem @key="context.Value.Id" Items="@context.Children" Expanded="@context.Expanded">

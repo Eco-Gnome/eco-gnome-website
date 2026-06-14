@@ -964,6 +964,10 @@ public class Server
 	public string JoinCode { get; set; }
 	public Guid ApiKey { get; set; } = Guid.NewGuid();
 
+	// Active le bouton « Planificateur » (mode automatisation de la chaîne de production) pour ce
+	// serveur. Activable uniquement par un super-admin depuis la page d'administration.
+	public bool IsAutomationPlannerEnabled { get; set; } = false;
+
     [NotMapped]
     public bool IsEmpty { get; set; }
 
