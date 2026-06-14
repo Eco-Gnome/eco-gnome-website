@@ -62,6 +62,8 @@
                                      Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Labor")"
                                      Variant="Variant.Outlined"
                                      Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                     Format="0.##"
+                                     Step="0.1m"
                                      Min="0"/>
                 </MudItem>
                 <MudItem sm="3">
@@ -70,6 +72,8 @@
                                      Label="@LocalizationService.GetTranslation("DataEditor.Recipe.CraftMinutes")"
                                      Variant="Variant.Outlined"
                                      Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                     Format="0.##"
+                                     Step="0.1m"
                                      Min="0"/>
                 </MudItem>
             </MudGrid>

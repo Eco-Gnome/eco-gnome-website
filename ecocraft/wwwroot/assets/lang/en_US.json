@@ -357,7 +357,12 @@
         "ProductionChainTitle": "Production chain",
         "ProductionChainPerMinute": "Per minute",
         "ProductionChainRecenter": "Fit to view",
-        "ProductionChainEmpty": "Add at least one recipe to this shopping list to see its production chain."
+        "ProductionChainEmpty": "Add at least one recipe to this shopping list to see its production chain.",
+        "AutomationButton": "Automation planner",
+        "AutomationTitle": "Automation planner",
+        "AutomationTargetRate": "Target output (per minute)",
+        "AutomationInputLimits": "Input limits (/min)",
+        "AutomationEmpty": "Add at least one recipe to this shopping list to plan its automation."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",

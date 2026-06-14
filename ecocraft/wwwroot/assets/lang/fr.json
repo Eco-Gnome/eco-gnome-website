@@ -350,7 +350,12 @@
         "ProductionChainTitle": "Chaine de production",
         "ProductionChainPerMinute": "Par minute",
         "ProductionChainRecenter": "Ajuster a l'ecran",
-        "ProductionChainEmpty": "Ajoutez au moins une recette a cette liste pour voir sa chaine de production."
+        "ProductionChainEmpty": "Ajoutez au moins une recette a cette liste pour voir sa chaine de production.",
+        "AutomationButton": "Planificateur d'automatisation",
+        "AutomationTitle": "Planificateur d'automatisation",
+        "AutomationTargetRate": "Debit cible (par minute)",
+        "AutomationInputLimits": "Limites d'entree (/min)",
+        "AutomationEmpty": "Ajoutez au moins une recette a cette liste pour planifier son automatisation."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",

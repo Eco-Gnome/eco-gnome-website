@@ -74,6 +74,27 @@
     border: none;
 }
 
+/* Mode automatisation : 3 colonnes — entrées à gauche, graphe au centre, sorties à droite */
+.shopping-list-automation-layout {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.shopping-list-automation-side {
+    flex: 2 1 0;
+    min-width: 0;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    background-color: var(--mud-palette-surface);
+}
+
+.shopping-list-automation-graph {
+    flex: 8 1 0;
+    min-width: 0;
+}
+
 .rectangle-input .mud-input {
     height: 25px;
     width: 100px;

@@ -298,6 +298,13 @@
                                 <MudStack Row Justify="Justify.FlexEnd" Class="mb-2">
                                     <MudButton Variant="Variant.Outlined"
                                                Color="Color.Tertiary"
+                                               StartIcon="@MDIIcons.Filled.Factory"
+                                               Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                               OnClick="OpenAutomationGraph">
+                                        @LocalizationService.GetTranslation("ShoppingList.AutomationButton")
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Tertiary"
                                                StartIcon="@MDIIcons.Filled.Sitemap"
                                                Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
                                                OnClick="OpenProductionChainGraph">
@@ -1347,6 +1354,22 @@
         var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
 
         await DialogService.ShowAsync<ShoppingListGraphDialog>("", parameters, options);
+    }
+
+    private async Task OpenAutomationGraph()
+    {
+        if (_selectedShoppingList is null || _selectedShoppingList.UserRecipes.Count == 0)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ShoppingListAutomationDialog>
+        {
+            { x => x.ShoppingList, _selectedShoppingList }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
+
+        await DialogService.ShowAsync<ShoppingListAutomationDialog>("", parameters, options);
     }
 
     private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)

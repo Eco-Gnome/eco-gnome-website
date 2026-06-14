@@ -29,10 +29,20 @@ window.ecoProductionGraph = (function () {
             }
 
             // matières à acheter (source) / produits finaux (puits)
-            return Object.assign(common, {
+            const leaf = Object.assign(common, {
                 shape: 'image',
                 size: 26,
             });
+
+            // entrée goulot (matière première plafonnée bridant la chaîne) : bordure rouge.
+            if (n.type === 'buy' && n.bottleneck) {
+                return Object.assign(leaf, {
+                    borderWidth: 3,
+                    color: { border: '#e5484d', background: '#1e2429' },
+                });
+            }
+
+            return leaf;
         });
     }
 
@@ -68,7 +78,7 @@ window.ecoProductionGraph = (function () {
         });
     }
 
-    function render(containerId, data) {
+    function render(containerId, data, initialMode) {
         const container = document.getElementById(containerId);
         if (!container || typeof vis === 'undefined') {
             return;
@@ -76,7 +86,7 @@ window.ecoProductionGraph = (function () {
 
         dispose(containerId);
 
-        const mode = 'quantity';
+        const mode = initialMode || 'quantity';
         const nodes = new vis.DataSet(buildNodes(data));
         const edges = new vis.DataSet(buildEdges(data, mode));
 
@@ -114,7 +124,7 @@ window.ecoProductionGraph = (function () {
         };
 
         const network = new vis.Network(container, { nodes: nodes, edges: edges }, options);
-        instances[containerId] = { network: network, edges: edges, data: data, mode: mode };
+        instances[containerId] = { network: network, nodes: nodes, edges: edges, data: data, mode: mode };
 
         network.once('afterDrawing', function () {
             // Le layout hiérarchique ne sert qu'au placement initial : on fige les positions
@@ -142,6 +152,33 @@ window.ecoProductionGraph = (function () {
         inst.edges.update(updates);
     }
 
+    // Met à jour en place les libellés des nœuds (nombre de tables) et des arêtes (débit /min) à
+    // partir de données recalculées de MÊME topologie (mêmes ids/ordre), sans re-layout : les
+    // positions des nœuds sont conservées. Utilisé quand l'utilisateur change un débit cible.
+    function updateLabels(containerId, data, mode) {
+        const inst = instances[containerId];
+        if (!inst) {
+            return;
+        }
+        inst.data = data;
+        inst.mode = mode || inst.mode;
+
+        inst.nodes.update(data.nodes.map(function (n) {
+            const update = { id: n.id, label: n.label };
+            // (Dé)marque les entrées goulots sans toucher aux nœuds tables (bordure verte).
+            if (n.type === 'buy') {
+                update.borderWidth = n.bottleneck ? 3 : 0;
+                update.color = n.bottleneck
+                    ? { border: '#e5484d', background: '#1e2429' }
+                    : { border: '#2ec26b', background: '#1e2429' };
+            }
+            return update;
+        }));
+        inst.edges.update(data.edges.map(function (e, i) {
+            return { id: 'e' + i, label: edgeLabel(e, inst.mode) };
+        }));
+    }
+
     function fit(containerId) {
         const inst = instances[containerId];
         if (inst) {
@@ -157,5 +194,5 @@ window.ecoProductionGraph = (function () {
         }
     }
 
-    return { render: render, setMode: setMode, fit: fit, dispose: dispose };
+    return { render: render, setMode: setMode, updateLabels: updateLabels, fit: fit, dispose: dispose };
 })();
