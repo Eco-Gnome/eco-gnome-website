@@ -1,0 +1,458 @@
+using ecocraft.Models;
+using ecocraft.Services.DbServices;
+using Microsoft.EntityFrameworkCore;
+
+namespace ecocraft.Services;
+
+// Manual CRUD on server data (Items/Tags, Recipes, Skills, CraftingTables, PluginModules) for the
+// /data-editor admin page. There is NO IsManual flag: a later re-import overwrites everything, the
+// UI just warns. Recipe editing is SIMPLIFIED (no Modifiers on DynamicValues).
+//
+// Every write goes through EcoCraftDbContext.ContextSaveAsync. We load the whole server graph with
+// GetServerWithData + Attach so relations (Skill/CraftingTable/ItemOrTag/PluginModule) resolve by Id
+// against tracked entities. Deletions never go through the tracker (cascade ordering races throw
+// DbUpdateConcurrencyException); they use ctx.QueueDelete<T>(id) after detaching, mirroring the
+// DetachAndQueueDelete pattern in ImportDataService.Crud.cs.
+public class ServerDataEditorService(
+    IDbContextFactory<EcoCraftDbContext> factory,
+    ServerDbService serverDbService,
+    LocalizationService localizationService)
+{
+    // ----- Item / Tag -----
+
+    public async Task CreateOrUpdateItemAsync(Server server, ItemEditModel m)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            if (IsNew(m.Id))
+            {
+                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var item = new ItemOrTag
+                {
+                    Name = m.Name,
+                    LocalizedName = localizedName,
+                    IsTag = m.IsTag,
+                    MinPrice = m.MinPrice,
+                    DefaultPrice = m.DefaultPrice,
+                    MaxPrice = m.MaxPrice,
+                    Server = sd,
+                };
+                sd.ItemOrTags.Add(item);
+                ctx.ItemOrTags.Add(item);
+            }
+            else
+            {
+                var item = sd.ItemOrTags.First(i => i.Id == m.Id);
+                item.Name = m.Name;
+                item.IsTag = m.IsTag;
+                item.MinPrice = m.MinPrice;
+                item.DefaultPrice = m.DefaultPrice;
+                item.MaxPrice = m.MaxPrice;
+                SetLocalizedName(item.LocalizedName, m.Name);
+                ctx.ItemOrTags.Update(item);
+            }
+        });
+    }
+
+    public async Task DeleteItemAsync(Server server, Guid itemId)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var item = sd.ItemOrTags.First(i => i.Id == itemId);
+            DetachAndQueueDelete(ctx, item, item.Id);
+        });
+    }
+
+    // ----- Recipe (simplified) -----
+
+    public async Task CreateOrUpdateRecipeAsync(Server server, RecipeEditModel m)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var skill = m.SkillId is not null ? sd.Skills.First(s => s.Id == m.SkillId) : null;
+            var craftingTable = sd.CraftingTables.First(c => c.Id == m.CraftingTableId);
+
+            Recipe recipe;
+
+            if (IsNew(m.Id))
+            {
+                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var labor = NewDynamicValue(ctx, sd, m.Labor);
+                var craftMinutes = NewDynamicValue(ctx, sd, m.CraftMinutes);
+
+                recipe = new Recipe
+                {
+                    Name = m.Name,
+                    LocalizedName = localizedName,
+                    FamilyName = m.Name,
+                    Skill = skill,
+                    SkillLevel = m.SkillLevel,
+                    IsBlueprint = false,
+                    IsDefault = false,
+                    Labor = labor,
+                    CraftMinutes = craftMinutes,
+                    CraftingTable = craftingTable,
+                    Server = sd,
+                };
+                sd.Recipes.Add(recipe);
+                ctx.Recipes.Add(recipe);
+            }
+            else
+            {
+                recipe = sd.Recipes.First(r => r.Id == m.Id);
+                recipe.Name = m.Name;
+                recipe.FamilyName = m.Name;
+                recipe.Skill = skill;
+                recipe.SkillLevel = m.SkillLevel;
+                recipe.CraftingTable = craftingTable;
+                SetLocalizedName(recipe.LocalizedName, m.Name);
+                recipe.Labor.BaseValue = m.Labor;
+                recipe.CraftMinutes.BaseValue = m.CraftMinutes;
+                ctx.Recipes.Update(recipe);
+                ctx.DynamicValues.Update(recipe.Labor);
+                ctx.DynamicValues.Update(recipe.CraftMinutes);
+
+                // Wipe all existing Elements + their Quantity DynamicValue, then recreate from model.
+                foreach (var element in recipe.Elements.ToList())
+                {
+                    DetachAndQueueDelete(ctx, element.Quantity, element.Quantity.Id);
+                    recipe.Elements.Remove(element);
+                    DetachAndQueueDelete(ctx, element, element.Id);
+                }
+            }
+
+            var index = 0;
+
+            foreach (var ingredient in m.Ingredients)
+            {
+                var itemOrTag = sd.ItemOrTags.First(i => i.Id == ingredient.ItemOrTagId);
+                var quantity = NewDynamicValue(ctx, sd, -Math.Abs(ingredient.Quantity));
+                var element = new Element
+                {
+                    Recipe = recipe,
+                    ItemOrTag = itemOrTag,
+                    Index = index++,
+                    Quantity = quantity,
+                    DefaultIsReintegrated = false,
+                    DefaultShare = 0,
+                };
+                recipe.Elements.Add(element);
+                ctx.Elements.Add(element);
+            }
+
+            foreach (var product in m.Products)
+            {
+                var itemOrTag = sd.ItemOrTags.First(i => i.Id == product.ItemOrTagId);
+                var quantity = NewDynamicValue(ctx, sd, Math.Abs(product.Quantity));
+                var element = new Element
+                {
+                    Recipe = recipe,
+                    ItemOrTag = itemOrTag,
+                    Index = index++,
+                    Quantity = quantity,
+                    DefaultIsReintegrated = false,
+                    DefaultShare = 0,
+                };
+                recipe.Elements.Add(element);
+                ctx.Elements.Add(element);
+            }
+
+            // DefaultShare distribution across non-reintegrated products (copied from
+            // ImportDataService.Import.cs): single product -> 1, otherwise first -> 0.8 and the
+            // remaining (n-1) split 0.2 evenly.
+            var productsToEdit = recipe.Elements
+                .Where(e => e.IsProduct() && !e.DefaultIsReintegrated)
+                .OrderBy(e => e.Index)
+                .ToList();
+
+            for (var i = 0; i < productsToEdit.Count; i++)
+            {
+                productsToEdit[i].DefaultShare = productsToEdit.Count > 1
+                    ? i == 0 ? 0.8m : 0.2m / (productsToEdit.Count - 1)
+                    : 1;
+            }
+        });
+    }
+
+    public async Task DeleteRecipeAsync(Server server, Guid recipeId)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var recipe = sd.Recipes.First(r => r.Id == recipeId);
+
+            // Recipe cascade deletes its Elements but NOT the DynamicValues (Labor, CraftMinutes,
+            // each Element.Quantity), so we queue those explicitly.
+            DetachAndQueueDelete(ctx, recipe.Labor, recipe.Labor.Id);
+            DetachAndQueueDelete(ctx, recipe.CraftMinutes, recipe.CraftMinutes.Id);
+
+            foreach (var element in recipe.Elements.ToList())
+            {
+                DetachAndQueueDelete(ctx, element.Quantity, element.Quantity.Id);
+            }
+
+            DetachAndQueueDelete(ctx, recipe, recipe.Id);
+        });
+    }
+
+    // ----- Skill -----
+
+    public async Task CreateOrUpdateSkillAsync(Server server, SkillEditModel m)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            if (IsNew(m.Id))
+            {
+                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var skill = new Skill
+                {
+                    Name = m.Name,
+                    LocalizedName = localizedName,
+                    Profession = m.Profession,
+                    MaxLevel = m.MaxLevel,
+                    LaborReducePercent = m.LaborReducePercent,
+                    Server = sd,
+                };
+                sd.Skills.Add(skill);
+                ctx.Skills.Add(skill);
+            }
+            else
+            {
+                var skill = sd.Skills.First(s => s.Id == m.Id);
+                skill.Name = m.Name;
+                skill.Profession = m.Profession;
+                skill.MaxLevel = m.MaxLevel;
+                skill.LaborReducePercent = m.LaborReducePercent;
+                SetLocalizedName(skill.LocalizedName, m.Name);
+                ctx.Skills.Update(skill);
+            }
+        });
+    }
+
+    public async Task DeleteSkillAsync(Server server, Guid skillId)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var skill = sd.Skills.First(s => s.Id == skillId);
+            DetachAndQueueDelete(ctx, skill, skill.Id);
+        });
+    }
+
+    // ----- CraftingTable -----
+
+    public async Task CreateOrUpdateCraftingTableAsync(Server server, CraftingTableEditModel m)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var pluginModules = sd.PluginModules
+                .Where(pm => m.PluginModuleIds.Contains(pm.Id))
+                .ToList();
+
+            if (IsNew(m.Id))
+            {
+                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var craftingTable = new CraftingTable
+                {
+                    Name = m.Name,
+                    LocalizedName = localizedName,
+                    PluginModules = pluginModules,
+                    Server = sd,
+                };
+                sd.CraftingTables.Add(craftingTable);
+                ctx.CraftingTables.Add(craftingTable);
+            }
+            else
+            {
+                var craftingTable = sd.CraftingTables.First(c => c.Id == m.Id);
+                craftingTable.Name = m.Name;
+                SetLocalizedName(craftingTable.LocalizedName, m.Name);
+
+                // Diff the M:M instead of reassigning the collection (see RefreshCraftingTable in
+                // ImportDataService.Crud.cs): bulk replacement emits join-row DELETEs that can hit
+                // already-removed rows and throw DbUpdateConcurrencyException.
+                var newSet = new HashSet<PluginModule>(pluginModules);
+                var oldSet = new HashSet<PluginModule>(craftingTable.PluginModules);
+
+                foreach (var pm in craftingTable.PluginModules.ToList())
+                {
+                    if (!newSet.Contains(pm))
+                    {
+                        craftingTable.PluginModules.Remove(pm);
+                    }
+                }
+
+                foreach (var pm in pluginModules)
+                {
+                    if (!oldSet.Contains(pm))
+                    {
+                        craftingTable.PluginModules.Add(pm);
+                    }
+                }
+
+                ctx.CraftingTables.Update(craftingTable);
+            }
+        });
+    }
+
+    public async Task DeleteCraftingTableAsync(Server server, Guid id)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var craftingTable = sd.CraftingTables.First(c => c.Id == id);
+            DetachAndQueueDelete(ctx, craftingTable, craftingTable.Id);
+        });
+    }
+
+    // ----- PluginModule -----
+
+    public async Task CreateOrUpdatePluginModuleAsync(Server server, PluginModuleEditModel m)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var skill = m.SkillId is not null ? sd.Skills.First(s => s.Id == m.SkillId) : null;
+
+            if (IsNew(m.Id))
+            {
+                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var pluginModule = new PluginModule
+                {
+                    Name = m.Name,
+                    LocalizedName = localizedName,
+                    PluginType = m.PluginType,
+                    Percent = m.Percent,
+                    Skill = skill,
+                    SkillPercent = m.SkillPercent,
+                    Server = sd,
+                };
+                sd.PluginModules.Add(pluginModule);
+                ctx.PluginModules.Add(pluginModule);
+            }
+            else
+            {
+                var pluginModule = sd.PluginModules.First(p => p.Id == m.Id);
+                pluginModule.Name = m.Name;
+                pluginModule.PluginType = m.PluginType;
+                pluginModule.Percent = m.Percent;
+                pluginModule.Skill = skill;
+                pluginModule.SkillPercent = m.SkillPercent;
+                SetLocalizedName(pluginModule.LocalizedName, m.Name);
+                ctx.PluginModules.Update(pluginModule);
+            }
+        });
+    }
+
+    public async Task DeletePluginModuleAsync(Server server, Guid id)
+    {
+        await EcoCraftDbContext.ContextSaveAsync(factory, async ctx =>
+        {
+            var sd = await serverDbService.GetServerWithData(server.Id, ctx);
+            ctx.Attach(sd);
+
+            var pluginModule = sd.PluginModules.First(p => p.Id == id);
+            DetachAndQueueDelete(ctx, pluginModule, pluginModule.Id);
+        });
+    }
+
+    // ----- Helpers -----
+
+    private static bool IsNew(Guid? id) => id is null || id == Guid.Empty;
+
+    // Detach from the tracker, then queue a SQL DELETE for after SaveChanges. Mirrors
+    // ImportDataService.Crud.cs:DetachAndQueueDelete — prevents the tracker from racing the
+    // DB-level cascade and throwing DbUpdateConcurrencyException on 0 rows affected.
+    private static void DetachAndQueueDelete<T>(EcoCraftDbContext ctx, T entity, Guid id) where T : class
+    {
+        var entry = ctx.Entry(entity);
+        if (entry.State != EntityState.Detached)
+        {
+            entry.State = EntityState.Detached;
+        }
+        ctx.QueueDelete<T>(id);
+    }
+
+    // Track the new row as Added right away (Add it to the ctx immediately). Otherwise a later
+    // ctx.X.Update(parent) would walk the graph and tag this untracked-but-keyed entity as
+    // Modified -> UPDATE on a non-existent row -> concurrency error. Same rationale as
+    // TranslationsToLocalizedField in ImportDataService.Helpers.cs.
+    private LocalizedField NewLocalizedField(EcoCraftDbContext ctx, Server server, string name)
+    {
+        var localizedField = new LocalizedField { Server = server };
+        ctx.Add(localizedField);
+        SetLocalizedName(localizedField, name);
+        return localizedField;
+    }
+
+    private DynamicValue NewDynamicValue(EcoCraftDbContext ctx, Server server, decimal baseValue)
+    {
+        var dynamicValue = new DynamicValue { BaseValue = baseValue, Server = server };
+        ctx.DynamicValues.Add(dynamicValue);
+        return dynamicValue;
+    }
+
+    // Manual editing exposes a single Name field, so we fill en_US (the fallback column) plus the
+    // current UI language column. The language->column switch mirrors
+    // ImportDataService.Helpers.cs:TranslationsToLocalizedField.
+    private void SetLocalizedName(LocalizedField localizedField, string name)
+    {
+        SetColumn(localizedField, LanguageCode.en_US, name);
+        SetColumn(localizedField, localizationService.CurrentLanguageCode, name);
+    }
+
+    private static void SetColumn(LocalizedField lf, LanguageCode code, string value)
+    {
+        switch (code)
+        {
+            case LanguageCode.en_US: lf.en_US = value; break;
+            case LanguageCode.fr: lf.fr = value; break;
+            case LanguageCode.es: lf.es = value; break;
+            case LanguageCode.de: lf.de = value; break;
+            case LanguageCode.ko: lf.ko = value; break;
+            case LanguageCode.pt_BR: lf.pt_BR = value; break;
+            case LanguageCode.zh_Hans: lf.zh_Hans = value; break;
+            case LanguageCode.ru: lf.ru = value; break;
+            case LanguageCode.it: lf.it = value; break;
+            case LanguageCode.pt_PT: lf.pt_PT = value; break;
+            case LanguageCode.hu: lf.hu = value; break;
+            case LanguageCode.ja: lf.ja = value; break;
+            case LanguageCode.nn: lf.nn = value; break;
+            case LanguageCode.pl: lf.pl = value; break;
+            case LanguageCode.nl: lf.nl = value; break;
+            case LanguageCode.ro: lf.ro = value; break;
+            case LanguageCode.da: lf.da = value; break;
+            case LanguageCode.cs: lf.cs = value; break;
+            case LanguageCode.sv: lf.sv = value; break;
+            case LanguageCode.uk: lf.uk = value; break;
+            case LanguageCode.el: lf.el = value; break;
+            case LanguageCode.ar_sa: lf.ar_sa = value; break;
+            case LanguageCode.vi: lf.vi = value; break;
+            case LanguageCode.tr: lf.tr = value; break;
+            default: throw new ArgumentException($"Unsupported LanguageCode: {code}");
+        }
+    }
+}

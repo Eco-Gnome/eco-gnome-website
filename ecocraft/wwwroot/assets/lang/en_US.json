@@ -2,6 +2,101 @@
     "Cancel": "Cancel",
     "CopyToClipboard": "Copy to clipboard",
     "CraftingTable": "Crafting Table",
+    "DataEditor": {
+        "ReimportWarning": "Data edited here is overwritten by any new server JSON file import (Administration page). Manual editing is meant for testing.",
+        "Actions": "Actions",
+        "Edit": "Edit",
+        "Delete": "Delete",
+        "Tab": {
+            "Items": "Items / Tags",
+            "Recipes": "Recipes",
+            "Skills": "Skills",
+            "Tables": "Crafting Tables",
+            "Modules": "Modules"
+        },
+        "Snackbar": {
+            "Saved": "Changes saved",
+            "Error": "An error occurred"
+        },
+        "Item": {
+            "CreateTitle": "Create an item / tag",
+            "EditTitle": "Edit the item / tag",
+            "Create": "Create an item / tag",
+            "Delete": "Delete the item / tag",
+            "DeleteConfirm": "Are you sure you want to delete \"{0}\"?",
+            "DeleteBlocked": "This item cannot be deleted: it is used in {0} recipe(s). Remove it from those recipes first.",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "IsTag": "Is a tag",
+            "MinPrice": "Min price",
+            "DefaultPrice": "Default price",
+            "MaxPrice": "Max price",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "Recipe": {
+            "CreateTitle": "Create a recipe",
+            "EditTitle": "Edit the recipe",
+            "Create": "Create a recipe",
+            "Delete": "Delete the recipe",
+            "DeleteConfirm": "Are you sure you want to delete the recipe \"{0}\"?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "Skill": "Skill",
+            "SkillLevel": "Skill level",
+            "CraftingTable": "Crafting table",
+            "CraftingTableRequired": "A crafting table is required",
+            "Labor": "Labor",
+            "CraftMinutes": "Craft minutes",
+            "Item": "Item / Tag",
+            "Quantity": "Quantity",
+            "AddLine": "Add a line",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "Skill": {
+            "CreateTitle": "Create a skill",
+            "EditTitle": "Edit the skill",
+            "Create": "Create a skill",
+            "Delete": "Delete the skill",
+            "DeleteConfirm": "Are you sure you want to delete the skill \"{0}\"?",
+            "DeleteConfirmCascade": "Deleting the skill \"{0}\" will also delete {1} recipe(s) using it. Continue?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "Profession": "Profession",
+            "MaxLevel": "Max level",
+            "LaborReducePercent": "Labor reduction per level",
+            "LaborReducePercentHelp": "Comma-separated values, one per level (e.g. 1, 0.9, 0.8).",
+            "LaborReducePercentInvalid": "Invalid list: only numbers separated by commas are allowed.",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "CraftingTable": {
+            "CreateTitle": "Create a crafting table",
+            "EditTitle": "Edit the crafting table",
+            "Create": "Create a crafting table",
+            "Delete": "Delete the crafting table",
+            "DeleteConfirm": "Are you sure you want to delete the crafting table \"{0}\"?",
+            "DeleteConfirmCascade": "Deleting the crafting table \"{0}\" will also delete {1} recipe(s) using it. Continue?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "PluginModules": "Modules",
+            "NoPluginModule": "No module"
+        },
+        "PluginModule": {
+            "CreateTitle": "Create a module",
+            "EditTitle": "Edit the module",
+            "Create": "Create a module",
+            "Delete": "Delete the module",
+            "DeleteConfirm": "Are you sure you want to delete the module \"{0}\"?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "PluginType": "Type",
+            "Percent": "Percent",
+            "Skill": "Skill",
+            "SkillPercent": "Skill percent"
+        }
+    },
     "DevVersion": "YOU ARE ON A DEVELOPMENT VERSION OF ECO GNOME ",
     "GraphView": {
         "ResetButton": "Reset Graph",
@@ -53,6 +148,7 @@
     "Margins": "Margins",
     "NavMenu": {
         "NavAdmin": "Server Management",
+        "NavDataEditor": "Data Editor",
         "NavCalculator": "Price Calculator",
         "ShoppingList": "Shopping List",
         "EconomyViewer": "Economy Viewer",
@@ -418,6 +514,7 @@
         "UserSettings": "User settings"
     },
     "Versions": "Versions",
+    "Validate": "Validate",
     "DataContext": {
         "DefaultContext": "Default Context",
         "NewContext": "New Context",

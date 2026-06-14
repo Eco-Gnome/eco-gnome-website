@@ -84,6 +84,7 @@ builder.Services.AddScoped<ContextService>();
 builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
+builder.Services.AddScoped<ServerDataEditorService>();
 builder.Services.AddScoped<UserServerDataService>();
 builder.Services.AddScoped<CraftingTableFuelCostService>();
 builder.Services.AddScoped<ShoppingListService>();

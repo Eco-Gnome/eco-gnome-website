@@ -2,6 +2,101 @@
     "Cancel": "Annuler",
     "CopyToClipboard": "Copier dans le presse-papiers",
     "CraftingTable": "Table d'artisanat",
+    "DataEditor": {
+        "ReimportWarning": "Les données éditées ici sont écrasées par tout nouvel import du fichier JSON serveur (page Administration). L'édition manuelle est destinée aux tests.",
+        "Actions": "Actions",
+        "Edit": "Modifier",
+        "Delete": "Supprimer",
+        "Tab": {
+            "Items": "Items / Tags",
+            "Recipes": "Recettes",
+            "Skills": "Compétences",
+            "Tables": "Tables d'artisanat",
+            "Modules": "Modules"
+        },
+        "Snackbar": {
+            "Saved": "Modifications enregistrées",
+            "Error": "Une erreur est survenue"
+        },
+        "Item": {
+            "CreateTitle": "Créer un item / tag",
+            "EditTitle": "Modifier l'item / tag",
+            "Create": "Créer un item / tag",
+            "Delete": "Supprimer l'item / tag",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer « {0} » ?",
+            "DeleteBlocked": "Cet item ne peut pas être supprimé : il est utilisé dans {0} recette(s). Retirez-le d'abord de ces recettes.",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "IsTag": "Est un tag",
+            "MinPrice": "Prix min",
+            "DefaultPrice": "Prix par défaut",
+            "MaxPrice": "Prix max",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "Recipe": {
+            "CreateTitle": "Créer une recette",
+            "EditTitle": "Modifier la recette",
+            "Create": "Créer une recette",
+            "Delete": "Supprimer la recette",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la recette « {0} » ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "Skill": "Compétence",
+            "SkillLevel": "Niveau de compétence",
+            "CraftingTable": "Table d'artisanat",
+            "CraftingTableRequired": "Une table d'artisanat est requise",
+            "Labor": "Labeur",
+            "CraftMinutes": "Minutes de fabrication",
+            "Item": "Item / Tag",
+            "Quantity": "Quantité",
+            "AddLine": "Ajouter une ligne",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "Skill": {
+            "CreateTitle": "Créer une compétence",
+            "EditTitle": "Modifier la compétence",
+            "Create": "Créer une compétence",
+            "Delete": "Supprimer la compétence",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la compétence « {0} » ?",
+            "DeleteConfirmCascade": "Supprimer la compétence « {0} » supprimera également {1} recette(s) qui l'utilise(nt). Continuer ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "Profession": "Profession",
+            "MaxLevel": "Niveau max",
+            "LaborReducePercent": "Réduction de labeur par niveau",
+            "LaborReducePercentHelp": "Valeurs séparées par des virgules, une par niveau (ex. 1, 0.9, 0.8).",
+            "LaborReducePercentInvalid": "Liste invalide : seuls des nombres séparés par des virgules sont autorisés.",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "CraftingTable": {
+            "CreateTitle": "Créer une table d'artisanat",
+            "EditTitle": "Modifier la table d'artisanat",
+            "Create": "Créer une table d'artisanat",
+            "Delete": "Supprimer la table d'artisanat",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la table d'artisanat « {0} » ?",
+            "DeleteConfirmCascade": "Supprimer la table d'artisanat « {0} » supprimera également {1} recette(s) qui l'utilise(nt). Continuer ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "PluginModules": "Modules",
+            "NoPluginModule": "Aucun module"
+        },
+        "PluginModule": {
+            "CreateTitle": "Créer un module",
+            "EditTitle": "Modifier le module",
+            "Create": "Créer un module",
+            "Delete": "Supprimer le module",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer le module « {0} » ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "PluginType": "Type",
+            "Percent": "Pourcentage",
+            "Skill": "Compétence",
+            "SkillPercent": "Pourcentage de compétence"
+        }
+    },
     "DevVersion": "VOUS ÊTES SUR UNE VERSION DE DÉVELOPPEMENT D'ECO GNOME",
     "GraphView": {
         "ResetButton": "Réinitialiser le graphique",
@@ -53,6 +148,7 @@
     "Margins": "Marges",
     "NavMenu": {
         "NavAdmin": "Gestion des serveurs",
+        "NavDataEditor": "Éditeur de données",
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
         "EconomyViewer": "Analyse économique",
@@ -411,6 +507,7 @@
         "UserSettings": "Paramètres de l'utilisateur"
     },
     "Versions": "Versions",
+    "Validate": "Valider",
     "DataContext": {
         "DefaultContext": "Contexte par défaut",
         "NewContext": "Nouveau contexte",

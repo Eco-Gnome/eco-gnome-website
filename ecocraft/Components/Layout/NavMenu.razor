@@ -26,6 +26,9 @@
         <MudTooltip RootClass="mud-nav-item" Color="Color.Warning" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavAdmin")">
             <MudNavLink IconColor="Color.Warning" Href="server-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AdminPanelSettings">@LocalizationService.GetTranslation("NavMenu.NavAdmin")</MudNavLink>
         </MudTooltip>
+        <MudTooltip RootClass="mud-nav-item" Color="Color.Warning" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavDataEditor")">
+            <MudNavLink IconColor="Color.Warning" Href="data-editor" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.EditNote">@LocalizationService.GetTranslation("NavMenu.NavDataEditor")</MudNavLink>
+        </MudTooltip>
     }
     @if (!IsLoadingUserAndServer && (ContextService.CurrentUser?.SuperAdmin ?? false))
     {
