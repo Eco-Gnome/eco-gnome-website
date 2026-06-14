@@ -3,9 +3,11 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
+@using ecocraft.Components.Dialog
 @using ecocraft.Services.DbServices
 @using Microsoft.EntityFrameworkCore
 @using System.Globalization
+@inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
 @inject ShoppingListDataService ShoppingListDataService
@@ -293,6 +295,15 @@
                         </MudItem>
                         <MudItem md="6" lg="6" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
+                                <MudStack Row Justify="Justify.FlexEnd" Class="mb-2">
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Tertiary"
+                                               StartIcon="@MDIIcons.Filled.Sitemap"
+                                               Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                               OnClick="OpenProductionChainGraph">
+                                        @LocalizationService.GetTranslation("ShoppingList.VisualizeProductionChain")
+                                    </MudButton>
+                                </MudStack>
                                 <MudAutocomplete T="Recipe"
                                                  @ref="_recipeAutocompleteRef"
                                                  Value="_emptyRecipe"
@@ -1320,6 +1331,22 @@
     private void OnContextChanged()
     {
         _ = RetrieveData();
+    }
+
+    private async Task OpenProductionChainGraph()
+    {
+        if (_selectedShoppingList is null || _selectedShoppingList.UserRecipes.Count == 0)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ShoppingListGraphDialog>
+        {
+            { x => x.ShoppingList, _selectedShoppingList }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
+
+        await DialogService.ShowAsync<ShoppingListGraphDialog>("", parameters, options);
     }
 
     private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)

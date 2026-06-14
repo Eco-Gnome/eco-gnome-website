@@ -345,7 +345,12 @@
         "GuidedAutoExpandLabel": "Expansion guidee auto vers ressources brutes",
         "GuidedAutoExpandTooltip": "Si active, un clic ingredient lance une expansion guidee jusqu'aux ressources non craftables. En cas d'ambiguite, le run se met en pause pour votre choix puis reprend automatiquement.",
         "StopGuidedAutoExpandLabel": "Stop auto-expand",
-        "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees."
+        "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees.",
+        "VisualizeProductionChain": "Visualiser la chaine de production",
+        "ProductionChainTitle": "Chaine de production",
+        "ProductionChainPerMinute": "Par minute",
+        "ProductionChainRecenter": "Ajuster a l'ecran",
+        "ProductionChainEmpty": "Ajoutez au moins une recette a cette liste pour voir sa chaine de production."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",

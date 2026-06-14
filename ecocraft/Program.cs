@@ -89,6 +89,7 @@ builder.Services.AddScoped<UserServerDataService>();
 builder.Services.AddScoped<CraftingTableFuelCostService>();
 builder.Services.AddScoped<ShoppingListService>();
 builder.Services.AddScoped<ShoppingListDataService>();
+builder.Services.AddScoped<ShoppingListGraphService>();
 builder.Services.AddScoped<EconomyViewerService>();
 builder.Services.AddScoped<EconomyViewerDisplayService>();
 

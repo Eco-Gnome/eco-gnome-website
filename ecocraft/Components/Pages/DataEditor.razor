@@ -252,7 +252,10 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (firstRender && ContextService.CurrentServerData is null)
+		// Always reload the full server data on entry: other pages (e.g. the shopping list) may have
+		// populated the shared CurrentServerData with a lighter query that omits fields the editor
+		// needs (Labor, full DynamicValues), which would NPE when opening a recipe for edit.
+		if (firstRender)
 		{
 			await RefreshServerData();
 		}

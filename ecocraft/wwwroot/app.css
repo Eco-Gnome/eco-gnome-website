@@ -67,6 +67,13 @@
     color: white;
 }
 
+/* Conteneur du graphe de chaîne de production (rendu vis-network sur canvas) */
+.shopping-list-graph-container {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: none;
+}
+
 .rectangle-input .mud-input {
     height: 25px;
     width: 100px;
