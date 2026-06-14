@@ -235,6 +235,7 @@
         "Settings": "Paramètres",
         "ItemsToBuy": "Objets à acheter:",
         "ItemsProduced": "Objets produits:",
+        "QuantityToProduceTooltip": "Nombre d'objets à produire (arrondi au crafting supérieur, donc un peu plus peut être produit)",
         "AddShoppingList": "Ajouter une liste de course",
         "NewShoppingList": "Liste de course #",
         "NameLabel": "Nom de la liste de course",

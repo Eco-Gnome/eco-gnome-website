@@ -355,17 +355,24 @@
                                                         </MudStack>
                                                     </MudStack>
                                                     <MudStack AlignItems="AlignItems.Center" Row Class="shopping-list-recipe-quantity">
-                                                        <MudNumericField T="int"
-                                                                         Value="context.Value.RoundFactor"
-                                                                         ValueChanged="@(v => OnQuantityToCraftChanged(context.Value, v))"
-                                                                         Format="0"
-                                                                         Step="1"
-                                                                         Culture="CultureInfo.InvariantCulture"
-                                                                         Variant="Variant.Filled"
-                                                                         Class="rectangle-input"
-                                                                         Min="1"
-                                                                         Style="width: 65px;"
-                                                                         Immediate/>
+                                                        @{
+                                                            var primaryProduct = GetOrderedProductsForDisplay(context.Value).First();
+                                                            var primaryProductPerCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList);
+                                                            var producedQuantity = primaryProductPerCraft * context.Value.RoundFactor;
+                                                            var quantityStep = primaryProductPerCraft >= 1 ? (int)Math.Round(primaryProductPerCraft) : 1;
+                                                        }
+                                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.QuantityToProduceTooltip")">
+                                                            <MudNumericField T="int"
+                                                                             Value="@((int)Math.Round(producedQuantity, MidpointRounding.AwayFromZero))"
+                                                                             ValueChanged="@(v => OnQuantityToProduceChanged(context.Value, primaryProduct, v))"
+                                                                             Format="0"
+                                                                             Step="quantityStep"
+                                                                             Culture="CultureInfo.InvariantCulture"
+                                                                             Variant="Variant.Filled"
+                                                                             Class="rectangle-input"
+                                                                             Min="1"
+                                                                             Style="width: 65px;"/>
+                                                        </MudTooltip>
                                                     </MudStack>
                                                     <div class="shopping-list-ingredient-scroll">
                                                         <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-ingredient-row">
@@ -1290,6 +1297,24 @@
         });
 
         Rebuild();
+    }
+
+    // The quantity field holds the number of primary-product items to produce, not the number of recipe
+    // repetitions. We derive RoundFactor (whole crafts) by rounding up, so we may produce a bit more than
+    // requested rather than less.
+    private async Task OnQuantityToProduceChanged(UserRecipe userRecipe, Element primaryProduct, int desiredQuantity)
+    {
+        var perCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList!);
+        var roundFactor = perCraft <= 0
+            ? 1
+            : (int)Math.Ceiling(desiredQuantity / perCraft);
+
+        if (roundFactor < 1)
+        {
+            roundFactor = 1;
+        }
+
+        await OnQuantityToCraftChanged(userRecipe, roundFactor);
     }
 
     private void OnContextChanged()

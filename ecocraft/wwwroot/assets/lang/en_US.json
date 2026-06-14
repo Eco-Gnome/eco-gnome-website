@@ -242,6 +242,7 @@
         "Settings": "Settings",
         "ItemsToBuy": "Items to buy:",
         "ItemsProduced": "Items produced:",
+        "QuantityToProduceTooltip": "Number of items to produce (rounded up to whole crafts, so a bit more may be produced)",
         "AddShoppingList": "Add shopping list",
         "NewShoppingList": "Shopping list #",
         "NameLabel": "Shopping list name",
