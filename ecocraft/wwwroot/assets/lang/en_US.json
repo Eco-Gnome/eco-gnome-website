@@ -362,6 +362,7 @@
         "AutomationTitle": "Automation planner",
         "AutomationTargetRate": "Target output (per minute)",
         "AutomationInputLimits": "Input limits (/min)",
+        "AutomationPerHour": "Show per hour",
         "AutomationEmpty": "Add at least one recipe to this shopping list to plan its automation."
     },
     "Skill": "Skill",

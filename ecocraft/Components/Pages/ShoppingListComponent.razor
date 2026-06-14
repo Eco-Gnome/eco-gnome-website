@@ -1363,9 +1363,15 @@
             return;
         }
 
+        // Lecture de l'option /h ici (JS interop dispo) pour la passer en paramètre : la lire dans le
+        // dialog la rendrait disponible trop tard (le TitleContent de MudDialog ne se re-rend pas après
+        // coup), d'où un switch incohérent. En paramètre, le switch naît avec la bonne valeur.
+        var perHour = await LocalStorageService.GetItem("AutomationRatePerHour") == "True";
+
         var parameters = new DialogParameters<ShoppingListAutomationDialog>
         {
-            { x => x.ShoppingList, _selectedShoppingList }
+            { x => x.ShoppingList, _selectedShoppingList },
+            { x => x.InitialPerHour, perHour }
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
 

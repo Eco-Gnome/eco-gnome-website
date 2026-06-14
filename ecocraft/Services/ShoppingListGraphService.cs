@@ -160,7 +160,9 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                     {
                         ItemId = id,
                         Name = localizationService.GetTranslation(product.ItemOrTag),
-                        DefaultRate = Math.Round(defaultRate, 2, MidpointRounding.AwayFromZero),
+                        // Pleine précision interne (l'affichage reste à 2 décimales via Format="0.##").
+                        // Garder 1/3 exact évite à la fois ×0,99 au lieu de ×1 et, en /h, 19,98 au lieu de 20.
+                        DefaultRate = defaultRate,
                     };
                 }
             }
@@ -498,7 +500,9 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
             To = to,
             Item = localizationService.GetTranslation(channel),
             Quantity = 0m,
-            PerMinute = Math.Round(rate, 2, MidpointRounding.AwayFromZero),
+            // Pleine précision : l'arrondi d'affichage (2 décimales) est fait côté JS APRÈS la
+            // conversion éventuelle en /h (×60). Pré-arrondir ici donnerait 0,67×60 = 40,2 au lieu de 40.
+            PerMinute = rate,
         };
     }
 

@@ -355,6 +355,7 @@
         "AutomationTitle": "Planificateur d'automatisation",
         "AutomationTargetRate": "Debit cible (par minute)",
         "AutomationInputLimits": "Limites d'entree (/min)",
+        "AutomationPerHour": "Afficher en /heure",
         "AutomationEmpty": "Ajoutez au moins une recette a cette liste pour planifier son automatisation."
     },
     "Skill": "Compétence",

@@ -51,6 +51,9 @@ window.ecoProductionGraph = (function () {
     }
 
     function edgeLabel(e, mode) {
+        if (mode === 'perHour') {
+            return formatNumber(e.perMinute * 60) + '/h ' + e.item;
+        }
         if (mode === 'perMinute') {
             return formatNumber(e.perMinute) + '/min ' + e.item;
         }
