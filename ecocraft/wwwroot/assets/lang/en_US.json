@@ -367,6 +367,8 @@
         "AutomationPerHour": "Show per hour",
         "AutomationMax": "Max",
         "AutomationMaxHint": "Maximize this output given the input constraints (recipes + items + input limits)",
+        "AutomationRulesHint": "Empty = automatic: follows the recipes, reduced if a limit is reached. A value = priority target, served first. MAX = maximum output with the remaining capacity.",
+        "AutomationCappedHint": "Target {0} unreachable (limit: {2}). Actual output: {1}.",
         "AutomationEmpty": "Add at least one recipe to this shopping list to plan its automation."
     },
     "Skill": "Skill",

@@ -215,44 +215,32 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
     // ResolveTargetRates) avant la propagation finale.
     public AutomationGraphResult BuildAutomationGraphData(
         DataContext shoppingList,
-        IReadOnlyDictionary<Guid, decimal> targetRates,
+        IReadOnlyDictionary<Guid, decimal> fixedRates,
         IReadOnlyDictionary<Guid, decimal> inputCaps,
         IReadOnlySet<Guid> maxItems)
     {
         var topology = ComputeTopology(shoppingList);
-        var resolvedRates = ResolveTargetRates(topology, shoppingList, targetRates, inputCaps, maxItems, out var unboundedMax);
-        var propagation = Propagate(topology, shoppingList, resolvedRates);
 
-        // Goulots : si une matière première plafonnée ne couvre pas le débit demandé, on bride TOUTE la
-        // chaîne (tous les débits/tables sont linéaires dans les cibles) d'un facteur global = min des
-        // (cap / demande) des entrées, jamais > 1. Les items au facteur le plus contraignant sont les
-        // goulots. Pour des cibles « max », ce facteur vaut ~1 (la résolution les a déjà calées sur le
-        // plafond) ; il ne brides réellement que des cibles fixes sur-dimensionnées.
-        var demandedByInput = DemandByInput(propagation);
+        // Trois familles de cibles : FIXES (débit saisi, prioritaires), NEUTRES (champ vide → débit par
+        // défaut de la recette, ajustables), « MAX » (maximisées sur la capacité restante). Les neutres et
+        // les bases « max » se déduisent de la liste des produits finaux.
+        var targets = GetAutomationTargets(shoppingList);
+        var fixedSeed = targets
+            .Where(t => fixedRates.ContainsKey(t.ItemId) && !maxItems.Contains(t.ItemId))
+            .ToDictionary(t => t.ItemId, t => fixedRates[t.ItemId]);
+        var neutralSeed = targets
+            .Where(t => !fixedRates.ContainsKey(t.ItemId) && !maxItems.Contains(t.ItemId))
+            .ToDictionary(t => t.ItemId, t => t.DefaultRate);
+        var maxSeed = targets
+            .Where(t => maxItems.Contains(t.ItemId))
+            .ToDictionary(t => t.ItemId, t => t.DefaultRate);
 
-        var globalFactor = 1m;
-        foreach (var (itemId, demanded) in demandedByInput)
-        {
-            if (inputCaps.TryGetValue(itemId, out var cap) && demanded > Epsilon)
-            {
-                globalFactor = Math.Min(globalFactor, cap / demanded);
-            }
-        }
+        var resolution = ResolveAutomation(topology, shoppingList, fixedSeed, neutralSeed, maxSeed, inputCaps);
+        var propagation = Propagate(topology, shoppingList, resolution.SeedRates);
+        var bottleneckItems = resolution.BottleneckInputs;
 
-        var bottleneckItems = new HashSet<Guid>();
-        if (globalFactor < 1m)
-        {
-            foreach (var (itemId, demanded) in demandedByInput)
-            {
-                if (inputCaps.TryGetValue(itemId, out var cap) && demanded > Epsilon
-                    && Math.Abs(cap / demanded - globalFactor) <= Epsilon)
-                {
-                    bottleneckItems.Add(itemId);
-                }
-            }
-        }
-
-        // 3. Matérialisation des nœuds et arêtes (mêmes ids/ordre que BuildGraphData).
+        // 3. Matérialisation des nœuds et arêtes (mêmes ids/ordre que BuildGraphData). La mise à l'échelle
+        // par priorité est déjà intégrée aux débits résolus : il n'y a plus de facteur global à appliquer.
         var data = new ProductionGraphData
         {
             FallbackImage = IconUrl("EmptyIcon"),
@@ -263,7 +251,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         {
             var recipe = group.First().Recipe;
             var nodeId = "r:" + group.Key;
-            var tables = propagation.TablesByRecipe.GetValueOrDefault(group.Key) * globalFactor;
+            var tables = propagation.TablesByRecipe.GetValueOrDefault(group.Key);
 
             data.Nodes.Add(new ProductionGraphNode
             {
@@ -278,22 +266,32 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
 
         foreach (var (key, channel) in topology.EdgeChannel)
         {
-            data.Edges.Add(BuildRateEdge(craftingNodeIds[key.Producer], craftingNodeIds[key.Consumer], channel, propagation.EdgeRate.GetValueOrDefault(key) * globalFactor));
+            data.Edges.Add(BuildRateEdge(craftingNodeIds[key.Producer], craftingNodeIds[key.Consumer], channel, propagation.EdgeRate.GetValueOrDefault(key)));
         }
 
+        // Noms des items goulots (limites saturées ayant raboté un palier fixe/neutre), pour le tooltip
+        // orange des cibles non atteintes. Dédupliqués sur l'item (un achat peut alimenter plusieurs nœuds).
+        var bottleneckNames = new List<string>();
+        var bottleneckSeen = new HashSet<Guid>();
         var leafIndex = 0;
         foreach (var (key, channel) in topology.PurchaseChannel)
         {
             var leafId = "b:" + leafIndex++;
+            var isBottleneck = bottleneckItems.Contains(channel.Id);
+            if (isBottleneck && bottleneckSeen.Add(channel.Id))
+            {
+                bottleneckNames.Add(localizationService.GetTranslation(channel));
+            }
+
             data.Nodes.Add(new ProductionGraphNode
             {
                 Id = leafId,
                 Type = "buy",
                 Image = IconUrl(channel.Name),
                 Label = localizationService.GetTranslation(channel),
-                Bottleneck = bottleneckItems.Contains(channel.Id),
+                Bottleneck = isBottleneck,
             });
-            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, propagation.PurchaseRate.GetValueOrDefault(key) * globalFactor));
+            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, propagation.PurchaseRate.GetValueOrDefault(key)));
         }
 
         foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
@@ -306,7 +304,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                     continue;
                 }
 
-                var rate = propagation.TablesByRecipe.GetValueOrDefault(rootRecipe.RecipeId) * PerTableOutForChannel(rootRecipe.Recipe, product.ItemOrTag, shoppingList) * globalFactor;
+                var rate = propagation.TablesByRecipe.GetValueOrDefault(rootRecipe.RecipeId) * PerTableOutForChannel(rootRecipe.Recipe, product.ItemOrTag, shoppingList);
                 var leafId = "f:" + leafIndex++;
                 data.Nodes.Add(new ProductionGraphNode
                 {
@@ -319,75 +317,123 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
             }
         }
 
-        // Débits « max » résolus, ramenés à la production réelle (après bridage éventuel), pour
-        // les réafficher dans les champs (lecture seule) du panneau de droite.
-        foreach (var itemId in maxItems)
-        {
-            resolvedRates[itemId] = resolvedRates.GetValueOrDefault(itemId) * globalFactor;
-        }
-
         return new AutomationGraphResult
         {
             Data = data,
-            ResolvedTargetRates = resolvedRates,
-            UnboundedMaxItems = unboundedMax,
+            // SeedRates = débit RÉELLEMENT produit par cible (après mise à l'échelle des paliers) : sert à
+            // afficher les « max » résolus ET à détecter les objectifs fixes rabotés (réel < saisi).
+            ResolvedTargetRates = resolution.SeedRates,
+            UnboundedMaxItems = resolution.UnboundedMax,
+            BottleneckItemNames = bottleneckNames,
         };
     }
 
-    // Débits cibles effectifs : les cibles fixes gardent leur valeur ; les cibles « max » sont poussées
-    // au plus haut débit que les contraintes d'entrée autorisent. Le système étant linéaire, on superpose
-    // deux propagations — fixes seuls vs « max » seuls à leur débit de base — pour obtenir, par entrée,
-    // la consommation des fixes et celle des max par unité d'échelle, puis on résout un facteur t commun :
-    // t = min sur les entrées plafonnées de (cap - conso_fixes) / conso_max. Si aucune entrée plafonnée
-    // ne borne les max, la production est illimitée (signalée via unboundedMax, débit de base conservé).
-    private Dictionary<Guid, decimal> ResolveTargetRates(
+    // Résout les débits effectifs par PRIORITÉ décroissante : objectifs FIXES d'abord (servis tels quels,
+    // réduits proportionnellement seulement s'ils saturent à eux seuls une limite d'entrée), puis cibles
+    // NEUTRES au débit par défaut (ajustées sur ce qu'il reste), enfin cibles « MAX » poussées au plus haut
+    // que la capacité restante autorise. Le modèle étant linéaire, chaque palier = une propagation mise à
+    // l'échelle par un scalaire saturant la limite la plus contraignante du palier. Une limite qui rabote un
+    // palier fixe/neutre (échelle < 1) est un goulot. Une « max » sans limite contraignante reste illimitée.
+    private ResolvedAutomation ResolveAutomation(
         AutomationTopology topology,
         DataContext shoppingList,
-        IReadOnlyDictionary<Guid, decimal> targetRates,
-        IReadOnlyDictionary<Guid, decimal> inputCaps,
-        IReadOnlySet<Guid> maxItems,
-        out HashSet<Guid> unboundedMax)
+        IReadOnlyDictionary<Guid, decimal> fixedSeed,
+        IReadOnlyDictionary<Guid, decimal> neutralSeed,
+        IReadOnlyDictionary<Guid, decimal> maxSeed,
+        IReadOnlyDictionary<Guid, decimal> inputCaps)
     {
-        var resolved = new Dictionary<Guid, decimal>(targetRates);
-        unboundedMax = new HashSet<Guid>();
+        var result = new ResolvedAutomation();
+        var remaining = new Dictionary<Guid, decimal>(inputCaps);
 
-        if (maxItems.Count == 0)
+        // Palier de DEMANDE (fixe ou neutre) : servi au débit voulu, réduit (échelle ≤ 1) si une limite déjà
+        // entamée par les paliers précédents ne suffit pas. Les limites forçant la réduction sont des goulots.
+        void ApplyDemandTier(IReadOnlyDictionary<Guid, decimal> seeds)
         {
-            return resolved;
-        }
-
-        var fixedSeed = targetRates.ToDictionary(kv => kv.Key, kv => maxItems.Contains(kv.Key) ? 0m : kv.Value);
-        var maxSeed = targetRates.ToDictionary(kv => kv.Key, kv => maxItems.Contains(kv.Key) ? kv.Value : 0m);
-
-        var fixedDemand = DemandByInput(Propagate(topology, shoppingList, fixedSeed));
-        var maxDemand = DemandByInput(Propagate(topology, shoppingList, maxSeed));
-
-        var t = decimal.MaxValue;
-        foreach (var (itemId, cap) in inputCaps)
-        {
-            if (maxDemand.TryGetValue(itemId, out var perBasis) && perBasis > Epsilon)
+            if (seeds.Count == 0)
             {
-                var available = cap - fixedDemand.GetValueOrDefault(itemId);
-                t = Math.Min(t, Math.Max(0m, available / perBasis));
+                return;
+            }
+
+            var demand = DemandByInput(Propagate(topology, shoppingList, seeds));
+
+            var scale = 1m;
+            foreach (var (itemId, used) in demand)
+            {
+                if (used > Epsilon && remaining.TryGetValue(itemId, out var available))
+                {
+                    scale = Math.Min(scale, Math.Max(0m, available / used));
+                }
+            }
+
+            foreach (var (itemId, rate) in seeds)
+            {
+                result.SeedRates[itemId] = rate * scale;
+            }
+
+            if (scale < 1m - Epsilon)
+            {
+                foreach (var (itemId, used) in demand)
+                {
+                    if (used > Epsilon && remaining.TryGetValue(itemId, out var available)
+                        && Math.Abs(Math.Max(0m, available / used) - scale) <= Epsilon)
+                    {
+                        result.BottleneckInputs.Add(itemId);
+                    }
+                }
+            }
+
+            foreach (var (itemId, used) in demand)
+            {
+                if (remaining.ContainsKey(itemId))
+                {
+                    remaining[itemId] = Math.Max(0m, remaining[itemId] - used * scale);
+                }
             }
         }
 
-        if (t == decimal.MaxValue)
+        ApplyDemandTier(fixedSeed);
+        ApplyDemandTier(neutralSeed);
+
+        // Palier « MAX » : facteur t le plus grand applicable aux bases sans dépasser une limite restante.
+        // Aucune limite contraignante → production illimitée (base conservée, signalée).
+        if (maxSeed.Count > 0)
         {
-            foreach (var itemId in maxItems)
+            var demand = DemandByInput(Propagate(topology, shoppingList, maxSeed));
+
+            var t = decimal.MaxValue;
+            foreach (var (itemId, perBasis) in demand)
             {
-                unboundedMax.Add(itemId); // base conservée dans `resolved` pour un graphe lisible
+                if (perBasis > Epsilon && remaining.TryGetValue(itemId, out var available))
+                {
+                    t = Math.Min(t, Math.Max(0m, available / perBasis));
+                }
             }
-        }
-        else
-        {
-            foreach (var itemId in maxItems)
+
+            if (t == decimal.MaxValue)
             {
-                resolved[itemId] = targetRates.GetValueOrDefault(itemId) * t;
+                foreach (var (itemId, rate) in maxSeed)
+                {
+                    result.SeedRates[itemId] = rate; // base conservée pour un graphe lisible
+                    result.UnboundedMax.Add(itemId);
+                }
+            }
+            else
+            {
+                foreach (var (itemId, rate) in maxSeed)
+                {
+                    result.SeedRates[itemId] = rate * t;
+                }
+                foreach (var (itemId, perBasis) in demand)
+                {
+                    if (remaining.ContainsKey(itemId))
+                    {
+                        remaining[itemId] = Math.Max(0m, remaining[itemId] - perBasis * t);
+                    }
+                }
             }
         }
 
-        return resolved;
+        return result;
     }
 
     // 1. Partie indépendante des débits : recettes (un nœud par recette) + quantités servant de POIDS de
@@ -686,6 +732,16 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         public Dictionary<(Guid Consumer, Guid Item), decimal> PurchaseRate { get; } = new();
     }
 
+    // Débits résolus par priorité (fixe > neutre > max) : débit effectif amorçant la propagation finale,
+    // cibles « max » illimitées (faute de limite contraignante) et entrées goulots (limite saturée ayant
+    // raboté un palier fixe/neutre).
+    private sealed class ResolvedAutomation
+    {
+        public Dictionary<Guid, decimal> SeedRates { get; } = new();
+        public HashSet<Guid> UnboundedMax { get; } = new();
+        public HashSet<Guid> BottleneckInputs { get; } = new();
+    }
+
 }
 
 public class ProductionGraphData
@@ -721,14 +777,15 @@ public class AutomationTarget
     public decimal DefaultRate { get; set; }
 }
 
-// Résultat du planificateur : graphe à afficher + débits cibles effectivement retenus (notamment ceux
-// résolus pour les cibles « max », à réafficher) et la liste des cibles « max » non bornées (illimitées
-// faute de contrainte d'entrée limitante).
+// Résultat du planificateur : graphe à afficher + débits réellement produits par cible (pour réafficher les
+// « max » résolus et détecter les objectifs fixes rabotés), la liste des cibles « max » non bornées
+// (illimitées faute de contrainte d'entrée limitante) et les noms des items goulots (pour le tooltip).
 public class AutomationGraphResult
 {
     public ProductionGraphData Data { get; set; } = new();
     public Dictionary<Guid, decimal> ResolvedTargetRates { get; set; } = new();
     public HashSet<Guid> UnboundedMaxItems { get; set; } = new();
+    public List<string> BottleneckItemNames { get; set; } = new();
 }
 
 public class AutomationInput

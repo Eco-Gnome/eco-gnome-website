@@ -163,50 +163,76 @@ public class ServerDataEditorService(
                 ctx.Recipes.Update(recipe);
                 ctx.DynamicValues.Update(recipe.Labor);
                 ctx.DynamicValues.Update(recipe.CraftMinutes);
-
-                // Wipe all existing Elements + their Quantity DynamicValue, then recreate from model.
-                foreach (var element in recipe.Elements.ToList())
-                {
-                    DetachAndQueueDelete(ctx, element.Quantity, element.Quantity.Id);
-                    recipe.Elements.Remove(element);
-                    DetachAndQueueDelete(ctx, element, element.Id);
-                }
             }
 
+            // Diff the elements IN PLACE instead of wipe/recreate: re-match each desired line to an
+            // existing Element by (item + role ingredient/product) and REFRESH it, keeping its Id stable.
+            // Only genuinely new lines get a new Element, and only unmatched existing rows are deleted.
+            // This mirrors ImportDataService.Import.cs ("do NOT churn element Ids"): a stable Element.Id is
+            // what keeps every user's UserElement (prices, recipe selections) attached after an edit. A brute
+            // recreate gives the elements new Ids, which Reconciliate then treats as orphans and silently
+            // removes — dropping the recipe from the price calculator / shopping list. Ingredients carry a
+            // negative quantity (sign = role), products positive; index is sequential (ingredients first).
+            var desiredLines = m.Ingredients
+                .Select(l => (l.ItemOrTagId, Quantity: -Math.Abs(l.Quantity), IsProduct: false))
+                .Concat(m.Products.Select(l => (l.ItemOrTagId, Quantity: Math.Abs(l.Quantity), IsProduct: true)))
+                .ToList();
+
+            var existingElements = recipe.Elements.ToList();
+            var matchedElements = new HashSet<Element>();
             var index = 0;
 
-            foreach (var ingredient in m.Ingredients)
+            foreach (var line in desiredLines)
             {
-                var itemOrTag = sd.ItemOrTags.First(i => i.Id == ingredient.ItemOrTagId);
-                var quantity = NewDynamicValue(ctx, sd, -Math.Abs(ingredient.Quantity));
-                var element = new Element
+                var itemOrTag = sd.ItemOrTags.First(i => i.Id == line.ItemOrTagId);
+
+                // Null guards on nav props: an orphan/cross-server element can have a dangling FK that
+                // identity-resolution can't populate. Unmatched here => handled by the orphan cleanup below.
+                var match = existingElements.FirstOrDefault(e =>
+                    !matchedElements.Contains(e)
+                    && (object?)e.ItemOrTag is not null
+                    && (object?)e.Quantity is not null
+                    && e.ItemOrTag.Id == line.ItemOrTagId
+                    && e.IsProduct() == line.IsProduct);
+
+                if (match is null)
                 {
-                    Recipe = recipe,
-                    ItemOrTag = itemOrTag,
-                    Index = index++,
-                    Quantity = quantity,
-                    DefaultIsReintegrated = false,
-                    DefaultShare = 0,
-                };
-                recipe.Elements.Add(element);
-                ctx.Elements.Add(element);
+                    var element = new Element
+                    {
+                        Recipe = recipe,
+                        ItemOrTag = itemOrTag,
+                        Index = index,
+                        Quantity = NewDynamicValue(ctx, sd, line.Quantity),
+                        DefaultIsReintegrated = false,
+                        DefaultShare = 0,
+                    };
+                    recipe.Elements.Add(element);
+                    ctx.Elements.Add(element);
+                }
+                else
+                {
+                    matchedElements.Add(match);
+                    match.ItemOrTag = itemOrTag;
+                    match.Index = index;
+                    match.DefaultIsReintegrated = false;
+                    match.Quantity.BaseValue = line.Quantity;
+                    ctx.Elements.Update(match);
+                    ctx.DynamicValues.Update(match.Quantity);
+                }
+
+                index++;
             }
 
-            foreach (var product in m.Products)
+            // Lines removed by the edit: delete the now-orphan Elements (+ their Quantity DynamicValue),
+            // routed through DetachAndQueueDelete to avoid the tracker racing the FK cascade at SaveChanges.
+            foreach (var orphan in existingElements.Where(e => !matchedElements.Contains(e)))
             {
-                var itemOrTag = sd.ItemOrTags.First(i => i.Id == product.ItemOrTagId);
-                var quantity = NewDynamicValue(ctx, sd, Math.Abs(product.Quantity));
-                var element = new Element
+                if ((object?)orphan.Quantity is not null)
                 {
-                    Recipe = recipe,
-                    ItemOrTag = itemOrTag,
-                    Index = index++,
-                    Quantity = quantity,
-                    DefaultIsReintegrated = false,
-                    DefaultShare = 0,
-                };
-                recipe.Elements.Add(element);
-                ctx.Elements.Add(element);
+                    DetachAndQueueDelete(ctx, orphan.Quantity, orphan.Quantity.Id);
+                }
+                recipe.Elements.Remove(orphan);
+                DetachAndQueueDelete(ctx, orphan, orphan.Id);
             }
 
             // DefaultShare distribution across non-reintegrated products (copied from

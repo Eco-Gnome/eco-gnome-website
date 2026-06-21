@@ -360,6 +360,8 @@
         "AutomationPerHour": "Afficher en /heure",
         "AutomationMax": "Max",
         "AutomationMaxHint": "Maximiser ce débit selon les contraintes d'entrée (recettes + items + limites d'entrée)",
+        "AutomationRulesHint": "Vide = automatique : suit les recettes, réduit si une limite est atteinte. Une valeur = objectif prioritaire, servi avant le reste. MAX = production maximale avec la capacité restante.",
+        "AutomationCappedHint": "Objectif {0} non atteignable (limite : {2}). Production réelle : {1}.",
         "AutomationEmpty": "Ajoutez au moins une recette à cette liste pour planifier son automatisation."
     },
     "Skill": "Compétence",
