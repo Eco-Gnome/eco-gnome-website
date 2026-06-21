@@ -18,7 +18,7 @@
             <MudLink Color="Color.Default" Underline="Underline.None" OnClick="@(() => ToggleDetails(context))">
                 <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                     <MudIcon Icon="@(_openedDetails.Contains(context) ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small"/>
-                    <EcoIcon Item="@context.Elements.First(e => e.IsProduct() && e.Index == 0).ItemOrTag" Size="32" />
+                    <EcoIcon Item="@context.Elements.Where(e => e.IsProduct()).OrderBy(e => e.Index).FirstOrDefault()?.ItemOrTag" Size="32" />
                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context)</MudText>
                     @if (context.IsBlueprint)
                     {

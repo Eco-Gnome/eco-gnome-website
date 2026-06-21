@@ -1,6 +1,7 @@
 @using System.Globalization
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 
@@ -14,12 +15,11 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="4">
-            <MudTextField @bind-Value="_model.Name"
-                          Immediate="true"
-                          Variant="Variant.Outlined"
-                          Label="@LocalizationService.GetTranslation("DataEditor.Skill.Name")"
-                          Error="@(string.IsNullOrWhiteSpace(_model.Name))"
-                          ErrorText="@LocalizationService.GetTranslation("DataEditor.Skill.NameRequired")"/>
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
 
             <MudTextField @bind-Value="_model.Profession"
                           Variant="Variant.Outlined"
@@ -71,6 +71,8 @@
             {
                 Id = Skill.Id,
                 Name = Skill.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(Skill.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(Skill.LocalizedName, LocalizationService.CurrentLanguageCode),
                 Profession = Skill.Profession,
                 MaxLevel = Skill.MaxLevel,
                 LaborReducePercent = Skill.LaborReducePercent ?? [],
@@ -82,7 +84,9 @@
 
     private bool IsCsvValid => TryParseCsv(out _);
 
-    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name) && IsCsvValid;
+    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name)
+                            && !string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs)
+                            && IsCsvValid;
 
     private bool TryParseCsv(out decimal[] values)
     {

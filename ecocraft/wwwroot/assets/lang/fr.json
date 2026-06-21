@@ -18,6 +18,13 @@
             "Saved": "Modifications enregistrées",
             "Error": "Une erreur est survenue"
         },
+        "Name": {
+            "Technical": "Nom technique (clé d'import)",
+            "TechnicalHelp": "Identifiant interne utilisé pour l'appariement avec l'import des données du jeu. Le modifier sur un élément importé le dé-liera du prochain import.",
+            "English": "Nom affiché (anglais)",
+            "Localized": "Nom affiché ({lang})",
+            "Required": "Un nom est requis"
+        },
         "Item": {
             "CreateTitle": "Créer un item / tag",
             "EditTitle": "Modifier l'item / tag",

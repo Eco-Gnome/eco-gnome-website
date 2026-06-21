@@ -18,12 +18,11 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="4">
-            <MudTextField @bind-Value="_model.Name"
-                          Label="@LocalizationService.GetTranslation("DataEditor.Item.Name")"
-                          Variant="Variant.Outlined"
-                          Immediate="true"
-                          Error="@_nameError"
-                          ErrorText="@LocalizationService.GetTranslation("DataEditor.Item.NameRequired")" />
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="_nameError"
+                                  DisplayNameError="_displayNameError" />
 
             <MudSwitch @bind-Value="_model.IsTag"
                        Color="Color.Primary"
@@ -109,6 +108,7 @@
 
     private ItemEditModel _model = new();
     private bool _nameError;
+    private bool _displayNameError;
 
     // Bound to the MudSelect (SelectedValues is IReadOnlyCollection); copied into the model lists on submit.
     private IReadOnlyCollection<Guid> _selectedTagIds = new HashSet<Guid>();
@@ -123,7 +123,9 @@
             _model = new ItemEditModel
             {
                 Id = ItemOrTag.Id,
-                Name = LocalizationService.GetTranslation(ItemOrTag),
+                Name = ItemOrTag.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(ItemOrTag.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(ItemOrTag.LocalizedName, LocalizationService.CurrentLanguageCode),
                 IsTag = ItemOrTag.IsTag,
                 MinPrice = ItemOrTag.MinPrice,
                 DefaultPrice = ItemOrTag.DefaultPrice,

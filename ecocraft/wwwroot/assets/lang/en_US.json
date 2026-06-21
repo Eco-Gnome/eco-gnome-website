@@ -18,6 +18,13 @@
             "Saved": "Changes saved",
             "Error": "An error occurred"
         },
+        "Name": {
+            "Technical": "Technical name (import key)",
+            "TechnicalHelp": "Internal identifier used to match game data imports. Changing it on an imported entry unlinks it from the next import.",
+            "English": "Display name (English)",
+            "Localized": "Display name ({lang})",
+            "Required": "A name is required"
+        },
         "Item": {
             "CreateTitle": "Create an item / tag",
             "EditTitle": "Edit the item / tag",

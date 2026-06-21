@@ -31,7 +31,7 @@ public class ServerDataEditorService(
 
             if (IsNew(m.Id))
             {
-                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 item = new ItemOrTag
                 {
                     Name = m.Name,
@@ -53,7 +53,7 @@ public class ServerDataEditorService(
                 item.MinPrice = m.MinPrice;
                 item.DefaultPrice = m.DefaultPrice;
                 item.MaxPrice = m.MaxPrice;
-                SetLocalizedName(item.LocalizedName, m.Name);
+                ApplyLocalizedName(item.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 ctx.ItemOrTags.Update(item);
             }
 
@@ -128,7 +128,7 @@ public class ServerDataEditorService(
 
             if (IsNew(m.Id))
             {
-                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 var labor = NewDynamicValue(ctx, sd, m.Labor);
                 var craftMinutes = NewDynamicValue(ctx, sd, m.CraftMinutes);
 
@@ -153,11 +153,14 @@ public class ServerDataEditorService(
             {
                 recipe = sd.Recipes.First(r => r.Id == m.Id);
                 recipe.Name = m.Name;
-                recipe.FamilyName = m.Name;
+                // Do NOT touch FamilyName here: it groups recipe variants and is set once at
+                // creation/import. Overwriting it with m.Name on every edit silently renamed the
+                // family (and broke family-based grouping/sorting) when only an unrelated field
+                // like the crafting table changed.
                 recipe.Skill = skill;
                 recipe.SkillLevel = m.SkillLevel;
                 recipe.CraftingTable = craftingTable;
-                SetLocalizedName(recipe.LocalizedName, m.Name);
+                ApplyLocalizedName(recipe.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 recipe.Labor.BaseValue = m.Labor;
                 recipe.CraftMinutes.BaseValue = m.CraftMinutes;
                 ctx.Recipes.Update(recipe);
@@ -172,7 +175,14 @@ public class ServerDataEditorService(
             // what keeps every user's UserElement (prices, recipe selections) attached after an edit. A brute
             // recreate gives the elements new Ids, which Reconciliate then treats as orphans and silently
             // removes — dropping the recipe from the price calculator / shopping list. Ingredients carry a
-            // negative quantity (sign = role), products positive; index is sequential (ingredients first).
+            // negative quantity (sign = role), products positive.
+            //
+            // Index is assigned as TWO independent sequences (ingredients 0,1,2... and products 0,1...),
+            // exactly like ImportDataService.Import.cs. This is a hard invariant: the rest of the app
+            // identifies a recipe's main product as "the product at Index 0" (RecipeList.razor,
+            // RecipeDialog.razor, PriceCalculator GetBestRelatedElement, ShoppingListComponent). Using a
+            // single global counter put the product at Index 3, which threw on the .First(...) lookups and
+            // made the recipe vanish from every list/dropdown.
             var desiredLines = m.Ingredients
                 .Select(l => (l.ItemOrTagId, Quantity: -Math.Abs(l.Quantity), IsProduct: false))
                 .Concat(m.Products.Select(l => (l.ItemOrTagId, Quantity: Math.Abs(l.Quantity), IsProduct: true)))
@@ -180,11 +190,13 @@ public class ServerDataEditorService(
 
             var existingElements = recipe.Elements.ToList();
             var matchedElements = new HashSet<Element>();
-            var index = 0;
+            var ingredientIndex = 0;
+            var productIndex = 0;
 
             foreach (var line in desiredLines)
             {
                 var itemOrTag = sd.ItemOrTags.First(i => i.Id == line.ItemOrTagId);
+                var index = line.IsProduct ? productIndex++ : ingredientIndex++;
 
                 // Null guards on nav props: an orphan/cross-server element can have a dangling FK that
                 // identity-resolution can't populate. Unmatched here => handled by the orphan cleanup below.
@@ -219,8 +231,6 @@ public class ServerDataEditorService(
                     ctx.Elements.Update(match);
                     ctx.DynamicValues.Update(match.Quantity);
                 }
-
-                index++;
             }
 
             // Lines removed by the edit: delete the now-orphan Elements (+ their Quantity DynamicValue),
@@ -286,7 +296,7 @@ public class ServerDataEditorService(
 
             if (IsNew(m.Id))
             {
-                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 var skill = new Skill
                 {
                     Name = m.Name,
@@ -306,7 +316,7 @@ public class ServerDataEditorService(
                 skill.Profession = m.Profession;
                 skill.MaxLevel = m.MaxLevel;
                 skill.LaborReducePercent = m.LaborReducePercent;
-                SetLocalizedName(skill.LocalizedName, m.Name);
+                ApplyLocalizedName(skill.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 ctx.Skills.Update(skill);
             }
         });
@@ -339,7 +349,7 @@ public class ServerDataEditorService(
 
             if (IsNew(m.Id))
             {
-                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 var craftingTable = new CraftingTable
                 {
                     Name = m.Name,
@@ -354,7 +364,7 @@ public class ServerDataEditorService(
             {
                 var craftingTable = sd.CraftingTables.First(c => c.Id == m.Id);
                 craftingTable.Name = m.Name;
-                SetLocalizedName(craftingTable.LocalizedName, m.Name);
+                ApplyLocalizedName(craftingTable.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
 
                 // Diff the M:M instead of reassigning the collection (see RefreshCraftingTable in
                 // ImportDataService.Crud.cs): bulk replacement emits join-row DELETEs that can hit
@@ -408,7 +418,7 @@ public class ServerDataEditorService(
 
             if (IsNew(m.Id))
             {
-                var localizedName = NewLocalizedField(ctx, sd, m.Name);
+                var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 var pluginModule = new PluginModule
                 {
                     Name = m.Name,
@@ -430,7 +440,7 @@ public class ServerDataEditorService(
                 pluginModule.Percent = m.Percent;
                 pluginModule.Skill = skill;
                 pluginModule.SkillPercent = m.SkillPercent;
-                SetLocalizedName(pluginModule.LocalizedName, m.Name);
+                ApplyLocalizedName(pluginModule.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 ctx.PluginModules.Update(pluginModule);
             }
         });
@@ -469,11 +479,11 @@ public class ServerDataEditorService(
     // ctx.X.Update(parent) would walk the graph and tag this untracked-but-keyed entity as
     // Modified -> UPDATE on a non-existent row -> concurrency error. Same rationale as
     // TranslationsToLocalizedField in ImportDataService.Helpers.cs.
-    private LocalizedField NewLocalizedField(EcoCraftDbContext ctx, Server server, string name)
+    private LocalizedField NewLocalizedField(EcoCraftDbContext ctx, Server server, string enUs, string current)
     {
         var localizedField = new LocalizedField { Server = server };
         ctx.Add(localizedField);
-        SetLocalizedName(localizedField, name);
+        ApplyLocalizedName(localizedField, enUs, current);
         return localizedField;
     }
 
@@ -484,13 +494,18 @@ public class ServerDataEditorService(
         return dynamicValue;
     }
 
-    // Manual editing exposes a single Name field, so we fill en_US (the fallback column) plus the
-    // current UI language column. The language->column switch mirrors
+    // Apply the two editable name columns coming from a data-editor dialog: en_US (the displayed
+    // fallback) is always written; the current UI language column is written too when it differs from
+    // en_US. Every OTHER language column is left untouched, so editing the French name never clobbers
+    // the English (or any other) translation. The language->column switch mirrors
     // ImportDataService.Helpers.cs:TranslationsToLocalizedField.
-    private void SetLocalizedName(LocalizedField localizedField, string name)
+    private void ApplyLocalizedName(LocalizedField localizedField, string enUs, string current)
     {
-        SetColumn(localizedField, LanguageCode.en_US, name);
-        SetColumn(localizedField, localizationService.CurrentLanguageCode, name);
+        SetColumn(localizedField, LanguageCode.en_US, enUs);
+        if (localizationService.CurrentLanguageCode != LanguageCode.en_US)
+        {
+            SetColumn(localizedField, localizationService.CurrentLanguageCode, current);
+        }
     }
 
     private static void SetColumn(LocalizedField lf, LanguageCode code, string value)

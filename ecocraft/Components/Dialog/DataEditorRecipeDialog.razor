@@ -13,12 +13,11 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="4">
-            <MudTextField @bind-Value="_model.Name"
-                          Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Name")"
-                          Variant="Variant.Outlined"
-                          Required="true"
-                          Error="@_nameError"
-                          ErrorText="@LocalizationService.GetTranslation("DataEditor.Recipe.NameRequired")"/>
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="_nameError"
+                                  DisplayNameError="_displayNameError" />
 
             <MudGrid>
                 <MudItem sm="6">
@@ -109,6 +108,7 @@
 
     private RecipeEditModel _model = new();
     private bool _nameError;
+    private bool _displayNameError;
     private bool _craftingTableError;
 
     protected override void OnParametersSet()
@@ -128,6 +128,8 @@
         {
             Id = Recipe.Id,
             Name = Recipe.Name,
+            LocalizedNameEnUs = LocalizationService.GetColumn(Recipe.LocalizedName, LanguageCode.en_US),
+            LocalizedNameCurrent = LocalizationService.GetColumn(Recipe.LocalizedName, LocalizationService.CurrentLanguageCode),
             SkillId = Recipe.Skill?.Id,
             SkillLevel = Recipe.SkillLevel,
             CraftingTableId = Recipe.CraftingTable.Id,
@@ -231,9 +233,10 @@
     private void Submit()
     {
         _nameError = string.IsNullOrWhiteSpace(_model.Name);
+        _displayNameError = string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs);
         _craftingTableError = _model.CraftingTableId == Guid.Empty;
 
-        if (_nameError || _craftingTableError)
+        if (_nameError || _displayNameError || _craftingTableError)
         {
             return;
         }

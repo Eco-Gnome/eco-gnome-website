@@ -1,6 +1,7 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Extensions
+@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 
@@ -14,12 +15,11 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="4">
-            <MudTextField @bind-Value="_model.Name"
-                          Immediate="true"
-                          Required="true"
-                          RequiredError="@LocalizationService.GetTranslation("DataEditor.PluginModule.NameRequired")"
-                          Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.Name")"
-                          Variant="Variant.Outlined"/>
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
 
             <MudSelect T="PluginType"
                        @bind-Value="_model.PluginType"
@@ -60,7 +60,7 @@
         <MudButton OnClick="Cancel">@LocalizationService.GetTranslation("Cancel")</MudButton>
         <MudButton Color="Color.Primary"
                    Variant="Variant.Filled"
-                   Disabled="@(string.IsNullOrWhiteSpace(_model.Name))"
+                   Disabled="@(string.IsNullOrWhiteSpace(_model.Name) || string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))"
                    OnClick="Submit">
             @LocalizationService.GetTranslation("Validate")
         </MudButton>
@@ -83,6 +83,8 @@
             {
                 Id = PluginModule.Id,
                 Name = PluginModule.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(PluginModule.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(PluginModule.LocalizedName, LocalizationService.CurrentLanguageCode),
                 PluginType = PluginModule.PluginType,
                 Percent = PluginModule.Percent,
                 SkillId = PluginModule.Skill?.Id,
@@ -98,7 +100,7 @@
 
     private void Submit()
     {
-        if (string.IsNullOrWhiteSpace(_model.Name))
+        if (string.IsNullOrWhiteSpace(_model.Name) || string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))
         {
             return;
         }

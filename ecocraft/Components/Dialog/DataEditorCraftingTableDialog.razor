@@ -1,5 +1,6 @@
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Components.Utils
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 
@@ -13,12 +14,11 @@
     </TitleContent>
     <DialogContent>
         <MudStack Spacing="4">
-            <MudTextField @bind-Value="_model.Name"
-                          Immediate="true"
-                          Required="true"
-                          RequiredError="@LocalizationService.GetTranslation("DataEditor.CraftingTable.NameRequired")"
-                          Label="@LocalizationService.GetTranslation("DataEditor.CraftingTable.Name")"
-                          Variant="Variant.Outlined"/>
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
 
             <MudSelect T="Guid"
                        MultiSelection="true"
@@ -57,7 +57,8 @@
 
     private List<PluginModule> PluginModules => ContextService.CurrentServerData?.PluginModules ?? [];
 
-    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name);
+    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name)
+                            && !string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs);
 
     protected override void OnInitialized()
     {
@@ -65,6 +66,8 @@
         {
             _model.Id = CraftingTable.Id;
             _model.Name = CraftingTable.Name;
+            _model.LocalizedNameEnUs = LocalizationService.GetColumn(CraftingTable.LocalizedName, LanguageCode.en_US);
+            _model.LocalizedNameCurrent = LocalizationService.GetColumn(CraftingTable.LocalizedName, LocalizationService.CurrentLanguageCode);
             _model.PluginModuleIds = CraftingTable.PluginModules.Select(pm => pm.Id).ToList();
         }
 
