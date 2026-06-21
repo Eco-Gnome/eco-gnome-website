@@ -159,6 +159,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                     targets[id] = new AutomationTarget
                     {
                         ItemId = id,
+                        ItemOrTag = product.ItemOrTag,
                         Name = localizationService.GetTranslation(product.ItemOrTag),
                         // Pleine précision interne (l'affichage reste à 2 décimales via Format="0.##").
                         // Garder 1/3 exact évite à la fois ×0,99 au lieu de ×1 et, en /h, 19,98 au lieu de 20.
@@ -193,6 +194,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 inputs.TryAdd(id, new AutomationInput
                 {
                     ItemId = id,
+                    ItemOrTag = ingredient.ItemOrTag,
                     Name = localizationService.GetTranslation(ingredient.ItemOrTag),
                 });
             }
@@ -207,190 +209,26 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
     // et on en déduit le nombre (fractionnaire) de tables par recette et le débit transitant sur
     // chaque arête. La TOPOLOGIE (ids des nœuds/arêtes, ordre) est identique à BuildGraphData : seuls
     // les libellés changent, ce qui permet une mise à jour côté client sans re-layout.
-    public ProductionGraphData BuildAutomationGraphData(DataContext shoppingList, IReadOnlyDictionary<Guid, decimal> targetRates, IReadOnlyDictionary<Guid, decimal> inputCaps)
+    //
+    // maxItems : produits finaux dont le débit cible n'est pas saisi mais « maximisé » sous les
+    // contraintes d'entrée. Le modèle étant linéaire, on résout le débit max par superposition (voir
+    // ResolveTargetRates) avant la propagation finale.
+    public AutomationGraphResult BuildAutomationGraphData(
+        DataContext shoppingList,
+        IReadOnlyDictionary<Guid, decimal> targetRates,
+        IReadOnlyDictionary<Guid, decimal> inputCaps,
+        IReadOnlySet<Guid> maxItems)
     {
-        var data = new ProductionGraphData
-        {
-            FallbackImage = IconUrl("EmptyIcon"),
-        };
+        var topology = ComputeTopology(shoppingList);
+        var resolvedRates = ResolveTargetRates(topology, shoppingList, targetRates, inputCaps, maxItems, out var unboundedMax);
+        var propagation = Propagate(topology, shoppingList, resolvedRates);
 
-        // 1. Recettes (un nœud par recette) + quantités servant de POIDS de répartition de la demande
-        //    quand plusieurs producteurs (ou un achat) couvrent un même ingrédient.
-        var recipesById = new Dictionary<Guid, Recipe>();
-        foreach (var group in shoppingList.UserRecipes.GroupBy(ur => ur.RecipeId))
-        {
-            recipesById[group.Key] = group.First().Recipe;
-        }
-
-        var edgeQty = new Dictionary<(Guid Producer, Guid Consumer, Guid Item), decimal>();
-        var edgeChannel = new Dictionary<(Guid Producer, Guid Consumer, Guid Item), ItemOrTag>();
-        var purchaseQty = new Dictionary<(Guid Consumer, Guid Item), decimal>();
-        var purchaseChannel = new Dictionary<(Guid Consumer, Guid Item), ItemOrTag>();
-
-        // Graphe consommateur -> producteur pour le tri topologique (consommateurs traités d'abord).
-        var producersOf = new Dictionary<Guid, HashSet<Guid>>();
-        var inDegree = recipesById.Keys.ToDictionary(id => id, _ => 0);
-
-        foreach (var parentRecipe in shoppingList.UserRecipes)
-        {
-            var coverage = ShoppingListCoverageCalculator.ComputeCoverage(parentRecipe, shoppingList, parentRecipe.ChildrenUserRecipes);
-
-            foreach (var ingredient in parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
-            {
-                foreach (var child in GetMatchingChildren(parentRecipe, ingredient))
-                {
-                    if (child.RecipeId == parentRecipe.RecipeId)
-                    {
-                        continue;
-                    }
-
-                    var producedPerCraft = child.Recipe.Elements
-                        .Where(p => p.IsProduct()
-                            && !p.DefaultIsReintegrated
-                            && ShoppingListCoverageCalculator.CanSupplyIngredient(p.ItemOrTag, ingredient.ItemOrTag))
-                        .Sum(p => p.Quantity.GetDynamicValue(shoppingList));
-
-                    var key = (child.RecipeId, parentRecipe.RecipeId, ingredient.ItemOrTag.Id);
-                    edgeQty[key] = edgeQty.GetValueOrDefault(key) + producedPerCraft * child.RoundFactor;
-                    edgeChannel[key] = ingredient.ItemOrTag;
-
-                    producersOf.TryAdd(parentRecipe.RecipeId, []);
-                    if (producersOf[parentRecipe.RecipeId].Add(child.RecipeId))
-                    {
-                        inDegree[child.RecipeId] += 1;
-                    }
-                }
-
-                var missing = coverage.GetMissingQuantity(ingredient);
-                if (missing > Epsilon)
-                {
-                    var pk = (parentRecipe.RecipeId, ingredient.ItemOrTag.Id);
-                    purchaseQty[pk] = purchaseQty.GetValueOrDefault(pk) + missing;
-                    purchaseChannel[pk] = ingredient.ItemOrTag;
-                }
-            }
-        }
-
-        // 2. Propagation du débit demandé (aval -> amont) sur le DAG des recettes.
-        var demandRate = new Dictionary<(Guid Recipe, Guid Item), decimal>();
-        var demandChannel = new Dictionary<(Guid Recipe, Guid Item), ItemOrTag>();
-        var tablesByRecipe = new Dictionary<Guid, decimal>();
-        var edgeRate = new Dictionary<(Guid Producer, Guid Consumer, Guid Item), decimal>();
-        var purchaseRate = new Dictionary<(Guid Consumer, Guid Item), decimal>();
-
-        void AddDemand(Guid recipeId, ItemOrTag channel, decimal rate)
-        {
-            var key = (recipeId, channel.Id);
-            demandRate[key] = demandRate.GetValueOrDefault(key) + rate;
-            demandChannel[key] = channel;
-        }
-
-        // Amorçage : chaque produit final reçoit le débit cible saisi (ou le débit d'une table par défaut).
-        foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
-        {
-            foreach (var product in rootRecipe.Recipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index))
-            {
-                var producedPerCraft = product.Quantity.GetDynamicValue(shoppingList);
-                if (producedPerCraft <= Epsilon)
-                {
-                    continue;
-                }
-
-                var rate = targetRates.TryGetValue(product.ItemOrTag.Id, out var target)
-                    ? target
-                    : PerMinuteRate(producedPerCraft, rootRecipe.Recipe, shoppingList);
-                AddDemand(rootRecipe.RecipeId, product.ItemOrTag, rate);
-            }
-        }
-
-        var queue = new Queue<Guid>(inDegree.Where(kv => kv.Value == 0).Select(kv => kv.Key));
-        var processed = new HashSet<Guid>();
-
-        void Process(Guid recipeId)
-        {
-            if (!processed.Add(recipeId))
-            {
-                return;
-            }
-
-            var recipe = recipesById[recipeId];
-
-            // tables(R) = max sur les sorties demandées de ( demande / débit d'une table ).
-            decimal tables = 0m;
-            foreach (var (key, dr) in demandRate.Where(kv => kv.Key.Recipe == recipeId))
-            {
-                var perTableOut = PerTableOutForChannel(recipe, demandChannel[key], shoppingList);
-                if (perTableOut > Epsilon)
-                {
-                    tables = Math.Max(tables, dr / perTableOut);
-                }
-            }
-            tablesByRecipe[recipeId] = tables;
-
-            // Répartition de la demande de chaque ingrédient vers ses producteurs (et l'achat).
-            foreach (var ingredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
-            {
-                var needRate = tables * PerMinuteRate(Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList)), recipe, shoppingList);
-                if (needRate <= Epsilon)
-                {
-                    continue;
-                }
-
-                var channelId = ingredient.ItemOrTag.Id;
-                var producerKeys = edgeQty.Keys.Where(k => k.Consumer == recipeId && k.Item == channelId).ToList();
-                var totalQty = producerKeys.Sum(k => edgeQty[k]) + purchaseQty.GetValueOrDefault((recipeId, channelId));
-                if (totalQty <= Epsilon)
-                {
-                    continue;
-                }
-
-                foreach (var key in producerKeys)
-                {
-                    var rate = needRate * edgeQty[key] / totalQty;
-                    edgeRate[key] = edgeRate.GetValueOrDefault(key) + rate;
-                    AddDemand(key.Producer, ingredient.ItemOrTag, rate);
-                }
-
-                var pk = (recipeId, channelId);
-                if (purchaseQty.TryGetValue(pk, out var pq))
-                {
-                    purchaseRate[pk] = purchaseRate.GetValueOrDefault(pk) + needRate * pq / totalQty;
-                }
-            }
-
-            if (producersOf.TryGetValue(recipeId, out var children))
-            {
-                foreach (var child in children)
-                {
-                    inDegree[child] -= 1;
-                    if (inDegree[child] == 0)
-                    {
-                        queue.Enqueue(child);
-                    }
-                }
-            }
-        }
-
-        while (queue.Count > 0)
-        {
-            Process(queue.Dequeue());
-        }
-
-        // Filet de sécurité si l'arbre contient un cycle (théoriquement impossible) : on traite le reste.
-        foreach (var recipeId in recipesById.Keys)
-        {
-            Process(recipeId);
-        }
-
-        // 2bis. Goulots : si une matière première plafonnée ne couvre pas le débit demandé, on bride
-        //       TOUTE la chaîne (tous les débits/tables sont linéaires dans les cibles) d'un facteur
-        //       global = min des (cap / demande) des entrées, jamais > 1. Les items dont le facteur
-        //       est le plus contraignant sont les goulots.
-        var demandedByInput = new Dictionary<Guid, decimal>();
-        foreach (var ((_, itemId), rate) in purchaseRate)
-        {
-            demandedByInput[itemId] = demandedByInput.GetValueOrDefault(itemId) + rate;
-        }
+        // Goulots : si une matière première plafonnée ne couvre pas le débit demandé, on bride TOUTE la
+        // chaîne (tous les débits/tables sont linéaires dans les cibles) d'un facteur global = min des
+        // (cap / demande) des entrées, jamais > 1. Les items au facteur le plus contraignant sont les
+        // goulots. Pour des cibles « max », ce facteur vaut ~1 (la résolution les a déjà calées sur le
+        // plafond) ; il ne brides réellement que des cibles fixes sur-dimensionnées.
+        var demandedByInput = DemandByInput(propagation);
 
         var globalFactor = 1m;
         foreach (var (itemId, demanded) in demandedByInput)
@@ -415,12 +253,17 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         }
 
         // 3. Matérialisation des nœuds et arêtes (mêmes ids/ordre que BuildGraphData).
+        var data = new ProductionGraphData
+        {
+            FallbackImage = IconUrl("EmptyIcon"),
+        };
+
         var craftingNodeIds = new Dictionary<Guid, string>();
         foreach (var group in shoppingList.UserRecipes.GroupBy(ur => ur.RecipeId))
         {
             var recipe = group.First().Recipe;
             var nodeId = "r:" + group.Key;
-            var tables = tablesByRecipe.GetValueOrDefault(group.Key) * globalFactor;
+            var tables = propagation.TablesByRecipe.GetValueOrDefault(group.Key) * globalFactor;
 
             data.Nodes.Add(new ProductionGraphNode
             {
@@ -433,13 +276,13 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
             craftingNodeIds[group.Key] = nodeId;
         }
 
-        foreach (var (key, channel) in edgeChannel)
+        foreach (var (key, channel) in topology.EdgeChannel)
         {
-            data.Edges.Add(BuildRateEdge(craftingNodeIds[key.Producer], craftingNodeIds[key.Consumer], channel, edgeRate.GetValueOrDefault(key) * globalFactor));
+            data.Edges.Add(BuildRateEdge(craftingNodeIds[key.Producer], craftingNodeIds[key.Consumer], channel, propagation.EdgeRate.GetValueOrDefault(key) * globalFactor));
         }
 
         var leafIndex = 0;
-        foreach (var (key, channel) in purchaseChannel)
+        foreach (var (key, channel) in topology.PurchaseChannel)
         {
             var leafId = "b:" + leafIndex++;
             data.Nodes.Add(new ProductionGraphNode
@@ -450,7 +293,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 Label = localizationService.GetTranslation(channel),
                 Bottleneck = bottleneckItems.Contains(channel.Id),
             });
-            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, purchaseRate.GetValueOrDefault(key) * globalFactor));
+            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, propagation.PurchaseRate.GetValueOrDefault(key) * globalFactor));
         }
 
         foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
@@ -463,7 +306,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                     continue;
                 }
 
-                var rate = tablesByRecipe.GetValueOrDefault(rootRecipe.RecipeId) * PerTableOutForChannel(rootRecipe.Recipe, product.ItemOrTag, shoppingList) * globalFactor;
+                var rate = propagation.TablesByRecipe.GetValueOrDefault(rootRecipe.RecipeId) * PerTableOutForChannel(rootRecipe.Recipe, product.ItemOrTag, shoppingList) * globalFactor;
                 var leafId = "f:" + leafIndex++;
                 data.Nodes.Add(new ProductionGraphNode
                 {
@@ -476,7 +319,260 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
             }
         }
 
-        return data;
+        // Débits « max » résolus, ramenés à la production réelle (après bridage éventuel), pour
+        // les réafficher dans les champs (lecture seule) du panneau de droite.
+        foreach (var itemId in maxItems)
+        {
+            resolvedRates[itemId] = resolvedRates.GetValueOrDefault(itemId) * globalFactor;
+        }
+
+        return new AutomationGraphResult
+        {
+            Data = data,
+            ResolvedTargetRates = resolvedRates,
+            UnboundedMaxItems = unboundedMax,
+        };
+    }
+
+    // Débits cibles effectifs : les cibles fixes gardent leur valeur ; les cibles « max » sont poussées
+    // au plus haut débit que les contraintes d'entrée autorisent. Le système étant linéaire, on superpose
+    // deux propagations — fixes seuls vs « max » seuls à leur débit de base — pour obtenir, par entrée,
+    // la consommation des fixes et celle des max par unité d'échelle, puis on résout un facteur t commun :
+    // t = min sur les entrées plafonnées de (cap - conso_fixes) / conso_max. Si aucune entrée plafonnée
+    // ne borne les max, la production est illimitée (signalée via unboundedMax, débit de base conservé).
+    private Dictionary<Guid, decimal> ResolveTargetRates(
+        AutomationTopology topology,
+        DataContext shoppingList,
+        IReadOnlyDictionary<Guid, decimal> targetRates,
+        IReadOnlyDictionary<Guid, decimal> inputCaps,
+        IReadOnlySet<Guid> maxItems,
+        out HashSet<Guid> unboundedMax)
+    {
+        var resolved = new Dictionary<Guid, decimal>(targetRates);
+        unboundedMax = new HashSet<Guid>();
+
+        if (maxItems.Count == 0)
+        {
+            return resolved;
+        }
+
+        var fixedSeed = targetRates.ToDictionary(kv => kv.Key, kv => maxItems.Contains(kv.Key) ? 0m : kv.Value);
+        var maxSeed = targetRates.ToDictionary(kv => kv.Key, kv => maxItems.Contains(kv.Key) ? kv.Value : 0m);
+
+        var fixedDemand = DemandByInput(Propagate(topology, shoppingList, fixedSeed));
+        var maxDemand = DemandByInput(Propagate(topology, shoppingList, maxSeed));
+
+        var t = decimal.MaxValue;
+        foreach (var (itemId, cap) in inputCaps)
+        {
+            if (maxDemand.TryGetValue(itemId, out var perBasis) && perBasis > Epsilon)
+            {
+                var available = cap - fixedDemand.GetValueOrDefault(itemId);
+                t = Math.Min(t, Math.Max(0m, available / perBasis));
+            }
+        }
+
+        if (t == decimal.MaxValue)
+        {
+            foreach (var itemId in maxItems)
+            {
+                unboundedMax.Add(itemId); // base conservée dans `resolved` pour un graphe lisible
+            }
+        }
+        else
+        {
+            foreach (var itemId in maxItems)
+            {
+                resolved[itemId] = targetRates.GetValueOrDefault(itemId) * t;
+            }
+        }
+
+        return resolved;
+    }
+
+    // 1. Partie indépendante des débits : recettes (un nœud par recette) + quantités servant de POIDS de
+    //    répartition de la demande quand plusieurs producteurs (ou un achat) couvrent un même ingrédient,
+    //    et le graphe consommateur -> producteur (degrés entrants) pour le tri topologique.
+    private AutomationTopology ComputeTopology(DataContext shoppingList)
+    {
+        var topology = new AutomationTopology();
+
+        foreach (var group in shoppingList.UserRecipes.GroupBy(ur => ur.RecipeId))
+        {
+            topology.RecipesById[group.Key] = group.First().Recipe;
+        }
+
+        topology.InDegree = topology.RecipesById.Keys.ToDictionary(id => id, _ => 0);
+
+        foreach (var parentRecipe in shoppingList.UserRecipes)
+        {
+            var coverage = ShoppingListCoverageCalculator.ComputeCoverage(parentRecipe, shoppingList, parentRecipe.ChildrenUserRecipes);
+
+            foreach (var ingredient in parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
+            {
+                foreach (var child in GetMatchingChildren(parentRecipe, ingredient))
+                {
+                    if (child.RecipeId == parentRecipe.RecipeId)
+                    {
+                        continue;
+                    }
+
+                    var producedPerCraft = child.Recipe.Elements
+                        .Where(p => p.IsProduct()
+                            && !p.DefaultIsReintegrated
+                            && ShoppingListCoverageCalculator.CanSupplyIngredient(p.ItemOrTag, ingredient.ItemOrTag))
+                        .Sum(p => p.Quantity.GetDynamicValue(shoppingList));
+
+                    var key = (child.RecipeId, parentRecipe.RecipeId, ingredient.ItemOrTag.Id);
+                    topology.EdgeQty[key] = topology.EdgeQty.GetValueOrDefault(key) + producedPerCraft * child.RoundFactor;
+                    topology.EdgeChannel[key] = ingredient.ItemOrTag;
+
+                    topology.ProducersOf.TryAdd(parentRecipe.RecipeId, []);
+                    if (topology.ProducersOf[parentRecipe.RecipeId].Add(child.RecipeId))
+                    {
+                        topology.InDegree[child.RecipeId] += 1;
+                    }
+                }
+
+                var missing = coverage.GetMissingQuantity(ingredient);
+                if (missing > Epsilon)
+                {
+                    var pk = (parentRecipe.RecipeId, ingredient.ItemOrTag.Id);
+                    topology.PurchaseQty[pk] = topology.PurchaseQty.GetValueOrDefault(pk) + missing;
+                    topology.PurchaseChannel[pk] = ingredient.ItemOrTag;
+                }
+            }
+        }
+
+        return topology;
+    }
+
+    // 2. Propagation du débit demandé (aval -> amont) sur le DAG des recettes, pour un jeu de débits
+    //    cibles donné. Ne dépend de la topologie qu'en lecture seule (l'état mutable — degrés entrants,
+    //    demande — est local), donc rejouable autant de fois que nécessaire (superposition « max »).
+    private PropagationResult Propagate(AutomationTopology topology, DataContext shoppingList, IReadOnlyDictionary<Guid, decimal> seedRates)
+    {
+        var result = new PropagationResult();
+        var demandRate = new Dictionary<(Guid Recipe, Guid Item), decimal>();
+        var demandChannel = new Dictionary<(Guid Recipe, Guid Item), ItemOrTag>();
+        var inDegree = new Dictionary<Guid, int>(topology.InDegree);
+
+        void AddDemand(Guid recipeId, ItemOrTag channel, decimal rate)
+        {
+            var key = (recipeId, channel.Id);
+            demandRate[key] = demandRate.GetValueOrDefault(key) + rate;
+            demandChannel[key] = channel;
+        }
+
+        // Amorçage : chaque produit final reçoit le débit cible fourni (ou le débit d'une table par défaut).
+        foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
+        {
+            foreach (var product in rootRecipe.Recipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index))
+            {
+                var producedPerCraft = product.Quantity.GetDynamicValue(shoppingList);
+                if (producedPerCraft <= Epsilon)
+                {
+                    continue;
+                }
+
+                var rate = seedRates.TryGetValue(product.ItemOrTag.Id, out var target)
+                    ? target
+                    : PerMinuteRate(producedPerCraft, rootRecipe.Recipe, shoppingList);
+                AddDemand(rootRecipe.RecipeId, product.ItemOrTag, rate);
+            }
+        }
+
+        var queue = new Queue<Guid>(inDegree.Where(kv => kv.Value == 0).Select(kv => kv.Key));
+        var processed = new HashSet<Guid>();
+
+        void Process(Guid recipeId)
+        {
+            if (!processed.Add(recipeId))
+            {
+                return;
+            }
+
+            var recipe = topology.RecipesById[recipeId];
+
+            // tables(R) = max sur les sorties demandées de ( demande / débit d'une table ).
+            decimal tables = 0m;
+            foreach (var (key, dr) in demandRate.Where(kv => kv.Key.Recipe == recipeId))
+            {
+                var perTableOut = PerTableOutForChannel(recipe, demandChannel[key], shoppingList);
+                if (perTableOut > Epsilon)
+                {
+                    tables = Math.Max(tables, dr / perTableOut);
+                }
+            }
+            result.TablesByRecipe[recipeId] = tables;
+
+            // Répartition de la demande de chaque ingrédient vers ses producteurs (et l'achat).
+            foreach (var ingredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
+            {
+                var needRate = tables * PerMinuteRate(Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList)), recipe, shoppingList);
+                if (needRate <= Epsilon)
+                {
+                    continue;
+                }
+
+                var channelId = ingredient.ItemOrTag.Id;
+                var producerKeys = topology.EdgeQty.Keys.Where(k => k.Consumer == recipeId && k.Item == channelId).ToList();
+                var totalQty = producerKeys.Sum(k => topology.EdgeQty[k]) + topology.PurchaseQty.GetValueOrDefault((recipeId, channelId));
+                if (totalQty <= Epsilon)
+                {
+                    continue;
+                }
+
+                foreach (var key in producerKeys)
+                {
+                    var rate = needRate * topology.EdgeQty[key] / totalQty;
+                    result.EdgeRate[key] = result.EdgeRate.GetValueOrDefault(key) + rate;
+                    AddDemand(key.Producer, ingredient.ItemOrTag, rate);
+                }
+
+                var pk = (recipeId, channelId);
+                if (topology.PurchaseQty.TryGetValue(pk, out var pq))
+                {
+                    result.PurchaseRate[pk] = result.PurchaseRate.GetValueOrDefault(pk) + needRate * pq / totalQty;
+                }
+            }
+
+            if (topology.ProducersOf.TryGetValue(recipeId, out var children))
+            {
+                foreach (var child in children)
+                {
+                    inDegree[child] -= 1;
+                    if (inDegree[child] == 0)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+        }
+
+        while (queue.Count > 0)
+        {
+            Process(queue.Dequeue());
+        }
+
+        // Filet de sécurité si l'arbre contient un cycle (théoriquement impossible) : on traite le reste.
+        foreach (var recipeId in topology.RecipesById.Keys)
+        {
+            Process(recipeId);
+        }
+
+        return result;
+    }
+
+    // Demande totale par item d'entrée (somme des débits d'achat sur tous les consommateurs).
+    private static Dictionary<Guid, decimal> DemandByInput(PropagationResult propagation)
+    {
+        var demand = new Dictionary<Guid, decimal>();
+        foreach (var ((_, itemId), rate) in propagation.PurchaseRate)
+        {
+            demand[itemId] = demand.GetValueOrDefault(itemId) + rate;
+        }
+        return demand;
     }
 
     // Débit d'UNE table de craft pour le canal (ingrédient/tag) donné : somme des produits de la
@@ -570,6 +666,26 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 && ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag)));
     }
 
+    // Partie du graphe d'automatisation indépendante des débits cibles (réutilisable entre propagations).
+    private sealed class AutomationTopology
+    {
+        public Dictionary<Guid, Recipe> RecipesById { get; } = new();
+        public Dictionary<(Guid Producer, Guid Consumer, Guid Item), decimal> EdgeQty { get; } = new();
+        public Dictionary<(Guid Producer, Guid Consumer, Guid Item), ItemOrTag> EdgeChannel { get; } = new();
+        public Dictionary<(Guid Consumer, Guid Item), decimal> PurchaseQty { get; } = new();
+        public Dictionary<(Guid Consumer, Guid Item), ItemOrTag> PurchaseChannel { get; } = new();
+        public Dictionary<Guid, HashSet<Guid>> ProducersOf { get; } = new();
+        public Dictionary<Guid, int> InDegree { get; set; } = new();
+    }
+
+    // Résultat d'une propagation : nombre de tables par recette, débits sur arêtes et débits d'achat.
+    private sealed class PropagationResult
+    {
+        public Dictionary<Guid, decimal> TablesByRecipe { get; } = new();
+        public Dictionary<(Guid Producer, Guid Consumer, Guid Item), decimal> EdgeRate { get; } = new();
+        public Dictionary<(Guid Consumer, Guid Item), decimal> PurchaseRate { get; } = new();
+    }
+
 }
 
 public class ProductionGraphData
@@ -600,12 +716,24 @@ public class ProductionGraphEdge
 public class AutomationTarget
 {
     public Guid ItemId { get; set; }
+    public ItemOrTag ItemOrTag { get; set; } = null!;
     public string Name { get; set; } = "";
     public decimal DefaultRate { get; set; }
+}
+
+// Résultat du planificateur : graphe à afficher + débits cibles effectivement retenus (notamment ceux
+// résolus pour les cibles « max », à réafficher) et la liste des cibles « max » non bornées (illimitées
+// faute de contrainte d'entrée limitante).
+public class AutomationGraphResult
+{
+    public ProductionGraphData Data { get; set; } = new();
+    public Dictionary<Guid, decimal> ResolvedTargetRates { get; set; } = new();
+    public HashSet<Guid> UnboundedMaxItems { get; set; } = new();
 }
 
 public class AutomationInput
 {
     public Guid ItemId { get; set; }
+    public ItemOrTag ItemOrTag { get; set; } = null!;
     public string Name { get; set; } = "";
 }

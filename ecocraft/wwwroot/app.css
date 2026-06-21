@@ -90,6 +90,16 @@
     background-color: var(--mud-palette-surface);
 }
 
+/* Colonne de gauche (limites d'entrée) réduite de moitié (2 → 1) */
+.shopping-list-automation-side-left {
+    flex: 1 1 0;
+}
+
+/* Colonne de droite (objectifs) réduite d'un tiers (2 → 4/3) */
+.shopping-list-automation-side-right {
+    flex: 1.3333 1 0;
+}
+
 .shopping-list-automation-graph {
     flex: 8 1 0;
     min-width: 0;

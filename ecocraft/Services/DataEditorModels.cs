@@ -13,6 +13,12 @@ public class ItemEditModel
     public decimal? MinPrice { get; set; }
     public decimal? DefaultPrice { get; set; }
     public decimal? MaxPrice { get; set; }
+
+    // Two ends of the same Item<->Tag M:M (join table ItemTagAssoc). Only the end matching IsTag is
+    // populated/applied: an item edits the tags it belongs to (AssociatedTagIds), a tag edits the
+    // items it groups (AssociatedItemIds).
+    public List<Guid> AssociatedTagIds { get; set; } = [];
+    public List<Guid> AssociatedItemIds { get; set; } = [];
 }
 
 // Reused for both ingredients and products of a recipe. Quantity is always stored as a positive

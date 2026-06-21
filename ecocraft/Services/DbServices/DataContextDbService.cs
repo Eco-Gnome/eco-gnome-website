@@ -50,6 +50,8 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			.Include(s => s.UserRecipes)
 			.ThenInclude(s => s.UserElements)
 			.Include(s => s.UserMargins)
+			.Include(s => s.UserAutomationInputs)
+			.Include(s => s.UserAutomationTargets)
 			.FirstAsync();
 
 		Reconciliate(dataContext, server);
@@ -171,6 +173,30 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 				up.UserMargin = null;
 				up.UserMarginId = null;
 			}
+		});
+
+		dataContext.UserAutomationInputs.ToList().ForEach(uai =>
+		{
+			if (!itemOrTags.TryGetValue(uai.ItemOrTagId, out var itemOrTag))
+			{
+				dataContext.UserAutomationInputs.Remove(uai);
+				return;
+			}
+
+			uai.ItemOrTag = itemOrTag;
+			uai.DataContext = dataContext;
+		});
+
+		dataContext.UserAutomationTargets.ToList().ForEach(uat =>
+		{
+			if (!itemOrTags.TryGetValue(uat.ItemOrTagId, out var itemOrTag))
+			{
+				dataContext.UserAutomationTargets.Remove(uat);
+				return;
+			}
+
+			uat.ItemOrTag = itemOrTag;
+			uat.DataContext = dataContext;
 		});
 
 		dataContext.UserRecipes.ToList().ForEach(ur =>

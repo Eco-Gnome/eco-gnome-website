@@ -1,10 +1,15 @@
 @using ecocraft.Models
 @using ecocraft.Services
+@using ecocraft.Services.DbServices
 @using ecocraft.Extensions
+@using Microsoft.EntityFrameworkCore
 @implements IAsyncDisposable
 @inject ShoppingListGraphService ShoppingListGraphService
 @inject LocalizationService LocalizationService
 @inject LocalStorageService LocalStorageService
+@inject UserAutomationInputDbService UserAutomationInputDbService
+@inject UserAutomationTargetDbService UserAutomationTargetDbService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 @inject IJSRuntime JS
 
 <MudDialog>
@@ -34,9 +39,9 @@
         @if (_hasContent)
         {
             <div class="shopping-list-automation-layout">
-                <MudPaper Elevation="4" Class="shopping-list-automation-side pa-3">
+                <MudPaper Elevation="4" Class="shopping-list-automation-side shopping-list-automation-side-left pa-3">
                     <MudText Typo="Typo.subtitle2" Class="mb-2">
-                        @LocalizationService.GetTranslation("ShoppingList.AutomationInputLimits")
+                        @LocalizationService.GetTranslation("ShoppingList.AutomationInputLimits") (@RateUnitLabel)
                     </MudText>
                     @if (_inputs.Count > 0)
                     {
@@ -44,7 +49,7 @@
                             @foreach (var input in _inputs)
                             {
                                 <MudNumericField T="decimal?"
-                                                 Value="@_caps[input.ItemId]"
+                                                 Value="@CapDisplay(input.ItemId)"
                                                  ValueChanged="@(v => OnInputCapChanged(input.ItemId, v))"
                                                  Label="@input.Name"
                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
@@ -66,24 +71,52 @@
                     <div id="@_containerId" class="shopping-list-graph-container"></div>
                 </div>
 
-                <MudPaper Elevation="4" Class="shopping-list-automation-side pa-3">
+                <MudPaper Elevation="4" Class="shopping-list-automation-side shopping-list-automation-side-right pa-3">
                     <MudText Typo="Typo.subtitle2" Class="mb-2">
-                        @LocalizationService.GetTranslation("ShoppingList.AutomationTargetRate")
+                        @LocalizationService.GetTranslation("ShoppingList.AutomationTargetRate") (@RateUnitLabel)
                     </MudText>
                     @if (_targets.Count > 0)
                     {
                         <MudStack Spacing="2">
                             @foreach (var target in _targets)
                             {
-                                <MudNumericField T="decimal"
-                                                 Value="@_rates[target.ItemId]"
-                                                 ValueChanged="@(v => OnTargetChanged(target.ItemId, v))"
-                                                 Label="@target.Name"
-                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimal"
-                                                 Format="0.##"
-                                                 Min="0"
-                                                 Variant="Variant.Outlined"
-                                                 Margin="Margin.Dense"/>
+                                var isMax = _isMax[target.ItemId];
+                                <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                    @if (isMax)
+                                    {
+                                        <MudNumericField T="decimal?"
+                                                         Value="@MaxDisplay(target.ItemId)"
+                                                         Label="@target.Name"
+                                                         Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                                         Format="0.##"
+                                                         ReadOnly="true"
+                                                         Placeholder="∞"
+                                                         Variant="Variant.Outlined"
+                                                         Margin="Margin.Dense"
+                                                         Class="flex-grow-1"/>
+                                    }
+                                    else
+                                    {
+                                        <MudNumericField T="decimal"
+                                                         Value="@(_rates[target.ItemId] * RateUnitFactor)"
+                                                         ValueChanged="@(v => OnTargetChanged(target.ItemId, v))"
+                                                         Label="@target.Name"
+                                                         Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                                         Format="0.##"
+                                                         Min="0"
+                                                         Variant="Variant.Outlined"
+                                                         Margin="Margin.Dense"
+                                                         Class="flex-grow-1"/>
+                                    }
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutomationMaxHint")">
+                                        <MudButton Size="Size.Small"
+                                                   Variant="@(isMax ? Variant.Filled : Variant.Outlined)"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => OnToggleMax(target.ItemId))">
+                                            @LocalizationService.GetTranslation("ShoppingList.AutomationMax")
+                                        </MudButton>
+                                    </MudTooltip>
+                                </MudStack>
                             }
                         </MudStack>
                     }
@@ -118,6 +151,9 @@
     private List<AutomationInput> _inputs = [];
     private readonly Dictionary<Guid, decimal> _rates = new();
     private readonly Dictionary<Guid, decimal?> _caps = new();
+    private readonly Dictionary<Guid, bool> _isMax = new();
+    private Dictionary<Guid, decimal> _resolvedRates = new();
+    private HashSet<Guid> _unboundedMax = new();
     private ProductionGraphData? _data;
     private bool _hasContent;
     private bool _perHour;
@@ -126,6 +162,21 @@
     // options du price calculator. Persistante entre sessions / listes.
     private const string PerHourStorageKey = "AutomationRatePerHour";
     private string RateMode => _perHour ? "perHour" : "perMinute";
+
+    // Tous les débits sont stockés/calculés en /min ; l'affichage bascule en /h via ce facteur (×60),
+    // en pleine précision pour éviter les arrondis intermédiaires (cf. le graphe : ×60 PUIS arrondi).
+    private decimal RateUnitFactor => _perHour ? 60m : 1m;
+    private string RateUnitLabel => _perHour ? "/h" : "/min";
+
+    // Valeur affichée (unité courante) d'une limite d'entrée, ou null si pas de limite.
+    private decimal? CapDisplay(Guid itemId)
+        => _caps.TryGetValue(itemId, out var cap) && cap.HasValue ? cap.Value * RateUnitFactor : null;
+
+    // Valeur affichée (unité courante) d'une cible « max » résolue, ou null si illimitée (placeholder ∞).
+    private decimal? MaxDisplay(Guid itemId)
+        => _unboundedMax.Contains(itemId)
+            ? null
+            : _resolvedRates.TryGetValue(itemId, out var rate) ? rate * RateUnitFactor : null;
 
     protected override void OnInitialized()
     {
@@ -136,27 +187,46 @@
             _targets = ShoppingListGraphService.GetAutomationTargets(ShoppingList);
             foreach (var target in _targets)
             {
-                _rates[target.ItemId] = target.DefaultRate;
+                // État persisté pour cette cible (si une ligne existe), sinon débit par défaut sans « max ».
+                var saved = ShoppingList.UserAutomationTargets.FirstOrDefault(uat => uat.ItemOrTagId == target.ItemId);
+                _rates[target.ItemId] = saved?.Rate ?? target.DefaultRate;
+                _isMax[target.ItemId] = saved?.IsMax ?? false;
             }
 
             _inputs = ShoppingListGraphService.GetAutomationInputs(ShoppingList);
             foreach (var input in _inputs)
             {
-                _caps[input.ItemId] = null; // pas de limite par défaut
+                // Limite persistée pour cet item (si une ligne existe), sinon « pas de limite ».
+                _caps[input.ItemId] = ShoppingList.UserAutomationInputs
+                    .FirstOrDefault(uai => uai.ItemOrTagId == input.ItemId)?.Cap;
             }
 
             _data = BuildData();
         }
     }
 
-    // Limites saisies (clés non nulles) → caps passés au service.
+    // Limites saisies (clés non nulles) → caps ; cibles « max » cochées → maxItems. Mémorise au passage
+    // les débits cibles résolus (pour réafficher les « max ») et les cibles non bornées.
     private ProductionGraphData BuildData()
     {
         var caps = _caps
             .Where(kv => kv.Value.HasValue)
             .ToDictionary(kv => kv.Key, kv => kv.Value!.Value);
 
-        return ShoppingListGraphService.BuildAutomationGraphData(ShoppingList, _rates, caps);
+        var maxItems = _isMax.Where(kv => kv.Value).Select(kv => kv.Key).ToHashSet();
+
+        // Une cible « max » est maximisée à partir du débit NEUTRE de la recette (DefaultRate), jamais de
+        // la valeur saisie : sinon les valeurs tapées fausseraient le ratio entre cibles « max » (et un 0
+        // saisi rendrait la cible faussement « illimitée »). La valeur saisie n'est utilisée que pour les
+        // cibles fixes ; elle reste mémorisée dans _rates pour réapparaître quand on désactive « max ».
+        var rates = _targets.ToDictionary(
+            t => t.ItemId,
+            t => _isMax[t.ItemId] ? t.DefaultRate : _rates[t.ItemId]);
+
+        var result = ShoppingListGraphService.BuildAutomationGraphData(ShoppingList, rates, caps, maxItems);
+        _resolvedRates = result.ResolvedTargetRates;
+        _unboundedMax = result.UnboundedMaxItems;
+        return result.Data;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -174,16 +244,105 @@
         await JS.InvokeVoidAsync("ecoProductionGraph.setMode", _containerId, RateMode);
     }
 
+    // Les valeurs saisies sont dans l'unité d'affichage (/min ou /h) ; on les reconvertit en /min, l'unité
+    // de stockage/calcul, en pleine précision (ex. 1200/h → 20/min, 20/h → 1/3/min sans perte).
     private async Task OnTargetChanged(Guid itemId, decimal value)
     {
-        _rates[itemId] = value < 0 ? 0 : value;
+        _rates[itemId] = (value < 0 ? 0 : value) / RateUnitFactor;
+        await PersistTarget(itemId);
         await RefreshLabels();
     }
 
     private async Task OnInputCapChanged(Guid itemId, decimal? value)
     {
-        _caps[itemId] = value is < 0 ? 0 : value;
+        decimal? cap = value is null ? null : (value < 0 ? 0 : value.Value) / RateUnitFactor;
+        _caps[itemId] = cap;
+        await PersistInputCap(itemId, cap);
         await RefreshLabels();
+    }
+
+    // Bascule une cible entre débit saisi et « max » (production maximale sous les contraintes d'entrée).
+    private async Task OnToggleMax(Guid itemId)
+    {
+        _isMax[itemId] = !_isMax.GetValueOrDefault(itemId);
+        await PersistTarget(itemId);
+        await RefreshLabels();
+    }
+
+    // Persiste l'objectif d'une cible (débit /min + mode « max »), par item et par shopping list. Une
+    // ligne UserAutomationTarget est créée dès qu'une cible est touchée, puis mise à jour ensuite.
+    private async Task PersistTarget(Guid itemId)
+    {
+        var existing = ShoppingList.UserAutomationTargets.FirstOrDefault(uat => uat.ItemOrTagId == itemId);
+        var rate = _rates[itemId];
+        var isMax = _isMax[itemId];
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            if (existing is not null)
+            {
+                existing.Rate = rate;
+                existing.IsMax = isMax;
+                UserAutomationTargetDbService.Update(context, existing);
+            }
+            else
+            {
+                var target = _targets.First(t => t.ItemId == itemId);
+                var userAutomationTarget = new UserAutomationTarget
+                {
+                    DataContext = ShoppingList,
+                    DataContextId = ShoppingList.Id,
+                    ItemOrTag = target.ItemOrTag,
+                    ItemOrTagId = itemId,
+                    Rate = rate,
+                    IsMax = isMax,
+                };
+                ShoppingList.UserAutomationTargets.Add(userAutomationTarget);
+                UserAutomationTargetDbService.Create(context, userAutomationTarget);
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    // Persiste la limite d'entrée par item, par shopping list : une ligne UserAutomationInput n'existe
+    // que si une limite est saisie. Effacer le champ (null) supprime la ligne.
+    private async Task PersistInputCap(Guid itemId, decimal? cap)
+    {
+        var existing = ShoppingList.UserAutomationInputs.FirstOrDefault(uai => uai.ItemOrTagId == itemId);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            if (cap is null)
+            {
+                if (existing is not null)
+                {
+                    ShoppingList.UserAutomationInputs.Remove(existing);
+                    UserAutomationInputDbService.Destroy(context, existing);
+                }
+            }
+            else if (existing is not null)
+            {
+                existing.Cap = cap.Value;
+                UserAutomationInputDbService.UpdateCap(context, existing);
+            }
+            else
+            {
+                var input = _inputs.First(i => i.ItemId == itemId);
+                var userAutomationInput = new UserAutomationInput
+                {
+                    DataContext = ShoppingList,
+                    DataContextId = ShoppingList.Id,
+                    ItemOrTag = input.ItemOrTag,
+                    ItemOrTagId = itemId,
+                    Cap = cap.Value,
+                };
+                ShoppingList.UserAutomationInputs.Add(userAutomationInput);
+                UserAutomationInputDbService.Create(context, userAutomationInput);
+            }
+
+            return Task.CompletedTask;
+        });
     }
 
     // La topologie ne dépend ni des débits cibles ni des limites d'entrée : on recalcule les libellés

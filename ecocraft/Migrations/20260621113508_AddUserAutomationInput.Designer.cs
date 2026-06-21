@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecocraft.Models;
@@ -11,9 +12,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260621113508_AddUserAutomationInput")]
+    partial class AddUserAutomationInput
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -761,33 +764,6 @@ namespace ecocraft.Migrations
                     b.ToTable("UserAutomationInput", (string)null);
                 });
 
-            modelBuilder.Entity("ecocraft.Models.UserAutomationTarget", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DataContextId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsMax")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("ItemOrTagId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Rate")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DataContextId");
-
-                    b.HasIndex("ItemOrTagId");
-
-                    b.ToTable("UserAutomationTarget", (string)null);
-                });
-
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1413,25 +1389,6 @@ namespace ecocraft.Migrations
                     b.Navigation("ItemOrTag");
                 });
 
-            modelBuilder.Entity("ecocraft.Models.UserAutomationTarget", b =>
-                {
-                    b.HasOne("ecocraft.Models.DataContext", "DataContext")
-                        .WithMany("UserAutomationTargets")
-                        .HasForeignKey("DataContextId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
-                        .WithMany()
-                        .HasForeignKey("ItemOrTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DataContext");
-
-                    b.Navigation("ItemOrTag");
-                });
-
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
                 {
                     b.HasOne("ecocraft.Models.CraftingTable", "CraftingTable")
@@ -1646,8 +1603,6 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.DataContext", b =>
                 {
                     b.Navigation("UserAutomationInputs");
-
-                    b.Navigation("UserAutomationTargets");
 
                     b.Navigation("UserCraftingTables");
 

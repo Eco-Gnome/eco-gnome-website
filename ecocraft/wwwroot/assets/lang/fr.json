@@ -28,6 +28,8 @@
             "Name": "Nom",
             "NameRequired": "Un nom est requis",
             "IsTag": "Est un tag",
+            "AssociatedTags": "Tags",
+            "AssociatedItems": "Items",
             "MinPrice": "Prix min",
             "DefaultPrice": "Prix par défaut",
             "MaxPrice": "Prix max",
@@ -353,10 +355,12 @@
         "ProductionChainEmpty": "Ajoutez au moins une recette a cette liste pour voir sa chaine de production.",
         "AutomationButton": "Planificateur",
         "AutomationTitle": "Planificateur d'automatisation",
-        "AutomationTargetRate": "Debit cible (par minute)",
-        "AutomationInputLimits": "Limites d'entree (/min)",
+        "AutomationTargetRate": "Débit cible",
+        "AutomationInputLimits": "Limites d'entrée",
         "AutomationPerHour": "Afficher en /heure",
-        "AutomationEmpty": "Ajoutez au moins une recette a cette liste pour planifier son automatisation."
+        "AutomationMax": "Max",
+        "AutomationMaxHint": "Maximiser ce débit selon les contraintes d'entrée (recettes + items + limites d'entrée)",
+        "AutomationEmpty": "Ajoutez au moins une recette à cette liste pour planifier son automatisation."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",
@@ -367,18 +371,15 @@
             "Yes": "Oui",
             "No": "Non"
         },
-        "BulkActions": {
-            "Title": "Actions groupées",
-            "TargetLabel": "Cible",
-            "TargetServers": "Serveurs",
-            "TargetUsers": "Joueurs",
-            "FiltersLabel": "Filtres",
-            "FilterNoServer": "Sans serveur",
-            "FilterNoPlayers": "Sans joueurs",
-            "FilterNoAdmin": "Sans admin",
-            "FilterNoData": "Sans data",
-            "FilterStaleData": "Data non mise à jour depuis (jours)",
-            "MatchCount": "{count} élément(s) concerné(s)",
+        "Chips": {
+            "NoServer": "Sans serveur",
+            "Empty": "Vide",
+            "NoPlayers": "Sans joueur",
+            "NoAdmin": "Sans admin",
+            "Stale": "Périmé"
+        },
+        "Bulk": {
+            "Affected": "{count} concerné(s)",
             "Delete": "Supprimer",
             "Confirm": "Vous allez supprimer {count} élément(s). Continuer ?",
             "Success": "{count} élément(s) supprimé(s).",
@@ -391,16 +392,6 @@
         "ConfirmUserDeletion": "Êtes-vous sûr de vouloir supprimer l'utilisateur {utilisateur} ?",
         "CreationDateCol": "Date de création",
         "DataCol": "Données",
-        "Dashboard": {
-            "Title": "Vue d'administration",
-            "Users": "Utilisateurs",
-            "Servers": "Serveurs",
-            "EmptyServers": "Serveurs vides",
-            "ServersWithoutPlayers": "Sans joueurs",
-            "LinkedServers": "Serveurs liés Eco",
-            "StaleImports": "Imports obsolètes",
-            "ModUploaders": "Uploaders de mods"
-        },
         "Filters": {
             "Users": {
                 "WithoutServer": "Sans serveur",
@@ -421,21 +412,9 @@
                 "ServerScoped": "Lié à un serveur"
             }
         },
-        "Health": {
-            "Title": "Santé des serveurs",
-            "NoIssues": "Aucun problème actif détecté.",
-            "OpenServer": "Ouvrir",
-            "GlobalScope": "Global",
-            "MultipleDefaultServers": "{server} est marqué comme serveur par défaut alors qu'un autre serveur par défaut existe.",
-            "ServerWithoutAdmin": "{server} n'a aucun administrateur serveur.",
-            "EmptyServer": "{server} n'a aucune donnée serveur importée.",
-            "NeverImported": "{server} n'a jamais importé de données serveur.",
-            "StaleImport": "Les données de {server} datent de plus de {days} jours.",
-            "UnlinkedEco": "{server} n'est pas lié à un id de serveur Eco.",
-            "RecentModUpload": "Upload récent d'icônes de mod pour {server}."
-        },
         "IdCol": "Id",
         "CopySecretId": "Copier l'id secret",
+        "CopyEcoServerId": "Copier l'id du serveur Eco",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Supprimer le serveur",
@@ -453,6 +432,7 @@
             "Title": "Détails du serveur",
             "Close": "Fermer",
             "Open": "Ouvrir les détails du serveur",
+            "OpenWithWarning": "Ouvrir les détails du serveur (avertissements présents)",
             "Default": "Serveur par défaut",
             "DataStatusLabel": "État des données",
             "EcoServerId": "Id du serveur Eco",
@@ -462,6 +442,12 @@
                 "NeverImported": "Jamais importé",
                 "Stale": "Obsolète",
                 "Fresh": "À jour"
+            },
+            "Warnings": {
+                "Title": "Avertissements",
+                "None": "Aucun problème actif détecté.",
+                "NoAdmin": "Ce serveur n'a aucun administrateur serveur.",
+                "Stale": "Les données du serveur datent de plus de {days} jours."
             }
         },
         "SnackbarCantEdit": "Vous ne pouvez pas vous modifier à partir de cette page.",

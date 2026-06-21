@@ -30,6 +30,36 @@
                     <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol"):</b> @GetAdminNames(Server)</MudText>
                 </MudStack>
             </MudItem>
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.Title")</MudText>
+                @{
+                    var hasNoAdmin = !Server.UserServers.Any(us => us.IsAdmin);
+                    var hasStale = IsStaleImport(Server);
+                }
+                @if (!hasNoAdmin && !hasStale)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true">
+                        @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.None")
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudStack Spacing="2">
+                        @if (hasNoAdmin)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true">
+                                @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.NoAdmin")
+                            </MudAlert>
+                        }
+                        @if (hasStale)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.Stale", StaleImportDays.ToString())
+                            </MudAlert>
+                        }
+                    </MudStack>
+                }
+            </MudItem>
         </MudGrid>
     </DialogContent>
     <DialogActions>

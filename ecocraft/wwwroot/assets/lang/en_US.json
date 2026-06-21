@@ -28,6 +28,8 @@
             "Name": "Name",
             "NameRequired": "A name is required",
             "IsTag": "Is a tag",
+            "AssociatedTags": "Tags",
+            "AssociatedItems": "Items",
             "MinPrice": "Min price",
             "DefaultPrice": "Default price",
             "MaxPrice": "Max price",
@@ -360,9 +362,11 @@
         "ProductionChainEmpty": "Add at least one recipe to this shopping list to see its production chain.",
         "AutomationButton": "Planner",
         "AutomationTitle": "Automation planner",
-        "AutomationTargetRate": "Target output (per minute)",
-        "AutomationInputLimits": "Input limits (/min)",
+        "AutomationTargetRate": "Target output",
+        "AutomationInputLimits": "Input limits",
         "AutomationPerHour": "Show per hour",
+        "AutomationMax": "Max",
+        "AutomationMaxHint": "Maximize this output given the input constraints (recipes + items + input limits)",
         "AutomationEmpty": "Add at least one recipe to this shopping list to plan its automation."
     },
     "Skill": "Skill",
@@ -374,18 +378,15 @@
             "Yes": "Yes",
             "No": "No"
         },
-        "BulkActions": {
-            "Title": "Bulk actions",
-            "TargetLabel": "Target",
-            "TargetServers": "Servers",
-            "TargetUsers": "Players",
-            "FiltersLabel": "Filters",
-            "FilterNoServer": "Without server",
-            "FilterNoPlayers": "Without players",
-            "FilterNoAdmin": "Without admin",
-            "FilterNoData": "Without data",
-            "FilterStaleData": "Data not updated for (days)",
-            "MatchCount": "{count} item(s) affected",
+        "Chips": {
+            "NoServer": "Without server",
+            "Empty": "Empty",
+            "NoPlayers": "Without players",
+            "NoAdmin": "Without admin",
+            "Stale": "Stale"
+        },
+        "Bulk": {
+            "Affected": "{count} affected",
             "Delete": "Delete",
             "Confirm": "You are about to delete {count} item(s). Continue?",
             "Success": "{count} item(s) deleted.",
@@ -398,16 +399,6 @@
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
-        "Dashboard": {
-            "Title": "Administration overview",
-            "Users": "Users",
-            "Servers": "Servers",
-            "EmptyServers": "Empty servers",
-            "ServersWithoutPlayers": "No players",
-            "LinkedServers": "Eco-linked servers",
-            "StaleImports": "Stale imports",
-            "ModUploaders": "Mod uploaders"
-        },
         "Filters": {
             "Users": {
                 "WithoutServer": "Without server",
@@ -428,21 +419,9 @@
                 "ServerScoped": "Server scoped"
             }
         },
-        "Health": {
-            "Title": "Server health",
-            "NoIssues": "No active issue detected.",
-            "OpenServer": "Open",
-            "GlobalScope": "Global",
-            "MultipleDefaultServers": "{server} is marked as default while another default server exists.",
-            "ServerWithoutAdmin": "{server} has no server admin.",
-            "EmptyServer": "{server} has no imported server data.",
-            "NeverImported": "{server} has never imported server data.",
-            "StaleImport": "{server} data is older than {days} days.",
-            "UnlinkedEco": "{server} is not linked to an Eco server id.",
-            "RecentModUpload": "Recent mod icon upload for {server}."
-        },
         "IdCol": "Id",
         "CopySecretId": "Copy Secret Id",
+        "CopyEcoServerId": "Copy Eco server id",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Delete server",
@@ -460,6 +439,7 @@
             "Title": "Server details",
             "Close": "Close",
             "Open": "Open server details",
+            "OpenWithWarning": "Open server details (warnings present)",
             "Default": "Default server",
             "DataStatusLabel": "Data status",
             "EcoServerId": "Eco server id",
@@ -469,6 +449,12 @@
                 "NeverImported": "Never imported",
                 "Stale": "Stale",
                 "Fresh": "Fresh"
+            },
+            "Warnings": {
+                "Title": "Warnings",
+                "None": "No active issue detected.",
+                "NoAdmin": "This server has no server admin.",
+                "Stale": "Server data is older than {days} days."
             }
         },
         "SnackbarCantEdit": "You can't edit yourself from this page.",

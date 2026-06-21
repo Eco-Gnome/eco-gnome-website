@@ -27,10 +27,12 @@ public class ServerDataEditorService(
             var sd = await serverDbService.GetServerWithData(server.Id, ctx);
             ctx.Attach(sd);
 
+            ItemOrTag item;
+
             if (IsNew(m.Id))
             {
                 var localizedName = NewLocalizedField(ctx, sd, m.Name);
-                var item = new ItemOrTag
+                item = new ItemOrTag
                 {
                     Name = m.Name,
                     LocalizedName = localizedName,
@@ -45,7 +47,7 @@ public class ServerDataEditorService(
             }
             else
             {
-                var item = sd.ItemOrTags.First(i => i.Id == m.Id);
+                item = sd.ItemOrTags.First(i => i.Id == m.Id);
                 item.Name = m.Name;
                 item.IsTag = m.IsTag;
                 item.MinPrice = m.MinPrice;
@@ -54,7 +56,48 @@ public class ServerDataEditorService(
                 SetLocalizedName(item.LocalizedName, m.Name);
                 ctx.ItemOrTags.Update(item);
             }
+
+            // Item<->Tag M:M (join table ItemTagAssoc). The dialog only fills the end matching IsTag:
+            // an item edits the tags it belongs to (AssociatedTags), a tag edits the items it groups
+            // (AssociatedItems). Clear the irrelevant end so a type flip leaves no stale link.
+            if (m.IsTag)
+            {
+                var items = sd.ItemOrTags.Where(i => m.AssociatedItemIds.Contains(i.Id)).ToList();
+                DiffManyToMany(item.AssociatedItems, items);
+                item.AssociatedTags.Clear();
+            }
+            else
+            {
+                var tags = sd.ItemOrTags.Where(i => m.AssociatedTagIds.Contains(i.Id)).ToList();
+                DiffManyToMany(item.AssociatedTags, tags);
+                item.AssociatedItems.Clear();
+            }
         });
+    }
+
+    // Reconcile a tracked M:M collection in place. Diffing (instead of reassigning) avoids join-row
+    // DELETEs hitting already-removed rows, which throw DbUpdateConcurrencyException. Same rationale
+    // as the CraftingTable.PluginModules diff above and RefreshTag in ImportDataService.Crud.cs.
+    private static void DiffManyToMany(List<ItemOrTag> current, List<ItemOrTag> target)
+    {
+        var newSet = new HashSet<ItemOrTag>(target);
+        var oldSet = new HashSet<ItemOrTag>(current);
+
+        foreach (var existing in current.ToList())
+        {
+            if (!newSet.Contains(existing))
+            {
+                current.Remove(existing);
+            }
+        }
+
+        foreach (var wanted in target)
+        {
+            if (!oldSet.Contains(wanted))
+            {
+                current.Add(wanted);
+            }
+        }
     }
 
     public async Task DeleteItemAsync(Server server, Guid itemId)

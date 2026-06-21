@@ -759,6 +759,8 @@ public class DataContext
     public List<UserSetting> UserSettings { get; set; } = [];
     public List<UserRecipe> UserRecipes { get; set; } = [];
     public List<UserMargin> UserMargins { get; set; } = [];
+    public List<UserAutomationInput> UserAutomationInputs { get; set; } = [];
+    public List<UserAutomationTarget> UserAutomationTargets { get; set; } = [];
 
     public List<UserRecipe> GetRootShoppingListRecipes()
     {
@@ -782,6 +784,39 @@ public class UserSetting
     public bool ApplyMarginBetweenSkills { get; set; } = true;
 
     public DataContext DataContext { get; set; }
+}
+
+// Limite d'entrée saisie dans le planificateur d'automatisation d'une shopping list : plafond de débit
+// (par minute) d'une matière première donnée. Persistée par shopping list (DataContext) et par item.
+// Une ligne n'existe que si une limite est effectivement saisie (sinon « pas de limite »).
+public class UserAutomationInput
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+
+    public decimal Cap { get; set; }
+
+    public DataContext DataContext { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
+}
+
+// Objectif de calcul saisi dans le planificateur d'automatisation d'une shopping list : débit cible
+// (par minute) d'un produit final, ou mode « max » (production maximale sous les contraintes d'entrée).
+// Persisté par shopping list (DataContext) et par item. Une ligne existe dès que l'utilisateur a touché
+// la cible (débit modifié ou « max » activé) ; sinon le débit par défaut est recalculé à l'ouverture.
+public class UserAutomationTarget
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+
+    // Débit cible /min (sert aussi de base quand IsMax : conserve un éventuel débit saisi avant « max »).
+    public decimal Rate { get; set; }
+    public bool IsMax { get; set; }
+
+    public DataContext DataContext { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
 }
 
 public class UserMargin

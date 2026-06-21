@@ -76,6 +76,8 @@ builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserServerDbService>();
 builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
+builder.Services.AddScoped<UserAutomationInputDbService>();
+builder.Services.AddScoped<UserAutomationTargetDbService>();
 builder.Services.AddScoped<DataContextDbService>();
 builder.Services.AddScoped<ModUploadHistoryDbService>();
 
