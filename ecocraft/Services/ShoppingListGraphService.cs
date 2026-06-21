@@ -221,9 +221,10 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
     {
         var topology = ComputeTopology(shoppingList);
 
-        // Trois familles de cibles : FIXES (débit saisi, prioritaires), NEUTRES (champ vide → débit par
-        // défaut de la recette, ajustables), « MAX » (maximisées sur la capacité restante). Les neutres et
-        // les bases « max » se déduisent de la liste des produits finaux.
+        // Trois familles de cibles, servies dans l'ordre FIXES → MAX → NEUTRES (cf. ResolveAutomation) :
+        // FIXES (débit saisi, prioritaires), « MAX » (maximisées sur la capacité restante après les fixes),
+        // NEUTRES (champ vide → débit par défaut de la recette, sur ce qu'il reste). Les neutres et les bases
+        // « max » se déduisent de la liste des produits finaux.
         var targets = GetAutomationTargets(shoppingList);
         var fixedSeed = targets
             .Where(t => fixedRates.ContainsKey(t.ItemId) && !maxItems.Contains(t.ItemId))
@@ -330,10 +331,14 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
 
     // Résout les débits effectifs par PRIORITÉ décroissante : objectifs FIXES d'abord (servis tels quels,
     // réduits proportionnellement seulement s'ils saturent à eux seuls une limite d'entrée), puis cibles
-    // NEUTRES au débit par défaut (ajustées sur ce qu'il reste), enfin cibles « MAX » poussées au plus haut
-    // que la capacité restante autorise. Le modèle étant linéaire, chaque palier = une propagation mise à
-    // l'échelle par un scalaire saturant la limite la plus contraignante du palier. Une limite qui rabote un
-    // palier fixe/neutre (échelle < 1) est un goulot. Une « max » sans limite contraignante reste illimitée.
+    // « MAX » poussées au plus haut que la capacité restante autorise, enfin cibles NEUTRES au débit par
+    // défaut (ajustées sur ce qu'il reste). Une cible explicitement maximisée est donc prioritaire sur une
+    // cible neutre (champ vide = simple défaut de recette) qui partage le même intrant : sans cette priorité,
+    // la neutre consommait toute la capacité partagée et la « max » tombait à 0 — voire EN DESSOUS du débit
+    // qu'elle aurait eu sans « max » (cas du partage du cuivre Fil/Plaque). Le modèle étant linéaire, chaque
+    // palier = une propagation mise à l'échelle par un scalaire saturant la limite la plus contraignante du
+    // palier. Une limite qui rabote un palier fixe/neutre (échelle < 1) est un goulot. Une « max » sans limite
+    // contraignante reste illimitée.
     private ResolvedAutomation ResolveAutomation(
         AutomationTopology topology,
         DataContext shoppingList,
@@ -392,10 +397,9 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         }
 
         ApplyDemandTier(fixedSeed);
-        ApplyDemandTier(neutralSeed);
 
-        // Palier « MAX » : facteur t le plus grand applicable aux bases sans dépasser une limite restante.
-        // Aucune limite contraignante → production illimitée (base conservée, signalée).
+        // Palier « MAX » AVANT le palier neutre : facteur t le plus grand applicable aux bases sans dépasser
+        // une limite restante. Aucune limite contraignante → production illimitée (base conservée, signalée).
         if (maxSeed.Count > 0)
         {
             var demand = DemandByInput(Propagate(topology, shoppingList, maxSeed));
@@ -432,6 +436,9 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 }
             }
         }
+
+        // Palier NEUTRE en dernier : récupère la capacité laissée par les paliers fixe et « max ».
+        ApplyDemandTier(neutralSeed);
 
         return result;
     }
@@ -510,7 +517,13 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
             demandChannel[key] = channel;
         }
 
-        // Amorçage : chaque produit final reçoit le débit cible fourni (ou le débit d'une table par défaut).
+        // Amorçage : la demande n'est portée QUE par les produits présents dans seedRates. Un produit
+        // absent du jeu courant ne retombe PAS sur son débit par défaut : pendant la résolution par paliers
+        // (cf. ResolveAutomation), chaque palier ne propage que ses propres cibles, et un produit d'un autre
+        // palier (ex. une cible « max » pendant le palier neutre) doit rester à 0 — sinon il consommerait la
+        // capacité d'entrée partagée et raboterait la résolution (une cible « max » tombait alors à 0 à cause
+        // d'un produit neutre concurrent sur le même intrant). La propagation finale reçoit SeedRates complet
+        // (tous les paliers résolus), donc aucun produit n'y manque.
         foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
         {
             foreach (var product in rootRecipe.Recipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated).OrderBy(e => e.Index))
@@ -521,9 +534,10 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                     continue;
                 }
 
-                var rate = seedRates.TryGetValue(product.ItemOrTag.Id, out var target)
-                    ? target
-                    : PerMinuteRate(producedPerCraft, rootRecipe.Recipe, shoppingList);
+                if (!seedRates.TryGetValue(product.ItemOrTag.Id, out var rate))
+                {
+                    continue;
+                }
                 AddDemand(rootRecipe.RecipeId, product.ItemOrTag, rate);
             }
         }
