@@ -239,6 +239,7 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         var resolution = ResolveAutomation(topology, shoppingList, fixedSeed, neutralSeed, maxSeed, inputCaps);
         var propagation = Propagate(topology, shoppingList, resolution.SeedRates);
         var bottleneckItems = resolution.BottleneckInputs;
+        var surplusPlan = ComputeSurplusPlan(topology, shoppingList, propagation, inputCaps);
 
         // 3. Matérialisation des nœuds et arêtes (mêmes ids/ordre que BuildGraphData). La mise à l'échelle
         // par priorité est déjà intégrée aux débits résolus : il n'y a plus de facteur global à appliquer.
@@ -252,7 +253,9 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         {
             var recipe = group.First().Recipe;
             var nodeId = "r:" + group.Key;
-            var tables = propagation.TablesByRecipe.GetValueOrDefault(group.Key);
+            var tables = surplusPlan.Tables.TryGetValue(group.Key, out var maxedTables)
+                ? maxedTables
+                : propagation.TablesByRecipe.GetValueOrDefault(group.Key);
 
             data.Nodes.Add(new ProductionGraphNode
             {
@@ -292,7 +295,11 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 Label = localizationService.GetTranslation(channel),
                 Bottleneck = isBottleneck,
             });
-            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, propagation.PurchaseRate.GetValueOrDefault(key)));
+            // Achat éventuellement majoré quand l'atelier source est poussé à saturer sa limite (cf. surplus).
+            var purchaseRate = surplusPlan.Purchase.TryGetValue(key, out var maxedPurchase)
+                ? maxedPurchase
+                : propagation.PurchaseRate.GetValueOrDefault(key);
+            data.Edges.Add(BuildRateEdge(leafId, craftingNodeIds[key.Consumer], channel, purchaseRate));
         }
 
         foreach (var rootRecipe in shoppingList.GetRootShoppingListRecipes())
@@ -316,6 +323,21 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
                 });
                 data.Edges.Add(BuildRateEdge(craftingNodeIds[rootRecipe.RecipeId], leafId, product.ItemOrTag, rate));
             }
+        }
+
+        // Surplus : ateliers source poussés à saturer leur limite d'entrée et qui produisent plus que ce que
+        // l'aval consomme → l'excédent part vers un nœud ressource dédié (cf. ComputeSurplusPlan).
+        foreach (var (recipeId, item, rate) in surplusPlan.Surplus)
+        {
+            var leafId = "s:" + leafIndex++;
+            data.Nodes.Add(new ProductionGraphNode
+            {
+                Id = leafId,
+                Type = "surplus",
+                Image = IconUrl(item.Name),
+                Label = localizationService.GetTranslation(item),
+            });
+            data.Edges.Add(BuildRateEdge(craftingNodeIds[recipeId], leafId, item, rate));
         }
 
         return new AutomationGraphResult
@@ -624,6 +646,150 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         return result;
     }
 
+    // Surplus de production : on pousse chaque atelier SOURCE (toutes ses entrées sont des achats de matière
+    // première, aucune entrée intermédiaire) à monter en charge jusqu'à SATURER une de ses limites d'entrée.
+    // Si, à ce régime, il produit plus que ce que l'aval consomme, l'excédent devient une sortie « surplus ».
+    // Règles voulues : on vise toujours la limite d'entrée (production maximale) ; une entrée sans limite ou
+    // déjà saturée ne déclenche aucun surplus. Les ateliers non-source (alimentés par un intermédiaire) ne
+    // sont pas montés en charge : ce serait répercuter la demande en amont (hors périmètre de cet affichage).
+    private SurplusPlan ComputeSurplusPlan(
+        AutomationTopology topology,
+        DataContext shoppingList,
+        PropagationResult propagation,
+        IReadOnlyDictionary<Guid, decimal> inputCaps)
+    {
+        var plan = new SurplusPlan();
+        if (inputCaps.Count == 0)
+        {
+            return plan;
+        }
+
+        // Capacité d'entrée encore disponible par item (limite − achats déjà planifiés par la propagation).
+        var leftover = inputCaps.ToDictionary(kv => kv.Key, kv => kv.Value);
+        foreach (var ((_, itemId), rate) in propagation.PurchaseRate)
+        {
+            if (leftover.ContainsKey(itemId))
+            {
+                leftover[itemId] = Math.Max(0m, leftover[itemId] - rate);
+            }
+        }
+
+        var rootRecipeIds = shoppingList.GetRootShoppingListRecipes().Select(r => r.RecipeId).ToHashSet();
+
+        foreach (var (recipeId, recipe) in topology.RecipesById)
+        {
+            // Atelier SOURCE (aucun producteur en amont) et NON final (ses sorties ne sont pas déjà des
+            // produits finaux). Les autres restent dimensionnés sur la demande.
+            if (rootRecipeIds.Contains(recipeId))
+            {
+                continue;
+            }
+            if (topology.ProducersOf.TryGetValue(recipeId, out var producers) && producers.Count > 0)
+            {
+                continue;
+            }
+
+            var tables = propagation.TablesByRecipe.GetValueOrDefault(recipeId);
+
+            // Tables cibles : on monte jusqu'à ce qu'une entrée PLAFONNÉE sature sa limite. Le débit par table
+            // de chaque entrée se lit sur la RECETTE (pas sur le régime courant), ce qui fonctionne même quand
+            // l'atelier ne tourne pas encore (aval à 0) : il peut alors produire un surplus pur en tapant sa
+            // limite. Entrée sans limite → ne contraint pas (ni ne pousse) ; entrée déjà saturée → pas de surplus.
+            var targetTables = decimal.MaxValue;
+            foreach (var ingredient in recipe.Elements.Where(e => e.IsIngredient()))
+            {
+                var itemId = ingredient.ItemOrTag.Id;
+                if (!inputCaps.ContainsKey(itemId))
+                {
+                    continue;
+                }
+                var perTable = PerMinuteRate(Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList)), recipe, shoppingList);
+                if (perTable <= Epsilon)
+                {
+                    continue;
+                }
+                // Capacité disponible pour CET atelier = restant global + ce qu'il consomme déjà (réallouable).
+                var available = leftover.GetValueOrDefault(itemId) + propagation.PurchaseRate.GetValueOrDefault((recipeId, itemId));
+                targetTables = Math.Min(targetTables, available / perTable);
+            }
+
+            if (targetTables == decimal.MaxValue || targetTables <= tables + Epsilon)
+            {
+                continue; // aucune entrée plafonnée à viser, ou déjà saturé → pas de surplus
+            }
+
+            var newTables = targetTables;
+            plan.Tables[recipeId] = newTables;
+
+            // Achats recalculés au régime maxé (débit/table × tables) + décompte de la capacité consommée.
+            foreach (var ingredient in recipe.Elements.Where(e => e.IsIngredient()))
+            {
+                var itemId = ingredient.ItemOrTag.Id;
+                var perTable = PerMinuteRate(Math.Abs(ingredient.Quantity.GetDynamicValue(shoppingList)), recipe, shoppingList);
+                if (perTable <= Epsilon)
+                {
+                    continue;
+                }
+                var scaled = perTable * newTables;
+                var current = propagation.PurchaseRate.GetValueOrDefault((recipeId, itemId));
+                plan.Purchase[(recipeId, itemId)] = scaled;
+                if (leftover.ContainsKey(itemId))
+                {
+                    leftover[itemId] = Math.Max(0m, leftover[itemId] - (scaled - current));
+                }
+            }
+
+            // Consommation aval par item produit (inchangée par la montée en charge), pour en déduire l'excédent.
+            var consumed = new Dictionary<Guid, decimal>();
+            foreach (var (key, rate) in propagation.EdgeRate.Where(kv => kv.Key.Producer == recipeId))
+            {
+                if (rate <= Epsilon)
+                {
+                    continue;
+                }
+                var channel = topology.EdgeChannel[key];
+                var suppliers = recipe.Elements
+                    .Where(e => e.IsProduct() && !e.DefaultIsReintegrated
+                        && ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, channel))
+                    .ToList();
+                var totalQ = suppliers.Sum(s => s.Quantity.GetDynamicValue(shoppingList));
+                if (totalQ <= Epsilon)
+                {
+                    continue;
+                }
+                foreach (var supplier in suppliers)
+                {
+                    consumed[supplier.ItemOrTag.Id] = consumed.GetValueOrDefault(supplier.ItemOrTag.Id)
+                        + rate * supplier.Quantity.GetDynamicValue(shoppingList) / totalQ;
+                }
+            }
+
+            // Production aux nouvelles tables, par item produit ; l'excédent (− consommation aval) part en surplus.
+            var produced = new Dictionary<Guid, (decimal Rate, ItemOrTag Item)>();
+            foreach (var product in recipe.Elements.Where(e => e.IsProduct() && !e.DefaultIsReintegrated))
+            {
+                var rate = newTables * PerMinuteRate(product.Quantity.GetDynamicValue(shoppingList), recipe, shoppingList);
+                if (rate <= Epsilon)
+                {
+                    continue;
+                }
+                var prev = produced.GetValueOrDefault(product.ItemOrTag.Id);
+                produced[product.ItemOrTag.Id] = (prev.Rate + rate, product.ItemOrTag);
+            }
+
+            foreach (var (itemId, entry) in produced)
+            {
+                var surplus = entry.Rate - consumed.GetValueOrDefault(itemId);
+                if (surplus > Epsilon)
+                {
+                    plan.Surplus.Add((recipeId, entry.Item, surplus));
+                }
+            }
+        }
+
+        return plan;
+    }
+
     // Demande totale par item d'entrée (somme des débits d'achat sur tous les consommateurs).
     private static Dictionary<Guid, decimal> DemandByInput(PropagationResult propagation)
     {
@@ -736,6 +902,15 @@ public class ShoppingListGraphService(LocalizationService localizationService, C
         public Dictionary<(Guid Consumer, Guid Item), ItemOrTag> PurchaseChannel { get; } = new();
         public Dictionary<Guid, HashSet<Guid>> ProducersOf { get; } = new();
         public Dictionary<Guid, int> InDegree { get; set; } = new();
+    }
+
+    // Plan de surplus : pour les ateliers source poussés à saturer leur limite d'entrée, le nombre de tables
+    // majoré, les achats majorés (entrée tapée à la limite) et les sorties excédentaires (recette, item, débit).
+    private sealed class SurplusPlan
+    {
+        public Dictionary<Guid, decimal> Tables { get; } = new();
+        public Dictionary<(Guid Consumer, Guid Item), decimal> Purchase { get; } = new();
+        public List<(Guid RecipeId, ItemOrTag Item, decimal Rate)> Surplus { get; } = new();
     }
 
     // Résultat d'une propagation : nombre de tables par recette, débits sur arêtes et débits d'achat.

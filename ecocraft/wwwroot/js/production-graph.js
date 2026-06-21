@@ -152,6 +152,17 @@ window.ecoProductionGraph = (function () {
         if (!inst) {
             return;
         }
+
+        // Topologie modifiée (ex. apparition/disparition de nœuds de surplus quand une limite d'entrée
+        // change) : la mise à jour en place suppose des nœuds/arêtes identiques, on relance un rendu complet.
+        const sameTopology = inst.data.nodes.length === data.nodes.length
+            && inst.data.edges.length === data.edges.length
+            && inst.data.nodes.every(function (n, i) { return data.nodes[i] && data.nodes[i].id === n.id; });
+        if (!sameTopology) {
+            render(containerId, data, mode || inst.mode);
+            return;
+        }
+
         inst.data = data;
         inst.mode = mode || inst.mode;
 
