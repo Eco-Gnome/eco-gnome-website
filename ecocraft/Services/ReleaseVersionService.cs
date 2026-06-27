@@ -13,6 +13,20 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.3.5",
+            "2026-06-27",
+            "Production Chain Graph, Server Data Editor & Shopping List Improvements",
+            """
+            - Production Chain Graph: New "Visualize Production Chain" view in the Shopping List that lays out your full crafting chain as an interactive diagram, making it easy to follow how items flow from raw resources to finished products.
+            - Server Data Editor: New admin page (/data-editor) to manually create and edit server data — Items & Tags, Recipes (simplified, without modifiers), Skills, Crafting Tables and Plugin Modules — with safe-delete guards and cascade handling.
+            - Recipe Output Lock (Admin): Server admins can lock a recipe's output share distribution and clamp item min/max prices, keeping calculated prices within agreed bounds.
+            - Shopping List – Recipe Preview: The "add recipe" dropdown and the recipe-choice tooltips now show a compact recipe summary (product icon plus ingredient icons with quantities), making it easy to tell apart variants of the same item.
+            - Shopping List – Quantity Meaning: The per-recipe quantity now means "number of primary-product items to produce". Craft counts round up to whole crafts, so you always produce at least the requested amount.
+            - Super Admin: Reworked the super-admin dashboard layout and filters, and added a per-server detail view.
+            - Fixes: data editor name-field handling, and various stability improvements.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.4",
             "2026-06-07",
             "Crafting Table Fuel Costs, Super Admin Improvements & Fixes",
