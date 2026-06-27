@@ -2,17 +2,28 @@
     "use strict";
 
     let dotnetRef = null;
+    let scheduled = false;
 
     function notifyLayoutChanged() {
-        if (dotnetRef) {
-            dotnetRef.invokeMethodAsync("OnLayoutChanged");
+        // Coalesce les événements scroll/resize en un seul appel par frame.
+        if (!dotnetRef || scheduled) {
+            return;
         }
+        scheduled = true;
+        requestAnimationFrame(function () {
+            scheduled = false;
+            if (dotnetRef) {
+                dotnetRef.invokeMethodAsync("OnLayoutChanged");
+            }
+        });
     }
 
     window.onboardingOverlay = {
         // Mesure la position/taille de chaque zone cible (par id) dans le repère du viewport.
         measure: function (ids) {
-            const viewport = { width: window.innerWidth, height: window.innerHeight, targets: [] };
+            const appBar = document.querySelector(".mud-appbar");
+            const headerBottom = appBar ? appBar.getBoundingClientRect().bottom : 0;
+            const viewport = { width: window.innerWidth, height: window.innerHeight, headerBottom: headerBottom, targets: [] };
 
             ids.forEach(function (id) {
                 // Cible par id d'élément, sinon par classe. Suffixe ":N" optionnel pour viser le

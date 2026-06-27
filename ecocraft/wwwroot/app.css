@@ -700,11 +700,21 @@
     pointer-events: none;
 }
 
+/* Groupe anneau+bulle d'une cible : monté en permanence, on fond l'opacité au scroll. */
+.onboarding-target {
+    transition: opacity 0.18s ease;
+}
+
+.onboarding-target--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .onboarding-spot-ring {
     position: absolute;
     border-radius: 10px;
     pointer-events: none;
-    transition: left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease;
+    transition: left 0.12s linear, top 0.12s linear, width 0.12s linear, height 0.12s linear;
 }
 
 .onboarding-spot-ring.reveal {
@@ -729,7 +739,7 @@
     color: var(--mud-palette-text-primary);
     pointer-events: auto;
     cursor: default;
-    animation: onboarding-fade-in 0.22s ease-out;
+    transition: left 0.12s linear, top 0.12s linear;
 }
 
 .onboarding-callout .mud-typography {
