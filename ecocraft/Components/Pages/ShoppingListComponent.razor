@@ -311,10 +311,7 @@
                                                      AnchorOrigin="Origin.BottomLeft"
                                                      TransformOrigin="Origin.TopLeft">
                                         <ItemTemplate>
-                                            <MudStack Row Class="pl-2" Spacing="2">
-                                                <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
-                                                <MudText>@LocalizationService.GetTranslation(context)</MudText>
-                                            </MudStack>
+                                            <RecipeSummary Recipe="context" Class="pl-2" />
                                         </ItemTemplate>
                                     </MudAutocomplete>
                                     <MudButton Variant="Variant.Outlined"
@@ -430,10 +427,15 @@
                                                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
                                                                             @foreach (var recipe in possibleRecipes)
                                                                             {
-                                                                                <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
-                                                                                    <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
-                                                                                        <EcoIcon Size="24" Item="recipe.CraftingTable"/>
-                                                                                    </MudLink>
+                                                                                <MudTooltip>
+                                                                                    <ChildContent>
+                                                                                        <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
+                                                                                            <EcoIcon Size="24" Item="recipe.CraftingTable"/>
+                                                                                        </MudLink>
+                                                                                    </ChildContent>
+                                                                                    <TooltipContent>
+                                                                                        <RecipeSummary Recipe="recipe" />
+                                                                                    </TooltipContent>
                                                                                 </MudTooltip>
                                                                             }
 
