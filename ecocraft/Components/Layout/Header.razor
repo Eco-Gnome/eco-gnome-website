@@ -2,6 +2,7 @@
 @using ecocraft.Components.Dialog
 @using ecocraft.Models
 @using ecocraft.Services
+@using Microsoft.AspNetCore.Components.Routing
 @inject ContextService ContextService
 @inject IDialogService DialogService
 @inject LocalStorageService LocalStorageService
@@ -40,7 +41,8 @@
             }
         </MudSelect>
         <MudTooltip Text="@LocalizationService.GetTranslation("Header.AddServer")">
-            <MudIconButton Icon="@MDIIcons.Outline.PlusCircle"
+            <MudIconButton id="onboarding-servers"
+                           Icon="@MDIIcons.Outline.PlusCircle"
                            Size="Size.Medium"
                            aria-label="@LocalizationService.GetTranslation("Header.CreateServer")"
                            Color="Color.Tertiary"
@@ -73,7 +75,20 @@
 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
     @if (!IsLoadingUserAndServer)
     {
-        <MudButton Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
+        @* Bouton d'aide d'onboarding — visible seulement sur le price calculator et dès qu'au moins un métier est ajouté. *@
+        @if (IsOnCalculator && SkillCount >= 1)
+        {
+            <MudTooltip Text="@LocalizationService.GetTranslation("Onboarding.Help.Tooltip")">
+                <MudIconButton Icon="@Icons.Material.Filled.HelpOutline"
+                               Color="Color.Tertiary"
+                               Size="Size.Large"
+                               Class="@(_helpPulse ? "onboarding-help-pulse" : "")"
+                               aria-label="@LocalizationService.GetTranslation("Onboarding.Help.Tooltip")"
+                               OnClick="OpenHelpOverlay"/>
+            </MudTooltip>
+        }
+
+        <MudButton id="onboarding-profile" Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
                    Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
 
         <MudSelect T="LanguageCode"
@@ -105,6 +120,15 @@
     private string? _lastAcknowledgeVersion;
     private string EnvironmentLabel;
 
+    private bool _helpPulse;
+    private const string HelpPulseSeenKey = "Onboarding.HelpPulseSeen";
+
+    // Nombre de métiers du DataContext courant (exposé par le PriceCalculator via ContextService).
+    private int SkillCount => ContextService.CurrentDataContext?.UserSkills.Count(us => us.Skill is not null) ?? 0;
+
+    // L'aide est centrée sur le price calculator : on ne montre le bouton que sur la route racine.
+    private bool IsOnCalculator => new Uri(NavManager.Uri).AbsolutePath == "/";
+
     protected override void OnInitialized()
     {
         var uri = NavManager.Uri;
@@ -123,6 +147,8 @@
         }
 
         ContextService.OnContextChanged += StateHasChanged;
+        ContextService.OnCurrentDataContextChanged += OnSkillContextChanged;
+        NavManager.LocationChanged += OnLocationChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -136,6 +162,32 @@
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
+        ContextService.OnCurrentDataContextChanged -= OnSkillContextChanged;
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    // Déclenche le pulse one-shot du bouton d'aide la première fois que le joueur a au moins un métier.
+    private async void OnSkillContextChanged()
+    {
+        if (SkillCount >= 1 && !_helpPulse)
+        {
+            var seen = await LocalStorageService.GetItem(HelpPulseSeenKey);
+            if (seen != "True")
+            {
+                _helpPulse = true;
+                await LocalStorageService.AddItem(HelpPulseSeenKey, "True");
+            }
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OpenHelpOverlay()
+    {
+        _helpPulse = false;
+        ContextService.RequestHelpOverlay();
     }
 
     private async Task OnSelectedLanguageChanged(IEnumerable<LanguageCode> languageCodes)

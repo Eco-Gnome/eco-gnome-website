@@ -1,4 +1,38 @@
 ﻿{
+    "Onboarding": {
+        "Steps": {
+            "Skills": {
+                "Title": "Ajoute tes métiers",
+                "Desc": "Commence ici : choisis les professions que tu pratiques."
+            },
+            "Buy": {
+                "Title": "Renseigne les prix d'achat",
+                "Desc": "Les ingrédients à acheter apparaîtront ici dès ton premier métier."
+            },
+            "Sell": {
+                "Title": "eco-gnome calcule tes prix de vente",
+                "Desc": "Choisis ensuite ta marge et tes variantes de recettes ici."
+            }
+        },
+        "Help": {
+            "Tooltip": "Comment fonctionne eco-gnome ?",
+            "Title": "Comment fonctionne eco-gnome",
+            "Close": "Fermer",
+            "DismissHint": "Appuie sur Échap ou clique n'importe où pour fermer",
+            "Item": {
+                "RecipeClick": "👆 Clique sur le nom d'une recette pour voir le détail du calcul et gérer la répartition des prix en cas de sorties multiples.",
+                "PrimaryStarSell": "👆 L'étoile bleue désigne la recette principale utilisée pour le prix de cet article quand plusieurs recettes le produisent.",
+                "PrimaryStarBuy": "👆 L'étoile bleue choisit le prix d'achat principal quand un ingrédient a plusieurs sources.",
+                "Reintegrate": "👆 Le « << » fait passer un article fabriqué vers la colonne d'achat, pour lui fixer un prix dans le reste des calculs.",
+                "CraftingTableClick": "👆 Clique sur le nom d'une table pour accéder à ses détails.",
+                "Fuels": "👆 Renseigne tes combustibles ici si tes recettes consomment de l'énergie.",
+                "Margins": "⚙️ Définis tes marges (pourcentage et arrondi) appliquées aux prix de vente.",
+                "Options": "⚙️ Configure le calculateur, surtout le coût pour 1000 calories.",
+                "Profile": "⚙️ Change ton pseudo (utile pour le support et l'analyse économique).",
+                "Servers": "⚙️ Rejoins un serveur existant ou crée le tien."
+            }
+        }
+    },
     "Cancel": "Annuler",
     "CopyToClipboard": "Copier dans le presse-papiers",
     "CraftingTable": "Table d'artisanat",

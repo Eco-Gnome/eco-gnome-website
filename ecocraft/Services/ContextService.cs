@@ -30,6 +30,18 @@ public class ContextService(
     public User? CurrentUser { get; private set; }
     public Server? CurrentServerData { get; set; }
 
+    // DataContext actuellement sélectionné dans le PriceCalculator. Exposé ici pour que le Header
+    // puisse gater le bouton d'aide d'onboarding sur le nombre de métiers. Signal dédié (distinct de
+    // OnContextChanged, qui déclenche un rechargement complet du PriceCalculator).
+    public DataContext? CurrentDataContext { get; set; }
+    public event Action? OnCurrentDataContextChanged;
+    public void NotifyCurrentDataContextChanged() => OnCurrentDataContextChanged?.Invoke();
+
+    // Demande d'ouverture de l'overlay d'aide d'onboarding (déclenchée depuis le Header, traitée par
+    // le PriceCalculator qui rend l'overlay au-dessus de la page).
+    public event Action? OnHelpOverlayRequested;
+    public void RequestHelpOverlay() => OnHelpOverlayRequested?.Invoke();
+
     public List<Server> AvailableServers
     {
         get { return _defaultServers.Concat(CurrentUser?.UserServers.Select(cus => cus.Server) ?? []).DistinctBy(s => s.Id).ToList(); }

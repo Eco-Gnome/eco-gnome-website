@@ -592,3 +592,184 @@
     min-width: 0;
 }
 
+/* ===== Onboarding / prise en main ===== */
+/* Composant 1 — une carte d'étape numérotée au-dessus de chaque colonne */
+.onboarding-step-wrapper {
+    position: relative;
+    margin-bottom: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.onboarding-step-card {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.05);
+    border: 1px solid rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.20);
+}
+
+/* L'étape active (colonne des métiers) est mise en avant. */
+.onboarding-step-card--active {
+    background: linear-gradient(135deg,
+        rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.16),
+        rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.04));
+    border-color: rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.45);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.onboarding-step-badge {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    background-color: var(--mud-palette-primary);
+}
+
+.onboarding-step-card:not(.onboarding-step-card--active) .onboarding-step-badge {
+    background-color: rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.55);
+}
+
+.onboarding-step-body {
+    min-width: 0;
+}
+
+.onboarding-step-title {
+    color: var(--mud-palette-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.25;
+}
+
+.onboarding-step-desc {
+    color: var(--mud-palette-text-primary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    opacity: 0.85;
+    margin-top: 3px;
+}
+
+.onboarding-arrow {
+    margin-top: 2px;
+    font-size: 2rem !important;
+    animation: onboarding-bob 1.3s ease-in-out infinite;
+}
+
+@keyframes onboarding-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(5px); }
+}
+
+/* Composant 2 — pulse one-shot du bouton d'aide (3 pulses puis stop) */
+.onboarding-help-pulse {
+    border-radius: 50%;
+    animation: onboarding-pulse 1s ease-out 3;
+}
+
+@keyframes onboarding-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.7); }
+    70%  { box-shadow: 0 0 0 12px rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0); }
+}
+
+/* Composant 2 — overlay « coach marks » au-dessus du site */
+.onboarding-overlay-root {
+    position: fixed;
+    inset: 0;
+    z-index: 2100;
+    outline: none;
+    cursor: pointer;
+    animation: onboarding-fade-in 0.18s ease-out;
+}
+
+.onboarding-overlay-svg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.onboarding-spot-ring {
+    position: absolute;
+    border-radius: 10px;
+    pointer-events: none;
+    transition: left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+
+.onboarding-spot-ring.reveal {
+    border: 2px solid var(--mud-palette-primary);
+    box-shadow: 0 0 0 2px rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.35),
+                0 0 18px rgba(var(--mud-palette-primary-rgb, 33, 150, 243), 0.55);
+}
+
+.onboarding-spot-ring.comfort {
+    border: 2px dashed rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.onboarding-callout {
+    position: absolute;
+    width: 240px;
+    box-sizing: border-box;
+    padding: 8px 11px;
+    border-radius: 8px;
+    background-color: var(--mud-palette-surface);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    color: var(--mud-palette-text-primary);
+    pointer-events: auto;
+    cursor: default;
+    animation: onboarding-fade-in 0.22s ease-out;
+}
+
+.onboarding-callout .mud-typography {
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.onboarding-callout--vcenter {
+    transform: translateY(-50%);
+}
+
+.onboarding-callout.reveal {
+    border-left: 3px solid var(--mud-palette-primary);
+}
+
+.onboarding-callout.comfort {
+    border-left: 3px solid rgba(255, 255, 255, 0.55);
+}
+
+.onboarding-overlay-close {
+    position: absolute !important;
+    top: 16px;
+    right: 16px;
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    pointer-events: auto;
+}
+
+.onboarding-overlay-hint {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+@keyframes onboarding-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+

@@ -1,4 +1,38 @@
 {
+    "Onboarding": {
+        "Steps": {
+            "Skills": {
+                "Title": "Add your skills",
+                "Desc": "Start here: pick the professions you craft with."
+            },
+            "Buy": {
+                "Title": "Enter ingredient buy prices",
+                "Desc": "Ingredients to buy will appear here once you add a skill."
+            },
+            "Sell": {
+                "Title": "eco-gnome calculates your sell prices",
+                "Desc": "Then pick your margin and recipe variants here."
+            }
+        },
+        "Help": {
+            "Tooltip": "How does eco-gnome work?",
+            "Title": "How eco-gnome works",
+            "Close": "Close",
+            "DismissHint": "Press Esc or click anywhere to close",
+            "Item": {
+                "RecipeClick": "👆 Click a recipe name to see the calculation breakdown and manage price distribution when a recipe has multiple outputs.",
+                "PrimaryStarSell": "👆 The blue star marks the main recipe used for this item's price when several recipes produce it.",
+                "PrimaryStarBuy": "👆 The blue star picks the main buy price when an ingredient has several sources.",
+                "Reintegrate": "👆 The « << » moves a crafted item over to the buy column, letting you fix its price for the rest of the calculation.",
+                "CraftingTableClick": "👆 Click a crafting table name to open its details.",
+                "Fuels": "👆 Set your fuels here if your recipes consume energy.",
+                "Margins": "⚙️ Set your margins (percentage and rounding) applied to sell prices.",
+                "Options": "⚙️ Configure the calculator — mainly the cost per 1000 calories.",
+                "Profile": "⚙️ Change your username (useful for support and the Economy Viewer).",
+                "Servers": "⚙️ Join an existing server or create your own."
+            }
+        }
+    },
     "Cancel": "Cancel",
     "CopyToClipboard": "Copy to clipboard",
     "CraftingTable": "Crafting Table",

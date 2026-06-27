@@ -3,7 +3,8 @@
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-<MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Fuels")} ({FuelItemCount})")"
+<MudExpansionPanel id="onboarding-fuels"
+                   Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Fuels")} ({FuelItemCount})")"
                    Expanded="Expanded"
                    ExpandedChanged="ExpandedChanged">
     <MudTable Items="@DisplayFuelItems"
