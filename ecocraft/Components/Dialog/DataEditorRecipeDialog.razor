@@ -1,0 +1,254 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@using ecocraft.Extensions
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<MudDialog Style="min-height: 500px;" Class="pb-4">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @LocalizationService.GetTranslation(Recipe is null ? "DataEditor.Recipe.CreateTitle" : "DataEditor.Recipe.EditTitle")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="_nameError"
+                                  DisplayNameError="_displayNameError" />
+
+            <MudGrid>
+                <MudItem sm="6">
+                    <MudSelect T="Guid?"
+                               @bind-Value="_model.SkillId"
+                               Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Skill")"
+                               Variant="Variant.Outlined"
+                               Clearable="true">
+                        @foreach (var skill in ContextService.CurrentServerData!.Skills.OrderBy(s => LocalizationService.GetTranslation(s)))
+                        {
+                            <MudSelectItem T="Guid?" Value="@skill.Id">@LocalizationService.GetTranslation(skill)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem sm="6">
+                    <MudNumericField T="long"
+                                     @bind-Value="_model.SkillLevel"
+                                     Label="@LocalizationService.GetTranslation("DataEditor.Recipe.SkillLevel")"
+                                     Variant="Variant.Outlined"
+                                     Min="0"/>
+                </MudItem>
+
+                <MudItem sm="6">
+                    <MudSelect T="Guid"
+                               @bind-Value="_model.CraftingTableId"
+                               Label="@LocalizationService.GetTranslation("DataEditor.Recipe.CraftingTable")"
+                               Variant="Variant.Outlined"
+                               Required="true"
+                               Error="@_craftingTableError"
+                               ErrorText="@LocalizationService.GetTranslation("DataEditor.Recipe.CraftingTableRequired")">
+                        @foreach (var craftingTable in ContextService.CurrentServerData!.CraftingTables.OrderBy(c => LocalizationService.GetTranslation(c)))
+                        {
+                            <MudSelectItem T="Guid" Value="@craftingTable.Id">@LocalizationService.GetTranslation(craftingTable)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem sm="3">
+                    <MudNumericField T="decimal"
+                                     @bind-Value="_model.Labor"
+                                     Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Labor")"
+                                     Variant="Variant.Outlined"
+                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                     Format="0.##"
+                                     Step="0.1m"
+                                     Min="0"/>
+                </MudItem>
+                <MudItem sm="3">
+                    <MudNumericField T="decimal"
+                                     @bind-Value="_model.CraftMinutes"
+                                     Label="@LocalizationService.GetTranslation("DataEditor.Recipe.CraftMinutes")"
+                                     Variant="Variant.Outlined"
+                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                     Format="0.##"
+                                     Step="0.1m"
+                                     Min="0"/>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid>
+                <MudItem sm="6">
+                    @RenderElementList(
+                        LocalizationService.GetTranslation("Ingredients"),
+                        _model.Ingredients,
+                        false)
+                </MudItem>
+                <MudItem sm="6">
+                    @RenderElementList(
+                        LocalizationService.GetTranslation("Products"),
+                        _model.Products,
+                        true)
+                </MudItem>
+            </MudGrid>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@LocalizationService.GetTranslation("DataEditor.Recipe.Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit">@LocalizationService.GetTranslation("DataEditor.Recipe.Validate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    // null => creation ; otherwise the existing recipe to pre-fill the edit model from.
+    [Parameter]
+    public Recipe? Recipe { get; set; }
+
+    private RecipeEditModel _model = new();
+    private bool _nameError;
+    private bool _displayNameError;
+    private bool _craftingTableError;
+
+    protected override void OnParametersSet()
+    {
+        if (Recipe is null)
+        {
+            _model = new RecipeEditModel
+            {
+                // Default to the first crafting table so the required field is satisfied on create.
+                CraftingTableId = ContextService.CurrentServerData!.CraftingTables.FirstOrDefault()?.Id ?? Guid.Empty,
+            };
+
+            return;
+        }
+
+        _model = new RecipeEditModel
+        {
+            Id = Recipe.Id,
+            Name = Recipe.Name,
+            LocalizedNameEnUs = LocalizationService.GetColumn(Recipe.LocalizedName, LanguageCode.en_US),
+            LocalizedNameCurrent = LocalizationService.GetColumn(Recipe.LocalizedName, LocalizationService.CurrentLanguageCode),
+            SkillId = Recipe.Skill?.Id,
+            SkillLevel = Recipe.SkillLevel,
+            CraftingTableId = Recipe.CraftingTable.Id,
+            Labor = Recipe.Labor.BaseValue,
+            CraftMinutes = Recipe.CraftMinutes.BaseValue,
+            Ingredients = Recipe.Elements
+                .Where(e => e.IsIngredient())
+                .OrderBy(e => e.Index)
+                .Select(e => new RecipeIngredientModel
+                {
+                    ItemOrTagId = e.ItemOrTag.Id,
+                    Quantity = Math.Abs(e.Quantity.BaseValue),
+                })
+                .ToList(),
+            Products = Recipe.Elements
+                .Where(e => e.IsProduct())
+                .OrderBy(e => e.Index)
+                .Select(e => new RecipeIngredientModel
+                {
+                    ItemOrTagId = e.ItemOrTag.Id,
+                    Quantity = Math.Abs(e.Quantity.BaseValue),
+                })
+                .ToList(),
+        };
+    }
+
+    private RenderFragment RenderElementList(string title, List<RecipeIngredientModel> lines, bool productsOnly) => __builder =>
+    {
+        <MudStack Spacing="1">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText Typo="Typo.subtitle1">@title</MudText>
+                <MudTooltip Text="@LocalizationService.GetTranslation("DataEditor.Recipe.AddLine")">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   Size="Size.Small"
+                                   Color="Color.Primary"
+                                   OnClick="@(() => AddLine(lines))"/>
+                </MudTooltip>
+            </MudStack>
+
+            @foreach (var line in lines)
+            {
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                    <MudSelect T="Guid"
+                               Value="@line.ItemOrTagId"
+                               ValueChanged="@(v => line.ItemOrTagId = v)"
+                               Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Item")"
+                               Variant="Variant.Outlined"
+                               Dense="true"
+                               Margin="Margin.Dense"
+                               Class="flex-grow-1">
+                        @foreach (var itemOrTag in GetSelectableItems(productsOnly))
+                        {
+                            <MudSelectItem T="Guid" Value="@itemOrTag.Id">@LocalizationService.GetTranslation(itemOrTag)</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudNumericField T="decimal"
+                                     Value="@line.Quantity"
+                                     ValueChanged="@(v => line.Quantity = v)"
+                                     Label="@LocalizationService.GetTranslation("DataEditor.Recipe.Quantity")"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                                     Min="0"
+                                     Style="width: 110px;"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Size="Size.Small"
+                                   Color="Color.Error"
+                                   OnClick="@(() => lines.Remove(line))"/>
+                </MudStack>
+            }
+        </MudStack>
+    };
+
+    // Products should normally not be tags; ingredients can be either.
+    private IEnumerable<ItemOrTag> GetSelectableItems(bool productsOnly)
+    {
+        var items = ContextService.CurrentServerData!.ItemOrTags.AsEnumerable();
+
+        if (productsOnly)
+        {
+            items = items.Where(i => !i.IsTag);
+        }
+
+        return items.OrderBy(i => LocalizationService.GetTranslation(i));
+    }
+
+    private void AddLine(List<RecipeIngredientModel> lines)
+    {
+        lines.Add(new RecipeIngredientModel
+        {
+            ItemOrTagId = Guid.Empty,
+            Quantity = 1,
+        });
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Submit()
+    {
+        _nameError = string.IsNullOrWhiteSpace(_model.Name);
+        _displayNameError = string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs);
+        _craftingTableError = _model.CraftingTableId == Guid.Empty;
+
+        if (_nameError || _displayNameError || _craftingTableError)
+        {
+            return;
+        }
+
+        // Drop incomplete lines (no item picked or non-positive quantity).
+        _model.Ingredients = _model.Ingredients
+            .Where(l => l.ItemOrTagId != Guid.Empty && l.Quantity > 0)
+            .ToList();
+        _model.Products = _model.Products
+            .Where(l => l.ItemOrTagId != Guid.Empty && l.Quantity > 0)
+            .ToList();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

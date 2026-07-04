@@ -66,6 +66,10 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			await UserPrices.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(UserMargin))
 			await UserMargins.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserAutomationInput))
+			await UserAutomationInputs.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserAutomationTarget))
+			await UserAutomationTargets.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(Skill))
 			await Skills.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(Talent))
@@ -119,6 +123,8 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 	public DbSet<UserRecipe> UserRecipes { get; set; }
 	public DbSet<Server> Servers { get; set; }
     public DbSet<UserMargin> UserMargins { get; set; }
+    public DbSet<UserAutomationInput> UserAutomationInputs { get; set; }
+    public DbSet<UserAutomationTarget> UserAutomationTargets { get; set; }
     public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -391,6 +397,38 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
             .HasForeignKey(us => us.DataContextId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // UserAutomationInput
+        modelBuilder.Entity<UserAutomationInput>()
+            .ToTable("UserAutomationInput");
+
+        modelBuilder.Entity<UserAutomationInput>()
+            .HasOne(uai => uai.DataContext)
+            .WithMany(dc => dc.UserAutomationInputs)
+            .HasForeignKey(uai => uai.DataContextId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserAutomationInput>()
+            .HasOne(uai => uai.ItemOrTag)
+            .WithMany()
+            .HasForeignKey(uai => uai.ItemOrTagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UserAutomationTarget
+        modelBuilder.Entity<UserAutomationTarget>()
+            .ToTable("UserAutomationTarget");
+
+        modelBuilder.Entity<UserAutomationTarget>()
+            .HasOne(uat => uat.DataContext)
+            .WithMany(dc => dc.UserAutomationTargets)
+            .HasForeignKey(uat => uat.DataContextId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserAutomationTarget>()
+            .HasOne(uat => uat.ItemOrTag)
+            .WithMany()
+            .HasForeignKey(uat => uat.ItemOrTagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // UserCraftingTable
         modelBuilder.Entity<UserCraftingTable>()
 			.ToTable("UserCraftingTable");
@@ -412,6 +450,13 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.WithMany()
 			.HasForeignKey(s => s.PluginModuleId)
 			.OnDelete(DeleteBehavior.Cascade)
+			.IsRequired(false);
+
+		modelBuilder.Entity<UserCraftingTable>()
+			.HasOne(uct => uct.FuelItem)
+			.WithMany(iot => iot.UserCraftingTables)
+			.HasForeignKey(uct => uct.FuelItemId)
+			.OnDelete(DeleteBehavior.SetNull)
 			.IsRequired(false);
 
 		modelBuilder.Entity<UserCraftingTable>()

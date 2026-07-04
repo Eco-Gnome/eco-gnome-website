@@ -1,0 +1,68 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+@* Shared name editor for every /data-editor entity dialog. Exposes the two distinct names an entity
+   carries: the displayed/localized name (en_US, plus the current UI language when it differs) and the
+   technical Name used as the import match key. Two-way bind each value from the dialog's edit model.
+   A single flex row with `flex: 1 1 0` children renders every field at exactly equal width. *@
+
+<div style="display: flex; gap: 16px; width: 100%; align-items: flex-start;">
+    <div style="flex: 1 1 0; min-width: 0;">
+        <MudTextField T="string"
+                      Value="@EnglishName"
+                      ValueChanged="@(async v => { EnglishName = v; await EnglishNameChanged.InvokeAsync(v); })"
+                      Label="@LocalizationService.GetTranslation("DataEditor.Name.English")"
+                      Variant="Variant.Outlined"
+                      Immediate="true"
+                      Required="true"
+                      Error="DisplayNameError"
+                      ErrorText="@LocalizationService.GetTranslation("DataEditor.Name.Required")" />
+    </div>
+
+    @if (_showCurrent)
+    {
+        <div style="flex: 1 1 0; min-width: 0;">
+            <MudTextField T="string"
+                          Value="@CurrentName"
+                          ValueChanged="@(async v => { CurrentName = v; await CurrentNameChanged.InvokeAsync(v); })"
+                          Label="@LocalizationService.GetTranslation("DataEditor.Name.Localized", LocalizationService.CurrentLanguageCode.ToString())"
+                          Variant="Variant.Outlined"
+                          Immediate="true" />
+        </div>
+    }
+
+    <div style="flex: 1 1 0; min-width: 0;">
+        <MudTooltip Text="@LocalizationService.GetTranslation("DataEditor.Name.TechnicalHelp")" RootStyle="width: 100%;">
+            <MudTextField T="string"
+                          Value="@TechnicalName"
+                          ValueChanged="@(async v => { TechnicalName = v; await TechnicalNameChanged.InvokeAsync(v); })"
+                          Label="@LocalizationService.GetTranslation("DataEditor.Name.Technical")"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@MDIIcons.Outline.Information"
+                          AdornmentColor="Color.Info"
+                          Variant="Variant.Outlined"
+                          Immediate="true"
+                          Required="true"
+                          Error="TechnicalNameError"
+                          ErrorText="@LocalizationService.GetTranslation("DataEditor.Name.Required")" />
+        </MudTooltip>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string TechnicalName { get; set; } = "";
+    [Parameter] public EventCallback<string> TechnicalNameChanged { get; set; }
+
+    [Parameter] public string EnglishName { get; set; } = "";
+    [Parameter] public EventCallback<string> EnglishNameChanged { get; set; }
+
+    [Parameter] public string CurrentName { get; set; } = "";
+    [Parameter] public EventCallback<string> CurrentNameChanged { get; set; }
+
+    [Parameter] public bool TechnicalNameError { get; set; }
+    [Parameter] public bool DisplayNameError { get; set; }
+
+    // Current UI language column is only shown when it differs from the always-present en_US one.
+    private bool _showCurrent => LocalizationService.CurrentLanguageCode != LanguageCode.en_US;
+}

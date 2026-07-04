@@ -127,6 +127,9 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("BaseValue")
                         .HasColumnType("numeric");
 
+                    b.Property<bool>("HasLayerModifier")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("ServerId")
                         .HasColumnType("uuid");
 
@@ -495,6 +498,9 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsShareLocked")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("LaborId")
                         .HasColumnType("uuid");
 
@@ -554,6 +560,9 @@ namespace ecocraft.Migrations
 
                     b.Property<string>("EcoServerId")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsAutomationPlannerEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsCalorieCostLocked")
                         .HasColumnType("boolean");
@@ -731,13 +740,64 @@ namespace ecocraft.Migrations
                     b.ToTable("User", (string)null);
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserAutomationInput", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Cap")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("DataContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemOrTagId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataContextId");
+
+                    b.HasIndex("ItemOrTagId");
+
+                    b.ToTable("UserAutomationInput", (string)null);
+                });
+
+            modelBuilder.Entity("ecocraft.Models.UserAutomationTarget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DataContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsMax")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ItemOrTagId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataContextId");
+
+                    b.HasIndex("ItemOrTagId");
+
+                    b.ToTable("UserAutomationTarget", (string)null);
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("CraftMinuteFee")
+                    b.Property<decimal>("AdditionalCraftMinuteFee")
                         .HasColumnType("numeric");
 
                     b.Property<Guid>("CraftingTableId")
@@ -746,14 +806,22 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("FuelItemId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("PluginModuleId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalCraftMinuteFee")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CraftingTableId");
 
                     b.HasIndex("DataContextId");
+
+                    b.HasIndex("FuelItemId");
 
                     b.HasIndex("PluginModuleId");
 
@@ -874,6 +942,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<decimal?>("CraftMinutesOverride")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");
@@ -1329,6 +1400,44 @@ namespace ecocraft.Migrations
                     b.Navigation("Talent");
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserAutomationInput", b =>
+                {
+                    b.HasOne("ecocraft.Models.DataContext", "DataContext")
+                        .WithMany("UserAutomationInputs")
+                        .HasForeignKey("DataContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                        .WithMany()
+                        .HasForeignKey("ItemOrTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DataContext");
+
+                    b.Navigation("ItemOrTag");
+                });
+
+            modelBuilder.Entity("ecocraft.Models.UserAutomationTarget", b =>
+                {
+                    b.HasOne("ecocraft.Models.DataContext", "DataContext")
+                        .WithMany("UserAutomationTargets")
+                        .HasForeignKey("DataContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                        .WithMany()
+                        .HasForeignKey("ItemOrTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DataContext");
+
+                    b.Navigation("ItemOrTag");
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserCraftingTable", b =>
                 {
                     b.HasOne("ecocraft.Models.CraftingTable", "CraftingTable")
@@ -1343,6 +1452,11 @@ namespace ecocraft.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ecocraft.Models.ItemOrTag", "FuelItem")
+                        .WithMany("UserCraftingTables")
+                        .HasForeignKey("FuelItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ecocraft.Models.PluginModule", "PluginModule")
                         .WithMany()
                         .HasForeignKey("PluginModuleId")
@@ -1351,6 +1465,8 @@ namespace ecocraft.Migrations
                     b.Navigation("CraftingTable");
 
                     b.Navigation("DataContext");
+
+                    b.Navigation("FuelItem");
 
                     b.Navigation("PluginModule");
                 });
@@ -1535,6 +1651,10 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.DataContext", b =>
                 {
+                    b.Navigation("UserAutomationInputs");
+
+                    b.Navigation("UserAutomationTargets");
+
                     b.Navigation("UserCraftingTables");
 
                     b.Navigation("UserElements");
@@ -1571,6 +1691,8 @@ namespace ecocraft.Migrations
             modelBuilder.Entity("ecocraft.Models.ItemOrTag", b =>
                 {
                     b.Navigation("Elements");
+
+                    b.Navigation("UserCraftingTables");
 
                     b.Navigation("UserPrices");
                 });

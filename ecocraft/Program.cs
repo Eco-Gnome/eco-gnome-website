@@ -76,6 +76,8 @@ builder.Services.AddScoped<UserSettingDbService>();
 builder.Services.AddScoped<UserServerDbService>();
 builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
+builder.Services.AddScoped<UserAutomationInputDbService>();
+builder.Services.AddScoped<UserAutomationTargetDbService>();
 builder.Services.AddScoped<DataContextDbService>();
 builder.Services.AddScoped<ModUploadHistoryDbService>();
 
@@ -84,9 +86,12 @@ builder.Services.AddScoped<ContextService>();
 builder.Services.AddScoped<ImportDataService>();
 builder.Services.AddScoped<PriceCalculatorService>();
 builder.Services.AddScoped<ServerDataService>();
+builder.Services.AddScoped<ServerDataEditorService>();
 builder.Services.AddScoped<UserServerDataService>();
+builder.Services.AddScoped<CraftingTableFuelCostService>();
 builder.Services.AddScoped<ShoppingListService>();
 builder.Services.AddScoped<ShoppingListDataService>();
+builder.Services.AddScoped<ShoppingListGraphService>();
 builder.Services.AddScoped<EconomyViewerService>();
 builder.Services.AddScoped<EconomyViewerDisplayService>();
 

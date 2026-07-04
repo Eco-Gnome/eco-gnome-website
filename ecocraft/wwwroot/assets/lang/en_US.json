@@ -1,7 +1,145 @@
 {
+    "Onboarding": {
+        "Steps": {
+            "Skills": {
+                "Title": "Add your skills",
+                "Desc": "Start here: pick the professions you craft with."
+            },
+            "Buy": {
+                "Title": "Enter ingredient buy prices",
+                "Desc": "Ingredients to buy will appear here once you add a skill."
+            },
+            "Sell": {
+                "Title": "eco-gnome calculates your sell prices",
+                "Desc": "Then pick your margin and recipe variants here."
+            }
+        },
+        "Help": {
+            "Tooltip": "How does eco-gnome work?",
+            "Title": "How eco-gnome works",
+            "Close": "Close",
+            "DismissHint": "Press Esc or click anywhere to close",
+            "Item": {
+                "RecipeClick": "👆 Click a recipe name to see the calculation breakdown and manage price distribution when a recipe has multiple outputs.",
+                "PrimaryStarSell": "👆 The blue star marks the main recipe used for this item's price when several recipes produce it.",
+                "PrimaryStarBuy": "👆 The blue star picks the main buy price when an ingredient has several sources.",
+                "Reintegrate": "👆 The « << » moves a crafted item over to the buy column, letting you fix its price for the rest of the calculation.",
+                "CraftingTableClick": "👆 Click a crafting table name to open its details.",
+                "Fuels": "👆 Set your fuels here if your recipes consume energy.",
+                "Margins": "⚙️ Set your margins (percentage and rounding) applied to sell prices.",
+                "Options": "⚙️ Configure the calculator — mainly the cost per 1000 calories.",
+                "Profile": "⚙️ Change your username (useful for support and the Economy Viewer).",
+                "Servers": "⚙️ Join an existing server or create your own."
+            }
+        }
+    },
     "Cancel": "Cancel",
     "CopyToClipboard": "Copy to clipboard",
     "CraftingTable": "Crafting Table",
+    "DataEditor": {
+        "ReimportWarning": "Data edited here is overwritten by any new server JSON file import (Administration page). Manual editing is meant for testing.",
+        "Actions": "Actions",
+        "Edit": "Edit",
+        "Delete": "Delete",
+        "Tab": {
+            "Items": "Items / Tags",
+            "Recipes": "Recipes",
+            "Skills": "Skills",
+            "Tables": "Crafting Tables",
+            "Modules": "Modules"
+        },
+        "Snackbar": {
+            "Saved": "Changes saved",
+            "Error": "An error occurred"
+        },
+        "Name": {
+            "Technical": "Technical name (import key)",
+            "TechnicalHelp": "Internal identifier used to match game data imports. Changing it on an imported entry unlinks it from the next import.",
+            "English": "Display name (English)",
+            "Localized": "Display name ({lang})",
+            "Required": "A name is required"
+        },
+        "Item": {
+            "CreateTitle": "Create an item / tag",
+            "EditTitle": "Edit the item / tag",
+            "Create": "Create an item / tag",
+            "Delete": "Delete the item / tag",
+            "DeleteConfirm": "Are you sure you want to delete \"{0}\"?",
+            "DeleteBlocked": "This item cannot be deleted: it is used in {0} recipe(s). Remove it from those recipes first.",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "IsTag": "Is a tag",
+            "AssociatedTags": "Tags",
+            "AssociatedItems": "Items",
+            "MinPrice": "Min price",
+            "DefaultPrice": "Default price",
+            "MaxPrice": "Max price",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "Recipe": {
+            "CreateTitle": "Create a recipe",
+            "EditTitle": "Edit the recipe",
+            "Create": "Create a recipe",
+            "Delete": "Delete the recipe",
+            "DeleteConfirm": "Are you sure you want to delete the recipe \"{0}\"?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "Skill": "Skill",
+            "SkillLevel": "Skill level",
+            "CraftingTable": "Crafting table",
+            "CraftingTableRequired": "A crafting table is required",
+            "Labor": "Labor",
+            "CraftMinutes": "Craft minutes",
+            "Item": "Item / Tag",
+            "Quantity": "Quantity",
+            "AddLine": "Add a line",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "Skill": {
+            "CreateTitle": "Create a skill",
+            "EditTitle": "Edit the skill",
+            "Create": "Create a skill",
+            "Delete": "Delete the skill",
+            "DeleteConfirm": "Are you sure you want to delete the skill \"{0}\"?",
+            "DeleteConfirmCascade": "Deleting the skill \"{0}\" will also delete {1} recipe(s) using it. Continue?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "Profession": "Profession",
+            "MaxLevel": "Max level",
+            "LaborReducePercent": "Labor reduction per level",
+            "LaborReducePercentHelp": "Comma-separated values, one per level (e.g. 1, 0.9, 0.8).",
+            "LaborReducePercentInvalid": "Invalid list: only numbers separated by commas are allowed.",
+            "Cancel": "Cancel",
+            "Validate": "Validate"
+        },
+        "CraftingTable": {
+            "CreateTitle": "Create a crafting table",
+            "EditTitle": "Edit the crafting table",
+            "Create": "Create a crafting table",
+            "Delete": "Delete the crafting table",
+            "DeleteConfirm": "Are you sure you want to delete the crafting table \"{0}\"?",
+            "DeleteConfirmCascade": "Deleting the crafting table \"{0}\" will also delete {1} recipe(s) using it. Continue?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "PluginModules": "Modules",
+            "NoPluginModule": "No module"
+        },
+        "PluginModule": {
+            "CreateTitle": "Create a module",
+            "EditTitle": "Edit the module",
+            "Create": "Create a module",
+            "Delete": "Delete the module",
+            "DeleteConfirm": "Are you sure you want to delete the module \"{0}\"?",
+            "Name": "Name",
+            "NameRequired": "A name is required",
+            "PluginType": "Type",
+            "Percent": "Percent",
+            "Skill": "Skill",
+            "SkillPercent": "Skill percent"
+        }
+    },
     "DevVersion": "YOU ARE ON A DEVELOPMENT VERSION OF ECO GNOME ",
     "GraphView": {
         "ResetButton": "Reset Graph",
@@ -35,7 +173,10 @@
         "ServerPrices": "Server prices",
         "MinPrice": "Minimum",
         "DefaultPrice": "Default",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Energy",
+        "EnergyConsumption": "Energy consumption",
+        "EnergyGeneration": "Energy generation"
     },
     "JoinCode": "Join code",
     "Language": "Language",
@@ -50,6 +191,7 @@
     "Margins": "Margins",
     "NavMenu": {
         "NavAdmin": "Server Management",
+        "NavDataEditor": "Data Editor",
         "NavCalculator": "Price Calculator",
         "ShoppingList": "Shopping List",
         "EconomyViewer": "Economy Viewer",
@@ -71,6 +213,8 @@
         "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "CraftTimeLayer": "This recipe's craft time depends on a world layer (deposit) and cannot be computed automatically. Enter the time observed in-game, in seconds.",
+        "Fuel": "Fuel",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
         "Labor": "Labor",
@@ -88,7 +232,14 @@
             "EquilibrateTooltip": "Split by quantity between products.",
             "FirstOnlyTooltip": "Grant 100% to first product and zero to the rest. Choose this if you consider other products to be garbage.",
             "HonestTooltip": "Grant 80% to first product and split the rest equally.",
-            "UnlockTooltip": "Disables automatic balancing, allowing manual editing of all values, including going above or below a total of 100%."
+            "UnlockTooltip": "Disables automatic balancing, allowing manual editing of all values, including going above or below a total of 100%.",
+            "AdminLockSwitch": "Lock and apply to all players",
+            "AdminLockTooltip": "Lock this recipe's distribution for the whole server. While locked, the current shares and reintegration are imposed on every player and overwrite their own settings.",
+            "AdminLockedTooltip": "This distribution is locked by the server administrator and cannot be changed."
+        },
+        "Price": {
+            "ClampedMax": "Price capped at the server maximum ({max} $).",
+            "ClampedMin": "Price raised to the server minimum ({min} $)."
         },
         "Static": "static",
         "TotalCost": "Total cost:",
@@ -175,6 +326,13 @@
             "Default": "Default price",
             "Default.Tooltip": "Clear default prices"
         },
+        "Recipes": {
+            "Title": "Multi-output recipes",
+            "Locked": "Locked",
+            "LockedTooltip": "The output distribution of this recipe is locked for all players.",
+            "Configure": "Configure the output distribution (share / reintegration)",
+            "OpenError": "Unable to open the recipe configuration"
+        },
         "Members": {
             "DemoteAdmin": "Demote Admin",
             "KickUser": "Kick user",
@@ -224,6 +382,7 @@
         "Settings": "Settings",
         "ItemsToBuy": "Items to buy:",
         "ItemsProduced": "Items produced:",
+        "QuantityToProduceTooltip": "Number of items to produce (rounded up to whole crafts, so a bit more may be produced)",
         "AddShoppingList": "Add shopping list",
         "NewShoppingList": "Shopping list #",
         "NameLabel": "Shopping list name",
@@ -237,13 +396,46 @@
         "GuidedAutoExpandLabel": "Guided auto-expand to raw resources",
         "GuidedAutoExpandTooltip": "When enabled, clicking an ingredient starts guided expansion to non-craftable resources. If multiple recipes are possible, the run pauses for your choice and resumes automatically.",
         "StopGuidedAutoExpandLabel": "Stop auto-expand",
-        "StopGuidedAutoExpandTooltip": "Stop the current guided auto-expand run and keep all recipes already added."
+        "StopGuidedAutoExpandTooltip": "Stop the current guided auto-expand run and keep all recipes already added.",
+        "VisualizeProductionChain": "Visualize",
+        "ProductionChainTitle": "Production chain",
+        "ProductionChainPerMinute": "Per minute",
+        "ProductionChainRecenter": "Fit to view",
+        "ProductionChainEmpty": "Add at least one recipe to this shopping list to see its production chain.",
+        "AutomationButton": "Planner",
+        "AutomationTitle": "Automation planner",
+        "AutomationTargetRate": "Target output",
+        "AutomationInputLimits": "Input limits",
+        "AutomationPerHour": "Show per hour",
+        "AutomationMax": "Max",
+        "AutomationMaxHint": "Maximize this output given the input constraints (recipes + items + input limits)",
+        "AutomationRulesHint": "A value = priority target, served first. MAX = maximum output with the remaining capacity (takes priority over empty fields). Empty = automatic: follows the recipes on what's left, reduced if a limit is reached.",
+        "AutomationCappedHint": "Target {0} unreachable (limit: {2}). Actual output: {1}.",
+        "AutomationEmpty": "Add at least one recipe to this shopping list to plan its automation."
     },
     "Skill": "Skill",
     "NoSkill": "No Skill",
     "SuperAdmin": {
         "ModUpload": "Upload mod file",
         "ActionCol": "Action",
+        "Boolean": {
+            "Yes": "Yes",
+            "No": "No"
+        },
+        "Chips": {
+            "NoServer": "Without server",
+            "Empty": "Empty",
+            "NoPlayers": "Without players",
+            "NoAdmin": "Without admin",
+            "Stale": "Stale"
+        },
+        "Bulk": {
+            "Affected": "{count} affected",
+            "Delete": "Delete",
+            "Confirm": "You are about to delete {count} item(s). Continue?",
+            "Success": "{count} item(s) deleted.",
+            "Error": "Bulk deletion failed"
+        },
         "ConfirmServerDeletion": "Are you sure you want to delete server {server}?",
         "ConfirmSuperAdminPromote": "Are you sure you want to promote this user to Super Admin?",
         "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",
@@ -251,12 +443,35 @@
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
+        "Filters": {
+            "Users": {
+                "WithoutServer": "Without server",
+                "AdminSomewhere": "Admin somewhere"
+            },
+            "Servers": {
+                "Empty": "Empty",
+                "WithData": "With data",
+                "Default": "Default",
+                "LinkedEco": "Eco linked",
+                "UnlinkedEco": "Eco unlinked",
+                "NeverImported": "Never imported",
+                "StaleImport": "Stale import",
+                "WithoutAdmin": "Without admin"
+            },
+            "Mods": {
+                "Global": "Global",
+                "ServerScoped": "Server scoped"
+            }
+        },
         "IdCol": "Id",
         "CopySecretId": "Copy Secret Id",
+        "CopyEcoServerId": "Copy Eco server id",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Delete server",
             "DemoteAdmin": "Remove yourself from admins",
+            "EnableAutomationPlanner": "Enable automation planner",
+            "DisableAutomationPlanner": "Disable automation planner",
             "PlayersCol": "Players",
             "PromoteAdmin": "Add yourself as admin",
             "ServerNameCol": "Name",
@@ -264,6 +479,30 @@
             "Title": "Servers",
             "UnsetDefault": "Remove from default servers"
         },
+        "ServerDetail": {
+            "Title": "Server details",
+            "Close": "Close",
+            "Open": "Open server details",
+            "OpenWithWarning": "Open server details (warnings present)",
+            "Default": "Default server",
+            "DataStatusLabel": "Data status",
+            "EcoServerId": "Eco server id",
+            "LastDataUpload": "Last data upload",
+            "DataStatus": {
+                "Empty": "Empty",
+                "NeverImported": "Never imported",
+                "Stale": "Stale",
+                "Fresh": "Fresh"
+            },
+            "Warnings": {
+                "Title": "Warnings",
+                "None": "No active issue detected.",
+                "NoAdmin": "This server has no server admin.",
+                "Stale": "Server data is older than {days} days."
+            }
+        },
+        "SnackbarCantEdit": "You can't edit yourself from this page.",
+        "SnackbarCopy": "Id copied to clipboard",
         "SnackBar": {
             "CantDeleteYourself": "You can't delete yourself from this page.",
             "SnackbarCantEdit": "You can't edit yourself from this page.",
@@ -286,6 +525,8 @@
             "DemoteUser": "Demote user from Super Admin",
             "HowMuchIsAdmin": "Number of servers the user is admin on",
             "JoinedServers": "Joined Servers",
+            "JoinedServersCol": "Joined",
+            "AdminServersCol": "Admin",
             "PromoteUser": "Promote user to Super Admin",
             "PseudoCol": "Pseudo",
             "SuperAdminCol": "Super Admin",
@@ -316,6 +557,7 @@
         "UserSettings": "User settings"
     },
     "Versions": "Versions",
+    "Validate": "Validate",
     "DataContext": {
         "DefaultContext": "Default Context",
         "NewContext": "New Context",
@@ -347,9 +589,26 @@
         "AddSkill": "Add skill",
         "CraftingTables": "Crafting tables",
         "AddCraftingTable": "Add crafting table",
+        "CraftingTableAdvancedConfiguration": "Advanced configuration",
         "CostMin": {
             "Tooltip": "The cost related to this crafting table for each minute of craft. Represent the fuel consumption, parts replacement, eventual crafting fees...",
             "CostMin": "Cost/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Additional cost/min",
+            "AdditionalTooltip": "Additional cost per crafting minute. Use it to include costs such as table rental, taxes or laws, and Parts replacement.",
+            "Detail": "Additional: {value} | Fuel: {value} | Total: {value}",
+            "Total": "Total cost/min",
+            "TotalTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}. Configure the details in the crafting table detail window."
+        },
+        "Fuel": {
+            "Fuel": "Fuel",
+            "NoFuel": "No fuel",
+            "CostPerMinute": "Cost/min",
+            "Energy": "Energy",
+            "CostPer1000Energy": "Cost / 1000 energy",
+            "SelectFuel": "Select fuel",
+            "CalculatedCostPerMinuteTooltip": "Calculated from table consumption, fuel energy and fuel price."
         },
         "NoModule": "No module",
         "MarginPercent": {
@@ -416,7 +675,9 @@
             "BoundedSnackbar": "Value adjusted to fit server boundaries."
         },
         "ItemsToBuy": "Items to buy",
+        "Fuels": "Fuels",
         "IngredientSearch": "Ingredient Items Or Tags",
+        "FuelSearch": "Fuel Items Or Tags",
         "BuyPrice": "Buy price",
         "PriceTooltip": {
             "isTagEmptyPrice": "This value will be the minimum price of it's related items (if all values are defined !), unless you choose a specific one by clicking a star.",
@@ -516,6 +777,7 @@
             "OnlyCommon": "Only common elements",
             "ContextSummaries": "Compared contexts",
             "CraftingTablesComparison": "Crafting tables comparison",
+            "CraftMinuteFeeTooltip": "Total craft minute fee. Additional: {value}, fuel: {value}, total: {value}.",
             "NoCraftingTableData": "No crafting table configured for this context.",
             "PriceOptionsComparison": "Compared Price Calculator options",
             "ComparisonTable": "Comparison",
@@ -531,13 +793,15 @@
             },
             "Values": {
                 "Enabled": "Enabled",
-                "Disabled": "Disabled"
+                "Disabled": "Disabled",
+                "NoFuel": "No fuel"
             },
             "Columns": {
                 "Role": "Role",
                 "Player": "Player",
                 "Option": "Option",
                 "Context": "Context",
+                "Fuel": "Fuel",
                 "ConfiguredItems": "Configured items",
                 "Recipes": "Recipes",
                 "Skills": "Skills",

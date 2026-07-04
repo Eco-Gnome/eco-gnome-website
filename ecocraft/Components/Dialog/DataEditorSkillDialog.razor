@@ -1,0 +1,145 @@
+@using System.Globalization
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @(Skill is null
+                ? LocalizationService.GetTranslation("DataEditor.Skill.CreateTitle")
+                : LocalizationService.GetTranslation("DataEditor.Skill.EditTitle"))
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
+
+            <MudTextField @bind-Value="_model.Profession"
+                          Variant="Variant.Outlined"
+                          Label="@LocalizationService.GetTranslation("DataEditor.Skill.Profession")"/>
+
+            <MudNumericField @bind-Value="MaxLevel"
+                             Variant="Variant.Outlined"
+                             Min="0"
+                             Label="@LocalizationService.GetTranslation("DataEditor.Skill.MaxLevel")"/>
+
+            <MudTextField @bind-Value="_laborReduceCsv"
+                          Variant="Variant.Outlined"
+                          Label="@LocalizationService.GetTranslation("DataEditor.Skill.LaborReducePercent")"
+                          HelperText="@LocalizationService.GetTranslation("DataEditor.Skill.LaborReducePercentHelp")"
+                          Error="@(!IsCsvValid)"
+                          ErrorText="@LocalizationService.GetTranslation("DataEditor.Skill.LaborReducePercentInvalid")"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@LocalizationService.GetTranslation("DataEditor.Skill.Cancel")</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(!IsValid)"
+                   OnClick="Submit">
+            @LocalizationService.GetTranslation("DataEditor.Skill.Validate")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public Skill? Skill { get; set; }
+
+    private SkillEditModel _model = new();
+    private string _laborReduceCsv = "";
+
+    private int MaxLevel
+    {
+        get => _model.MaxLevel;
+        set => _model.MaxLevel = value;
+    }
+
+    protected override void OnInitialized()
+    {
+        if (Skill is not null)
+        {
+            _model = new SkillEditModel
+            {
+                Id = Skill.Id,
+                Name = Skill.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(Skill.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(Skill.LocalizedName, LocalizationService.CurrentLanguageCode),
+                Profession = Skill.Profession,
+                MaxLevel = Skill.MaxLevel,
+                LaborReducePercent = Skill.LaborReducePercent ?? [],
+            };
+            _laborReduceCsv = string.Join(", ",
+                _model.LaborReducePercent.Select(v => v.ToString(CultureInfo.InvariantCulture)));
+        }
+    }
+
+    private bool IsCsvValid => TryParseCsv(out _);
+
+    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name)
+                            && !string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs)
+                            && IsCsvValid;
+
+    private bool TryParseCsv(out decimal[] values)
+    {
+        var parts = (_laborReduceCsv ?? "")
+            .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        var result = new List<decimal>();
+        foreach (var part in parts)
+        {
+            if (!decimal.TryParse(part, NumberStyles.Any, CultureInfo.InvariantCulture, out var v))
+            {
+                values = [];
+                return false;
+            }
+
+            result.Add(v);
+        }
+
+        values = result.ToArray();
+        return true;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        if (!IsValid)
+        {
+            return;
+        }
+
+        TryParseCsv(out var parsed);
+
+        // Resize the labor-reduce array to MaxLevel + 1: pad missing entries with the last known
+        // value (or 1 if empty), truncate any extra entries.
+        var size = Math.Max(0, _model.MaxLevel) + 1;
+        var resized = new decimal[size];
+        for (var i = 0; i < size; i++)
+        {
+            if (i < parsed.Length)
+            {
+                resized[i] = parsed[i];
+            }
+            else
+            {
+                resized[i] = parsed.Length > 0 ? parsed[^1] : 1m;
+            }
+        }
+
+        _model.LaborReducePercent = resized;
+        _model.Name = _model.Name.Trim();
+        _model.Profession = string.IsNullOrWhiteSpace(_model.Profession) ? null : _model.Profession!.Trim();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

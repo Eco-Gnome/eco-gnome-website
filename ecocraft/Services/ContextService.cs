@@ -30,6 +30,18 @@ public class ContextService(
     public User? CurrentUser { get; private set; }
     public Server? CurrentServerData { get; set; }
 
+    // DataContext actuellement sélectionné dans le PriceCalculator. Exposé ici pour que le Header
+    // puisse gater le bouton d'aide d'onboarding sur le nombre de métiers. Signal dédié (distinct de
+    // OnContextChanged, qui déclenche un rechargement complet du PriceCalculator).
+    public DataContext? CurrentDataContext { get; set; }
+    public event Action? OnCurrentDataContextChanged;
+    public void NotifyCurrentDataContextChanged() => OnCurrentDataContextChanged?.Invoke();
+
+    // Demande d'ouverture de l'overlay d'aide d'onboarding (déclenchée depuis le Header, traitée par
+    // le PriceCalculator qui rend l'overlay au-dessus de la page).
+    public event Action? OnHelpOverlayRequested;
+    public void RequestHelpOverlay() => OnHelpOverlayRequested?.Invoke();
+
     public List<Server> AvailableServers
     {
         get { return _defaultServers.Concat(CurrentUser?.UserServers.Select(cus => cus.Server) ?? []).DistinctBy(s => s.Id).ToList(); }
@@ -70,6 +82,7 @@ public class ContextService(
             server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
+            server.IsAutomationPlannerEnabled = serverWithUsers.IsAutomationPlannerEnabled;
         }
 
         // Force pages to reload server-scoped data instead of reusing previous server cache.
@@ -333,7 +346,9 @@ public class ContextService(
                 DataContext = newCtx,
                 CraftingTable = uct.CraftingTable,
                 PluginModule = uct.PluginModule,
-                CraftMinuteFee = uct.CraftMinuteFee,
+                FuelItem = uct.FuelItem,
+                AdditionalCraftMinuteFee = uct.AdditionalCraftMinuteFee,
+                TotalCraftMinuteFee = uct.TotalCraftMinuteFee,
                 SkilledPluginModules = uct.SkilledPluginModules.ToList(),
             };
         }
@@ -373,6 +388,7 @@ public class ContextService(
                 Recipe = ur.Recipe,
                 RoundFactor = ur.RoundFactor,
                 LockShare = ur.LockShare,
+                CraftMinutesOverride = ur.CraftMinutesOverride,
             };
         }
 
@@ -629,6 +645,42 @@ public class ContextService(
         OnContextChanged?.Invoke();
     }
 
+    public async Task DeleteServersAsSuperAdmin(IReadOnlyCollection<Guid> serverIds)
+    {
+        if (serverIds.Count == 0)
+        {
+            return;
+        }
+
+        var ids = serverIds.ToArray();
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        {
+            await ClearTalentLocalizedDescriptionsForServers(context, ids);
+            await context.Servers.Where(s => ids.Contains(s.Id)).ExecuteDeleteAsync();
+        });
+
+        foreach (var id in ids)
+        {
+            await HandleDeletedServer(id);
+        }
+    }
+
+    public async Task DeleteUsersAsSuperAdmin(IReadOnlyCollection<Guid> userIds)
+    {
+        if (userIds.Count == 0)
+        {
+            return;
+        }
+
+        var ids = userIds.ToArray();
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, async context =>
+        {
+            await context.Users.Where(u => ids.Contains(u.Id)).ExecuteDeleteAsync();
+        });
+    }
+
     private static async Task ClearTalentLocalizedDescriptionsForServer(EcoCraftDbContext context, Guid serverId)
     {
         await context.Database.ExecuteSqlInterpolatedAsync($@"
@@ -637,6 +689,17 @@ public class ContextService(
             FROM ""Skill"" AS s
             WHERE t.""SkillId"" = s.""Id""
               AND s.""ServerId"" = {serverId}
+              AND t.""LocalizedDescriptionId"" IS NOT NULL;");
+    }
+
+    private static async Task ClearTalentLocalizedDescriptionsForServers(EcoCraftDbContext context, Guid[] serverIds)
+    {
+        await context.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Talent"" AS t
+            SET ""LocalizedDescriptionId"" = NULL
+            FROM ""Skill"" AS s
+            WHERE t.""SkillId"" = s.""Id""
+              AND s.""ServerId"" = ANY({serverIds})
               AND t.""LocalizedDescriptionId"" IS NOT NULL;");
     }
 }

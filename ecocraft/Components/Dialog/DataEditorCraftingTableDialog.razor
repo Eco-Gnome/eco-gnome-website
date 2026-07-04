@@ -1,0 +1,103 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @LocalizationService.GetTranslation(CraftingTable is null
+                ? "DataEditor.CraftingTable.CreateTitle"
+                : "DataEditor.CraftingTable.EditTitle")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
+
+            <MudSelect T="Guid"
+                       MultiSelection="true"
+                       @bind-SelectedValues="_selectedPluginModuleIds"
+                       Label="@LocalizationService.GetTranslation("DataEditor.CraftingTable.PluginModules")"
+                       Variant="Variant.Outlined"
+                       AnchorOrigin="Origin.BottomCenter"
+                       MultiSelectionTextFunc="@(_ => GetSelectionText())">
+                @foreach (var pluginModule in PluginModules)
+                {
+                    <MudSelectItem T="Guid" Value="@pluginModule.Id">
+                        @LocalizationService.GetTranslation(pluginModule)
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(!IsValid)"
+                   OnClick="Submit">
+            @LocalizationService.GetTranslation("Validate")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public CraftingTable? CraftingTable { get; set; }
+
+    private readonly CraftingTableEditModel _model = new();
+    private IReadOnlyCollection<Guid> _selectedPluginModuleIds = new HashSet<Guid>();
+
+    private List<PluginModule> PluginModules => ContextService.CurrentServerData?.PluginModules ?? [];
+
+    private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name)
+                            && !string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs);
+
+    protected override void OnInitialized()
+    {
+        if (CraftingTable is not null)
+        {
+            _model.Id = CraftingTable.Id;
+            _model.Name = CraftingTable.Name;
+            _model.LocalizedNameEnUs = LocalizationService.GetColumn(CraftingTable.LocalizedName, LanguageCode.en_US);
+            _model.LocalizedNameCurrent = LocalizationService.GetColumn(CraftingTable.LocalizedName, LocalizationService.CurrentLanguageCode);
+            _model.PluginModuleIds = CraftingTable.PluginModules.Select(pm => pm.Id).ToList();
+        }
+
+        _selectedPluginModuleIds = new HashSet<Guid>(_model.PluginModuleIds);
+    }
+
+    private string GetSelectionText()
+    {
+        var names = PluginModules
+            .Where(pm => _selectedPluginModuleIds.Contains(pm.Id))
+            .Select(LocalizationService.GetTranslation)
+            .ToList();
+
+        return names.Count == 0
+            ? LocalizationService.GetTranslation("DataEditor.CraftingTable.NoPluginModule")
+            : string.Join(", ", names);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        if (!IsValid)
+        {
+            return;
+        }
+
+        _model.Name = _model.Name.Trim();
+        _model.PluginModuleIds = _selectedPluginModuleIds.ToList();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

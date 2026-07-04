@@ -16,6 +16,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		return await context.UserCraftingTables
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.FuelItem)
 			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
@@ -32,6 +33,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			.Where(s => s.DataContextId == dataContext.Id)
 			.Include(uct => uct.CraftingTable)
 			.Include(uct => uct.PluginModule)
+			.Include(uct => uct.FuelItem)
 			.Include(uct => uct.SkilledPluginModules)
 			.ToListAsync();
 	}
@@ -56,7 +58,9 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			DataContextId = userCraftingTable.DataContext.Id,
 			CraftingTableId = userCraftingTable.CraftingTable.Id,
 			PluginModuleId = userCraftingTable.PluginModule?.Id,
-			CraftMinuteFee = userCraftingTable.CraftMinuteFee,
+			FuelItemId = userCraftingTable.FuelItem?.Id,
+			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
 		};
 	}
 
@@ -86,7 +90,9 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 				.FirstAsync(uct => uct.Id == userCraftingTable.Id);
 
 		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
-		existing.CraftMinuteFee = userCraftingTable.CraftMinuteFee;
+		existing.FuelItemId = userCraftingTable.FuelItem?.Id;
+		existing.AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee;
+		existing.TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee;
 
 		// Delta-based update: Clear()+ReAdd on a tracked skip-nav collection leaves the
 		// just-cleared join entries in Deleted state; re-adding the same tracked instance
@@ -118,12 +124,40 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		return context.PluginModules.Attach(new PluginModule { Id = pluginModuleId }).Entity;
 	}
 
-	public void UpdateCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	public void UpdateTotalCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
 	{
-		var stub = new UserCraftingTable { Id = userCraftingTable.Id, CraftMinuteFee = userCraftingTable.CraftMinuteFee };
+		var stub = new UserCraftingTable { Id = userCraftingTable.Id, TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee };
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
-		entry.Property(x => x.CraftMinuteFee).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
+	}
+
+	public void UpdateAdditionalCraftMinuteFee(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	{
+		var stub = new UserCraftingTable
+		{
+			Id = userCraftingTable.Id,
+			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
+		};
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.AdditionalCraftMinuteFee).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
+	}
+
+	public void UpdateFuelItem(EcoCraftDbContext context, UserCraftingTable userCraftingTable)
+	{
+		var stub = new UserCraftingTable
+		{
+			Id = userCraftingTable.Id,
+			FuelItemId = userCraftingTable.FuelItemId,
+			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
+		};
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.FuelItemId).IsModified = true;
+		entry.Property(x => x.TotalCraftMinuteFee).IsModified = true;
 	}
 
 	public void Destroy(EcoCraftDbContext context, UserCraftingTable userCraftingTable)

@@ -1,0 +1,110 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Extensions
+@using ecocraft.Components.Utils
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @LocalizationService.GetTranslation(PluginModule is null
+                ? "DataEditor.PluginModule.CreateTitle"
+                : "DataEditor.PluginModule.EditTitle")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
+                                  DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
+
+            <MudSelect T="PluginType"
+                       @bind-Value="_model.PluginType"
+                       Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.PluginType")"
+                       Variant="Variant.Outlined">
+                @foreach (var pluginType in Enum.GetValues<PluginType>())
+                {
+                    <MudSelectItem T="PluginType" Value="@pluginType">@pluginType.ToString()</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="decimal"
+                             @bind-Value="_model.Percent"
+                             Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.Percent")"
+                             Variant="Variant.Outlined"
+                             Format="0.##"/>
+
+            <MudSelect T="Guid?"
+                       @bind-Value="_model.SkillId"
+                       Clearable="true"
+                       Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.Skill")"
+                       Variant="Variant.Outlined">
+                <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("None")</MudSelectItem>
+                @foreach (var skill in ContextService.CurrentServerData?.Skills ?? [])
+                {
+                    <MudSelectItem T="Guid?" Value="@((Guid?)skill.Id)">@LocalizationService.GetTranslation(skill)</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField T="decimal?"
+                             @bind-Value="_model.SkillPercent"
+                             Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.SkillPercent")"
+                             Variant="Variant.Outlined"
+                             Format="0.##"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(string.IsNullOrWhiteSpace(_model.Name) || string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))"
+                   OnClick="Submit">
+            @LocalizationService.GetTranslation("Validate")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public PluginModule? PluginModule { get; set; }
+
+    private PluginModuleEditModel _model = new();
+
+    protected override void OnParametersSet()
+    {
+        if (PluginModule is not null)
+        {
+            _model = new PluginModuleEditModel
+            {
+                Id = PluginModule.Id,
+                Name = PluginModule.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(PluginModule.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(PluginModule.LocalizedName, LocalizationService.CurrentLanguageCode),
+                PluginType = PluginModule.PluginType,
+                Percent = PluginModule.Percent,
+                SkillId = PluginModule.Skill?.Id,
+                SkillPercent = PluginModule.SkillPercent,
+            };
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Submit()
+    {
+        if (string.IsNullOrWhiteSpace(_model.Name) || string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))
+        {
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

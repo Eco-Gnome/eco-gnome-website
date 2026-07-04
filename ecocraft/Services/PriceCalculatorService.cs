@@ -9,6 +9,8 @@ public class PriceCalculatorService(
     IDbContextFactory<EcoCraftDbContext> factory,
     UserElementDbService userElementDbService,
     UserPriceDbService userPriceDbService,
+    UserCraftingTableDbService userCraftingTableDbService,
+    CraftingTableFuelCostService craftingTableFuelCostService,
     LocalizationService localizationService,
     ILogger<PriceCalculatorService> logger)
 {
@@ -53,12 +55,25 @@ public class PriceCalculatorService(
         public Dictionary<Guid, UserCraftingTable> UserCraftingTablesByCraftingTableId { get; } =
             dataContext.UserCraftingTables.GroupBy(uct => uct.CraftingTableId).ToDictionary(g => g.Key, g => g.First());
 
+        public Dictionary<Guid, UserCraftingTable> UserCraftingTablesById { get; } =
+            dataContext.UserCraftingTables.GroupBy(uct => uct.Id).ToDictionary(g => g.Key, g => g.First());
+
+        public Dictionary<Guid, decimal> OriginalUserCraftingTableFeesById { get; } =
+            dataContext.UserCraftingTables
+                .GroupBy(uct => uct.Id)
+                .ToDictionary(g => g.Key, g => g.First().TotalCraftMinuteFee);
+
         public Dictionary<Guid, HashSet<Guid>> ProducerSkillsByItemOrTagId { get; } = BuildProducerSkillsMap(dataContext);
         private Dictionary<Guid, decimal> DynamicValueCache { get; } = [];
         private Dictionary<Guid, decimal> RoundDynamicValueCache { get; } = [];
         private DynamicValueCalculationContext? _dynamicValueCalculationContext;
         public HashSet<Guid> DirtyUserPriceIds { get; } = [];
         public HashSet<Guid> DirtyUserElementIds { get; } = [];
+        public HashSet<Guid> DirtyUserCraftingTableIds { get; } = [];
+
+        // Real (unclamped) per-unit output cost, kept so the margin can be computed
+        // on the real price even when the stored cost is clamped to the item min/max bounds.
+        public Dictionary<Guid, decimal?> RealProductPriceByUserElementId { get; } = [];
 
         public DynamicValueCalculationContext DynamicValueCalculationContext =>
             _dynamicValueCalculationContext ??= new DynamicValueCalculationContext
@@ -174,6 +189,29 @@ public class PriceCalculatorService(
             return userElement.Price != original.Price || userElement.IsMarginPrice != original.IsMarginPrice;
         }
 
+        public bool TrySetUserCraftingTableFee(UserCraftingTable userCraftingTable, decimal craftMinuteFee)
+        {
+            if (userCraftingTable.TotalCraftMinuteFee == craftMinuteFee)
+            {
+                return false;
+            }
+
+            userCraftingTable.TotalCraftMinuteFee = craftMinuteFee;
+            DirtyUserCraftingTableIds.Add(userCraftingTable.Id);
+            return true;
+        }
+
+        public bool HasUserCraftingTableFeeChangedFromOriginal(Guid userCraftingTableId)
+        {
+            if (!UserCraftingTablesById.TryGetValue(userCraftingTableId, out var userCraftingTable)
+                || !OriginalUserCraftingTableFeesById.TryGetValue(userCraftingTableId, out var original))
+            {
+                return false;
+            }
+
+            return userCraftingTable.TotalCraftMinuteFee != original;
+        }
+
     }
 
     public (List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) GetCategorizedItemOrTags(DataContext dataContext)
@@ -222,6 +260,22 @@ public class PriceCalculatorService(
         return (listOfIngredients, listOfProducts);
     }
 
+    public List<ItemOrTag> GetFuelItemOrTagsForDisplay(DataContext dataContext)
+    {
+        return GetFuelItemGroupsForDisplay(dataContext)
+            .SelectMany(group => group.Tag is null
+                ? group.Items
+                : Enumerable.Repeat(group.Tag!, 1))
+            .ToList();
+    }
+
+    public Dictionary<Guid, List<ItemOrTag>> GetFuelAssociatedItemsByGroupTagIdForDisplay(DataContext dataContext)
+    {
+        return GetFuelItemGroupsForDisplay(dataContext)
+            .Where(group => group.Tag is not null)
+            .ToDictionary(group => group.Tag!.Id, group => group.Items);
+    }
+
     public async Task Calculate(DataContext dataContext, string triggerOrigin = "Unknown")
     {
         try
@@ -231,6 +285,12 @@ public class PriceCalculatorService(
                 var calculationContext = new CalculationContext(dataContext);
                 var dynamicValueCalculationContext = calculationContext.DynamicValueCalculationContext;
                 var marginType = calculationContext.UserSetting.MarginType;
+
+                foreach (var userCraftingTable in dataContext.UserCraftingTables)
+                {
+                    var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, userCraftingTable);
+                    calculationContext.TrySetUserCraftingTableFee(userCraftingTable, craftMinuteFee);
+                }
 
                 var (_, itemOrTagsToSell) = GetCategorizedItemOrTags(dataContext);
                 var itemOrTagsToSellIds = itemOrTagsToSell.Select(iot => iot.Id).ToHashSet();
@@ -387,8 +447,10 @@ public class PriceCalculatorService(
 
                         if (calculationContext.UserCraftingTablesByCraftingTableId.TryGetValue(userRecipe.Recipe.CraftingTableId, out var currentUserCraftingTable))
                         {
-                            var craftMinutes = userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext, dynamicValueCalculationContext);
-                            ingredientCostSum += currentUserCraftingTable.CraftMinuteFee * craftMinutes;
+                            var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, currentUserCraftingTable);
+                            calculationContext.TrySetUserCraftingTableFee(currentUserCraftingTable, craftMinuteFee);
+                            var craftMinutes = userRecipe.Recipe.GetEffectiveCraftMinutes(dataContext, userRecipe, dynamicValueCalculationContext);
+                            ingredientCostSum += currentUserCraftingTable.TotalCraftMinuteFee * craftMinutes;
                         }
 
                         foreach (var product in userElementProducts.Where(p => p.Price is null).ToList())
@@ -399,8 +461,13 @@ public class PriceCalculatorService(
                                 continue;
                             }
 
-                            var computedProductPrice = ingredientCostSum * product.Share / finalQuantity;
-                            calculationContext.TrySetUserElementPrice(product, computedProductPrice, product.IsMarginPrice);
+                            // Real (unclamped) output cost. The stored cost is clamped to the
+                            // produced item min/max bounds, but the margin must be computed on the
+                            // real price (then clamped in turn) — see issue #84.
+                            var realProductPrice = ingredientCostSum * product.Share / finalQuantity;
+                            var clampedProductPrice = ClampToItemBounds(realProductPrice, product.Element.ItemOrTag);
+                            calculationContext.RealProductPriceByUserElementId[product.Id] = realProductPrice;
+                            calculationContext.TrySetUserElementPrice(product, clampedProductPrice, product.IsMarginPrice);
 
                             var productUserPrice = calculationContext.GetUserPrice(product.Element.ItemOrTag);
                             if (productUserPrice is null || productUserPrice.OverrideIsBought || productUserPrice.Price is not null)
@@ -410,7 +477,7 @@ public class PriceCalculatorService(
 
                             if (productUserPrice.PrimaryUserElement == product)
                             {
-                                SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, marginType);
+                                SetUserPriceWithMargin(calculationContext, productUserPrice, product.Price, realProductPrice, product.Element.ItemOrTag, marginType);
                             }
                             else if (productUserPrice.PrimaryUserElement is null)
                             {
@@ -423,7 +490,11 @@ public class PriceCalculatorService(
 
                                 if (relatedUserElements.All(ue => ue.Price is not null))
                                 {
-                                    SetUserPriceWithMargin(calculationContext, productUserPrice, relatedUserElements.Min(ue => ue.Price), marginType);
+                                    // Clamping shares the same bounds for every producer of this item, so the
+                                    // cheapest stored (clamped) cost is also the cheapest real cost.
+                                    var cheapest = relatedUserElements.OrderBy(ue => ue.Price).First();
+                                    var cheapestRealPrice = calculationContext.RealProductPriceByUserElementId.GetValueOrDefault(cheapest.Id) ?? cheapest.Price;
+                                    SetUserPriceWithMargin(calculationContext, productUserPrice, cheapest.Price, cheapestRealPrice, product.Element.ItemOrTag, marginType);
                                 }
                             }
                         }
@@ -431,6 +502,8 @@ public class PriceCalculatorService(
                         nbHandled++;
                     }
                 } while (nbHandled > 0);
+
+                CalculateFuelTagPrices(calculationContext, dataContext);
 
                 if (recipesWithMissingUserElements.Count > 0)
                 {
@@ -446,6 +519,9 @@ public class PriceCalculatorService(
                 var finalDirtyUserElementIds = calculationContext.DirtyUserElementIds
                     .Where(calculationContext.HasUserElementChangedFromOriginal)
                     .ToList();
+                var finalDirtyUserCraftingTableIds = calculationContext.DirtyUserCraftingTableIds
+                    .Where(calculationContext.HasUserCraftingTableFeeChangedFromOriginal)
+                    .ToList();
 
                 var existingDirtyUserPriceIds = await context.UserPrices
                     .Where(up => finalDirtyUserPriceIds.Contains(up.Id))
@@ -455,6 +531,11 @@ public class PriceCalculatorService(
                 var existingDirtyUserElementIds = await context.UserElements
                     .Where(ue => finalDirtyUserElementIds.Contains(ue.Id))
                     .Select(ue => ue.Id)
+                    .ToHashSetAsync();
+
+                var existingDirtyUserCraftingTableIds = await context.UserCraftingTables
+                    .Where(uct => finalDirtyUserCraftingTableIds.Contains(uct.Id))
+                    .Select(uct => uct.Id)
                     .ToHashSetAsync();
 
                 foreach (var userPriceId in finalDirtyUserPriceIds)
@@ -482,6 +563,19 @@ public class PriceCalculatorService(
                         userElementDbService.UpdateAll(context, userElement);
                     }
                 }
+
+                foreach (var userCraftingTableId in finalDirtyUserCraftingTableIds)
+                {
+                    if (!existingDirtyUserCraftingTableIds.Contains(userCraftingTableId))
+                    {
+                        continue;
+                    }
+
+                    if (calculationContext.UserCraftingTablesById.TryGetValue(userCraftingTableId, out var userCraftingTable))
+                    {
+                        userCraftingTableDbService.UpdateTotalCraftMinuteFee(context, userCraftingTable);
+                    }
+                }
                 return;
             });
         }
@@ -499,11 +593,81 @@ public class PriceCalculatorService(
         }
     }
 
-    private static void SetUserPriceWithMargin(CalculationContext calculationContext, UserPrice userPrice, decimal? basePrice, MarginType marginType)
+    private void CalculateFuelTagPrices(CalculationContext calculationContext, DataContext dataContext)
+    {
+        foreach (var fuelGroup in GetFuelItemGroupsForDisplay(dataContext).Where(group => group.Tag is not null))
+        {
+            var tagUserPrice = calculationContext.GetUserPrice(fuelGroup.Tag!);
+            if (tagUserPrice is null || tagUserPrice.OverrideIsBought)
+            {
+                continue;
+            }
+
+            if (tagUserPrice.PrimaryUserPrice?.Price is not null)
+            {
+                calculationContext.TrySetUserPrice(tagUserPrice, tagUserPrice.PrimaryUserPrice.Price, tagUserPrice.PrimaryUserPrice.MarginPrice);
+                continue;
+            }
+
+            var associatedFuelPrices = fuelGroup.Items
+                .Select(calculationContext.GetUserPrice)
+                .Where(userPrice => userPrice?.ItemOrTag.FuelCalories is > 0)
+                .Cast<UserPrice>()
+                .ToList();
+
+            if (associatedFuelPrices.Count != fuelGroup.Items.Count
+                || associatedFuelPrices.Any(userPrice => userPrice.Price is null))
+            {
+                calculationContext.TrySetUserPrice(tagUserPrice, null, null);
+                continue;
+            }
+
+            var cheapestFuel = associatedFuelPrices
+                .MinBy(userPrice => userPrice.Price!.Value / userPrice.ItemOrTag.FuelCalories!.Value)!;
+            calculationContext.TrySetUserPrice(tagUserPrice, cheapestFuel.Price, cheapestFuel.MarginPrice);
+        }
+    }
+
+    private List<ItemOrTag> GetPotentialFuelItemsAndTags(DataContext dataContext)
+    {
+        return dataContext.UserCraftingTables
+            .SelectMany(uct => craftingTableFuelCostService.GetEligibleFuelItemsAndTags(uct.CraftingTable))
+            .DistinctBy(item => item.Id)
+            .ToList();
+    }
+
+    private List<FuelItemGroup> GetFuelItemGroupsForDisplay(DataContext dataContext)
+    {
+        var fuelItems = GetPotentialFuelItemsAndTags(dataContext)
+            .Where(itemOrTag => !itemOrTag.IsTag)
+            .DistinctBy(itemOrTag => itemOrTag.Id)
+            .ToList();
+
+        return fuelItems
+            .GroupBy(item => craftingTableFuelCostService.GetFuelGroupingTag(item, fuelItems))
+            .Select(group => new FuelItemGroup(
+                group.Key,
+                group
+                    .OrderBy(localizationService.GetTranslation)
+                    .ToList()))
+            .Where(group => group.Items.Count > 0)
+            .OrderBy(group => group.Tag is null ? 1 : 0)
+            .ThenBy(group => group.Tag is null
+                ? localizationService.GetTranslation(group.Items.First())
+                : localizationService.GetTranslation(group.Tag))
+            .ToList();
+    }
+
+    private sealed record FuelItemGroup(ItemOrTag? Tag, List<ItemOrTag> Items);
+
+    // storedPrice is the cost stored on the UserPrice (already clamped to the item bounds).
+    // marginBasePrice is the real, unclamped cost the margin is computed from; the resulting
+    // margin is then clamped to the same item bounds (issue #84).
+    private static void SetUserPriceWithMargin(CalculationContext calculationContext, UserPrice userPrice, decimal? storedPrice, decimal? marginBasePrice, ItemOrTag clampItemOrTag, MarginType marginType)
     {
         decimal? marginPrice;
 
-        if (basePrice is null || userPrice.UserMargin is null)
+        if (marginBasePrice is null || userPrice.UserMargin is null)
         {
             marginPrice = null;
         }
@@ -514,17 +678,22 @@ public class PriceCalculatorService(
             switch (marginType)
             {
                 case MarginType.MarkUp:
-                    marginPrice = basePrice * (1 + userPrice.UserMargin.Margin / 100);
+                    marginPrice = marginBasePrice * (1 + userPrice.UserMargin.Margin / 100);
                     break;
                 case MarginType.GrossMargin:
                 {
                     var divisionFactor = 1 - userPrice.UserMargin.Margin / 100;
                     if (divisionFactor > 0)
                     {
-                        marginPrice = basePrice / divisionFactor;
+                        marginPrice = marginBasePrice / divisionFactor;
                     }
                     break;
                 }
+            }
+
+            if (marginPrice is not null)
+            {
+                marginPrice = ClampToItemBounds(marginPrice.Value, clampItemOrTag);
             }
 
             if (marginPrice is not null && userPrice.UserMargin.Rounding != RoundingMode.None)
@@ -533,7 +702,23 @@ public class PriceCalculatorService(
             }
         }
 
-        calculationContext.TrySetUserPrice(userPrice, basePrice, marginPrice);
+        calculationContext.TrySetUserPrice(userPrice, storedPrice, marginPrice);
+    }
+
+    // Bounds a price to the item min/max defined by the server admin. No-op when a bound is null.
+    private static decimal ClampToItemBounds(decimal price, ItemOrTag itemOrTag)
+    {
+        if (itemOrTag.MinPrice is not null && price < itemOrTag.MinPrice.Value)
+        {
+            price = itemOrTag.MinPrice.Value;
+        }
+
+        if (itemOrTag.MaxPrice is not null && price > itemOrTag.MaxPrice.Value)
+        {
+            price = itemOrTag.MaxPrice.Value;
+        }
+
+        return price;
     }
 
     // Below 1$ → no rounding. Above:

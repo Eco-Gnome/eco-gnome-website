@@ -210,7 +210,9 @@
                                                 }
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                        <MudTd>
+                                            <EconomyCraftingTableCostMinuteSummary Summary="context"/>
+                                        </MudTd>
                                     </RowTemplate>
                                     <NoRecordsContent>
                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>
@@ -279,7 +281,9 @@
                                                 }
                                             </MudStack>
                                         </MudTd>
-                                        <MudTd>@EconomyViewerDisplayService.FormatDecimal(context.CraftMinuteFee)</MudTd>
+                                        <MudTd>
+                                            <EconomyCraftingTableCostMinuteSummary Summary="context"/>
+                                        </MudTd>
                                     </RowTemplate>
                                     <NoRecordsContent>
                                         <MudText Class="pa-2">@LocalizationService.GetTranslation("EconomyViewer.Drilldown.NoCraftingTableData")</MudText>

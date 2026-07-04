@@ -1,7 +1,145 @@
 ﻿{
+    "Onboarding": {
+        "Steps": {
+            "Skills": {
+                "Title": "Ajoute tes métiers",
+                "Desc": "Commence ici : choisis les professions que tu pratiques."
+            },
+            "Buy": {
+                "Title": "Renseigne les prix d'achat",
+                "Desc": "Les ingrédients à acheter apparaîtront ici dès ton premier métier."
+            },
+            "Sell": {
+                "Title": "eco-gnome calcule tes prix de vente",
+                "Desc": "Choisis ensuite ta marge et tes variantes de recettes ici."
+            }
+        },
+        "Help": {
+            "Tooltip": "Comment fonctionne eco-gnome ?",
+            "Title": "Comment fonctionne eco-gnome",
+            "Close": "Fermer",
+            "DismissHint": "Appuie sur Échap ou clique n'importe où pour fermer",
+            "Item": {
+                "RecipeClick": "👆 Clique sur le nom d'une recette pour voir le détail du calcul et gérer la répartition des prix en cas de sorties multiples.",
+                "PrimaryStarSell": "👆 L'étoile bleue désigne la recette principale utilisée pour le prix de cet article quand plusieurs recettes le produisent.",
+                "PrimaryStarBuy": "👆 L'étoile bleue choisit le prix d'achat principal quand un ingrédient a plusieurs sources.",
+                "Reintegrate": "👆 Le « << » fait passer un article fabriqué vers la colonne d'achat, pour lui fixer un prix dans le reste des calculs.",
+                "CraftingTableClick": "👆 Clique sur le nom d'une table pour accéder à ses détails.",
+                "Fuels": "👆 Renseigne tes combustibles ici si tes recettes consomment de l'énergie.",
+                "Margins": "⚙️ Définis tes marges (pourcentage et arrondi) appliquées aux prix de vente.",
+                "Options": "⚙️ Configure le calculateur, surtout le coût pour 1000 calories.",
+                "Profile": "⚙️ Change ton pseudo (utile pour le support et l'analyse économique).",
+                "Servers": "⚙️ Rejoins un serveur existant ou crée le tien."
+            }
+        }
+    },
     "Cancel": "Annuler",
     "CopyToClipboard": "Copier dans le presse-papiers",
     "CraftingTable": "Table d'artisanat",
+    "DataEditor": {
+        "ReimportWarning": "Les données éditées ici sont écrasées par tout nouvel import du fichier JSON serveur (page Administration). L'édition manuelle est destinée aux tests.",
+        "Actions": "Actions",
+        "Edit": "Modifier",
+        "Delete": "Supprimer",
+        "Tab": {
+            "Items": "Items / Tags",
+            "Recipes": "Recettes",
+            "Skills": "Compétences",
+            "Tables": "Tables d'artisanat",
+            "Modules": "Modules"
+        },
+        "Snackbar": {
+            "Saved": "Modifications enregistrées",
+            "Error": "Une erreur est survenue"
+        },
+        "Name": {
+            "Technical": "Nom technique (clé d'import)",
+            "TechnicalHelp": "Identifiant interne utilisé pour l'appariement avec l'import des données du jeu. Le modifier sur un élément importé le dé-liera du prochain import.",
+            "English": "Nom affiché (anglais)",
+            "Localized": "Nom affiché ({lang})",
+            "Required": "Un nom est requis"
+        },
+        "Item": {
+            "CreateTitle": "Créer un item / tag",
+            "EditTitle": "Modifier l'item / tag",
+            "Create": "Créer un item / tag",
+            "Delete": "Supprimer l'item / tag",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer « {0} » ?",
+            "DeleteBlocked": "Cet item ne peut pas être supprimé : il est utilisé dans {0} recette(s). Retirez-le d'abord de ces recettes.",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "IsTag": "Est un tag",
+            "AssociatedTags": "Tags",
+            "AssociatedItems": "Items",
+            "MinPrice": "Prix min",
+            "DefaultPrice": "Prix par défaut",
+            "MaxPrice": "Prix max",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "Recipe": {
+            "CreateTitle": "Créer une recette",
+            "EditTitle": "Modifier la recette",
+            "Create": "Créer une recette",
+            "Delete": "Supprimer la recette",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la recette « {0} » ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "Skill": "Compétence",
+            "SkillLevel": "Niveau de compétence",
+            "CraftingTable": "Table d'artisanat",
+            "CraftingTableRequired": "Une table d'artisanat est requise",
+            "Labor": "Labeur",
+            "CraftMinutes": "Minutes de fabrication",
+            "Item": "Item / Tag",
+            "Quantity": "Quantité",
+            "AddLine": "Ajouter une ligne",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "Skill": {
+            "CreateTitle": "Créer une compétence",
+            "EditTitle": "Modifier la compétence",
+            "Create": "Créer une compétence",
+            "Delete": "Supprimer la compétence",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la compétence « {0} » ?",
+            "DeleteConfirmCascade": "Supprimer la compétence « {0} » supprimera également {1} recette(s) qui l'utilise(nt). Continuer ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "Profession": "Profession",
+            "MaxLevel": "Niveau max",
+            "LaborReducePercent": "Réduction de labeur par niveau",
+            "LaborReducePercentHelp": "Valeurs séparées par des virgules, une par niveau (ex. 1, 0.9, 0.8).",
+            "LaborReducePercentInvalid": "Liste invalide : seuls des nombres séparés par des virgules sont autorisés.",
+            "Cancel": "Annuler",
+            "Validate": "Valider"
+        },
+        "CraftingTable": {
+            "CreateTitle": "Créer une table d'artisanat",
+            "EditTitle": "Modifier la table d'artisanat",
+            "Create": "Créer une table d'artisanat",
+            "Delete": "Supprimer la table d'artisanat",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer la table d'artisanat « {0} » ?",
+            "DeleteConfirmCascade": "Supprimer la table d'artisanat « {0} » supprimera également {1} recette(s) qui l'utilise(nt). Continuer ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "PluginModules": "Modules",
+            "NoPluginModule": "Aucun module"
+        },
+        "PluginModule": {
+            "CreateTitle": "Créer un module",
+            "EditTitle": "Modifier le module",
+            "Create": "Créer un module",
+            "Delete": "Supprimer le module",
+            "DeleteConfirm": "Voulez-vous vraiment supprimer le module « {0} » ?",
+            "Name": "Nom",
+            "NameRequired": "Un nom est requis",
+            "PluginType": "Type",
+            "Percent": "Pourcentage",
+            "Skill": "Compétence",
+            "SkillPercent": "Pourcentage de compétence"
+        }
+    },
     "DevVersion": "VOUS ÊTES SUR UNE VERSION DE DÉVELOPPEMENT D'ECO GNOME",
     "GraphView": {
         "ResetButton": "Réinitialiser le graphique",
@@ -35,7 +173,10 @@
         "ServerPrices": "Prix du serveur",
         "MinPrice": "Minimum",
         "DefaultPrice": "Par défaut",
-        "MaxPrice": "Maximum"
+        "MaxPrice": "Maximum",
+        "Energy": "Énergie",
+        "EnergyConsumption": "Consommation énergétique",
+        "EnergyGeneration": "Génération d'énergie"
     },
     "JoinCode": "Code de participation",
     "Language": "Langue",
@@ -50,6 +191,7 @@
     "Margins": "Marges",
     "NavMenu": {
         "NavAdmin": "Gestion des serveurs",
+        "NavDataEditor": "Éditeur de données",
         "NavCalculator": "Calculateur de prix",
         "ShoppingList": "Liste de course",
         "EconomyViewer": "Analyse économique",
@@ -71,6 +213,8 @@
         "ReductionOf": "Réduction des",
         "AdditionalCosts": "Coûts supplémentaires",
         "CraftTime": "Temps de fabrication",
+        "CraftTimeLayer": "Le temps de fabrication de cette recette dépend d'une couche du monde (gisement) et ne peut pas être calculé automatiquement. Saisissez le temps observé en jeu, en secondes.",
+        "Fuel": "Carburant",
         "CraftTimeReductionTooltip": "{valeur initiale} avec {pourcentage}% de réduction grâce au module de mise à niveau {nom du module de mise à niveau}",
         "Dynamic": "dynamique",
         "Labor": "Main-d'œuvre",
@@ -88,7 +232,14 @@
             "EquilibrateTooltip": "Répartir par quantité entre les produits.",
             "FirstOnlyTooltip": "Accorder 100 % au premier produit et zéro aux autres. Choisissez cette option si vous considérez les autres produits comme des déchets.",
             "HonestTooltip": "Accorder 80 % au premier produit et répartir le reste de manière égale.",
-            "UnlockTooltip": "Désactive l'équilibrage automatique et permet l'édition manuelle de toutes les valeurs, y compris le dépassement d'un total de 100 %."
+            "UnlockTooltip": "Désactive l'équilibrage automatique et permet l'édition manuelle de toutes les valeurs, y compris le dépassement d'un total de 100 %.",
+            "AdminLockSwitch": "Verrouiller et appliquer à tous les joueurs",
+            "AdminLockTooltip": "Verrouille la répartition de cette recette pour tout le serveur. Une fois verrouillée, les parts et la réintégration actuelles sont imposées à tous les joueurs et écrasent leurs propres réglages.",
+            "AdminLockedTooltip": "Cette répartition est verrouillée par l'administrateur du serveur et ne peut pas être modifiée."
+        },
+        "Price": {
+            "ClampedMax": "Prix plafonné au maximum du serveur ({max} $).",
+            "ClampedMin": "Prix relevé au minimum du serveur ({min} $)."
         },
         "Static": "statique",
         "TotalCost": "Coût total :",
@@ -169,6 +320,13 @@
             "Default": "Prix par défaut",
             "Default.Tooltip": "Effacer les prix par défaut"
         },
+        "Recipes": {
+            "Title": "Recettes multi-produits",
+            "Locked": "Verrouillée",
+            "LockedTooltip": "La répartition des produits de cette recette est verrouillée pour tous les joueurs.",
+            "Configure": "Configurer la répartition des produits (parts / réintégration)",
+            "OpenError": "Impossible d'ouvrir la configuration de la recette"
+        },
         "Members": {
             "DemoteAdmin": "Rétrograder l'administrateur",
             "KickUser": "Rétrograder l'utilisateur",
@@ -217,6 +375,7 @@
         "Settings": "Paramètres",
         "ItemsToBuy": "Objets à acheter:",
         "ItemsProduced": "Objets produits:",
+        "QuantityToProduceTooltip": "Nombre d'objets à produire (arrondi au crafting supérieur, donc un peu plus peut être produit)",
         "AddShoppingList": "Ajouter une liste de course",
         "NewShoppingList": "Liste de course #",
         "NameLabel": "Nom de la liste de course",
@@ -230,13 +389,46 @@
         "GuidedAutoExpandLabel": "Expansion guidee auto vers ressources brutes",
         "GuidedAutoExpandTooltip": "Si active, un clic ingredient lance une expansion guidee jusqu'aux ressources non craftables. En cas d'ambiguite, le run se met en pause pour votre choix puis reprend automatiquement.",
         "StopGuidedAutoExpandLabel": "Stop auto-expand",
-        "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees."
+        "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees.",
+        "VisualizeProductionChain": "Visualiser",
+        "ProductionChainTitle": "Chaine de production",
+        "ProductionChainPerMinute": "Par minute",
+        "ProductionChainRecenter": "Ajuster a l'ecran",
+        "ProductionChainEmpty": "Ajoutez au moins une recette a cette liste pour voir sa chaine de production.",
+        "AutomationButton": "Planificateur",
+        "AutomationTitle": "Planificateur d'automatisation",
+        "AutomationTargetRate": "Débit cible",
+        "AutomationInputLimits": "Limites d'entrée",
+        "AutomationPerHour": "Afficher en /heure",
+        "AutomationMax": "Max",
+        "AutomationMaxHint": "Maximiser ce débit selon les contraintes d'entrée (recettes + items + limites d'entrée)",
+        "AutomationRulesHint": "Une valeur = objectif prioritaire, servi en premier. MAX = production maximale avec la capacité restante (prioritaire sur les champs vides). Vide = automatique : suit les recettes sur ce qu'il reste, réduit si une limite est atteinte.",
+        "AutomationCappedHint": "Objectif {0} non atteignable (limite : {2}). Production réelle : {1}.",
+        "AutomationEmpty": "Ajoutez au moins une recette à cette liste pour planifier son automatisation."
     },
     "Skill": "Compétence",
     "NoSkill": "Pas de compétence",
     "SuperAdmin": {
         "ModUpload": "Télécharger le fichier mod",
         "ActionCol": "Action",
+        "Boolean": {
+            "Yes": "Oui",
+            "No": "Non"
+        },
+        "Chips": {
+            "NoServer": "Sans serveur",
+            "Empty": "Vide",
+            "NoPlayers": "Sans joueur",
+            "NoAdmin": "Sans admin",
+            "Stale": "Périmé"
+        },
+        "Bulk": {
+            "Affected": "{count} concerné(s)",
+            "Delete": "Supprimer",
+            "Confirm": "Vous allez supprimer {count} élément(s). Continuer ?",
+            "Success": "{count} élément(s) supprimé(s).",
+            "Error": "Échec de la suppression groupée"
+        },
         "ConfirmServerDeletion": "Etes-vous sûr de vouloir supprimer le serveur {serveur} ?",
         "ConfirmSuperAdminPromote": "Êtes-vous sûr de vouloir promouvoir cet utilisateur au rang de super administrateur ?",
         "ConfirmSuperAdminDemote": "Êtes-vous sûr de vouloir rétrograder cet utilisateur de Super Admin ?",
@@ -244,11 +436,35 @@
         "ConfirmUserDeletion": "Êtes-vous sûr de vouloir supprimer l'utilisateur {utilisateur} ?",
         "CreationDateCol": "Date de création",
         "DataCol": "Données",
+        "Filters": {
+            "Users": {
+                "WithoutServer": "Sans serveur",
+                "AdminSomewhere": "Admin quelque part"
+            },
+            "Servers": {
+                "Empty": "Vide",
+                "WithData": "Avec données",
+                "Default": "Par défaut",
+                "LinkedEco": "Lié Eco",
+                "UnlinkedEco": "Non lié Eco",
+                "NeverImported": "Jamais importé",
+                "StaleImport": "Import obsolète",
+                "WithoutAdmin": "Sans admin"
+            },
+            "Mods": {
+                "Global": "Global",
+                "ServerScoped": "Lié à un serveur"
+            }
+        },
         "IdCol": "Id",
+        "CopySecretId": "Copier l'id secret",
+        "CopyEcoServerId": "Copier l'id du serveur Eco",
         "ServerTable": {
             "AdminsCol": "Admins",
             "DeleteServer": "Supprimer le serveur",
             "DemoteAdmin": "Retirez-vous des administrateurs",
+            "EnableAutomationPlanner": "Activer le planificateur d'automatisation",
+            "DisableAutomationPlanner": "Désactiver le planificateur d'automatisation",
             "PlayersCol": "Joueurs",
             "PromoteAdmin": "Ajoutez vous en tant qu'administrateur",
             "ServerNameCol": "Nom",
@@ -256,6 +472,30 @@
             "Title": "Serveurs",
             "UnsetDefault": "Supprimer des serveurs par défaut"
         },
+        "ServerDetail": {
+            "Title": "Détails du serveur",
+            "Close": "Fermer",
+            "Open": "Ouvrir les détails du serveur",
+            "OpenWithWarning": "Ouvrir les détails du serveur (avertissements présents)",
+            "Default": "Serveur par défaut",
+            "DataStatusLabel": "État des données",
+            "EcoServerId": "Id du serveur Eco",
+            "LastDataUpload": "Dernier import de données",
+            "DataStatus": {
+                "Empty": "Vide",
+                "NeverImported": "Jamais importé",
+                "Stale": "Obsolète",
+                "Fresh": "À jour"
+            },
+            "Warnings": {
+                "Title": "Avertissements",
+                "None": "Aucun problème actif détecté.",
+                "NoAdmin": "Ce serveur n'a aucun administrateur serveur.",
+                "Stale": "Les données du serveur datent de plus de {days} jours."
+            }
+        },
+        "SnackbarCantEdit": "Vous ne pouvez pas vous modifier à partir de cette page.",
+        "SnackbarCopy": "Id copié dans le presse-papiers",
         "SnackBar": {
             "CantDeleteYourself": "Vous ne pouvez pas vous supprimer de cette page.",
             "SnackbarCantEdit": "Vous ne pouvez pas vous modifier à partir de cette page.",
@@ -278,6 +518,8 @@
             "DemoteUser": "Rétrograder l'utilisateur de Super Admin",
             "HowMuchIsAdmin": "Nombre de serveurs sur lesquels l'utilisateur est administrateur",
             "JoinedServers": "Serveurs rejoints",
+            "JoinedServersCol": "Rejoints",
+            "AdminServersCol": "Admin",
             "PromoteUser": "Promouvoir l'utilisateur au rang de super administrateur",
             "PseudoCol": "Pseudo",
             "SuperAdminCol": "Super Admin",
@@ -308,6 +550,7 @@
         "UserSettings": "Paramètres de l'utilisateur"
     },
     "Versions": "Versions",
+    "Validate": "Valider",
     "DataContext": {
         "DefaultContext": "Contexte par défaut",
         "NewContext": "Nouveau contexte",
@@ -338,9 +581,26 @@
         "AddSkill": "Ajouter une compétence",
         "CraftingTables": "Tables d'artisanat",
         "AddCraftingTable": "Ajouter une table d'artisanat",
+        "CraftingTableAdvancedConfiguration": "Configuration avancée",
         "CostMin": {
             "Tooltip": "Le coût lié à cette table d'artisanat pour chaque minute d'artisanat. Représente la consommation de carburant, le remplacement des pièces, les frais d'artisanat éventuels...",
             "CostMin": "Coût/min"
+        },
+        "CraftMinuteFee": {
+            "Additional": "Coût/min additionnel",
+            "AdditionalTooltip": "Coût additionnel par minute de craft. Permet de prendre en compte par exemple le coût de location, les taxes ou lois, et le remplacement des pièces d'usure.",
+            "Detail": "Additionnel : {value} | Carburant : {value} | Total : {value}",
+            "Total": "Coût/min total",
+            "TotalTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}. Le détail se configure dans la fenêtre de détail de la table d'artisanat."
+        },
+        "Fuel": {
+            "Fuel": "Carburant",
+            "NoFuel": "Aucun carburant",
+            "CostPerMinute": "Coût/min",
+            "Energy": "Énergie",
+            "CostPer1000Energy": "Coût / 1000 énergie",
+            "SelectFuel": "Sélectionner un carburant",
+            "CalculatedCostPerMinuteTooltip": "Calculé à partir de la consommation de la table, de l'énergie du carburant et de son prix."
         },
         "NoModule": "Pas de module",
         "MarginPercent": {
@@ -407,7 +667,9 @@
             "BoundedSnackbar": "Valeur ajustee pour respecter les bornes du serveur."
         },
         "ItemsToBuy": "Articles à acheter",
+        "Fuels": "Carburants",
         "IngredientSearch": "Ingrédients ou étiquettes",
+        "FuelSearch": "Carburants ou étiquettes",
         "BuyPrice": "Prix d'achat",
         "PriceTooltip": {
             "isTagEmptyPrice": "Cette valeur sera le prix minimum des articles associés (si toutes les valeurs sont définies !), à moins que vous ne choisissiez un article spécifique en cliquant sur une étoile.",
@@ -507,6 +769,7 @@
             "OnlyCommon": "Seulement les éléments en commun",
             "ContextSummaries": "Contextes comparés",
             "CraftingTablesComparison": "Comparaison des tables d'artisanat",
+            "CraftMinuteFeeTooltip": "Coût/min total de craft. Additionnel : {value}, carburant : {value}, total : {value}.",
             "NoCraftingTableData": "Aucune table d'artisanat configurée pour ce contexte.",
             "PriceOptionsComparison": "Options du calculateur de prix comparées",
             "ComparisonTable": "Comparaison",
@@ -522,13 +785,15 @@
             },
             "Values": {
                 "Enabled": "Activé",
-                "Disabled": "Désactivé"
+                "Disabled": "Désactivé",
+                "NoFuel": "Aucun carburant"
             },
             "Columns": {
                 "Role": "Rôle",
                 "Player": "Joueur",
                 "Option": "Option",
                 "Context": "Contexte",
+                "Fuel": "Carburant",
                 "ConfiguredItems": "Articles configurés",
                 "Recipes": "Recettes",
                 "Skills": "Métiers",

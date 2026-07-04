@@ -141,7 +141,18 @@ public partial class LocalizationService(LocalStorageService localStorageService
 
     private string GetLocalizedFieldTranslation(LocalizedField localizedField)
     {
-        var translation = CurrentLanguageCode switch
+        var translation = GetColumn(localizedField, CurrentLanguageCode);
+        return string.IsNullOrEmpty(translation) ? localizedField.en_US : translation;
+    }
+
+    // Raw read of a single language column (NO en_US fallback). Used by the data-editor dialogs to
+    // pre-fill the per-language name fields with exactly what is stored, so editing one language does
+    // not silently inherit the English fallback as its value.
+    public string GetColumn(LocalizedField? localizedField, LanguageCode code)
+    {
+        if (localizedField is null) return "";
+
+        return code switch
         {
             LanguageCode.en_US => localizedField.en_US,
             LanguageCode.fr => localizedField.fr,
@@ -167,9 +178,7 @@ public partial class LocalizationService(LocalStorageService localStorageService
             LanguageCode.ar_sa => localizedField.ar_sa,
             LanguageCode.vi => localizedField.vi,
             LanguageCode.tr => localizedField.tr,
-            _ => throw new ArgumentException($"Unsupported LanguageCode: {CurrentLanguageCode}")
+            _ => throw new ArgumentException($"Unsupported LanguageCode: {code}")
         };
-
-        return string.IsNullOrEmpty(translation) ? localizedField.en_US : translation;
     }
 }

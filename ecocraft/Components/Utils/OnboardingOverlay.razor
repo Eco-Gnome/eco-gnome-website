@@ -1,0 +1,230 @@
+@using ecocraft.Services
+@using Microsoft.JSInterop
+@implements IDisposable
+@inject IJSRuntime JsRuntime
+@inject LocalizationService LocalizationService
+
+@* Overlay d'aide « coach marks » : couche fixe au-dessus du site, fond assombri avec des spotlights
+   découpés sur les zones réelles (masque SVG) + bulles d'info ancrées. Statique et non séquentiel :
+   toutes les zones sont mises en évidence en même temps. Fermeture : Échap, clic sur le fond, ✕. *@
+<div class="onboarding-overlay-root"
+     role="dialog"
+     aria-modal="true"
+     aria-label="@LocalizationService.GetTranslation("Onboarding.Help.Title")"
+     tabindex="0"
+     @ref="_rootRef"
+     @onclick="Close"
+     @onkeydown="OnKeyDown">
+
+    <svg class="onboarding-overlay-svg" width="@_vw" height="@_vh" viewBox="0 0 @_vw @_vh" preserveAspectRatio="none">
+        <defs>
+            <mask id="onboarding-spot-mask">
+                <rect x="0" y="0" width="@_vw" height="@_vh" fill="white" />
+                @foreach (var p in _placed)
+                {
+                    @if (p.Visible)
+                    {
+                        <rect x="@p.RingX" y="@p.RingY" width="@p.RingW" height="@p.RingH" rx="10" ry="10" fill="black" />
+                    }
+                }
+            </mask>
+        </defs>
+        <rect x="0" y="0" width="@_vw" height="@_vh" fill="rgba(13,17,23,0.74)" mask="url(#onboarding-spot-mask)" />
+    </svg>
+
+    @* Cibles montées en permanence (avec @@key stable) : on ne fait que faire varier l'opacité quand
+       elles passent sous le header, pour éviter le clignotement add/remove au scroll. *@
+    @foreach (var p in _placed)
+    {
+        <div class="onboarding-target @(p.Visible ? "" : "onboarding-target--hidden")" @key="p.Target.Id">
+            <div class="onboarding-spot-ring @(p.Target.IsReveal ? "reveal" : "comfort")"
+                 style="left:@(p.RingX)px;top:@(p.RingY)px;width:@(p.RingW)px;height:@(p.RingH)px"></div>
+
+            <div class="@CalloutCss(p)"
+                 style="left:@(p.CalloutX)px;top:@(p.CalloutY)px"
+                 @onclick:stopPropagation="true">
+                <MudText Typo="Typo.body2">@p.Target.Text</MudText>
+            </div>
+        </div>
+    }
+
+    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                   Color="Color.Inherit"
+                   Class="onboarding-overlay-close"
+                   aria-label="@LocalizationService.GetTranslation("Onboarding.Help.Close")"
+                   OnClick="Close" />
+
+    <div class="onboarding-overlay-hint" @onclick:stopPropagation="true">
+        @LocalizationService.GetTranslation("Onboarding.Help.DismissHint")
+    </div>
+</div>
+
+@code {
+    public record OnboardingTarget(string Id, bool IsReveal, string Text, string Placement, bool Fixed = false);
+
+    [Parameter, EditorRequired] public List<OnboardingTarget> Targets { get; set; } = [];
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private const int Pad = 6;
+    private const int Gap = 16;
+    private const int CalloutWidth = 240;
+
+    private int _vw = 0;
+    private int _vh = 0;
+    private int _headerBottom = 0;
+    private List<PlacedTarget> _placed = [];
+    private DotNetObjectReference<OnboardingOverlay>? _selfRef;
+    private ElementReference _rootRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _selfRef = DotNetObjectReference.Create(this);
+            await JsRuntime.InvokeVoidAsync("onboardingOverlay.register", _selfRef);
+            await MeasureAsync();
+            await _rootRef.FocusAsync();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnLayoutChanged()
+    {
+        await MeasureAsync();
+    }
+
+    private async Task MeasureAsync()
+    {
+        var ids = Targets.Select(t => t.Id).ToArray();
+        var result = await JsRuntime.InvokeAsync<MeasureResult>("onboardingOverlay.measure", new object[] { ids });
+
+        _vw = (int)Math.Round(result.Width);
+        _vh = (int)Math.Round(result.Height);
+        _headerBottom = (int)Math.Round(result.HeaderBottom);
+
+        var placed = new List<PlacedTarget>();
+        foreach (var rect in result.Targets)
+        {
+            var target = Targets.FirstOrDefault(t => t.Id == rect.Id);
+            if (target is null)
+            {
+                continue;
+            }
+
+            // Cible défilante passée sous le header fixe ou sortie par le bas : on la garde montée
+            // mais invisible (fondu d'opacité) pour éviter le clignotement add/remove au scroll.
+            // Les cibles du header (Fixed) restent toujours visibles.
+            var centerY = rect.Y + rect.Height / 2;
+            var visible = target.Fixed || (centerY >= _headerBottom && centerY <= _vh);
+
+            placed.Add(BuildPlaced(target, rect, visible));
+        }
+
+        _placed = placed;
+        StateHasChanged();
+    }
+
+    private PlacedTarget BuildPlaced(OnboardingTarget target, MeasuredRect rect, bool visible)
+    {
+        var ringX = (int)Math.Round(rect.X) - Pad;
+        var ringY = (int)Math.Round(rect.Y) - Pad;
+        var ringW = (int)Math.Round(rect.Width) + Pad * 2;
+        var ringH = (int)Math.Round(rect.Height) + Pad * 2;
+
+        int calloutX;
+        int calloutY;
+        var vcenter = false;
+
+        switch (target.Placement)
+        {
+            case "left":
+                calloutX = ringX - CalloutWidth - Gap;
+                calloutY = ringY;
+                break;
+            // Variantes centrées verticalement sur la cible (boutons du header) : translateY(-50%) en CSS.
+            case "left-center":
+                calloutX = ringX - CalloutWidth - Gap;
+                calloutY = ringY + ringH / 2;
+                vcenter = true;
+                break;
+            case "right-center":
+                calloutX = ringX + ringW + Gap;
+                calloutY = ringY + ringH / 2;
+                vcenter = true;
+                break;
+            case "below":
+                calloutX = ringX;
+                calloutY = ringY + ringH + Gap;
+                break;
+            case "right":
+            default:
+                calloutX = ringX + ringW + Gap;
+                calloutY = ringY;
+                break;
+        }
+
+        // Garde la bulle dans le viewport (sous le header fixe).
+        calloutX = Math.Clamp(calloutX, 8, Math.Max(8, _vw - CalloutWidth - 8));
+        if (!vcenter)
+        {
+            var minY = _headerBottom + 4;
+            calloutY = Math.Clamp(calloutY, minY, Math.Max(minY, _vh - 90));
+        }
+
+        return new PlacedTarget(target, ringX, ringY, ringW, ringH, calloutX, calloutY, vcenter, visible);
+    }
+
+    private static string CalloutCss(PlacedTarget p)
+    {
+        var css = "onboarding-callout " + (p.Target.IsReveal ? "reveal" : "comfort");
+        if (p.VCenter)
+        {
+            css += " onboarding-callout--vcenter";
+        }
+        return css;
+    }
+
+    private void OnKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            _ = Close();
+        }
+    }
+
+    private async Task Close()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_selfRef is not null)
+        {
+            _ = JsRuntime.InvokeVoidAsync("onboardingOverlay.unregister");
+            _selfRef.Dispose();
+        }
+    }
+
+    private record PlacedTarget(OnboardingTarget Target, int RingX, int RingY, int RingW, int RingH, int CalloutX, int CalloutY, bool VCenter, bool Visible);
+
+    private class MeasureResult
+    {
+        public double Width { get; set; }
+        public double Height { get; set; }
+        public double HeaderBottom { get; set; }
+        public List<MeasuredRect> Targets { get; set; } = [];
+    }
+
+    private class MeasuredRect
+    {
+        public string Id { get; set; } = "";
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
+}

@@ -451,6 +451,8 @@ public partial class ImportDataService
             RefreshDynamicValue(context, dbDynamicValue, newDynamicValue.BaseValue);
         }
 
+        dbDynamicValue.HasLayerModifier = newDynamicValue.Modifiers.Any(m => m.DynamicType == "Layer");
+
         ImportModifiers(context, dbDynamicValue, newDynamicValue.Modifiers);
 
         return dbDynamicValue;
@@ -479,7 +481,7 @@ public partial class ImportDataService
             }
 
             if (iSLinkedToModifier is null)
-                return;
+                continue;
 
             if (dbModifier is null)
             {

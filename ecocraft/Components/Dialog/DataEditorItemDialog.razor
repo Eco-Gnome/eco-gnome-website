@@ -1,0 +1,187 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@using ecocraft.Extensions
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+
+<MudDialog Style="min-height: 320px;">
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@MDIIcons.Outline.Pencil" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">
+                @(IsCreation
+                    ? LocalizationService.GetTranslation("DataEditor.Item.CreateTitle")
+                    : LocalizationService.GetTranslation("DataEditor.Item.EditTitle"))
+            </MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <DataEditorNameFields @bind-TechnicalName="_model.Name"
+                                  @bind-EnglishName="_model.LocalizedNameEnUs"
+                                  @bind-CurrentName="_model.LocalizedNameCurrent"
+                                  TechnicalNameError="_nameError"
+                                  DisplayNameError="_displayNameError" />
+
+            <MudSwitch @bind-Value="_model.IsTag"
+                       Color="Color.Primary"
+                       Label="@LocalizationService.GetTranslation("DataEditor.Item.IsTag")" />
+
+            @if (_model.IsTag)
+            {
+                <MudSelect T="Guid"
+                           MultiSelection="true"
+                           @bind-SelectedValues="_selectedItemIds"
+                           Label="@LocalizationService.GetTranslation("DataEditor.Item.AssociatedItems")"
+                           Variant="Variant.Outlined"
+                           Clearable="true"
+                           MultiSelectionTextFunc="@(GetMultiSelectionText)">
+                    @foreach (var item in GetSelectableItems(false))
+                    {
+                        <MudSelectItem T="Guid" Value="@item.Id">@LocalizationService.GetTranslation(item)</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else
+            {
+                <MudSelect T="Guid"
+                           MultiSelection="true"
+                           @bind-SelectedValues="_selectedTagIds"
+                           Label="@LocalizationService.GetTranslation("DataEditor.Item.AssociatedTags")"
+                           Variant="Variant.Outlined"
+                           Clearable="true"
+                           MultiSelectionTextFunc="@(GetMultiSelectionText)">
+                    @foreach (var tag in GetSelectableItems(true))
+                    {
+                        <MudSelectItem T="Guid" Value="@tag.Id">@LocalizationService.GetTranslation(tag)</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            <MudStack Row Spacing="2">
+                <MudNumericField T="decimal?"
+                                 @bind-Value="_model.MinPrice"
+                                 Label="@LocalizationService.GetTranslation("DataEditor.Item.MinPrice")"
+                                 Variant="Variant.Outlined"
+                                 Format="0.##"
+                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                 Adornment="Adornment.End"
+                                 AdornmentText="$" />
+
+                <MudNumericField T="decimal?"
+                                 @bind-Value="_model.DefaultPrice"
+                                 Label="@LocalizationService.GetTranslation("DataEditor.Item.DefaultPrice")"
+                                 Variant="Variant.Outlined"
+                                 Format="0.##"
+                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                 Adornment="Adornment.End"
+                                 AdornmentText="$" />
+
+                <MudNumericField T="decimal?"
+                                 @bind-Value="_model.MaxPrice"
+                                 Label="@LocalizationService.GetTranslation("DataEditor.Item.MaxPrice")"
+                                 Variant="Variant.Outlined"
+                                 Format="0.##"
+                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                 Adornment="Adornment.End"
+                                 AdornmentText="$" />
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@Cancel">
+            @LocalizationService.GetTranslation("DataEditor.Item.Cancel")
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Submit">
+            @LocalizationService.GetTranslation("DataEditor.Item.Validate")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    // null => creation, otherwise edition of the given item/tag.
+    [Parameter]
+    public ItemOrTag? ItemOrTag { get; set; }
+
+    private ItemEditModel _model = new();
+    private bool _nameError;
+    private bool _displayNameError;
+
+    // Bound to the MudSelect (SelectedValues is IReadOnlyCollection); copied into the model lists on submit.
+    private IReadOnlyCollection<Guid> _selectedTagIds = new HashSet<Guid>();
+    private IReadOnlyCollection<Guid> _selectedItemIds = new HashSet<Guid>();
+
+    private bool IsCreation => ItemOrTag is null;
+
+    protected override void OnParametersSet()
+    {
+        if (ItemOrTag is not null)
+        {
+            _model = new ItemEditModel
+            {
+                Id = ItemOrTag.Id,
+                Name = ItemOrTag.Name,
+                LocalizedNameEnUs = LocalizationService.GetColumn(ItemOrTag.LocalizedName, LanguageCode.en_US),
+                LocalizedNameCurrent = LocalizationService.GetColumn(ItemOrTag.LocalizedName, LocalizationService.CurrentLanguageCode),
+                IsTag = ItemOrTag.IsTag,
+                MinPrice = ItemOrTag.MinPrice,
+                DefaultPrice = ItemOrTag.DefaultPrice,
+                MaxPrice = ItemOrTag.MaxPrice,
+            };
+            _selectedTagIds = new HashSet<Guid>(ItemOrTag.AssociatedTags.Select(t => t.Id));
+            _selectedItemIds = new HashSet<Guid>(ItemOrTag.AssociatedItems.Select(i => i.Id));
+        }
+        else
+        {
+            _model = new ItemEditModel();
+            _selectedTagIds = new HashSet<Guid>();
+            _selectedItemIds = new HashSet<Guid>();
+        }
+    }
+
+    // wantTags=true -> selectable tags (for an item's tags); false -> selectable items (for a tag's items).
+    // Never offer the entity itself as its own association.
+    private IEnumerable<ItemOrTag> GetSelectableItems(bool wantTags)
+    {
+        return ContextService.CurrentServerData!.ItemOrTags
+            .Where(i => i.IsTag == wantTags && i.Id != _model.Id)
+            .OrderBy(i => LocalizationService.GetTranslation(i));
+    }
+
+    private string GetMultiSelectionText(IReadOnlyList<string> selectedIds)
+    {
+        var names = selectedIds
+            .Select(id => Guid.TryParse(id, out var guid)
+                ? ContextService.CurrentServerData!.ItemOrTags.FirstOrDefault(i => i.Id == guid)
+                : null)
+            .Where(i => i is not null)
+            .Select(i => LocalizationService.GetTranslation(i!));
+
+        return string.Join(", ", names);
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Submit()
+    {
+        _model.Name = _model.Name?.Trim() ?? "";
+        _nameError = string.IsNullOrWhiteSpace(_model.Name);
+
+        if (_nameError)
+        {
+            return;
+        }
+
+        // Only the end matching IsTag is meaningful; the service applies that one.
+        _model.AssociatedTagIds = _selectedTagIds.ToList();
+        _model.AssociatedItemIds = _selectedItemIds.ToList();
+
+        MudDialog.Close(DialogResult.Ok(_model));
+    }
+}

@@ -1,0 +1,81 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Extensions
+@inject LocalizationService LocalizationService
+
+@if (UserCraftingTable.CraftingTable.PluginModules.Count > 0)
+{
+    var genericPluginModules = UserCraftingTable.CraftingTable.PluginModules
+        .Where(p => p.Skill is null)
+        .OrderByDescending(pm => pm.Percent)
+        .ThenBy(pm => LocalizationService.GetTranslation(pm))
+        .ToList();
+
+    var skilledPluginModules = UserCraftingTable.CraftingTable.PluginModules
+        .Where(p => p.Skill is not null)
+        .OrderByDescending(pm => pm.SkillPercent)
+        .ThenBy(pm => LocalizationService.GetTranslation(pm))
+        .ToList();
+
+    var currentPluginModuleId = UserCraftingTable.PluginModuleId;
+    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
+
+    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@Class">
+        <MudIconButton Icon="@MDIIcons.Filled.Minus"
+                       Size="Size.Small"
+                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
+                       OnClick="@(() => IncreaseOrDecreasePluginModule(PluginModuleChangeDirection.Decrease, genericPluginModules))"/>
+        <MudTooltip Text="@(UserCraftingTable.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+            <EcoIcon Item="@UserCraftingTable.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel"/>
+        </MudTooltip>
+        @if (!shouldDisableIncrease)
+        {
+            <MudIconButton Icon="@MDIIcons.Filled.Plus"
+                           Size="Size.Small"
+                           Disabled="shouldDisableIncrease"
+                           OnClick="@(() => IncreaseOrDecreasePluginModule(PluginModuleChangeDirection.Increase, genericPluginModules))"/>
+        }
+
+        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
+        {
+            @foreach (var skilledPluginModule in skilledPluginModules)
+            {
+                <MudLink OnClick="() => ToggleSkilledPluginModule(skilledPluginModule)">
+                    <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
+                        <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(UserCraftingTable.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                    </MudTooltip>
+                </MudLink>
+            }
+        }
+    </MudStack>
+}
+
+@code {
+    [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<List<PluginModule>> IncreaseRequested { get; set; }
+    [Parameter] public EventCallback<List<PluginModule>> DecreaseRequested { get; set; }
+    [Parameter] public EventCallback<PluginModule> SkilledPluginModuleToggled { get; set; }
+
+    private async Task IncreaseOrDecreasePluginModule(PluginModuleChangeDirection direction, List<PluginModule> pluginModules)
+    {
+        if (direction == PluginModuleChangeDirection.Increase)
+        {
+            await IncreaseRequested.InvokeAsync(pluginModules);
+            return;
+        }
+
+        await DecreaseRequested.InvokeAsync(pluginModules);
+    }
+
+    private async Task ToggleSkilledPluginModule(PluginModule pluginModule)
+    {
+        await SkilledPluginModuleToggled.InvokeAsync(pluginModule);
+    }
+
+    private enum PluginModuleChangeDirection
+    {
+        Increase,
+        Decrease,
+    }
+}

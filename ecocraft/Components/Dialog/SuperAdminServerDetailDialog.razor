@@ -1,0 +1,120 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudDialog Style="min-height: 320px;">
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Primary" />
+            <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Title")</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h6">@Server.Name</MudText>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.IdCol"):</b> @Server.Id</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol"):</b> @Server.CreationDateTime</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Default"):</b> @GetBooleanLabel(Server.IsDefault)</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.DataStatusLabel"):</b> @GetServerDataStatus(Server)</MudText>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.EcoServerId"):</b> @(Server.EcoServerId ?? "-")</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.LastDataUpload"):</b> @(Server.LastDataUploadTime?.ToString() ?? "-")</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.PlayersCol"):</b> @Server.UserServers.Count</MudText>
+                    <MudText Typo="Typo.body2"><b>@LocalizationService.GetTranslation("SuperAdmin.ServerTable.AdminsCol"):</b> @GetAdminNames(Server)</MudText>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.Title")</MudText>
+                @{
+                    var hasNoAdmin = !Server.UserServers.Any(us => us.IsAdmin);
+                    var hasStale = IsStaleImport(Server);
+                }
+                @if (!hasNoAdmin && !hasStale)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true">
+                        @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.None")
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudStack Spacing="2">
+                        @if (hasNoAdmin)
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true">
+                                @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.NoAdmin")
+                            </MudAlert>
+                        }
+                        @if (hasStale)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                                @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Warnings.Stale", StaleImportDays.ToString())
+                            </MudAlert>
+                        }
+                    </MudStack>
+                }
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@CloseDialog">
+            @LocalizationService.GetTranslation("SuperAdmin.ServerDetail.Close")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public required Server Server { get; set; }
+
+    [Parameter]
+    public int StaleImportDays { get; set; }
+
+    private void CloseDialog()
+    {
+        MudDialog.Close();
+    }
+
+    private string GetAdminNames(Server server)
+    {
+        var admins = server.UserServers
+            .Where(us => us.IsAdmin)
+            .Select(us => us.GetPseudo())
+            .OrderBy(pseudo => pseudo)
+            .ToList();
+
+        return admins.Count == 0 ? "-" : string.Join(", ", admins);
+    }
+
+    private string GetServerDataStatus(Server server)
+    {
+        if (server.IsEmpty)
+            return LocalizationService.GetTranslation("SuperAdmin.ServerDetail.DataStatus.Empty");
+        if (server.LastDataUploadTime is null)
+            return LocalizationService.GetTranslation("SuperAdmin.ServerDetail.DataStatus.NeverImported");
+        if (IsStaleImport(server))
+            return LocalizationService.GetTranslation("SuperAdmin.ServerDetail.DataStatus.Stale");
+        return LocalizationService.GetTranslation("SuperAdmin.ServerDetail.DataStatus.Fresh");
+    }
+
+    private bool IsStaleImport(Server server)
+    {
+        return server.LastDataUploadTime is { } lastUpload
+               && lastUpload < DateTimeOffset.UtcNow.AddDays(-StaleImportDays);
+    }
+
+    private string GetBooleanLabel(bool value)
+    {
+        return value
+            ? LocalizationService.GetTranslation("SuperAdmin.Boolean.Yes")
+            : LocalizationService.GetTranslation("SuperAdmin.Boolean.No");
+    }
+}

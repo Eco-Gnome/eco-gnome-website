@@ -47,6 +47,7 @@ public class Recipe: IHasLocalizedName
     [ForeignKey("DynamicValue")] public Guid LaborId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
+    public bool IsShareLocked { get; set; } = false;
 
     public LocalizedField LocalizedName { get; set; }
     public DynamicValue CraftMinutes { get; set; }
@@ -60,6 +61,21 @@ public class Recipe: IHasLocalizedName
     public UserRecipe? GetCurrentUserRecipe(DataContext dataContext)
     {
         return dataContext.UserRecipes.FirstOrDefault(ur => ur.RecipeId == Id);
+    }
+
+    /// <summary>
+    /// Effective craft time in minutes. When the craft time is driven by a world Layer (e.g. Oilfield for
+    /// Petroleum), its real value cannot be computed from the exported data, so the user's override is used
+    /// when set. Otherwise the standard dynamic value applies.
+    /// </summary>
+    public decimal GetEffectiveCraftMinutes(DataContext dataContext, UserRecipe? userRecipe, DynamicValueCalculationContext? calculationContext = null)
+    {
+        if (CraftMinutes.HasLayerModifier && userRecipe?.CraftMinutesOverride is { } craftMinutesOverride)
+        {
+            return craftMinutesOverride;
+        }
+
+        return CraftMinutes.GetDynamicValue(dataContext, calculationContext);
     }
 
     public override string ToString()
@@ -119,6 +135,7 @@ public class DynamicValue
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public decimal BaseValue { get; set; }
+    public bool HasLayerModifier { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public List<Modifier> Modifiers { get; set; } = [];
@@ -470,6 +487,7 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public Server Server { get; set; }
     public List<Element> Elements { get; set; } = [];
     public List<UserPrice> UserPrices { get; set; } = [];
+    public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<ItemOrTag> AssociatedTags { get; set; } = [];
     public List<ItemOrTag> AssociatedItems { get; set; } = [];
 
@@ -757,6 +775,8 @@ public class DataContext
     public List<UserSetting> UserSettings { get; set; } = [];
     public List<UserRecipe> UserRecipes { get; set; } = [];
     public List<UserMargin> UserMargins { get; set; } = [];
+    public List<UserAutomationInput> UserAutomationInputs { get; set; } = [];
+    public List<UserAutomationTarget> UserAutomationTargets { get; set; } = [];
 
     public List<UserRecipe> GetRootShoppingListRecipes()
     {
@@ -782,6 +802,39 @@ public class UserSetting
     public DataContext DataContext { get; set; }
 }
 
+// Limite d'entrée saisie dans le planificateur d'automatisation d'une shopping list : plafond de débit
+// (par minute) d'une matière première donnée. Persistée par shopping list (DataContext) et par item.
+// Une ligne n'existe que si une limite est effectivement saisie (sinon « pas de limite »).
+public class UserAutomationInput
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+
+    public decimal Cap { get; set; }
+
+    public DataContext DataContext { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
+}
+
+// Objectif de calcul saisi dans le planificateur d'automatisation d'une shopping list : débit cible
+// (par minute) d'un produit final, ou mode « max » (production maximale sous les contraintes d'entrée).
+// Persisté par shopping list (DataContext) et par item. Une ligne existe dès que l'utilisateur a touché
+// la cible (débit modifié ou « max » activé) ; sinon le débit par défaut est recalculé à l'ouverture.
+public class UserAutomationTarget
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+
+    // Débit cible /min (sert aussi de base quand IsMax : conserve un éventuel débit saisi avant « max »).
+    public decimal Rate { get; set; }
+    public bool IsMax { get; set; }
+
+    public DataContext DataContext { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
+}
+
 public class UserMargin
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
@@ -801,12 +854,15 @@ public class UserCraftingTable
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
     [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
+    [ForeignKey("FuelItem")] public Guid? FuelItemId { get; set; }
 
-    public decimal CraftMinuteFee { get; set; } = 0;
+    public decimal AdditionalCraftMinuteFee { get; set; } = 0;
+    public decimal TotalCraftMinuteFee { get; set; } = 0;
 
     public DataContext DataContext { get; set; }
     public CraftingTable CraftingTable { get; set; }
     public PluginModule? PluginModule { get; set; }
+    public ItemOrTag? FuelItem { get; set; }
     public List<PluginModule> SkilledPluginModules { get; set; } = [];
 
     public PluginModule? GetBestPluginModule(Skill? skill, bool requireSpeed = false)
@@ -926,6 +982,9 @@ public class UserRecipe
     public int RoundFactor { get; set; }
     public bool LockShare { get; set; } = false;
 
+    // Craft time (minutes) set by the user when the recipe's craft time is driven by a world Layer (null = unset)
+    public decimal? CraftMinutesOverride { get; set; }
+
     // For Shopping List only
     [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }
 
@@ -958,6 +1017,10 @@ public class Server
     public DateTimeOffset? LastDataUploadTime { get; set; }
 	public string JoinCode { get; set; }
 	public Guid ApiKey { get; set; } = Guid.NewGuid();
+
+	// Active le bouton « Planificateur » (mode automatisation de la chaîne de production) pour ce
+	// serveur. Activable uniquement par un super-admin depuis la page d'administration.
+	public bool IsAutomationPlannerEnabled { get; set; } = false;
 
     [NotMapped]
     public bool IsEmpty { get; set; }

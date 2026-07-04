@@ -1,0 +1,43 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using System.Globalization
+@inject LocalizationService LocalizationService
+
+<MudStack Row Spacing="2" AlignItems="AlignItems.Center" Class="@Class">
+    <EcoIcon Item="@_primaryProduct?.ItemOrTag" Size="@IconSize"></EcoIcon>
+    <MudText>@LocalizationService.GetTranslation(Recipe)</MudText>
+    @if (_ingredients.Count > 0)
+    {
+        <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="mud-text-secondary">
+            <MudText Typo="Typo.caption">(</MudText>
+            @foreach (var ingredient in _ingredients)
+            {
+                <MudText Typo="Typo.caption">@FormatQuantity(Math.Abs(ingredient.Quantity.BaseValue))×</MudText>
+                <EcoIcon Item="@ingredient.ItemOrTag" Size="@SmallIconSize"></EcoIcon>
+            }
+            <MudText Typo="Typo.caption">)</MudText>
+        </MudStack>
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired] public Recipe Recipe { get; set; } = null!;
+    [Parameter] public int IconSize { get; set; } = 24;
+    [Parameter] public int SmallIconSize { get; set; } = 18;
+    [Parameter] public string? Class { get; set; }
+
+    private Element? _primaryProduct;
+    private List<Element> _ingredients = [];
+
+    protected override void OnParametersSet()
+    {
+        _primaryProduct = Recipe.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0);
+        _ingredients = Recipe.Elements
+            .Where(e => e.IsIngredient())
+            .OrderBy(e => e.Index)
+            .ToList();
+    }
+
+    private static string FormatQuantity(decimal value)
+        => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

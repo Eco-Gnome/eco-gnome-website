@@ -1,0 +1,552 @@
+@page "/data-editor"
+@implements IDisposable
+@using ecocraft.Models
+@using ecocraft.Extensions
+@using ecocraft.Components.Dialog
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@inject ContextService ContextService
+@inject NavigationManager Navigation
+@inject ServerDbService ServerDbService
+@inject LocalizationService LocalizationService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JsRuntime
+@inject ServerDataEditorService ServerDataEditorService
+
+<PageTitle>@LocalizationService.GetTranslation("NavMenu.NavDataEditor") - Eco Gnome</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-4">
+	<MudAlert Severity="Severity.Warning" Class="mb-4">
+		@LocalizationService.GetTranslation("DataEditor.ReimportWarning")
+	</MudAlert>
+
+	@if (_isLoadingData || ContextService.CurrentServerData is null)
+	{
+		<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="pa-8">
+			<MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true"/>
+		</MudStack>
+	}
+	else
+	{
+		<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+			<MudTabPanel Text="@LocalizationService.GetTranslation("DataEditor.Tab.Items")">
+				<MudTable Items="@GetItems()"
+				          Filter="new Func<ItemOrTag, bool>(FilterItem)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="600px"
+				          Dense="true"
+				          Hover="true">
+					<ToolBarContent>
+						<MudButton Variant="Variant.Filled"
+						           Color="Color.Primary"
+						           StartIcon="@Icons.Material.Filled.Add"
+						           OnClick="@(() => OpenItemDialog(null))">
+							@LocalizationService.GetTranslation("DataEditor.Item.Create")
+						</MudButton>
+						<MudSpacer/>
+						<MudTextField @bind-Value="_searchItem" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+					</ToolBarContent>
+					<HeaderContent>
+						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Item.IsTag")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Item.MinPrice")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Item.DefaultPrice")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Item.MaxPrice")</MudTh>
+						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
+						<MudTd>
+							@if (context.IsTag)
+							{
+								<MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small"/>
+							}
+						</MudTd>
+						<MudTd>@context.MinPrice</MudTd>
+						<MudTd>@context.DefaultPrice</MudTd>
+						<MudTd>@context.MaxPrice</MudTd>
+						<MudTd Style="text-align:right">
+							@RenderRowActions(() => OpenItemDialog(context), () => DeleteItem(context))
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudTabPanel>
+
+			<MudTabPanel Text="@LocalizationService.GetTranslation("DataEditor.Tab.Recipes")">
+				<MudTable Items="@GetRecipes()"
+				          Filter="new Func<Recipe, bool>(FilterRecipe)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="600px"
+				          Dense="true"
+				          Hover="true">
+					<ToolBarContent>
+						<MudButton Variant="Variant.Filled"
+						           Color="Color.Primary"
+						           StartIcon="@Icons.Material.Filled.Add"
+						           OnClick="@(() => OpenRecipeDialog(null))">
+							@LocalizationService.GetTranslation("DataEditor.Recipe.Create")
+						</MudButton>
+						<MudSpacer/>
+						<MudTextField @bind-Value="_searchRecipe" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+					</ToolBarContent>
+					<HeaderContent>
+						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Recipe.Skill")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Recipe.CraftingTable")</MudTh>
+						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
+						<MudTd>@(context.Skill is null ? "-" : LocalizationService.GetTranslation(context.Skill))</MudTd>
+						<MudTd>@LocalizationService.GetTranslation(context.CraftingTable)</MudTd>
+						<MudTd Style="text-align:right">
+							@RenderRowActions(() => OpenRecipeDialog(context), () => DeleteRecipe(context))
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudTabPanel>
+
+			<MudTabPanel Text="@LocalizationService.GetTranslation("DataEditor.Tab.Skills")">
+				<MudTable Items="@GetSkills()"
+				          Filter="new Func<Skill, bool>(FilterSkill)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="600px"
+				          Dense="true"
+				          Hover="true">
+					<ToolBarContent>
+						<MudButton Variant="Variant.Filled"
+						           Color="Color.Primary"
+						           StartIcon="@Icons.Material.Filled.Add"
+						           OnClick="@(() => OpenSkillDialog(null))">
+							@LocalizationService.GetTranslation("DataEditor.Skill.Create")
+						</MudButton>
+						<MudSpacer/>
+						<MudTextField @bind-Value="_searchSkill" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+					</ToolBarContent>
+					<HeaderContent>
+						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Skill.Profession")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.Skill.MaxLevel")</MudTh>
+						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
+						<MudTd>@(context.Profession ?? "-")</MudTd>
+						<MudTd>@context.MaxLevel</MudTd>
+						<MudTd Style="text-align:right">
+							@RenderRowActions(() => OpenSkillDialog(context), () => DeleteSkill(context))
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudTabPanel>
+
+			<MudTabPanel Text="@LocalizationService.GetTranslation("DataEditor.Tab.Tables")">
+				<MudTable Items="@GetCraftingTables()"
+				          Filter="new Func<CraftingTable, bool>(FilterCraftingTable)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="600px"
+				          Dense="true"
+				          Hover="true">
+					<ToolBarContent>
+						<MudButton Variant="Variant.Filled"
+						           Color="Color.Primary"
+						           StartIcon="@Icons.Material.Filled.Add"
+						           OnClick="@(() => OpenCraftingTableDialog(null))">
+							@LocalizationService.GetTranslation("DataEditor.CraftingTable.Create")
+						</MudButton>
+						<MudSpacer/>
+						<MudTextField @bind-Value="_searchCraftingTable" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+					</ToolBarContent>
+					<HeaderContent>
+						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.CraftingTable.PluginModules")</MudTh>
+						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
+						<MudTd>@(string.Join(", ", context.PluginModules.Select(LocalizationService.GetTranslation)))</MudTd>
+						<MudTd Style="text-align:right">
+							@RenderRowActions(() => OpenCraftingTableDialog(context), () => DeleteCraftingTable(context))
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudTabPanel>
+
+			<MudTabPanel Text="@LocalizationService.GetTranslation("DataEditor.Tab.Modules")">
+				<MudTable Items="@GetPluginModules()"
+				          Filter="new Func<PluginModule, bool>(FilterPluginModule)"
+				          Virtualize="false"
+				          FixedHeader="true"
+				          Height="600px"
+				          Dense="true"
+				          Hover="true">
+					<ToolBarContent>
+						<MudButton Variant="Variant.Filled"
+						           Color="Color.Primary"
+						           StartIcon="@Icons.Material.Filled.Add"
+						           OnClick="@(() => OpenPluginModuleDialog(null))">
+							@LocalizationService.GetTranslation("DataEditor.PluginModule.Create")
+						</MudButton>
+						<MudSpacer/>
+						<MudTextField @bind-Value="_searchPluginModule" Immediate Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+					</ToolBarContent>
+					<HeaderContent>
+						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.PluginType")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.Percent")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.Skill")</MudTh>
+						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
+					</HeaderContent>
+					<RowTemplate>
+						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
+						<MudTd>@context.PluginType.ToString()</MudTd>
+						<MudTd>@context.Percent</MudTd>
+						<MudTd>@(context.Skill is null ? "-" : LocalizationService.GetTranslation(context.Skill))</MudTd>
+						<MudTd Style="text-align:right">
+							@RenderRowActions(() => OpenPluginModuleDialog(context), () => DeletePluginModule(context))
+						</MudTd>
+					</RowTemplate>
+					<PagerContent>
+						<MudTablePager PageSizeOptions="new[] { 25, 50, 100, 200 }"/>
+					</PagerContent>
+				</MudTable>
+			</MudTabPanel>
+		</MudTabs>
+	}
+</MudContainer>
+
+@code {
+	private bool _isLoadingData;
+	private string _searchItem = "";
+	private string _searchRecipe = "";
+	private string _searchSkill = "";
+	private string _searchCraftingTable = "";
+	private string _searchPluginModule = "";
+
+	protected override void OnInitialized()
+	{
+		if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentUserServer.IsAdmin)
+		{
+			Navigation.NavigateTo("/");
+		}
+
+		ContextService.OnContextChanged += OnContextChanged;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		// Always reload the full server data on entry: other pages (e.g. the shopping list) may have
+		// populated the shared CurrentServerData with a lighter query that omits fields the editor
+		// needs (Labor, full DynamicValues), which would NPE when opening a recipe for edit.
+		if (firstRender)
+		{
+			await RefreshServerData();
+		}
+	}
+
+	private void OnContextChanged()
+	{
+		// Make sure you don't have access to this page if you're not admin on this server
+		if (ContextService.CurrentUser == null || ContextService.CurrentUserServer == null || !ContextService.CurrentUserServer.IsAdmin)
+		{
+			Navigation.NavigateTo("/");
+			return;
+		}
+
+		_ = RefreshServerData();
+	}
+
+	public void Dispose()
+	{
+		ContextService.OnContextChanged -= OnContextChanged;
+	}
+
+	private async Task RefreshServerData()
+	{
+		_isLoadingData = ContextService.CurrentServerData is null;
+		StateHasChanged();
+
+		ContextService.CurrentServerData = await ServerDbService.GetServerWithData(ContextService.CurrentServer!.Id);
+
+		_isLoadingData = false;
+		StateHasChanged();
+	}
+
+	// ----- Lists & filters -----
+
+	private List<ItemOrTag> GetItems()
+	{
+		return ContextService.CurrentServerData!.ItemOrTags
+			.OrderBy(i => LocalizationService.GetTranslation(i))
+			.ToList();
+	}
+
+	private List<Recipe> GetRecipes()
+	{
+		return ContextService.CurrentServerData!.Recipes
+			.OrderBy(r => LocalizationService.GetTranslation(r))
+			.ToList();
+	}
+
+	private List<Skill> GetSkills()
+	{
+		return ContextService.CurrentServerData!.Skills
+			.OrderBy(s => LocalizationService.GetTranslation(s))
+			.ToList();
+	}
+
+	private List<CraftingTable> GetCraftingTables()
+	{
+		return ContextService.CurrentServerData!.CraftingTables
+			.OrderBy(c => LocalizationService.GetTranslation(c))
+			.ToList();
+	}
+
+	private List<PluginModule> GetPluginModules()
+	{
+		return ContextService.CurrentServerData!.PluginModules
+			.OrderBy(p => LocalizationService.GetTranslation(p))
+			.ToList();
+	}
+
+	private bool Matches(IHasLocalizedName entity, string name, string search)
+	{
+		if (string.IsNullOrWhiteSpace(search))
+		{
+			return true;
+		}
+
+		return name.Contains(search, StringComparison.OrdinalIgnoreCase)
+		       || LocalizationService.GetTranslation(entity).Contains(search, StringComparison.OrdinalIgnoreCase);
+	}
+
+	private bool FilterItem(ItemOrTag itemOrTag) => Matches(itemOrTag, itemOrTag.Name, _searchItem);
+	private bool FilterRecipe(Recipe recipe) => Matches(recipe, recipe.Name, _searchRecipe);
+	private bool FilterSkill(Skill skill) => Matches(skill, skill.Name, _searchSkill);
+	private bool FilterCraftingTable(CraftingTable craftingTable) => Matches(craftingTable, craftingTable.Name, _searchCraftingTable);
+	private bool FilterPluginModule(PluginModule pluginModule) => Matches(pluginModule, pluginModule.Name, _searchPluginModule);
+
+	// ----- Row actions render helper -----
+
+	private RenderFragment RenderRowActions(Func<Task> edit, Func<Task> delete) => __builder =>
+	{
+		<MudStack Row Justify="Justify.FlexEnd" Spacing="1">
+			<MudTooltip Text="@LocalizationService.GetTranslation("DataEditor.Edit")">
+				<MudIconButton Icon="@Icons.Material.Filled.Edit"
+				               Size="Size.Small"
+				               Color="Color.Primary"
+				               OnClick="@(async () => await edit())"/>
+			</MudTooltip>
+			<MudTooltip Text="@LocalizationService.GetTranslation("DataEditor.Delete")">
+				<MudIconButton Icon="@Icons.Material.Filled.Delete"
+				               Size="Size.Small"
+				               Color="Color.Error"
+				               OnClick="@(async () => await delete())"/>
+			</MudTooltip>
+		</MudStack>
+	};
+
+	// ----- Item -----
+
+	private async Task OpenItemDialog(ItemOrTag? itemOrTag)
+	{
+		var parameters = new DialogParameters { ["ItemOrTag"] = itemOrTag };
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Small };
+		var dialog = await DialogService.ShowAsync<DataEditorItemDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (result is null || result.Canceled || result.Data is not ItemEditModel model)
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.CreateOrUpdateItemAsync(ContextService.CurrentServer!, model));
+	}
+
+	private async Task DeleteItem(ItemOrTag itemOrTag)
+	{
+		// Guard-rail: an item used in any recipe element cannot be deleted (cascade would wipe recipes).
+		var usingRecipes = ContextService.CurrentServerData!.Recipes
+			.Where(r => r.Elements.Any(e => e.ItemOrTag.Id == itemOrTag.Id))
+			.ToList();
+
+		if (usingRecipes.Count > 0)
+		{
+			Snackbar.Add(LocalizationService.GetTranslation("DataEditor.Item.DeleteBlocked", usingRecipes.Count.ToString()), Severity.Error);
+			return;
+		}
+
+		if (!await Confirm(LocalizationService.GetTranslation("DataEditor.Item.Delete"),
+			    LocalizationService.GetTranslation("DataEditor.Item.DeleteConfirm", LocalizationService.GetTranslation(itemOrTag))))
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.DeleteItemAsync(ContextService.CurrentServer!, itemOrTag.Id));
+	}
+
+	// ----- Recipe -----
+
+	private async Task OpenRecipeDialog(Recipe? recipe)
+	{
+		var parameters = new DialogParameters { ["Recipe"] = recipe };
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
+		var dialog = await DialogService.ShowAsync<DataEditorRecipeDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (result is null || result.Canceled || result.Data is not RecipeEditModel model)
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.CreateOrUpdateRecipeAsync(ContextService.CurrentServer!, model));
+	}
+
+	private async Task DeleteRecipe(Recipe recipe)
+	{
+		if (!await Confirm(LocalizationService.GetTranslation("DataEditor.Recipe.Delete"),
+			    LocalizationService.GetTranslation("DataEditor.Recipe.DeleteConfirm", LocalizationService.GetTranslation(recipe))))
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.DeleteRecipeAsync(ContextService.CurrentServer!, recipe.Id));
+	}
+
+	// ----- Skill -----
+
+	private async Task OpenSkillDialog(Skill? skill)
+	{
+		var parameters = new DialogParameters { ["Skill"] = skill };
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Small };
+		var dialog = await DialogService.ShowAsync<DataEditorSkillDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (result is null || result.Canceled || result.Data is not SkillEditModel model)
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.CreateOrUpdateSkillAsync(ContextService.CurrentServer!, model));
+	}
+
+	private async Task DeleteSkill(Skill skill)
+	{
+		// Cascade warning: deleting a skill deletes every recipe referencing it (Recipe.SkillId).
+		var linkedRecipes = ContextService.CurrentServerData!.Recipes
+			.Count(r => r.Skill?.Id == skill.Id);
+
+		var message = linkedRecipes > 0
+			? LocalizationService.GetTranslation("DataEditor.Skill.DeleteConfirmCascade", LocalizationService.GetTranslation(skill), linkedRecipes.ToString())
+			: LocalizationService.GetTranslation("DataEditor.Skill.DeleteConfirm", LocalizationService.GetTranslation(skill));
+
+		if (!await Confirm(LocalizationService.GetTranslation("DataEditor.Skill.Delete"), message))
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.DeleteSkillAsync(ContextService.CurrentServer!, skill.Id));
+	}
+
+	// ----- CraftingTable -----
+
+	private async Task OpenCraftingTableDialog(CraftingTable? craftingTable)
+	{
+		var parameters = new DialogParameters { ["CraftingTable"] = craftingTable };
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Small };
+		var dialog = await DialogService.ShowAsync<DataEditorCraftingTableDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (result is null || result.Canceled || result.Data is not CraftingTableEditModel model)
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.CreateOrUpdateCraftingTableAsync(ContextService.CurrentServer!, model));
+	}
+
+	private async Task DeleteCraftingTable(CraftingTable craftingTable)
+	{
+		// Cascade warning: deleting a table deletes every recipe referencing it (Recipe.CraftingTableId).
+		var linkedRecipes = ContextService.CurrentServerData!.Recipes
+			.Count(r => r.CraftingTable.Id == craftingTable.Id);
+
+		var message = linkedRecipes > 0
+			? LocalizationService.GetTranslation("DataEditor.CraftingTable.DeleteConfirmCascade", LocalizationService.GetTranslation(craftingTable), linkedRecipes.ToString())
+			: LocalizationService.GetTranslation("DataEditor.CraftingTable.DeleteConfirm", LocalizationService.GetTranslation(craftingTable));
+
+		if (!await Confirm(LocalizationService.GetTranslation("DataEditor.CraftingTable.Delete"), message))
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.DeleteCraftingTableAsync(ContextService.CurrentServer!, craftingTable.Id));
+	}
+
+	// ----- PluginModule -----
+
+	private async Task OpenPluginModuleDialog(PluginModule? pluginModule)
+	{
+		var parameters = new DialogParameters { ["PluginModule"] = pluginModule };
+		var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Small };
+		var dialog = await DialogService.ShowAsync<DataEditorPluginModuleDialog>("", parameters, options);
+		var result = await dialog.Result;
+
+		if (result is null || result.Canceled || result.Data is not PluginModuleEditModel model)
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.CreateOrUpdatePluginModuleAsync(ContextService.CurrentServer!, model));
+	}
+
+	private async Task DeletePluginModule(PluginModule pluginModule)
+	{
+		if (!await Confirm(LocalizationService.GetTranslation("DataEditor.PluginModule.Delete"),
+			    LocalizationService.GetTranslation("DataEditor.PluginModule.DeleteConfirm", LocalizationService.GetTranslation(pluginModule))))
+		{
+			return;
+		}
+
+		await Mutate(() => ServerDataEditorService.DeletePluginModuleAsync(ContextService.CurrentServer!, pluginModule.Id));
+	}
+
+	// ----- Shared helpers -----
+
+	private async Task<bool> Confirm(string title, string message)
+	{
+		return await JsRuntime.InvokeAsync<bool>("confirm", $"{title}\n\n{message}");
+	}
+
+	private async Task Mutate(Func<Task> action)
+	{
+		try
+		{
+			await action();
+			await RefreshServerData();
+			Snackbar.Add(LocalizationService.GetTranslation("DataEditor.Snackbar.Saved"), Severity.Success);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex);
+			Snackbar.Add($"{LocalizationService.GetTranslation("DataEditor.Snackbar.Error")}: {ex.Message}", Severity.Error);
+		}
+	}
+}

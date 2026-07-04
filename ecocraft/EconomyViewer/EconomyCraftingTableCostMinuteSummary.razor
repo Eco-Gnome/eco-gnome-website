@@ -1,0 +1,48 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Extensions
+@inject EconomyViewerDisplayService EconomyViewerDisplayService
+@inject LocalizationService LocalizationService
+
+<MudTooltip Text="@GetCraftMinuteFeeTooltip()">
+    <MudNumericField T="decimal"
+                     Class="rectangle-input small-adornment"
+                     Style="width: 80px;"
+                     Value="Summary.TotalCraftMinuteFee"
+                     Disabled="true"
+                     HideSpinButtons="true"
+                     Format="0.##"
+                     Converter="@CultureInvariantConverter.DotOrCommaDecimal"
+                     Adornment="Adornment.End"
+                     AdornmentIcon="@MDIIcons.Filled.Calculator"
+                     AdornmentColor="Color.Default"
+                     Variant="Variant.Outlined"/>
+</MudTooltip>
+
+@code {
+    [Parameter, EditorRequired] public EconomyPlayerCraftingTableSummary Summary { get; set; } = null!;
+
+    private string GetCraftMinuteFeeTooltip()
+    {
+        return LocalizationService.GetTranslation(
+            "EconomyViewer.Drilldown.CraftMinuteFeeTooltip",
+            EconomyViewerDisplayService.FormatDecimal(Summary.AdditionalCraftMinuteFee),
+            FormatFuelCraftMinuteFee(),
+            EconomyViewerDisplayService.FormatDecimal(Summary.TotalCraftMinuteFee));
+    }
+
+    private string FormatFuelCraftMinuteFee()
+    {
+        var formattedFuelCraftMinuteFee = EconomyViewerDisplayService.FormatDecimal(Summary.FuelCraftMinuteFee);
+
+        return Summary.FuelItem is null
+            ? formattedFuelCraftMinuteFee
+            : $"{formattedFuelCraftMinuteFee} ({GetFuelName(Summary.FuelItem)})";
+    }
+
+    private string GetFuelName(ItemOrTag fuelItem)
+    {
+        var localizedName = LocalizationService.GetTranslation(fuelItem);
+        return string.IsNullOrWhiteSpace(localizedName) ? fuelItem.Name : localizedName;
+    }
+}

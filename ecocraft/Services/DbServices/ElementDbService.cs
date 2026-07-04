@@ -55,6 +55,20 @@ public class ElementDbService(IDbContextFactory<EcoCraftDbContext> factory) : IG
 		context.Attach(CloneForDb(element)).State = EntityState.Modified;
 	}
 
+	public void UpdateDefaultShareConfig(EcoCraftDbContext context, Element element)
+	{
+		var stub = new Element
+		{
+			Id = element.Id,
+			DefaultShare = element.DefaultShare,
+			DefaultIsReintegrated = element.DefaultIsReintegrated,
+		};
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.DefaultShare).IsModified = true;
+		entry.Property(x => x.DefaultIsReintegrated).IsModified = true;
+	}
+
 	public void Destroy(EcoCraftDbContext context, Element element)
 	{
 		var entity = new Element { Id = element.Id };

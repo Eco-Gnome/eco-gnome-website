@@ -1,15 +1,17 @@
-﻿@using Blazor.Diagrams.Components.Renderers;
-@using ecocraft.Diagram;
+@using Blazor.Diagrams.Components.Renderers;
+@using ecocraft.Components.Utils
+@using ecocraft.Diagram
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-<div class="d-flex justify-center align-center">
-    <div style="position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 100px; background-color: black; margin-right: -5px; padding: 5px;">
-        <PortRenderer @key="Node.Ports[0]" Port="@Node.Ports[0]"/>
+<div class="eco-graph-node">
+    <div class="eco-graph-node-row">
+        <span class="eco-graph-port"><PortRenderer @key="Node.Ports[0]" Port="@Node.Ports[0]"/></span>
+        <EcoIcon Item="@Node.ItemOrTag" Size="64"/>
+        <span class="eco-graph-port"><PortRenderer @key="Node.Ports[1]" Port="@Node.Ports[1]"/></span>
     </div>
-    <h5 style="position: relative; z-index: 2; " class="eco-node item-node-title">@LocalizationService.GetTranslation(Node.ItemOrTag)</h5>
-    <div style="position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 100px; background-color: black; margin-left: -5px; padding: 5px;">
-        <PortRenderer @key="Node.Ports[1]" Port="@Node.Ports[1]"/>
+    <div class="eco-graph-caption">
+        <span class="eco-graph-caption-main">@LocalizationService.GetTranslation(Node.ItemOrTag)</span>
     </div>
 </div>
 

@@ -3,9 +3,11 @@
 @using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Components.Utils
+@using ecocraft.Components.Dialog
 @using ecocraft.Services.DbServices
 @using Microsoft.EntityFrameworkCore
 @using System.Globalization
+@inject IDialogService DialogService
 @inject ContextService ContextService
 @inject LocalStorageService LocalStorageService
 @inject ShoppingListDataService ShoppingListDataService
@@ -293,27 +295,43 @@
                         </MudItem>
                         <MudItem md="6" lg="6" Class="pa-2 d-flex flex-column">
                             <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                                <MudAutocomplete T="Recipe"
-                                                 @ref="_recipeAutocompleteRef"
-                                                 Value="_emptyRecipe"
-                                                 Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
-                                                 SearchFunc="SearchRecipes"
-                                                 ValueChanged="AddShoppingListRecipe"
-                                                 CoerceText="false"
-                                                 Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
-                                                 Class="auto-complete-input"
-                                                 Dense="true"
-                                                 MaxItems="null"
-                                                 Variant="Variant.Outlined"
-                                                 AnchorOrigin="Origin.BottomLeft"
-                                                 TransformOrigin="Origin.TopLeft">
-                                    <ItemTemplate>
-                                        <MudStack Row Class="pl-2" Spacing="2">
-                                            <EcoIcon Item="@context.Elements.FirstOrDefault(e => e.IsProduct() && e.Index == 0)?.ItemOrTag" Size="24"></EcoIcon>
-                                            <MudText>@LocalizationService.GetTranslation(context)</MudText>
-                                        </MudStack>
-                                    </ItemTemplate>
-                                </MudAutocomplete>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                    <MudAutocomplete T="Recipe"
+                                                     @ref="_recipeAutocompleteRef"
+                                                     Value="_emptyRecipe"
+                                                     Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
+                                                     SearchFunc="SearchRecipes"
+                                                     ValueChanged="AddShoppingListRecipe"
+                                                     CoerceText="false"
+                                                     Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
+                                                     Class="auto-complete-input flex-grow-1"
+                                                     Dense="true"
+                                                     MaxItems="null"
+                                                     Variant="Variant.Outlined"
+                                                     AnchorOrigin="Origin.BottomLeft"
+                                                     TransformOrigin="Origin.TopLeft">
+                                        <ItemTemplate>
+                                            <RecipeSummary Recipe="context" Class="pl-2" />
+                                        </ItemTemplate>
+                                    </MudAutocomplete>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Tertiary"
+                                               StartIcon="@MDIIcons.Filled.Sitemap"
+                                               Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                               OnClick="OpenProductionChainGraph">
+                                        @LocalizationService.GetTranslation("ShoppingList.VisualizeProductionChain")
+                                    </MudButton>
+                                    @if (ContextService.CurrentServer?.IsAutomationPlannerEnabled == true)
+                                    {
+                                        <MudButton Variant="Variant.Outlined"
+                                                   Color="Color.Tertiary"
+                                                   StartIcon="@MDIIcons.Filled.Factory"
+                                                   Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                                   OnClick="OpenAutomationGraph">
+                                            @LocalizationService.GetTranslation("ShoppingList.AutomationButton")
+                                        </MudButton>
+                                    }
+                                </MudStack>
                                 <MudTreeView Items="TreeItems" Class="shopping-list-tree">
                                     <ItemTemplate>
                                         <MudTreeViewItem @key="context.Value.Id" Items="@context.Children" Expanded="@context.Expanded">
@@ -355,17 +373,24 @@
                                                         </MudStack>
                                                     </MudStack>
                                                     <MudStack AlignItems="AlignItems.Center" Row Class="shopping-list-recipe-quantity">
-                                                        <MudNumericField T="int"
-                                                                         Value="context.Value.RoundFactor"
-                                                                         ValueChanged="@(v => OnQuantityToCraftChanged(context.Value, v))"
-                                                                         Format="0"
-                                                                         Step="1"
-                                                                         Culture="CultureInfo.InvariantCulture"
-                                                                         Variant="Variant.Filled"
-                                                                         Class="rectangle-input"
-                                                                         Min="1"
-                                                                         Style="width: 65px;"
-                                                                         Immediate/>
+                                                        @{
+                                                            var primaryProduct = GetOrderedProductsForDisplay(context.Value).First();
+                                                            var primaryProductPerCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList);
+                                                            var producedQuantity = primaryProductPerCraft * context.Value.RoundFactor;
+                                                            var quantityStep = primaryProductPerCraft >= 1 ? (int)Math.Round(primaryProductPerCraft) : 1;
+                                                        }
+                                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.QuantityToProduceTooltip")">
+                                                            <MudNumericField T="int"
+                                                                             Value="@((int)Math.Round(producedQuantity, MidpointRounding.AwayFromZero))"
+                                                                             ValueChanged="@(v => OnQuantityToProduceChanged(context.Value, primaryProduct, v))"
+                                                                             Format="0"
+                                                                             Step="quantityStep"
+                                                                             Culture="CultureInfo.InvariantCulture"
+                                                                             Variant="Variant.Filled"
+                                                                             Class="rectangle-input"
+                                                                             Min="1"
+                                                                             Style="width: 65px;"/>
+                                                        </MudTooltip>
                                                     </MudStack>
                                                     <div class="shopping-list-ingredient-scroll">
                                                         <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-ingredient-row">
@@ -402,10 +427,15 @@
                                                                             <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
                                                                             @foreach (var recipe in possibleRecipes)
                                                                             {
-                                                                                <MudTooltip Text="@LocalizationService.GetTranslation(recipe)">
-                                                                                    <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
-                                                                                        <EcoIcon Size="24" Item="recipe.CraftingTable"/>
-                                                                                    </MudLink>
+                                                                                <MudTooltip>
+                                                                                    <ChildContent>
+                                                                                        <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
+                                                                                            <EcoIcon Size="24" Item="recipe.CraftingTable"/>
+                                                                                        </MudLink>
+                                                                                    </ChildContent>
+                                                                                    <TooltipContent>
+                                                                                        <RecipeSummary Recipe="recipe" />
+                                                                                    </TooltipContent>
                                                                                 </MudTooltip>
                                                                             }
 
@@ -1292,9 +1322,65 @@
         Rebuild();
     }
 
+    // The quantity field holds the number of primary-product items to produce, not the number of recipe
+    // repetitions. We derive RoundFactor (whole crafts) by rounding up, so we may produce a bit more than
+    // requested rather than less.
+    private async Task OnQuantityToProduceChanged(UserRecipe userRecipe, Element primaryProduct, int desiredQuantity)
+    {
+        var perCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList!);
+        var roundFactor = perCraft <= 0
+            ? 1
+            : (int)Math.Ceiling(desiredQuantity / perCraft);
+
+        if (roundFactor < 1)
+        {
+            roundFactor = 1;
+        }
+
+        await OnQuantityToCraftChanged(userRecipe, roundFactor);
+    }
+
     private void OnContextChanged()
     {
         _ = RetrieveData();
+    }
+
+    private async Task OpenProductionChainGraph()
+    {
+        if (_selectedShoppingList is null || _selectedShoppingList.UserRecipes.Count == 0)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ShoppingListGraphDialog>
+        {
+            { x => x.ShoppingList, _selectedShoppingList }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
+
+        await DialogService.ShowAsync<ShoppingListGraphDialog>("", parameters, options);
+    }
+
+    private async Task OpenAutomationGraph()
+    {
+        if (_selectedShoppingList is null || _selectedShoppingList.UserRecipes.Count == 0)
+        {
+            return;
+        }
+
+        // Lecture de l'option /h ici (JS interop dispo) pour la passer en paramètre : la lire dans le
+        // dialog la rendrait disponible trop tard (le TitleContent de MudDialog ne se re-rend pas après
+        // coup), d'où un switch incohérent. En paramètre, le switch naît avec la bonne valeur.
+        var perHour = await LocalStorageService.GetItem("AutomationRatePerHour") == "True";
+
+        var parameters = new DialogParameters<ShoppingListAutomationDialog>
+        {
+            { x => x.ShoppingList, _selectedShoppingList },
+            { x => x.InitialPerHour, perHour }
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullScreen = true, CloseButton = false };
+
+        await DialogService.ShowAsync<ShoppingListAutomationDialog>("", parameters, options);
     }
 
     private async Task RetrieveData(DataContext? shoppingList = null, bool forceServerReload = false)

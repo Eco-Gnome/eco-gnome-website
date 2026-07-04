@@ -142,12 +142,15 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 			.ThenInclude(s => s.LocalizedName)
 			.Include(u => u.PluginModules)
 			.ThenInclude(s => s.Skill)
-			// Recipes (shopping list does not need CraftMinutes/Labor)
+			// Recipes (CraftMinutes needed for the production-chain graph's per-minute mode; Labor still unused)
 			.Include(u => u.Recipes)
 			.ThenInclude(r => r.LocalizedName)
 			.Include(u => u.Recipes)
 			.ThenInclude(r => r.Elements)
 			.ThenInclude(e => e.Quantity)
+			.ThenInclude(dv => dv.Modifiers)
+			.Include(u => u.Recipes)
+			.ThenInclude(r => r.CraftMinutes)
 			.ThenInclude(dv => dv.Modifiers)
 			// ItemOrTag
 			.Include(u => u.ItemOrTags)
@@ -280,6 +283,7 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    LastDataUploadTime = server.LastDataUploadTime,
 		    JoinCode = server.JoinCode,
 		    ApiKey = server.ApiKey,
+		    IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled,
 	    };
     }
 
@@ -371,6 +375,14 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.IsDefault).IsModified = true;
+    }
+
+    public void UpdateIsAutomationPlannerEnabled(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server { Id = server.Id, IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.IsAutomationPlannerEnabled).IsModified = true;
     }
 
     public void Destroy(EcoCraftDbContext context, Server server)

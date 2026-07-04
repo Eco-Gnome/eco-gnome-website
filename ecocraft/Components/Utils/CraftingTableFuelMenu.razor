@@ -1,0 +1,158 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject CraftingTableFuelCostService CraftingTableFuelCostService
+@inject LocalizationService LocalizationService
+
+<MudMenu @ref="_menu"
+         Dense="true"
+         MaxHeight="360"
+         AnchorOrigin="Origin.BottomCenter"
+         TransformOrigin="Origin.TopCenter">
+    <ActivatorContent Context="menuContext">
+        <span @onclick:stopPropagation="true">
+            <MudButton Variant="Variant.Text"
+                       Size="Size.Small"
+                       Class="fuel-menu-activator"
+                       title="@GetFuelTooltip(SelectedFuelItem)"
+                       aria-label="@LocalizationService.GetTranslation("PriceCalculator.Fuel.SelectFuel")"
+                       OnClick="ToggleMenu">
+                @if (SelectedFuelItem is null)
+                {
+                    <EcoIcon Item="null" FallbackIcon="@MDIIcons.Filled.Cancel"/>
+                }
+                else
+                {
+                    <EcoIcon Item="@SelectedFuelItem"/>
+                    <MudText Color="Color.Primary" Typo="Typo.body2" Class="fuel-menu-selected-cost">
+                        @FormatCraftMinuteFeeWithUnit(SelectedFuelItem!)
+                    </MudText>
+                }
+                <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Size="Size.Small" Class="fuel-menu-caret"/>
+            </MudButton>
+        </span>
+    </ActivatorContent>
+
+    <ChildContent>
+        <MudMenuItem OnClick="@(() => SelectFuel(null))">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@MDIIcons.Filled.Cancel" Size="Size.Small"/>
+                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.Fuel.NoFuel")</MudText>
+            </MudStack>
+        </MudMenuItem>
+        @foreach (var fuelGroup in FuelItemGroups)
+        {
+            @if (fuelGroup.Tag is not null)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Primary" Class="px-4 pt-2 pb-1">
+                    @LocalizationService.GetTranslation(fuelGroup.Tag)
+                </MudText>
+            }
+            @foreach (var fuelItem in fuelGroup.Items)
+            {
+                <MudMenuItem OnClick="@(() => SelectFuel(fuelItem.Id))">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Style="min-width: 260px;">
+                        <EcoIcon Item="@fuelItem" Size="24"/>
+                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(fuelItem)</MudText>
+                        <MudSpacer/>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @FormatCraftMinuteFeeLabel(fuelItem)
+                        </MudText>
+                    </MudStack>
+                </MudMenuItem>
+            }
+        }
+    </ChildContent>
+</MudMenu>
+
+@code {
+    private MudMenu? _menu;
+
+    [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
+    [Parameter, EditorRequired] public DataContext DataContext { get; set; } = null!;
+    [Parameter] public IReadOnlyList<ItemOrTag> EligibleFuelItems { get; set; } = [];
+    [Parameter] public EventCallback<Guid?> FuelChanged { get; set; }
+
+    private ItemOrTag? SelectedFuelItem => UserCraftingTable.FuelItem
+                                           ?? EligibleFuelItems.FirstOrDefault(item => item.Id == UserCraftingTable.FuelItemId);
+
+    private IReadOnlyList<FuelItemGroup> FuelItemGroups => BuildFuelItemGroups();
+
+    private Task ToggleMenu(MouseEventArgs args)
+    {
+        return _menu?.ToggleMenuAsync(args) ?? Task.CompletedTask;
+    }
+
+    private async Task SelectFuel(Guid? fuelItemId)
+    {
+        await FuelChanged.InvokeAsync(fuelItemId);
+    }
+
+    private IReadOnlyList<FuelItemGroup> BuildFuelItemGroups()
+    {
+        return EligibleFuelItems
+            .GroupBy(item => CraftingTableFuelCostService.GetFuelGroupingTag(item, EligibleFuelItems))
+            .Select(group => new FuelItemGroup(
+                group.Key,
+                group
+                    .OrderBy(item => LocalizationService.GetTranslation(item))
+                    .ToList()))
+            .Where(group => group.Items.Count > 0)
+            .OrderBy(group => group.Tag is null ? 1 : 0)
+            .ThenBy(group => group.Tag is null
+                ? LocalizationService.GetTranslation(group.Items.First())
+                : LocalizationService.GetTranslation(group.Tag))
+            .ToList();
+    }
+
+    private string GetFuelTooltip(ItemOrTag? fuelItem)
+    {
+        var fuelLabel = fuelItem is null
+            ? LocalizationService.GetTranslation("PriceCalculator.Fuel.NoFuel")
+            : LocalizationService.GetTranslation(fuelItem);
+        var craftMinuteFee = fuelItem is null
+            ? 0m
+            : CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(
+                DataContext,
+                new UserCraftingTable
+                {
+                    CraftingTable = UserCraftingTable.CraftingTable,
+                    FuelItem = fuelItem,
+                });
+
+        return $"{fuelLabel} - {LocalizationService.GetTranslation("PriceCalculator.Fuel.CostPerMinute")}: {FormatDecimal(craftMinuteFee)}";
+    }
+
+    private string FormatCraftMinuteFee(ItemOrTag fuelItem)
+    {
+        return FormatDecimal(CalculateFuelCraftMinuteFee(fuelItem));
+    }
+
+    private string FormatCraftMinuteFeeLabel(ItemOrTag fuelItem)
+    {
+        return $"{LocalizationService.GetTranslation("PriceCalculator.Fuel.CostPerMinute")}: {FormatCraftMinuteFee(fuelItem)}";
+    }
+
+    private string FormatCraftMinuteFeeWithUnit(ItemOrTag fuelItem)
+    {
+        return $"{FormatCraftMinuteFee(fuelItem)} $/min";
+    }
+
+    private decimal CalculateFuelCraftMinuteFee(ItemOrTag fuelItem)
+    {
+        return CraftingTableFuelCostService.CalculateFuelCraftMinuteFee(
+            DataContext,
+            new UserCraftingTable
+            {
+                CraftingTable = UserCraftingTable.CraftingTable,
+                FuelItem = fuelItem,
+            });
+    }
+
+    private static string FormatDecimal(decimal value)
+    {
+        return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
+    }
+
+    private sealed record FuelItemGroup(ItemOrTag? Tag, IReadOnlyList<ItemOrTag> Items);
+}
