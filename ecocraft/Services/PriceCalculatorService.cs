@@ -449,7 +449,7 @@ public class PriceCalculatorService(
                         {
                             var craftMinuteFee = craftingTableFuelCostService.CalculateTotalCraftMinuteFee(dataContext, currentUserCraftingTable);
                             calculationContext.TrySetUserCraftingTableFee(currentUserCraftingTable, craftMinuteFee);
-                            var craftMinutes = userRecipe.Recipe.CraftMinutes.GetDynamicValue(dataContext, dynamicValueCalculationContext);
+                            var craftMinutes = userRecipe.Recipe.GetEffectiveCraftMinutes(dataContext, userRecipe, dynamicValueCalculationContext);
                             ingredientCostSum += currentUserCraftingTable.TotalCraftMinuteFee * craftMinutes;
                         }
 

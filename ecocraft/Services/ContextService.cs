@@ -388,6 +388,7 @@ public class ContextService(
                 Recipe = ur.Recipe,
                 RoundFactor = ur.RoundFactor,
                 LockShare = ur.LockShare,
+                CraftMinutesOverride = ur.CraftMinutesOverride,
             };
         }
 

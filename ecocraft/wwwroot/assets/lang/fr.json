@@ -213,6 +213,7 @@
         "ReductionOf": "Réduction des",
         "AdditionalCosts": "Coûts supplémentaires",
         "CraftTime": "Temps de fabrication",
+        "CraftTimeLayer": "Le temps de fabrication de cette recette dépend d'une couche du monde (gisement) et ne peut pas être calculé automatiquement. Saisissez le temps observé en jeu, en secondes.",
         "Fuel": "Carburant",
         "CraftTimeReductionTooltip": "{valeur initiale} avec {pourcentage}% de réduction grâce au module de mise à niveau {nom du module de mise à niveau}",
         "Dynamic": "dynamique",

@@ -198,22 +198,47 @@
                             </MudTr>
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
-                                    <MudStack Row Spacing="1">
-                                        @if (Recipe.CraftMinutes.GetMultiplier(DataContext) != 1m)
-                                        {
-                                            <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(DataContext, LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
-                                                <MudStack Row Spacing="1">
-                                                    <MudText Color="Color.Secondary">
-                                                        @(GetFormatedCraftTime(Recipe.CraftMinutes.GetDynamicValue(DataContext)))
-                                                    </MudText>
-                                                </MudStack>
-                                            </MudTooltip>
-                                        }
-                                        else
-                                        {
-                                            <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue())</MudText>
-                                        }
-                                    </MudStack>
+                                    @if (!AdminServerMode && Recipe.CraftMinutes.HasLayerModifier && _currentUserRecipe is not null)
+                                    {
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.CraftTimeLayer")">
+                                            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                                <MudNumericField T="decimal?"
+                                                                 Class="rectangle-input small-adornment"
+                                                                 Style="width: 90px;"
+                                                                 Value="@(_currentUserRecipe.CraftMinutesOverride * 60)"
+                                                                 Immediate="true"
+                                                                 DebounceInterval="150"
+                                                                 Format="0.##"
+                                                                 Min="0"
+                                                                 Variant="Variant.Outlined"
+                                                                 Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                                                                 Adornment="Adornment.End"
+                                                                 AdornmentIcon="@MDIIcons.Outline.Information"
+                                                                 AdornmentColor="Color.Warning"
+                                                                 ValueChanged="@(value => CraftMinutesOverrideChange(value))"/>
+                                                <MudText Color="Color.Primary">s</MudText>
+                                            </MudStack>
+                                        </MudTooltip>
+                                    }
+                                    else
+                                    {
+                                        <MudStack Row Spacing="1">
+                                            @if (Recipe.CraftMinutes.GetMultiplier(DataContext) != 1m)
+                                            {
+                                                <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(DataContext, LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
+                                                    <MudStack Row Spacing="1">
+                                                        <MudText Color="Color.Secondary">
+                                                            @(GetFormatedCraftTime(Recipe.CraftMinutes.GetDynamicValue(DataContext)))
+                                                        </MudText>
+                                                    </MudStack>
+                                                </MudTooltip>
+                                            }
+                                            else
+                                            {
+                                                <MudText>@GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue())</MudText>
+                                            }
+                                        </MudStack>
+                                    }
                                 </MudTd>
                                 <MudTd Class="px-2">
 
@@ -828,7 +853,7 @@
 
     private decimal GetCraftMinutePrice()
     {
-        return Recipe.CraftMinutes.GetDynamicValue(DataContext) * (_currentUserCraftingTable?.TotalCraftMinuteFee ?? 0);
+        return Recipe.GetEffectiveCraftMinutes(DataContext, _currentUserRecipe) * (_currentUserCraftingTable?.TotalCraftMinuteFee ?? 0);
     }
 
     private string GetCraftMinuteFeeTooltip()
@@ -883,6 +908,32 @@
         });
 
         await RecalculateFromDialog(nameof(RoundFactorChange));
+    }
+
+    private async Task CraftMinutesOverrideChange(decimal? seconds)
+    {
+        var userRecipe = _currentUserRecipe;
+        if (userRecipe is null)
+        {
+            return;
+        }
+
+        var minutes = seconds.HasValue ? seconds.Value / 60 : (decimal?)null;
+
+        if (userRecipe.CraftMinutesOverride == minutes)
+        {
+            return;
+        }
+
+        userRecipe.CraftMinutesOverride = minutes;
+
+        await PersistAsync(context =>
+        {
+            UserRecipeDbService.UpdateCraftMinutesOverride(context, userRecipe);
+            return Task.CompletedTask;
+        });
+
+        await RecalculateFromDialog(nameof(CraftMinutesOverrideChange));
     }
 
     private List<UserElement> GetIngredientUserElements()

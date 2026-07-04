@@ -63,6 +63,21 @@ public class Recipe: IHasLocalizedName
         return dataContext.UserRecipes.FirstOrDefault(ur => ur.RecipeId == Id);
     }
 
+    /// <summary>
+    /// Effective craft time in minutes. When the craft time is driven by a world Layer (e.g. Oilfield for
+    /// Petroleum), its real value cannot be computed from the exported data, so the user's override is used
+    /// when set. Otherwise the standard dynamic value applies.
+    /// </summary>
+    public decimal GetEffectiveCraftMinutes(DataContext dataContext, UserRecipe? userRecipe, DynamicValueCalculationContext? calculationContext = null)
+    {
+        if (CraftMinutes.HasLayerModifier && userRecipe?.CraftMinutesOverride is { } craftMinutesOverride)
+        {
+            return craftMinutesOverride;
+        }
+
+        return CraftMinutes.GetDynamicValue(dataContext, calculationContext);
+    }
+
     public override string ToString()
     {
         return Name;
@@ -120,6 +135,7 @@ public class DynamicValue
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public decimal BaseValue { get; set; }
+    public bool HasLayerModifier { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public List<Modifier> Modifiers { get; set; } = [];
@@ -965,6 +981,9 @@ public class UserRecipe
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     public int RoundFactor { get; set; }
     public bool LockShare { get; set; } = false;
+
+    // Craft time (minutes) set by the user when the recipe's craft time is driven by a world Layer (null = unset)
+    public decimal? CraftMinutesOverride { get; set; }
 
     // For Shopping List only
     [ForeignKey("UserRecipe")] public Guid? ParentUserRecipeId { get; set; }

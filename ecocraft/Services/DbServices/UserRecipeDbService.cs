@@ -70,6 +70,7 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
             DataContextId = userRecipe.DataContext.Id,
             RoundFactor = userRecipe.RoundFactor,
             LockShare = userRecipe.LockShare,
+            CraftMinutesOverride = userRecipe.CraftMinutesOverride,
             ParentUserRecipeId = userRecipe.ParentUserRecipe?.Id,
         };
     }
@@ -99,6 +100,23 @@ public class UserRecipeDbService(IDbContextFactory<EcoCraftDbContext> factory) :
         var entry = context.Entry(stub);
         entry.State = EntityState.Unchanged;
         entry.Property(x => x.RoundFactor).IsModified = true;
+    }
+
+    public void UpdateCraftMinutesOverride(EcoCraftDbContext context, UserRecipe userRecipe)
+    {
+        var trackedEntry = context.ChangeTracker.Entries<UserRecipe>().FirstOrDefault(e => e.Entity.Id == userRecipe.Id);
+
+        if (trackedEntry is not null)
+        {
+            trackedEntry.Entity.CraftMinutesOverride = userRecipe.CraftMinutesOverride;
+            trackedEntry.Property(x => x.CraftMinutesOverride).IsModified = true;
+            return;
+        }
+
+        var stub = new UserRecipe { Id = userRecipe.Id, CraftMinutesOverride = userRecipe.CraftMinutesOverride };
+        var entry = context.Entry(stub);
+        entry.State = EntityState.Unchanged;
+        entry.Property(x => x.CraftMinutesOverride).IsModified = true;
     }
 
     public void Destroy(EcoCraftDbContext context, UserRecipe userRecipe)

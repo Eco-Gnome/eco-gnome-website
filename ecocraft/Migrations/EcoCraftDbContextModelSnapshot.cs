@@ -127,6 +127,9 @@ namespace ecocraft.Migrations
                     b.Property<decimal>("BaseValue")
                         .HasColumnType("numeric");
 
+                    b.Property<bool>("HasLayerModifier")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("ServerId")
                         .HasColumnType("uuid");
 
@@ -939,6 +942,9 @@ namespace ecocraft.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<decimal?>("CraftMinutesOverride")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("DataContextId")
                         .HasColumnType("uuid");

@@ -213,6 +213,7 @@
         "ReductionOf": "Reduction of",
         "AdditionalCosts": "Additional Costs",
         "CraftTime": "Craft time",
+        "CraftTimeLayer": "This recipe's craft time depends on a world layer (deposit) and cannot be computed automatically. Enter the time observed in-game, in seconds.",
         "Fuel": "Fuel",
         "CraftTimeReductionTooltip": "{initialValue} with {percent}% reduction due to upgrade module {upgradeModuleName}",
         "Dynamic": "dynamic",
