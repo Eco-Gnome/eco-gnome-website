@@ -2260,6 +2260,12 @@
             return;
         }
 
+        // Quand on part de zéro métier, on déplie la liste des recettes fabriquées à droite pour
+        // la rendre visible. On ne le fait qu'à cette transition 0 -> 1 : au-delà, on respecte
+        // l'état de repliage choisi (le Take(3) de _expandFirstSellGroupsOnNextRender préserve
+        // par ailleurs la protection « heavy context » quand beaucoup de métiers sont configurés).
+        var wasWithoutSkill = SelectedSkillCount == 0;
+
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             UserServerDataService.AddUserSkill(context, _selectedDataContext!, ContextService.CurrentServerData!, skill, _selectedDataContext!.UserSettings.First().OnlyLevelAccessibleRecipes);
@@ -2271,6 +2277,16 @@
         await RequestCalculate(CalculateTriggerOrigin.SkillChange);
         await RefreshSkillAutocompleteAsync();
         ContextService.NotifyCurrentDataContextChanged();
+
+        // Le drapeau doit être posé APRÈS le calcul : un SkillChange déclenche un rendu
+        // intermédiaire puis reconstruit les lignes de groupe (IsInitiallyExpanded = false).
+        // Poser le drapeau avant le calcul le ferait consommer trop tôt, sur des lignes
+        // ensuite recréées repliées (même logique que RetrieveData qui le pose en dernier).
+        if (wasWithoutSkill)
+        {
+            _expandFirstSellGroupsOnNextRender = true;
+            StateHasChanged();
+        }
     }
 
     private async Task RemoveUserSkill(UserSkill userSkill)
