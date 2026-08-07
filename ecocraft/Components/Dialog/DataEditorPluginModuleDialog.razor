@@ -21,39 +21,102 @@
                                   TechnicalNameError="@(string.IsNullOrWhiteSpace(_model.Name))"
                                   DisplayNameError="@(string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs))" />
 
-            <MudSelect T="PluginType"
-                       @bind-Value="_model.PluginType"
-                       Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.PluginType")"
-                       Variant="Variant.Outlined">
-                @foreach (var pluginType in Enum.GetValues<PluginType>())
-                {
-                    <MudSelectItem T="PluginType" Value="@pluginType">@pluginType.ToString()</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudNumericField T="decimal"
-                             @bind-Value="_model.Percent"
-                             Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.Percent")"
-                             Variant="Variant.Outlined"
-                             Format="0.##"/>
-
             <MudSelect T="Guid?"
-                       @bind-Value="_model.SkillId"
+                       @bind-Value="_model.ModuleSlotId"
                        Clearable="true"
-                       Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.Skill")"
+                       Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.ModuleSlot")"
                        Variant="Variant.Outlined">
                 <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("None")</MudSelectItem>
-                @foreach (var skill in ContextService.CurrentServerData?.Skills ?? [])
+                @foreach (var moduleSlot in (ContextService.CurrentServerData?.ModuleSlots ?? []).OrderBy(ms => ms.SortOrder))
                 {
-                    <MudSelectItem T="Guid?" Value="@((Guid?)skill.Id)">@LocalizationService.GetTranslation(skill)</MudSelectItem>
+                    <MudSelectItem T="Guid?" Value="@((Guid?)moduleSlot.Id)">@LocalizationService.GetTranslation(moduleSlot)</MudSelectItem>
                 }
             </MudSelect>
 
             <MudNumericField T="decimal?"
-                             @bind-Value="_model.SkillPercent"
-                             Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.SkillPercent")"
+                             @bind-Value="_model.MaterialTierBump"
+                             Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.MaterialTierBump")"
                              Variant="Variant.Outlined"
                              Format="0.##"/>
+
+            <MudStack Spacing="2">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("DataEditor.PluginModule.Bonuses")</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="AddBonus"/>
+                </MudStack>
+
+                @foreach (var bonus in _model.Bonuses)
+                {
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-2">
+                        <MudStack Spacing="2">
+                            <MudStack Row Spacing="2" AlignItems="AlignItems.Center">
+                                <MudSelect T="TalentBonusAction"
+                                           @bind-Value="bonus.Action"
+                                           Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusAction")"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense">
+                                    @foreach (var action in Enum.GetValues<TalentBonusAction>())
+                                    {
+                                        <MudSelectItem T="TalentBonusAction" Value="@action">@LocalizationService.GetTranslation($"Bonus.Action.{action}")</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudSelect T="TalentBonusEffectType"
+                                           @bind-Value="bonus.EffectType"
+                                           Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusEffectType")"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense">
+                                    @foreach (var effectType in Enum.GetValues<TalentBonusEffectType>())
+                                    {
+                                        <MudSelectItem T="TalentBonusEffectType" Value="@effectType">@effectType.ToString()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudNumericField T="decimal"
+                                                 @bind-Value="bonus.Value"
+                                                 Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusValue")"
+                                                 Variant="Variant.Outlined"
+                                                 Margin="Margin.Dense"
+                                                 Format="0.####"/>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => RemoveBonus(bonus))"/>
+                            </MudStack>
+                            <MudStack Row Spacing="2">
+                                @if (bonus.EffectType == TalentBonusEffectType.CappedMultiplicative)
+                                {
+                                    <MudNumericField T="decimal?"
+                                                     @bind-Value="bonus.Cap"
+                                                     Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusCap")"
+                                                     Variant="Variant.Outlined"
+                                                     Margin="Margin.Dense"
+                                                     Format="0.####"/>
+                                }
+                                @if (bonus.EffectType == TalentBonusEffectType.Chance)
+                                {
+                                    <MudNumericField T="decimal?"
+                                                     @bind-Value="bonus.Chance"
+                                                     Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusChance")"
+                                                     Variant="Variant.Outlined"
+                                                     Margin="Margin.Dense"
+                                                     Format="0.####"/>
+                                }
+                                <MudTextField T="string"
+                                              @bind-Value="bonus.SkillTypes"
+                                              Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusSkillTypes")"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              @bind-Value="bonus.ExcludedSkillTypes"
+                                              Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusExcludedSkillTypes")"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              @bind-Value="bonus.ItemTags"
+                                              Label="@LocalizationService.GetTranslation("DataEditor.PluginModule.BonusItemTags")"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudStack>
         </MudStack>
     </DialogContent>
     <DialogActions>
@@ -85,12 +148,32 @@
                 Name = PluginModule.Name,
                 LocalizedNameEnUs = LocalizationService.GetColumn(PluginModule.LocalizedName, LanguageCode.en_US),
                 LocalizedNameCurrent = LocalizationService.GetColumn(PluginModule.LocalizedName, LocalizationService.CurrentLanguageCode),
-                PluginType = PluginModule.PluginType,
-                Percent = PluginModule.Percent,
-                SkillId = PluginModule.Skill?.Id,
-                SkillPercent = PluginModule.SkillPercent,
+                ModuleSlotId = PluginModule.ModuleSlot?.Id,
+                MaterialTierBump = PluginModule.MaterialTierBump,
+                Bonuses = PluginModule.Bonuses.Select(b => new BonusEditModel
+                {
+                    Action = b.Action,
+                    EffectType = b.EffectType,
+                    Value = b.Value,
+                    Cap = b.Cap,
+                    Chance = b.Chance,
+                    Levels = b.Levels,
+                    SkillTypes = string.Join(", ", b.SkillTypes ?? []),
+                    ExcludedSkillTypes = string.Join(", ", b.ExcludedSkillTypes ?? []),
+                    ItemTags = string.Join(", ", b.ItemTags ?? []),
+                }).ToList(),
             };
         }
+    }
+
+    private void AddBonus()
+    {
+        _model.Bonuses.Add(new BonusEditModel());
+    }
+
+    private void RemoveBonus(BonusEditModel bonus)
+    {
+        _model.Bonuses.Remove(bonus);
     }
 
     private void Cancel()

@@ -38,19 +38,17 @@
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
 
                             @{
-                                var pluginModule = _currentUserCraftingTable?.PluginModule;
+                                var installedPluginModules = (_currentUserCraftingTable?.PluginModules ?? [])
+                                    .OrderBy(pm => pm.ModuleSlot?.SortOrder ?? int.MaxValue)
+                                    .ToList();
 
-                                @if (pluginModule is not null)
+                                @if (installedPluginModules.Count > 0)
                                 {
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        <MudTooltip Text="@pluginModule.GetTooltip(LocalizationService)">
-                                            <EcoIcon Item="@pluginModule" Size="32" Class="mt-1"/>
-                                        </MudTooltip>
-
-                                        @foreach (var skilledPluginModule in _currentUserCraftingTable?.SkilledPluginModules ?? [])
+                                        @foreach (var installedPluginModule in installedPluginModules)
                                         {
-                                            <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
-                                                <EcoIcon Item="@skilledPluginModule" Size="24" Class="mt-1"/>
+                                            <MudTooltip Text="@installedPluginModule.GetTooltip(LocalizationService)">
+                                                <EcoIcon Item="@installedPluginModule" Size="24" Class="mt-1"/>
                                             </MudTooltip>
                                         }
                                     </MudStack>
@@ -223,7 +221,7 @@
                                     else
                                     {
                                         <MudStack Row Spacing="1">
-                                            @if (Recipe.CraftMinutes.GetMultiplier(DataContext) != 1m)
+                                            @if (Recipe.CraftMinutes.HasDynamicEffect(DataContext))
                                             {
                                                 <MudTooltip Text="@Recipe.CraftMinutes.GetMultiplierTooltip(DataContext, LocalizationService, GetFormatedCraftTime(Recipe.CraftMinutes.GetBaseValue()))">
                                                     <MudStack Row Spacing="1">
@@ -270,7 +268,7 @@
                             <MudTr>
                                 <MudTd Class="px-1 pl-2">
                                     <MudStack Row Spacing="1">
-                                        @if ((int)Recipe.Labor.GetMultiplier(DataContext) != 1)
+                                        @if (Recipe.Labor.HasDynamicEffect(DataContext))
                                         {
                                             <MudTooltip Text="@Recipe.Labor.GetMultiplierTooltip(DataContext, LocalizationService)">
                                                 <MudText Color="Color.Secondary">

@@ -345,11 +345,10 @@ public class ContextService(
                 Id = Guid.NewGuid(),
                 DataContext = newCtx,
                 CraftingTable = uct.CraftingTable,
-                PluginModule = uct.PluginModule,
                 FuelItem = uct.FuelItem,
                 AdditionalCraftMinuteFee = uct.AdditionalCraftMinuteFee,
                 TotalCraftMinuteFee = uct.TotalCraftMinuteFee,
-                SkilledPluginModules = uct.SkilledPluginModules.ToList(),
+                PluginModules = uct.PluginModules.ToList(),
             };
         }
 
@@ -476,7 +475,7 @@ public class ContextService(
         });
 
         var tablesNeedingPluginModules = newTables.Values
-            .Where(t => t.SkilledPluginModules.Count > 0)
+            .Where(t => t.PluginModules.Count > 0)
             .ToList();
         if (tablesNeedingPluginModules.Count > 0)
         {

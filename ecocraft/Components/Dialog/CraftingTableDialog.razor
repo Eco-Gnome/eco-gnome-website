@@ -42,18 +42,45 @@
                 <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.CraftingTableAdvancedConfiguration")</MudText>
                 <MudStack Spacing="1">
                     <MudText Style="color: #888">@LocalizationService.GetTranslation("Upgrade")</MudText>
-                    @if (CraftingTable.PluginModules.Count > 0)
+                    @if (CraftingTable.ModuleSlots.Count > 0 && CraftingTable.PluginModules.Count > 0)
                     {
                         <CraftingTablePluginModuleControl UserCraftingTable="UserCraftingTable"
-                                                          IncreaseRequested="IncreasePluginModule"
-                                                          DecreaseRequested="DecreasePluginModule"
-                                                          SkilledPluginModuleToggled="ToggleSkilledPluginModule"/>
+                                                          ModuleSelected="SelectPluginModule"/>
                     }
                     else
                     {
                         <MudText Typo="Typo.body2" Color="Color.Secondary">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
                     }
                 </MudStack>
+
+                @* GetEffectiveRoomMaterialTier covers the module-only case: a table without a base
+                   tier requirement still gets one when an installed module carries a tier bump. *@
+                @if (UserCraftingTable.GetEffectiveRoomMaterialTier() is not null || CraftingTable.RoomVolume is not null || CraftingTable.RoomRequiresContainment)
+                {
+                    <MudStack Spacing="1">
+                        <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTableDialog.RoomRequirements")</MudText>
+                        <MudStack Row Spacing="4">
+                            @if (UserCraftingTable.GetEffectiveRoomMaterialTier() is { } effectiveTier)
+                            {
+                                <MudText Typo="Typo.body2">
+                                    @LocalizationService.GetTranslation("CraftingTableDialog.RoomMaterialTier"): @FormatDecimal(effectiveTier)
+                                    @if (CraftingTable.RoomMaterialTier is { } baseTier && effectiveTier != baseTier)
+                                    {
+                                        <span> (@FormatDecimal(baseTier) + @FormatDecimal(effectiveTier - baseTier))</span>
+                                    }
+                                </MudText>
+                            }
+                            @if (CraftingTable.RoomVolume is { } roomVolume)
+                            {
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("CraftingTableDialog.RoomVolume"): @FormatDecimal(roomVolume) m³</MudText>
+                            }
+                            @if (CraftingTable.RoomRequiresContainment)
+                            {
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("CraftingTableDialog.RequiresRoom")</MudText>
+                            }
+                        </MudStack>
+                    </MudStack>
+                }
 
                 <MudPaper Elevation="0" Class="mud-background">
                     <MudStack Spacing="0">
@@ -128,9 +155,7 @@
     [Parameter, EditorRequired] public required UserCraftingTable UserCraftingTable { get; set; }
     [Parameter] public Func<Guid?, Task>? FuelChanged { get; set; }
     [Parameter] public Func<decimal, Task>? AdditionalCraftMinuteFeeChanged { get; set; }
-    [Parameter] public Func<List<PluginModule>, Task>? IncreasePluginModuleRequested { get; set; }
-    [Parameter] public Func<List<PluginModule>, Task>? DecreasePluginModuleRequested { get; set; }
-    [Parameter] public Func<PluginModule, Task>? SkilledPluginModuleToggled { get; set; }
+    [Parameter] public Func<CraftingTablePluginModuleControl.ModuleSelection, Task>? PluginModuleSelected { get; set; }
 
     private static readonly IReadOnlyList<int> AdditionalCostRows = [0];
     private CraftingTable CraftingTable => UserCraftingTable.CraftingTable;
@@ -154,29 +179,11 @@
         }
     }
 
-    private async Task IncreasePluginModule(List<PluginModule> pluginModules)
+    private async Task SelectPluginModule(CraftingTablePluginModuleControl.ModuleSelection selection)
     {
-        if (IncreasePluginModuleRequested is not null)
+        if (PluginModuleSelected is not null)
         {
-            await IncreasePluginModuleRequested(pluginModules);
-            StateHasChanged();
-        }
-    }
-
-    private async Task DecreasePluginModule(List<PluginModule> pluginModules)
-    {
-        if (DecreasePluginModuleRequested is not null)
-        {
-            await DecreasePluginModuleRequested(pluginModules);
-            StateHasChanged();
-        }
-    }
-
-    private async Task ToggleSkilledPluginModule(PluginModule pluginModule)
-    {
-        if (SkilledPluginModuleToggled is not null)
-        {
-            await SkilledPluginModuleToggled(pluginModule);
+            await PluginModuleSelected(selection);
             StateHasChanged();
         }
     }

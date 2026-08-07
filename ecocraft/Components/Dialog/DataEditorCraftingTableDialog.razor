@@ -22,6 +22,21 @@
 
             <MudSelect T="Guid"
                        MultiSelection="true"
+                       @bind-SelectedValues="_selectedModuleSlotIds"
+                       Label="@LocalizationService.GetTranslation("DataEditor.CraftingTable.ModuleSlots")"
+                       Variant="Variant.Outlined"
+                       AnchorOrigin="Origin.BottomCenter"
+                       MultiSelectionTextFunc="@(_ => GetSlotSelectionText())">
+                @foreach (var moduleSlot in ModuleSlots)
+                {
+                    <MudSelectItem T="Guid" Value="@moduleSlot.Id">
+                        @LocalizationService.GetTranslation(moduleSlot)
+                    </MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid"
+                       MultiSelection="true"
                        @bind-SelectedValues="_selectedPluginModuleIds"
                        Label="@LocalizationService.GetTranslation("DataEditor.CraftingTable.PluginModules")"
                        Variant="Variant.Outlined"
@@ -54,8 +69,10 @@
 
     private readonly CraftingTableEditModel _model = new();
     private IReadOnlyCollection<Guid> _selectedPluginModuleIds = new HashSet<Guid>();
+    private IReadOnlyCollection<Guid> _selectedModuleSlotIds = new HashSet<Guid>();
 
     private List<PluginModule> PluginModules => ContextService.CurrentServerData?.PluginModules ?? [];
+    private List<ModuleSlot> ModuleSlots => (ContextService.CurrentServerData?.ModuleSlots ?? []).OrderBy(ms => ms.SortOrder).ToList();
 
     private bool IsValid => !string.IsNullOrWhiteSpace(_model.Name)
                             && !string.IsNullOrWhiteSpace(_model.LocalizedNameEnUs);
@@ -69,9 +86,11 @@
             _model.LocalizedNameEnUs = LocalizationService.GetColumn(CraftingTable.LocalizedName, LanguageCode.en_US);
             _model.LocalizedNameCurrent = LocalizationService.GetColumn(CraftingTable.LocalizedName, LocalizationService.CurrentLanguageCode);
             _model.PluginModuleIds = CraftingTable.PluginModules.Select(pm => pm.Id).ToList();
+            _model.ModuleSlotIds = CraftingTable.ModuleSlots.Select(ms => ms.Id).ToList();
         }
 
         _selectedPluginModuleIds = new HashSet<Guid>(_model.PluginModuleIds);
+        _selectedModuleSlotIds = new HashSet<Guid>(_model.ModuleSlotIds);
     }
 
     private string GetSelectionText()
@@ -86,6 +105,18 @@
             : string.Join(", ", names);
     }
 
+    private string GetSlotSelectionText()
+    {
+        var names = ModuleSlots
+            .Where(ms => _selectedModuleSlotIds.Contains(ms.Id))
+            .Select(LocalizationService.GetTranslation)
+            .ToList();
+
+        return names.Count == 0
+            ? LocalizationService.GetTranslation("DataEditor.CraftingTable.NoModuleSlot")
+            : string.Join(", ", names);
+    }
+
     private void Cancel() => MudDialog.Cancel();
 
     private void Submit()
@@ -97,6 +128,7 @@
 
         _model.Name = _model.Name.Trim();
         _model.PluginModuleIds = _selectedPluginModuleIds.ToList();
+        _model.ModuleSlotIds = _selectedModuleSlotIds.ToList();
 
         MudDialog.Close(DialogResult.Ok(_model));
     }

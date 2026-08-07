@@ -77,11 +77,11 @@ public class ServerDataEditorService(
 
     // Reconcile a tracked M:M collection in place. Diffing (instead of reassigning) avoids join-row
     // DELETEs hitting already-removed rows, which throw DbUpdateConcurrencyException. Same rationale
-    // as the CraftingTable.PluginModules diff above and RefreshTag in ImportDataService.Crud.cs.
-    private static void DiffManyToMany(List<ItemOrTag> current, List<ItemOrTag> target)
+    // as RefreshTag/RefreshCraftingTable in ImportDataService.Crud.cs, which share this helper.
+    internal static void DiffManyToMany<T>(List<T> current, List<T> target) where T : class
     {
-        var newSet = new HashSet<ItemOrTag>(target);
-        var oldSet = new HashSet<ItemOrTag>(current);
+        var newSet = new HashSet<T>(target);
+        var oldSet = new HashSet<T>(current);
 
         foreach (var existing in current.ToList())
         {
@@ -347,6 +347,10 @@ public class ServerDataEditorService(
                 .Where(pm => m.PluginModuleIds.Contains(pm.Id))
                 .ToList();
 
+            var moduleSlots = sd.ModuleSlots
+                .Where(ms => m.ModuleSlotIds.Contains(ms.Id))
+                .ToList();
+
             if (IsNew(m.Id))
             {
                 var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
@@ -355,6 +359,7 @@ public class ServerDataEditorService(
                     Name = m.Name,
                     LocalizedName = localizedName,
                     PluginModules = pluginModules,
+                    ModuleSlots = moduleSlots,
                     Server = sd,
                 };
                 sd.CraftingTables.Add(craftingTable);
@@ -366,27 +371,11 @@ public class ServerDataEditorService(
                 craftingTable.Name = m.Name;
                 ApplyLocalizedName(craftingTable.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
 
-                // Diff the M:M instead of reassigning the collection (see RefreshCraftingTable in
-                // ImportDataService.Crud.cs): bulk replacement emits join-row DELETEs that can hit
-                // already-removed rows and throw DbUpdateConcurrencyException.
-                var newSet = new HashSet<PluginModule>(pluginModules);
-                var oldSet = new HashSet<PluginModule>(craftingTable.PluginModules);
-
-                foreach (var pm in craftingTable.PluginModules.ToList())
-                {
-                    if (!newSet.Contains(pm))
-                    {
-                        craftingTable.PluginModules.Remove(pm);
-                    }
-                }
-
-                foreach (var pm in pluginModules)
-                {
-                    if (!oldSet.Contains(pm))
-                    {
-                        craftingTable.PluginModules.Add(pm);
-                    }
-                }
+                // Diff the M:M collections instead of reassigning them: bulk replacement emits
+                // join-row DELETEs that can hit already-removed rows and throw
+                // DbUpdateConcurrencyException.
+                DiffManyToMany(craftingTable.PluginModules, pluginModules);
+                DiffManyToMany(craftingTable.ModuleSlots, moduleSlots);
 
                 ctx.CraftingTables.Update(craftingTable);
             }
@@ -414,19 +403,19 @@ public class ServerDataEditorService(
             var sd = await serverDbService.GetServerWithData(server.Id, ctx);
             ctx.Attach(sd);
 
-            var skill = m.SkillId is not null ? sd.Skills.First(s => s.Id == m.SkillId) : null;
+            var moduleSlot = m.ModuleSlotId is not null ? sd.ModuleSlots.First(ms => ms.Id == m.ModuleSlotId) : null;
+
+            PluginModule pluginModule;
 
             if (IsNew(m.Id))
             {
                 var localizedName = NewLocalizedField(ctx, sd, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
-                var pluginModule = new PluginModule
+                pluginModule = new PluginModule
                 {
                     Name = m.Name,
                     LocalizedName = localizedName,
-                    PluginType = m.PluginType,
-                    Percent = m.Percent,
-                    Skill = skill,
-                    SkillPercent = m.SkillPercent,
+                    ModuleSlot = moduleSlot,
+                    MaterialTierBump = m.MaterialTierBump,
                     Server = sd,
                 };
                 sd.PluginModules.Add(pluginModule);
@@ -434,16 +423,50 @@ public class ServerDataEditorService(
             }
             else
             {
-                var pluginModule = sd.PluginModules.First(p => p.Id == m.Id);
+                pluginModule = sd.PluginModules.First(p => p.Id == m.Id);
                 pluginModule.Name = m.Name;
-                pluginModule.PluginType = m.PluginType;
-                pluginModule.Percent = m.Percent;
-                pluginModule.Skill = skill;
-                pluginModule.SkillPercent = m.SkillPercent;
+                pluginModule.ModuleSlot = moduleSlot;
+                pluginModule.MaterialTierBump = m.MaterialTierBump;
                 ApplyLocalizedName(pluginModule.LocalizedName, m.LocalizedNameEnUs, m.LocalizedNameCurrent);
                 ctx.PluginModules.Update(pluginModule);
             }
+
+            // Replace the bonus rows wholesale — same strategy as the import path.
+            foreach (var existing in pluginModule.Bonuses.ToList())
+            {
+                DetachAndQueueDelete(ctx, existing, existing.Id);
+            }
+            pluginModule.Bonuses.Clear();
+
+            foreach (var bonusModel in m.Bonuses)
+            {
+                var bonus = new TalentBonus
+                {
+                    PluginModule = pluginModule,
+                    Action = bonusModel.Action,
+                    EffectType = bonusModel.EffectType,
+                    Value = bonusModel.Value,
+                    Cap = bonusModel.Cap,
+                    Chance = bonusModel.Chance,
+                    Levels = bonusModel.Levels,
+                    SkillTypes = ParseNameList(bonusModel.SkillTypes),
+                    ExcludedSkillTypes = ParseNameList(bonusModel.ExcludedSkillTypes),
+                    ItemTags = ParseNameList(bonusModel.ItemTags),
+                };
+
+                pluginModule.Bonuses.Add(bonus);
+                ctx.TalentBonuses.Add(bonus);
+            }
         });
+    }
+
+    private static string[]? ParseNameList(string commaSeparated)
+    {
+        var names = commaSeparated
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToArray();
+
+        return names.Length > 0 ? names : null;
     }
 
     public async Task DeletePluginModuleAsync(Server server, Guid id)

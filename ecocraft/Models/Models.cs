@@ -165,36 +165,120 @@ public class DynamicValue
         return element.IsIngredient() ? TalentBonusAction.ResourceCost : TalentBonusAction.Yield;
     }
 
-    private IEnumerable<TalentBonus> GetMatchingBonuses(Modifier modifier)
+    private Recipe? GetOwningRecipe()
+    {
+        return Recipe ?? Element?.Recipe;
+    }
+
+    // Names of the tags carried by the recipe's products — the target of the bonus ItemTags filters.
+    private List<string> GetRecipeProductTags()
+    {
+        var recipe = GetOwningRecipe();
+        if (recipe is null) return [];
+
+        return recipe.Elements
+            .Where(e => e.IsProduct() && (object?)e.ItemOrTag is not null)
+            .SelectMany(e => e.ItemOrTag.AssociatedTags)
+            .Select(t => t.Name)
+            .Distinct()
+            .ToList();
+    }
+
+    private IEnumerable<TalentBonus> GetMatchingBonuses(Modifier modifier, TalentBonusAction? action, Skill? recipeSkill, Lazy<List<string>> recipeProductTags)
     {
         var talent = modifier.Talent;
         if (talent is null) return [];
-        var action = GetTalentAction();
         if (action is null) return [];
-        return talent.Bonuses.Where(b => b.Action == action.Value);
+        return talent.Bonuses.Where(b => b.Action == action.Value && b.PassesFilters(recipeSkill, recipeProductTags));
     }
 
-    public decimal GetMultiplier(DataContext dataContext, DynamicValueCalculationContext? calculationContext = null)
+    // Whether the installed modules' bonuses reach this value (v4 rules): LaborCost and CraftTime
+    // always, ResourceCost only on non-static ingredients, Yield only on non-refund products.
+    private bool ModuleBonusesApply(TalentBonusAction action)
+    {
+        return action switch
+        {
+            TalentBonusAction.LaborCost => true,
+            TalentBonusAction.CraftTime => true,
+            TalentBonusAction.ResourceCost => IsDynamic(),
+            TalentBonusAction.Yield => Element?.DefaultIsReintegrated != true,
+            _ => false,
+        };
+    }
+
+    private IEnumerable<(PluginModule PluginModule, TalentBonus Bonus)> GetApplicableModuleBonuses(
+        DataContext dataContext,
+        DynamicValueCalculationContext? calculationContext,
+        TalentBonusAction? action,
+        Recipe? recipe,
+        Lazy<List<string>> recipeProductTags)
+    {
+        if (action is null || recipe is null || !ModuleBonusesApply(action.Value)) yield break;
+
+        var userCraftingTable = calculationContext is not null
+            ? calculationContext.GetUserCraftingTable(recipe, dataContext)
+            : recipe.CraftingTable.GetCurrentUserCraftingTable(dataContext);
+        if (userCraftingTable is null) yield break;
+
+        foreach (var pluginModule in userCraftingTable.PluginModules)
+        {
+            foreach (var bonus in pluginModule.Bonuses)
+            {
+                if (bonus.Action == action.Value && bonus.PassesFilters(recipe.Skill, recipeProductTags))
+                {
+                    yield return (pluginModule, bonus);
+                }
+            }
+        }
+    }
+
+    private readonly record struct BonusAggregate(decimal Multiplier, decimal Additive, decimal PercentSum, decimal ChanceAdditive, decimal? OverrideValue);
+
+    // Collects every applicable bonus (skill labor reduction + user talents via the exported
+    // modifiers + the modules installed on the recipe's crafting table) into the §3 components.
+    private BonusAggregate CollectBonuses(DataContext dataContext, DynamicValueCalculationContext? calculationContext)
     {
         var multiplier = 1m;
+        var additive = 0m;
+        var percentSum = 0m;
+        var chanceAdditive = 0m;
+        decimal? overrideValue = null;
+
+        var action = GetTalentAction();
+        var recipe = GetOwningRecipe();
+        // Lazy: walking the products' tags is only needed when a bonus carries ItemTags filters.
+        var recipeProductTags = new Lazy<List<string>>(GetRecipeProductTags);
+
+        void ApplyBonus(TalentBonus bonus, int level)
+        {
+            switch (bonus.EffectType)
+            {
+                case TalentBonusEffectType.Multiplicative:
+                case TalentBonusEffectType.CappedMultiplicative:
+                case TalentBonusEffectType.TieredMultiplicative:
+                    multiplier *= Talent.GetBonusMultiplier(bonus, level);
+                    break;
+                case TalentBonusEffectType.Additive:
+                    additive += BaseValue < 0 ? -bonus.Value : bonus.Value;
+                    break;
+                case TalentBonusEffectType.AdditivePercent:
+                    // Pooled additively across all sources, applied once against the base value.
+                    percentSum += bonus.Value;
+                    break;
+                case TalentBonusEffectType.Chance:
+                    // Average-price calculator: use the expected value.
+                    chanceAdditive += (bonus.Chance ?? 0m) * (BaseValue < 0 ? -bonus.Value : bonus.Value);
+                    break;
+                case TalentBonusEffectType.Override:
+                    overrideValue = BaseValue < 0 ? -bonus.Value : bonus.Value;
+                    break;
+            }
+        }
 
         foreach (var modifier in Modifiers)
         {
             switch (modifier.DynamicType)
             {
-                case "Module":
-                {
-                    var recipe = Recipe ?? Element?.Recipe;
-                    var userCraftingTable = recipe is not null
-                        ? calculationContext is not null
-                            ? calculationContext.GetUserCraftingTable(recipe, dataContext)
-                            : recipe.CraftingTable.GetCurrentUserCraftingTable(dataContext)
-                        : null;
-                    multiplier *= userCraftingTable
-                        ?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed")
-                        ?.GetPercent(modifier.Skill) ?? 1m;
-                    break;
-                }
                 case "Talent":
                 {
                     var userTalent = modifier.TalentId is not null
@@ -204,12 +288,9 @@ public class DynamicValue
                         : null;
                     if (userTalent is null) break;
 
-                    foreach (var bonus in GetMatchingBonuses(modifier))
+                    foreach (var bonus in GetMatchingBonuses(modifier, action, recipe?.Skill, recipeProductTags))
                     {
-                        if (bonus.EffectType is TalentBonusEffectType.Multiplicative or TalentBonusEffectType.CappedMultiplicative)
-                        {
-                            multiplier *= Talent.GetBonusMultiplier(bonus, userTalent.Level);
-                        }
+                        ApplyBonus(bonus, userTalent.Level);
                     }
                     break;
                 }
@@ -225,38 +306,17 @@ public class DynamicValue
                         : 1m;
                     break;
                 }
-                /*case "Layer":
-
-                    break;*/
+                // "Module" modifiers no longer drive any math (v4): module effects come exclusively
+                // from the installed modules' bonuses, handled below.
             }
         }
 
-        return multiplier;
-    }
-
-    private decimal GetAdditive(DataContext dataContext)
-    {
-        var additive = 0m;
-
-        foreach (var modifier in Modifiers)
+        foreach (var (_, bonus) in GetApplicableModuleBonuses(dataContext, calculationContext, action, recipe, recipeProductTags))
         {
-            if (modifier.DynamicType != "Talent") continue;
-
-            var userTalent = modifier.TalentId is not null
-                ? dataContext.UserTalents.FirstOrDefault(ut => ut.TalentId == modifier.TalentId.Value)
-                : null;
-            if (userTalent is null) continue;
-
-            foreach (var bonus in GetMatchingBonuses(modifier))
-            {
-                if (bonus.EffectType == TalentBonusEffectType.Additive)
-                {
-                    additive += BaseValue < 0 ? -bonus.Value : bonus.Value;
-                }
-            }
+            ApplyBonus(bonus, 1);
         }
 
-        return additive;
+        return new BonusAggregate(multiplier, additive, percentSum, chanceAdditive, overrideValue);
     }
 
     public decimal GetBaseValue()
@@ -279,7 +339,17 @@ public class DynamicValue
             return cachedValue;
         }
 
-        var dynamicValue = BaseValue * GetMultiplier(dataContext, calculationContext) + GetAdditive(dataContext);
+        // §3 effect math: multiplicatives compound, flat additives, then Override, then the
+        // AdditivePercent pool applied once against the pre-bonus base, then Chance (expected value).
+        var aggregate = CollectBonuses(dataContext, calculationContext);
+        var dynamicValue = BaseValue * aggregate.Multiplier + aggregate.Additive;
+        if (aggregate.OverrideValue is not null)
+        {
+            dynamicValue = aggregate.OverrideValue.Value;
+        }
+        dynamicValue += BaseValue * aggregate.PercentSum;
+        dynamicValue += aggregate.ChanceAdditive;
+
         if (dynamicValueCache is not null)
         {
             dynamicValueCache[Id] = dynamicValue;
@@ -334,27 +404,64 @@ public class DynamicValue
         baseValue ??= Math.Abs(Math.Round(GetBaseValue(), 0, MidpointRounding.AwayFromZero)).ToString();
 
         List<string> tooltip = [];
-        decimal totalMultiplier = 1;
+
+        var action = GetTalentAction();
+        var recipe = GetOwningRecipe();
+        var recipeProductTags = new Lazy<List<string>>(GetRecipeProductTags);
+
+        string FormatAdditive(decimal value)
+        {
+            var addedValue = BaseValue < 0 ? -value : value;
+            var rounded = Math.Round(addedValue, 2, MidpointRounding.AwayFromZero);
+            return (rounded > 0 ? "+" : "") + rounded.ToString("0.##");
+        }
+
+        static string FormatReductionPercent(decimal multiplier)
+        {
+            return Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##");
+        }
+
+        // Single formatter for one bonus line, shared by the talent and module loops so the
+        // per-effect-type display rules cannot drift between the two sources.
+        void AddBonusTooltip(TalentBonus bonus, int level, string sourceName, string reductionKey, string additiveKey)
+        {
+            switch (bonus.EffectType)
+            {
+                case TalentBonusEffectType.Multiplicative:
+                case TalentBonusEffectType.CappedMultiplicative:
+                case TalentBonusEffectType.TieredMultiplicative:
+                {
+                    var bonusMultiplier = Talent.GetBonusMultiplier(bonus, level);
+                    if (bonusMultiplier == 1m) break;
+                    tooltip.Add(localizationService.GetTranslation(reductionKey, sourceName, FormatReductionPercent(bonusMultiplier)));
+                    break;
+                }
+                case TalentBonusEffectType.AdditivePercent:
+                {
+                    if (bonus.Value == 0m) break;
+                    tooltip.Add(localizationService.GetTranslation(reductionKey, sourceName, Math.Round(-bonus.Value * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")));
+                    break;
+                }
+                case TalentBonusEffectType.Additive:
+                {
+                    if (bonus.Value == 0m) break;
+                    tooltip.Add(localizationService.GetTranslation(additiveKey, sourceName, FormatAdditive(bonus.Value)));
+                    break;
+                }
+                case TalentBonusEffectType.Chance:
+                {
+                    var expected = (bonus.Chance ?? 0m) * bonus.Value;
+                    if (expected == 0m) break;
+                    tooltip.Add(localizationService.GetTranslation(additiveKey, sourceName, FormatAdditive(expected)));
+                    break;
+                }
+            }
+        }
 
         foreach (var modifier in Modifiers)
         {
-            decimal multiplier = 1m;
-
             switch (modifier.DynamicType)
             {
-                case "Module":
-                    var bestPluginModule = (Recipe ?? Element?.Recipe)?.CraftingTable.GetCurrentUserCraftingTable(dataContext)?.GetBestPluginModule(modifier.Skill, modifier.ValueType == "Speed");
-                    multiplier *= bestPluginModule?.GetPercent(modifier.Skill) ?? 1m;
-
-                    if (multiplier != 1m)
-                    {
-                        tooltip.Add(localizationService.GetTranslation(
-                            "RecipeDialog.ModuleReductionTooltip",
-                            localizationService.GetTranslation(bestPluginModule),
-                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
-                        ));
-                    }
-                    break;
                 case "Talent":
                 {
                     var userTalent = modifier.TalentId is not null
@@ -363,45 +470,15 @@ public class DynamicValue
                     var talent = modifier.Talent ?? userTalent?.Talent;
                     if (userTalent is null || talent is null) break;
 
-                    foreach (var bonus in GetMatchingBonuses(modifier))
+                    foreach (var bonus in GetMatchingBonuses(modifier, action, recipe?.Skill, recipeProductTags))
                     {
-                        switch (bonus.EffectType)
-                        {
-                            case TalentBonusEffectType.Multiplicative:
-                            case TalentBonusEffectType.CappedMultiplicative:
-                            {
-                                var bonusMultiplier = Talent.GetBonusMultiplier(bonus, userTalent.Level);
-                                multiplier *= bonusMultiplier;
-
-                                if (bonusMultiplier != 1m)
-                                {
-                                    tooltip.Add(localizationService.GetTranslation(
-                                        "RecipeDialog.TalentReductionTooltip",
-                                        localizationService.GetTranslation(talent),
-                                        Math.Round(100 - bonusMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
-                                    ));
-                                }
-                                break;
-                            }
-                            case TalentBonusEffectType.Additive:
-                            {
-                                if (bonus.Value == 0m) break;
-                                var addedValue = BaseValue < 0 ? -bonus.Value : bonus.Value;
-                                var rounded = Math.Round(addedValue, 2, MidpointRounding.AwayFromZero);
-                                var formatted = (rounded > 0 ? "+" : "") + rounded.ToString("0.##");
-                                tooltip.Add(localizationService.GetTranslation(
-                                    "RecipeDialog.TalentAdditiveTooltip",
-                                    localizationService.GetTranslation(talent),
-                                    formatted
-                                ));
-                                break;
-                            }
-                        }
+                        AddBonusTooltip(bonus, userTalent.Level, localizationService.GetTranslation(talent), "RecipeDialog.TalentReductionTooltip", "RecipeDialog.TalentAdditiveTooltip");
                     }
                     break;
                 }
                 case "Skill":
-                    multiplier = modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
+                {
+                    var multiplier = modifier.Skill?.GetCurrentUserSkill(dataContext) is not null ? modifier.Skill.GetLevelLaborReducePercent(modifier.Skill.GetCurrentUserSkill(dataContext)!.Level) : 1m;
 
                     if (multiplier != 1m)
                     {
@@ -409,23 +486,28 @@ public class DynamicValue
                             "RecipeDialog.SkillReductionTooltip",
                             localizationService.GetTranslation(modifier.Skill),
                             modifier.Skill!.GetCurrentUserSkill(dataContext)!.Level.ToString(),
-                            Math.Round(100 - multiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                            FormatReductionPercent(multiplier)
                         ));
                     }
                     break;
-                /*case "Layer":
-
-                    break;*/
+                }
             }
-
-            totalMultiplier *= multiplier;
         }
 
-        if (totalMultiplier != 1m)
+        // Installed modules (one per slot, all active): each applicable bonus gets its own line.
+        // Module bonuses are not level-scaled, so they are described at level 1.
+        foreach (var (pluginModule, bonus) in GetApplicableModuleBonuses(dataContext, null, action, recipe, recipeProductTags))
+        {
+            AddBonusTooltip(bonus, 1, localizationService.GetTranslation(pluginModule), "RecipeDialog.ModuleReductionTooltip", "RecipeDialog.ModuleAdditiveTooltip");
+        }
+
+        var dynamicValue = GetDynamicValue(dataContext);
+
+        if (dynamicValue != BaseValue && BaseValue != 0m)
         {
             var prefix = localizationService.GetTranslation(
                 "RecipeDialog.TotalReductionTooltip",
-                Math.Round(100 - totalMultiplier * 100, 1, MidpointRounding.AwayFromZero).ToString("0.##")
+                FormatReductionPercent(dynamicValue / BaseValue)
             );
             return baseValue + " " + prefix + string.Join(", ", tooltip);
         }
@@ -481,6 +563,9 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public string? HousingTypeForRoomLimit { get; set; }
     public decimal? HousingDiminishingReturnMultiplier { get; set; }
     public decimal? HousingDiminishingMultiplierAcrossFullProperty { get; set; }
+    public decimal? RoomMaterialTier { get; set; }
+    public decimal? RoomVolume { get; set; }
+    public bool RoomRequiresContainment { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -540,7 +625,6 @@ public class Skill: IHasLocalizedName, IHasIconName, ISLinkedToModifier
     public List<UserSkill> UserSkills { get; set; } = [];
     public List<Talent> Talents { get; set; } = [];
     public List<Modifier> Modifiers { get; set; } = [];
-    public List<PluginModule> PluginModules { get; set; } = [];
 
     public UserSkill? GetCurrentUserSkill(DataContext dataContext)
     {
@@ -572,19 +656,74 @@ public enum TalentBonusEffectType
     CappedMultiplicative = 1,
     Additive = 2,
     Override = 3,
+    AdditivePercent = 4,
+    Chance = 5,
+    TieredMultiplicative = 6,
 }
 
+// Shared bonus shape: carried by a Talent (TalentId set) or by a PluginModule (PluginModuleId set).
 public class TalentBonus
 {
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
-    [ForeignKey("Talent")] public Guid TalentId { get; set; }
+    [ForeignKey("Talent")] public Guid? TalentId { get; set; }
+    [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
     public TalentBonusAction Action { get; set; }
     public TalentBonusEffectType EffectType { get; set; }
     public decimal Value { get; set; }
     public decimal? Cap { get; set; }
+    public decimal? Chance { get; set; }
+    public decimal[]? Levels { get; set; }
+    public string[]? SkillTypes { get; set; }
+    public string[]? ExcludedSkillTypes { get; set; }
     public string[]? ItemTags { get; set; }
 
-    public Talent Talent { get; set; }
+    public Talent? Talent { get; set; }
+    public PluginModule? PluginModule { get; set; }
+
+    // A bonus only applies to a recipe when its skill/tag filters match the recipe's required
+    // skill and the tags carried by at least one of the recipe's products. The product tags come
+    // in lazily: most bonuses carry no ItemTags filter, so the tag walk is usually skipped.
+    public bool PassesFilters(Skill? recipeSkill, Lazy<List<string>> recipeProductTags)
+    {
+        if (SkillTypes is { Length: > 0 } && (recipeSkill is null || !SkillTypes.Contains(recipeSkill.Name))) return false;
+        if (ExcludedSkillTypes is { Length: > 0 } && recipeSkill is not null && ExcludedSkillTypes.Contains(recipeSkill.Name)) return false;
+        if (ItemTags is { Length: > 0 } && !ItemTags.Any(recipeProductTags.Value.Contains)) return false;
+
+        return true;
+    }
+
+    // Compact human-readable form, e.g. "Resource cost -10%" or "Yield +1", used in module tooltips
+    // and the data editor. Level-scaled effects are described at level 1.
+    public string GetDescription(LocalizationService localizationService)
+    {
+        var actionLabel = localizationService.GetTranslation($"Bonus.Action.{Action}");
+
+        switch (EffectType)
+        {
+            case TalentBonusEffectType.Multiplicative:
+            case TalentBonusEffectType.CappedMultiplicative:
+            case TalentBonusEffectType.TieredMultiplicative:
+            {
+                var percent = (Talent.GetBonusMultiplier(this, 1) - 1m) * 100;
+                return percent == 0m ? "" : $"{actionLabel} {FormatPercent(percent)}";
+            }
+            case TalentBonusEffectType.AdditivePercent:
+                return Value == 0m ? "" : $"{actionLabel} {FormatPercent(Value * 100)}";
+            case TalentBonusEffectType.Additive:
+                return $"{actionLabel} {(Value > 0 ? "+" : "")}{Value:0.##}";
+            case TalentBonusEffectType.Override:
+                return $"{actionLabel} = {Value:0.##}";
+            case TalentBonusEffectType.Chance:
+                return $"{actionLabel} {(Value > 0 ? "+" : "")}{Value:0.##} ({(Chance ?? 0) * 100:0.##}%)";
+            default:
+                return "";
+        }
+    }
+
+    private static string FormatPercent(decimal percent)
+    {
+        return (percent > 0 ? "+" : "−") + Math.Abs(Math.Round(percent, 1, MidpointRounding.AwayFromZero)).ToString("0.##") + "%";
+    }
 }
 
 public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
@@ -624,6 +763,11 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
                 if (bonus.Value > 1m) return Math.Min(multiplier, bonus.Cap.Value);
                 return multiplier;
             }
+            case TalentBonusEffectType.TieredMultiplicative:
+            {
+                if (bonus.Levels is not { Length: > 0 }) return bonus.Value;
+                return bonus.Levels[Math.Clamp(level, 1, bonus.Levels.Length) - 1];
+            }
             default:
                 return 1m;
         }
@@ -632,8 +776,9 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
     private TalentBonus? GetReductionBonus()
     {
         return Bonuses.FirstOrDefault(b =>
-            b.EffectType == TalentBonusEffectType.CappedMultiplicative
-            || (b.EffectType == TalentBonusEffectType.Multiplicative && b.Value != 1m && b.Value != 0m));
+            b.EffectType is TalentBonusEffectType.CappedMultiplicative or TalentBonusEffectType.TieredMultiplicative
+            || (b.EffectType == TalentBonusEffectType.Multiplicative && b.Value != 1m && b.Value != 0m)
+            || (b.EffectType == TalentBonusEffectType.AdditivePercent && b.Value != 0m));
     }
 
     public bool HasReductionDisplay()
@@ -646,6 +791,11 @@ public class Talent: IHasLocalizedName, ISLinkedToModifier, IHasIconName
         var bonus = GetReductionBonus();
         if (bonus is null) return 0m;
 
+        if (bonus.EffectType == TalentBonusEffectType.AdditivePercent)
+        {
+            return Math.Round(-bonus.Value * 100, 1, MidpointRounding.AwayFromZero);
+        }
+
         return Math.Round((1 - GetBonusMultiplier(bonus, level)) * 100, 1, MidpointRounding.AwayFromZero);
     }
 }
@@ -656,16 +806,30 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
+    public decimal? RoomMaterialTier { get; set; }
+    public decimal? RoomVolume { get; set; }
+    public bool RoomRequiresContainment { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
     public Server Server { get; set; }
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
+    public List<ModuleSlot> ModuleSlots { get; set; } = [];
 
     public UserCraftingTable? GetCurrentUserCraftingTable(DataContext dataContext)
     {
         return dataContext.UserCraftingTables.FirstOrDefault(ur => ur.CraftingTableId == Id);
+    }
+
+    public List<ModuleSlot> GetOrderedModuleSlots()
+    {
+        return ModuleSlots.OrderBy(ms => ms.SortOrder).ThenBy(ms => ms.Name).ToList();
+    }
+
+    public List<PluginModule> GetPluginModulesForSlot(ModuleSlot moduleSlot)
+    {
+        return PluginModules.Where(pm => pm.ModuleSlotId == moduleSlot.Id).ToList();
     }
 
     public override string ToString()
@@ -674,12 +838,25 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
     }
 }
 
-public enum PluginType
+// A module slot type registered by the game (BasicModule, AdvancedModule, ...). Each crafting
+// table exposes a subset of slots; one module can be installed per slot, all active at once.
+public class ModuleSlot: IHasLocalizedName
 {
-    None = 0,
-    Resource = 1,
-    Speed = 2,
-    ResourceAndSpeed = 3,
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
+    [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
+    public int SortOrder { get; set; }
+    [ForeignKey("Server")] public Guid ServerId { get; set; }
+
+    public LocalizedField LocalizedName { get; set; }
+    public Server Server { get; set; }
+    public List<PluginModule> PluginModules { get; set; } = [];
+    public List<CraftingTable> CraftingTables { get; set; } = [];
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }
 
 public class PluginModule: IHasLocalizedName, IHasIconName
@@ -688,35 +865,26 @@ public class PluginModule: IHasLocalizedName, IHasIconName
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
 
-    public PluginType PluginType { get; set; }
-    public decimal Percent { get; set; }
-    public decimal? SkillPercent { get; set; }
-    [ForeignKey("Skill")] public Guid? SkillId { get; set; }
+    [ForeignKey("ModuleSlot")] public Guid? ModuleSlotId { get; set; }
+    public decimal? MaterialTierBump { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
-    public Skill? Skill { get; set; }
+    public ModuleSlot? ModuleSlot { get; set; }
     public Server Server { get; set; }
+    public List<TalentBonus> Bonuses { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<UserCraftingTable> UserCraftingTables { get; set; } = [];
 
-    public decimal GetPercent(Skill? recipeSkill)
-    {
-        if (recipeSkill is not null && recipeSkill == Skill && SkillPercent is not null)
-        {
-            return (decimal)SkillPercent;
-        }
-
-        return Percent;
-    }
-
     public string GetTooltip(LocalizationService localizationService)
     {
+        var bonuses = Bonuses
+            .Select(b => b.GetDescription(localizationService))
+            .Where(d => d.Length > 0)
+            .ToList();
+
         return localizationService.GetTranslation(this)
-               + $" [{((1 - Percent) * 100).ToString("0.##")}%]"
-               + (Skill is not null
-                   ? $" - {localizationService.GetTranslation(Skill)}: [{((1 - (decimal)SkillPercent!) * 100).ToString("0.##")}%]"
-                   : "");
+               + (bonuses.Count > 0 ? $" [{string.Join(", ", bonuses)}]" : "");
     }
 
     public override string ToString()
@@ -853,7 +1021,6 @@ public class UserCraftingTable
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
     [ForeignKey("CraftingTable")] public Guid CraftingTableId { get; set; }
-    [ForeignKey("PluginModule")] public Guid? PluginModuleId { get; set; }
     [ForeignKey("FuelItem")] public Guid? FuelItemId { get; set; }
 
     public decimal AdditionalCraftMinuteFee { get; set; } = 0;
@@ -861,15 +1028,48 @@ public class UserCraftingTable
 
     public DataContext DataContext { get; set; }
     public CraftingTable CraftingTable { get; set; }
-    public PluginModule? PluginModule { get; set; }
     public ItemOrTag? FuelItem { get; set; }
-    public List<PluginModule> SkilledPluginModules { get; set; } = [];
 
-    public PluginModule? GetBestPluginModule(Skill? skill, bool requireSpeed = false)
+    // Installed modules: at most one per module slot, all applying their bonuses simultaneously.
+    public List<PluginModule> PluginModules { get; set; } = [];
+
+    public PluginModule? GetPluginModuleForSlot(ModuleSlot moduleSlot)
     {
-        return SkilledPluginModules
-            .Concat([PluginModule])
-            .Where(pm => pm is not null && (requireSpeed ? pm.PluginType != PluginType.Resource : pm.PluginType != PluginType.Speed)).MinBy(pm => pm!.GetPercent(skill));
+        return PluginModules.FirstOrDefault(pm => pm.ModuleSlotId == moduleSlot.Id);
+    }
+
+    // Installs (or clears, when pluginModule is null) the module of one slot, enforcing the
+    // at-most-one-module-per-slot invariant in a single place. Returns false when nothing changed.
+    public bool SetPluginModuleForSlot(ModuleSlot moduleSlot, PluginModule? pluginModule)
+    {
+        var currentModule = GetPluginModuleForSlot(moduleSlot);
+
+        if (currentModule?.Id == pluginModule?.Id)
+        {
+            return false;
+        }
+
+        if (currentModule is not null)
+        {
+            PluginModules.Remove(currentModule);
+        }
+
+        if (pluginModule is not null)
+        {
+            PluginModules.Add(pluginModule);
+        }
+
+        return true;
+    }
+
+    // Effective required room material tier of the table: base requirement + installed module bumps.
+    public decimal? GetEffectiveRoomMaterialTier()
+    {
+        var bump = PluginModules.Sum(pm => pm.MaterialTierBump ?? 0m);
+
+        if (CraftingTable.RoomMaterialTier is null) return bump > 0 ? bump : null;
+
+        return CraftingTable.RoomMaterialTier.Value + bump;
     }
 }
 
@@ -1028,6 +1228,7 @@ public class Server
 	public List<UserServer> UserServers { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
+    public List<ModuleSlot> ModuleSlots { get; set; } = [];
     public List<Skill> Skills { get; set; } = [];
     public List<ItemOrTag> ItemOrTags { get; set; } = [];
     public List<Recipe> Recipes { get; set; } = [];
@@ -1088,6 +1289,7 @@ public class LocalizedField
     public List<Talent> TalentDescriptions { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
     public List<PluginModule> PluginModules { get; set; } = [];
+    public List<ModuleSlot> ModuleSlots { get; set; } = [];
 
     public static Dictionary<SupportedLanguage, LanguageCode> SupportedLanguageToCode =
         new()

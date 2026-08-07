@@ -124,7 +124,9 @@
             "Name": "Nom",
             "NameRequired": "Un nom est requis",
             "PluginModules": "Modules",
-            "NoPluginModule": "Aucun module"
+            "NoPluginModule": "Aucun module",
+            "ModuleSlots": "Emplacements de modules",
+            "NoModuleSlot": "Pas d'emplacement de module"
         },
         "PluginModule": {
             "CreateTitle": "Créer un module",
@@ -134,10 +136,17 @@
             "DeleteConfirm": "Voulez-vous vraiment supprimer le module « {0} » ?",
             "Name": "Nom",
             "NameRequired": "Un nom est requis",
-            "PluginType": "Type",
-            "Percent": "Pourcentage",
-            "Skill": "Compétence",
-            "SkillPercent": "Pourcentage de compétence"
+            "ModuleSlot": "Emplacement de module",
+            "MaterialTierBump": "Hausse du niveau de matériaux requis",
+            "Bonuses": "Bonus",
+            "BonusAction": "Action",
+            "BonusEffectType": "Type d'effet",
+            "BonusValue": "Valeur",
+            "BonusCap": "Plafond",
+            "BonusChance": "Probabilité (0-1)",
+            "BonusSkillTypes": "Filtres de compétences (séparés par des virgules)",
+            "BonusExcludedSkillTypes": "Compétences exclues (séparées par des virgules)",
+            "BonusItemTags": "Tags d'objets (séparés par des virgules)"
         }
     },
     "DevVersion": "VOUS ÊTES SUR UNE VERSION DE DÉVELOPPEMENT D'ECO GNOME",
@@ -243,7 +252,8 @@
         },
         "Static": "statique",
         "TotalCost": "Coût total :",
-        "TotalPrice": "Prix total :"
+        "TotalPrice": "Prix total :",
+        "ModuleAdditiveTooltip": "Module {moduleName} -> {value}"
     },
     "RecipeList": {
         "RecipeName": "Nom de la recette"
@@ -832,5 +842,19 @@
     },
     "UserServerDataService": {
         "NewMargin": "Nouvelle marge"
+    },
+    "Bonus": {
+        "Action": {
+            "ResourceCost": "Coût en ressources",
+            "LaborCost": "Coût en labeur",
+            "CraftTime": "Temps de craft",
+            "Yield": "Rendement"
+        }
+    },
+    "CraftingTableDialog": {
+        "RoomRequirements": "Exigences de la pièce",
+        "RoomMaterialTier": "Niveau de matériaux",
+        "RoomVolume": "Volume",
+        "RequiresRoom": "Doit être placé dans une pièce valide"
     }
 }

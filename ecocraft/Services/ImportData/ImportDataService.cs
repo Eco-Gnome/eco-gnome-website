@@ -14,9 +14,10 @@ public partial class ImportDataService(
     ServerDbService serverDbService,
     ServerDataService serverDataService)
 {
-    private const int SupportedVersion = 3;
+    private const int SupportedVersion = 4;
 
     private List<Skill> Skills { get; set; } = [];
+    private List<ModuleSlot> ModuleSlots { get; set; } = [];
     private List<PluginModule> PluginModules { get; set; } = [];
     private List<CraftingTable> CraftingTables { get; set; } = [];
     private List<Recipe> Recipes { get; set; } = [];
@@ -25,6 +26,7 @@ public partial class ImportDataService(
     private void SetTrackedCollectionsFromServer(Server serverWithData)
     {
         Skills = serverWithData.Skills;
+        ModuleSlots = serverWithData.ModuleSlots;
         PluginModules = serverWithData.PluginModules;
         CraftingTables = serverWithData.CraftingTables;
         Recipes = serverWithData.Recipes;
@@ -63,6 +65,7 @@ public partial class ImportDataService(
             if (importedData.Version != SupportedVersion) throw new ImportException(localizationService.GetTranslation("ServerManagement.Snackbar.UploadWrongVersion", SupportedVersion.ToString()));
 
             ImportSkills(context, serverWithData, importedData.Skills);
+            ImportModuleSlots(context, serverWithData, importedData.ModuleSlots);
             errorCount += ImportItems(context, serverWithData, importedData.Items, out itemErrorNames);
             ImportTags(context, serverWithData, importedData.Tags);
             errorCount += ImportRecipes(context, serverWithData, importedData.Recipes, out recipeErrorNames);
@@ -82,6 +85,7 @@ public partial class ImportDataService(
             SetTrackedCollectionsFromServer(targetServerWithData);
 
             ImportSkills(context, targetServerWithData, data.Skills);
+            ImportModuleSlots(context, targetServerWithData, data.ModuleSlots);
             ImportItems(context, targetServerWithData, data.Items, out _);
             ImportTags(context, targetServerWithData, data.Tags);
             ImportRecipes(context, targetServerWithData, data.Recipes, out _);

@@ -179,17 +179,7 @@
                                         </MudTd>
                                         <MudTd>
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                @if (context.PluginModuleId is Guid pluginModuleId)
-                                                {
-                                                    var pluginModule = GetPluginModule(pluginModuleId);
-                                                    <MudTooltip Text="@(pluginModule?.GetTooltip(LocalizationService) ?? context.PluginModuleName ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                        <EcoIcon Item="@pluginModule"
-                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                 Size="24"
-                                                                 Class="mt-1"/>
-                                                    </MudTooltip>
-                                                }
-                                                else
+                                                @if (context.InstalledPluginModuleIds.Count == 0)
                                                 {
                                                     <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NoModule")">
                                                         <EcoIcon Item="@((IHasIconName?)null)"
@@ -198,12 +188,12 @@
                                                                  Class="mt-1"/>
                                                     </MudTooltip>
                                                 }
-
-                                                @foreach (var skilledPluginModuleId in context.SkilledPluginModuleIds)
+                                                @foreach (var installedPluginModuleId in context.InstalledPluginModuleIds)
                                                 {
-                                                    var skilledPluginModule = GetPluginModule(skilledPluginModuleId);
-                                                    <MudTooltip Text="@(skilledPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                        <EcoIcon Item="@skilledPluginModule"
+                                                    var installedPluginModule = GetPluginModule(installedPluginModuleId);
+                                                    <MudTooltip Text="@(installedPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                        <EcoIcon Item="@installedPluginModule"
+                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
                                                                  Size="24"
                                                                  Class="has-pluginmodule mt-1"/>
                                                     </MudTooltip>
@@ -250,17 +240,7 @@
                                         </MudTd>
                                         <MudTd>
                                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                @if (context.PluginModuleId is Guid pluginModuleId)
-                                                {
-                                                    var pluginModule = GetPluginModule(pluginModuleId);
-                                                    <MudTooltip Text="@(pluginModule?.GetTooltip(LocalizationService) ?? context.PluginModuleName ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                        <EcoIcon Item="@pluginModule"
-                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
-                                                                 Size="24"
-                                                                 Class="mt-1"/>
-                                                    </MudTooltip>
-                                                }
-                                                else
+                                                @if (context.InstalledPluginModuleIds.Count == 0)
                                                 {
                                                     <MudTooltip Text="@LocalizationService.GetTranslation("PriceCalculator.NoModule")">
                                                         <EcoIcon Item="@((IHasIconName?)null)"
@@ -269,12 +249,12 @@
                                                                  Class="mt-1"/>
                                                     </MudTooltip>
                                                 }
-
-                                                @foreach (var skilledPluginModuleId in context.SkilledPluginModuleIds)
+                                                @foreach (var installedPluginModuleId in context.InstalledPluginModuleIds)
                                                 {
-                                                    var skilledPluginModule = GetPluginModule(skilledPluginModuleId);
-                                                    <MudTooltip Text="@(skilledPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                        <EcoIcon Item="@skilledPluginModule"
+                                                    var installedPluginModule = GetPluginModule(installedPluginModuleId);
+                                                    <MudTooltip Text="@(installedPluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
+                                                        <EcoIcon Item="@installedPluginModule"
+                                                                 FallbackIcon="@MDIIcons.Filled.Cancel"
                                                                  Size="24"
                                                                  Class="has-pluginmodule mt-1"/>
                                                     </MudTooltip>
