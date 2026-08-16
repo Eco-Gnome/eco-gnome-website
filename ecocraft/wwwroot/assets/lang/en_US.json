@@ -206,6 +206,8 @@
         "EconomyViewer": "Economy Viewer",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
+        "Donate": "Support us",
+        "DonateTooltip": "Eco Gnome is free, and always will be. If it saved you time, you can chip in.",
         "SourceCode": "Source Code",
         "Contact": "Contact",
         "JoinServer": "Join Server"

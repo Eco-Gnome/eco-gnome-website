@@ -53,6 +53,8 @@
         "NavCalculator": "Preiskalkulator",
         "NavGraph": "Grafik-Ansicht [WIP]",
         "NavSuperAdmin": "Superverwalter",
+        "Donate": "Uns unterstützen",
+        "DonateTooltip": "Eco Gnome ist kostenlos und bleibt es auch. Wenn dir das Tool Zeit gespart hat, kannst du uns gerne unterstützen.",
         "SourceCode": "Quellcode",
         "Contact": "Kontakt",
         "JoinServer": "Server beitreten"
