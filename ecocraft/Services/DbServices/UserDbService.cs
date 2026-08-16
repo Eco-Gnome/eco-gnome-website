@@ -124,9 +124,30 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 		userServer.EcoUserId = ecoUserId;
 		userServer.Pseudo = serverPseudo;
 
+		// Se déclarer en jeu via /eguser est la preuve d'humain la plus forte qu'on ait. Chemin API,
+		// hors circuit Blazor : le hook d'interaction ne passe pas ici, on tamponne explicitement.
+		user.LastActionDateTime = DateTimeOffset.UtcNow;
+
 		await context.SaveChangesAsync();
 
 		return RegisterUserResult.Success;
+	}
+
+	// Ids des comptes ayant au moins un métier, tous serveurs et tous contextes confondus. Projection
+	// plutôt qu'un Include : la page super admin charge tous les users, et remonter leurs DataContexts
+	// et UserSkills ferait exploser la requête pour une simple case à cocher.
+	// SkillId non nul exclut le UserSkill fantôme posé par l'option « recettes sans métier ».
+	public async Task<HashSet<Guid>> GetUserIdsWithSkillAsync()
+	{
+		await using var context = await factory.CreateDbContextAsync();
+
+		var ids = await context.UserSkills
+			.Where(us => us.SkillId != null)
+			.Select(us => us.DataContext.UserServer.UserId)
+			.Distinct()
+			.ToListAsync();
+
+		return ids.ToHashSet();
 	}
 
 	public async Task<int> CountUsers()
@@ -147,6 +168,7 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 			SuperAdmin = user.SuperAdmin,
 			CanUploadMod = user.CanUploadMod,
 			ShowHelp = user.ShowHelp,
+			LastActionDateTime = user.LastActionDateTime,
 		};
 	}
 
@@ -166,6 +188,14 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.CanUploadMod).IsModified = true;
+	}
+
+	public void UpdateLastActionDateTime(EcoCraftDbContext context, User user)
+	{
+		var stub = new User { Id = user.Id, LastActionDateTime = user.LastActionDateTime };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.LastActionDateTime).IsModified = true;
 	}
 
 	public void UpdateSuperAdmin(EcoCraftDbContext context, User user)

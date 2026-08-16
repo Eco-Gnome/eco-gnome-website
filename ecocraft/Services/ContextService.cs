@@ -119,6 +119,7 @@ public class ContextService(
                 SecretId = Guid.NewGuid(),
                 CreationDateTime = DateTimeOffset.UtcNow,
                 SuperAdmin = isFirstUser,
+                LastActionDateTime = isFirstUser ? DateTimeOffset.UtcNow : null,
             };
             newUser.GeneratePseudo();
 
@@ -193,7 +194,7 @@ public class ContextService(
             }
             else if (_defaultServers.Count != 0)
             {
-                await JoinServer(_defaultServers.First());
+                await JoinServer(_defaultServers.First(), isBootstrap: true);
                 searchedServer = _defaultServers.First();
             }
         }
@@ -209,7 +210,31 @@ public class ContextService(
 		OnContextChanged?.Invoke();
 	}
 
-    public async Task JoinServer(Server server, bool isAdmin = false)
+    // Un User est créé dès la première page vue, y compris pour un crawler. Ce tampon n'est posé que
+    // sur des gestes délibérés — pas sur une simple visite, ni sur « toute écriture en base » : le
+    // calculateur enregistre déjà au chargement (PriceCalculator, origine InitialLoad), donc écrire
+    // ne prouve rien. Sépare les joueurs des robots, et date la dernière venue active pour repérer les
+    // comptes abandonnés. Étranglé à une écriture par 24 h.
+    public async Task TouchLastAction()
+    {
+        if (CurrentUser is null || CurrentUser.LastActionDateTime > DateTimeOffset.UtcNow.AddDays(-1))
+        {
+            return;
+        }
+
+        var user = CurrentUser;
+        user.LastActionDateTime = DateTimeOffset.UtcNow;
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            userDbService.UpdateLastActionDateTime(context, user);
+            return Task.CompletedTask;
+        });
+    }
+
+    // isBootstrap : auto-join du serveur par défaut au premier chargement. C'est le site qui l'initie,
+    // pas le joueur, donc ça ne compte pas comme une action.
+    public async Task JoinServer(Server server, bool isAdmin = false, bool isBootstrap = false)
     {
         var existingUserServer = CurrentUser!.UserServers.Find(us => us.ServerId == server.Id || us.Server.Id == server.Id);
 
@@ -221,6 +246,11 @@ public class ContextService(
             }
 
             return;
+        }
+
+        if (!isBootstrap)
+        {
+            await TouchLastAction();
         }
 
         var userServer = new UserServer
@@ -245,6 +275,12 @@ public class ContextService(
 
     public async Task<DataContext> AddDataContext(UserServer userServer, bool isDefault = false)
     {
+        // isDefault : contexte créé d'office avec le serveur, pas un geste du joueur.
+        if (!isDefault)
+        {
+            await TouchLastAction();
+        }
+
         var dataContext = new DataContext
         {
             Name = isDefault
@@ -294,6 +330,8 @@ public class ContextService(
         {
             throw new InvalidOperationException("CurrentServerData is not initialized.");
         }
+
+        await TouchLastAction();
 
         var src = await dataContextDbService.GetDataContextWithData(source.Id, CurrentServerData);
 

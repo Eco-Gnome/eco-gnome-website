@@ -429,6 +429,8 @@
         },
         "Chips": {
             "NoServer": "Sans serveur",
+            "NeverActed": "Jamais agi",
+            "NoSkill": "Sans métier",
             "Empty": "Vide",
             "NoPlayers": "Sans joueur",
             "NoAdmin": "Sans admin",
@@ -446,6 +448,7 @@
         "ConfirmSuperAdminDemote": "Êtes-vous sûr de vouloir rétrograder cet utilisateur de Super Admin ?",
         "ConfirmTwiceSuperAdmin": "Ce changement a un impact considérable et pourrait corrompre l'ensemble du site web ! Veuillez confirmer à nouveau.",
         "ConfirmUserDeletion": "Êtes-vous sûr de vouloir supprimer l'utilisateur {utilisateur} ?",
+        "LastActionDateCol": "Dernière action",
         "CreationDateCol": "Date de création",
         "DataCol": "Données",
         "Filters": {

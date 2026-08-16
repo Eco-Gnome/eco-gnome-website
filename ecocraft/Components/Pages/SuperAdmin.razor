@@ -33,6 +33,8 @@
                     <MudText Typo="Typo.h6" Class="super-admin-panel-title">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title") (@_users.Count)</MudText>
                     <div class="super-admin-chip-row">
                         @FilterChip("SuperAdmin.Chips.NoServer", _users.Count(u => u.UserServers.Count == 0), _uNoServer, () => _uNoServer = !_uNoServer, Color.Warning)
+                        @FilterChip("SuperAdmin.Chips.NeverActed", _users.Count(HasNeverActed), _uNeverActed, () => _uNeverActed = !_uNeverActed, Color.Error)
+                        @FilterChip("SuperAdmin.Chips.NoSkill", _users.Count(u => !_usersWithSkill.Contains(u.Id)), _uNoSkill, () => _uNoSkill = !_uNoSkill, Color.Warning)
                     </div>
                     <MudTextField @bind-Value="_searchUser"
                                   Immediate
@@ -42,7 +44,7 @@
                                   IconSize="Size.Small"
                                   Class="super-admin-panel-search mt-0"/>
                 </div>
-                @if (_uNoServer)
+                @if (HasUserBulkFilter())
                 {
                     <div class="super-admin-bulk-bar">
                         <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("SuperAdmin.Bulk.Affected", GetUserBulkIds().Count.ToString())</MudText>
@@ -67,6 +69,7 @@
                         <col style="width: 104px;" />
                         <col />
                         <col style="width: 64px;" />
+                        <col style="width: 64px;" />
                         <col style="width: 56px;" />
                         <col style="width: 52px;" />
                         <col style="width: 64px;" />
@@ -76,6 +79,7 @@
                     <HeaderContent>
                         <MudTh Class="super-admin-user-id-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Pseudo)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.LastActionDateTime ?? DateTimeOffset.MinValue)">@LocalizationService.GetTranslation("SuperAdmin.LastActionDateCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.CreationDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-count-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.UserServers.Count)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServersCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-admin-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.UserServers.Count(us => us.IsAdmin))">@LocalizationService.GetTranslation("SuperAdmin.UserTable.AdminServersCol")</MudTableSortLabel></MudTh>
@@ -94,6 +98,20 @@
                         </MudTd>
                         <MudTd>
                             @context.Pseudo
+                        </MudTd>
+                        <MudTd Class="super-admin-user-date-col">
+                            @if (context.LastActionDateTime is { } lastAction)
+                            {
+                                <MudTooltip Text="@lastAction.ToString()">
+                                    <MudIcon Icon="@Icons.Material.Outlined.History" Size="Size.Small"/>
+                                </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.Chips.NeverActed")">
+                                    <MudIcon Icon="@Icons.Material.Outlined.HighlightOff" Color="Color.Error" Size="Size.Small"/>
+                                </MudTooltip>
+                            }
                         </MudTd>
                         <MudTd Class="super-admin-user-date-col">
                             <MudTooltip Text="@context.CreationDateTime.ToString()">
@@ -351,6 +369,7 @@
 
     private bool _isLoading;
     private List<User> _users = [];
+    private HashSet<Guid> _usersWithSkill = [];
     private List<Server> _servers = [];
     private List<ModUploadHistory> _modUploadHistories = [];
     private string _searchUser = "";
@@ -359,6 +378,8 @@
 
     // Filtres = critères de bulk (une seule source de vérité par tableau).
     private bool _uNoServer;
+    private bool _uNeverActed;
+    private bool _uNoSkill;
     private bool _sEmpty;
     private bool _sNoPlayers;
     private bool _sNoAdmin;
@@ -411,6 +432,7 @@
 
     private async Task RetrieveUsers() {
         _users = await UserDbService.GetAllAsync();
+        _usersWithSkill = await UserDbService.GetUserIdsWithSkillAsync();
     }
 
     private async Task RetrieveServers() {
@@ -497,7 +519,19 @@
             return false;
         if (_uNoServer && user.UserServers.Count != 0)
             return false;
+        if (_uNeverActed && !HasNeverActed(user))
+            return false;
+        if (_uNoSkill && _usersWithSkill.Contains(user.Id))
+            return false;
         return true;
+    }
+
+    // Littéral : n'a jamais rien fait. Attention avant une suppression en masse — la colonne n'étant
+    // pas rétro-remplie, les comptes antérieurs au déploiement restent NULL tant que leur joueur n'est
+    // pas repassé. Trier sur « Date de création » pour les distinguer des vrais robots.
+    private static bool HasNeverActed(User user)
+    {
+        return user.LastActionDateTime is null;
     }
 
     private bool SearchServer(Server server)
@@ -663,9 +697,14 @@
             .ToList();
     }
 
+    private bool HasUserBulkFilter()
+    {
+        return _uNoServer || _uNeverActed || _uNoSkill;
+    }
+
     private List<Guid> GetUserBulkIds()
     {
-        if (!_uNoServer)
+        if (!HasUserBulkFilter())
         {
             return [];
         }

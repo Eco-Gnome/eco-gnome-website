@@ -3289,6 +3289,14 @@
             return;
         }
 
+        // Point de passage unique de toutes les modifications du calculateur. L'origine sépare déjà les
+        // gestes du joueur du simple chargement — Calculate() écrit en base même sur un InitialLoad, donc
+        // c'est bien l'origine, et pas l'écriture, qui distingue un joueur d'un crawler.
+        if (origin is not (CalculateTriggerOrigin.InitialLoad or CalculateTriggerOrigin.ContextSwitch or CalculateTriggerOrigin.Unknown))
+        {
+            await ContextService.TouchLastAction();
+        }
+
         if (!force && IsManualCalculationMode)
         {
             _hasPendingManualCalculation = true;

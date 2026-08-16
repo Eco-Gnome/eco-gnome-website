@@ -199,6 +199,8 @@
 	{
 		ContextService.CurrentUser!.Pseudo = newPseudo;
 
+		await ContextService.TouchLastAction();
+
 		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
 		{
 			UserDbService.UpdateAll(context, ContextService.CurrentUser);
