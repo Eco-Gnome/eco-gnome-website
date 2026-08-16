@@ -481,17 +481,10 @@
     {
         server.IsDefault = !server.IsDefault;
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
 		{
-            if (server.IsDefault)
-            {
-                // Unset other defaults
-                await context.Servers
-                    .Where(s => s.IsDefault && s.Id != server.Id)
-                    .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsDefault, false));
-            }
-
             ServerDbService.UpdateIsDefault(context, server);
+            return Task.CompletedTask;
 		});
 
         await RetrieveServers();
