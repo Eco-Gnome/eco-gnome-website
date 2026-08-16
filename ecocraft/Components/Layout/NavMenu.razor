@@ -37,6 +37,10 @@
         </MudTooltip>
     }
     <MudSpacer />
+    @* ponytail: lien Ko-fi externe direct plutôt qu'une page /donate interne *@
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Secondary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.DonateTooltip")">
+        <MudNavLink IconColor="Color.Secondary" Target="_blank" Href="https://ko-fi.com/ecognome" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.HandHeart">@LocalizationService.GetTranslation("NavMenu.Donate")</MudNavLink>
+    </MudTooltip>
     <MudTooltip RootClass="mud-nav-item" Color="Color.Default" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.SourceCode")">
         <MudNavLink IconColor="Color.Default" Target="_blank" Href="https://github.com/Eco-Gnome/eco-gnome-website" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.Github">@LocalizationService.GetTranslation("NavMenu.SourceCode")</MudNavLink>
     </MudTooltip>

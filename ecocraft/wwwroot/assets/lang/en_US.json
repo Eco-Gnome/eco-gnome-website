@@ -206,6 +206,8 @@
         "EconomyViewer": "Economy Viewer",
         "NavGraph": "Graph View [WIP]",
         "NavSuperAdmin": "Super Admin",
+        "Donate": "Support us",
+        "DonateTooltip": "Eco Gnome is free, and always will be. If it saved you time, you can chip in.",
         "SourceCode": "Source Code",
         "Contact": "Contact",
         "JoinServer": "Join Server"
@@ -434,6 +436,8 @@
         },
         "Chips": {
             "NoServer": "Without server",
+            "NeverActed": "Never acted",
+            "NoSkill": "Without skill",
             "Empty": "Empty",
             "NoPlayers": "Without players",
             "NoAdmin": "Without admin",
@@ -451,6 +455,7 @@
         "ConfirmSuperAdminDemote": "Are you sure you want to demote this user from Super Admin?",
         "ConfirmTwiceSuperAdmin": "This change has a lot of impact and could corrupt the entire website! Please confirm again.",
         "ConfirmUserDeletion": "Are you sure you want to delete user {user}?",
+        "LastActionDateCol": "Last Action",
         "CreationDateCol": "Creation Date",
         "DataCol": "Data",
         "Filters": {

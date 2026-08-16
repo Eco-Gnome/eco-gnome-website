@@ -906,6 +906,11 @@ public class User
     public bool CanUploadMod { get; set; }
     public bool ShowHelp { get; set; }
 
+    // NULL tant que le visiteur n'a jamais interagi : c'est ce qui distingue un joueur d'un crawler.
+    // Ensuite, date de la dernière venue active, pour repérer les comptes abandonnés.
+    // Voir ContextService.TouchLastAction.
+    public DateTimeOffset? LastActionDateTime { get; set; }
+
     public List<UserServer> UserServers { get; set; } = [];
     public List<ModUploadHistory> ModUploadHistories { get; set; } = [];
 }

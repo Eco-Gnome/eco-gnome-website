@@ -794,6 +794,9 @@ namespace ecocraft.Migrations
                     b.Property<DateTimeOffset>("CreationDateTime")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("LastActionDateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Pseudo")
                         .IsRequired()
                         .HasColumnType("text");
