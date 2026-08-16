@@ -594,14 +594,21 @@
             .GroupBy(ue => ue.ElementId)
             .ToDictionary(g => g.Key, g => g.First());
 
-        _ingredientUserElements = Recipe.Elements
+        // A server data upload can add Elements to this recipe before the DataContext has
+        // been healed with matching UserElements (done at PriceCalculator load time). Render
+        // only the elements that have one instead of crashing the whole circuit.
+        var elementsWithUserData = Recipe.Elements
+            .Where(e => _userElementsByElementId.ContainsKey(e.Id))
+            .ToList();
+
+        _ingredientUserElements = elementsWithUserData
             .Where(e => e.IsIngredient() || (e.IsProduct() && GetUserElement(e).IsReintegrated))
             .OrderBy(e => !e.IsIngredient())
             .ThenBy(e => e.Index)
             .Select(GetUserElement)
             .ToList();
 
-        _productUserElements = Recipe.Elements
+        _productUserElements = elementsWithUserData
             .Where(e => e.IsProduct() && !GetUserElement(e).IsReintegrated)
             .OrderBy(e => e.Index)
             .Select(GetUserElement)
@@ -770,7 +777,7 @@
     // server-level Element defaults, and push them to all players when the recipe is locked.
     private async Task PersistAdminOutputConfig()
     {
-        var outputElements = Recipe.Elements.Where(e => e.IsProduct()).ToList();
+        var outputElements = Recipe.Elements.Where(e => e.IsProduct() && _userElementsByElementId.ContainsKey(e.Id)).ToList();
 
         foreach (var element in outputElements)
         {

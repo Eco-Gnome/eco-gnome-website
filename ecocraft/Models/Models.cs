@@ -879,6 +879,9 @@ public class PluginModule: IHasLocalizedName, IHasIconName
     public string GetTooltip(LocalizationService localizationService)
     {
         var bonuses = Bonuses
+            .OrderBy(b => b.Action)
+            .ThenBy(b => b.EffectType)
+            .ThenBy(b => b.Value)
             .Select(b => b.GetDescription(localizationService))
             .Where(d => d.Length > 0)
             .ToList();

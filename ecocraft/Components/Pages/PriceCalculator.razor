@@ -1432,6 +1432,7 @@
 
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
 
+        await EnsureUserElementsIfNeeded();
         await EnsureCraftingTableFuelUserPricesIfNeeded();
         await EnforceServerCaloriePolicyIfNeeded();
         await EnforceServerMarginPolicyIfNeeded();
@@ -3067,6 +3068,24 @@
     private static string FormatCraftMinuteFee(decimal value)
     {
         return Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##");
+    }
+
+    // A server data upload can add Elements to recipes this DataContext already owns
+    // (e.g. a changed skill book recipe); the import never touches per-user data. Without
+    // the matching UserElements the price calculation skips the recipe and RecipeDialog
+    // can't display it, so they are created here at load time.
+    private async Task EnsureUserElementsIfNeeded()
+    {
+        if (_selectedDataContext is null || !UserServerDataService.HasMissingUserElements(_selectedDataContext))
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            UserServerDataService.EnsureUserElements(context, _selectedDataContext);
+            return Task.CompletedTask;
+        });
     }
 
     private async Task EnsureCraftingTableFuelUserPricesIfNeeded()

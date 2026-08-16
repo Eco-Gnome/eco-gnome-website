@@ -135,9 +135,9 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 			// Silently drop installed modules deleted by a re-import or that the table no longer
 			// accepts, and keep at most one module per real slot (slots may have changed after a
-			// game update). Modules without a slot are kept as-is: right after the v14 migration
-			// every module has ModuleSlotId = null until the next v4 import assigns slots, and
-			// collapsing that group would arbitrarily discard the user's migrated selections.
+			// game update). Modules without a slot are kept as-is: v4 exports can legitimately
+			// carry slotless modules (e.g. legacy leveled upgrade items), and collapsing that
+			// group would arbitrarily discard the user's selections.
 			uct.PluginModules = uct.PluginModules
 				.Where(pm => pluginModules.ContainsKey(pm.Id))
 				.Select(pm => pluginModules[pm.Id])

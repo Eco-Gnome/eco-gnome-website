@@ -316,6 +316,27 @@ public class UserServerDataService(
         }
     }
 
+    // A server data upload can add Elements to recipes that existing DataContexts already
+    // reference through a UserRecipe; the import never touches per-user data, so those
+    // contexts are left without UserElements for the new Elements until healed here.
+    public bool HasMissingUserElements(DataContext dataContext)
+    {
+        var userElementIds = dataContext.UserElements.Select(ue => ue.ElementId).ToHashSet();
+
+        return dataContext.UserRecipes.Any(ur => ur.Recipe.Elements.Any(e => !userElementIds.Contains(e.Id)));
+    }
+
+    public void EnsureUserElements(EcoCraftDbContext context, DataContext dataContext)
+    {
+        foreach (var userRecipe in dataContext.UserRecipes)
+        {
+            foreach (var element in userRecipe.Recipe.Elements)
+            {
+                AddUserElementIfNotExists(context, element, userRecipe, dataContext);
+            }
+        }
+    }
+
     private void RemoveUserElement(EcoCraftDbContext context, UserElement userElement)
     {
         // Clear any UserPrice pointing to this UserElement as its primary element first, so the

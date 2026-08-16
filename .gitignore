@@ -386,3 +386,4 @@ FodyWeavers.xsd
 /pgdata
 /dumps
 Trace-*.json
+deploy/backups/
