@@ -15,7 +15,8 @@ public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory)
     {
         return await context.PluginModules
             .Include(s => s.LocalizedName)
-            .Include(s => s.Skill)
+            .Include(s => s.ModuleSlot)
+            .Include(s => s.Bonuses)
             .ToListAsync();
     }
 
@@ -30,7 +31,8 @@ public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory)
         return await context.PluginModules
             .Where(s => s.ServerId == server.Id)
             .Include(s => s.LocalizedName)
-            .Include(s => s.Skill)
+            .Include(s => s.ModuleSlot)
+            .Include(s => s.Bonuses)
             .ToListAsync();
     }
 
@@ -65,10 +67,8 @@ public class PluginModuleDbService(IDbContextFactory<EcoCraftDbContext> factory)
             Id = pluginModule.Id,
             Name = pluginModule.Name,
             LocalizedNameId = pluginModule.LocalizedName.Id,
-            PluginType = pluginModule.PluginType,
-            Percent = pluginModule.Percent,
-            SkillPercent = pluginModule.SkillPercent,
-            SkillId = pluginModule.Skill?.Id,
+            ModuleSlotId = pluginModule.ModuleSlot?.Id,
+            MaterialTierBump = pluginModule.MaterialTierBump,
             ServerId = pluginModule.Server.Id,
         };
     }

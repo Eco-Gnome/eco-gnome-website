@@ -124,7 +124,9 @@
             "Name": "Name",
             "NameRequired": "A name is required",
             "PluginModules": "Modules",
-            "NoPluginModule": "No module"
+            "NoPluginModule": "No module",
+            "ModuleSlots": "Module slots",
+            "NoModuleSlot": "No module slot"
         },
         "PluginModule": {
             "CreateTitle": "Create a module",
@@ -134,10 +136,17 @@
             "DeleteConfirm": "Are you sure you want to delete the module \"{0}\"?",
             "Name": "Name",
             "NameRequired": "A name is required",
-            "PluginType": "Type",
-            "Percent": "Percent",
-            "Skill": "Skill",
-            "SkillPercent": "Skill percent"
+            "ModuleSlot": "Module slot",
+            "MaterialTierBump": "Room material tier bump",
+            "Bonuses": "Bonuses",
+            "BonusAction": "Action",
+            "BonusEffectType": "Effect type",
+            "BonusValue": "Value",
+            "BonusCap": "Cap",
+            "BonusChance": "Chance (0-1)",
+            "BonusSkillTypes": "Skill filters (comma-separated)",
+            "BonusExcludedSkillTypes": "Excluded skills (comma-separated)",
+            "BonusItemTags": "Item tags (comma-separated)"
         }
     },
     "DevVersion": "YOU ARE ON A DEVELOPMENT VERSION OF ECO GNOME ",
@@ -243,7 +252,8 @@
         },
         "Static": "static",
         "TotalCost": "Total cost:",
-        "TotalPrice": "Total price:"
+        "TotalPrice": "Total price:",
+        "ModuleAdditiveTooltip": "Module {moduleName} -> {value}"
     },
     "RecipeList": {
         "RecipeName": "Recipe name"
@@ -840,5 +850,19 @@
     },
     "UserServerDataService": {
         "NewMargin": "New margin"
+    },
+    "Bonus": {
+        "Action": {
+            "ResourceCost": "Resource cost",
+            "LaborCost": "Labor cost",
+            "CraftTime": "Craft time",
+            "Yield": "Yield"
+        }
+    },
+    "CraftingTableDialog": {
+        "RoomRequirements": "Room requirements",
+        "RoomMaterialTier": "Material tier",
+        "RoomVolume": "Volume",
+        "RequiresRoom": "Must be placed inside a valid room"
     }
 }

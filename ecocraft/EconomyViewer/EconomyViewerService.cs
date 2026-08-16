@@ -803,10 +803,10 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
             .AsNoTracking()
             .Where(uct => contextIds.Contains(uct.DataContextId))
             .Include(uct => uct.CraftingTable)
-            .Include(uct => uct.PluginModule)
             .Include(uct => uct.FuelItem)
             .ThenInclude(fuelItem => fuelItem!.LocalizedName)
-            .Include(uct => uct.SkilledPluginModules)
+            .Include(uct => uct.PluginModules)
+            .ThenInclude(pm => pm.ModuleSlot)
             .ToListAsync();
 
         var fuelItemIds = userCraftingTables
@@ -827,9 +827,10 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
                     DataContextId = uct.DataContextId,
                     CraftingTableId = uct.CraftingTableId,
                     CraftingTableName = uct.CraftingTable.Name,
-                    PluginModuleId = uct.PluginModuleId,
-                    PluginModuleName = uct.PluginModule?.Name,
-                    SkilledPluginModuleIds = uct.SkilledPluginModules.Select(pm => pm.Id).ToList(),
+                    InstalledPluginModuleIds = uct.PluginModules
+                        .OrderBy(pm => pm.ModuleSlot?.SortOrder ?? int.MaxValue)
+                        .Select(pm => pm.Id)
+                        .ToList(),
                     FuelItem = uct.FuelItem,
                     AdditionalCraftMinuteFee = additionalCraftMinuteFee,
                     FuelCraftMinuteFee = fuelCraftMinuteFee,

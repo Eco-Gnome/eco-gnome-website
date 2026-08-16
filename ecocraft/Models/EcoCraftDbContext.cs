@@ -78,6 +78,8 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			await TalentBonuses.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(PluginModule))
 			await PluginModules.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(ModuleSlot))
+			await ModuleSlots.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(CraftingTable))
 			await CraftingTables.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(ItemOrTag))
@@ -111,6 +113,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 	public DbSet<Modifier> Modifiers { get; set; }
 	public DbSet<CraftingTable> CraftingTables { get; set; }
 	public DbSet<PluginModule> PluginModules { get; set; }
+	public DbSet<ModuleSlot> ModuleSlots { get; set; }
 	public DbSet<User> Users { get; set; }
 	public DbSet<UserServer> UserServers { get; set; }
 	public DbSet<DataContext> DataContexts { get; set; }
@@ -297,7 +300,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.HasForeignKey(s => s.SkillId)
 			.OnDelete(DeleteBehavior.Cascade);
 
-		// TalentBonus
+		// TalentBonus (shared bonus row: talent-owned or module-owned)
 		modelBuilder.Entity<TalentBonus>()
 			.ToTable("TalentBonus");
 
@@ -305,6 +308,12 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.HasOne(tb => tb.Talent)
 			.WithMany(t => t.Bonuses)
 			.HasForeignKey(tb => tb.TalentId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<TalentBonus>()
+			.HasOne(tb => tb.PluginModule)
+			.WithMany(pm => pm.Bonuses)
+			.HasForeignKey(tb => tb.PluginModuleId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// CraftingTable
@@ -335,9 +344,42 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 				j => j.HasKey("CraftingTableId", "PluginModuleId"));
 
 		modelBuilder.Entity<CraftingTable>()
+			.HasMany(ct => ct.ModuleSlots)
+			.WithMany(ms => ms.CraftingTables)
+			.UsingEntity(
+				"CraftingTableModuleSlot",
+				r => r.HasOne(typeof(ModuleSlot))
+					.WithMany()
+					.HasForeignKey("ModuleSlotId")
+					.OnDelete(DeleteBehavior.Cascade)
+					.HasPrincipalKey(nameof(ModuleSlot.Id)),
+				l => l.HasOne(typeof(CraftingTable))
+					.WithMany()
+					.HasForeignKey("CraftingTableId")
+					.OnDelete(DeleteBehavior.Cascade)
+					.HasPrincipalKey(nameof(CraftingTable.Id)),
+				j => j.HasKey("CraftingTableId", "ModuleSlotId"));
+
+		modelBuilder.Entity<CraftingTable>()
 			.HasOne(c => c.LocalizedName)
 			.WithMany(lt => lt.CraftingTables)
 			.HasForeignKey(c => c.LocalizedNameId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// ModuleSlot
+		modelBuilder.Entity<ModuleSlot>()
+			.ToTable("ModuleSlot");
+
+		modelBuilder.Entity<ModuleSlot>()
+			.HasOne(ms => ms.Server)
+			.WithMany(s => s.ModuleSlots)
+			.HasForeignKey(ms => ms.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ModuleSlot>()
+			.HasOne(ms => ms.LocalizedName)
+			.WithMany(lt => lt.ModuleSlots)
+			.HasForeignKey(ms => ms.LocalizedNameId)
 			.OnDelete(DeleteBehavior.Cascade);
 
 		// PluginModule
@@ -357,10 +399,10 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<PluginModule>()
-			.HasOne(pm => pm.Skill)
-			.WithMany(s => s.PluginModules)
-			.HasForeignKey(pm => pm.SkillId)
-			.OnDelete(DeleteBehavior.Cascade);
+			.HasOne(pm => pm.ModuleSlot)
+			.WithMany(ms => ms.PluginModules)
+			.HasForeignKey(pm => pm.ModuleSlotId)
+			.OnDelete(DeleteBehavior.SetNull);
 
 		// * User Data
 		// User
@@ -446,13 +488,6 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<UserCraftingTable>()
-			.HasOne(uct => uct.PluginModule)
-			.WithMany()
-			.HasForeignKey(s => s.PluginModuleId)
-			.OnDelete(DeleteBehavior.Cascade)
-			.IsRequired(false);
-
-		modelBuilder.Entity<UserCraftingTable>()
 			.HasOne(uct => uct.FuelItem)
 			.WithMany(iot => iot.UserCraftingTables)
 			.HasForeignKey(uct => uct.FuelItemId)
@@ -460,7 +495,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.IsRequired(false);
 
 		modelBuilder.Entity<UserCraftingTable>()
-			.HasMany(uct => uct.SkilledPluginModules)
+			.HasMany(uct => uct.PluginModules)
 			.WithMany(pm => pm.UserCraftingTables)
 			.UsingEntity(
 				"UserCraftingTablePluginModule",

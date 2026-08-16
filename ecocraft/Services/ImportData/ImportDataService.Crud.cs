@@ -98,19 +98,46 @@ public partial class ImportDataService
 
         foreach (var bonusDto in bonuses)
         {
-            var bonus = new TalentBonus
-            {
-                Talent = talent,
-                Action = bonusDto.Action,
-                EffectType = bonusDto.EffectType,
-                Value = bonusDto.Value,
-                Cap = bonusDto.Cap,
-                ItemTags = bonusDto.ItemTags,
-            };
+            var bonus = BonusFromDto(bonusDto);
+            bonus.Talent = talent;
 
             talent.Bonuses.Add(bonus);
             context.TalentBonuses.Add(bonus);
         }
+    }
+
+    private void ReplacePluginModuleBonuses(EcoCraftDbContext context, PluginModule pluginModule, List<TalentBonusDto> bonuses)
+    {
+        foreach (var existing in pluginModule.Bonuses.ToList())
+        {
+            DetachAndQueueDelete(context, existing, existing.Id);
+        }
+        pluginModule.Bonuses.Clear();
+
+        foreach (var bonusDto in bonuses)
+        {
+            var bonus = BonusFromDto(bonusDto);
+            bonus.PluginModule = pluginModule;
+
+            pluginModule.Bonuses.Add(bonus);
+            context.TalentBonuses.Add(bonus);
+        }
+    }
+
+    private static TalentBonus BonusFromDto(TalentBonusDto bonusDto)
+    {
+        return new TalentBonus
+        {
+            Action = bonusDto.Action,
+            EffectType = bonusDto.EffectType,
+            Value = bonusDto.Value,
+            Cap = bonusDto.Cap,
+            Chance = bonusDto.Chance,
+            Levels = bonusDto.Levels,
+            SkillTypes = bonusDto.SkillTypes,
+            ExcludedSkillTypes = bonusDto.ExcludedSkillTypes,
+            ItemTags = bonusDto.ItemTags,
+        };
     }
 
     private void DeleteTalent(EcoCraftDbContext context, Talent talent)
@@ -119,34 +146,64 @@ public partial class ImportDataService
         DetachAndQueueDelete(context, talent, talent.Id);
     }
 
-    private PluginModule ImportPluginModule(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, PluginType pluginType, decimal percent, Skill? skill, decimal? skillPercent)
+    private ModuleSlot ImportModuleSlot(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, int sortOrder)
+    {
+        var moduleSlot = new ModuleSlot
+        {
+            Name = name,
+            LocalizedName = localizedName,
+            SortOrder = sortOrder,
+            Server = server,
+        };
+
+        ModuleSlots.Add(moduleSlot);
+        context.ModuleSlots.Add(moduleSlot);
+
+        return moduleSlot;
+    }
+
+    private void RefreshModuleSlot(EcoCraftDbContext context, ModuleSlot moduleSlot, LocalizedField localizedName, int sortOrder)
+    {
+        moduleSlot.LocalizedName = localizedName;
+        moduleSlot.SortOrder = sortOrder;
+
+        context.ModuleSlots.Update(moduleSlot);
+    }
+
+    private void DeleteModuleSlot(EcoCraftDbContext context, ModuleSlot moduleSlot)
+    {
+        ModuleSlots.Remove(moduleSlot);
+        DetachAndQueueDelete(context, moduleSlot, moduleSlot.Id);
+    }
+
+    private PluginModule ImportPluginModule(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, ModuleSlot? moduleSlot, decimal? materialTierBump, List<TalentBonusDto> bonuses)
     {
         var pluginModule = new PluginModule
         {
             Name = name,
             LocalizedName = localizedName,
-            PluginType = pluginType,
-            Percent = percent,
-            Skill = skill,
-            SkillPercent = skillPercent,
+            ModuleSlot = moduleSlot,
+            MaterialTierBump = materialTierBump,
             Server = server,
         };
 
         PluginModules.Add(pluginModule);
         context.PluginModules.Add(pluginModule);
 
+        ReplacePluginModuleBonuses(context, pluginModule, bonuses);
+
         return pluginModule;
     }
 
-    private void RefreshPluginModule(EcoCraftDbContext context, PluginModule pluginModule, LocalizedField localizedName, PluginType pluginType, decimal percent, Skill? skill, decimal? skillPercent)
+    private void RefreshPluginModule(EcoCraftDbContext context, PluginModule pluginModule, LocalizedField localizedName, ModuleSlot? moduleSlot, decimal? materialTierBump, List<TalentBonusDto> bonuses)
     {
         pluginModule.LocalizedName = localizedName;
-        pluginModule.PluginType = pluginType;
-        pluginModule.Percent = percent;
-        pluginModule.Skill = skill;
-        pluginModule.SkillPercent = skillPercent;
+        pluginModule.ModuleSlot = moduleSlot;
+        pluginModule.MaterialTierBump = materialTierBump;
 
         context.PluginModules.Update(pluginModule);
+
+        ReplacePluginModuleBonuses(context, pluginModule, bonuses);
     }
 
     private void DeletePluginModule(EcoCraftDbContext context, PluginModule pluginModule)
@@ -155,12 +212,13 @@ public partial class ImportDataService
         DetachAndQueueDelete(context, pluginModule, pluginModule.Id);
     }
 
-    private CraftingTable ImportCraftingTable(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, List<PluginModule> pluginModules)
+    private CraftingTable ImportCraftingTable(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, List<PluginModule> pluginModules, List<ModuleSlot> moduleSlots)
     {
         var craftingTable = new CraftingTable
         {
             Name = name,
             PluginModules = pluginModules,
+            ModuleSlots = moduleSlots,
             Server = server,
             LocalizedName = localizedName,
         };
@@ -171,29 +229,13 @@ public partial class ImportDataService
         return craftingTable;
     }
 
-    private void RefreshCraftingTable(EcoCraftDbContext context, CraftingTable craftingTable, LocalizedField localizedName, List<PluginModule> pluginModules)
+    private void RefreshCraftingTable(EcoCraftDbContext context, CraftingTable craftingTable, LocalizedField localizedName, List<PluginModule> pluginModules, List<ModuleSlot> moduleSlots)
     {
         craftingTable.LocalizedName = localizedName;
 
         // Diff the M:M instead of bulk-replacing the collection: see ImportTags for full rationale.
-        var newPluginModuleSet = new HashSet<PluginModule>(pluginModules);
-        var oldPluginModuleSet = new HashSet<PluginModule>(craftingTable.PluginModules);
-
-        foreach (var pluginModule in craftingTable.PluginModules.ToList())
-        {
-            if (!newPluginModuleSet.Contains(pluginModule))
-            {
-                craftingTable.PluginModules.Remove(pluginModule);
-            }
-        }
-
-        foreach (var pluginModule in pluginModules)
-        {
-            if (!oldPluginModuleSet.Contains(pluginModule))
-            {
-                craftingTable.PluginModules.Add(pluginModule);
-            }
-        }
+        ServerDataEditorService.DiffManyToMany(craftingTable.PluginModules, pluginModules);
+        ServerDataEditorService.DiffManyToMany(craftingTable.ModuleSlots, moduleSlots);
 
         context.CraftingTables.Update(craftingTable);
     }
@@ -251,6 +293,10 @@ public partial class ImportDataService
         dbItem.HousingTypeForRoomLimit = item.Housing?.TypeForRoomLimit;
         dbItem.HousingDiminishingReturnMultiplier = item.Housing?.DiminishingReturnMultiplier;
         dbItem.HousingDiminishingMultiplierAcrossFullProperty = item.Housing?.DiminishingMultiplierAcrossFullProperty;
+
+        dbItem.RoomMaterialTier = item.RoomRequirements?.MaterialTier;
+        dbItem.RoomVolume = item.RoomRequirements?.Volume;
+        dbItem.RoomRequiresContainment = item.RoomRequirements?.RequiresContainment ?? false;
     }
 
     private Recipe ImportRecipe(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, string familyName, Skill? skill, int requiredSkillLevel, bool isBlueprint, bool isDefault, CraftingTable craftingTable)

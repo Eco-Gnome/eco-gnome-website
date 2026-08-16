@@ -72,6 +72,24 @@ public class CraftingTableEditModel
     public string LocalizedNameEnUs { get; set; } = "";
     public string LocalizedNameCurrent { get; set; } = "";
     public List<Guid> PluginModuleIds { get; set; } = [];
+    public List<Guid> ModuleSlotIds { get; set; } = [];
+}
+
+// One bonus row of a plugin module (v4 slot+bonus system). The skill/tag filters are edited as
+// comma-separated technical names, mapped to string[] by the service.
+public class BonusEditModel
+{
+    public TalentBonusAction Action { get; set; } = TalentBonusAction.ResourceCost;
+    public TalentBonusEffectType EffectType { get; set; } = TalentBonusEffectType.AdditivePercent;
+    public decimal Value { get; set; }
+    public decimal? Cap { get; set; }
+    public decimal? Chance { get; set; }
+    // Not editable in the dialog, but carried through so saving a module does not wipe the
+    // per-level multipliers of an imported TieredMultiplicative bonus.
+    public decimal[]? Levels { get; set; }
+    public string SkillTypes { get; set; } = "";
+    public string ExcludedSkillTypes { get; set; } = "";
+    public string ItemTags { get; set; } = "";
 }
 
 public class PluginModuleEditModel
@@ -80,8 +98,7 @@ public class PluginModuleEditModel
     public string Name { get; set; } = "";
     public string LocalizedNameEnUs { get; set; } = "";
     public string LocalizedNameCurrent { get; set; } = "";
-    public PluginType PluginType { get; set; } = PluginType.None;
-    public decimal Percent { get; set; }
-    public Guid? SkillId { get; set; }
-    public decimal? SkillPercent { get; set; }
+    public Guid? ModuleSlotId { get; set; }
+    public decimal? MaterialTierBump { get; set; }
+    public List<BonusEditModel> Bonuses { get; set; } = [];
 }

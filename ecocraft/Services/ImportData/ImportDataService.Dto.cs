@@ -11,6 +11,12 @@ public partial class ImportDataService
         public required List<ItemDto> Items { get; init; } = [];
         public required List<TagDto> Tags { get; init; } = [];
         public required List<RecipeDto> Recipes { get; init; } = [];
+        public List<ModuleSlotDto> ModuleSlots { get; init; } = [];
+    }
+
+    private class ModuleSlotDto : EcoItemDto
+    {
+        public int SortOrder { get; init; }
     }
 
     private class EcoItemDto
@@ -36,29 +42,42 @@ public partial class ImportDataService
         public List<TalentBonusDto> Bonuses { get; init; } = [];
     }
 
+    // Shared bonus shape (v4): used by both Skills[].Talents[].Bonuses and Items[].ModuleBonuses.
     private class TalentBonusDto
     {
         public required TalentBonusAction Action { get; init; }
         public required TalentBonusEffectType EffectType { get; init; }
         public required decimal Value { get; init; }
         public decimal? Cap { get; init; }
+        public decimal? Chance { get; init; }
+        public decimal[]? Levels { get; init; }
+        public string[]? SkillTypes { get; init; }
+        public string[]? ExcludedSkillTypes { get; init; }
         public string[]? ItemTags { get; init; }
     }
 
     private class ItemDto : EcoItemDto
     {
         public bool? IsPluginModule { get; set; }
-        public string? PluginType { get; set; }
-        public decimal? PluginModulePercent { get; set; }
-        public string? PluginModuleSkill { get; set; }
-        public decimal? PluginModuleSkillPercent { get; set; }
+        public string? ModuleSlot { get; set; }
+        public List<TalentBonusDto>? ModuleBonuses { get; set; }
+        public decimal? ModuleMaterialTierBump { get; set; }
         public bool? IsCraftingTable { get; set; }
+        public List<string>? CraftingTableModuleSlots { get; set; }
         public List<string>? CraftingTablePluginModules { get; set; }
+        public RoomRequirementsDto? RoomRequirements { get; set; }
         public decimal? FuelCalories { get; set; }
         public decimal? FuelConsumptionPerSecond { get; set; }
         public string[]? AcceptedFuelTags { get; set; }
         public FoodDto? Food { get; set; }
         public HousingDto? Housing { get; set; }
+    }
+
+    private class RoomRequirementsDto
+    {
+        public decimal? MaterialTier { get; set; }
+        public decimal? Volume { get; set; }
+        public bool RequiresContainment { get; set; }
     }
 
     private class FoodDto
@@ -131,6 +150,17 @@ public partial class ImportDataService
             Items = serverWithData.ItemOrTags.Where(iot => !iot.IsTag).Select(s => ItemToDto(s, serverWithData.CraftingTables, serverWithData.PluginModules)).ToList(),
             Tags = serverWithData.ItemOrTags.Where(iot => iot.IsTag).Select(TagToDto).ToList(),
             Recipes = serverWithData.Recipes.Select(RecipeToDto).ToList(),
+            ModuleSlots = serverWithData.ModuleSlots.Select(ModuleSlotToDto).ToList(),
+        };
+    }
+
+    private static ModuleSlotDto ModuleSlotToDto(ModuleSlot moduleSlot)
+    {
+        return new ModuleSlotDto
+        {
+            Name = moduleSlot.Name,
+            LocalizedName = LocalizedFieldToDto(moduleSlot.LocalizedName),
+            SortOrder = moduleSlot.SortOrder,
         };
     }
 
@@ -169,6 +199,10 @@ public partial class ImportDataService
             EffectType = bonus.EffectType,
             Value = bonus.Value,
             Cap = bonus.Cap,
+            Chance = bonus.Chance,
+            Levels = bonus.Levels,
+            SkillTypes = bonus.SkillTypes,
+            ExcludedSkillTypes = bonus.ExcludedSkillTypes,
             ItemTags = bonus.ItemTags,
         };
     }
@@ -200,12 +234,19 @@ public partial class ImportDataService
                 DiminishingReturnMultiplier = item.HousingDiminishingReturnMultiplier ?? 1,
                 DiminishingMultiplierAcrossFullProperty = item.HousingDiminishingMultiplierAcrossFullProperty ?? 1,
             },
+            RoomRequirements = item.RoomMaterialTier is null && item.RoomVolume is null && !item.RoomRequiresContainment ? null : new RoomRequirementsDto
+            {
+                MaterialTier = item.RoomMaterialTier,
+                Volume = item.RoomVolume,
+                RequiresContainment = item.RoomRequiresContainment,
+            },
         };
 
         var associatedCraftingTable = craftingTables.FirstOrDefault(c => c.Name == item.Name);
         if (associatedCraftingTable is not null)
         {
             itemDto.IsCraftingTable = true;
+            itemDto.CraftingTableModuleSlots = associatedCraftingTable.ModuleSlots.Select(ms => ms.Name).ToList();
             itemDto.CraftingTablePluginModules = associatedCraftingTable.PluginModules.Select(p => p.Name).ToList();
 
             return itemDto;
@@ -215,16 +256,9 @@ public partial class ImportDataService
         if (associatedPluginModule is not null)
         {
             itemDto.IsPluginModule = true;
-            itemDto.PluginType = associatedPluginModule.PluginType switch
-            {
-                PluginType.Resource => "Resource",
-                PluginType.Speed => "Speed",
-                PluginType.ResourceAndSpeed => "Resource&Speed",
-                _ => null
-            };
-            itemDto.PluginModulePercent = associatedPluginModule.Percent;
-            itemDto.PluginModuleSkill = associatedPluginModule.Skill?.Name;
-            itemDto.PluginModuleSkillPercent = associatedPluginModule.SkillPercent;
+            itemDto.ModuleSlot = associatedPluginModule.ModuleSlot?.Name;
+            itemDto.ModuleBonuses = associatedPluginModule.Bonuses.Select(TalentBonusToDto).ToList();
+            itemDto.ModuleMaterialTierBump = associatedPluginModule.MaterialTierBump;
         }
 
         return itemDto;

@@ -42,7 +42,7 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			.Include(s => s.UserSkills)
 			.Include(s => s.UserTalents)
 			.Include(s => s.UserCraftingTables)
-			.ThenInclude(s => s.SkilledPluginModules)
+			.ThenInclude(s => s.PluginModules)
 			.Include(s => s.UserCraftingTables)
 			.ThenInclude(s => s.FuelItem)
 			.Include(s => s.UserSettings)
@@ -122,17 +122,6 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			uct.CraftingTable = craftingTable;
 			uct.CraftingTable.UserCraftingTables.Add(uct);
 
-			if (uct.PluginModuleId is Guid pluginModuleId && pluginModules.TryGetValue(pluginModuleId, out var pluginModule))
-			{
-				uct.PluginModule = pluginModule;
-				uct.PluginModule.UserCraftingTables.Add(uct);
-			}
-			else
-			{
-				uct.PluginModule = null;
-				uct.PluginModuleId = null;
-			}
-
 			if (uct.FuelItemId is Guid fuelItemId && itemOrTags.TryGetValue(fuelItemId, out var fuelItem) && !fuelItem.IsTag)
 			{
 				uct.FuelItem = fuelItem;
@@ -144,11 +133,20 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 				uct.FuelItemId = null;
 			}
 
-			uct.SkilledPluginModules = uct.SkilledPluginModules
-				.Where(spm => pluginModules.ContainsKey(spm.Id))
-				.Select(spm => pluginModules[spm.Id])
+			// Silently drop installed modules deleted by a re-import or that the table no longer
+			// accepts, and keep at most one module per real slot (slots may have changed after a
+			// game update). Modules without a slot are kept as-is: right after the v14 migration
+			// every module has ModuleSlotId = null until the next v4 import assigns slots, and
+			// collapsing that group would arbitrarily discard the user's migrated selections.
+			uct.PluginModules = uct.PluginModules
+				.Where(pm => pluginModules.ContainsKey(pm.Id))
+				.Select(pm => pluginModules[pm.Id])
+				.Where(pm => craftingTable.PluginModules.Any(ctpm => ctpm.Id == pm.Id))
+				.Where(pm => pm.ModuleSlotId is null || craftingTable.ModuleSlots.Any(ms => ms.Id == pm.ModuleSlotId))
+				.GroupBy(pm => pm.ModuleSlotId)
+				.SelectMany(g => g.Key is null ? g.AsEnumerable() : g.Take(1))
 				.ToList();
-			// We don't care about the reverse of the skilledPluginModules
+			// We don't care about the reverse of the installed modules
 		});
 
 		dataContext.UserPrices.ToList().ForEach(up =>

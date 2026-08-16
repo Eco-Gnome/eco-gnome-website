@@ -281,9 +281,7 @@
                                             <MudTd Class="pa-1 crafting-table-config-cell">
                                                 <CraftingTablePluginModuleControl UserCraftingTable="context"
                                                                                   Class="crafting-table-config-stack"
-                                                                                  IncreaseRequested="@(pluginModules => IncreasePluginModule(context, pluginModules))"
-                                                                                  DecreaseRequested="@(pluginModules => DecreasePluginModule(context, pluginModules))"
-                                                                                  SkilledPluginModuleToggled="@(pluginModule => ToggleSkilledPluginModule(context, pluginModule))"/>
+                                                                                  ModuleSelected="@(selection => SelectPluginModule(context, selection))"/>
                                             </MudTd>
                                             <MudTd Class="px-1 crafting-table-config-cell">
                                                 <MudTooltip Text="@GetCraftMinuteFeeConfigurationTooltip(context)">
@@ -2937,9 +2935,7 @@
             ["UserCraftingTable"] = userCraftingTable,
             ["FuelChanged"] = new Func<Guid?, Task>(fuelItemId => UpdateCraftingTableFuel(userCraftingTable, fuelItemId)),
             ["AdditionalCraftMinuteFeeChanged"] = new Func<decimal, Task>(value => UpdateCraftingTableAdditionalCraftMinuteFee(userCraftingTable, value)),
-            ["IncreasePluginModuleRequested"] = new Func<List<PluginModule>, Task>(pluginModules => IncreasePluginModule(userCraftingTable, pluginModules)),
-            ["DecreasePluginModuleRequested"] = new Func<List<PluginModule>, Task>(pluginModules => DecreasePluginModule(userCraftingTable, pluginModules)),
-            ["SkilledPluginModuleToggled"] = new Func<PluginModule, Task>(pluginModule => ToggleSkilledPluginModule(userCraftingTable, pluginModule)),
+            ["PluginModuleSelected"] = new Func<CraftingTablePluginModuleControl.ModuleSelection, Task>(selection => SelectPluginModule(userCraftingTable, selection)),
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
         var dialog = await DialogService.ShowAsync<CraftingTableDialog>(LocalizationService.GetTranslation(userCraftingTable.CraftingTable), parameters, options);
@@ -3118,64 +3114,18 @@
         Snackbar.Add(LocalizationService.GetTranslation("PriceCalculator.Snackbar.PriceCopied"), Severity.Success);
     }
 
-    private async Task IncreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
+    // Installs (or clears) the module of one slot (v4 slot+bonus system); the per-slot invariant
+    // lives in UserCraftingTable.SetPluginModuleForSlot.
+    private async Task SelectPluginModule(UserCraftingTable userCraftingTable, CraftingTablePluginModuleControl.ModuleSelection selection)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm.Id == userCraftingTable.PluginModuleId);
-
-        if (currentIndex == pluginModules.Count - 1)
+        if (!userCraftingTable.SetPluginModuleForSlot(selection.ModuleSlot, selection.PluginModule))
         {
             return;
         }
 
-        userCraftingTable.PluginModule = pluginModules[currentIndex + 1];
-        userCraftingTable.PluginModuleId = userCraftingTable.PluginModule.Id;
-
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
 
         await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
-    }
-
-    private async Task DecreasePluginModule(UserCraftingTable userCraftingTable, List<PluginModule> pluginModules)
-    {
-        var currentIndex = pluginModules.FindIndex(pm => pm.Id == userCraftingTable.PluginModuleId);
-
-        switch (currentIndex)
-        {
-            case -1:
-                return;
-            case 0:
-                userCraftingTable.PluginModule = null;
-                userCraftingTable.PluginModuleId = null;
-                break;
-            default:
-                userCraftingTable.PluginModule = pluginModules[currentIndex - 1];
-                userCraftingTable.PluginModuleId = userCraftingTable.PluginModule.Id;
-                break;
-        }
-
-        userCraftingTable.SkilledPluginModules.Clear();
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
-
-        await RequestCalculate(CalculateTriggerOrigin.PluginModuleChange);
-    }
-
-    private async Task ToggleSkilledPluginModule(UserCraftingTable userCraftingTable, PluginModule pluginModule)
-    {
-        var existingPluginModule = userCraftingTable.SkilledPluginModules.FirstOrDefault(pm => pm.Id == pluginModule.Id);
-
-        if (existingPluginModule is not null)
-        {
-            userCraftingTable.SkilledPluginModules.Remove(existingPluginModule);
-        }
-        else
-        {
-            userCraftingTable.SkilledPluginModules.Add(pluginModule);
-        }
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context => { await UserCraftingTableDbService.UpdateAllAsync(context, userCraftingTable); });
-
-        await RequestCalculate(CalculateTriggerOrigin.StructureChange);
     }
 
     private bool FilterTagToBuy(ItemOrTag itemOrTag)

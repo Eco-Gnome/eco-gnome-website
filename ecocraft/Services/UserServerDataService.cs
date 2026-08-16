@@ -213,7 +213,6 @@ public class UserServerDataService(
             CraftingTableId = craftingTable.Id,
             DataContext = dataContext,
             DataContextId = dataContext.Id,
-            PluginModule = null
         };
 
         userCraftingTableDbService.Create(context, userCraftingTable);

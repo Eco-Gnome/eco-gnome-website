@@ -148,9 +148,8 @@ public class EconomyPlayerCraftingTableSummary
     public Guid DataContextId { get; set; }
     public Guid CraftingTableId { get; set; }
     public string CraftingTableName { get; set; } = string.Empty;
-    public Guid? PluginModuleId { get; set; }
-    public string? PluginModuleName { get; set; }
-    public List<Guid> SkilledPluginModuleIds { get; set; } = [];
+    // Installed modules (v4: one per slot, all active at once)
+    public List<Guid> InstalledPluginModuleIds { get; set; } = [];
     public ItemOrTag? FuelItem { get; set; }
     public decimal AdditionalCraftMinuteFee { get; set; }
     public decimal FuelCraftMinuteFee { get; set; }

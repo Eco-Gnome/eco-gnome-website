@@ -78,6 +78,32 @@ public partial class ImportDataService
         }
     }
 
+    private void ImportModuleSlots(EcoCraftDbContext context, Server server, List<ModuleSlotDto> newModuleSlots)
+    {
+        var nameOccurence = new Dictionary<string, int>();
+
+        foreach (var newModuleSlot in newModuleSlots)
+        {
+            nameOccurence.Add(newModuleSlot.Name, 1);
+
+            var dbModuleSlot = ModuleSlots.FirstOrDefault(ms => ms.Name == newModuleSlot.Name);
+
+            if (dbModuleSlot is null)
+            {
+                ImportModuleSlot(context, server, newModuleSlot.Name, TranslationsToLocalizedField(context, server, newModuleSlot.LocalizedName), newModuleSlot.SortOrder);
+            }
+            else
+            {
+                RefreshModuleSlot(context, dbModuleSlot, TranslationsToLocalizedField(context, server, newModuleSlot.LocalizedName, dbModuleSlot.LocalizedName), newModuleSlot.SortOrder);
+            }
+        }
+
+        foreach (var dbModuleSlot in ModuleSlots.Where(dbModuleSlot => !nameOccurence.TryGetValue(dbModuleSlot.Name, out _)).ToList())
+        {
+            DeleteModuleSlot(context, dbModuleSlot);
+        }
+    }
+
     private int ImportItems(EcoCraftDbContext context, Server server, List<ItemDto> items, out string[] itemErrorNames)
     {
         var errorCount = 0;
@@ -147,22 +173,15 @@ public partial class ImportDataService
     private void ImportPluginModule(EcoCraftDbContext context, Server server, ItemDto pluginModule)
     {
         var dbPluginModule = PluginModules.FirstOrDefault(p => p.Name == pluginModule.Name);
-        var dbSkill = Skills.FirstOrDefault(s => s.Name == pluginModule.PluginModuleSkill);
-        var pluginType = pluginModule.PluginType switch
-        {
-            "Resource" => PluginType.Resource,
-            "Speed" => PluginType.Speed,
-            "Resource&Speed" => PluginType.ResourceAndSpeed,
-            _ => PluginType.None
-        } ;
+        var dbModuleSlot = ModuleSlots.FirstOrDefault(ms => ms.Name == pluginModule.ModuleSlot);
 
         if (dbPluginModule is null)
         {
-            ImportPluginModule(context, server, pluginModule.Name, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
+            ImportPluginModule(context, server, pluginModule.Name, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName), dbModuleSlot, pluginModule.ModuleMaterialTierBump, pluginModule.ModuleBonuses ?? []);
         }
         else
         {
-            RefreshPluginModule(context, dbPluginModule, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), pluginType, (decimal)pluginModule.PluginModulePercent!, dbSkill, pluginModule.PluginModuleSkillPercent);
+            RefreshPluginModule(context, dbPluginModule, TranslationsToLocalizedField(context, server, pluginModule.LocalizedName, dbPluginModule.LocalizedName), dbModuleSlot, pluginModule.ModuleMaterialTierBump, pluginModule.ModuleBonuses ?? []);
         }
     }
 
@@ -177,14 +196,21 @@ public partial class ImportDataService
                 .Where(pm => pm is not null)
                 .ToList() ?? [];
 
+            var moduleSlots = craftingTable.CraftingTableModuleSlots?
+                .Select(ctms => ModuleSlots.FirstOrDefault(ms => ms.Name == ctms))
+                .Where(ms => ms is not null)
+                .Cast<ModuleSlot>()
+                .ToList() ?? [];
+
             if (dbCraftingTable is null)
             {
-                ImportCraftingTable(
+                dbCraftingTable = ImportCraftingTable(
                     context,
                     server,
                     craftingTable.Name,
                     TranslationsToLocalizedField(context, server, craftingTable.LocalizedName),
-                    pluginModules
+                    pluginModules,
+                    moduleSlots
                 );
             }
             else
@@ -193,9 +219,14 @@ public partial class ImportDataService
                     context,
                     dbCraftingTable,
                     TranslationsToLocalizedField(context, server, craftingTable.LocalizedName, dbCraftingTable.LocalizedName),
-                    pluginModules
+                    pluginModules,
+                    moduleSlots
                 );
             }
+
+            dbCraftingTable.RoomMaterialTier = craftingTable.RoomRequirements?.MaterialTier;
+            dbCraftingTable.RoomVolume = craftingTable.RoomRequirements?.Volume;
+            dbCraftingTable.RoomRequiresContainment = craftingTable.RoomRequirements?.RequiresContainment ?? false;
         }
         catch (Exception)
         {

@@ -40,20 +40,27 @@
 
             <MudStack Spacing="2">
                 <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("PriceCalculator.CraftingTableAdvancedConfiguration")</MudText>
-                <MudStack Spacing="1">
-                    <MudText Style="color: #888">@LocalizationService.GetTranslation("Upgrade")</MudText>
-                    @if (CraftingTable.PluginModules.Count > 0)
-                    {
-                        <CraftingTablePluginModuleControl UserCraftingTable="UserCraftingTable"
-                                                          IncreaseRequested="IncreasePluginModule"
-                                                          DecreaseRequested="DecreasePluginModule"
-                                                          SkilledPluginModuleToggled="ToggleSkilledPluginModule"/>
-                    }
-                    else
-                    {
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
-                    }
-                </MudStack>
+                <MudPaper Elevation="0" Class="mud-background">
+                    <MudStack Spacing="0">
+                        <MudText Class="px-2 py-1">@LocalizationService.GetTranslation("Upgrade")</MudText>
+                        <MudDivider/>
+                        <div class="pa-2">
+                            @if (CraftingTable.ModuleSlots.Count > 0 && CraftingTable.PluginModules.Count > 0)
+                            {
+                                <CraftingTablePluginModuleControl UserCraftingTable="UserCraftingTable"
+                                                                  ModuleSelected="SelectPluginModule"/>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
+                            }
+                        </div>
+                    </MudStack>
+                </MudPaper>
+
+                @* Room requirements (tier/volume/containment + module tier bumps) are imported and
+                   available via UserCraftingTable.GetEffectiveRoomMaterialTier(); display is
+                   intentionally disabled for now. *@
 
                 <MudPaper Elevation="0" Class="mud-background">
                     <MudStack Spacing="0">
@@ -128,9 +135,7 @@
     [Parameter, EditorRequired] public required UserCraftingTable UserCraftingTable { get; set; }
     [Parameter] public Func<Guid?, Task>? FuelChanged { get; set; }
     [Parameter] public Func<decimal, Task>? AdditionalCraftMinuteFeeChanged { get; set; }
-    [Parameter] public Func<List<PluginModule>, Task>? IncreasePluginModuleRequested { get; set; }
-    [Parameter] public Func<List<PluginModule>, Task>? DecreasePluginModuleRequested { get; set; }
-    [Parameter] public Func<PluginModule, Task>? SkilledPluginModuleToggled { get; set; }
+    [Parameter] public Func<CraftingTablePluginModuleControl.ModuleSelection, Task>? PluginModuleSelected { get; set; }
 
     private static readonly IReadOnlyList<int> AdditionalCostRows = [0];
     private CraftingTable CraftingTable => UserCraftingTable.CraftingTable;
@@ -154,29 +159,11 @@
         }
     }
 
-    private async Task IncreasePluginModule(List<PluginModule> pluginModules)
+    private async Task SelectPluginModule(CraftingTablePluginModuleControl.ModuleSelection selection)
     {
-        if (IncreasePluginModuleRequested is not null)
+        if (PluginModuleSelected is not null)
         {
-            await IncreasePluginModuleRequested(pluginModules);
-            StateHasChanged();
-        }
-    }
-
-    private async Task DecreasePluginModule(List<PluginModule> pluginModules)
-    {
-        if (DecreasePluginModuleRequested is not null)
-        {
-            await DecreasePluginModuleRequested(pluginModules);
-            StateHasChanged();
-        }
-    }
-
-    private async Task ToggleSkilledPluginModule(PluginModule pluginModule)
-    {
-        if (SkilledPluginModuleToggled is not null)
-        {
-            await SkilledPluginModuleToggled(pluginModule);
+            await PluginModuleSelected(selection);
             StateHasChanged();
         }
     }

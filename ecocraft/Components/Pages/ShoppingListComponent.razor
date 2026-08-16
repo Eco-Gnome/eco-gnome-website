@@ -162,54 +162,8 @@
                                                 </MudStack>
                                             </MudTd>
                                             <MudTd Class="pa-1">
-                                                @if (context.CraftingTable.PluginModules.Count > 0)
-                                                {
-                                                    var genericPluginModules = context.CraftingTable.PluginModules
-                                                        .Where(p => p.Skill is null)
-                                                        .OrderByDescending(pm => pm.Percent)
-                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-                                                        .ToList();
-
-                                                    var skilledPluginModules = context.CraftingTable.PluginModules
-                                                        .Where(p => p.Skill is not null)
-                                                        .OrderByDescending(pm => pm.SkillPercent)
-                                                        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-                                                        .ToList();
-
-                                                    var currentPluginModuleId = context.PluginModuleId;
-                                                    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
-
-                                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                                        <MudIconButton Icon="@MDIIcons.Filled.Minus"
-                                                                       Size="Size.Small"
-                                                                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
-                                                                       OnClick="@(() => DecreasePluginModule(context, genericPluginModules))"/>
-                                                        <MudTooltip Text="@(context.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-                                                            <EcoIcon Item="@context.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel" Class="mt-1"/>
-                                                        </MudTooltip>
-                                                        @if (!shouldDisableIncrease)
-                                                        {
-                                                            <MudIconButton Icon="@MDIIcons.Filled.Plus"
-                                                                           Size="Size.Small"
-                                                                           Disabled="shouldDisableIncrease"
-                                                                           OnClick="@(() => IncreasePluginModule(context, genericPluginModules))"/>
-                                                        }
-
-                                                        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
-                                                        {
-                                                            @foreach (var skilledPluginModule in skilledPluginModules)
-                                                            {
-                                                                <MudLink OnClick="() => ToggleSkilledPluginModule(context, skilledPluginModule)">
-                                                                    <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
-                                                                        <EcoIcon Item="@skilledPluginModule"
-                                                                                 Size="24"
-                                                                                 Class="@($"{(context.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
-                                                                    </MudTooltip>
-                                                                </MudLink>
-                                                            }
-                                                        }
-                                                    </MudStack>
-                                                }
+                                                <CraftingTablePluginModuleControl UserCraftingTable="context"
+                                                                                  ModuleSelected="@(selection => SelectPluginModule(context, selection))"/>
                                             </MudTd>
                                         </RowTemplate>
                                     </MudTable>
@@ -1737,65 +1691,13 @@
         Rebuild();
     }
 
-    private async Task IncreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
+    // Installs (or clears) the module of one slot (v4 slot+bonus system); the per-slot invariant
+    // lives in UserCraftingTable.SetPluginModuleForSlot.
+    private async Task SelectPluginModule(UserCraftingTable shoppingListCraftingTable, CraftingTablePluginModuleControl.ModuleSelection selection)
     {
-        var currentIndex = pluginModules.FindIndex(pm => pm.Id == shoppingListCraftingTable.PluginModuleId);
-
-        if (currentIndex == pluginModules.Count - 1)
+        if (!shoppingListCraftingTable.SetPluginModuleForSlot(selection.ModuleSlot, selection.PluginModule))
         {
             return;
-        }
-
-        shoppingListCraftingTable.PluginModule = pluginModules[currentIndex + 1];
-        shoppingListCraftingTable.PluginModuleId = shoppingListCraftingTable.PluginModule.Id;
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            await PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
-        });
-
-        Rebuild();
-    }
-
-    private async Task DecreasePluginModule(UserCraftingTable shoppingListCraftingTable, List<PluginModule> pluginModules)
-    {
-        var currentIndex = pluginModules.FindIndex(pm => pm.Id == shoppingListCraftingTable.PluginModuleId);
-
-        switch (currentIndex)
-        {
-            case -1:
-                return;
-            case 0:
-                shoppingListCraftingTable.PluginModule = null;
-                shoppingListCraftingTable.PluginModuleId = null;
-                break;
-            default:
-                shoppingListCraftingTable.PluginModule = pluginModules[currentIndex - 1];
-                shoppingListCraftingTable.PluginModuleId = shoppingListCraftingTable.PluginModule.Id;
-                break;
-        }
-
-        shoppingListCraftingTable.SkilledPluginModules.Clear();
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
-        {
-            await PersistCraftingTableAndSynchronize(context, shoppingListCraftingTable);
-        });
-
-        Rebuild();
-    }
-
-    private async Task ToggleSkilledPluginModule(UserCraftingTable shoppingListCraftingTable, PluginModule pluginModule)
-    {
-        var existingPluginModule = shoppingListCraftingTable.SkilledPluginModules.FirstOrDefault(pm => pm.Id == pluginModule.Id);
-
-        if (existingPluginModule is not null)
-        {
-            shoppingListCraftingTable.SkilledPluginModules.Remove(existingPluginModule);
-        }
-        else
-        {
-            shoppingListCraftingTable.SkilledPluginModules.Add(pluginModule);
         }
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>

@@ -1,81 +1,67 @@
 @using ecocraft.Models
 @using ecocraft.Services
-@using ecocraft.Extensions
 @inject LocalizationService LocalizationService
 
-@if (UserCraftingTable.CraftingTable.PluginModules.Count > 0)
+@* One icon per module slot of the table. Clicking cycles through the modules the table accepts
+   for that slot (none -> first variant -> ... -> last variant -> none); the tooltip shows the
+   installed module's bonuses. One module per slot, all installed modules apply together. *@
+@{
+    var orderedModuleSlots = UserCraftingTable.CraftingTable.GetOrderedModuleSlots()
+        .Where(ms => UserCraftingTable.CraftingTable.GetPluginModulesForSlot(ms).Count > 0)
+        .ToList();
+}
+
+@if (orderedModuleSlots.Count > 0)
 {
-    var genericPluginModules = UserCraftingTable.CraftingTable.PluginModules
-        .Where(p => p.Skill is null)
-        .OrderByDescending(pm => pm.Percent)
-        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-        .ToList();
-
-    var skilledPluginModules = UserCraftingTable.CraftingTable.PluginModules
-        .Where(p => p.Skill is not null)
-        .OrderByDescending(pm => pm.SkillPercent)
-        .ThenBy(pm => LocalizationService.GetTranslation(pm))
-        .ToList();
-
-    var currentPluginModuleId = UserCraftingTable.PluginModuleId;
-    var shouldDisableIncrease = genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) == genericPluginModules.Count - 1;
-
     <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@Class">
-        <MudIconButton Icon="@MDIIcons.Filled.Minus"
-                       Size="Size.Small"
-                       Disabled="@(genericPluginModules.FindIndex(pm => pm.Id == currentPluginModuleId) <= -1)"
-                       OnClick="@(() => IncreaseOrDecreasePluginModule(PluginModuleChangeDirection.Decrease, genericPluginModules))"/>
-        <MudTooltip Text="@(UserCraftingTable.PluginModule?.GetTooltip(LocalizationService) ?? LocalizationService.GetTranslation("PriceCalculator.NoModule"))">
-            <EcoIcon Item="@UserCraftingTable.PluginModule" FallbackIcon="@MDIIcons.Filled.Cancel"/>
-        </MudTooltip>
-        @if (!shouldDisableIncrease)
+        @foreach (var moduleSlot in orderedModuleSlots)
         {
-            <MudIconButton Icon="@MDIIcons.Filled.Plus"
-                           Size="Size.Small"
-                           Disabled="shouldDisableIncrease"
-                           OnClick="@(() => IncreaseOrDecreasePluginModule(PluginModuleChangeDirection.Increase, genericPluginModules))"/>
-        }
+            var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
 
-        @if (genericPluginModules.LastOrDefault()?.Id == currentPluginModuleId)
-        {
-            @foreach (var skilledPluginModule in skilledPluginModules)
-            {
-                <MudLink OnClick="() => ToggleSkilledPluginModule(skilledPluginModule)">
-                    <MudTooltip Text="@skilledPluginModule.GetTooltip(LocalizationService)">
-                        <EcoIcon Item="@skilledPluginModule" Size="24" Class="@($"{(UserCraftingTable.SkilledPluginModules.Any(pm => pm.Id == skilledPluginModule.Id) ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
-                    </MudTooltip>
-                </MudLink>
-            }
+            <MudLink OnClick="() => CycleModule(moduleSlot)">
+                <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
+                    <EcoIcon Item="@installed"
+                             FallbackIcon="@MDIIcons.Filled.Cancel"
+                             Size="24"
+                             Class="@($"{(installed is not null ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                </MudTooltip>
+            </MudLink>
         }
     </MudStack>
 }
 
 @code {
+    public record ModuleSelection(ModuleSlot ModuleSlot, PluginModule? PluginModule);
+
     [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
     [Parameter] public string? Class { get; set; }
-    [Parameter] public EventCallback<List<PluginModule>> IncreaseRequested { get; set; }
-    [Parameter] public EventCallback<List<PluginModule>> DecreaseRequested { get; set; }
-    [Parameter] public EventCallback<PluginModule> SkilledPluginModuleToggled { get; set; }
+    [Parameter] public EventCallback<ModuleSelection> ModuleSelected { get; set; }
 
-    private async Task IncreaseOrDecreasePluginModule(PluginModuleChangeDirection direction, List<PluginModule> pluginModules)
+    private List<PluginModule> GetOrderedCandidates(ModuleSlot moduleSlot)
     {
-        if (direction == PluginModuleChangeDirection.Increase)
-        {
-            await IncreaseRequested.InvokeAsync(pluginModules);
-            return;
-        }
-
-        await DecreaseRequested.InvokeAsync(pluginModules);
+        return UserCraftingTable.CraftingTable.GetPluginModulesForSlot(moduleSlot)
+            .OrderBy(pm => LocalizationService.GetTranslation(pm))
+            .ToList();
     }
 
-    private async Task ToggleSkilledPluginModule(PluginModule pluginModule)
+    private async Task CycleModule(ModuleSlot moduleSlot)
     {
-        await SkilledPluginModuleToggled.InvokeAsync(pluginModule);
+        var candidates = GetOrderedCandidates(moduleSlot);
+        if (candidates.Count == 0) return;
+
+        var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
+        var currentIndex = installed is null ? -1 : candidates.FindIndex(pm => pm.Id == installed.Id);
+        var next = currentIndex + 1 < candidates.Count ? candidates[currentIndex + 1] : null;
+
+        await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, next));
     }
 
-    private enum PluginModuleChangeDirection
+    private string GetSlotTooltip(ModuleSlot moduleSlot, PluginModule? installed)
     {
-        Increase,
-        Decrease,
+        var slotName = LocalizationService.GetTranslation(moduleSlot);
+
+        return installed is not null
+            ? $"{slotName}: {installed.GetTooltip(LocalizationService)}"
+            : $"{slotName}: {LocalizationService.GetTranslation("PriceCalculator.NoModule")}";
     }
 }

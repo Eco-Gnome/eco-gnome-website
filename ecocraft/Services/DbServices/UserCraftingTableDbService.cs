@@ -15,9 +15,8 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 	{
 		return await context.UserCraftingTables
 			.Include(uct => uct.CraftingTable)
-			.Include(uct => uct.PluginModule)
 			.Include(uct => uct.FuelItem)
-			.Include(uct => uct.SkilledPluginModules)
+			.Include(uct => uct.PluginModules)
 			.ToListAsync();
 	}
 
@@ -32,9 +31,8 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		return await context.UserCraftingTables
 			.Where(s => s.DataContextId == dataContext.Id)
 			.Include(uct => uct.CraftingTable)
-			.Include(uct => uct.PluginModule)
 			.Include(uct => uct.FuelItem)
-			.Include(uct => uct.SkilledPluginModules)
+			.Include(uct => uct.PluginModules)
 			.ToListAsync();
 	}
 
@@ -57,7 +55,6 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 			Id = userCraftingTable.Id,
 			DataContextId = userCraftingTable.DataContext.Id,
 			CraftingTableId = userCraftingTable.CraftingTable.Id,
-			PluginModuleId = userCraftingTable.PluginModule?.Id,
 			FuelItemId = userCraftingTable.FuelItem?.Id,
 			AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee,
 			TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee,
@@ -78,7 +75,7 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 	{
 		// A freshly Create()'d UCT is Added but not yet persisted: querying the DB with
 		// FirstAsync would throw "Sequence contains no elements". In that case we operate
-		// on the tracked Added instance instead (its SkilledPluginModules collection is
+		// on the tracked Added instance instead (its PluginModules collection is
 		// empty, so the delta logic below simply inserts every desired module).
 		var addedEntity = context.ChangeTracker.Entries<UserCraftingTable>()
 			.FirstOrDefault(e => e.State == EntityState.Added && e.Entity.Id == userCraftingTable.Id)
@@ -86,10 +83,9 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 
 		var existing = addedEntity
 			?? await context.UserCraftingTables
-				.Include(uct => uct.SkilledPluginModules)
+				.Include(uct => uct.PluginModules)
 				.FirstAsync(uct => uct.Id == userCraftingTable.Id);
 
-		existing.PluginModuleId = userCraftingTable.PluginModule?.Id;
 		existing.FuelItemId = userCraftingTable.FuelItem?.Id;
 		existing.AdditionalCraftMinuteFee = userCraftingTable.AdditionalCraftMinuteFee;
 		existing.TotalCraftMinuteFee = userCraftingTable.TotalCraftMinuteFee;
@@ -98,17 +94,17 @@ public class UserCraftingTableDbService(IDbContextFactory<EcoCraftDbContext> fac
 		// just-cleared join entries in Deleted state; re-adding the same tracked instance
 		// does not revert it, so the previously persisted modules silently get DELETEd
 		// while only newly-attached stubs INSERT.
-		var desiredIds = userCraftingTable.SkilledPluginModules.Select(pm => pm.Id).ToHashSet();
+		var desiredIds = userCraftingTable.PluginModules.Select(pm => pm.Id).ToHashSet();
 
-		foreach (var pm in existing.SkilledPluginModules.Where(pm => !desiredIds.Contains(pm.Id)).ToList())
+		foreach (var pm in existing.PluginModules.Where(pm => !desiredIds.Contains(pm.Id)).ToList())
 		{
-			existing.SkilledPluginModules.Remove(pm);
+			existing.PluginModules.Remove(pm);
 		}
 
-		var existingIds = existing.SkilledPluginModules.Select(pm => pm.Id).ToHashSet();
+		var existingIds = existing.PluginModules.Select(pm => pm.Id).ToHashSet();
 		foreach (var pmId in desiredIds.Where(id => !existingIds.Contains(id)))
 		{
-			existing.SkilledPluginModules.Add(GetTrackedPluginModule(context, pmId));
+			existing.PluginModules.Add(GetTrackedPluginModule(context, pmId));
 		}
 	}
 

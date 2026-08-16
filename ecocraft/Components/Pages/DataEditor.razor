@@ -209,16 +209,14 @@
 					</ToolBarContent>
 					<HeaderContent>
 						<MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.PluginType")</MudTh>
-						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.Percent")</MudTh>
-						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.Skill")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.ModuleSlot")</MudTh>
+						<MudTh>@LocalizationService.GetTranslation("DataEditor.PluginModule.Bonuses")</MudTh>
 						<MudTh Style="text-align:right">@LocalizationService.GetTranslation("DataEditor.Actions")</MudTh>
 					</HeaderContent>
 					<RowTemplate>
 						<MudTd>@LocalizationService.GetTranslation(context)</MudTd>
-						<MudTd>@context.PluginType.ToString()</MudTd>
-						<MudTd>@context.Percent</MudTd>
-						<MudTd>@(context.Skill is null ? "-" : LocalizationService.GetTranslation(context.Skill))</MudTd>
+						<MudTd>@(context.ModuleSlot is null ? "-" : LocalizationService.GetTranslation(context.ModuleSlot))</MudTd>
+						<MudTd>@(string.Join(", ", context.Bonuses.Select(b => b.GetDescription(LocalizationService)).Where(d => d.Length > 0)))</MudTd>
 						<MudTd Style="text-align:right">
 							@RenderRowActions(() => OpenPluginModuleDialog(context), () => DeletePluginModule(context))
 						</MudTd>
