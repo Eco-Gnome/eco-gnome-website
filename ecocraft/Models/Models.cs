@@ -720,7 +720,7 @@ public class TalentBonus
         }
     }
 
-    private static string FormatPercent(decimal percent)
+    internal static string FormatPercent(decimal percent)
     {
         return (percent > 0 ? "+" : "−") + Math.Abs(Math.Round(percent, 1, MidpointRounding.AwayFromZero)).ToString("0.##") + "%";
     }
@@ -1060,6 +1060,57 @@ public class UserCraftingTable
         }
 
         return true;
+    }
+
+    // Compact aggregate of the installed modules' bonuses grouped by action, level-1 values,
+    // e.g. "Craft time −30%, Resource cost −10%". Skill/tag filters are ignored: this is a
+    // table-level overview, the per-module tooltips carry the exact conditions.
+    public string GetModuleSummary(LocalizationService localizationService)
+    {
+        var parts = PluginModules
+            .SelectMany(pm => pm.Bonuses)
+            .GroupBy(b => b.Action)
+            .OrderBy(g => g.Key)
+            .Select(g =>
+            {
+                var multiplier = 1m;
+                var percentSum = 0m;
+                var additive = 0m;
+
+                foreach (var bonus in g)
+                {
+                    switch (bonus.EffectType)
+                    {
+                        case TalentBonusEffectType.Multiplicative:
+                        case TalentBonusEffectType.CappedMultiplicative:
+                        case TalentBonusEffectType.TieredMultiplicative:
+                            multiplier *= Talent.GetBonusMultiplier(bonus, 1);
+                            break;
+                        case TalentBonusEffectType.AdditivePercent:
+                            percentSum += bonus.Value;
+                            break;
+                        case TalentBonusEffectType.Additive:
+                            additive += bonus.Value;
+                            break;
+                        case TalentBonusEffectType.Chance:
+                            // Average-price calculator: use the expected value.
+                            additive += (bonus.Chance ?? 0m) * bonus.Value;
+                            break;
+                    }
+                }
+
+                var percent = (multiplier - 1m + percentSum) * 100m;
+                var values = new List<string>();
+                if (percent != 0m) values.Add(TalentBonus.FormatPercent(percent));
+                if (additive != 0m) values.Add((additive > 0 ? "+" : "") + additive.ToString("0.##"));
+
+                return values.Count > 0
+                    ? $"{localizationService.GetTranslation($"Bonus.Action.{g.Key}")} {string.Join(" ", values)}"
+                    : "";
+            })
+            .Where(s => s.Length > 0);
+
+        return string.Join(", ", parts);
     }
 
     // Effective required room material tier of the table: base requirement + installed module bumps.

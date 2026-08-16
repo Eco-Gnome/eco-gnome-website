@@ -13,6 +13,15 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.4.0",
+            "2026-08-07",
+            "Eco v14 Compatibility",
+            """
+            - Eco v14 Compatibility: Eco Gnome now supports version 14 of Eco.
+            - Modules UI: Updated the module selection interface.
+            """
+        ),
+        new ReleaseVersion(
             "1.3.5",
             "2026-06-27",
             "Production Chain Graph, Server Data Editor & Shopping List Improvements",

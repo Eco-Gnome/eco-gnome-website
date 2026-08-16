@@ -8,7 +8,7 @@ const { Worker, isMainThread, parentPort, workerData } = require('worker_threads
 if (isMainThread) {
     // Variables en dur au début du fichier
     const assetRipperPath = 'C:\\Users\\thiba\\Documents\\ECO\\AssetRipper_win_x64\\AssetRipper.GUI.Free.exe'; // Chemin vers AssetRipper
-    const unityBundlePath = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Eco\\Eco_Data\\StreamingAssets\\aa\\StandaloneWindows64\\icons_assets_all_b400c64e881987a0fcb008ee7a773e5c.bundle'; // Chemin vers le bundle Unity
+    const unityBundlePath = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Eco\\Eco_Data\\StreamingAssets\\aa\\StandaloneWindows64\\icons_assets_all_b2e8b48c9227956475cc53218aef86ce.bundle'; // Chemin vers le bundle Unity
     const exportDirectory = 'C:\\Users\\thiba\\Documents\\Repositories\\eco-calculator-website\\ecocraft\\tmp'; // Chemin vers le dossier d'exportation
     const outputDirectory = 'C:\\Users\\thiba\\Documents\\Repositories\\eco-calculator-website\\ecocraft\\Exports\\OfficialIcons'; // Chemin vers le dossier de sortie final
 

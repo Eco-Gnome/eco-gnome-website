@@ -1,8 +1,10 @@
 @using ecocraft.Models
 @using ecocraft.Services
-@using ecocraft.Extensions
 @inject LocalizationService LocalizationService
 
+@* One icon per module slot of the table. Clicking cycles through the modules the table accepts
+   for that slot (none -> first variant -> ... -> last variant -> none); the tooltip shows the
+   installed module's bonuses. One module per slot, all installed modules apply together. *@
 @{
     var orderedModuleSlots = UserCraftingTable.CraftingTable.GetOrderedModuleSlots()
         .Where(ms => UserCraftingTable.CraftingTable.GetPluginModulesForSlot(ms).Count > 0)
@@ -14,52 +16,45 @@
     <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@Class">
         @foreach (var moduleSlot in orderedModuleSlots)
         {
-            var candidates = UserCraftingTable.CraftingTable.GetPluginModulesForSlot(moduleSlot)
-                .OrderBy(pm => LocalizationService.GetTranslation(pm))
-                .ToList();
             var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
 
-            <MudMenu Dense="true">
-                <ActivatorContent>
-                    <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
-                        <MudLink Class="d-flex">
-                            <EcoIcon Item="@installed"
-                                     FallbackIcon="@MDIIcons.Filled.Cancel"
-                                     Size="24"
-                                     Class="@($"{(installed is not null ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
-                        </MudLink>
-                    </MudTooltip>
-                </ActivatorContent>
-                <ChildContent>
-                    <MudMenuItem OnClick="() => SelectModule(moduleSlot, null)">
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                            <EcoIcon Item="@((IHasIconName?)null)" FallbackIcon="@MDIIcons.Filled.Cancel" Size="24"/>
-                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
-                        </MudStack>
-                    </MudMenuItem>
-                    @foreach (var candidate in candidates)
-                    {
-                        <MudMenuItem OnClick="() => SelectModule(moduleSlot, candidate)">
-                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                <EcoIcon Item="@candidate" Size="24"/>
-                                <MudText Typo="Typo.body2">@candidate.GetTooltip(LocalizationService)</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    }
-                </ChildContent>
-            </MudMenu>
+            <MudLink OnClick="() => CycleModule(moduleSlot)">
+                <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
+                    <EcoIcon Item="@installed"
+                             FallbackIcon="@MDIIcons.Filled.Cancel"
+                             Size="24"
+                             Class="@($"{(installed is not null ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                </MudTooltip>
+            </MudLink>
         }
     </MudStack>
 }
 
 @code {
-    // One activator icon per module slot of the table; clicking it opens the list of modules the
-    // table accepts for that slot (one module per slot, all installed modules apply together).
     public record ModuleSelection(ModuleSlot ModuleSlot, PluginModule? PluginModule);
 
     [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
     [Parameter] public string? Class { get; set; }
     [Parameter] public EventCallback<ModuleSelection> ModuleSelected { get; set; }
+
+    private List<PluginModule> GetOrderedCandidates(ModuleSlot moduleSlot)
+    {
+        return UserCraftingTable.CraftingTable.GetPluginModulesForSlot(moduleSlot)
+            .OrderBy(pm => LocalizationService.GetTranslation(pm))
+            .ToList();
+    }
+
+    private async Task CycleModule(ModuleSlot moduleSlot)
+    {
+        var candidates = GetOrderedCandidates(moduleSlot);
+        if (candidates.Count == 0) return;
+
+        var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
+        var currentIndex = installed is null ? -1 : candidates.FindIndex(pm => pm.Id == installed.Id);
+        var next = currentIndex + 1 < candidates.Count ? candidates[currentIndex + 1] : null;
+
+        await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, next));
+    }
 
     private string GetSlotTooltip(ModuleSlot moduleSlot, PluginModule? installed)
     {
@@ -68,10 +63,5 @@
         return installed is not null
             ? $"{slotName}: {installed.GetTooltip(LocalizationService)}"
             : $"{slotName}: {LocalizationService.GetTranslation("PriceCalculator.NoModule")}";
-    }
-
-    private async Task SelectModule(ModuleSlot moduleSlot, PluginModule? pluginModule)
-    {
-        await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, pluginModule));
     }
 }

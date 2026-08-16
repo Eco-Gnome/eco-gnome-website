@@ -33,28 +33,31 @@
                 <MudItem sm="6">
                     <MudStack Spacing="1">
                         <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTable")</MudText>
+                        @{
+                            var installedPluginModules = (_currentUserCraftingTable?.PluginModules ?? [])
+                                .OrderBy(pm => pm.ModuleSlot?.SortOrder ?? int.MaxValue)
+                                .ToList();
+                        }
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <EcoIcon Item="@Recipe.CraftingTable" />
                             <MudText>@LocalizationService.GetTranslation(Recipe.CraftingTable)</MudText>
 
-                            @{
-                                var installedPluginModules = (_currentUserCraftingTable?.PluginModules ?? [])
-                                    .OrderBy(pm => pm.ModuleSlot?.SortOrder ?? int.MaxValue)
-                                    .ToList();
-
-                                @if (installedPluginModules.Count > 0)
-                                {
-                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                        @foreach (var installedPluginModule in installedPluginModules)
-                                        {
-                                            <MudTooltip Text="@installedPluginModule.GetTooltip(LocalizationService)">
-                                                <EcoIcon Item="@installedPluginModule" Size="24" Class="mt-1"/>
-                                            </MudTooltip>
-                                        }
-                                    </MudStack>
-                                }
+                            @foreach (var installedPluginModule in installedPluginModules)
+                            {
+                                <MudTooltip Text="@installedPluginModule.GetTooltip(LocalizationService)">
+                                    <EcoIcon Item="@installedPluginModule" Size="18"/>
+                                </MudTooltip>
                             }
                         </MudStack>
+                        @if (installedPluginModules.Count > 0)
+                        {
+                            var moduleSummary = _currentUserCraftingTable!.GetModuleSummary(LocalizationService);
+
+                            @if (moduleSummary.Length > 0)
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@moduleSummary</MudText>
+                            }
+                        }
                     </MudStack>
                 </MudItem>
 
