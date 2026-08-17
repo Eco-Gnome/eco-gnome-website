@@ -2018,17 +2018,6 @@
             }
             else
             {
-                var firstTalent = talents.First();
-                var selectedTalentsWithSameLevel = _selectedDataContext.UserTalents
-                    .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
-                    .Select(ut => ut.Talent)
-                    .ToList();
-
-                if (selectedTalentsWithSameLevel.Count > 0)
-                {
-                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedDataContext);
-                }
-
                 foreach (var talent in talents)
                 {
                     if (talent.GetCurrentUserTalent(_selectedDataContext) is null)
@@ -2058,16 +2047,6 @@
         {
             if (existingUserTalent is null)
             {
-                var selectedTalentsWithSameLevel = _selectedDataContext.UserTalents
-                    .Where(ut => ut.Talent.Skill == firstTalent.Skill && ut.Talent.Level == firstTalent.Level && !talents.Contains(ut.Talent))
-                    .Select(ut => ut.Talent)
-                    .ToList();
-
-                if (selectedTalentsWithSameLevel.Count > 0)
-                {
-                    RemoveTalentGroup(context, selectedTalentsWithSameLevel, _selectedDataContext);
-                }
-
                 foreach (var talent in talents)
                 {
                     UserServerDataService.AddUserTalent(context, talent, _selectedDataContext);
