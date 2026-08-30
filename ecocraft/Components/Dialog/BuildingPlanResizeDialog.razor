@@ -1,0 +1,23 @@
+@using ecocraft.BuildingPlanner.Model
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Row Spacing="2">
+            <MudNumericField T="int" @bind-Value="Width" Min="1" Max="@PlanValidator.MaxGridSide" Variant="Variant.Outlined" Label="@LocalizationService.GetTranslation("BuildingPlanner.Dialog.Width")"/>
+            <MudNumericField T="int" @bind-Value="Depth" Min="1" Max="@PlanValidator.MaxGridSide" Variant="Variant.Outlined" Label="@LocalizationService.GetTranslation("BuildingPlanner.Dialog.Depth")"/>
+        </MudStack>
+        <MudText Typo="Typo.caption" Class="mt-2">@LocalizationService.GetTranslation("BuildingPlanner.Dialog.ResizeHelp")</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => MudDialog.Close(DialogResult.Ok((Math.Clamp(Width, 1, PlanValidator.MaxGridSide), Math.Clamp(Depth, 1, PlanValidator.MaxGridSide)))))">@LocalizationService.GetTranslation("Validate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public int Width { get; set; } = 25;
+    [Parameter] public int Depth { get; set; } = 20;
+}

@@ -82,6 +82,39 @@ namespace ecocraft.Migrations
                     b.ToTable("UserCraftingTablePluginModule");
                 });
 
+            modelBuilder.Entity("ecocraft.Models.BuildingPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreationDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Document")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdateDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserServerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserServerId");
+
+                    b.ToTable("BuildingPlan", (string)null);
+                });
+
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -279,6 +312,45 @@ namespace ecocraft.Migrations
 
                     b.Property<Guid>("ServerId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool?>("BlockHasForms")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("BlockIgnoreRooms")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("BlockIsRoomMaterialOption")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("BlockIsWall")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("BlockTier")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WorldObjectAttachedSide")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("WorldObjectCanBeOnSurface")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("WorldObjectHasTableSurface")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("WorldObjectMustBeGridAligned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("WorldObjectOccupancyIsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("WorldObjectOccupancyJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int?>("WorldObjectTier")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("WorldObjectWallMounted")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -615,6 +687,15 @@ namespace ecocraft.Migrations
 
                     b.Property<string>("EcoServerId")
                         .HasColumnType("text");
+
+                    b.Property<string>("BuildingConfigJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("HasBuildingData")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HousingConfigJson")
+                        .HasColumnType("jsonb");
 
                     b.Property<bool>("IsAutomationPlannerEnabled")
                         .HasColumnType("boolean");
@@ -1210,6 +1291,17 @@ namespace ecocraft.Migrations
                         .HasForeignKey("UserCraftingTableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ecocraft.Models.BuildingPlan", b =>
+                {
+                    b.HasOne("ecocraft.Models.UserServer", "UserServer")
+                        .WithMany("BuildingPlans")
+                        .HasForeignKey("UserServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserServer");
                 });
 
             modelBuilder.Entity("ecocraft.Models.CraftingTable", b =>
@@ -1902,6 +1994,8 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.UserServer", b =>
                 {
+                    b.Navigation("BuildingPlans");
+
                     b.Navigation("DataContexts");
                 });
 #pragma warning restore 612, 618

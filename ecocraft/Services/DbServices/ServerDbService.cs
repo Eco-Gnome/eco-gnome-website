@@ -294,6 +294,9 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    JoinCode = server.JoinCode,
 		    ApiKey = server.ApiKey,
 		    IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled,
+		    HasBuildingData = server.HasBuildingData,
+		    BuildingConfigJson = server.BuildingConfigJson,
+		    HousingConfigJson = server.HousingConfigJson,
 	    };
     }
 

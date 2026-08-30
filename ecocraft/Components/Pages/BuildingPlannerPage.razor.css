@@ -1,0 +1,190 @@
+.bp-page {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: calc(100vh - 88px);
+    min-height: 480px;
+}
+
+.bp-toolbar {
+    flex: 0 0 auto;
+}
+
+/* MudSelect place son Class sur le .mud-input-control interne ; l'élément flex est le wrapper .mud-select,
+   qui reste en flex-grow et étire le champ. flex-no-grow ne peut donc pas l'atteindre. */
+::deep .bp-toolbar .mud-select {
+    flex: 0 1 auto;
+}
+
+/* La puce de tier fait 32 px de haut alors que la ligne du champ dense en fait 19 : le contenu
+   descendait sous la bordure. On la ramène à la hauteur de la ligne. */
+::deep .bp-toolbar .mud-select div.mud-input-slot .mud-chip {
+    height: 20px;
+    margin: 0;
+    font-size: 0.7rem;
+}
+
+.bp-body {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 390px;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.bp-side {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.bp-right {
+    overflow-y: auto;
+}
+
+/* .bp-right est posé sur un MudPaper (composant) : l'isolation CSS ne lui met pas l'attribut de scope,
+   donc une règle ancrée dessus ne matche jamais. On ancre sur .bp-body, vrai div de cette page. */
+.bp-body ::deep .bp-table td,
+.bp-body ::deep .bp-table th {
+    padding: 6px 8px;
+}
+
+.bp-canvas-wrap {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.bp-canvas {
+    position: absolute;
+    inset: 0;
+}
+
+.bp-hint {
+    position: absolute;
+    left: 8px;
+    bottom: 4px;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+::deep .bp-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+::deep .bp-layer {
+    position: absolute;
+    inset: 0;
+    outline: none;
+}
+
+::deep .bp-layer-dynamic {
+    touch-action: none;
+}
+
+.bp-object-list {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100vh - 220px);
+}
+
+.bp-group-title {
+    display: block;
+    padding: 6px 6px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.bp-object-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.bp-object-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bp-object-item.selected {
+    background: rgba(100, 181, 246, 0.18);
+    outline: 1px solid rgba(100, 181, 246, 0.6);
+}
+
+.bp-object-text {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.bp-object-label {
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bp-object-meta {
+    display: flex;
+    gap: 6px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+@media (max-width: 1280px) {
+    .bp-body {
+        grid-template-columns: 220px minmax(0, 1fr) 330px;
+    }
+}
+
+@media (max-width: 960px) {
+    .bp-page {
+        height: auto;
+    }
+
+    .bp-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 260px 60vh auto;
+    }
+}
+
+/* Légende de la dalle (niveaux ≥ 1) et des ouvertures de l'étage au-dessus, dans l'infobulle du « i » à côté du menu de niveau. */
+.bp-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 2px 0;
+    font-size: 0.75rem;
+    text-align: left;
+}
+
+.bp-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.bp-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+}
+
+.bp-swatch-slab { background: rgba(255, 255, 255, 0.28); }
+.bp-swatch-low { background: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.35) 3px 4px); }
+.bp-swatch-missing { background: rgba(244, 67, 54, 0.35); }
+.bp-swatch-hole { background: rgba(0, 0, 0, 0.6) repeating-linear-gradient(45deg, transparent 0 2px, rgba(255, 255, 255, 0.35) 2px 3px); }
+.bp-swatch-watermark { background: rgba(194, 162, 106, 0.35); }
+.bp-swatch-hole-above { border: 2px dashed rgba(255, 255, 255, 0.7); }

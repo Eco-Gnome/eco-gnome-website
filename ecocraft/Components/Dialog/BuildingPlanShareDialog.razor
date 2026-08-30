@@ -1,0 +1,33 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-2">@LocalizationService.GetTranslation("BuildingPlanner.Dialog.ShareHelp")</MudText>
+        <MudTextField T="string" Value="@Url" ReadOnly="true" Variant="Variant.Outlined" Lines="3"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ContentCopy" OnClick="CopyAsync">@LocalizationService.GetTranslation("CopyToClipboard")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Url { get; set; } = "";
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Url);
+            Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.Copied"), Severity.Success);
+        }
+        catch (JSException)
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.CopyFailed"), Severity.Warning);
+        }
+    }
+}

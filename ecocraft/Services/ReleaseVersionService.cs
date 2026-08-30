@@ -13,6 +13,16 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.5.0",
+            "2026-08-29",
+            "Building Planner",
+            """
+            - Building Planner (new page, per server, enabled by a super admin): draw walls, floors and rooms on a 2D grid, place crafting tables, doors and furniture, and get the game's exact verdict before building — room detection (volume, average material tier, leaks, empty edges), crafting table room requirements (tier with installed modules, cumulative volume, containment) and housing value (room categories, diminishing returns, material caps, residents) computed with the rules of Eco 0.14.
+            - Requires EcoGnomeMod export version 5: the mod now exports object footprints, block tiers and the server's room/housing configuration. Older (v4) files still import; the planner stays hidden until a v5 file is uploaded.
+            - Plans are saved per player and server, kept as a local draft while editing, and can be shared by link.
+            """
+        ),
+        new ReleaseVersion(
             "1.4.0",
             "2026-08-07",
             "Eco v14 Compatibility",

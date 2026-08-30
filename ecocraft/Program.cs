@@ -35,7 +35,10 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    // Le planificateur de bâtiment renvoie le plan complet (JSON) à chaque commit d'édition ; la limite
+    // par défaut de Blazor Server (32 Ko) est trop basse pour un plan de 200×200.
+    .AddHubOptions(options => options.MaximumReceiveMessageSize = 2 * 1024 * 1024);
 
 builder.Services.AddMudServices();
 builder.Services.AddMudMarkdownServices();
@@ -80,6 +83,7 @@ builder.Services.AddScoped<UserAutomationInputDbService>();
 builder.Services.AddScoped<UserAutomationTargetDbService>();
 builder.Services.AddScoped<DataContextDbService>();
 builder.Services.AddScoped<ModUploadHistoryDbService>();
+builder.Services.AddScoped<BuildingPlanDbService>();
 
 // Business Services
 builder.Services.AddScoped<ContextService>();
@@ -94,6 +98,8 @@ builder.Services.AddScoped<ShoppingListDataService>();
 builder.Services.AddScoped<ShoppingListGraphService>();
 builder.Services.AddScoped<EconomyViewerService>();
 builder.Services.AddScoped<EconomyViewerDisplayService>();
+builder.Services.AddScoped<BuildingPlannerCatalogService>();
+builder.Services.AddScoped<BuildingPlannerService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();

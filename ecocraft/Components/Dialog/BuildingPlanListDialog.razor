@@ -1,0 +1,46 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+@inject BuildingPlannerService BuildingPlannerService
+
+<MudDialog>
+    <DialogContent>
+        @if (Plans.Count == 0)
+        {
+            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("BuildingPlanner.Dialog.NoPlans")</MudText>
+        }
+        else
+        {
+            <MudList T="BuildingPlan" Dense="true">
+                @foreach (var plan in Plans)
+                {
+                    <MudListItem T="BuildingPlan" Value="@plan" OnClick="@(() => MudDialog.Close(DialogResult.Ok(plan)))">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body1">@plan.Name</MudText>
+                                <MudText Typo="Typo.caption">@plan.UpdateDateTime.ToLocalTime().ToString("g")</MudText>
+                            </MudStack>
+                            <span @onclick:stopPropagation="true">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteAsync(plan))"/>
+                            </span>
+                        </MudStack>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public List<BuildingPlan> Plans { get; set; } = [];
+
+    private async Task DeleteAsync(BuildingPlan plan)
+    {
+        await BuildingPlannerService.DeletePlanAsync(plan);
+        Plans.Remove(plan);
+    }
+}

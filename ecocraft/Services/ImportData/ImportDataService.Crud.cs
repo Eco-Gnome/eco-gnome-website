@@ -297,6 +297,21 @@ public partial class ImportDataService
         dbItem.RoomMaterialTier = item.RoomRequirements?.MaterialTier;
         dbItem.RoomVolume = item.RoomRequirements?.Volume;
         dbItem.RoomRequiresContainment = item.RoomRequirements?.RequiresContainment ?? false;
+
+        // v5 — building planner. Un import v4 remet tout à zéro : pas de donnée obsolète d'un ancien v5.
+        dbItem.WorldObjectTier = item.WorldObject?.Tier;
+        dbItem.WorldObjectHasTableSurface = item.WorldObject?.HasTableSurface ?? false;
+        dbItem.WorldObjectCanBeOnSurface = item.WorldObject?.CanBeOnSurface ?? false;
+        dbItem.WorldObjectAttachedSide = item.WorldObject?.RequiredAttachedSide;
+        dbItem.WorldObjectMustBeGridAligned = item.WorldObject?.MustBeGridAligned ?? false;
+        dbItem.WorldObjectWallMounted = item.WorldObject?.WallMounted ?? false;
+        dbItem.WorldObjectOccupancyIsDefault = item.WorldObject?.OccupancyIsDefault ?? false;
+        dbItem.WorldObjectOccupancyJson = item.WorldObject is null ? null : OccupancyDtoToJson(item.WorldObject.Occupancy);
+        dbItem.BlockTier = item.BuildingBlock?.Tier;
+        dbItem.BlockIsWall = item.BuildingBlock?.IsWall;
+        dbItem.BlockIgnoreRooms = item.BuildingBlock?.IgnoreRooms;
+        dbItem.BlockHasForms = item.BuildingBlock?.HasForms;
+        dbItem.BlockIsRoomMaterialOption = item.BuildingBlock?.IsRoomMaterialOption;
     }
 
     private Recipe ImportRecipe(EcoCraftDbContext context, Server server, string name, LocalizedField localizedName, string familyName, Skill? skill, int requiredSkillLevel, bool isBlueprint, bool isDefault, CraftingTable craftingTable)

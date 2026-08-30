@@ -1,0 +1,217 @@
+@using ecocraft.BuildingPlanner.Model
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+@inject ContextService ContextService
+
+<div class="pa-2">
+    @if (SelectedRoom is { } roomEntry)
+    {
+        var room = roomEntry.Room;
+        var analysis = Analysis?.Rooms.FirstOrDefault(r => r.RoomId == room.Id);
+        <MudStack Spacing="1">
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="OnDeleteSelection"/>
+            </MudStack>
+            <MudTextField T="string" Value="@room.Name" ValueChanged="@(v => RoomChanged(room, r => r.Name = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                          Label="@LocalizationService.GetTranslation("Name")"/>
+            <MudStack Row Spacing="1">
+                <MudNumericField T="int?" Value="@room.Height" ValueChanged="@(v => RoomChanged(room, r => r.Height = v is { } h ? Math.Clamp(h, 1, 50) : null))" Min="1" Max="50" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                 Placeholder="@Document?.LevelHeight(roomEntry.Level).ToString()" Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Height")"/>
+                <MudSelect T="string" Value="@(room.CeilingMaterial ?? "")" ValueChanged="@(v => RoomChanged(room, r => r.CeilingMaterial = string.IsNullOrEmpty(v) ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")">
+                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.DefaultMaterial")</MudSelectItem>
+                    @foreach (var m in Catalog?.Materials ?? [])
+                    {
+                        <MudSelectItem T="string" Value="@m.Name">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+                                <span>@m.Label</span>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
+                            </MudStack>
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudStack>
+            <MudSelect T="string" Value="@(room.LockCategory ?? "")" ValueChanged="@(v => RoomChanged(room, r => r.LockCategory = string.IsNullOrEmpty(v) ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                       Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.LockCategory")">
+                <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.AutoCategory")</MudSelectItem>
+                @foreach (var c in Catalog?.Categories ?? [])
+                {
+                    <MudSelectItem T="string" Value="@c.Name">@c.Label</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (analysis is not null)
+            {
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="mt-1" Wrap="Wrap.Wrap">
+                    <MudChip T="string" Size="Size.Small" Color="@(analysis.Contained ? Color.Success : Color.Error)" Icon="@(analysis.Contained ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)">
+                        @(analysis.Contained ? LocalizationService.GetTranslation("BuildingPlanner.Inspector.Contained") : LocalizationService.GetTranslation($"BuildingPlanner.Issue.{analysis.FailCode ?? "RoomInvalid"}", analysis.Name, analysis.FailHeight?.ToString() ?? ""))
+                    </MudChip>
+                    @if (analysis.Contained)
+                    {
+                        <MudChip T="string" Size="Size.Small">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Volume") @analysis.Volume m³</MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Tier") @analysis.AverageTier.ToString("0.00")</MudChip>
+                        <MudChip T="string" Size="Size.Small">@analysis.WallCount @LocalizationService.GetTranslation("BuildingPlanner.Inspector.WallBlocks")</MudChip>
+                    }
+                </MudStack>
+                @if (analysis.Contained)
+                {
+                    <MudText Typo="Typo.caption">
+                        @LocalizationService.GetTranslation("BuildingPlanner.Inspector.Composition"):
+                        @string.Join(", ", analysis.WallTierComposition.OrderBy(k => k.Key).Select(k => $"T{k.Key:0.#} × {k.Value}"))
+                    </MudText>
+                    @if (analysis.EmptyEdgeCount > 0)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Issue.EmptyEdges", analysis.Name, analysis.EmptyEdgeCount.ToString(), analysis.AverageTierWithoutEmptyEdges.ToString("0.00"))</MudText>
+                    }
+                    @if (analysis.Housing is { } housing)
+                    {
+                        <MudText Typo="Typo.caption">
+                            @LocalizationService.GetTranslation("BuildingPlanner.Housing.Category"): <b>@housing.PrimaryCategory</b>@(housing.CategoryLocked ? " 🔒" : "") —
+                            @LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue"): <b>@housing.Value.ToString("0.00")</b>
+                            @if (housing.CappedByTier) { <span> (@housing.TotalBeforeCap.ToString("0.00") → cap T@(housing.TierVal.ToString("0.#")))</span> }
+                        </MudText>
+                    }
+                    @if (analysis.Tables.Count > 0)
+                    {
+                        <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.VolumeUsed"): @analysis.RequiredVolumeTotal / @analysis.Volume</MudText>
+                    }
+                }
+            }
+        </MudStack>
+    }
+    else if (SelectedObject is { } objectEntry)
+    {
+        var obj = objectEntry.Object;
+        var info = Catalog?.Objects.FirstOrDefault(o => o.Name == obj.Type);
+        var placed = Analysis?.Objects.FirstOrDefault(o => o.Id == obj.Id);
+        var table = Analysis?.Tables.FirstOrDefault(t => t.ObjectId == obj.Id);
+        var housingLine = Analysis?.Rooms.SelectMany(r => r.Housing?.Objects ?? []).FirstOrDefault(l => l.ObjectId == obj.Id);
+        <MudStack Spacing="1">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                <MudImage Src="@($"/assets/eco-icons/{obj.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="32" Height="32"/>
+                <MudText Typo="Typo.subtitle2" Class="flex-grow-1">@(info?.Label ?? obj.Type)</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="OnDeleteSelection"/>
+            </MudStack>
+            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.caption">(@obj.X, @obj.Y)</MudText>
+                @if (obj.AttachedTo is null)
+                {
+                    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="@(() => ObjectChanged(obj, o => o.Rotation = (o.Rotation + 1) & 3))">r@(obj.Rotation)</MudButton>
+                    <MudNumericField T="int?" Value="@obj.Z" ValueChanged="@(v => ObjectChanged(obj, o => o.Z = v))" Min="0" Max="60" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                                     Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Z")" Style="width: 110px;"/>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.AttachedTo", ParentLabel(obj.AttachedTo))</MudChip>
+                }
+            </MudStack>
+            @if (placed is not null)
+            {
+                <MudStack Row Spacing="1" Wrap="Wrap.Wrap">
+                    <MudChip T="string" Size="Size.Small" Color="@(placed.Placed ? Color.Success : Color.Error)">
+                        @(placed.Placed ? LocalizationService.GetTranslation("BuildingPlanner.Inspector.Placed") : LocalizationService.GetTranslation("BuildingPlanner.Inspector.NotPlaced"))
+                    </MudChip>
+                    @if (placed.Placed) { <MudChip T="string" Size="Size.Small">z = @(placed.Origin.Y - (Document?.LevelBaseY(objectEntry.Level) ?? 0))</MudChip> }
+                    @if (placed.RoomId is not null)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@RoomLabel(placed.RoomId)</MudChip>
+                    }
+                    else if (placed.Placed)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.NoRoom")</MudChip>
+                    }
+                </MudStack>
+            }
+            @if (info is not null)
+            {
+                <MudText Typo="Typo.caption">
+                    @if (info.RequiredTier is { } rt) { <span>@LocalizationService.GetTranslation("BuildingPlanner.Inspector.RequiredTier") @rt.ToString("0.##") </span> }
+                    @if (info.RequiredVolume > 0) { <span>· @LocalizationService.GetTranslation("BuildingPlanner.Inspector.RequiredVolume") @info.RequiredVolume </span> }
+                    @if (info.HousingCategory is not null) { <span>· @info.HousingCategory @(info.HousingValue is { } hv ? $"+{hv:0.##}" : "")</span> }
+                    @if (info.Tier is { } t) { <span>· @LocalizationService.GetTranslation("BuildingPlanner.Inspector.Tier") @t</span> }
+                </MudText>
+            }
+            else
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.UnknownType")</MudChip>
+            }
+            @if (table is not null)
+            {
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption" Color="@(table.TierOk ? Color.Success : Color.Error)">
+                        @LocalizationService.GetTranslation("BuildingPlanner.Tables.Tier"): @table.RoomTier.ToString("0.00") / @(table.EffectiveTier?.ToString("0.00") ?? "-")
+                        @if (table.ModuleBump > 0) { <span> (@table.BaseTier?.ToString("0.##") + @table.ModuleBump.ToString("0.##"))</span> }
+                        @if (table.TierOk && !table.ModulesOk) { <span> — @LocalizationService.GetTranslation("BuildingPlanner.Tables.ModulesInactive")</span> }
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="@(table.VolumeOk ? Color.Success : Color.Error)">
+                        @LocalizationService.GetTranslation("BuildingPlanner.Tables.Volume"): @table.RoomVolumeUsed / @table.RoomVolume
+                    </MudText>
+                    @if (table.RequiresContainment)
+                    {
+                        <MudText Typo="Typo.caption" Color="@(table.ContainmentOk ? Color.Success : Color.Error)">@LocalizationService.GetTranslation("BuildingPlanner.Tables.Containment")</MudText>
+                    }
+                </MudStack>
+            }
+            @if (housingLine is not null)
+            {
+                <MudText Typo="Typo.caption" Color="@(housingLine.Excluded ? Color.Warning : Color.Default)">
+                    @LocalizationService.GetTranslation("BuildingPlanner.Housing.Contribution"): @housingLine.Value.ToString("0.00")
+                    @if (housingLine.Multiplier < 0.999f && !housingLine.Excluded) { <span> (× @housingLine.Multiplier.ToString("0.##"))</span> }
+                    @if (housingLine.Excluded) { <span> — @LocalizationService.GetTranslation("BuildingPlanner.Housing.Excluded")</span> }
+                </MudText>
+            }
+        </MudStack>
+    }
+    else
+    {
+        <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.NothingSelected")</MudText>
+    }
+</div>
+
+@code {
+    [Parameter] public PlanDocument? Document { get; set; }
+    [Parameter] public AnalysisResult? Analysis { get; set; }
+    [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? SelectionKind { get; set; }
+    [Parameter] public string? SelectionId { get; set; }
+    [Parameter] public EventCallback<PlanRoom> OnRoomChanged { get; set; }
+    [Parameter] public EventCallback<PlanObject> OnObjectChanged { get; set; }
+    [Parameter] public EventCallback OnDeleteSelection { get; set; }
+
+    private (int Level, PlanRoom Room)? SelectedRoom => SelectionKind == "room" ? Document?.FindRoom(SelectionId) : null;
+    private (int Level, PlanObject Object)? SelectedObject => SelectionKind == "object" ? Document?.FindObject(SelectionId) : null;
+
+    // Nom de pièce préfixé par son niveau dès qu'il y a plusieurs niveaux.
+    private string RoomLabel(string roomId)
+    {
+        var entry = Document?.FindRoom(roomId);
+        if (entry is null || Document is null) return roomId;
+        if (Document.Levels.Count <= 1) return entry.Value.Room.Name;
+        var levelName = Document.Levels[entry.Value.Level].Name;
+        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", entry.Value.Level.ToString());
+        return $"{levelName} · {entry.Value.Room.Name}";
+    }
+
+    private async Task RoomChanged(PlanRoom room, Action<PlanRoom> mutate)
+    {
+        var copy = new PlanRoom { Id = room.Id, Name = room.Name, Seed = new GridPoint { X = room.Seed.X, Y = room.Seed.Y }, Height = room.Height, CeilingMaterial = room.CeilingMaterial, LockCategory = room.LockCategory };
+        mutate(copy);
+        await OnRoomChanged.InvokeAsync(copy);
+    }
+
+    private async Task ObjectChanged(PlanObject obj, Action<PlanObject> mutate)
+    {
+        var copy = new PlanObject { Id = obj.Id, Type = obj.Type, X = obj.X, Y = obj.Y, Z = obj.Z, Rotation = obj.Rotation, AttachedTo = obj.AttachedTo };
+        mutate(copy);
+        await OnObjectChanged.InvokeAsync(copy);
+    }
+
+    private string ParentLabel(string parentId)
+    {
+        var parent = Document?.FindObject(parentId)?.Object;
+        if (parent is null) return parentId;
+        return Catalog?.Objects.FirstOrDefault(o => o.Name == parent.Type)?.Label ?? parent.Type;
+    }
+}

@@ -1,0 +1,24 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField T="string" @bind-Value="Name" Label="@LocalizationService.GetTranslation("Name")" Variant="Variant.Outlined" Immediate="true" AutoFocus="true"
+                      OnKeyDown="@(e => { if (e.Key == "Enter") Submit(); })"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@string.IsNullOrWhiteSpace(Name)" OnClick="Submit">@LocalizationService.GetTranslation("Validate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Name { get; set; } = "";
+
+    private void Submit()
+    {
+        if (string.IsNullOrWhiteSpace(Name)) return;
+        MudDialog.Close(DialogResult.Ok(Name.Trim()));
+    }
+}

@@ -16,6 +16,9 @@
             <MudNavLink IconColor="Color.Primary" Href="economy-viewer" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QueryStats">@LocalizationService.GetTranslation("NavMenu.EconomyViewer")</MudNavLink>
         </MudTooltip>
     }
+    <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.BuildingPlanner")">
+        <MudNavLink IconColor="Color.Primary" Href="building-planner" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Architecture">@LocalizationService.GetTranslation("NavMenu.BuildingPlanner")</MudNavLink>
+    </MudTooltip>
 
     <!--<MudTooltip RootClass="mud-nav-item" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavGraph")">
         <MudNavLink Href="graph-view" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">@LocalizationService.GetTranslation("NavMenu.NavGraph")</MudNavLink>

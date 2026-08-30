@@ -1,0 +1,705 @@
+@page "/building-planner"
+@implements IAsyncDisposable
+@using System.Text.Json
+@using ecocraft.BuildingPlanner
+@using ecocraft.BuildingPlanner.Model
+@using ecocraft.Components.Dialog
+@using ecocraft.Components.Utils
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.WebUtilities
+@inject ContextService ContextService
+@inject LocalizationService LocalizationService
+@inject BuildingPlannerService BuildingPlannerService
+@inject ServerDbService ServerDbService
+@inject DataContextDbService DataContextDbService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject LocalStorageService LocalStorageService
+
+<PageTitle>@LocalizationService.GetTranslation("BuildingPlanner.Title") - Eco Gnome</PageTitle>
+
+@if (!BuildingPlannerService.HasBuildingData)
+{
+    <MudAlert Severity="Severity.Warning"><MudMarkdown Value="@LocalizationService.GetTranslation("BuildingPlanner.NoData")" /></MudAlert>
+}
+else if (_loading)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="pa-8">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary"/>
+    </MudStack>
+}
+else
+{
+    <div class="bp-page">
+        <MudPaper Class="bp-toolbar pa-1" Elevation="1">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap">
+                <MudToggleGroup T="string" Value="@_tool" ValueChanged="SetTool" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-tools">
+                    @foreach (var tool in Tools)
+                    {
+                        <MudToggleItem T="string" Value="@tool.Key" Disabled="@(tool.Key == "hole" && _level == 0)">
+                            <MudTooltip Text="@LocalizationService.GetTranslation($"BuildingPlanner.Tool.{tool.Key}")">
+                                <MudIcon Icon="@tool.Icon" Size="Size.Small"/>
+                            </MudTooltip>
+                        </MudToggleItem>
+                    }
+                </MudToggleGroup>
+
+                <MudSelect T="string" Value="@_material" ValueChanged="OnMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Material")" Style="min-width: 220px; max-width: 260px;">
+                    @foreach (var m in _clientCatalog!.Materials)
+                    {
+                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Rotate")">
+                    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="RotateAsync">r@(_rotation)</MudButton>
+                </MudTooltip>
+
+                <MudDivider Vertical="true" FlexItem="true"/>
+
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Undo")"><MudIconButton Icon="@MDIIcons.Filled.Undo" Size="Size.Small" Disabled="!_canUndo" OnClick="@(() => Js("undo"))"/></MudTooltip>
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Redo")"><MudIconButton Icon="@MDIIcons.Filled.Redo" Size="Size.Small" Disabled="!_canRedo" OnClick="@(() => Js("redo"))"/></MudTooltip>
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomIn")"><MudIconButton Icon="@Icons.Material.Filled.ZoomIn" Size="Size.Small" OnClick="@(() => Js("zoomIn"))"/></MudTooltip>
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomOut")"><MudIconButton Icon="@Icons.Material.Filled.ZoomOut" Size="Size.Small" OnClick="@(() => Js("zoomOut"))"/></MudTooltip>
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Fit")"><MudIconButton Icon="@MDIIcons.Filled.FitToScreen" Size="Size.Small" OnClick="@(() => Js("fit"))"/></MudTooltip>
+
+                <MudDivider Vertical="true" FlexItem="true"/>
+
+                <MudMenu Label="@PlanMenuLabel" Variant="Variant.Outlined" Size="Size.Small" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
+                    <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="NewPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.New")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FolderOpen" OnClick="OpenPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Open")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ContentSave" OnClick="@(() => SaveAsync(false))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Save")</MudMenuItem>
+                    @if (_savedPlan is not null)
+                    {
+                        <MudMenuItem Icon="@MDIIcons.Filled.ContentDuplicate" OnClick="@(() => SaveAsync(true))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Duplicate")</MudMenuItem>
+                    }
+                    <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
+                </MudMenu>
+
+                <MudMenu Label="@LevelLabel(_level)" Variant="Variant.Outlined" Size="Size.Small" StartIcon="@MDIIcons.Filled.Layers" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
+                    @for (var i = 0; i < _document.Levels.Count; i++)
+                    {
+                        var k = i;
+                        <MudMenuItem Icon="@(k == _level ? Icons.Material.Filled.RadioButtonChecked : Icons.Material.Filled.RadioButtonUnchecked)" OnClick="@(() => Js("setLevel", k))">@LevelLabel(k) (h@(_document.LevelHeight(k)))</MudMenuItem>
+                    }
+                    <MudDivider/>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Add" Disabled="@(_document.Levels.Count >= PlanValidator.MaxLevels)" OnClick="@(() => Js("addLevel"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Add")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level == 0)" OnClick="@(() => Js("copyWallsFromBelow"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromBelow")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.Pencil" OnClick="EditLevelAsync">@LocalizationService.GetTranslation("BuildingPlanner.Level.Edit")</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" Disabled="@(_document.Levels.Count <= 1)" OnClick="@(() => Js("removeLevel", _level))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Remove")</MudMenuItem>
+                </MudMenu>
+                @if (_level > 0 || _level + 1 < _document.Levels.Count)
+                {
+                    <MudTooltip Placement="Placement.Bottom">
+                        <ChildContent>
+                            <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Info" Size="Size.Small" Class="d-flex align-center"/>
+                        </ChildContent>
+                        <TooltipContent>
+                            <div class="bp-legend">
+                                @if (_level > 0)
+                                {
+                                    <span><i class="bp-swatch bp-swatch-slab"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Slab")</span>
+                                    <span><i class="bp-swatch bp-swatch-low"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.LowCeiling")</span>
+                                    <span><i class="bp-swatch bp-swatch-missing"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Missing")</span>
+                                    <span><i class="bp-swatch bp-swatch-hole"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Hole")</span>
+                                    <span><i class="bp-swatch bp-swatch-watermark"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Watermark")</span>
+                                }
+                                @if (_level + 1 < _document.Levels.Count)
+                                {
+                                    <span><i class="bp-swatch bp-swatch-hole-above"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.HoleAbove")</span>
+                                }
+                            </div>
+                        </TooltipContent>
+                    </MudTooltip>
+                }
+
+                <MudSpacer/>
+
+                <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")" Class="flex-no-grow" Style="width: 110px;"/>
+                <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")" Style="width: 190px;">
+                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Terrain")</MudSelectItem>
+                    @foreach (var m in _clientCatalog!.Materials)
+                    {
+                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect T="string" Value="@(_document.Defaults.CeilingMaterial ?? "")" ValueChanged="OnCeilingMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")" Style="width: 190px;">
+                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.None")</MudSelectItem>
+                    @foreach (var m in _clientCatalog!.Materials)
+                    {
+                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudNumericField T="int" Value="@_document.Analysis.Residents" ValueChanged="OnResidentsChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Residents")" Class="flex-no-grow" Style="width: 100px;"/>
+                <MudNumericField T="float?" Value="@_document.Analysis.TargetHousing" ValueChanged="OnTargetChanged" Min="0" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Target")" Class="flex-no-grow" Style="width: 175px;"/>
+
+            </MudStack>
+        </MudPaper>
+
+        <div class="bp-body">
+            <MudPaper Class="bp-side bp-left" Elevation="1">
+                <MudTabs Elevation="0" Rounded="false" PanelClass="pa-1" MinimumTabWidth="40px" Position="Position.Top" ApplyEffectsToContainer="true" ShowToolTips="true" Class="bp-tabs">
+                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Tables")" Icon="@Icons.Material.Filled.Handyman">
+                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "table"))
+                    </MudTabPanel>
+                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Furniture")" Icon="@MDIIcons.Filled.Sofa">
+                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "housing"))
+                    </MudTabPanel>
+                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Doors")" Icon="@MDIIcons.Filled.DoorClosed">
+                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "door"))
+                    </MudTabPanel>
+                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Others")" Icon="@Icons.Material.Filled.Category">
+                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "other"))
+                    </MudTabPanel>
+                </MudTabs>
+            </MudPaper>
+
+            <div class="bp-canvas-wrap">
+                <div id="@_containerId" class="bp-canvas"></div>
+                <div class="bp-hint">
+                    <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Hint")</MudText>
+                </div>
+            </div>
+
+            <MudPaper Class="bp-side bp-right" Elevation="1">
+                <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
+                                          OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
+                <MudDivider/>
+                <BuildingPlannerResults Document="_document" Analysis="_analysis" Catalog="_clientCatalog" OnFocusIssue="FocusIssueAsync"/>
+            </MudPaper>
+        </div>
+    </div>
+}
+
+@code {
+    private sealed record ToolDef(string Key, string Icon);
+
+    private static readonly ToolDef[] Tools =
+    [
+        new("select", MDIIcons.Filled.CursorDefault),
+        new("pan", MDIIcons.Filled.HandBackRight),
+        new("wall", MDIIcons.Filled.Wall),
+        new("floor", MDIIcons.Filled.VectorSquare),
+        new("room", MDIIcons.Filled.Home),
+        new("object", MDIIcons.Filled.Sofa),
+        new("erase", MDIIcons.Filled.Eraser),
+        new("hole", MDIIcons.Filled.Stairs),
+    ];
+
+    private const int AnalyzeDebounceMs = 150;
+
+    private readonly string _containerId = "bp-canvas-" + Guid.NewGuid().ToString("N");
+    private DotNetObjectReference<BuildingPlannerPage>? _selfRef;
+    private IDisposable? _locationChangingRegistration;
+    private CancellationTokenSource? _analyzeCts;
+
+    private bool _loading = true;
+    private bool _jsInitialized;
+    private Catalog? _catalog;
+    private ClientCatalog? _clientCatalog;
+    private PlanDocument _document = PlanDocument.Empty();
+    private AnalysisResult? _analysis;
+    private BuildingPlan? _savedPlan;
+
+    private string _tool = "select";
+    private string? _material;
+    private string? _objectType;
+    private int _rotation;
+    private int _level;
+    private bool _canUndo, _canRedo, _dirty;
+    private string? _selectionKind, _selectionId;
+    private string _objectSearch = "";
+
+    protected override void OnInitialized()
+    {
+        ContextService.OnContextChanged += OnContextChanged;
+        _locationChangingRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAsync();
+            return;
+        }
+
+        if (!_loading && !_jsInitialized && _clientCatalog is not null)
+        {
+            await InitializeJsAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        if (!BuildingPlannerService.HasBuildingData || ContextService.CurrentServer is null || ContextService.CurrentUserServer is null)
+        {
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+
+        ContextService.CurrentServerData ??= await ServerDbService.GetServerWithData(ContextService.CurrentServer.Id);
+        var serverData = ContextService.CurrentServerData;
+
+        // Bumps de tier des modules : ceux installés dans le contexte de données par défaut du joueur.
+        DataContext? dataContext = null;
+        var defaultContext = ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => d.IsDefault && !d.IsShoppingList) ?? ContextService.CurrentUserServer.DataContexts.FirstOrDefault(d => !d.IsShoppingList);
+        if (defaultContext is not null)
+        {
+            try { dataContext = await DataContextDbService.GetDataContextWithData(defaultContext.Id, serverData); }
+            catch (Exception) { dataContext = null; }
+        }
+
+        _catalog = BuildingPlannerService.GetCatalog(serverData, dataContext);
+        _clientCatalog = BuildingPlannerService.GetClientCatalog(_catalog, serverData);
+        _material ??= _clientCatalog.Materials.FirstOrDefault(m => m.IsRoomMaterialOption)?.Name ?? _clientCatalog.Materials.FirstOrDefault()?.Name;
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task InitializeJsAsync()
+    {
+        _selfRef ??= DotNetObjectReference.Create(this);
+        var ok = await JS.InvokeAsync<bool>("ecoBuildingPlanner.init", _containerId, _selfRef, new { roomLabel = LocalizationService.GetTranslation("BuildingPlanner.RoomDefaultName") });
+        if (!ok) return;
+        _jsInitialized = true;
+
+        await JS.InvokeVoidAsync("ecoBuildingPlanner.setCatalog", _containerId, _clientCatalog);
+        await JS.InvokeVoidAsync("ecoBuildingPlanner.setMaterial", _containerId, _material);
+        await JS.InvokeVoidAsync("ecoBuildingPlanner.setBeforeUnloadGuard", _containerId, true);
+
+        // Chargement : ?plan= (URL) > ?id= (sauvegardé) > dernier plan ouvert (sous le brouillon local s'il existe) > brouillon local > vide.
+        string? initialJson = null;
+        BuildingPlan? plan = null;
+        var query = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+        var hasLink = query.TryGetValue("plan", out var encoded);
+        var fromUrl = hasLink ? PlanUrlCodec.TryDecode(encoded.ToString()) : null;
+        if (hasLink && fromUrl is null) Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.LinkInvalid"), Severity.Warning);
+        var linkedId = query.TryGetValue("id", out var idValue) && Guid.TryParse(idValue.ToString(), out var parsedId) ? parsedId : (Guid?)null;
+
+        // Un lien alors qu'un brouillon non sauvegardé existe sur ce serveur : demander avant de l'écraser ; refus → flux sans lien.
+        if ((fromUrl is not null || linkedId is not null) && await JS.InvokeAsync<bool>("ecoBuildingPlanner.hasDraft", _containerId) && !await ConfirmDiscardAsync())
+        {
+            fromUrl = null;
+            linkedId = null;
+            Navigation.NavigateTo("/building-planner", replace: true);
+        }
+
+        if (fromUrl is not null)
+        {
+            initialJson = PlanDocumentJson.Serialize(fromUrl);
+        }
+        else if (linkedId is { } id)
+        {
+            plan = await BuildingPlannerService.LoadPlanAsync(id);
+            if (plan is not null) initialJson = plan.Document;
+            else Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.PlanNotFound"), Severity.Warning);
+        }
+        else if (Guid.TryParse(await LocalStorageService.GetItem(LastPlanKey), out var lastId))
+        {
+            plan = await BuildingPlannerService.LoadPlanAsync(lastId);
+            if (plan is null) await LocalStorageService.RemoveItem(LastPlanKey);
+            else
+            {
+                // Le brouillon local prime (modifications en cours), _savedPlan reste renseigné pour que Enregistrer mette à jour le bon plan.
+                if (!await JS.InvokeAsync<bool>("ecoBuildingPlanner.hasDraft", _containerId)) initialJson = plan.Document;
+                Navigation.NavigateTo($"/building-planner?id={plan.Id}", replace: true);
+            }
+        }
+        // Un plan d'un autre joueur n'est pas mémorisé : il ne doit pas se rouvrir d'office aux visites suivantes.
+        if (plan is not null && BuildingPlannerService.OwnsPlan(plan))
+        {
+            _savedPlan = plan;
+            await RememberLastPlanAsync(plan.Id);
+        }
+
+        var fromDraft = await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, initialJson, true);
+        if (fromDraft) Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.DraftRestored"), Severity.Info);
+    }
+
+    // ---- Callbacks JS ---------------------------------------------------------------------------------
+
+    [JSInvokable]
+    public void OnPlanChanged(string json, bool canUndo, bool canRedo, bool dirty)
+    {
+        _canUndo = canUndo;
+        _canRedo = canRedo;
+        _dirty = dirty;
+        var parsed = PlanDocumentJson.TryParse(json);
+        if (parsed is not null) _document = parsed;
+        ScheduleAnalysis();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnSelectionChanged(string? kind, string? id)
+    {
+        _selectionKind = kind;
+        _selectionId = id;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnToolChanged(string tool)
+    {
+        _tool = tool;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnRotationChanged(int rotation)
+    {
+        _rotation = rotation;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnLevelChanged(int level)
+    {
+        _level = level;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnSaveRequested() => await SaveAsync(false);
+
+    // ---- Analyse ------------------------------------------------------------------------------------------
+
+    private void ScheduleAnalysis()
+    {
+        _analyzeCts?.Cancel();
+        _analyzeCts?.Dispose();
+        var cts = new CancellationTokenSource();
+        _analyzeCts = cts;
+        _ = RunAnalysisAsync(cts.Token);
+    }
+
+    private async Task RunAnalysisAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(AnalyzeDebounceMs, token);
+            if (_catalog is null) return;
+            var doc = _document;
+            var result = await Task.Run(() => PlanAnalyzer.Analyze(doc, _catalog), token);
+            if (token.IsCancellationRequested) return;
+            _analysis = result;
+            await InvokeAsync(async () =>
+            {
+                if (_jsInitialized) await JS.InvokeVoidAsync("ecoBuildingPlanner.setAnalysis", _containerId, result);
+                StateHasChanged();
+            });
+        }
+        catch (OperationCanceledException) { }
+        catch (JSDisconnectedException) { }
+        catch (Exception e)
+        {
+            Console.WriteLine($"BuildingPlanner analysis failed: {e}");
+        }
+    }
+
+    // ---- Outils / catalogue -----------------------------------------------------------------------------------
+
+    private async Task Js(string method, params object?[] args)
+    {
+        if (!_jsInitialized) return;
+        var all = new object?[args.Length + 1];
+        all[0] = _containerId;
+        Array.Copy(args, 0, all, 1, args.Length);
+        try { await JS.InvokeVoidAsync($"ecoBuildingPlanner.{method}", all); }
+        catch (JSDisconnectedException) { }
+    }
+
+    private async Task SetTool(string tool)
+    {
+        _tool = tool;
+        await Js("setTool", tool);
+    }
+
+    private async Task OnMaterialChanged(string material)
+    {
+        _material = material;
+        await Js("setMaterial", material);
+        if (_tool is not ("wall" or "floor")) await SetTool("wall");
+    }
+
+    private async Task SelectObjectType(ClientObject obj)
+    {
+        _objectType = obj.Name;
+        _tool = "object";
+        await Js("setObject", obj.Name);
+    }
+
+    private async Task RotateAsync()
+    {
+        _rotation = (_rotation + 1) & 3;
+        await Js("setRotation", _rotation);
+    }
+
+    private async Task OnWallHeightChanged(int value) => await Js("setDefaults", new { wallHeight = Math.Clamp(value, 1, 50) });
+    private async Task OnFloorMaterialChanged(string value) => await Js("setDefaults", new { floorMaterial = string.IsNullOrEmpty(value) ? null : value });
+    private async Task OnCeilingMaterialChanged(string value) => await Js("setDefaults", new { ceilingMaterial = string.IsNullOrEmpty(value) ? null : value });
+    private async Task OnResidentsChanged(int value) => await Js("setAnalysisOptions", new { residents = Math.Clamp(value, 1, 50) });
+    private async Task OnTargetChanged(float? value) => await Js("setAnalysisOptions", new { targetHousing = value });
+
+    private async Task UpdateRoomAsync(PlanRoom room) => await Js("updateRoom", PlanDocumentJson.SerializePart(room));
+    private async Task UpdateObjectAsync(PlanObject obj) => await Js("updateObject", PlanDocumentJson.SerializePart(obj));
+
+    private string LevelLabel(int level)
+    {
+        var name = level < _document.Levels.Count ? _document.Levels[level].Name : "";
+        return string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Level.Default", level.ToString()) : name;
+    }
+
+    private async Task EditLevelAsync()
+    {
+        if (_level >= _document.Levels.Count) return;
+        var level = _document.Levels[_level];
+        var parameters = new DialogParameters<BuildingPlanLevelDialog>
+        {
+            { d => d.Name, level.Name }, { d => d.Height, level.Height },
+            { d => d.DefaultName, LocalizationService.GetTranslation("BuildingPlanner.Level.Default", _level.ToString()) }, { d => d.DefaultHeight, _document.Defaults.WallHeight },
+        };
+        var dialog = await DialogService.ShowAsync<BuildingPlanLevelDialog>(LocalizationService.GetTranslation("BuildingPlanner.Level.Edit"), parameters, new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not (string name, int height)) return;
+        // height 0 = hauteur par défaut (évite de dépendre de la sérialisation des null vers le JS).
+        await Js("updateLevel", _level, new { name, height });
+    }
+
+    private async Task FocusIssueAsync(PlanIssue issue)
+    {
+        if (issue.Level is { } level) await Js("setLevel", level);
+        if (issue.ObjectId is not null) await Js("selectObject", issue.ObjectId);
+        else if (issue.RoomId is not null) await Js("selectRoom", issue.RoomId);
+        if (issue.Cell is not null) await Js("focusCell", issue.Cell.X, issue.Cell.Y);
+    }
+
+    private string IconUrl(string name) => $"/assets/eco-icons/{name}.png?serverId={ContextService.CurrentServer?.Id}";
+
+    // Ligne de matériau (icône, libellé, tier) partagée par les sélecteurs matériau / sol / plafond.
+    private RenderFragment MaterialItem(ClientMaterial m) => __builder =>
+    {
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <MudImage Src="@IconUrl(m.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+            <span>@m.Label</span>
+            <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
+        </MudStack>
+    };
+
+    private RenderFragment RenderObjectList(IEnumerable<ClientObject> objects) => __builder =>
+    {
+        var filtered = objects.Where(o => string.IsNullOrWhiteSpace(_objectSearch) || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+        <MudTextField T="string" Value="@_objectSearch" ValueChanged="@(v => _objectSearch = v)" Immediate="true" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                      Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-1"/>
+        <div class="bp-object-list">
+            @foreach (var group in filtered.GroupBy(o => o.HousingCategory ?? "").OrderBy(g => g.Key))
+            {
+                @if (filtered.Any(o => o.HousingCategory is not null) && group.Key.Length > 0)
+                {
+                    <MudText Typo="Typo.caption" Class="bp-group-title" Style="@($"color: #{_clientCatalog!.Categories.FirstOrDefault(c => c.Name == group.Key)?.Color ?? "aaaaaa"}")">@group.Key</MudText>
+                }
+                @foreach (var o in group.OrderBy(o => o.Label))
+                {
+                    <div class="@("bp-object-item" + (_objectType == o.Name ? " selected" : ""))" @onclick="@(() => SelectObjectType(o))" title="@o.Name">
+                        <MudImage Src="@IconUrl(o.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="28" Height="28"/>
+                        <div class="bp-object-text">
+                            <div class="bp-object-label">@o.Label</div>
+                            <div class="bp-object-meta">
+                                <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SizeHint")">@o.Size[0]×@o.Size[1]×@o.Size[2]</span>
+                                @if (o.RequiredTier is { } rt) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredTierHint")">T≥@rt.ToString("0.#")</span> }
+                                @if (o.RequiredVolume > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredVolumeHint")">@(o.RequiredVolume) m³</span> }
+                                @if (o.HousingValue is { } hv && hv > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.HousingValueHint")">+@hv.ToString("0.#")</span> }
+                                @if (o.Tier is { } t) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.TierHint")">T@(t)</span> }
+                                @if (o.HasTableSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SurfaceHint")">▭</span> }
+                                @if (o.CanBeOnSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.OnSurfaceHint")">▴</span> }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            @if (filtered.Count == 0)
+            {
+                <MudText Typo="Typo.caption" Class="pa-2">@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Empty")</MudText>
+            }
+        </div>
+    };
+
+    // ---- Plans ----------------------------------------------------------------------------------------------
+
+    private async Task NewPlanAsync()
+    {
+        if (_dirty && !await ConfirmDiscardAsync()) return;
+        _savedPlan = null;
+        await RememberLastPlanAsync(null);
+        await Js("clearDraft");
+        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(PlanDocument.Empty()), true);
+        Navigation.NavigateTo("/building-planner", replace: true);
+    }
+
+    private async Task OpenPlanAsync()
+    {
+        var plans = await BuildingPlannerService.ListPlansAsync();
+        var parameters = new DialogParameters<BuildingPlanListDialog> { { d => d.Plans, plans } };
+        var dialog = await DialogService.ShowAsync<BuildingPlanListDialog>(LocalizationService.GetTranslation("BuildingPlanner.Plan.Open"), parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true });
+        var result = await dialog.Result;
+        if (_savedPlan is not null && plans.All(p => p.Id != _savedPlan.Id))
+        {
+            // Le plan courant a été supprimé depuis le dialogue : il redevient un brouillon non sauvegardé.
+            _savedPlan = null;
+            await RememberLastPlanAsync(null);
+            Navigation.NavigateTo("/building-planner", replace: true);
+            await Js("markDirty");
+        }
+        if (result is null || result.Canceled || result.Data is not BuildingPlan chosen) return;
+        if (_dirty && !await ConfirmDiscardAsync()) return;
+
+        var full = await BuildingPlannerService.LoadPlanAsync(chosen.Id);
+        if (full is null) return;
+        _savedPlan = full;
+        await RememberLastPlanAsync(full.Id);
+        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, full.Document, true);
+        Navigation.NavigateTo($"/building-planner?id={full.Id}", replace: true);
+    }
+
+    // Dernier plan ouvert, mémorisé par serveur pour le rouvrir quand on revient sur la page sans ?id=.
+    private string LastPlanKey => $"BuildingPlanner.LastPlanId.{ContextService.CurrentServer?.Id}";
+
+    private Task RememberLastPlanAsync(Guid? id) => id is { } planId ? LocalStorageService.AddItem(LastPlanKey, planId.ToString()) : LocalStorageService.RemoveItem(LastPlanKey);
+
+    private string PlanMenuLabel => (string.IsNullOrWhiteSpace(_document.Name) ? LocalizationService.GetTranslation("BuildingPlanner.Plan.Untitled") : _document.Name) + (_dirty ? " *" : "");
+
+    private async Task RenameAsync()
+    {
+        var parameters = new DialogParameters<BuildingPlanSaveDialog> { { d => d.Name, _document.Name } };
+        var dialog = await DialogService.ShowAsync<BuildingPlanSaveDialog>(LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename"), parameters, new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not string newName || string.IsNullOrWhiteSpace(newName)) return;
+        newName = newName.Trim();
+        _document.Name = newName;
+        await Js("setName", newName);
+
+        // Plan deja sauvegarde : on persiste le nouveau nom (et l'etat courant) immediatement.
+        if (_savedPlan is not null && BuildingPlannerService.OwnsPlan(_savedPlan))
+        {
+            var latest = await JS.InvokeAsync<string?>("ecoBuildingPlanner.getPlan", _containerId);
+            var doc = PlanDocumentJson.TryParse(latest) ?? _document;
+            doc.Name = newName;
+            _savedPlan = await BuildingPlannerService.SavePlanAsync(_savedPlan, newName, doc);
+            _document = doc;
+            await Js("markSaved");
+        }
+    }
+
+    private async Task SaveAsync(bool saveAs)
+    {
+        var name = _document.Name;
+        if (saveAs || _savedPlan is null || string.IsNullOrWhiteSpace(name))
+        {
+            var proposed = string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Plan.Untitled") : name;
+            if (saveAs) proposed += LocalizationService.GetTranslation("DataContext.CopySuffix");
+            var parameters = new DialogParameters<BuildingPlanSaveDialog> { { d => d.Name, proposed } };
+            var dialog = await DialogService.ShowAsync<BuildingPlanSaveDialog>(LocalizationService.GetTranslation(saveAs ? "BuildingPlanner.Plan.Duplicate" : "BuildingPlanner.Plan.Save"), parameters, new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
+            var result = await dialog.Result;
+            if (result is null || result.Canceled || result.Data is not string chosenName || string.IsNullOrWhiteSpace(chosenName)) return;
+            name = chosenName.Trim();
+        }
+
+        var latest = await JS.InvokeAsync<string?>("ecoBuildingPlanner.getPlan", _containerId);
+        var doc = PlanDocumentJson.TryParse(latest) ?? _document;
+        _savedPlan = await BuildingPlannerService.SavePlanAsync(saveAs ? null : _savedPlan, name, doc);
+        await RememberLastPlanAsync(_savedPlan.Id);
+        _document = doc;
+        await Js("setName", name);
+        await Js("markSaved");
+        Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.Saved", name), Severity.Success);
+        Navigation.NavigateTo($"/building-planner?id={_savedPlan.Id}", replace: true);
+    }
+
+    private async Task ShareAsync()
+    {
+        var latest = await JS.InvokeAsync<string?>("ecoBuildingPlanner.getPlan", _containerId);
+        var doc = PlanDocumentJson.TryParse(latest) ?? _document;
+        var (url, needsSave) = BuildingPlannerService.BuildShareUrl(Navigation.BaseUri, doc, _savedPlan?.Id);
+        if (needsSave)
+        {
+            Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.ShareNeedsSave"), Severity.Info);
+            await SaveAsync(false);
+            if (_savedPlan is null) return;
+            (url, _) = BuildingPlannerService.BuildShareUrl(Navigation.BaseUri, doc, _savedPlan.Id);
+        }
+        if (url is null) return;
+        var parameters = new DialogParameters<BuildingPlanShareDialog> { { d => d.Url, url } };
+        await DialogService.ShowAsync<BuildingPlanShareDialog>(LocalizationService.GetTranslation("BuildingPlanner.Plan.Share"), parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true });
+    }
+
+    private async Task ResizeAsync()
+    {
+        var parameters = new DialogParameters<BuildingPlanResizeDialog> { { d => d.Width, _document.Grid.Width }, { d => d.Depth, _document.Grid.Depth } };
+        var dialog = await DialogService.ShowAsync<BuildingPlanResizeDialog>(LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize"), parameters, new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not (int width, int depth)) return;
+        await Js("resizePlan", width, depth);
+    }
+
+    private async Task<bool> ConfirmDiscardAsync()
+    {
+        try { return await JS.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("BuildingPlanner.ConfirmDiscard")); }
+        catch (JSDisconnectedException) { return true; }
+    }
+
+    private async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (!_dirty) return;
+        if (context.TargetLocation.Contains("/building-planner", StringComparison.OrdinalIgnoreCase)) return;
+        if (!await ConfirmDiscardAsync()) context.PreventNavigation();
+    }
+
+    private void OnContextChanged()
+    {
+        _ = InvokeAsync(async () =>
+        {
+            if (_jsInitialized)
+            {
+                try { await JS.InvokeVoidAsync("ecoBuildingPlanner.dispose", _containerId); } catch (JSDisconnectedException) { }
+                _jsInitialized = false;
+            }
+            _analysis = null;
+            _savedPlan = null;
+            await LoadAsync();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        ContextService.OnContextChanged -= OnContextChanged;
+        _locationChangingRegistration?.Dispose();
+        _analyzeCts?.Cancel();
+        _analyzeCts?.Dispose();
+        if (_jsInitialized)
+        {
+            try { await JS.InvokeVoidAsync("ecoBuildingPlanner.dispose", _containerId); }
+            catch (JSDisconnectedException) { }
+        }
+        _selfRef?.Dispose();
+    }
+}

@@ -567,6 +567,23 @@ public class ItemOrTag: IHasLocalizedName, IHasIconName
     public decimal? RoomMaterialTier { get; set; }
     public decimal? RoomVolume { get; set; }
     public bool RoomRequiresContainment { get; set; }
+
+    // Building planner (export v5). WorldObject* : objets posables ; Block* : blocs de construction.
+    // Occupancy JSON compact : [{"x":0,"y":0,"z":0,"k":"O"}] en axes Eco (Y vertical), k = O (occupé),
+    // W (mur), S (solide), L (eau), N (cellule de contrôle, ne pose rien).
+    public int? WorldObjectTier { get; set; }
+    public bool WorldObjectHasTableSurface { get; set; }
+    public bool WorldObjectCanBeOnSurface { get; set; }
+    public string? WorldObjectAttachedSide { get; set; }
+    public bool WorldObjectMustBeGridAligned { get; set; }
+    public bool WorldObjectWallMounted { get; set; }
+    public bool WorldObjectOccupancyIsDefault { get; set; }
+    public string? WorldObjectOccupancyJson { get; set; }
+    public int? BlockTier { get; set; }
+    public bool? BlockIsWall { get; set; }
+    public bool? BlockIgnoreRooms { get; set; }
+    public bool? BlockHasForms { get; set; }
+    public bool? BlockIsRoomMaterialOption { get; set; }
     [ForeignKey("Server")] public Guid ServerId { get; set; }
 
     public LocalizedField LocalizedName { get; set; }
@@ -928,6 +945,7 @@ public class UserServer
     public User User { get; init; }
     public Server Server { get; init; }
     public List<DataContext> DataContexts { get; init; } = [];
+    public List<BuildingPlan> BuildingPlans { get; init; } = [];
 
     public string GetPseudo()
     {
@@ -1010,6 +1028,21 @@ public class UserAutomationTarget
 
     public DataContext DataContext { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
+}
+
+// Plan de bâtiment du planificateur, propre à un joueur sur un serveur (pas à un DataContext :
+// les prix n'entrent pas en jeu). Document = JSON du contrat BuildingPlanner.Model.PlanDocument.
+public class BuildingPlan
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("UserServer")] public Guid UserServerId { get; set; }
+    public string Name { get; set; } = "";
+    public int SchemaVersion { get; set; } = 1;
+    public string Document { get; set; } = "{}";
+    public DateTimeOffset CreationDateTime { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdateDateTime { get; set; } = DateTimeOffset.UtcNow;
+
+    public UserServer UserServer { get; set; }
 }
 
 public class UserMargin
@@ -1281,6 +1314,12 @@ public class Server
 	// Active le bouton « Planificateur » (mode automatisation de la chaîne de production) pour ce
 	// serveur. Activable uniquement par un super-admin depuis la page d'administration.
 	public bool IsAutomationPlannerEnabled { get; set; } = false;
+
+	// « Planificateur de bâtiment » : disponible seulement si HasBuildingData, c.-à-d. si le dernier
+	// import venait d'un EcoGnomeMod en export v5 (occupancy, tiers, configs).
+	public bool HasBuildingData { get; set; } = false;
+	public string? BuildingConfigJson { get; set; }  // Bloc « Building » de l'export (RoomConfig, constantes), brut.
+	public string? HousingConfigJson { get; set; }   // Bloc « HousingConfig » de l'export (catégories, tiers), brut.
 
     [NotMapped]
     public bool IsEmpty { get; set; }

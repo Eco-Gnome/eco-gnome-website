@@ -1,0 +1,25 @@
+@using ecocraft.BuildingPlanner.Model
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudTextField T="string" @bind-Value="Name" Variant="Variant.Outlined" Placeholder="@DefaultName" Label="@LocalizationService.GetTranslation("BuildingPlanner.Level.Name")"/>
+            <MudNumericField T="int?" @bind-Value="Height" Min="1" Max="@PlanValidator.MaxHeight" Clearable="true" Variant="Variant.Outlined" Placeholder="@DefaultHeight.ToString()"
+                             Label="@LocalizationService.GetTranslation("BuildingPlanner.Level.Height")" HelperText="@LocalizationService.GetTranslation("BuildingPlanner.Level.HeightHelp")"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => MudDialog.Close(DialogResult.Ok((Name?.Trim() ?? "", Height ?? 0))))">@LocalizationService.GetTranslation("Validate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Name { get; set; } = "";
+    [Parameter] public int? Height { get; set; }
+    [Parameter] public string DefaultName { get; set; } = "";
+    [Parameter] public int DefaultHeight { get; set; } = 3;
+}

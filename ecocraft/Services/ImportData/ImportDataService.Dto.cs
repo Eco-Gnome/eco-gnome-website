@@ -1,4 +1,6 @@
-﻿using ecocraft.Models;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using ecocraft.Models;
 
 namespace ecocraft.Services.ImportData;
 
@@ -12,6 +14,42 @@ public partial class ImportDataService
         public required List<TagDto> Tags { get; init; } = [];
         public required List<RecipeDto> Recipes { get; init; } = [];
         public List<ModuleSlotDto> ModuleSlots { get; init; } = [];
+        // v5 : conservés bruts, relus par ecocraft.BuildingPlanner.
+        public JsonElement? Building { get; init; }
+        public JsonElement? HousingConfig { get; init; }
+    }
+
+    // v5 : emprise et drapeaux de placement d'un objet posable (Items[].WorldObject).
+    private class WorldObjectDto
+    {
+        public List<OccupancyCellDto> Occupancy { get; init; } = [];
+        public bool OccupancyIsDefault { get; init; }
+        public int? Tier { get; init; }
+        public bool HasTableSurface { get; init; }
+        public bool CanBeOnSurface { get; init; }
+        public string? RequiredAttachedSide { get; init; }
+        public bool MustBeGridAligned { get; init; }
+        public bool WallMounted { get; init; }
+    }
+
+    private class OccupancyCellDto
+    {
+        public int X { get; init; }
+        public int Y { get; init; }
+        public int Z { get; init; }
+        public string BlockType { get; init; } = "Occupied";
+    }
+
+    // v5 : drapeaux du bloc posé par un item de construction (Items[].BuildingBlock).
+    private class BuildingBlockDto
+    {
+        public int Tier { get; init; }
+        public bool HasTier { get; init; }
+        public bool IsWall { get; init; }
+        public bool IsSolid { get; init; }
+        public bool IgnoreRooms { get; init; }
+        public bool HasForms { get; init; }
+        public bool IsRoomMaterialOption { get; init; }
     }
 
     private class ModuleSlotDto : EcoItemDto
@@ -71,6 +109,8 @@ public partial class ImportDataService
         public string[]? AcceptedFuelTags { get; set; }
         public FoodDto? Food { get; set; }
         public HousingDto? Housing { get; set; }
+        public WorldObjectDto? WorldObject { get; set; }
+        public BuildingBlockDto? BuildingBlock { get; set; }
     }
 
     private class RoomRequirementsDto
@@ -145,13 +185,105 @@ public partial class ImportDataService
 
         return new ImportDataDto
         {
-            Version = SupportedVersion,
+            Version = ExportVersion,
             Skills = serverWithData.Skills.Select(SkillToDto).ToList(),
             Items = serverWithData.ItemOrTags.Where(iot => !iot.IsTag).Select(s => ItemToDto(s, serverWithData.CraftingTables, serverWithData.PluginModules)).ToList(),
             Tags = serverWithData.ItemOrTags.Where(iot => iot.IsTag).Select(TagToDto).ToList(),
             Recipes = serverWithData.Recipes.Select(RecipeToDto).ToList(),
             ModuleSlots = serverWithData.ModuleSlots.Select(ModuleSlotToDto).ToList(),
+            Building = ParseStoredJson(serverWithData.HasBuildingData ? serverWithData.BuildingConfigJson : null),
+            HousingConfig = ParseStoredJson(serverWithData.HasBuildingData ? serverWithData.HousingConfigJson : null),
         };
+    }
+
+    private static JsonElement? ParseStoredJson(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+
+        using var document = JsonDocument.Parse(json);
+        return document.RootElement.Clone();
+    }
+
+    private static WorldObjectDto? WorldObjectToDto(ItemOrTag item)
+    {
+        if (item.WorldObjectOccupancyJson is null) return null;
+
+        return new WorldObjectDto
+        {
+            Occupancy = OccupancyJsonToDto(item.WorldObjectOccupancyJson),
+            OccupancyIsDefault = item.WorldObjectOccupancyIsDefault,
+            Tier = item.WorldObjectTier,
+            HasTableSurface = item.WorldObjectHasTableSurface,
+            CanBeOnSurface = item.WorldObjectCanBeOnSurface,
+            RequiredAttachedSide = item.WorldObjectAttachedSide,
+            MustBeGridAligned = item.WorldObjectMustBeGridAligned,
+            WallMounted = item.WorldObjectWallMounted,
+        };
+    }
+
+    private static BuildingBlockDto? BuildingBlockToDto(ItemOrTag item)
+    {
+        if (item.BlockIsWall is null) return null;
+
+        return new BuildingBlockDto
+        {
+            Tier = item.BlockTier ?? 0,
+            HasTier = item.BlockTier > 0,
+            IsWall = item.BlockIsWall ?? false,
+            IsSolid = item.BlockIsWall ?? false,
+            IgnoreRooms = item.BlockIgnoreRooms ?? false,
+            HasForms = item.BlockHasForms ?? false,
+            IsRoomMaterialOption = item.BlockIsRoomMaterialOption ?? false,
+        };
+    }
+
+    // Stockage compact des cellules d'occupation : [{"x":0,"y":0,"z":0,"k":"O"}], k = O|W|S|L|N.
+    private static string OccupancyDtoToJson(List<OccupancyCellDto> cells)
+    {
+        var compact = cells.Select(c => new OccupancyCellStorage
+        {
+            X = c.X,
+            Y = c.Y,
+            Z = c.Z,
+            K = c.BlockType switch
+            {
+                "Wall" => "W",
+                "Solid" => "S",
+                "Water" => "L",
+                "None" => "N",
+                _ => "O",
+            },
+        });
+
+        return JsonSerializer.Serialize(compact);
+    }
+
+    private static List<OccupancyCellDto> OccupancyJsonToDto(string json)
+    {
+        var cells = JsonSerializer.Deserialize<List<OccupancyCellStorage>>(json) ?? [];
+
+        return cells.Select(c => new OccupancyCellDto
+        {
+            X = c.X,
+            Y = c.Y,
+            Z = c.Z,
+            BlockType = c.K switch
+            {
+                "W" => "Wall",
+                "S" => "Solid",
+                "L" => "Water",
+                "N" => "None",
+                _ => "Occupied",
+            },
+        }).ToList();
+    }
+
+    private class OccupancyCellStorage
+    {
+        [JsonPropertyName("x")] public int X { get; init; }
+        [JsonPropertyName("y")] public int Y { get; init; }
+        [JsonPropertyName("z")] public int Z { get; init; }
+        [JsonPropertyName("k")] public string K { get; init; } = "O";
     }
 
     private static ModuleSlotDto ModuleSlotToDto(ModuleSlot moduleSlot)
@@ -240,6 +372,8 @@ public partial class ImportDataService
                 Volume = item.RoomVolume,
                 RequiresContainment = item.RoomRequiresContainment,
             },
+            WorldObject = WorldObjectToDto(item),
+            BuildingBlock = BuildingBlockToDto(item),
         };
 
         var associatedCraftingTable = craftingTables.FirstOrDefault(c => c.Name == item.Name);

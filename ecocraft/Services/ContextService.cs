@@ -83,6 +83,9 @@ public class ContextService(
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
             server.IsAutomationPlannerEnabled = serverWithUsers.IsAutomationPlannerEnabled;
+            server.HasBuildingData = serverWithUsers.HasBuildingData;
+            server.BuildingConfigJson = serverWithUsers.BuildingConfigJson;
+            server.HousingConfigJson = serverWithUsers.HousingConfigJson;
         }
 
         // Force pages to reload server-scoped data instead of reusing previous server cache.
