@@ -165,7 +165,7 @@
                                 <MudStack Row Justify="Justify.FlexEnd">
                                     <MudText Typo="Typo.body2" Color="Color.Primary">
                                         @(context.Price is not null
-                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
+                                            ? Math.Round((decimal)context.Price! * (context.Element.IsIngredient() ? -1 : 1) * context.Element.Quantity.GetRoundFactorDynamicValue(DataContext), 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $"
                                             : "")
                                     </MudText>
                                 </MudStack>

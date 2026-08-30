@@ -340,14 +340,15 @@ public class DynamicValue
         }
 
         // §3 effect math: multiplicatives compound, flat additives, then Override, then the
-        // AdditivePercent pool applied once against the pre-bonus base, then Chance (expected value).
+        // AdditivePercent pool applied once as a single (1 + sum) multiplier on the running value
+        // (Eco 14.0.3: modules stack multiplicatively with talents), then Chance (expected value).
         var aggregate = CollectBonuses(dataContext, calculationContext);
         var dynamicValue = BaseValue * aggregate.Multiplier + aggregate.Additive;
         if (aggregate.OverrideValue is not null)
         {
             dynamicValue = aggregate.OverrideValue.Value;
         }
-        dynamicValue += BaseValue * aggregate.PercentSum;
+        dynamicValue *= Math.Max(0m, 1m + aggregate.PercentSum);
         dynamicValue += aggregate.ChanceAdditive;
 
         if (dynamicValueCache is not null)
@@ -1107,7 +1108,7 @@ public class UserCraftingTable
                     }
                 }
 
-                var percent = (multiplier - 1m + percentSum) * 100m;
+                var percent = (multiplier * (1m + percentSum) - 1m) * 100m;
                 var values = new List<string>();
                 if (percent != 0m) values.Add(TalentBonus.FormatPercent(percent));
                 if (additive != 0m) values.Add((additive > 0 ? "+" : "") + additive.ToString("0.##"));
