@@ -874,7 +874,8 @@
     "BuildingPlanner": {
         "Title": "Building Planner",
         "NoData": "The building planner needs building data (occupancy, block tiers, room and housing configuration). Update [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) on the server to the latest version (export version 5), then upload the newly generated data file.",
-        "Hint": "1–6: tools · drag: draw · right click: erase · R: rotate · Del: delete · Ctrl+Z/Y: undo/redo · wheel: zoom · Alt+drag or middle click: pan · double click: select · 7: opening · PgUp/PgDn: level",
+        "Hint": "1: select · 2: walls · 3: opening · H: pan · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · Shift+click: place object again · R: rotate · Del: delete object · Ctrl+Z/Y: undo/redo · wheel: zoom · Alt+drag or middle click: pan · double click: select · PgUp/PgDn: level",
+        "Shortcuts": "Shortcuts",
         "RoomDefaultName": "Room",
         "Material": "Material",
         "Rotate": "Rotate (R)",
@@ -889,12 +890,9 @@
         "Tool": {
             "select": "Select / move (1)",
             "pan": "Pan (H)",
-            "wall": "Walls (2) — drag a rectangle, only its outline is built",
-            "floor": "Floor (3) — filled rectangle",
-            "room": "Room (4) — click inside an enclosed area",
-            "object": "Object (5) — pick one in the catalog",
-            "erase": "Erase (6)",
-            "hole": "Opening in the slab (7) — stairwell, hatch (upper levels only)"
+            "wall": "Walls (2) — drag a rectangle, only its outline is built; Shift+drag: filled floor",
+            "hole": "Opening in the slab (3) — stairwell, hatch (not on the lowest level)",
+            "holeDisabled": "Opening in the slab — unavailable on the lowest level: its floor is the terrain"
         },
         "Defaults": {
             "WallHeight": "Wall height",
@@ -913,9 +911,13 @@
         },
         "Level": {
             "Default": "Level {level}",
-            "Add": "Add a level",
-            "CopyWallsFromBelow": "Copy walls from the level below",
+            "Add": "Add a floor",
+            "AddBasement": "Add a basement",
+            "MoveUp": "Move up",
+            "MoveDown": "Move down",
             "Edit": "Rename / height…",
+            "CopyWallsFromBelow": "Copy walls from the level below",
+            "CopyWallsFromAbove": "Copy walls from the level above",
             "Remove": "Remove this level",
             "Name": "Level name",
             "Height": "Height (air layers)",
@@ -934,6 +936,7 @@
             "Untitled": "Untitled plan"
         },
         "Catalog": {
+            "All": "All",
             "Tables": "Tables",
             "Furniture": "Furniture",
             "Doors": "Doors",
@@ -1040,6 +1043,7 @@
             "MissingFloor": "Room « {room} »: {count} cell(s) with no slab below (floor and walls). Paint floor on this level or give the room below a ceiling.",
             "RoomTallerThanLevel": "Room « {room} » (height {height}) is taller than its level (height {level}): its ceiling will sit above the upper slab.",
             "TooManyLevels": "Too many levels (max {max}).",
+            "InvalidGroundIndex": "Invalid ground level ({index}).",
             "BuildingTooHigh": "The building exceeds the maximum height ({max} blocks).",
             "MissingCeilingMaterial": "Room « {room} » has no ceiling material: it will leak.",
             "CeilingConflict": "Room « {room} »: ceiling already built in {material} here — kept as is.",
@@ -1055,7 +1059,7 @@
             "OutOfGrid": "« {type} » goes outside the grid.",
             "Blocked": "« {type} » cannot be placed: blocked by {blocker}.",
             "BlockedByCeiling": "« {type} » ({objectHeight} high) hits the ceiling: the room needs at least {height} air layers.",
-            "NoRoomDefined": "No room defined: place a room seed (Room tool, key 4) inside the walls so the room can be checked.",
+            "NoRoomDefined": "No room detected: enclose an area with walls (Walls tool, key 2) — the room is created automatically.",
             "NoSupportBelow": "« {type} » has nothing solid below it.",
             "RoomTooBig": "Room « {room} » is too big: a cell is more than 70 m from the seed.",
             "NoCeiling": "Room « {room} » leaks: nothing solid above at height {height} (missing wall, ceiling or corner).",

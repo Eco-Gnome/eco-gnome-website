@@ -18,6 +18,7 @@ public static class PlanValidator
         if (doc.Grid.Width < 1 || doc.Grid.Depth < 1 || doc.Grid.Width > MaxGridSide || doc.Grid.Depth > MaxGridSide)
             issues.Add(PlanIssue.Error("GridSizeInvalid", [MaxGridSide.ToString()]));
         if (doc.Levels.Count == 0 || doc.Levels.Count > MaxLevels) { issues.Add(PlanIssue.Error("TooManyLevels", [MaxLevels.ToString()])); return issues; }
+        if (doc.GroundIndex < 0 || doc.GroundIndex >= doc.Levels.Count) issues.Add(PlanIssue.Error("InvalidGroundIndex", [doc.GroundIndex.ToString()]));
         if (doc.Levels.Sum(l => l.Objects.Count) > MaxObjects) issues.Add(PlanIssue.Error("TooManyObjects", [MaxObjects.ToString()]));
         if (doc.Levels.Sum(l => l.Rooms.Count) > MaxRooms) issues.Add(PlanIssue.Error("TooManyRooms", [MaxRooms.ToString()]));
         if (doc.Defaults.WallHeight < 1 || doc.Defaults.WallHeight > MaxHeight) issues.Add(PlanIssue.Error("InvalidHeight", ["defaults.wallHeight"]));

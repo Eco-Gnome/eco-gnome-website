@@ -866,7 +866,8 @@
     "BuildingPlanner": {
         "Title": "Planificateur de bâtiment",
         "NoData": "Le planificateur a besoin des données de construction (emprises, tiers des blocs, configuration des pièces et du housing). Mettez à jour [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) sur le serveur (export version 5), puis importez le nouveau fichier de données.",
-        "Hint": "1–6 : outils · glisser : dessiner · clic droit : gommer · R : rotation · Suppr : supprimer · Ctrl+Z/Y : annuler/rétablir · molette : zoom · Alt+glisser ou clic milieu : déplacer la vue · double-clic : sélectionner · 7 : ouverture · PgUp/PgDn : niveau",
+        "Hint": "1 : sélection · 2 : murs · 3 : ouverture · H : déplacer la vue · les pièces sont créées automatiquement dans les zones fermées par des murs · glisser : dessiner · Maj+glisser (murs) : sol plein · clic droit (maintenu) : gommer au passage · Maj+clic droit glissé : gommer une zone, objets compris · Maj+clic : poser l'objet en série · R : rotation · Suppr : supprimer l'objet · Ctrl+Z/Y : annuler/rétablir · molette : zoom · Alt+glisser ou clic milieu : déplacer la vue · double-clic : sélectionner · PgUp/PgDn : niveau",
+        "Shortcuts": "Raccourcis",
         "RoomDefaultName": "Pièce",
         "Material": "Matériau",
         "Rotate": "Rotation (R)",
@@ -881,12 +882,9 @@
         "Tool": {
             "select": "Sélection / déplacement (1)",
             "pan": "Déplacer la vue (H)",
-            "wall": "Murs (2) — glissez un rectangle, seul son contour est construit",
-            "floor": "Sol (3) — rectangle plein",
-            "room": "Pièce (4) — cliquez dans une zone fermée",
-            "object": "Objet (5) — choisissez-le dans le catalogue",
-            "erase": "Gomme (6)",
-            "hole": "Ouverture dans la dalle (7) — cage d'escalier, trappe (étages seulement)"
+            "wall": "Murs (2) — glissez un rectangle, seul son contour est construit ; Maj+glisser : sol plein",
+            "hole": "Ouverture dans la dalle (3) — cage d'escalier, trappe (pas au niveau le plus bas)",
+            "holeDisabled": "Ouverture dans la dalle — indisponible au niveau le plus bas : son sol est le terrain"
         },
         "Defaults": {
             "WallHeight": "Hauteur des murs",
@@ -905,9 +903,13 @@
         },
         "Level": {
             "Default": "Niveau {level}",
-            "Add": "Ajouter un niveau",
-            "CopyWallsFromBelow": "Copier les murs du niveau inférieur",
+            "Add": "Ajouter un étage",
+            "AddBasement": "Ajouter un sous-sol",
+            "MoveUp": "Monter",
+            "MoveDown": "Descendre",
             "Edit": "Renommer / hauteur…",
+            "CopyWallsFromBelow": "Copier les murs du niveau inférieur",
+            "CopyWallsFromAbove": "Copier les murs du niveau supérieur",
             "Remove": "Supprimer le niveau",
             "Name": "Nom du niveau",
             "Height": "Hauteur (couches d'air)",
@@ -926,6 +928,7 @@
             "Untitled": "Plan sans nom"
         },
         "Catalog": {
+            "All": "Tous",
             "Tables": "Tables",
             "Furniture": "Mobilier",
             "Doors": "Portes",
@@ -1032,6 +1035,7 @@
             "MissingFloor": "Pièce « {room} » : {count} cellule(s) sans dalle dessous (sol et murs). Peignez du sol à cet étage ou donnez un plafond à la pièce du dessous.",
             "RoomTallerThanLevel": "La pièce « {room} » (hauteur {height}) dépasse son niveau (hauteur {level}) : son plafond sera au-dessus de la dalle de l'étage.",
             "TooManyLevels": "Trop de niveaux (max {max}).",
+            "InvalidGroundIndex": "Niveau du sol invalide ({index}).",
             "BuildingTooHigh": "Le bâtiment dépasse la hauteur maximale ({max} blocs).",
             "MissingCeilingMaterial": "La pièce « {room} » n'a pas de matériau de plafond : elle fuira.",
             "CeilingConflict": "Pièce « {room} » : un plafond en {material} existe déjà ici — conservé.",
@@ -1047,7 +1051,7 @@
             "OutOfGrid": "« {type} » sort de la grille.",
             "Blocked": "« {type} » ne peut pas être posé : bloqué par {blocker}.",
             "BlockedByCeiling": "« {type} » ({objectHeight} de haut) touche le plafond : la pièce doit avoir au moins {height} couches d'air.",
-            "NoRoomDefined": "Aucune pièce définie : pose une graine de pièce (outil Pièce, touche 4) à l'intérieur des murs pour qu'elle soit vérifiée.",
+            "NoRoomDefined": "Aucune pièce détectée : entoure une zone avec des murs (outil Murs, touche 2), la pièce est créée automatiquement.",
             "NoSupportBelow": "« {type} » n'a rien de solide dessous.",
             "RoomTooBig": "La pièce « {room} » est trop grande : une cellule est à plus de 70 m de la graine.",
             "NoCeiling": "La pièce « {room} » fuit : rien de solide au-dessus à la hauteur {height} (mur, plafond ou angle manquant).",

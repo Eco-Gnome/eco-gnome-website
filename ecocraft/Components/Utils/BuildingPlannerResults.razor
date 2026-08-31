@@ -228,7 +228,7 @@
         if (entry is null || Document is null) return roomId;
         if (Document.Levels.Count <= 1) return entry.Value.Room.Name;
         var levelName = Document.Levels[entry.Value.Level].Name;
-        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", entry.Value.Level.ToString());
+        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", Document.DisplayNumber(entry.Value.Level).ToString());
         return $"{levelName} · {entry.Value.Room.Name}";
     }
 

@@ -80,12 +80,18 @@ public static class GridBuilder
         foreach (var (id, footprint) in footprints) ctx.RoomFootprints[id] = footprint;
         foreach (var (k, room) in doc.AllRooms()) ctx.RoomLevel[room.Id] = k;
 
-        // Sol du niveau 0 : surcharge par cellule, sinon matériau par défaut, sinon terrain — partout, murs compris.
+        // Sol du niveau 0 : surcharge par cellule où qu'elle soit ; le matériau par défaut ne couvre que les
+        // pièces du niveau 0 (intérieur + anneau de murs, comme dalle/plafond) pour ne compter en matériaux que
+        // le sol réellement nécessaire ; le reste est du terrain (tier 0).
         var defaultFloorIndex = string.IsNullOrWhiteSpace(doc.Defaults.FloorMaterial) ? -1 : ctx.GetOrAddMaterial(doc.Defaults.FloorMaterial);
+        var defaultFloorCells = new HashSet<(int X, int Y)>();
+        if (defaultFloorIndex >= 0)
+            foreach (var room in doc.Levels[0].Rooms)
+                defaultFloorCells.UnionWith(Covered(footprints[room.Id], walls[0]));
         for (var y = 0; y < doc.Grid.Depth; y++)
         for (var x = 0; x < doc.Grid.Width; x++)
         {
-            var materialIndex = floors[0].TryGetValue((x, y), out var m) ? ctx.GetOrAddMaterial(m) : defaultFloorIndex;
+            var materialIndex = floors[0].TryGetValue((x, y), out var m) ? ctx.GetOrAddMaterial(m) : defaultFloorCells.Contains((x, y)) ? defaultFloorIndex : -1;
             grid.Set(new Vec3i(x, 0, y), materialIndex < 0 ? Voxel.Terrain : new Voxel { Kind = VoxelKind.Block, MaterialIndex = materialIndex, ObjectIndex = -1, IsFloor = true });
         }
 

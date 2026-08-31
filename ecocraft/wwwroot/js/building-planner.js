@@ -3,8 +3,10 @@
 // Blazor analyse (règles du jeu) et renvoie le résultat, affiché ici en surimpression.
 // Axes : x → colonne, y → ligne (Eco Z) ; z = hauteur (Eco Y). Le plan est une pile de niveaux ; un seul est
 // affiché et édité à la fois (st.level), avec les murs du niveau inférieur en filigrane et la couverture de la
-// dalle (sol peint, plafond du dessous, ouverture). L'aperçu des pièces (flood fill 2D 4-connexe) est indicatif :
-// seule l'analyse C# connaît les diagonales, arêtes vides et plafonds.
+// dalle (sol peint, plafond du dessous, ouverture). Les pièces sont détectées automatiquement : toute zone
+// 4-connexe fermée par des murs porte une pièce (reconcileRooms) ; la graine reste un détail interne conservé
+// pour le schéma et l'analyse C#. L'aperçu des pièces (flood fill 2D 4-connexe) est indicatif : seule
+// l'analyse C# connaît les diagonales, arêtes vides et plafonds.
 window.ecoBuildingPlanner = (function () {
     'use strict';
 
@@ -26,6 +28,7 @@ window.ecoBuildingPlanner = (function () {
             grid: { width: width || 25, depth: depth || 20 },
             defaults: { wallHeight: 3, floorMaterial: null, ceilingMaterial: null },
             levels: [emptyLevel()],
+            groundIndex: 0,
             analysis: { residents: 1, targetHousing: null, propertyType: 'Residence' },
         };
     }
@@ -46,6 +49,7 @@ window.ecoBuildingPlanner = (function () {
             l.walls = l.walls || {}; l.floors = l.floors || {}; l.holes = l.holes || {};
             l.rooms = l.rooms || []; l.objects = l.objects || [];
         });
+        plan.groundIndex = Math.max(0, Math.min(plan.levels.length - 1, plan.groundIndex || 0));
         plan.schemaVersion = 2;
         return plan;
     }
@@ -185,6 +189,16 @@ window.ecoBuildingPlanner = (function () {
         st.dotnetRef.invokeMethodAsync('OnLevelChanged', st.level).catch(function () { });
     }
 
+    // Ajoute au niveau affiché les murs du niveau source qui n'y sont pas (matériau seul), sans rien écraser.
+    function copyWallsFrom(st, source) {
+        const level = cur(st);
+        const missing = Object.keys(source.walls).filter(function (k) { return !level.walls[k]; });
+        if (!missing.length) return;
+        pushHistory(st);
+        missing.forEach(function (k) { level.walls[k] = { material: source.walls[k].material }; });
+        commit(st, 'copyWalls');
+    }
+
     // Couverture de la dalle du niveau affiché (étages seulement) : sol peint > plafond des pièces du dessous
     // (empreinte + murs adjacents, si leur plafond est à la hauteur du niveau) ; les ouvertures restent vides.
     // « low » : cellules d'une pièce du dessous dont le plafond est plus bas que le niveau (vide sous la dalle).
@@ -221,6 +235,7 @@ window.ecoBuildingPlanner = (function () {
     function commit(st, label) {
         st.dirty = true;
         st.staticDirty = true;
+        reconcileRooms(st);
         recomputeFootprints(st);
         saveDraft(st);
         notifyPlan(st);
@@ -240,6 +255,10 @@ window.ecoBuildingPlanner = (function () {
         if (!st.dotnetRef) return;
         st.dotnetRef.invokeMethodAsync('OnToolChanged', st.tool).catch(function () { });
     }
+    function notifyObjectType(st) {
+        if (!st.dotnetRef) return;
+        st.dotnetRef.invokeMethodAsync('OnObjectTypeChanged', st.objectType).catch(function () { });
+    }
 
     function draftKey(st) { return 'ecoBuildingPlanner.draft.' + (st.catalog.serverId || 'default'); }
     function saveDraft(st) { try { localStorage.setItem(draftKey(st), JSON.stringify(st.plan)); } catch (e) { /* quota / privé */ } }
@@ -247,6 +266,97 @@ window.ecoBuildingPlanner = (function () {
     function clearDraft(st) { try { localStorage.removeItem(draftKey(st)); } catch (e) { } }
 
     // ---- Pièces (aperçu 2D) ---------------------------------------------------------------------------
+
+    // Détection automatique des pièces : toute zone 4-connexe fermée par des murs (sans contact avec le
+    // bord de la grille) porte exactement une pièce. Une pièce existante dont la graine reste dans une zone
+    // garde id/nom/réglages (en cas de fusion, la première — ordre de création — gagne) ; une zone orpheline
+    // reçoit une pièce neuve (graine au centroïde) ; le reste est supprimé. Mêmes règles de blocage que
+    // recomputeFootprints et GridBuilder.FloodFill2D côté C# : les murs seulement.
+    // Appelé par commit et setPlanInternal — PAS par restorePlan : undo/redo restaurent la liste exacte.
+    const MIN_ROOM_CELLS = 1;   // taille minimale d'une zone pour créer une pièce (1 = toutes)
+    const MAX_ROOMS = 200;      // = PlanValidator.MaxRooms (Error bloquante côté C#)
+
+    function nextRoomNumber(st) {
+        const label = (st.options.roomLabel || 'Room') + ' ';
+        let max = 0;
+        st.plan.levels.forEach(function (level) {
+            level.rooms.forEach(function (room) {
+                if (!room.name || room.name.indexOf(label) !== 0) return;
+                const suffix = room.name.slice(label.length);
+                const n = parseInt(suffix, 10);
+                if (!isNaN(n) && String(n) === suffix && n > max) max = n;
+            });
+        });
+        return max + 1;
+    }
+
+    function reconcileRooms(st) {
+        const W = st.plan.grid.width, D = st.plan.grid.depth;
+        let total = st.plan.levels.reduce(function (a, l) { return a + l.rooms.length; }, 0);
+        let nextNum = 0;   // calculé paresseusement, seulement si une pièce est créée
+
+        st.plan.levels.forEach(function (level) {
+            // labels : 0 libre, -1 mur, -2 extérieur, n > 0 région fermée n.
+            const labels = new Int32Array(W * D);
+            for (const k in level.walls) {
+                const c = parseKey(k);
+                if (c.x >= 0 && c.y >= 0 && c.x < W && c.y < D) labels[c.y * W + c.x] = -1;
+            }
+            const stack = [];
+            function flood(start, lbl) {
+                labels[start] = lbl;
+                stack.push(start);
+                const rg = lbl > 0 ? { cells: [], sx: 0, sy: 0, count: 0 } : null;
+                while (stack.length) {
+                    const i = stack.pop();
+                    const x = i % W, y = (i / W) | 0;
+                    if (rg) { rg.cells.push(i); rg.sx += x; rg.sy += y; rg.count++; }
+                    if (x > 0 && labels[i - 1] === 0) { labels[i - 1] = lbl; stack.push(i - 1); }
+                    if (x < W - 1 && labels[i + 1] === 0) { labels[i + 1] = lbl; stack.push(i + 1); }
+                    if (y > 0 && labels[i - W] === 0) { labels[i - W] = lbl; stack.push(i - W); }
+                    if (y < D - 1 && labels[i + W] === 0) { labels[i + W] = lbl; stack.push(i + W); }
+                }
+                return rg;
+            }
+            for (let x = 0; x < W; x++) {
+                if (labels[x] === 0) flood(x, -2);
+                if (labels[(D - 1) * W + x] === 0) flood((D - 1) * W + x, -2);
+            }
+            for (let y = 0; y < D; y++) {
+                if (labels[y * W] === 0) flood(y * W, -2);
+                if (labels[y * W + W - 1] === 0) flood(y * W + W - 1, -2);
+            }
+            const regions = [];
+            for (let i = 0; i < W * D; i++) if (labels[i] === 0) regions.push(flood(i, regions.length + 1));
+
+            const claimed = new Array(regions.length).fill(false);
+            const kept = [];
+            level.rooms.forEach(function (room) {
+                const x = room.seed.x, y = room.seed.y;
+                const lbl = x >= 0 && y >= 0 && x < W && y < D ? labels[y * W + x] : -2;
+                if (lbl > 0 && !claimed[lbl - 1]) { claimed[lbl - 1] = true; kept.push(room); }
+                else total--;
+            });
+
+            regions.forEach(function (rg, i) {
+                if (claimed[i] || rg.count < MIN_ROOM_CELLS || total >= MAX_ROOMS) return;
+                if (!nextNum) nextNum = nextRoomNumber(st);
+                // Graine au plus près du centroïde (déterministe ; loin des bords → pas de faux RoomTooBig).
+                const cx = rg.sx / rg.count, cy = rg.sy / rg.count;
+                let best = rg.cells[0], bestD = Infinity;
+                rg.cells.forEach(function (idx) {
+                    const dx = idx % W - cx, dy = ((idx / W) | 0) - cy;
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; best = idx; }
+                });
+                kept.push({ id: uid('r'), name: (st.options.roomLabel || 'Room') + ' ' + (nextNum++), seed: { x: best % W, y: (best / W) | 0 }, ceilingMaterial: null, lockCategory: null });
+                total++;
+            });
+            level.rooms = kept;
+        });
+
+        if (st.selection && st.selection.kind === 'room' && !findRoom(st, st.selection.id)) select(st, null, null);
+    }
 
     function recomputeFootprints(st) {
         st.footprints = {};
@@ -304,10 +414,6 @@ window.ecoBuildingPlanner = (function () {
             if (objectCells(st, o).some(function (c) { return c.x === x && c.y === y; })) found = o;
         });
         return found;
-    }
-
-    function seedAt(st, x, y) {
-        return cur(st).rooms.find(function (r) { return r.seed.x === x && r.seed.y === y; }) || null;
     }
 
     function analysisObject(st, id) {
@@ -632,9 +738,10 @@ window.ecoBuildingPlanner = (function () {
         const hx = st.hover.x, hy = st.hover.y;
         if (st.drag && st.drag.kind === 'rect') {
             const r = normRect(st.drag.start, st.hover);
-            ctx.fillStyle = st.tool === 'erase' ? 'rgba(244,67,54,0.25)' : (st.tool === 'wall' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)');
+            const tool = st.drag.tool;
+            ctx.fillStyle = tool === 'erase' ? 'rgba(244,67,54,0.25)' : (tool === 'wall' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)');
             for (let x = r.x0; x <= r.x1; x++) for (let y = r.y0; y <= r.y1; y++) {
-                const hollow = st.tool === 'wall' && !(x === r.x0 || x === r.x1 || y === r.y0 || y === r.y1);
+                const hollow = tool === 'wall' && !(x === r.x0 || x === r.x1 || y === r.y0 || y === r.y1);
                 if (hollow) continue;
                 const p = toScreen(st, x, y); ctx.fillRect(p.x, p.y, cs, cs);
             }
@@ -656,9 +763,9 @@ window.ecoBuildingPlanner = (function () {
                 ctx.fillRect(p.x + 2, p.y + 2, cs - 4, cs - 4);
             });
             ctx.globalAlpha = 1;
-        } else if (st.tool === 'wall' || st.tool === 'floor' || st.tool === 'hole' || st.tool === 'erase' || st.tool === 'room') {
+        } else if (st.tool === 'wall' || st.tool === 'hole') {
             const p = toScreen(st, hx, hy);
-            ctx.strokeStyle = st.tool === 'erase' ? st.palette.error : st.palette.primary; ctx.lineWidth = 2;
+            ctx.strokeStyle = st.palette.primary; ctx.lineWidth = 2;
             ctx.strokeRect(p.x + 1, p.y + 1, cs - 2, cs - 2);
         }
     }
@@ -694,8 +801,7 @@ window.ecoBuildingPlanner = (function () {
             const cell = toCell(st, e.clientX - rect.left, e.clientY - rect.top);
             const o = objectAt(st, cell.x, cell.y);
             const rid = roomAt(st, cell.x, cell.y);
-            const r = seedAt(st, cell.x, cell.y) || (rid ? findRoom(st, rid).item : null);
-            if (o) select(st, 'object', o.id); else if (r) select(st, 'room', r.id);
+            if (o) select(st, 'object', o.id); else if (rid) select(st, 'room', rid);
         });
     }
 
@@ -715,8 +821,11 @@ window.ecoBuildingPlanner = (function () {
             return;
         }
         if (e.button === 2) {
-            // Clic droit : gomme ponctuelle quel que soit l'outil.
-            eraseAt(st, cell.x, cell.y, true);
+            // Clic droit maintenu : gomme au passage quel que soit l'outil ; Maj+clic droit : gomme rectangulaire.
+            if (e.shiftKey) { st.drag = { kind: 'rect', start: cell, tool: 'erase' }; return; }
+            st.drag = { kind: 'eraseBrush', pushed: false, changed: false, last: cell };
+            brushErase(st, st.drag, cell.x, cell.y);
+            requestRender(st);
             return;
         }
         if (e.button !== 0) return;
@@ -724,9 +833,7 @@ window.ecoBuildingPlanner = (function () {
         switch (st.tool) {
             case 'select': {
                 const o = objectAt(st, cell.x, cell.y);
-                const seed = seedAt(st, cell.x, cell.y);
-                if (seed) { select(st, 'room', seed.id); st.drag = { kind: 'moveRoom', id: seed.id, start: cell, orig: { x: seed.seed.x, y: seed.seed.y }, moved: false }; }
-                else if (o) { select(st, 'object', o.id); st.drag = { kind: 'moveObject', id: o.id, start: cell, orig: { x: o.x, y: o.y }, moved: false }; }
+                if (o) { select(st, 'object', o.id); st.drag = { kind: 'moveObject', id: o.id, start: cell, orig: { x: o.x, y: o.y }, moved: false }; }
                 else {
                     const rid = roomAt(st, cell.x, cell.y);
                     if (rid) select(st, 'room', rid); else select(st, null, null);
@@ -735,18 +842,18 @@ window.ecoBuildingPlanner = (function () {
             }
             case 'hole':
                 if (st.level === 0) break;   // pas d'ouverture dans le sol du rez-de-chaussée
-                st.drag = { kind: 'rect', start: cell };
+                st.drag = { kind: 'rect', start: cell, tool: 'hole' };
                 break;
             case 'wall':
-            case 'floor':
-            case 'erase':
-                st.drag = { kind: 'rect', start: cell };
-                break;
-            case 'room':
-                if (inGrid(st, cell.x, cell.y)) addRoom(st, cell.x, cell.y);
+                // Maj capturé au pointerdown : le relâcher en cours de tracé ne change pas le drag.
+                st.drag = { kind: 'rect', start: cell, tool: e.shiftKey ? 'floor' : 'wall' };
                 break;
             case 'object':
-                if (st.objectType && inGrid(st, cell.x, cell.y)) addObject(st, cell.x, cell.y);
+                if (st.objectType && inGrid(st, cell.x, cell.y)) {
+                    addObject(st, cell.x, cell.y);
+                    // Maj+clic : pose en série ; clic simple : on repose l'outil et on rend la main.
+                    if (!e.shiftKey) { st.objectType = null; notifyObjectType(st); setTool(st, 'select'); }
+                }
                 break;
         }
         requestRender(st);
@@ -773,17 +880,15 @@ window.ecoBuildingPlanner = (function () {
                         st.plan.levels[f.level].objects.forEach(function (child) { if (child.attachedTo === o.id) { child.x += dx; child.y += dy; } });
                     }
                 }
-            } else if (st.drag.kind === 'moveRoom') {
-                const f = findRoom(st, st.drag.id);
-                if (f) {
-                    const r = f.item;
-                    const nx = st.drag.orig.x + (pc.cell.x - st.drag.start.x), ny = st.drag.orig.y + (pc.cell.y - st.drag.start.y);
-                    if ((nx !== r.seed.x || ny !== r.seed.y) && inGrid(st, nx, ny)) {
-                        if (!st.drag.moved) { pushHistory(st); st.drag.moved = true; }
-                        r.seed.x = nx; r.seed.y = ny;
-                        recomputeFootprints(st); st.staticDirty = true;
-                    }
+            } else if (st.drag.kind === 'eraseBrush') {
+                // Interpole entre la dernière cellule et la courante pour ne rien sauter quand le curseur va vite.
+                let x = st.drag.last.x, y = st.drag.last.y;
+                while (x !== pc.cell.x || y !== pc.cell.y) {
+                    if (x !== pc.cell.x) x += pc.cell.x > x ? 1 : -1;
+                    if (y !== pc.cell.y) y += pc.cell.y > y ? 1 : -1;
+                    brushErase(st, st.drag, x, y);
                 }
+                st.drag.last = pc.cell;
             }
         }
         requestRender(st);
@@ -796,9 +901,16 @@ window.ecoBuildingPlanner = (function () {
         if (!drag) return;
         if (drag.kind === 'rect') {
             const r = normRect(drag.start, pc.cell);
-            applyRect(st, r);
-        } else if ((drag.kind === 'moveObject' || drag.kind === 'moveRoom') && drag.moved) {
+            applyRect(st, r, drag.tool);
+        } else if (drag.kind === 'moveObject' && drag.moved) {
             commit(st, 'move');
+        } else if (drag.kind === 'eraseBrush' && drag.changed) {
+            commit(st, 'erase');
+        } else if (drag.kind === 'eraseBrush' && (st.tool !== 'select' || st.objectType)) {
+            // Clic droit dans le vide avec un outil actif : même effet qu'Échap.
+            if (st.objectType) { st.objectType = null; notifyObjectType(st); }
+            setTool(st, 'select');
+            select(st, null, null);
         }
         requestRender(st);
     }
@@ -827,18 +939,19 @@ window.ecoBuildingPlanner = (function () {
         if (ctrl && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(st); return; }
         if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnSaveRequested').catch(function () { }); return; }
         if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(st); return; }
-        if (e.key === 'Escape') { setTool(st, 'select'); select(st, null, null); return; }
+        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); return; }
         if (e.key === 'PageUp') { e.preventDefault(); setLevelInternal(st, st.level + 1); return; }
         if (e.key === 'PageDown') { e.preventDefault(); setLevelInternal(st, st.level - 1); return; }
         if (e.key.toLowerCase() === 'r') { e.preventDefault(); rotateCurrent(st); return; }
-        const tools = { '1': 'select', '2': 'wall', '3': 'floor', '4': 'room', '5': 'object', '6': 'erase', '7': 'hole', 'h': 'pan' };
+        const tools = { '1': 'select', '2': 'wall', '3': 'hole', 'h': 'pan' };
         const t = tools[e.key.toLowerCase()];
+        if (t === 'hole' && st.level === 0) return;   // pas d'ouverture au rez-de-chaussée
         if (t) { setTool(st, t); }
     }
 
     // ---- Édition --------------------------------------------------------------------------------------
 
-    function applyRect(st, r) {
+    function applyRect(st, r, tool) {
         const plan = st.plan;
         const level = cur(st);
         r.x0 = Math.max(0, r.x0); r.y0 = Math.max(0, r.y0);
@@ -848,43 +961,43 @@ window.ecoBuildingPlanner = (function () {
         let changed = false;
         for (let x = r.x0; x <= r.x1; x++) for (let y = r.y0; y <= r.y1; y++) {
             const k = key(x, y);
-            if (st.tool === 'wall') {
+            if (tool === 'wall') {
                 const edge = x === r.x0 || x === r.x1 || y === r.y0 || y === r.y1;
                 if (!edge) continue;
                 if (!st.material) continue;
                 level.walls[k] = { material: st.material, height: level.walls[k] ? level.walls[k].height : null };
                 if (level.walls[k].height === null) delete level.walls[k].height;
                 changed = true;
-            } else if (st.tool === 'floor') {
+            } else if (tool === 'floor') {
                 if (!st.material) continue;
                 level.floors[k] = st.material; delete level.holes[k]; changed = true;
-            } else if (st.tool === 'hole') {
+            } else if (tool === 'hole') {
                 if (level.holes[k]) continue;
                 level.holes[k] = true; delete level.floors[k]; changed = true;
-            } else if (st.tool === 'erase') {
+            } else if (tool === 'erase') {
                 if (level.walls[k]) { delete level.walls[k]; changed = true; }
                 if (level.floors[k]) { delete level.floors[k]; changed = true; }
                 if (level.holes[k]) { delete level.holes[k]; changed = true; }
                 const o = objectAt(st, x, y);
-                if (o && r.x0 === r.x1 && r.y0 === r.y1) { removeObject(st, o.id); changed = true; }
-                const seed = seedAt(st, x, y);
-                if (seed) { level.rooms = level.rooms.filter(function (rr) { return rr.id !== seed.id; }); if (st.selection && st.selection.id === seed.id) select(st, null, null); changed = true; }
+                if (o) { removeObject(st, o.id); changed = true; }
             }
         }
-        if (changed) commit(st, st.tool); else { st.history.pop(); }
+        if (changed) commit(st, tool); else { st.history.pop(); }
     }
 
-    function eraseAt(st, x, y, single) {
+    // Gomme d'une cellule pendant un drag au clic droit : objet en priorité, sinon mur/sol/trou.
+    // L'historique n'est poussé qu'au premier effacement du geste ; le commit arrive au pointerup.
+    function brushErase(st, drag, x, y) {
         const level = cur(st);
         const k = key(x, y);
         const o = objectAt(st, x, y);
-        const seed = seedAt(st, x, y);
-        if (!level.walls[k] && !level.floors[k] && !level.holes[k] && !o && !seed) return;
-        pushHistory(st);
+        if (!level.walls[k] && !level.floors[k] && !level.holes[k] && !o) return;
+        if (!drag.pushed) { pushHistory(st); drag.pushed = true; }
         if (o) removeObject(st, o.id);
-        else if (seed) level.rooms = level.rooms.filter(function (rr) { return rr.id !== seed.id; });
         else { delete level.walls[k]; delete level.floors[k]; delete level.holes[k]; }
-        commit(st, 'erase');
+        drag.changed = true;
+        st.staticDirty = true;
+        recomputeFootprints(st);
     }
 
     function removeObject(st, id) {
@@ -898,25 +1011,6 @@ window.ecoBuildingPlanner = (function () {
         }
         st.plan.levels.forEach(function (level) { level.objects = level.objects.filter(function (o) { return !ids.has(o.id); }); });
         if (st.selection && ids.has(st.selection.id)) select(st, null, null);
-    }
-
-    function removeRoom(st, id) {
-        st.plan.levels.forEach(function (level) { level.rooms = level.rooms.filter(function (r) { return r.id !== id; }); });
-    }
-
-    function addRoom(st, x, y) {
-        const level = cur(st);
-        if (level.walls[key(x, y)]) return;
-        // Une zone fermée n'a qu'une pièce : cliquer dans une zone déjà couverte sélectionne sa pièce.
-        const existing = roomAt(st, x, y);
-        if (existing) { select(st, 'room', existing); return; }
-        pushHistory(st);
-        const n = st.plan.levels.reduce(function (acc, l) { return acc + l.rooms.length; }, 0) + 1;
-        // Pas de hauteur figée : la pièce suit la hauteur de son niveau tant qu'elle n'est pas surchargée.
-        const room = { id: uid('r'), name: (st.options.roomLabel || 'Room') + ' ' + n, seed: { x: x, y: y }, ceilingMaterial: null, lockCategory: null };
-        level.rooms.push(room);
-        commit(st, 'room');
-        select(st, 'room', room.id);
     }
 
     function addObject(st, x, y) {
@@ -945,9 +1039,10 @@ window.ecoBuildingPlanner = (function () {
 
     function deleteSelection(st) {
         if (!st.selection) return;
+        // Les pièces sont auto-détectées : en supprimer une n'aurait aucun effet durable, on désélectionne.
+        if (st.selection.kind !== 'object') { select(st, null, null); return; }
         pushHistory(st);
-        if (st.selection.kind === 'object') removeObject(st, st.selection.id);
-        else removeRoom(st, st.selection.id);
+        removeObject(st, st.selection.id);
         select(st, null, null);
         commit(st, 'delete');
     }
@@ -1000,12 +1095,15 @@ window.ecoBuildingPlanner = (function () {
 
     function setPlanInternal(st, plan, markClean) {
         st.plan = normalizePlan(plan);
-        st.level = 0;
+        st.level = st.plan.groundIndex;   // à l'ouverture, on affiche le niveau du sol (0), pas le sous-sol le plus bas
         st.history = []; st.future = [];
         st.selection = null;
         st.dirty = !markClean;
         st.analysis = null;
         st.staticDirty = true;
+        // Purge/complète les pièces des plans chargés (graine dans un mur, zone ouverte, zone sans pièce)
+        // avant le premier aller-retour d'analyse ; ne touche pas à markClean.
+        reconcileRooms(st);
         recomputeFootprints(st);
         if (markClean) clearDraft(st); else saveDraft(st);   // le brouillon ne reflète que des modifications non sauvegardées
         fit(st);
@@ -1089,11 +1187,38 @@ window.ecoBuildingPlanner = (function () {
             commit(st, 'level');
             notifyLevel(st);
         },
+        // Insère un sous-sol sous la pile : tous les indices glissent de +1, le numéro affiché du sol est préservé.
+        addBasement: function (id) {
+            const st = get(id); if (!st) return;
+            pushHistory(st);
+            st.plan.levels.unshift(emptyLevel());
+            st.plan.groundIndex++;
+            st.level = 0;
+            select(st, null, null);
+            commit(st, 'level');
+            notifyLevel(st);
+        },
+        // Déplace un niveau dans la pile ; groundIndex reste une position (traverser le sol change le signe affiché).
+        moveLevel: function (id, from, to) {
+            const st = get(id); if (!st) return;
+            const n = st.plan.levels.length;
+            if (from === to || from < 0 || from >= n || to < 0 || to >= n) return;
+            pushHistory(st);
+            const lvl = st.plan.levels.splice(from, 1)[0];
+            st.plan.levels.splice(to, 0, lvl);
+            if (st.level === from) st.level = to;
+            else if (from < st.level && to >= st.level) st.level--;
+            else if (from > st.level && to <= st.level) st.level++;
+            commit(st, 'level');
+            notifyLevel(st);
+        },
         removeLevel: function (id, k) {
             const st = get(id); if (!st || st.plan.levels.length <= 1 || k < 0 || k >= st.plan.levels.length) return;
             pushHistory(st);
             st.plan.levels.splice(k, 1);
-            st.level = Math.min(st.level, st.plan.levels.length - 1);
+            if (k < st.plan.groundIndex) st.plan.groundIndex--;
+            st.plan.groundIndex = Math.min(st.plan.groundIndex, st.plan.levels.length - 1);
+            if (k < st.level) st.level--; else st.level = Math.min(st.level, st.plan.levels.length - 1);
             select(st, null, null);
             commit(st, 'level');
             notifyLevel(st);
@@ -1109,12 +1234,12 @@ window.ecoBuildingPlanner = (function () {
         // Ajoute au niveau affiché les murs du niveau inférieur qui n'y sont pas (matériau seul), sans rien écraser.
         copyWallsFromBelow: function (id) {
             const st = get(id); if (!st || st.level === 0) return;
-            const below = st.plan.levels[st.level - 1], level = cur(st);
-            const missing = Object.keys(below.walls).filter(function (k) { return !level.walls[k]; });
-            if (!missing.length) return;
-            pushHistory(st);
-            missing.forEach(function (k) { level.walls[k] = { material: below.walls[k].material }; });
-            commit(st, 'copyWalls');
+            copyWallsFrom(st, st.plan.levels[st.level - 1]);
+        },
+        // Idem depuis le niveau supérieur (utile après l'ajout d'un sous-sol).
+        copyWallsFromAbove: function (id) {
+            const st = get(id); if (!st || st.level >= st.plan.levels.length - 1) return;
+            copyWallsFrom(st, st.plan.levels[st.level + 1]);
         },
         updateRoom: function (id, roomJson) {
             const st = get(id); if (!st) return;
@@ -1165,8 +1290,7 @@ window.ecoBuildingPlanner = (function () {
                 Object.keys(level.walls).forEach(function (k) { if (!inside(k)) delete level.walls[k]; });
                 Object.keys(level.floors).forEach(function (k) { if (!inside(k)) delete level.floors[k]; });
                 Object.keys(level.holes).forEach(function (k) { if (!inside(k)) delete level.holes[k]; });
-                level.rooms = level.rooms.filter(function (r) { return r.seed.x < width && r.seed.y < depth; });
-                level.objects = level.objects.filter(function (o) { return o.x < width && o.y < depth; });
+                    level.objects = level.objects.filter(function (o) { return o.x < width && o.y < depth; });
             });
             commit(st, 'resize');
             fit(st);

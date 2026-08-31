@@ -17,6 +17,7 @@ public sealed class PlanDocument
     public GridSize Grid { get; set; } = new();
     public PlanDefaults Defaults { get; set; } = new();
     public List<PlanLevel> Levels { get; set; } = [];
+    public int GroundIndex { get; set; }          // index du niveau posé au sol ; numéro affiché = k − GroundIndex, index < GroundIndex = sous-sol
     public AnalysisOptions Analysis { get; set; } = new();
 
     // Schéma 1 : un seul niveau, collections à la racine. Relues pour la migration, jamais réécrites.
@@ -33,10 +34,14 @@ public sealed class PlanDocument
         if (Levels.Count == 0)
             Levels.Add(new PlanLevel { Walls = Walls ?? new(), Floors = Floors ?? new(), Rooms = Rooms ?? [], Objects = Objects ?? [] });
         Walls = null; Floors = null; Rooms = null; Objects = null;
+        GroundIndex = Math.Clamp(GroundIndex, 0, Levels.Count - 1);
         SchemaVersion = CurrentSchemaVersion;
     }
 
     public int LevelHeight(int level) => Levels[level].Height ?? Defaults.WallHeight;
+
+    // Numéro de niveau tel qu'affiché à l'utilisateur (négatif pour un sous-sol).
+    public int DisplayNumber(int level) => level - GroundIndex;
 
     // Y de la dalle du niveau : 0 au sol, puis somme des (hauteur + dalle) des niveaux inférieurs.
     public int LevelBaseY(int level)

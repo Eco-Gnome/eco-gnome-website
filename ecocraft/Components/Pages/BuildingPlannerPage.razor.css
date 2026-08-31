@@ -1,8 +1,13 @@
+/* Le layout (MudMainContent pa-6) met 24px de padding autour de la page : on en récupère 16px
+   en haut et en bas (reste 8px), et la hauteur compte l'appbar (64) + 2 × 8 de padding restant.
+   L'ancien calc(100vh - 88px) ignorait le padding bas → 24px de scroll global permanent. */
 .bp-page {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    height: calc(100vh - 88px);
+    margin-top: -16px;
+    margin-bottom: -16px;
+    height: calc(100vh - 80px);
     min-height: 480px;
 }
 
@@ -32,15 +37,24 @@
     min-height: 0;
 }
 
-.bp-side {
+/* .bp-side/.bp-right sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
+   directe ne matche jamais — on ancre sur .bp-body comme pour .bp-table plus bas. Sans ça le
+   panneau droit ne scrolle pas en interne et déborde de la hauteur de page (scroll global). */
+.bp-body ::deep .bp-side {
     min-height: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-.bp-right {
+.bp-body ::deep .bp-right {
     overflow-y: auto;
+}
+
+/* hr.mud-divider a flex-grow:1 chez MudBlazor : dans le panneau devenu flex column,
+   il s'étirait et poussait les résultats tout en bas. */
+.bp-body ::deep .bp-right > .mud-divider {
+    flex-grow: 0;
 }
 
 /* .bp-right est posé sur un MudPaper (composant) : l'isolation CSS ne lui met pas l'attribut de scope,
@@ -64,12 +78,40 @@
     inset: 0;
 }
 
-.bp-hint {
+/* Boutons annuler/zoom + « i » des raccourcis, en surimpression bas-gauche du canvas.
+   pointer-events: none sur le conteneur (le canvas reste cliquable), réactivé sur chaque bouton. */
+.bp-canvas-actions {
     position: absolute;
-    left: 8px;
-    bottom: 4px;
+    left: 6px;
+    bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.35);
     pointer-events: none;
-    opacity: 0.6;
+    z-index: 1;
+}
+
+.bp-canvas-actions ::deep .mud-tooltip-root {
+    pointer-events: auto;
+}
+
+.bp-hint-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 2px 0;
+    font-size: 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Ouverture au rez-de-chaussée : grisée mais pas Disabled, pour que son tooltip explicatif s'affiche. */
+::deep .bp-tools .bp-tool-off {
+    opacity: 0.38;
+    cursor: default;
 }
 
 ::deep .bp-container {
@@ -120,6 +162,11 @@
 .bp-group-count {
     margin-left: 4px;
     opacity: 0.6;
+}
+
+/* Sous-groupes imbriqués de l'onglet « Tous » (portes par tier). */
+.bp-group-children {
+    margin-left: 12px;
 }
 
 .bp-object-item {

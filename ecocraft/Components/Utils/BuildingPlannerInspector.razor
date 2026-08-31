@@ -9,10 +9,7 @@
         var room = roomEntry.Room;
         var analysis = Analysis?.Rooms.FirstOrDefault(r => r.RoomId == room.Id);
         <MudStack Spacing="1">
-            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="OnDeleteSelection"/>
-            </MudStack>
+            <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</MudText>
             <MudTextField T="string" Value="@room.Name" ValueChanged="@(v => RoomChanged(room, r => r.Name = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                           Label="@LocalizationService.GetTranslation("Name")"/>
             <MudStack Row Spacing="1">
@@ -190,7 +187,7 @@
         if (entry is null || Document is null) return roomId;
         if (Document.Levels.Count <= 1) return entry.Value.Room.Name;
         var levelName = Document.Levels[entry.Value.Level].Name;
-        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", entry.Value.Level.ToString());
+        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", Document.DisplayNumber(entry.Value.Level).ToString());
         return $"{levelName} · {entry.Value.Room.Name}";
     }
 

@@ -38,11 +38,30 @@ else
     <div class="bp-page">
         <MudPaper Class="bp-toolbar pa-1" Elevation="1">
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap">
+                <MudMenu Label="@PlanMenuLabel" Variant="Variant.Outlined" Size="Size.Small" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
+                    <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="NewPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.New")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FolderOpen" OnClick="OpenPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Open")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ContentSave" OnClick="@(() => SaveAsync(false))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Save")</MudMenuItem>
+                    @if (_savedPlan is not null)
+                    {
+                        <MudMenuItem Icon="@MDIIcons.Filled.ContentDuplicate" OnClick="@(() => SaveAsync(true))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Duplicate")</MudMenuItem>
+                    }
+                    <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
+                </MudMenu>
+
+                <MudDivider Vertical="true" FlexItem="true"/>
+
                 <MudToggleGroup T="string" Value="@_tool" ValueChanged="SetTool" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-tools">
                     @foreach (var tool in Tools)
                     {
-                        <MudToggleItem T="string" Value="@tool.Key" Disabled="@(tool.Key == "hole" && _level == 0)">
-                            <MudTooltip Text="@LocalizationService.GetTranslation($"BuildingPlanner.Tool.{tool.Key}")">
+                        @* L'ouverture au rez-de-chaussée n'est pas réellement Disabled (un bouton disabled ne reçoit
+                           plus d'événements souris, donc plus de tooltip) : on la grise et SetTool ignore le clic. *@
+                        var disabled = tool.Key == "hole" && _level == 0;
+                        <MudToggleItem T="string" Value="@tool.Key" Class="@(disabled ? "bp-tool-off" : null)">
+                            <MudTooltip Text="@LocalizationService.GetTranslation(disabled ? "BuildingPlanner.Tool.holeDisabled" : $"BuildingPlanner.Tool.{tool.Key}")">
                                 <MudIcon Icon="@tool.Icon" Size="Size.Small"/>
                             </MudTooltip>
                         </MudToggleItem>
@@ -63,39 +82,28 @@ else
 
                 <MudDivider Vertical="true" FlexItem="true"/>
 
-                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Undo")"><MudIconButton Icon="@MDIIcons.Filled.Undo" Size="Size.Small" Disabled="!_canUndo" OnClick="@(() => Js("undo"))"/></MudTooltip>
-                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Redo")"><MudIconButton Icon="@MDIIcons.Filled.Redo" Size="Size.Small" Disabled="!_canRedo" OnClick="@(() => Js("redo"))"/></MudTooltip>
-                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomIn")"><MudIconButton Icon="@Icons.Material.Filled.ZoomIn" Size="Size.Small" OnClick="@(() => Js("zoomIn"))"/></MudTooltip>
-                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomOut")"><MudIconButton Icon="@Icons.Material.Filled.ZoomOut" Size="Size.Small" OnClick="@(() => Js("zoomOut"))"/></MudTooltip>
-                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Fit")"><MudIconButton Icon="@MDIIcons.Filled.FitToScreen" Size="Size.Small" OnClick="@(() => Js("fit"))"/></MudTooltip>
-
-                <MudDivider Vertical="true" FlexItem="true"/>
-
-                <MudMenu Label="@PlanMenuLabel" Variant="Variant.Outlined" Size="Size.Small" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
-                    <MudMenuItem Icon="@Icons.Material.Filled.Add" OnClick="NewPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.New")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.FolderOpen" OnClick="OpenPlanAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Open")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.ContentSave" OnClick="@(() => SaveAsync(false))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Save")</MudMenuItem>
-                    @if (_savedPlan is not null)
-                    {
-                        <MudMenuItem Icon="@MDIIcons.Filled.ContentDuplicate" OnClick="@(() => SaveAsync(true))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Duplicate")</MudMenuItem>
-                    }
-                    <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
-                </MudMenu>
-
                 <MudMenu Label="@LevelLabel(_level)" Variant="Variant.Outlined" Size="Size.Small" StartIcon="@MDIIcons.Filled.Layers" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
-                    @for (var i = 0; i < _document.Levels.Count; i++)
+                    @for (var i = _document.Levels.Count - 1; i >= 0; i--)
                     {
                         var k = i;
-                        <MudMenuItem Icon="@(k == _level ? Icons.Material.Filled.RadioButtonChecked : Icons.Material.Filled.RadioButtonUnchecked)" OnClick="@(() => Js("setLevel", k))">@LevelLabel(k) (h@(_document.LevelHeight(k)))</MudMenuItem>
+                        <MudMenuItem Icon="@(k == _level ? Icons.Material.Filled.RadioButtonChecked : Icons.Material.Filled.RadioButtonUnchecked)" OnClick="@(() => Js("setLevel", k))">
+                            <div class="d-flex align-center" style="min-width: 240px; gap: 2px;">
+                                <span class="mr-auto">@LevelLabel(k) (h@(_document.LevelHeight(k)))</span>
+                                @* stopPropagation : les icônes n'activent pas l'item (pas de changement de niveau) et laissent le menu ouvert *@
+                                <span @onclick:stopPropagation="true" class="d-flex">
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Level.MoveUp")" Disabled="@(k == _document.Levels.Count - 1)" OnClick="@(() => Js("moveLevel", k, k + 1))"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Level.MoveDown")" Disabled="@(k == 0)" OnClick="@(() => Js("moveLevel", k, k - 1))"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Level.Remove")" Disabled="@(_document.Levels.Count <= 1)" OnClick="@(() => Js("removeLevel", k))"/>
+                                </span>
+                            </div>
+                        </MudMenuItem>
                     }
                     <MudDivider/>
                     <MudMenuItem Icon="@Icons.Material.Filled.Add" Disabled="@(_document.Levels.Count >= PlanValidator.MaxLevels)" OnClick="@(() => Js("addLevel"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Add")</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.Add" Disabled="@(_document.Levels.Count >= PlanValidator.MaxLevels)" OnClick="@(() => Js("addBasement"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.AddBasement")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level == 0)" OnClick="@(() => Js("copyWallsFromBelow"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromBelow")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level >= _document.Levels.Count - 1)" OnClick="@(() => Js("copyWallsFromAbove"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromAbove")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Pencil" OnClick="EditLevelAsync">@LocalizationService.GetTranslation("BuildingPlanner.Level.Edit")</MudMenuItem>
-                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" Disabled="@(_document.Levels.Count <= 1)" OnClick="@(() => Js("removeLevel", _level))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Remove")</MudMenuItem>
                 </MudMenu>
                 @if (_level > 0 || _level + 1 < _document.Levels.Count)
                 {
@@ -153,6 +161,9 @@ else
         <div class="bp-body">
             <MudPaper Class="bp-side bp-left" Elevation="1">
                 <MudTabs Elevation="0" Rounded="false" PanelClass="pa-1" MinimumTabWidth="40px" Position="Position.Top" ApplyEffectsToContainer="true" ShowToolTips="true" Class="bp-tabs">
+                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.All")" Icon="@Icons.Material.Filled.Apps">
+                        @RenderObjectList("all")
+                    </MudTabPanel>
                     <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Tables")" Icon="@Icons.Material.Filled.Handyman">
                         @RenderObjectList("table")
                     </MudTabPanel>
@@ -170,8 +181,26 @@ else
 
             <div class="bp-canvas-wrap">
                 <div id="@_containerId" class="bp-canvas"></div>
-                <div class="bp-hint">
-                    <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Hint")</MudText>
+                <div class="bp-canvas-actions">
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Undo")"><MudIconButton Icon="@MDIIcons.Filled.Undo" Size="Size.Small" Disabled="!_canUndo" OnClick="@(() => Js("undo"))"/></MudTooltip>
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Redo")"><MudIconButton Icon="@MDIIcons.Filled.Redo" Size="Size.Small" Disabled="!_canRedo" OnClick="@(() => Js("redo"))"/></MudTooltip>
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomIn")"><MudIconButton Icon="@Icons.Material.Filled.ZoomIn" Size="Size.Small" OnClick="@(() => Js("zoomIn"))"/></MudTooltip>
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.ZoomOut")"><MudIconButton Icon="@Icons.Material.Filled.ZoomOut" Size="Size.Small" OnClick="@(() => Js("zoomOut"))"/></MudTooltip>
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Fit")"><MudIconButton Icon="@MDIIcons.Filled.FitToScreen" Size="Size.Small" OnClick="@(() => Js("fit"))"/></MudTooltip>
+                    <MudTooltip Placement="Placement.Top">
+                        <ChildContent>
+                            <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Info" Size="Size.Small" Class="d-flex align-center"/>
+                        </ChildContent>
+                        <TooltipContent>
+                            <div class="bp-hint-lines">
+                                <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Shortcuts")</MudText>
+                                @foreach (var line in LocalizationService.GetTranslation("BuildingPlanner.Hint").Split(" · "))
+                                {
+                                    <div>@line</div>
+                                }
+                            </div>
+                        </TooltipContent>
+                    </MudTooltip>
                 </div>
             </div>
 
@@ -193,10 +222,6 @@ else
         new("select", MDIIcons.Filled.CursorDefault),
         new("pan", MDIIcons.Filled.HandBackRight),
         new("wall", MDIIcons.Filled.Wall),
-        new("floor", MDIIcons.Filled.VectorSquare),
-        new("room", MDIIcons.Filled.Home),
-        new("object", MDIIcons.Filled.Sofa),
-        new("erase", MDIIcons.Filled.Eraser),
         new("hole", MDIIcons.Filled.Stairs),
     ];
 
@@ -367,6 +392,13 @@ else
     }
 
     [JSInvokable]
+    public void OnObjectTypeChanged(string? objectType)
+    {
+        _objectType = objectType;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
     public void OnRotationChanged(int rotation)
     {
         _rotation = rotation;
@@ -432,6 +464,7 @@ else
 
     private async Task SetTool(string tool)
     {
+        if (tool == "hole" && _level == 0) return;
         _tool = tool;
         await Js("setTool", tool);
     }
@@ -440,7 +473,7 @@ else
     {
         _material = material;
         await Js("setMaterial", material);
-        if (_tool is not ("wall" or "floor")) await SetTool("wall");
+        if (_tool != "wall") await SetTool("wall");
     }
 
     private async Task SelectObjectType(ClientObject obj)
@@ -468,7 +501,7 @@ else
     private string LevelLabel(int level)
     {
         var name = level < _document.Levels.Count ? _document.Levels[level].Name : "";
-        return string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Level.Default", level.ToString()) : name;
+        return string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Level.Default", _document.DisplayNumber(level).ToString()) : name;
     }
 
     private async Task EditLevelAsync()
@@ -478,7 +511,7 @@ else
         var parameters = new DialogParameters<BuildingPlanLevelDialog>
         {
             { d => d.Name, level.Name }, { d => d.Height, level.Height },
-            { d => d.DefaultName, LocalizationService.GetTranslation("BuildingPlanner.Level.Default", _level.ToString()) }, { d => d.DefaultHeight, _document.Defaults.WallHeight },
+            { d => d.DefaultName, LocalizationService.GetTranslation("BuildingPlanner.Level.Default", _document.DisplayNumber(_level).ToString()) }, { d => d.DefaultHeight, _document.Defaults.WallHeight },
         };
         var dialog = await DialogService.ShowAsync<BuildingPlanLevelDialog>(LocalizationService.GetTranslation("BuildingPlanner.Level.Edit"), parameters, new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
         var result = await dialog.Result;
@@ -513,7 +546,7 @@ else
         if (!_expandedGroups.Add(key)) _expandedGroups.Remove(key);
     }
 
-    private sealed record ObjectGroup(string Key, string Label, string? Color, bool HasHeader, List<ClientObject> Items);
+    private sealed record ObjectGroup(string Key, string Label, string? Color, bool HasHeader, List<ClientObject> Items, List<ObjectGroup>? Children = null);
 
     // Regroupement de la palette : portes par tier, sinon par catégorie housing ; les items sans catégorie vont
     // dans « Divers ». Les en-têtes n'apparaissent que si l'onglet a au moins un vrai groupe (l'onglet Autres reste plat).
@@ -532,52 +565,81 @@ else
                 showHeaders, g.OrderBy(o => o.Label).ToList()));
     }
 
+    // Onglet « Tous » : les types de pièce (catégories housing : Cultural, Decoration, Lighting…) d'abord,
+    // puis Tables, Portes (sous-groupes par tier) et Autres.
+    private IEnumerable<ObjectGroup> GroupAllObjects(List<ClientObject> objects)
+    {
+        foreach (var g in GroupObjects("all-housing", false, objects.Where(o => o.Group == "housing").ToList()))
+            yield return g with { HasHeader = true };
+        var tables = objects.Where(o => o.Group == "table").OrderBy(o => o.Label).ToList();
+        if (tables.Count > 0) yield return new ObjectGroup("all-table", LocalizationService.GetTranslation("BuildingPlanner.Catalog.Tables"), null, true, tables);
+        var doors = objects.Where(o => o.Group == "door").ToList();
+        if (doors.Count > 0) yield return new ObjectGroup("all-door", LocalizationService.GetTranslation("BuildingPlanner.Catalog.Doors"), null, true, [],
+            GroupObjects("all-door", true, doors).ToList());
+        var others = objects.Where(o => o.Group == "other").OrderBy(o => o.Label).ToList();
+        if (others.Count > 0) yield return new ObjectGroup("all-other", LocalizationService.GetTranslation("BuildingPlanner.Catalog.Others"), null, true, others);
+    }
+
     private RenderFragment RenderObjectList(string group) => __builder =>
     {
         var searching = !string.IsNullOrWhiteSpace(_objectSearch);
         var byTier = group == "door";
-        var filtered = _clientCatalog!.Objects.Where(o => o.Group == group && (!searching || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase))).ToList();
+        var filtered = _clientCatalog!.Objects.Where(o => (group == "all" || o.Group == group) && (!searching || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase))).ToList();
         <MudTextField T="string" Value="@_objectSearch" ValueChanged="@(v => _objectSearch = v)" Immediate="true" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                       Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-1"/>
         <div class="bp-object-list">
-            @foreach (var g in GroupObjects(group, byTier, filtered))
+            @foreach (var g in group == "all" ? GroupAllObjects(filtered) : GroupObjects(group, byTier, filtered))
             {
-                var expanded = !g.HasHeader || searching || _expandedGroups.Contains(g.Key);
-                @if (g.HasHeader)
-                {
-                    <div class="bp-group-title" style="@(g.Color is null ? null : $"color: #{g.Color}")" @onclick="@(() => ToggleGroup(g.Key))">
-                        <MudIcon Icon="@(expanded ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/>
-                        <span>@g.Label</span>
-                        <span class="bp-group-count">@g.Items.Count</span>
-                    </div>
-                }
-                @if (expanded)
-                {
-                    @foreach (var o in g.Items)
-                    {
-                        <div class="@("bp-object-item" + (_objectType == o.Name ? " selected" : ""))" @onclick="@(() => SelectObjectType(o))" title="@o.Name">
-                            <MudImage Src="@IconUrl(o.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="28" Height="28"/>
-                            <div class="bp-object-text">
-                                <div class="bp-object-label">@o.Label</div>
-                                <div class="bp-object-meta">
-                                    <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SizeHint")">@o.Size[0]×@o.Size[1]×@o.Size[2]</span>
-                                    @if (o.RequiredTier is { } rt) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredTierHint")">T≥@rt.ToString("0.#")</span> }
-                                    @if (o.RequiredVolume > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredVolumeHint")">@(o.RequiredVolume) m³</span> }
-                                    @if (o.HousingValue is { } hv && hv > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.HousingValueHint")">+@hv.ToString("0.#")</span> }
-                                    @if (o.Tier is { } t) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.TierHint")">T@(t)</span> }
-                                    @if (o.HasTableSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SurfaceHint")">▭</span> }
-                                    @if (o.CanBeOnSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.OnSurfaceHint")">▴</span> }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
+                @RenderGroup(g, searching)
             }
             @if (filtered.Count == 0)
             {
                 <MudText Typo="Typo.caption" Class="pa-2">@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Empty")</MudText>
             }
         </div>
+    };
+
+    private RenderFragment RenderGroup(ObjectGroup g, bool searching) => __builder =>
+    {
+        var expanded = !g.HasHeader || searching || _expandedGroups.Contains(g.Key);
+        @if (g.HasHeader)
+        {
+            <div class="bp-group-title" style="@(g.Color is null ? null : $"color: #{g.Color}")" @onclick="@(() => ToggleGroup(g.Key))">
+                <MudIcon Icon="@(expanded ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/>
+                <span>@g.Label</span>
+                <span class="bp-group-count">@(g.Children?.Sum(c => c.Items.Count) ?? g.Items.Count)</span>
+            </div>
+        }
+        @if (expanded)
+        {
+            @foreach (var o in g.Items)
+            {
+                <div class="@("bp-object-item" + (_objectType == o.Name ? " selected" : ""))" @onclick="@(() => SelectObjectType(o))" title="@o.Name">
+                    <MudImage Src="@IconUrl(o.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="28" Height="28"/>
+                    <div class="bp-object-text">
+                        <div class="bp-object-label">@o.Label</div>
+                        <div class="bp-object-meta">
+                            <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SizeHint")">@o.Size[0]×@o.Size[1]×@o.Size[2]</span>
+                            @if (o.RequiredTier is { } rt) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredTierHint")">T≥@rt.ToString("0.#")</span> }
+                            @if (o.RequiredVolume > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredVolumeHint")">@(o.RequiredVolume) m³</span> }
+                            @if (o.HousingValue is { } hv && hv > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.HousingValueHint")">+@hv.ToString("0.#")</span> }
+                            @if (o.Tier is { } t) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.TierHint")">T@(t)</span> }
+                            @if (o.HasTableSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SurfaceHint")">▭</span> }
+                            @if (o.CanBeOnSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.OnSurfaceHint")">▴</span> }
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (g.Children is not null)
+            {
+                <div class="bp-group-children">
+                    @foreach (var child in g.Children)
+                    {
+                        @RenderGroup(child, searching)
+                    }
+                </div>
+            }
+        }
     };
 
     // ---- Plans ----------------------------------------------------------------------------------------------
