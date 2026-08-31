@@ -154,16 +154,16 @@ else
             <MudPaper Class="bp-side bp-left" Elevation="1">
                 <MudTabs Elevation="0" Rounded="false" PanelClass="pa-1" MinimumTabWidth="40px" Position="Position.Top" ApplyEffectsToContainer="true" ShowToolTips="true" Class="bp-tabs">
                     <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Tables")" Icon="@Icons.Material.Filled.Handyman">
-                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "table"))
+                        @RenderObjectList("table")
                     </MudTabPanel>
                     <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Furniture")" Icon="@MDIIcons.Filled.Sofa">
-                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "housing"))
+                        @RenderObjectList("housing")
                     </MudTabPanel>
                     <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Doors")" Icon="@MDIIcons.Filled.DoorClosed">
-                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "door"))
+                        @RenderObjectList("door")
                     </MudTabPanel>
                     <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Others")" Icon="@Icons.Material.Filled.Category">
-                        @RenderObjectList(_clientCatalog!.Objects.Where(o => o.Group == "other"))
+                        @RenderObjectList("other")
                     </MudTabPanel>
                 </MudTabs>
             </MudPaper>
@@ -223,6 +223,7 @@ else
     private bool _canUndo, _canRedo, _dirty;
     private string? _selectionKind, _selectionId;
     private string _objectSearch = "";
+    private readonly HashSet<string> _expandedGroups = [];
 
     protected override void OnInitialized()
     {
@@ -506,35 +507,70 @@ else
         </MudStack>
     };
 
-    private RenderFragment RenderObjectList(IEnumerable<ClientObject> objects) => __builder =>
+    private void ToggleGroup(string key)
     {
-        var filtered = objects.Where(o => string.IsNullOrWhiteSpace(_objectSearch) || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (!string.IsNullOrWhiteSpace(_objectSearch)) return; // pendant une recherche, tout est déplié d'office
+        if (!_expandedGroups.Add(key)) _expandedGroups.Remove(key);
+    }
+
+    private sealed record ObjectGroup(string Key, string Label, string? Color, bool HasHeader, List<ClientObject> Items);
+
+    // Regroupement de la palette : portes par tier, sinon par catégorie housing ; les items sans catégorie vont
+    // dans « Divers ». Les en-têtes n'apparaissent que si l'onglet a au moins un vrai groupe (l'onglet Autres reste plat).
+    private IEnumerable<ObjectGroup> GroupObjects(string group, bool byTier, List<ClientObject> objects)
+    {
+        var misc = LocalizationService.GetTranslation("BuildingPlanner.Catalog.Misc");
+        if (byTier)
+        {
+            return objects.GroupBy(o => o.Tier).OrderBy(g => g.Key ?? int.MaxValue)
+                .Select(g => new ObjectGroup($"{group}-T{g.Key}", g.Key is { } t ? $"T{t}" : misc, null, true, g.OrderBy(o => o.Label).ToList()));
+        }
+        var showHeaders = objects.Any(o => o.HousingCategory is not null);
+        return objects.GroupBy(o => o.HousingCategory ?? "").OrderBy(g => g.Key.Length == 0 ? 1 : 0).ThenBy(g => g.Key)
+            .Select(g => new ObjectGroup($"{group}-{g.Key}", g.Key.Length > 0 ? g.Key : misc,
+                g.Key.Length > 0 ? _clientCatalog!.Categories.FirstOrDefault(c => c.Name == g.Key)?.Color ?? "aaaaaa" : null,
+                showHeaders, g.OrderBy(o => o.Label).ToList()));
+    }
+
+    private RenderFragment RenderObjectList(string group) => __builder =>
+    {
+        var searching = !string.IsNullOrWhiteSpace(_objectSearch);
+        var byTier = group == "door";
+        var filtered = _clientCatalog!.Objects.Where(o => o.Group == group && (!searching || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase))).ToList();
         <MudTextField T="string" Value="@_objectSearch" ValueChanged="@(v => _objectSearch = v)" Immediate="true" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                       Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-1"/>
         <div class="bp-object-list">
-            @foreach (var group in filtered.GroupBy(o => o.HousingCategory ?? "").OrderBy(g => g.Key))
+            @foreach (var g in GroupObjects(group, byTier, filtered))
             {
-                @if (filtered.Any(o => o.HousingCategory is not null) && group.Key.Length > 0)
+                var expanded = !g.HasHeader || searching || _expandedGroups.Contains(g.Key);
+                @if (g.HasHeader)
                 {
-                    <MudText Typo="Typo.caption" Class="bp-group-title" Style="@($"color: #{_clientCatalog!.Categories.FirstOrDefault(c => c.Name == group.Key)?.Color ?? "aaaaaa"}")">@group.Key</MudText>
+                    <div class="bp-group-title" style="@(g.Color is null ? null : $"color: #{g.Color}")" @onclick="@(() => ToggleGroup(g.Key))">
+                        <MudIcon Icon="@(expanded ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/>
+                        <span>@g.Label</span>
+                        <span class="bp-group-count">@g.Items.Count</span>
+                    </div>
                 }
-                @foreach (var o in group.OrderBy(o => o.Label))
+                @if (expanded)
                 {
-                    <div class="@("bp-object-item" + (_objectType == o.Name ? " selected" : ""))" @onclick="@(() => SelectObjectType(o))" title="@o.Name">
-                        <MudImage Src="@IconUrl(o.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="28" Height="28"/>
-                        <div class="bp-object-text">
-                            <div class="bp-object-label">@o.Label</div>
-                            <div class="bp-object-meta">
-                                <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SizeHint")">@o.Size[0]×@o.Size[1]×@o.Size[2]</span>
-                                @if (o.RequiredTier is { } rt) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredTierHint")">T≥@rt.ToString("0.#")</span> }
-                                @if (o.RequiredVolume > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredVolumeHint")">@(o.RequiredVolume) m³</span> }
-                                @if (o.HousingValue is { } hv && hv > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.HousingValueHint")">+@hv.ToString("0.#")</span> }
-                                @if (o.Tier is { } t) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.TierHint")">T@(t)</span> }
-                                @if (o.HasTableSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SurfaceHint")">▭</span> }
-                                @if (o.CanBeOnSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.OnSurfaceHint")">▴</span> }
+                    @foreach (var o in g.Items)
+                    {
+                        <div class="@("bp-object-item" + (_objectType == o.Name ? " selected" : ""))" @onclick="@(() => SelectObjectType(o))" title="@o.Name">
+                            <MudImage Src="@IconUrl(o.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="28" Height="28"/>
+                            <div class="bp-object-text">
+                                <div class="bp-object-label">@o.Label</div>
+                                <div class="bp-object-meta">
+                                    <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SizeHint")">@o.Size[0]×@o.Size[1]×@o.Size[2]</span>
+                                    @if (o.RequiredTier is { } rt) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredTierHint")">T≥@rt.ToString("0.#")</span> }
+                                    @if (o.RequiredVolume > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.RequiredVolumeHint")">@(o.RequiredVolume) m³</span> }
+                                    @if (o.HousingValue is { } hv && hv > 0) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.HousingValueHint")">+@hv.ToString("0.#")</span> }
+                                    @if (o.Tier is { } t) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.TierHint")">T@(t)</span> }
+                                    @if (o.HasTableSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.SurfaceHint")">▭</span> }
+                                    @if (o.CanBeOnSurface) { <span title="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.OnSurfaceHint")">▴</span> }
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
                 }
             }
             @if (filtered.Count == 0)

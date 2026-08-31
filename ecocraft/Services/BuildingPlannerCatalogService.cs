@@ -167,8 +167,10 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
             .OrderBy(m => m.Tier).ThenBy(m => m.Label)
             .ToList();
 
+        // Tout objet avec une empreinte est proposé (stockages, véhicules... → onglet « Autres »), sauf les panneaux
+        // décoratifs sans effet pièce/housing (heuristique sur le nom, ~130 variantes en vanilla).
         var objects = catalog.Objects.Values
-            .Where(o => o.IsCraftingTable || o.Requirements is not null || o.Housing is not null || o.HasWallCells || o.HasTableSurface || o.Tier is not null)
+            .Where(o => o.IsCraftingTable || o.Requirements is not null || o.Housing is not null || o.HasWallCells || o.HasTableSurface || o.Tier is not null || !o.Name.Contains("Sign", StringComparison.Ordinal))
             .Select(o => new ClientObject
             {
                 Name = o.Name,

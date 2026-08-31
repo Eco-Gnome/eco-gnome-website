@@ -95,11 +95,31 @@
     max-height: calc(100vh - 220px);
 }
 
+/* En-tête de sous-catégorie repliable : vrai div de cette page (un composant Mud n'aurait pas l'attribut de scope). */
 .bp-group-title {
-    display: block;
-    padding: 6px 6px 2px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.bp-group-title:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bp-group-title ::deep .mud-icon-root {
+    font-size: 1rem;
+}
+
+.bp-group-count {
+    margin-left: 4px;
+    opacity: 0.6;
 }
 
 .bp-object-item {

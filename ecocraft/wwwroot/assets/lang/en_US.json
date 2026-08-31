@@ -938,6 +938,7 @@
             "Furniture": "Furniture",
             "Doors": "Doors",
             "Others": "Others",
+            "Misc": "Misc",
             "Empty": "No object matches.",
             "SizeHint": "Size: width × depth × height (cells)",
             "RequiredTierHint": "Required average room tier",

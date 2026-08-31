@@ -930,6 +930,7 @@
             "Furniture": "Mobilier",
             "Doors": "Portes",
             "Others": "Autres",
+            "Misc": "Divers",
             "Empty": "Aucun objet ne correspond.",
             "SizeHint": "Taille : largeur × profondeur × hauteur (cases)",
             "RequiredTierHint": "Tier moyen de pièce requis",
