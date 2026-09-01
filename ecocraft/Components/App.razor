@@ -1,10 +1,14 @@
 ﻿@using ecocraft.Services
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		@* Google Translate (Chrome) remplace les noeuds texte par des <font>, ce qui casse le rendu Blazor Server :
+		   le premier render batch qui touche un texte traduit echoue et le circuit meurt (ex : le bouton Join
+		   ne s'active plus). L'app a sa propre localisation, on interdit donc la traduction automatique. *@
+		<meta name="google" content="notranslate" />
 		<base href="/" />
 		<link href="/app.css?v=@ReleaseVersionService.ReleaseVersions.First().Title" rel="stylesheet">
 		<link href="/ecocraft.styles.css?v=@ReleaseVersionService.ReleaseVersions.First().Title" rel="stylesheet">
