@@ -20,7 +20,9 @@ public class ContextService(
     UserElementDbService userElementDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
-    UserServerDbService userServerDbService)
+    UserServerDbService userServerDbService,
+    LiveCircuitTracker liveCircuitTracker,
+    CircuitSession circuitSession)
 {
     private readonly List<Server> _defaultServers = [];
 
@@ -156,6 +158,8 @@ public class ContextService(
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         await localStorageService.AddItem("SecretUserId", CurrentUser.SecretId.ToString());
+
+        liveCircuitTracker.SetUser(circuitSession.Key, CurrentUser.Id);
 
         var languageCode = await localStorageService.GetItem("LanguageCode");
 

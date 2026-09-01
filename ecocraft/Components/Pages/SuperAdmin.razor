@@ -1,4 +1,4 @@
-@page "/super-admin"
+﻿@page "/super-admin"
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 @using ecocraft.Components.Dialog
@@ -17,6 +17,7 @@
 @inject IDialogService DialogService
 @inject LocalizationService LocalizationService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
+@inject LiveCircuitTracker LiveCircuitTracker
 
 <PageTitle>@LocalizationService.GetTranslation("SuperAdmin.Title") - Eco Gnome</PageTitle>
 
@@ -25,6 +26,15 @@
     {
         <MudProgressLinear Color="Color.Tertiary" Indeterminate="true" Class="mb-4" />
     }
+
+    <div class="super-admin-live-bar">
+        <MudIcon Icon="@Icons.Material.Filled.Sensors" Color="Color.Success" Size="Size.Small" />
+        <MudText Typo="Typo.subtitle2" Class="super-admin-live-title">@LocalizationService.GetTranslation("SuperAdmin.Live.Title")</MudText>
+        @LiveStat("SuperAdmin.Live.Connected", _live.ConnectedCircuits, "SuperAdmin.Live.ConnectedHint")
+        @LiveStat("SuperAdmin.Live.Open", _live.OpenCircuits, "SuperAdmin.Live.OpenHint")
+        @LiveStat("SuperAdmin.Live.UniqueUsers", _live.UniqueUsers, "SuperAdmin.Live.UniqueUsersHint")
+        @LiveStat("SuperAdmin.Live.UniqueClients", _live.UniqueClients, "SuperAdmin.Live.UniqueClientsHint")
+    </div>
 
     <MudGrid>
         <MudItem xs="12" lg="6">
@@ -385,6 +395,16 @@
     private bool _sNoAdmin;
     private bool _sStale;
 
+    private LiveCircuitSnapshot _live = new(0, 0, 0, 0);
+    private System.Threading.Timer? _liveTimer;
+
+    private RenderFragment LiveStat(string labelKey, int value, string hintKey) =>@<MudTooltip Text="@LocalizationService.GetTranslation(hintKey)">
+        <div class="super-admin-live-stat">
+            <span class="super-admin-live-value">@value</span>
+            <span class="super-admin-live-label">@LocalizationService.GetTranslation(labelKey)</span>
+        </div>
+    </MudTooltip>;
+
     private RenderFragment FilterChip(string labelKey, int count, bool active, Action onToggle, Color color) =>@<MudChip T="string"
               Size="Size.Small"
               Variant="@(active ? Variant.Filled : Variant.Outlined)"
@@ -400,6 +420,28 @@
         }
 
         ContextService.OnContextChanged += StateHasChanged;
+
+        _live = LiveCircuitTracker.GetSnapshot();
+        _liveTimer = new System.Threading.Timer(_ => _ = RefreshLiveAsync(), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+    }
+
+    private async Task RefreshLiveAsync()
+    {
+        var snapshot = LiveCircuitTracker.GetSnapshot();
+        if (snapshot == _live)
+        {
+            return;
+        }
+
+        _live = snapshot;
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Circuit fermé entre deux ticks : le timer est libéré dans Dispose.
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -442,6 +484,7 @@
     public void Dispose()
     {
         ContextService.OnContextChanged -= StateHasChanged;
+        _liveTimer?.Dispose();
     }
 
     private async Task CopyToClipboard(string text)

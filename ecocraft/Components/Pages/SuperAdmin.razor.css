@@ -1,3 +1,39 @@
+﻿.super-admin-live-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: color-mix(in srgb, var(--mud-palette-success) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mud-palette-success) 35%, transparent);
+}
+
+.super-admin-live-title {
+    white-space: nowrap;
+    margin-right: 8px;
+}
+
+.super-admin-live-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    cursor: help;
+}
+
+.super-admin-live-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.super-admin-live-label {
+    font-size: 0.78rem;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
 .super-admin-panel-header {
     display: flex;
     align-items: center;

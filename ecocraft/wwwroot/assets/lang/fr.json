@@ -543,6 +543,17 @@
             "Title": "Utilisateurs",
             "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Action"
+        },
+        "Live": {
+            "Title": "En direct",
+            "Connected": "onglets connectés",
+            "ConnectedHint": "Circuits Blazor avec un WebSocket ouvert en ce moment (un par onglet).",
+            "Open": "circuits ouverts",
+            "OpenHint": "Onglets connectés plus ceux fermés récemment encore retenus en mémoire par Blazor (3 min).",
+            "UniqueUsers": "utilisateurs uniques",
+            "UniqueUsersHint": "Comptes Eco Gnome distincts parmi les onglets connectés.",
+            "UniqueClients": "IP uniques",
+            "UniqueClientsHint": "IP clientes distinctes parmi les onglets connectés. Seul un hash SHA-256 salé est gardé en RAM, rien n'est stocké."
         }
     },
     "TagName": "Nom du tag",

@@ -550,6 +550,17 @@
             "Title": "Users",
             "CanUploadModCol": "Mod Uploader",
             "ActionCol": "Action"
+        },
+        "Live": {
+            "Title": "Live",
+            "Connected": "connected tabs",
+            "ConnectedHint": "Blazor circuits with an open WebSocket right now (one per browser tab).",
+            "Open": "open circuits",
+            "OpenHint": "Connected tabs plus recently closed ones still retained in memory by Blazor (3 min).",
+            "UniqueUsers": "unique users",
+            "UniqueUsersHint": "Distinct Eco Gnome accounts among connected tabs.",
+            "UniqueClients": "unique IPs",
+            "UniqueClientsHint": "Distinct client IPs among connected tabs. Only a salted SHA-256 hash is kept in memory, nothing is stored."
         }
     },
     "TagName": "Tag name",

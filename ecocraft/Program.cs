@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using ecocraft.Components;
 using ecocraft.Extensions;
 using ecocraft.Models;
@@ -12,6 +12,7 @@ using ecocraft.Services.ImportData;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +104,10 @@ builder.Services.AddScoped<BuildingPlannerService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<LiveCircuitTracker>();
+builder.Services.AddScoped<CircuitSession>();
+builder.Services.AddScoped<CircuitHandler, LiveCircuitHandler>();
 builder.Services.AddScoped<LocalizationService>();
 
 // Authorization
