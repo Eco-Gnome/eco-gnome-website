@@ -167,7 +167,7 @@
     </MudTabPanel>
 
     <MudTabPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Results.Materials")">
-        @if (Analysis is not null && (Analysis.Materials.Count > 0 || Analysis.ObjectCounts.Count > 0))
+        @if (Analysis is not null && Analysis.Materials.Count > 0)
         {
             <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
                 <thead>
@@ -188,14 +188,6 @@
                         <td style="text-align:right">@m.Floors</td>
                         <td style="text-align:right">@m.Ceilings</td>
                         <td style="text-align:right"><b>@m.Total</b></td>
-                    </tr>
-                }
-                @foreach (var o in Analysis.ObjectCounts)
-                {
-                    <tr>
-                        <td>@(Catalog?.Objects.FirstOrDefault(x => x.Name == o.Type)?.Label ?? o.Type)</td>
-                        <td colspan="3"></td>
-                        <td style="text-align:right"><b>@o.Count</b></td>
                     </tr>
                 }
                 </tbody>
