@@ -488,6 +488,8 @@
             "DemoteAdmin": "Remove yourself from admins",
             "EnableAutomationPlanner": "Enable automation planner",
             "DisableAutomationPlanner": "Disable automation planner",
+            "EnableBuildingPlanner": "Enable building planner",
+            "DisableBuildingPlanner": "Disable building planner",
             "PlayersCol": "Players",
             "PromoteAdmin": "Add yourself as admin",
             "ServerNameCol": "Name",

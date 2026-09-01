@@ -481,6 +481,8 @@
             "DemoteAdmin": "Retirez-vous des administrateurs",
             "EnableAutomationPlanner": "Activer le planificateur d'automatisation",
             "DisableAutomationPlanner": "Désactiver le planificateur d'automatisation",
+            "EnableBuildingPlanner": "Activer le planificateur de bâtiment",
+            "DisableBuildingPlanner": "Désactiver le planificateur de bâtiment",
             "PlayersCol": "Joueurs",
             "PromoteAdmin": "Ajoutez vous en tant qu'administrateur",
             "ServerNameCol": "Nom",
