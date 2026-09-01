@@ -1,7 +1,7 @@
 ﻿# Eco Gnome - Website
 
 
-Eco Gnome is a mod for the game [ECO](https://play.eco/), 
+[Eco Gnome](https://eco-gnome.com) is a mod for the game [ECO](https://play.eco/), 
 designed to simplify and optimize in-game economic management.
 With an intuitive user interface and advanced calculations, 
 Eco Gnome assists players in determining optimal buying and selling prices for materials and items, 
