@@ -36,7 +36,13 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
+    .AddInteractiveServerComponents(options =>
+    {
+        // Chaque circuit porte sa copie du graphe serveur (~130 Mo observés en prod). Par défaut Blazor
+        // garde un circuit déconnecté 3 min en attendant une reconnexion ; 1 min suffit pour un
+        // rechargement d'onglet et libère la RAM des onglets perdus trois fois plus vite.
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(1);
+    })
     // Le planificateur de bâtiment renvoie le plan complet (JSON) à chaque commit d'édition ; la limite
     // par défaut de Blazor Server (32 Ko) est trop basse pour un plan de 200×200.
     .AddHubOptions(options => options.MaximumReceiveMessageSize = 2 * 1024 * 1024);

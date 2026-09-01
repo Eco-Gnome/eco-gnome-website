@@ -42,6 +42,7 @@
                 <div class="super-admin-panel-header">
                     <MudText Typo="Typo.h6" Class="super-admin-panel-title">@LocalizationService.GetTranslation("SuperAdmin.UserTable.Title") (@_users.Count)</MudText>
                     <div class="super-admin-chip-row">
+                        @FilterChip("SuperAdmin.Chips.Online", _onlineUsers.Count, _uOnline, () => _uOnline = !_uOnline, Color.Success)
                         @FilterChip("SuperAdmin.Chips.NoServer", _users.Count(u => u.UserServers.Count == 0), _uNoServer, () => _uNoServer = !_uNoServer, Color.Warning)
                         @FilterChip("SuperAdmin.Chips.NeverActed", _users.Count(HasNeverActed), _uNeverActed, () => _uNeverActed = !_uNeverActed, Color.Error)
                         @FilterChip("SuperAdmin.Chips.NoSkill", _users.Count(u => !_usersWithSkill.Contains(u.Id)), _uNoSkill, () => _uNoSkill = !_uNoSkill, Color.Warning)
@@ -78,6 +79,7 @@
                     <ColGroup>
                         <col style="width: 104px;" />
                         <col />
+                        <col style="width: 52px;" />
                         <col style="width: 64px;" />
                         <col style="width: 64px;" />
                         <col style="width: 56px;" />
@@ -89,6 +91,7 @@
                     <HeaderContent>
                         <MudTh Class="super-admin-user-id-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Pseudo)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTableSortLabel></MudTh>
+                        <MudTh Class="super-admin-user-online-col"><MudTableSortLabel SortBy="new Func<User, object>(u => _onlineUsers.GetValueOrDefault(u.Id))">@LocalizationService.GetTranslation("SuperAdmin.UserTable.OnlineCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.LastActionDateTime ?? DateTimeOffset.MinValue)">@LocalizationService.GetTranslation("SuperAdmin.LastActionDateCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.CreationDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-count-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.UserServers.Count)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.JoinedServersCol")</MudTableSortLabel></MudTh>
@@ -108,6 +111,18 @@
                         </MudTd>
                         <MudTd>
                             @context.Pseudo
+                        </MudTd>
+                        <MudTd Class="super-admin-user-online-col">
+                            @if (_onlineUsers.TryGetValue(context.Id, out var tabs))
+                            {
+                                <MudTooltip Text="@LocalizationService.GetTranslation("SuperAdmin.UserTable.OnlineTabs", tabs.ToString())">
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Success" Size="Size.Small" Class="super-admin-online-dot"/>
+                                </MudTooltip>
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Outlined.Circle" Size="Size.Small" Class="super-admin-offline-dot"/>
+                            }
                         </MudTd>
                         <MudTd Class="super-admin-user-date-col">
                             @if (context.LastActionDateTime is { } lastAction)
@@ -387,6 +402,7 @@
     private string _searchModUpload = "";
 
     // Filtres = critères de bulk (une seule source de vérité par tableau).
+    private bool _uOnline; // filtre pur, jamais critère de suppression en masse
     private bool _uNoServer;
     private bool _uNeverActed;
     private bool _uNoSkill;
@@ -396,6 +412,7 @@
     private bool _sStale;
 
     private LiveCircuitSnapshot _live = new(0, 0, 0, 0);
+    private Dictionary<Guid, int> _onlineUsers = new();
     private System.Threading.Timer? _liveTimer;
 
     private RenderFragment LiveStat(string labelKey, int value, string hintKey) =>@<MudTooltip Text="@LocalizationService.GetTranslation(hintKey)">
@@ -422,18 +439,23 @@
         ContextService.OnContextChanged += StateHasChanged;
 
         _live = LiveCircuitTracker.GetSnapshot();
+        _onlineUsers = LiveCircuitTracker.GetOnlineUsers();
         _liveTimer = new System.Threading.Timer(_ => _ = RefreshLiveAsync(), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
     }
 
     private async Task RefreshLiveAsync()
     {
         var snapshot = LiveCircuitTracker.GetSnapshot();
-        if (snapshot == _live)
+        var onlineUsers = LiveCircuitTracker.GetOnlineUsers();
+        var sameOnlineUsers = onlineUsers.Count == _onlineUsers.Count
+            && onlineUsers.All(kv => _onlineUsers.TryGetValue(kv.Key, out var n) && n == kv.Value);
+        if (snapshot == _live && sameOnlineUsers)
         {
             return;
         }
 
         _live = snapshot;
+        _onlineUsers = onlineUsers;
         try
         {
             await InvokeAsync(StateHasChanged);
@@ -559,6 +581,8 @@
     private bool SearchUser(User user)
     {
         if (!UserMatchesTextSearch(user))
+            return false;
+        if (_uOnline && !_onlineUsers.ContainsKey(user.Id))
             return false;
         if (_uNoServer && user.UserServers.Count != 0)
             return false;

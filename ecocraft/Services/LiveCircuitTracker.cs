@@ -63,6 +63,15 @@ public sealed class LiveCircuitTracker
         entry.ClientHash = Convert.ToHexString(bytes);
     }
 
+    // Nombre d'onglets connectés par compte, pour la colonne « En ligne » du super admin.
+    public Dictionary<Guid, int> GetOnlineUsers()
+    {
+        return _circuits.Values
+            .Where(e => e.Connected && e.UserId is not null)
+            .GroupBy(e => e.UserId!.Value)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
     public LiveCircuitSnapshot GetSnapshot()
     {
         var entries = _circuits.Values.ToList();

@@ -435,7 +435,8 @@
             "Empty": "Vide",
             "NoPlayers": "Sans joueur",
             "NoAdmin": "Sans admin",
-            "Stale": "Périmé"
+            "Stale": "Périmé",
+            "Online": "En ligne"
         },
         "Bulk": {
             "Affected": "{count} concerné(s)",
@@ -542,14 +543,16 @@
             "ServersCol": "Serveurs",
             "Title": "Utilisateurs",
             "CanUploadModCol": "Mod Uploader",
-            "ActionCol": "Action"
+            "ActionCol": "Action",
+            "OnlineCol": "En ligne",
+            "OnlineTabs": "{count} onglet(s) connecté(s)"
         },
         "Live": {
             "Title": "En direct",
             "Connected": "onglets connectés",
             "ConnectedHint": "Circuits Blazor avec un WebSocket ouvert en ce moment (un par onglet).",
             "Open": "circuits ouverts",
-            "OpenHint": "Onglets connectés plus ceux fermés récemment encore retenus en mémoire par Blazor (3 min).",
+            "OpenHint": "Onglets connectés plus ceux perdus récemment encore retenus en mémoire par Blazor (1 min).",
             "UniqueUsers": "utilisateurs uniques",
             "UniqueUsersHint": "Comptes Eco Gnome distincts parmi les onglets connectés.",
             "UniqueClients": "IP uniques",

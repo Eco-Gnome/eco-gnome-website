@@ -92,6 +92,7 @@
 }
 
 .super-admin-user-table ::deep .super-admin-user-date-col,
+.super-admin-user-table ::deep .super-admin-user-online-col,
 .super-admin-user-table ::deep .super-admin-user-count-col,
 .super-admin-user-table ::deep .super-admin-user-admin-col,
 .super-admin-user-table ::deep .super-admin-user-mod-col,
@@ -106,6 +107,22 @@
     width: 64px;
     min-width: 64px;
     max-width: 64px;
+}
+
+.super-admin-user-table ::deep .super-admin-user-online-col {
+    width: 52px;
+    min-width: 52px;
+    max-width: 52px;
+}
+
+.super-admin-user-table ::deep .super-admin-online-dot {
+    font-size: 0.75rem;
+    filter: drop-shadow(0 0 3px var(--mud-palette-success));
+}
+
+.super-admin-user-table ::deep .super-admin-offline-dot {
+    font-size: 0.75rem;
+    opacity: 0.25;
 }
 
 .super-admin-user-table ::deep .super-admin-user-count-col {
@@ -133,6 +150,7 @@
 }
 
 .super-admin-user-table ::deep .super-admin-user-date-col .mud-table-sort-label,
+.super-admin-user-table ::deep .super-admin-user-online-col .mud-table-sort-label,
 .super-admin-user-table ::deep .super-admin-user-count-col .mud-table-sort-label,
 .super-admin-user-table ::deep .super-admin-user-admin-col .mud-table-sort-label,
 .super-admin-user-table ::deep .super-admin-user-mod-col .mud-table-sort-label,

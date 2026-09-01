@@ -442,7 +442,8 @@
             "Empty": "Empty",
             "NoPlayers": "Without players",
             "NoAdmin": "Without admin",
-            "Stale": "Stale"
+            "Stale": "Stale",
+            "Online": "Online"
         },
         "Bulk": {
             "Affected": "{count} affected",
@@ -549,14 +550,16 @@
             "ServersCol": "Servers",
             "Title": "Users",
             "CanUploadModCol": "Mod Uploader",
-            "ActionCol": "Action"
+            "ActionCol": "Action",
+            "OnlineCol": "Online",
+            "OnlineTabs": "{count} connected tab(s)"
         },
         "Live": {
             "Title": "Live",
             "Connected": "connected tabs",
             "ConnectedHint": "Blazor circuits with an open WebSocket right now (one per browser tab).",
             "Open": "open circuits",
-            "OpenHint": "Connected tabs plus recently closed ones still retained in memory by Blazor (3 min).",
+            "OpenHint": "Connected tabs plus recently dropped ones still retained in memory by Blazor (1 min).",
             "UniqueUsers": "unique users",
             "UniqueUsersHint": "Distinct Eco Gnome accounts among connected tabs.",
             "UniqueClients": "unique IPs",
