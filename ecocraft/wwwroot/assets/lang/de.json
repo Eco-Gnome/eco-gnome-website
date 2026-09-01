@@ -13,6 +13,7 @@
         "MyServers": "Meine Server",
         "AddServer": "Treten Sie einem bestehenden Server bei, oder erstellen Sie einen neuen Server.",
         "New": "Neu!",
+        "RenameTooltip": "Wähl einen Namen, damit die Admins deines Servers dich erkennen. Und exportiere dein Konto über dieses Menü, damit du es nicht verlierst.",
         "ReleaseDialog": {
             "Title": "Veröffentlichungen"
         },

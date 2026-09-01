@@ -2,6 +2,7 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
+@inject NavigationManager NavManager
 
 <MudNavMenu Style="display: flex; flex-direction: column; flex: 1 0 auto;">
     <MudTooltip RootClass="mud-nav-item" Color="Color.Primary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.NavCalculator")">
@@ -41,9 +42,13 @@
     }
     <MudSpacer />
     @* ponytail: lien Ko-fi externe direct plutôt qu'une page /donate interne *@
-    <MudTooltip RootClass="mud-nav-item" Color="Color.Secondary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.DonateTooltip")">
-        <MudNavLink IconColor="Color.Secondary" Target="_blank" Href="https://ko-fi.com/ecognome" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.HandHeart">@LocalizationService.GetTranslation("NavMenu.Donate")</MudNavLink>
-    </MudTooltip>
+    @* Affiché uniquement sur *eco-gnome.com (et localhost pour le dev) : un fork hébergé ailleurs ne doit pas pointer vers notre Ko-fi. *@
+    @if (IsOfficialDomain)
+    {
+        <MudTooltip RootClass="mud-nav-item" Color="Color.Secondary" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.DonateTooltip")">
+            <MudNavLink Class="donate-nav-link" IconColor="Color.Secondary" Target="_blank" Href="https://ko-fi.com/ecognome" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.HandHeart">@LocalizationService.GetTranslation("NavMenu.Donate")</MudNavLink>
+        </MudTooltip>
+    }
     <MudTooltip RootClass="mud-nav-item" Color="Color.Default" Disabled="Opened" Placement="Placement.Right" Text="@LocalizationService.GetTranslation("NavMenu.SourceCode")">
         <MudNavLink IconColor="Color.Default" Target="_blank" Href="https://github.com/Eco-Gnome/eco-gnome-website" Match="NavLinkMatch.Prefix" Icon="@MDIIcons.Filled.Github">@LocalizationService.GetTranslation("NavMenu.SourceCode")</MudNavLink>
     </MudTooltip>
@@ -58,8 +63,13 @@
 
     [Parameter] public bool Opened { get; set; }
 
+    private bool IsOfficialDomain;
+
     protected override void OnInitialized()
     {
+        var host = new Uri(NavManager.Uri).Host;
+        IsOfficialDomain = host == "eco-gnome.com" || host.EndsWith(".eco-gnome.com") || host == "localhost";
+
         ContextService.OnContextChanged += StateHasChanged;
     }
 

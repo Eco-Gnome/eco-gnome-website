@@ -775,3 +775,42 @@
     to   { opacity: 1; }
 }
 
+/* Header — pulse continu de l'icône profil tant que le joueur garde son pseudo généré (userXXXXXXXX) */
+.rename-pulse .mud-button-icon-start {
+    border-radius: 50%;
+    animation: rename-pulse 1.6s ease-out infinite;
+}
+
+/* Dialogue utilisateur — même pulse sur le bouton d'export tant que le pseudo est celui généré */
+.rename-pulse-button {
+    animation: rename-pulse 1.6s ease-out infinite;
+}
+
+@keyframes rename-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(var(--mud-palette-tertiary-rgb, 33, 150, 243), 0.7); transform: scale(1); }
+    40%  { transform: scale(1.15); }
+    70%  { box-shadow: 0 0 0 10px rgba(var(--mud-palette-tertiary-rgb, 33, 150, 243), 0); transform: scale(1); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--mud-palette-tertiary-rgb, 33, 150, 243), 0); }
+}
+
+/* NavMenu — pulse de l'icône de don toutes les 2 minutes (cycle CSS de 120s, 3 pulses sur les 5 dernières secondes) */
+.donate-nav-link .mud-nav-link-icon {
+    border-radius: 50%;
+    animation: donate-pulse 120s linear infinite;
+}
+
+@keyframes donate-pulse {
+    0%, 96% { box-shadow: 0 0 0 0 rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0); transform: scale(1); }
+    /* pulse 1 */
+    96.05%  { box-shadow: 0 0 0 0 rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0.7); }
+    96.55%  { transform: scale(1.15); }
+    97%     { box-shadow: 0 0 0 10px rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0); transform: scale(1); }
+    /* pulse 2 */
+    97.4%   { box-shadow: 0 0 0 0 rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0.7); }
+    97.9%   { transform: scale(1.15); }
+    98.35%  { box-shadow: 0 0 0 10px rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0); transform: scale(1); }
+    /* pulse 3 */
+    98.75%  { box-shadow: 0 0 0 0 rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0.7); }
+    99.25%  { transform: scale(1.15); }
+    99.7%, 100% { box-shadow: 0 0 0 10px rgba(var(--mud-palette-secondary-rgb, 255, 64, 129), 0); transform: scale(1); }
+}

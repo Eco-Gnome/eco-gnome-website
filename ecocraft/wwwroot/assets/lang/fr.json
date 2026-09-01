@@ -160,6 +160,7 @@
         "MyServers": "Mes serveurs",
         "AddServer": "Rejoignez un serveur existant ou créez-en un nouveau.",
         "New": "Nouveau !",
+        "RenameTooltip": "Choisis un pseudo pour être reconnu par les admins de ton serveur. Et pense à exporter ton compte depuis ce menu pour ne pas le perdre.",
         "ReleaseDialog": {
             "Title": "Communiqués"
         },

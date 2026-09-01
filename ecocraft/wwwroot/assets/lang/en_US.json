@@ -160,6 +160,7 @@
         "MyServers": "My Servers",
         "AddServer": "Join an existing server, or create a new one.",
         "New": "New!",
+        "RenameTooltip": "Pick a name so your server's admins can recognise you. And remember to export your account from this menu so you don't lose it.",
         "ReleaseDialog": {
             "Title": "Releases"
         },

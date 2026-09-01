@@ -88,8 +88,12 @@
             </MudTooltip>
         }
 
-        <MudButton id="onboarding-profile" Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
-                   Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+        @* Tant que le joueur garde son pseudo généré (userXXXXXXXX), l'icône pulse et une tooltip l'invite à se renommer. *@
+        <MudTooltip Text="@LocalizationService.GetTranslation("Header.RenameTooltip")" Disabled="@(!HasDefaultPseudo)" Color="Color.Tertiary">
+            <MudButton id="onboarding-profile" Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
+                       Class="@(HasDefaultPseudo ? "rename-pulse" : "")"
+                       Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+        </MudTooltip>
 
         <MudSelect T="LanguageCode"
                    Class="select-dense"
@@ -128,6 +132,10 @@
 
     // L'aide est centrée sur le price calculator : on ne montre le bouton que sur la route racine.
     private bool IsOnCalculator => new Uri(NavManager.Uri).AbsolutePath == "/";
+
+    // Pseudo encore celui généré par UserExtensions.GeneratePseudo ("user" + 8 chiffres) : le joueur ne s'est pas renommé.
+    private bool HasDefaultPseudo => ContextService.CurrentUser?.Pseudo is { } pseudo && DefaultPseudoRegex.IsMatch(pseudo);
+    private static readonly System.Text.RegularExpressions.Regex DefaultPseudoRegex = new(@"^user\d{8}$", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     protected override void OnInitialized()
     {

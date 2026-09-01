@@ -43,6 +43,7 @@
 				<MudIconButton Icon="@Icons.Material.Filled.Download"
 				               Variant="Variant.Filled"
 				               Color="Color.Primary"
+				               Class="@(HasDefaultPseudo ? "rename-pulse-button" : "")"
 				               OnClick="@(() => ExportUser())" />
 			</MudTooltip>
 
@@ -194,6 +195,9 @@
 		await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
 		Snackbar.Add(LocalizationService.GetTranslation("UserConfigurationDialog.SnackbarCopy"), Severity.Info);
 	}
+
+	// Même détection que dans Header.razor : pseudo encore généré ("user" + 8 chiffres), on incite à exporter son compte.
+	private bool HasDefaultPseudo => ContextService.CurrentUser?.Pseudo is { } pseudo && System.Text.RegularExpressions.Regex.IsMatch(pseudo, @"^user\d{8}$");
 
 	private async Task OnUpdateUserName(string newPseudo)
 	{
