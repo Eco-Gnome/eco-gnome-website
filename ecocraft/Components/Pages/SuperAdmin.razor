@@ -277,12 +277,6 @@
                                                    Size="Size.Small"
                                                    OnClick="@(() => ToggleAutomationPlanner(context))"/>
                                 </MudTooltip>
-                                <MudTooltip Text="@(context.IsBuildingPlannerEnabled ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DisableBuildingPlanner") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.EnableBuildingPlanner"))">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Architecture"
-                                                   Color="@(context.IsBuildingPlannerEnabled ? Color.Tertiary : Color.Default)"
-                                                   Size="Size.Small"
-                                                   OnClick="@(() => ToggleBuildingPlanner(context))"/>
-                                </MudTooltip>
                                 <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
                                     <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
                                                    Color="@(context.IsDefault ? Color.Warning : Color.Default)"
@@ -499,26 +493,6 @@
         if (ContextService.CurrentServer?.Id == server.Id)
         {
             ContextService.CurrentServer.IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled;
-            ContextService.InvokeContextChanged();
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task ToggleBuildingPlanner(Server server)
-    {
-        server.IsBuildingPlannerEnabled = !server.IsBuildingPlannerEnabled;
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            ServerDbService.UpdateIsBuildingPlannerEnabled(context, server);
-            return Task.CompletedTask;
-        });
-
-        // Si on modifie le serveur courant, rafraîchir le contexte pour que le bouton apparaisse/disparaisse.
-        if (ContextService.CurrentServer?.Id == server.Id)
-        {
-            ContextService.CurrentServer.IsBuildingPlannerEnabled = server.IsBuildingPlannerEnabled;
             ContextService.InvokeContextChanged();
         }
 

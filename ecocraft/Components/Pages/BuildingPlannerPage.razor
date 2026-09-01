@@ -132,6 +132,12 @@ else
 
                 <MudSpacer/>
 
+                <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.WipTooltip")" Placement="Placement.Bottom">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.Construction">@LocalizationService.GetTranslation("BuildingPlanner.Wip")</MudChip>
+                </MudTooltip>
+
+                <MudSpacer/>
+
                 <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")" Class="flex-no-grow" Style="width: 110px;"/>
                 <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"

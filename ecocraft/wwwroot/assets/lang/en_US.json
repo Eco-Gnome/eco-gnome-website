@@ -488,8 +488,6 @@
             "DemoteAdmin": "Remove yourself from admins",
             "EnableAutomationPlanner": "Enable automation planner",
             "DisableAutomationPlanner": "Disable automation planner",
-            "EnableBuildingPlanner": "Enable building planner",
-            "DisableBuildingPlanner": "Disable building planner",
             "PlayersCol": "Players",
             "PromoteAdmin": "Add yourself as admin",
             "ServerNameCol": "Name",
@@ -875,6 +873,8 @@
     },
     "BuildingPlanner": {
         "Title": "Building Planner",
+        "Wip": "Work in progress",
+        "WipTooltip": "This tool is still under development: results may differ from the game.",
         "NoData": "The building planner needs building data (occupancy, block tiers, room and housing configuration). Update [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) on the server to the latest version (export version 5), then upload the newly generated data file.",
         "Hint": "1: select · 2: walls · 3: opening · H: pan · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · Shift+click: place object again · R: rotate · Del: delete object · Ctrl+Z/Y: undo/redo · wheel: zoom · Alt+drag or middle click: pan · double click: select · PgUp/PgDn: level",
         "Shortcuts": "Shortcuts",

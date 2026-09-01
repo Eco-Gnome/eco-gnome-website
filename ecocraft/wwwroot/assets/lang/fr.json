@@ -481,8 +481,6 @@
             "DemoteAdmin": "Retirez-vous des administrateurs",
             "EnableAutomationPlanner": "Activer le planificateur d'automatisation",
             "DisableAutomationPlanner": "Désactiver le planificateur d'automatisation",
-            "EnableBuildingPlanner": "Activer le planificateur de bâtiment",
-            "DisableBuildingPlanner": "Désactiver le planificateur de bâtiment",
             "PlayersCol": "Joueurs",
             "PromoteAdmin": "Ajoutez vous en tant qu'administrateur",
             "ServerNameCol": "Nom",
@@ -867,6 +865,8 @@
     },
     "BuildingPlanner": {
         "Title": "Planificateur de bâtiment",
+        "Wip": "En développement",
+        "WipTooltip": "Outil encore en développement : des écarts avec le jeu sont possibles.",
         "NoData": "Le planificateur a besoin des données de construction (emprises, tiers des blocs, configuration des pièces et du housing). Mettez à jour [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) sur le serveur (export version 5), puis importez le nouveau fichier de données.",
         "Hint": "1 : sélection · 2 : murs · 3 : ouverture · H : déplacer la vue · les pièces sont créées automatiquement dans les zones fermées par des murs · glisser : dessiner · Maj+glisser (murs) : sol plein · clic droit (maintenu) : gommer au passage · Maj+clic droit glissé : gommer une zone, objets compris · Maj+clic : poser l'objet en série · R : rotation · Suppr : supprimer l'objet · Ctrl+Z/Y : annuler/rétablir · molette : zoom · Alt+glisser ou clic milieu : déplacer la vue · double-clic : sélectionner · PgUp/PgDn : niveau",
         "Shortcuts": "Raccourcis",

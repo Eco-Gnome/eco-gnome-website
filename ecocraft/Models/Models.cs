@@ -1315,10 +1315,6 @@ public class Server
 	// serveur. Activable uniquement par un super-admin depuis la page d'administration.
 	public bool IsAutomationPlannerEnabled { get; set; } = false;
 
-	// Active l'accès au « Planificateur de bâtiment » pour ce serveur. Activable uniquement par un
-	// super-admin depuis la page d'administration.
-	public bool IsBuildingPlannerEnabled { get; set; } = false;
-
 	// « Planificateur de bâtiment » : disponible seulement si HasBuildingData, c.-à-d. si le dernier
 	// import venait d'un EcoGnomeMod en export v5 (occupancy, tiers, configs).
 	public bool HasBuildingData { get; set; } = false;

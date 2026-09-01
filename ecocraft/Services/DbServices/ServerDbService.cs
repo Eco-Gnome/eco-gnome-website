@@ -294,7 +294,6 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    JoinCode = server.JoinCode,
 		    ApiKey = server.ApiKey,
 		    IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled,
-		    IsBuildingPlannerEnabled = server.IsBuildingPlannerEnabled,
 		    HasBuildingData = server.HasBuildingData,
 		    BuildingConfigJson = server.BuildingConfigJson,
 		    HousingConfigJson = server.HousingConfigJson,
@@ -397,14 +396,6 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.IsAutomationPlannerEnabled).IsModified = true;
-    }
-
-    public void UpdateIsBuildingPlannerEnabled(EcoCraftDbContext context, Server server)
-    {
-	    var stub = new Server { Id = server.Id, IsBuildingPlannerEnabled = server.IsBuildingPlannerEnabled };
-	    var entry = context.Entry(stub);
-	    entry.State = EntityState.Unchanged;
-	    entry.Property(x => x.IsBuildingPlannerEnabled).IsModified = true;
     }
 
     public void Destroy(EcoCraftDbContext context, Server server)
