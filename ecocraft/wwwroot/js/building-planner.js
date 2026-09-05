@@ -939,7 +939,7 @@ window.ecoBuildingPlanner = (function () {
         if (ctrl && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(st); return; }
         if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnSaveRequested').catch(function () { }); return; }
         if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(st); return; }
-        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); return; }
+        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnEscape').catch(function () { }); return; }
         if (e.key === 'PageUp') { e.preventDefault(); setLevelInternal(st, st.level + 1); return; }
         if (e.key === 'PageDown') { e.preventDefault(); setLevelInternal(st, st.level - 1); return; }
         if (e.key.toLowerCase() === 'r') { e.preventDefault(); rotateCurrent(st); return; }

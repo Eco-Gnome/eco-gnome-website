@@ -130,35 +130,77 @@ else
                     </MudTooltip>
                 }
 
-                <MudSpacer/>
-
                 <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.WipTooltip")" Placement="Placement.Bottom">
                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.Construction">@LocalizationService.GetTranslation("BuildingPlanner.Wip")</MudChip>
                 </MudTooltip>
 
                 <MudSpacer/>
 
-                <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")" Class="flex-no-grow" Style="width: 110px;"/>
-                <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")" Style="width: 190px;">
-                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Terrain")</MudSelectItem>
-                    @foreach (var m in _clientCatalog!.Materials)
-                    {
-                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
-                    }
-                </MudSelect>
-                <MudSelect T="string" Value="@(_document.Defaults.CeilingMaterial ?? "")" ValueChanged="OnCeilingMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")" Style="width: 190px;">
-                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.None")</MudSelectItem>
-                    @foreach (var m in _clientCatalog!.Materials)
-                    {
-                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
-                    }
-                </MudSelect>
-                <MudNumericField T="int" Value="@_document.Analysis.Residents" ValueChanged="OnResidentsChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Residents")" Class="flex-no-grow" Style="width: 100px;"/>
+                @* Bandeau housing + état des avertissements, toujours visibles ; un clic ouvre le volet correspondant. *@
+                <div class="bp-housing-block">
+                    <div class="bp-housing-score" @onclick="@(() => SetRightPanelAsync("housing"))">
+                        <MudIcon Icon="@Icons.Material.Filled.Home" Class="bp-housing-icon"/>
+                        <span class="bp-housing-value">@((_analysis?.Housing?.Total ?? 0f).ToString("0.00"))</span>
+                        <span class="bp-housing-label">@PerDayLines.First<br/>@PerDayLines.Second · ×@((_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</span>
+                    </div>
+                    <i class="bp-vsep"></i>
+                    <div class="@("bp-status-chip " + StatusClass)" @onclick="@(() => SetRightPanelAsync("issues"))">
+                        <MudIcon Icon="@(ErrorCount > 0 ? Icons.Material.Filled.Error : WarningCount > 0 ? Icons.Material.Filled.Warning : Icons.Material.Filled.Check)"/>
+                        <span>@StatusText</span>
+                    </div>
+                </div>
 
+                @* Réglages du plan : les champs écrivent dans le document via JS comme avant (setDefaults / setAnalysisOptions). *@
+                <div class="bp-settings-anchor">
+                    <div class="bp-settings-btn" @onclick="@(() => _settingsOpen = !_settingsOpen)">
+                        <MudIcon Icon="@Icons.Material.Filled.Settings" Class="bp-settings-icon"/>
+                        <span class="bp-settings-title">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
+                        <i class="bp-vsep bp-vsep-sm"></i>
+                        <span class="bp-settings-summary">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString())</span>
+                        <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Class="bp-settings-caret"/>
+                    </div>
+                    <MudOverlay Visible="_settingsOpen" VisibleChanged="@(v => _settingsOpen = v)" AutoClose="true" LockScroll="false"/>
+                    @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style, le reste sur le div intérieur. *@
+                    <MudPopover Open="_settingsOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8" Style="width: 520px; background: #3a3b46; border-radius: 6px;">
+                        <div class="bp-settings">
+                            <div class="bp-settings-head">
+                                <span class="bp-settings-heading">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
+                                <span class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Help")</span>
+                            </div>
+                            <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Construction")</div>
+                            <div class="bp-settings-grid bp-settings-grid-3">
+                                <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")"/>
+                                <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")">
+                                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Terrain")</MudSelectItem>
+                                    @foreach (var m in _clientCatalog!.Materials)
+                                    {
+                                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudSelect T="string" Value="@(_document.Defaults.CeilingMaterial ?? "")" ValueChanged="OnCeilingMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
+                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")">
+                                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.None")</MudSelectItem>
+                                    @foreach (var m in _clientCatalog!.Materials)
+                                    {
+                                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </div>
+                            <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Housing")</div>
+                            <div class="bp-settings-grid bp-settings-grid-2">
+                                <MudNumericField T="int" Value="@_document.Analysis.Residents" ValueChanged="OnResidentsChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Residents")"/>
+                                <div class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Settings.ResidentsHelp", _document.Analysis.Residents.ToString(), (_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</div>
+                            </div>
+                            <div class="bp-settings-foot">
+                                <span>@LocalizationService.GetTranslation("BuildingPlanner.Settings.Grid", _document.Grid.Width.ToString(), _document.Grid.Depth.ToString(), _document.Levels.Count.ToString())</span>
+                                <span class="bp-link" @onclick="OpenResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</span>
+                            </div>
+                        </div>
+                    </MudPopover>
+                </div>
             </MudStack>
         </MudPaper>
 
@@ -181,6 +223,11 @@ else
                         @RenderObjectList("other")
                     </MudTabPanel>
                 </MudTabs>
+                @* Zone Sélection : fiche de la pièce / de l'objet sélectionné, tiers bas du panneau, scroll interne. *@
+                <div class="bp-selection">
+                    <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
+                                              OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
+                </div>
             </MudPaper>
 
             <div class="bp-canvas-wrap">
@@ -208,12 +255,35 @@ else
                 </div>
             </div>
 
-            <MudPaper Class="bp-side bp-right" Elevation="1">
-                <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
-                                          OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
-                <MudDivider/>
-                <BuildingPlannerResults Document="_document" Analysis="_analysis" Catalog="_clientCatalog" OnFocusIssue="FocusIssueAsync"/>
-            </MudPaper>
+            @* Colonne droite : volet à la demande (un seul à la fois) + rail d'icônes toujours présent. *@
+            <div class="bp-right-col">
+                @if (_rightPanel is { } panel)
+                {
+                    <MudPaper Class="bp-side bp-panel" Elevation="1">
+                        <div class="bp-panel-head">
+                            <MudIcon Icon="@PanelIcon(panel)" Size="Size.Small"/>
+                            <span class="bp-panel-title">@PanelTitle(panel)</span>
+                            @if (panel == "issues" && IssueCount > 0)
+                            {
+                                <span class="@("bp-count-badge" + (ErrorCount > 0 ? " error" : ""))">@IssueCount</span>
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Class="ml-auto" OnClick="@(() => SetRightPanelAsync(null))"/>
+                        </div>
+                        <div class="bp-panel-body">
+                            <BuildingPlannerResults Panel="@panel" Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
+                                                    OnFocusIssue="FocusIssueAsync" OnFocusRoom="@(id => Js("selectRoom", id))"/>
+                        </div>
+                    </MudPaper>
+                }
+                <MudPaper Class="bp-side bp-rail" Elevation="1">
+                    @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom")
+                    @RailButton("issues", Icons.Material.Filled.Warning, "BuildingPlanner.Results.Issues", IssueCount > 0 ? IssueBadge : null)
+                    @RailButton("tables", Icons.Material.Filled.Handyman, "BuildingPlanner.Results.Tables", _analysis is { Tables.Count: > 0 } ? TablesDot : null)
+                    @RailButton("materials", Icons.Material.Filled.GridView, "BuildingPlanner.Results.Materials")
+                    <div class="bp-rail-spacer"></div>
+                    @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
+                </MudPaper>
+            </div>
         </div>
     </div>
 }
@@ -253,6 +323,11 @@ else
     private string? _selectionKind, _selectionId;
     private string _objectSearch = "";
     private readonly HashSet<string> _expandedGroups = [];
+    private string? _rightPanel;      // volet ouvert : housing | issues | tables | materials | assumptions, null = fermé
+    private bool _settingsOpen;
+
+    private const string RightPanelKey = "BuildingPlanner.RightPanel";
+    private static readonly string[] RightPanels = ["housing", "issues", "tables", "materials", "assumptions"];
 
     protected override void OnInitialized()
     {
@@ -312,6 +387,9 @@ else
         var ok = await JS.InvokeAsync<bool>("ecoBuildingPlanner.init", _containerId, _selfRef, new { roomLabel = LocalizationService.GetTranslation("BuildingPlanner.RoomDefaultName") });
         if (!ok) return;
         _jsInitialized = true;
+
+        var savedPanel = await LocalStorageService.GetItem(RightPanelKey);
+        if (RightPanels.Contains(savedPanel)) _rightPanel = savedPanel;
 
         await JS.InvokeVoidAsync("ecoBuildingPlanner.setCatalog", _containerId, _clientCatalog);
         await JS.InvokeVoidAsync("ecoBuildingPlanner.setMaterial", _containerId, _material);
@@ -413,6 +491,14 @@ else
     public void OnLevelChanged(int level)
     {
         _level = level;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnEscape()
+    {
+        if (_rightPanel is null) return;
+        await SetRightPanelAsync(null);
         StateHasChanged();
     }
 
@@ -522,6 +608,92 @@ else
         // height 0 = hauteur par défaut (évite de dépendre de la sérialisation des null vers le JS).
         await Js("updateLevel", _level, new { name, height });
     }
+
+    // ---- Rail / volet droit / bandeau -------------------------------------------------------------
+
+    private async Task SetRightPanelAsync(string? key)
+    {
+        _rightPanel = key;
+        if (key is null) await LocalStorageService.RemoveItem(RightPanelKey);
+        else await LocalStorageService.AddItem(RightPanelKey, key);
+    }
+
+    private Task ToggleRightPanelAsync(string key) => SetRightPanelAsync(_rightPanel == key ? null : key);
+
+    private async Task OpenResizeAsync()
+    {
+        _settingsOpen = false;
+        await ResizeAsync();
+    }
+
+    private int ErrorCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Error) ?? 0;
+    private int WarningCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Warning) ?? 0;
+    private int IssueCount => ErrorCount + WarningCount;   // les Info ne sont pas comptées (décision Romain)
+    private string StatusClass => ErrorCount > 0 ? "error" : WarningCount > 0 ? "warn" : "ok";
+
+    private string StatusText
+    {
+        get
+        {
+            if (ErrorCount > 0)
+            {
+                var errors = LocalizationService.GetTranslation("BuildingPlanner.Results.ErrorsCount", ErrorCount.ToString());
+                return WarningCount > 0 ? $"{errors}, {LocalizationService.GetTranslation("BuildingPlanner.Results.IssuesCount", WarningCount.ToString())}" : errors;
+            }
+            return WarningCount > 0
+                ? LocalizationService.GetTranslation("BuildingPlanner.Results.IssuesCount", WarningCount.ToString())
+                : LocalizationService.GetTranslation("BuildingPlanner.Results.NoIssue");
+        }
+    }
+
+    // « XP housing / jour » → deux lignes : « XP housing » / « / jour · ×m ».
+    private (string First, string Second) PerDayLines
+    {
+        get
+        {
+            var text = LocalizationService.GetTranslation("BuildingPlanner.Housing.PerDay");
+            var i = text.IndexOf(" / ", StringComparison.Ordinal);
+            return i < 0 ? (text, "") : (text[..i], text[(i + 1)..]);
+        }
+    }
+
+    private static string PanelIcon(string panel) => panel switch
+    {
+        "issues" => Icons.Material.Filled.Warning,
+        "tables" => Icons.Material.Filled.Handyman,
+        "materials" => Icons.Material.Filled.GridView,
+        "assumptions" => MDIIcons.Outline.Information,
+        _ => Icons.Material.Filled.Home,
+    };
+
+    private string PanelTitle(string panel) => LocalizationService.GetTranslation(panel switch
+    {
+        "issues" => "BuildingPlanner.Results.Issues",
+        "tables" => "BuildingPlanner.Results.Tables",
+        "materials" => "BuildingPlanner.Results.Materials",
+        "assumptions" => "BuildingPlanner.Assumptions.Title",
+        _ => "BuildingPlanner.Results.HousingByRoom",
+    });
+
+    private RenderFragment RailButton(string key, string icon, string labelKey, RenderFragment? badge = null) => __builder =>
+    {
+        <MudTooltip Text="@LocalizationService.GetTranslation(labelKey)" Placement="Placement.Left">
+            <div class="@("bp-rail-btn" + (_rightPanel == key ? " active" : "") + (key == "issues" ? " warn" : ""))" @onclick="@(() => ToggleRightPanelAsync(key))">
+                <MudIcon Icon="@icon"/>
+                @badge
+            </div>
+        </MudTooltip>
+    };
+
+    private RenderFragment IssueBadge => __builder =>
+    {
+        <span class="@("bp-rail-badge" + (ErrorCount > 0 ? " error" : ""))">@IssueCount</span>
+    };
+
+    private RenderFragment TablesDot => __builder =>
+    {
+        <span class="@("bp-rail-dot" + (_analysis!.Tables.All(t => t.Satisfied) ? "" : " warn"))"></span>
+    };
 
     private async Task FocusIssueAsync(PlanIssue issue)
     {
