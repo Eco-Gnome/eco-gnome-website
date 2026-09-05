@@ -21,7 +21,7 @@
             {
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingConfigMissing")</MudAlert>
             }
-            @* Une ligne par pièce, regroupées par catégorie (catégories limitées en dernier, comme le jeu) : valeur de la pièce,
+            @* Une ligne par pièce, regroupées par niveau puis par catégorie (catégories limitées en dernier, comme le jeu) : valeur de la pièce,
                puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
                la somme de la colonne Total retombe sur « avant multiplicateur ». *@
             <div class="bp-hrows">
@@ -30,11 +30,12 @@
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue")</span>
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</span>
                 </div>
-                @foreach (var cat in housing.Rooms.Select(r => r.Category).Distinct().OrderBy(c => CapPercent(c) > 0f ? 1 : 0))
+                @foreach (var levelGroup in housing.Rooms.GroupBy(r => Document?.FindRoom(r.RoomId)?.Level ?? 0).OrderBy(g => g.Key))
                 {
-                    var catLabel = CategoryLabel(cat);
-                    foreach (var row in housing.Rooms.Where(r => r.Category == cat).OrderBy(r => r.Rank))
+                    <div class="bp-theme-title">@LevelLabel(levelGroup.Key)</div>
+                    foreach (var row in levelGroup.OrderBy(r => CapPercent(r.Category) > 0f ? 1 : 0).ThenBy(r => r.Category).ThenBy(r => r.Rank))
                     {
+                        var catLabel = CategoryLabel(row.Category);
                         var entry = Document?.FindRoom(row.RoomId);
                         var roomHousing = Analysis.Rooms.FirstOrDefault(r => r.RoomId == row.RoomId)?.Housing;
                         var steps = roomHousing is null ? [] : HousingBreakdown.RoomSteps(roomHousing, housing, row.RoomId, CapPercent);
@@ -42,7 +43,7 @@
                         var reduced = effective < row.RoomValue - 0.005f;
                         <div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
                             <div class="bp-hrow-main">
-                                <span class="bp-ellipsis"><span class="bp-strong">@(entry?.Room.Name ?? row.RoomId)</span><span class="bp-muted"> · @(entry is { } e ? LevelLabel(e.Level) : "") · @catLabel</span></span>
+                                <span class="bp-ellipsis"><span class="bp-strong">@(entry?.Room.Name ?? row.RoomId)</span><span class="bp-muted"> · @catLabel</span></span>
                                 <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
                                 <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Catalog="Catalog"/></span>
                             </div>
