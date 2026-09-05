@@ -1030,8 +1030,15 @@
         "Materials": {
             "Walls": "Murs",
             "Floors": "Sols",
-            "Ceilings": "Plafonds",
-            "Total": "Total"
+            "Ceilings": "Plafonds"
+        },
+        "Price": {
+            "Object": "Objet",
+            "Quantity": "Qté",
+            "Unit": "Prix u.",
+            "Total": "Total",
+            "Missing": "{n} sans prix",
+            "DefaultHelp": "Moyenne des prix des joueurs du serveur (Economy viewer). Saisissez un prix pour la remplacer, × pour y revenir."
         },
         "Dialog": {
             "NoPlans": "Aucun plan sauvegardé pour l'instant.",

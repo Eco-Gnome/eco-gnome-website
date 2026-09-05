@@ -39,6 +39,7 @@ window.ecoBuildingPlanner = (function () {
         if (!plan.grid) plan.grid = { width: 25, depth: 20 };
         if (!plan.defaults) plan.defaults = { wallHeight: 3, floorMaterial: null, ceilingMaterial: null };
         if (!plan.analysis) plan.analysis = { residents: 1, propertyType: 'Residence' };
+        if (!plan.prices) plan.prices = {};
         if (!plan.levels || !plan.levels.length) {
             plan.levels = [{ name: '', height: null, walls: plan.walls || {}, floors: plan.floors || {}, holes: {}, rooms: plan.rooms || [], objects: plan.objects || [] }];
         }
@@ -1204,6 +1205,12 @@ window.ecoBuildingPlanner = (function () {
             const st = get(id); if (!st) return;
             st.plan.analysis = Object.assign({}, st.plan.analysis, options);
             commit(st, 'analysis');
+        },
+        // Prix unitaire saisi pour un matériau/objet (null = retour à la moyenne du serveur) ; pas d'historique, comme les options d'analyse.
+        setPrice: function (id, name, value) {
+            const st = get(id); if (!st) return;
+            if (value == null) delete st.plan.prices[name]; else st.plan.prices[name] = value;
+            commit(st, 'price');
         },
         setName: function (id, name) { const st = get(id); if (st) { st.plan.name = name; saveDraft(st); } },
         // Niveaux.

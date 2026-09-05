@@ -1169,6 +1169,18 @@ public class EconomyViewerService(IDbContextFactory<EcoCraftDbContext> factory)
         return deltaAbs > 0 ? "Higher" : "Lower";
     }
 
+    // Prix moyen par item (Name technique) parmi les prix des joueurs du serveur, hors listes de courses : la colonne « Moyenne » de l'Economy viewer.
+    public async Task<Dictionary<string, decimal>> GetAveragePricesByItemNameAsync(Guid serverId)
+    {
+        await using var context = await factory.CreateDbContextAsync();
+        var prices = await context.UserPrices
+            .AsNoTracking()
+            .Where(up => up.DataContext.UserServer.ServerId == serverId && !up.DataContext.IsShoppingList && (up.MarginPrice ?? up.Price) != null)
+            .Select(up => new { up.ItemOrTag.Name, Price = (up.MarginPrice ?? up.Price)!.Value })
+            .ToListAsync();
+        return prices.GroupBy(p => p.Name).ToDictionary(g => g.Key, g => g.Average(p => p.Price));
+    }
+
     private async Task<List<PriceFact>> GetPriceFactsAsync(EcoCraftDbContext context, Guid serverId)
     {
         var priceFacts = await context.UserPrices

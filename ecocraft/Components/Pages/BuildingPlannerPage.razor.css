@@ -40,7 +40,7 @@
 }
 
 /* .bp-side/.bp-left/.bp-panel/.bp-rail sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
-   directe ne matche jamais — on ancre sur .bp-body comme pour .bp-table plus bas. Sans ça le
+   directe ne matche jamais — on ancre sur .bp-body, vrai div de cette page. Sans ça le
    panneau droit ne scrolle pas en interne et déborde de la hauteur de page (scroll global). */
 .bp-body ::deep .bp-side {
     min-height: 0;
@@ -428,13 +428,6 @@
     color: #4fa3f7;
     font-weight: 500;
     cursor: pointer;
-}
-
-/* .bp-table est posé dans un composant enfant : l'isolation CSS ne lui met pas l'attribut de scope de cette page,
-   donc une règle directe ne matche jamais. On ancre sur .bp-body, vrai div de cette page. */
-.bp-body ::deep .bp-table td,
-.bp-body ::deep .bp-table th {
-    padding: 6px 8px;
 }
 
 .bp-canvas-wrap {

@@ -19,6 +19,7 @@ public sealed class PlanDocument
     public List<PlanLevel> Levels { get; set; } = [];
     public int GroundIndex { get; set; }          // index du niveau posé au sol ; numéro affiché = k − GroundIndex, index < GroundIndex = sous-sol
     public AnalysisOptions Analysis { get; set; } = new();
+    public Dictionary<string, decimal> Prices { get; set; } = new();   // prix unitaire saisi par Name d'item ; absent → moyenne des prix du serveur
 
     // Schéma 1 : un seul niveau, collections à la racine. Relues pour la migration, jamais réécrites.
     public Dictionary<string, WallCell>? Walls { get; set; }

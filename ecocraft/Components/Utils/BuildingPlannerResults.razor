@@ -1,5 +1,6 @@
 @using ecocraft.BuildingPlanner
 @using ecocraft.BuildingPlanner.Model
+@using ecocraft.Extensions
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 @inject ContextService ContextService
@@ -101,54 +102,41 @@
         else
         {
             @* Liste d'achat : quantité par type d'objet posé, groupée par spécialité qui le fabrique (sans spécialité en dernier)
-               pour faire ses courses boutique par boutique ; cliquer l'en-tête replie le groupe. *@
+               pour faire ses courses boutique par boutique ; cliquer l'en-tête replie le groupe. Prix unitaire (moyenne du serveur,
+               remplaçable) et total par ligne, sous-total par spécialité, total en pied. *@
+            @CostHead("BuildingPlanner.Price.Object")
             foreach (var g in Analysis.ObjectCounts.GroupBy(l => ObjectOf(l.Type)?.Skill ?? "").OrderBy(g => g.Key == "" ? 1 : 0).ThenBy(g => SkillLabel(g.First().Type)))
             {
                 var collapsed = _collapsedSkills.Contains(g.Key);
+                var sum = Sum(g.Select(l => (l.Type, l.Count)));
                 <div class="bp-theme-title bp-skill-title" @onclick="@(() => ToggleSkill(g.Key))">
                     <MudIcon Icon="@(collapsed ? Icons.Material.Filled.ChevronRight : Icons.Material.Filled.ExpandMore)" Size="Size.Small"/>
                     <span class="bp-ellipsis">@SkillLabel(g.First().Type)</span>
-                    <span class="bp-num">×@g.Sum(l => l.Count)</span>
+                    <span class="bp-num">
+                        ×@g.Sum(l => l.Count)
+                        @if (sum.Missing < g.Count()) { <span> · @Money(sum.Total)</span> }
+                    </span>
                 </div>
                 if (collapsed) continue;
                 foreach (var line in g.OrderBy(l => ObjectLabel(l.Type)))
                 {
-                    <div class="bp-orow">
-                        <MudImage Src="@($"/assets/eco-icons/{line.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
-                        <span class="bp-ellipsis">@ObjectLabel(line.Type)</span>
-                        <span class="bp-num bp-strong">×@line.Count</span>
-                    </div>
+                    @CostRow(line.Type, ObjectLabel(line.Type), line.Count, null)
                 }
             }
+            @CostFoot(Analysis.ObjectCounts.Select(l => (l.Type, l.Count)))
         }
         break;
 
     case "materials":
         @if (Analysis is not null && Analysis.Materials.Count > 0)
         {
-            <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
-                <thead>
-                <tr>
-                    <th>@LocalizationService.GetTranslation("BuildingPlanner.Material")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Materials.Walls")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Materials.Floors")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Materials.Ceilings")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Materials.Total")</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var m in Analysis.Materials)
-                {
-                    <tr>
-                        <td>@(Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material)</td>
-                        <td style="text-align:right">@m.Walls</td>
-                        <td style="text-align:right">@m.Floors</td>
-                        <td style="text-align:right">@m.Ceilings</td>
-                        <td style="text-align:right"><b>@m.Total</b></td>
-                    </tr>
-                }
-                </tbody>
-            </MudSimpleTable>
+            @* Liste d'achat des blocs : quantité par matériau (détail murs · sols · plafonds en sous-ligne), prix unitaire, total. *@
+            @CostHead("BuildingPlanner.Material")
+            foreach (var m in Analysis.Materials)
+            {
+                @CostRow(m.Material, Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material, m.Total, MaterialParts(m))
+            }
+            @CostFoot(Analysis.Materials.Select(m => (m.Material, m.Total)))
         }
         else
         {
@@ -175,6 +163,8 @@
     [Parameter] public string? SelectionId { get; set; }
     [Parameter] public EventCallback<PlanIssue> OnFocusIssue { get; set; }
     [Parameter] public EventCallback<string?> OnFocusRoom { get; set; }   // null = désélection (re-clic sur l'œil de la pièce sélectionnée)
+    [Parameter] public IReadOnlyDictionary<string, decimal>? DefaultPrices { get; set; }   // moyenne des prix du serveur par Name d'item
+    [Parameter] public EventCallback<(string Name, decimal? Price)> OnPriceChanged { get; set; }   // null = effacer la saisie (retour à la moyenne)
 
     private static readonly string[] AssumptionKeys =
     [
@@ -202,6 +192,69 @@
 
     private ClientObject? ObjectOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type);
     private string SkillLabel(string type) => ObjectOf(type)?.SkillLabel ?? LocalizationService.GetTranslation("BuildingPlanner.Objects.NoSkill");
+    private string IconUrl(string name) => $"/assets/eco-icons/{name}.png?serverId={ContextService.CurrentServer?.Id}";
+
+    // Prix unitaire d'une ligne : saisie du plan, sinon moyenne des prix du serveur, sinon aucun (ligne hors total).
+    private decimal? Override(string name) => Document is not null && Document.Prices.TryGetValue(name, out var p) ? p : null;
+    private decimal? DefaultPrice(string name) => DefaultPrices is not null && DefaultPrices.TryGetValue(name, out var p) ? p : null;
+    private decimal? LineTotal(string name, int count) => (Override(name) ?? DefaultPrice(name)) is { } p ? p * count : null;
+    private static string Money(decimal value) => Math.Round(value, 2, MidpointRounding.AwayFromZero).ToString("0.##") + " $";
+
+    private (decimal Total, int Missing) Sum(IEnumerable<(string Name, int Count)> lines)
+    {
+        decimal total = 0;
+        var missing = 0;
+        foreach (var (name, count) in lines)
+        {
+            if (LineTotal(name, count) is { } t) total += t; else missing++;
+        }
+        return (total, missing);
+    }
+
+    // Détail murs · sols · plafonds d'un matériau (parts non nulles), en sous-ligne.
+    private string MaterialParts(MaterialCostLine m) => string.Join(" · ", new[] { ("Walls", m.Walls), ("Floors", m.Floors), ("Ceilings", m.Ceilings) }
+        .Where(p => p.Item2 > 0).Select(p => $"{LocalizationService.GetTranslation($"BuildingPlanner.Materials.{p.Item1}")} {p.Item2}"));
+
+    // Lignes de coût des volets Matériaux et Mobilier : en-tête, ligne (icône, libellé + sous-ligne, ×quantité, prix unitaire, total), pied.
+    // Le champ prix reprend les champs du calculateur de prix (rectangle-input, 0.##, virgule ou point) ; vide = moyenne du serveur en
+    // placeholder, la croix efface la saisie et y revient.
+    private RenderFragment CostHead(string firstKey) =>
+        @<div class="bp-crow-head">
+            <span></span>
+            <span>@LocalizationService.GetTranslation(firstKey)</span>
+            <span>@LocalizationService.GetTranslation("BuildingPlanner.Price.Quantity")</span>
+            <span title="@LocalizationService.GetTranslation("BuildingPlanner.Price.DefaultHelp")">@LocalizationService.GetTranslation("BuildingPlanner.Price.Unit")</span>
+            <span>@LocalizationService.GetTranslation("BuildingPlanner.Price.Total")</span>
+        </div>;
+
+    private RenderFragment CostRow(string name, string label, int count, string? sub) =>
+        @<div class="bp-orow bp-crow">
+            <MudImage Src="@IconUrl(name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+            <div class="bp-ellipsis">
+                @label
+                @if (sub is not null) { <div class="bp-crow-sub bp-muted">@sub</div> }
+            </div>
+            <span class="bp-num bp-strong">×@count</span>
+            <MudNumericField T="decimal?" Value="@Override(name)" ValueChanged="@(v => OnPriceChanged.InvokeAsync((name, v is { } p ? Math.Max(0, p) : null)))"
+                             Immediate="true" DebounceInterval="250" Format="0.##" Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+                             Min="0" HideSpinButtons="true" Clearable="true" Variant="Variant.Outlined"
+                             Placeholder="@(DefaultPrice(name) is { } d ? Math.Round(d, 2, MidpointRounding.AwayFromZero).ToString("0.##") : "—")"
+                             Class="rectangle-input small-adornment bp-price"/>
+            <span class="bp-num">@(LineTotal(name, count) is { } t ? Money(t) : "—")</span>
+        </div>;
+
+    private RenderFragment CostFoot(IEnumerable<(string Name, int Count)> lines) =>
+        @<div class="bp-orow bp-crow bp-crow-total">
+            @{ var (total, missing) = Sum(lines); }
+            <span></span>
+            <div class="bp-ellipsis">
+                @LocalizationService.GetTranslation("BuildingPlanner.Price.Total")
+                @if (missing > 0) { <span class="bp-muted">&nbsp;(@LocalizationService.GetTranslation("BuildingPlanner.Price.Missing", missing.ToString()))</span> }
+            </div>
+            <span></span>
+            <span></span>
+            <span class="bp-num bp-strong">@Money(total)</span>
+        </div>;
 
     // Groupes repliés du volet Mobilier (tous dépliés par défaut) ; "" = sans spécialité.
     private readonly HashSet<string> _collapsedSkills = [];

@@ -1038,8 +1038,15 @@
         "Materials": {
             "Walls": "Walls",
             "Floors": "Floors",
-            "Ceilings": "Ceilings",
-            "Total": "Total"
+            "Ceilings": "Ceilings"
+        },
+        "Price": {
+            "Object": "Object",
+            "Quantity": "Qty",
+            "Unit": "Unit price",
+            "Total": "Total",
+            "Missing": "{n} without price",
+            "DefaultHelp": "Average of the server players' prices (Economy viewer). Type a price to override it, × to go back to it."
         },
         "Dialog": {
             "NoPlans": "No saved plan yet.",

@@ -13,6 +13,7 @@
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
 @inject BuildingPlannerService BuildingPlannerService
+@inject EconomyViewerService EconomyViewerService
 @inject ServerDbService ServerDbService
 @inject DataContextDbService DataContextDbService
 @inject IDialogService DialogService
@@ -265,7 +266,8 @@ else
                         </div>
                         <div class="bp-panel-body">
                             <BuildingPlannerResults Panel="@panel" Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
-                                                    OnFocusIssue="FocusIssueAsync" OnFocusRoom="@(id => Js("selectRoom", id))"/>
+                                                    OnFocusIssue="FocusIssueAsync" OnFocusRoom="@(id => Js("selectRoom", id))"
+                                                    DefaultPrices="_defaultPrices" OnPriceChanged="@(p => Js("setPrice", p.Name, p.Price))"/>
                         </div>
                     </MudPaper>
                 }
@@ -307,6 +309,7 @@ else
     private PlanDocument _document = PlanDocument.Empty();
     private AnalysisResult? _analysis;
     private BuildingPlan? _savedPlan;
+    private Dictionary<string, decimal> _defaultPrices = new();   // moyenne des prix joueurs du serveur par Name : défaut des champs prix des volets
 
     private string _tool = "select";
     private string? _material;
@@ -369,6 +372,7 @@ else
 
         _catalog = BuildingPlannerService.GetCatalog(serverData, dataContext);
         _clientCatalog = BuildingPlannerService.GetClientCatalog(_catalog, serverData);
+        _defaultPrices = await EconomyViewerService.GetAveragePricesByItemNameAsync(ContextService.CurrentServer.Id);
         _material ??= _clientCatalog.Materials.FirstOrDefault(m => m.IsRoomMaterialOption)?.Name ?? _clientCatalog.Materials.FirstOrDefault()?.Name;
 
         _loading = false;
