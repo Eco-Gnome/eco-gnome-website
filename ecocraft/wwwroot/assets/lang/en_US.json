@@ -998,7 +998,7 @@
             "Issues": "Warnings",
             "IssuesCount": "{n} warnings",
             "ErrorsCount": "{n} errors",
-            "Tables": "Tables",
+            "Objects": "Furniture",
             "Materials": "Materials",
             "Pending": "Draw walls and add a room to start the analysis.",
             "NoIssue": "Everything checks out.",
@@ -1025,10 +1025,12 @@
         },
         "Tables": {
             "Tier": "Room tier",
-            "Volume": "Volume",
             "Containment": "Must be inside an enclosed room",
-            "ModulesInactive": "table works, modules inactive",
-            "None": "No crafting table with room requirements on the plan."
+            "ModulesInactive": "table works, modules inactive"
+        },
+        "Objects": {
+            "Furniture": "Furniture",
+            "None": "No object placed on the plan."
         },
         "Materials": {
             "Walls": "Walls",

@@ -990,7 +990,7 @@
             "Issues": "Avertissements",
             "IssuesCount": "{n} avertissements",
             "ErrorsCount": "{n} erreurs",
-            "Tables": "Tables",
+            "Objects": "Mobilier",
             "Materials": "Matériaux",
             "Pending": "Dessinez des murs et ajoutez une pièce pour lancer l'analyse.",
             "NoIssue": "Tout est bon.",
@@ -1017,10 +1017,12 @@
         },
         "Tables": {
             "Tier": "Tier de la pièce",
-            "Volume": "Volume",
             "Containment": "Doit être dans une pièce fermée",
-            "ModulesInactive": "table OK, modules inactifs",
-            "None": "Aucune table de craft avec exigences de pièce sur le plan."
+            "ModulesInactive": "table OK, modules inactifs"
+        },
+        "Objects": {
+            "Furniture": "Mobilier",
+            "None": "Aucun objet posé sur le plan."
         },
         "Materials": {
             "Walls": "Murs",

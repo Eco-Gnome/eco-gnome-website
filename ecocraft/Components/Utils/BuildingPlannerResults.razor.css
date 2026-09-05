@@ -1,4 +1,4 @@
-/* Contenu des volets du rail (housing, avertissements, tables, matériaux, hypothèses).
+/* Contenu des volets du rail (housing, avertissements, mobilier, matériaux, hypothèses).
    Toutes ces classes sont sur des div/span de ce composant : règles scoped directes. */
 .bp-muted {
     color: rgba(255, 255, 255, 0.55);
@@ -106,6 +106,17 @@
 
 .bp-theme-title:first-child {
     padding-top: 0;
+}
+
+/* Liste d'achat (volet Mobilier) : icône, libellé, quantité. */
+.bp-orow {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 6px;
+    font-size: 12.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .bp-issue {

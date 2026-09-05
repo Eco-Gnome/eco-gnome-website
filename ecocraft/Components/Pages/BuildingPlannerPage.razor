@@ -272,7 +272,7 @@ else
                 <MudPaper Class="bp-side bp-rail" Elevation="1">
                     @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom")
                     @RailButton("issues", Icons.Material.Filled.Warning, "BuildingPlanner.Results.Issues", IssueCount > 0 ? IssueBadge : null)
-                    @RailButton("tables", Icons.Material.Filled.Handyman, "BuildingPlanner.Results.Tables", _analysis is { Tables.Count: > 0 } ? TablesDot : null)
+                    @RailButton("objects", Icons.Material.Filled.Chair, "BuildingPlanner.Results.Objects")
                     @RailButton("materials", Icons.Material.Filled.GridView, "BuildingPlanner.Results.Materials")
                     <div class="bp-rail-spacer"></div>
                     @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
@@ -317,11 +317,11 @@ else
     private string? _selectionKind, _selectionId;
     private string _objectSearch = "";
     private readonly HashSet<string> _expandedGroups = [];
-    private string? _rightPanel;      // volet ouvert : housing | issues | tables | materials | assumptions, null = fermé
+    private string? _rightPanel;      // volet ouvert : housing | issues | objects | materials | assumptions, null = fermé
     private bool _settingsOpen;
 
     private const string RightPanelKey = "BuildingPlanner.RightPanel";
-    private static readonly string[] RightPanels = ["housing", "issues", "tables", "materials", "assumptions"];
+    private static readonly string[] RightPanels = ["housing", "issues", "objects", "materials", "assumptions"];
 
     protected override void OnInitialized()
     {
@@ -656,7 +656,7 @@ else
     private static string PanelIcon(string panel) => panel switch
     {
         "issues" => Icons.Material.Filled.Warning,
-        "tables" => Icons.Material.Filled.Handyman,
+        "objects" => Icons.Material.Filled.Chair,
         "materials" => Icons.Material.Filled.GridView,
         "assumptions" => MDIIcons.Outline.Information,
         _ => Icons.Material.Filled.Home,
@@ -665,7 +665,7 @@ else
     private string PanelTitle(string panel) => LocalizationService.GetTranslation(panel switch
     {
         "issues" => "BuildingPlanner.Results.Issues",
-        "tables" => "BuildingPlanner.Results.Tables",
+        "objects" => "BuildingPlanner.Results.Objects",
         "materials" => "BuildingPlanner.Results.Materials",
         "assumptions" => "BuildingPlanner.Assumptions.Title",
         _ => "BuildingPlanner.Results.HousingByRoom",
@@ -684,11 +684,6 @@ else
     private RenderFragment IssueBadge => __builder =>
     {
         <span class="@("bp-rail-badge" + (ErrorCount > 0 ? " error" : ""))">@IssueCount</span>
-    };
-
-    private RenderFragment TablesDot => __builder =>
-    {
-        <span class="@("bp-rail-dot" + (_analysis!.Tables.All(t => t.Satisfied) ? "" : " warn"))"></span>
     };
 
     private async Task FocusIssueAsync(PlanIssue issue)

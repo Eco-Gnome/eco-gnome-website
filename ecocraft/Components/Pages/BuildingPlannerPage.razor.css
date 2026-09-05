@@ -158,20 +158,6 @@
     place-items: center;
 }
 
-.bp-rail-dot {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #3ec26a;
-}
-
-.bp-rail-dot.warn {
-    background: #ff9800;
-}
-
 .bp-rail-spacer {
     flex: 1 1 auto;
 }

@@ -2,6 +2,7 @@
 @using ecocraft.BuildingPlanner.Model
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
+@inject ContextService ContextService
 
 @* Un volet à la fois (Panel) : le rail et l'entête du volet sont dans BuildingPlannerPage. *@
 @switch (Panel)
@@ -89,39 +90,32 @@
         }
         break;
 
-    case "tables":
-        @if (Analysis is { Tables.Count: > 0 })
+    case "objects":
+        @if (Analysis is null)
         {
-            <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>@LocalizationService.GetTranslation("CraftingTable")</th>
-                    <th>@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Tables.Tier")</th>
-                    <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Tables.Volume")</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var t in Analysis.Tables)
-                {
-                    <tr>
-                        <td><MudIcon Icon="@(t.Satisfied ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Error)" Color="@(t.Satisfied ? Color.Success : (t.TierOk && !t.ModulesOk ? Color.Warning : Color.Error))" Size="Size.Small"/></td>
-                        <td>@ObjectLabel(t.Type)</td>
-                        <td>@(t.RoomId is null ? "—" : RoomLabel(t.RoomId))</td>
-                        <td style="text-align:right; white-space: nowrap;">
-                            <span style="@(t.TierOk ? "" : "color: var(--mud-palette-error)")">@t.RoomTier.ToString("0.00") / @(t.EffectiveTier?.ToString("0.00") ?? "—")</span>
-                            @if (t.TierOk && !t.ModulesOk) { <MudIcon Icon="@Icons.Material.Filled.Extension" Color="Color.Warning" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Tables.ModulesInactive")"/> }
-                        </td>
-                        <td style="text-align:right; white-space: nowrap; @(t.VolumeOk ? "" : "color: var(--mud-palette-error)")">@t.RoomVolumeUsed / @t.RoomVolume</td>
-                    </tr>
-                }
-                </tbody>
-            </MudSimpleTable>
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</div>
+        }
+        else if (Analysis.ObjectCounts.Count == 0)
+        {
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Objects.None")</div>
         }
         else
         {
-            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Tables.None")</div>
+            @* Liste d'achat : quantité par type d'objet posé, groupée comme la palette (Tables, Portes, Mobilier, Autres). *@
+            foreach (var g in ObjectGroups)
+            {
+                var lines = Analysis.ObjectCounts.Where(l => ObjectGroupOf(l.Type) == g.Group).OrderBy(l => ObjectLabel(l.Type)).ToList();
+                if (lines.Count == 0) continue;
+                <div class="bp-theme-title">@LocalizationService.GetTranslation(g.LabelKey)</div>
+                foreach (var line in lines)
+                {
+                    <div class="bp-orow">
+                        <MudImage Src="@($"/assets/eco-icons/{line.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+                        <span class="bp-ellipsis">@ObjectLabel(line.Type)</span>
+                        <span class="bp-num bp-strong">×@line.Count</span>
+                    </div>
+                }
+            }
         }
         break;
 
@@ -202,6 +196,14 @@
 
     private static string ThemeOf(string code) => IssueTheme.GetValueOrDefault(code, "Data");
 
+    // Volet Mobilier : mêmes familles et même ordre que la palette d'objets (Group calculé par BuildingPlannerCatalogService).
+    private static readonly (string Group, string LabelKey)[] ObjectGroups =
+    [
+        ("table", "BuildingPlanner.Catalog.Tables"), ("door", "BuildingPlanner.Catalog.Doors"), ("housing", "BuildingPlanner.Objects.Furniture"), ("other", "BuildingPlanner.Catalog.Others"),
+    ];
+
+    private string ObjectGroupOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type)?.Group ?? "other";
+
     // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
     // puis ses objets avec leur valeur réellement comptée ; pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…)
     // et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange comme les autres règles.
@@ -270,14 +272,5 @@
     {
         var name = Document is not null && level < Document.Levels.Count ? Document.Levels[level].Name : "";
         return string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Level.Default", Document?.DisplayNumber(level).ToString() ?? "") : name;
-    }
-
-    // Nom de pièce préfixé par son niveau dès qu'il y a plusieurs niveaux.
-    private string RoomLabel(string roomId)
-    {
-        var entry = Document?.FindRoom(roomId);
-        if (entry is null || Document is null) return roomId;
-        if (Document.Levels.Count <= 1) return entry.Value.Room.Name;
-        return $"{LevelLabel(entry.Value.Level)} · {entry.Value.Room.Name}";
     }
 }
