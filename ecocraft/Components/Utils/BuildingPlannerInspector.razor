@@ -126,7 +126,7 @@
             var steps = roomHousing is null || placed?.RoomId is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis?.Housing, placed.RoomId, CapPercent);
             var adjusted = housingLine is null ? 0f : housingLine.Value * HousingBreakdown.ObjectFactor(steps, housingLine.Category);
             <div class="@(housingLine is { Excluded: true } ? "bp-insp-warn" : "bp-insp-muted")">
-                <span>@CategoryLabel(info.HousingCategory) </span>
+                <span>@CategoryLabel(info.HousingCategory)&nbsp;</span>
                 @if (housingLine is null) { <span> +@(info.HousingValue?.ToString("0.##") ?? "?")</span> }
                 else if (housingLine.Excluded) { <span> : @LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", CategoryLabel(roomHousing!.PrimaryCategory))</span> }
                 else
