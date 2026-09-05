@@ -1,4 +1,4 @@
-{
+﻿{
     "Onboarding": {
         "Steps": {
             "Skills": {
@@ -891,7 +891,7 @@
         "Wip": "Work in progress",
         "WipTooltip": "This tool is still under development: results may differ from the game.",
         "NoData": "The building planner needs building data (occupancy, block tiers, room and housing configuration). Update [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) on the server to the latest version (export version 5), then upload the newly generated data file.",
-        "Hint": "1: select · 2: walls · 3: opening · H: pan · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · Shift+click: place object again · R: rotate · Del: delete object · Ctrl+Z/Y: undo/redo · wheel: zoom · Alt+drag or middle click: pan · double click: select · PgUp/PgDn: level",
+        "Hint": "1: select · 2: walls · 3: opening · H: pan · Esc: drop the tool, deselect, close the panel · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · right click on empty space: drop the tool · click: place the object · Shift+click: place again · drag an object: move it · R: rotate · Del: delete object · middle click: copy the object or material under the cursor · double click: select · wheel: zoom · Alt+drag or middle drag: pan · PgUp/PgDn: level · Ctrl+Z/Y: undo/redo · Ctrl+S: save",
         "Shortcuts": "Shortcuts",
         "RoomDefaultName": "Room",
         "Material": "Material",
@@ -902,7 +902,6 @@
         "ZoomOut": "Zoom out",
         "Fit": "Fit to screen",
         "Residents": "Residents",
-        "Target": "Housing target",
         "ConfirmDiscard": "This plan has unsaved changes. Discard them?",
         "Tool": {
             "select": "Select / move (1)",
@@ -916,7 +915,19 @@
             "Floor": "Default floor",
             "Ceiling": "Default ceiling",
             "Terrain": "Terrain (tier 0)",
+            "TerrainHelp": "Terrain = tier 0, caps housing",
+            "CeilingRequired": "Required: without a ceiling every room leaks (tier 0, no housing)",
             "None": "None"
+        },
+        "Settings": {
+            "Title": "Plan settings",
+            "Help": "Apply to the whole plan · Ctrl+S to save",
+            "Construction": "Construction",
+            "Housing": "Housing",
+            "ResidentsHelp": "The residents multiplier applies to the total. With {n} resident(s): ×{m}.",
+            "Summary": "Walls {height} · {n} resident(s)",
+            "CeilingTodo": "Ceiling to set",
+            "Grid": "Grid {w} × {d} · {n} levels"
         },
         "Legend": {
             "Slab": "Slab: ceiling below or painted floor",
@@ -953,9 +964,7 @@
             "Untitled": "Untitled plan"
         },
         "Catalog": {
-            "All": "All",
             "Tables": "Tables",
-            "Furniture": "Furniture",
             "Doors": "Doors",
             "Others": "Others",
             "Misc": "Misc",
@@ -970,58 +979,74 @@
         },
         "Inspector": {
             "Room": "Room",
-            "Height": "Height (empty = wall height)",
+            "Height": "Height",
             "DefaultMaterial": "Default",
-            "LockCategory": "Room category",
-            "AutoCategory": "Automatic (like in game)",
             "Contained": "Enclosed",
-            "Volume": "Volume",
+            "NotContained": "Not enclosed",
             "Tier": "Tier",
-            "WallBlocks": "wall blocks",
-            "Composition": "Composition",
-            "VolumeUsed": "Volume used by tables",
             "Z": "Height (z)",
             "AttachedTo": "Stacked on {parent}",
             "Placed": "Placed",
             "NotPlaced": "Not placed",
-            "NoRoom": "Outside any room",
+            "NoRoom": "No room",
             "UnknownType": "Not available on this server",
-            "RequiredTier": "Requires tier",
-            "RequiredVolume": "volume",
-            "NothingSelected": "Select a room seed or an object to edit it. Double-click on the plan also selects."
+            "NothingSelected": "Click a room or an object on the plan to edit it."
         },
         "Results": {
-            "Validation": "Validation",
             "Housing": "Housing",
-            "Tables": "Tables",
+            "HousingByRoom": "Housing per room",
+            "Issues": "Warnings",
+            "IssuesCount": "{n} warnings",
+            "ErrorsCount": "{n} errors",
+            "Objects": "Furniture",
             "Materials": "Materials",
             "Pending": "Draw walls and add a room to start the analysis.",
-            "RoomsOk": "rooms enclosed",
-            "TablesOk": "tables satisfied",
-            "NoIssue": "Everything checks out."
+            "NoIssue": "Everything checks out.",
+            "Theme": {
+                "Rooms": "Rooms",
+                "Housing": "Housing",
+                "Tables": "Tables",
+                "Data": "Data"
+            }
         },
         "Housing": {
-            "Category": "Category",
-            "RoomValue": "Room value",
-            "Contribution": "Contribution",
             "Total": "Total",
+            "Outdoor": "Outdoor",
+            "OutdoorHelp": "Objects outside any room, all levels together (garden, uncovered balcony). No tier cap; at most 100 % of the main rooms.",
             "PerDay": "housing XP / day",
             "BeforeOccupancy": "Before residents multiplier",
-            "CategoryCapped": "{category} capped to {after} (was {before}): this category can be at most {percent} of the value of the primary rooms (currently {rest}).",
-            "Excluded": "does not count for this room category"
+            "Ignored": "Ignored: doesn't support {category}",
+            "Support": "(support)",
+            "RepeatInfo": "Object #{rank} of type « {type} » in the room: × {percent} (diminishing return).",
+            "PropertyInfo": "Already present elsewhere on the property: × {percent}.",
+            "RankInfo": "{category} #{rank}: {percent} of its value. The first room of a category counts fully (one per resident, here {n}), the next ones less and less.",
+            "SupportCapInfo": "Support category: at most {percent} of the primary category {category} ({primary}).",
+            "TierCapInfo": "Tier {tier}: soft-cap at {softcap}. Above it, additional value diminishes exponentially.",
+            "SoftCapped": "Room value was soft-capped from {from} to {to} due to materials (tier {tier}, soft-cap {softcap}): {percent} reduction.",
+            "ShowRoom": "Show the room on the plan",
+            "CategoryCapInfo": "{category} rooms can be at most {percent} of the value of the primary rooms (currently {rest}). Dropping value from {before} to {after}: −{reduction}."
         },
         "Tables": {
             "Tier": "Room tier",
-            "Volume": "Volume",
             "Containment": "Must be inside an enclosed room",
-            "ModulesInactive": "table works, modules inactive",
-            "None": "No crafting table with room requirements on the plan."
+            "ModulesInactive": "table works, modules inactive"
+        },
+        "Objects": {
+            "NoSkill": "No specialty",
+            "None": "No object placed on the plan."
         },
         "Materials": {
             "Walls": "Walls",
             "Floors": "Floors",
-            "Ceilings": "Ceilings",
-            "Total": "Total"
+            "Ceilings": "Ceilings"
+        },
+        "Price": {
+            "Object": "Object",
+            "Quantity": "Qty",
+            "Unit": "Unit price",
+            "Total": "Total",
+            "Missing": "{n} without price",
+            "DefaultHelp": "Average of the server players' prices (Economy viewer). Type a price to override it, × to go back to it."
         },
         "Dialog": {
             "NoPlans": "No saved plan yet.",
@@ -1079,7 +1104,7 @@
             "NoRoomDefined": "No room detected: enclose an area with walls (Walls tool, key 2) — the room is created automatically.",
             "NoSupportBelow": "« {type} » has nothing solid below it.",
             "RoomTooBig": "Room « {room} » is too big: a cell is more than 70 m from the seed.",
-            "NoCeiling": "Room « {room} » leaks: nothing solid above at height {height} (missing wall, ceiling or corner).",
+            "NoCeiling": "Room « {room} » is not covered at height {height} (missing wall, ceiling or corner): its objects count as outdoor.",
             "VolumeTooSmall": "Room « {room} » is too small (volume must be at least 3).",
             "RoomInvalid": "Room « {room} » is invalid.",
             "EmptyEdges": "Room « {room} »: {count} empty edge(s) (diagonal air) count as tier 0 — without them the tier would be {tier}.",
@@ -1101,7 +1126,7 @@
             "Paint": "Painted blocks: bonus not applied (0).",
             "Pollution": "Ground pollution penalty: not applied.",
             "Culture": "Cultural multiplier of the deed: ×1. Admin boosts: 0.",
-            "Deed": "One deed fully owned; objects outside rooms give no housing.",
+            "Deed": "One deed fully owned; objects outside rooms form its « Outdoor » room.",
             "Efficiency": "All objects enabled at 100 % operating efficiency, no dynamic value (picture frames…).",
             "Talents": "Lavish / Frugal talents on room tier requirements are ignored.",
             "Modules": "Module tier bumps come from the modules installed on each table type in your default data context.",

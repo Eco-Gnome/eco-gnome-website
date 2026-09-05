@@ -68,7 +68,7 @@ public sealed class TableCheck
     public bool RequiresContainment { get; init; }
     public bool ContainmentOk { get; init; }
     public bool InRoom { get; init; }
-    public bool Satisfied => InRoom && TierOk && VolumeOk && ContainmentOk;
+    public bool Satisfied => (InRoom || !RequiresContainment) && TierOk && VolumeOk && ContainmentOk;   // hors pièce : valide sans confinement ni tier exigés
 }
 
 public sealed class ObjectHousingLine
@@ -77,8 +77,10 @@ public sealed class ObjectHousingLine
     public required string Type { get; init; }
     public required string Category { get; init; }
     public string TypeForRoomLimit { get; init; } = "";
+    public float BaseValue { get; init; }               // valeur catalogue
     public float FurnishingValue { get; init; }         // valeur de base × pénalité propriété
     public float Multiplier { get; init; }              // rendement décroissant dans la pièce
+    public int Rank { get; init; }                      // rang dans son groupe TypeForRoomLimit (0 = premier)
     public float Value { get; init; }
     public bool Excluded { get; init; }
 }
@@ -115,7 +117,6 @@ public sealed class RoomContribution
 public sealed class PropertyHousingResult
 {
     public int Residents { get; init; }
-    public float? Target { get; init; }
     public float Total { get; set; }
     public float TotalBeforeOccupancy { get; set; }
     public float OccupancyMultiplier { get; set; } = 1f;
@@ -123,7 +124,6 @@ public sealed class PropertyHousingResult
     public Dictionary<string, float> CapAppliedByCategory { get; set; } = new();  // catégorie → plafond appliqué (valeur avant)
     public float UncappedTotal { get; set; }                                       // somme des pièces principales (base des plafonds)
     public List<RoomContribution> Rooms { get; set; } = [];
-    public bool TargetReached => Target is null || Total >= Target.Value;
 }
 
 public sealed class MaterialCostLine
@@ -148,6 +148,7 @@ public sealed class AnalysisResult
     public List<RoomAnalysis> Rooms { get; init; } = [];
     public List<TableCheck> Tables { get; init; } = [];
     public PropertyHousingResult? Housing { get; init; }
+    public RoomHousingResult? OutdoorHousing { get; init; }  // pièce « Extérieur » du deed (RoomId = PlanAnalyzer.OutdoorRoomId), null sans objet dehors
     public List<MaterialCostLine> Materials { get; init; } = [];
     public List<ObjectCostLine> ObjectCounts { get; init; } = [];
     public List<PlacedObjectResult> Objects { get; init; } = [];

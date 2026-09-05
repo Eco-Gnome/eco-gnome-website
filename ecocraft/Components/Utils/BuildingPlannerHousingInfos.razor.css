@@ -1,0 +1,8 @@
+/* Tooltip combiné : une réduction par ligne, aligné à gauche (MudTooltip centre par défaut). */
+.bp-info-lines {
+    text-align: left;
+}
+
+.bp-info-lines div + div {
+    margin-top: 4px;
+}

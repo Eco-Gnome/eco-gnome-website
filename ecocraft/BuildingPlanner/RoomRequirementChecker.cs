@@ -36,10 +36,12 @@ public static class RoomRequirementChecker
 
             // RoomRequirementsComponent : la table exige son tier de base ; le bump des modules non atteint
             // laisse la table fonctionnelle mais désactive les modules.
-            var tierOk = inRoom && contained && (req.MaterialTier is null || roomTier >= req.MaterialTier.Value);
-            var modulesOk = inRoom && contained && (effective is null || roomTier >= effective.Value);
+            // Hors pièce sans exigence de confinement (banc, table de jardin) : valide en jeu tant qu'aucun tier n'est exigé.
+            var outdoors = obj.Placed && !inRoom && !req.RequiresContainment;
+            var tierOk = outdoors ? req.MaterialTier is null : inRoom && contained && (req.MaterialTier is null || roomTier >= req.MaterialTier.Value);
+            var modulesOk = outdoors ? tierOk : inRoom && contained && (effective is null || roomTier >= effective.Value);
 
-            var volumeOk = inRoom && contained && volumeUsed <= roomVolume;
+            var volumeOk = outdoors || (inRoom && contained && volumeUsed <= roomVolume);
             var containmentOk = !req.RequiresContainment || (inRoom && contained);
 
             results.Add(new TableCheck

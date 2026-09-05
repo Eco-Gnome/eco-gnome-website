@@ -155,6 +155,14 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
         var itemsByName = serverData.ItemOrTags.Where(i => !i.IsTag).ToDictionary(i => i.Name, i => i, StringComparer.Ordinal);
         string Label(string name) => itemsByName.TryGetValue(name, out var item) ? localizationService.GetTranslation(item) : name;
 
+        // Spécialité qui fabrique chaque objet (liste d'achat) : une recette sans spécialité l'emporte (tout le monde peut la faire),
+        // sinon celle demandant le niveau le plus bas.
+        var itemsById = serverData.ItemOrTags.ToDictionary(i => i.Id, i => i.Name);
+        var skillByItem = serverData.Recipes
+            .SelectMany(r => r.Elements.Where(e => e.Quantity.BaseValue > 0 && itemsById.ContainsKey(e.ItemOrTagId)).Select(e => (Item: itemsById[e.ItemOrTagId], Recipe: r)))
+            .GroupBy(x => x.Item, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Recipe.Skill is null ? 0 : 1).ThenBy(x => x.Recipe.SkillLevel).First().Recipe.Skill, StringComparer.Ordinal);
+
         var materials = catalog.Materials.Values
             .Where(m => m.CountsAsWall && m.Tier >= 1)
             .Select(m => new ClientMaterial
@@ -188,6 +196,8 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
                 RequiredVolume = o.Requirements?.Volume ?? 0,
                 RequiresContainment = o.Requirements?.RequiresContainment ?? false,
                 IsDefaultOccupancy = o.IsDefaultOccupancy,
+                Skill = skillByItem.GetValueOrDefault(o.Name)?.Name,
+                SkillLabel = skillByItem.GetValueOrDefault(o.Name) is { } skill ? localizationService.GetTranslation(skill) : null,
                 Group = o.IsCraftingTable || (o.Housing is null && o.Requirements?.MaterialTier is not null) ? "table" : o.HasWallCells ? "door" : o.Housing is not null ? "housing" : "other",
             })
             .OrderBy(o => o.Group).ThenBy(o => o.HousingCategory).ThenBy(o => o.Label)
@@ -242,6 +252,8 @@ public sealed class ClientObject
     public int RequiredVolume { get; init; }
     public bool RequiresContainment { get; init; }
     public bool IsDefaultOccupancy { get; init; }
+    public string? Skill { get; init; }                  // spécialité qui le fabrique (null : aucune recette ou recette sans spécialité)
+    public string? SkillLabel { get; init; }
     public required string Group { get; init; }
 }
 

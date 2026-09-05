@@ -7,12 +7,12 @@ namespace ecocraft.BuildingPlanner;
 // somme, × multiplicateur d'occupation. Culture ×1 et boost admin 0 en v1.
 public static class PropertyScorer
 {
-    public static PropertyHousingResult Score(IReadOnlyList<RoomHousingResult> rooms, int residents, float? target, Catalog catalog)
+    public static PropertyHousingResult Score(IReadOnlyList<RoomHousingResult> rooms, int residents, Catalog catalog)
     {
         var rules = catalog.Housing;
         var build = catalog.Build;
         var residentsNumber = residents <= 0 ? 1 : residents;
-        var result = new PropertyHousingResult { Residents = residentsNumber, Target = target };
+        var result = new PropertyHousingResult { Residents = residentsNumber };
 
         var groups = rooms
             .Where(r => !r.Negated || true)  // une pièce industrielle vaut 0 mais reste listée

@@ -883,7 +883,7 @@
         "Wip": "En développement",
         "WipTooltip": "Outil encore en développement : des écarts avec le jeu sont possibles.",
         "NoData": "Le planificateur a besoin des données de construction (emprises, tiers des blocs, configuration des pièces et du housing). Mettez à jour [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) sur le serveur (export version 5), puis importez le nouveau fichier de données.",
-        "Hint": "1 : sélection · 2 : murs · 3 : ouverture · H : déplacer la vue · les pièces sont créées automatiquement dans les zones fermées par des murs · glisser : dessiner · Maj+glisser (murs) : sol plein · clic droit (maintenu) : gommer au passage · Maj+clic droit glissé : gommer une zone, objets compris · Maj+clic : poser l'objet en série · R : rotation · Suppr : supprimer l'objet · Ctrl+Z/Y : annuler/rétablir · molette : zoom · Alt+glisser ou clic milieu : déplacer la vue · double-clic : sélectionner · PgUp/PgDn : niveau",
+        "Hint": "1 : sélection · 2 : murs · 3 : ouverture · H : déplacer la vue · Échap : reposer l'outil, désélectionner, fermer le volet · les pièces sont créées automatiquement dans les zones fermées par des murs · glisser : dessiner · Maj+glisser (murs) : sol plein · clic droit (maintenu) : gommer au passage · Maj+clic droit glissé : gommer une zone, objets compris · clic droit dans le vide : reposer l'outil · clic : poser l'objet · Maj+clic : poser en série · glisser un objet : le déplacer · R : rotation · Suppr : supprimer l'objet · clic milieu : copier l'objet ou le matériau sous le curseur · double-clic : sélectionner · molette : zoom · Alt+glisser ou clic milieu glissé : déplacer la vue · PgUp/PgDn : niveau · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer",
         "Shortcuts": "Raccourcis",
         "RoomDefaultName": "Pièce",
         "Material": "Matériau",
@@ -894,7 +894,6 @@
         "ZoomOut": "Zoom arrière",
         "Fit": "Ajuster à l'écran",
         "Residents": "Résidents",
-        "Target": "Objectif housing",
         "ConfirmDiscard": "Ce plan a des modifications non sauvegardées. Les abandonner ?",
         "Tool": {
             "select": "Sélection / déplacement (1)",
@@ -908,7 +907,19 @@
             "Floor": "Sol par défaut",
             "Ceiling": "Plafond par défaut",
             "Terrain": "Terrain (tier 0)",
+            "TerrainHelp": "Terrain = tier 0, limite le housing",
+            "CeilingRequired": "Requis : sans plafond, toutes les pièces fuient (tier 0, housing nul)",
             "None": "Aucun"
+        },
+        "Settings": {
+            "Title": "Réglages du plan",
+            "Help": "S'appliquent à tout le plan · Ctrl+S pour sauvegarder",
+            "Construction": "Construction",
+            "Housing": "Housing",
+            "ResidentsHelp": "Le multiplicateur de résidents s'applique au total. Avec {n} résident(s) : ×{m}.",
+            "Summary": "Murs {height} · {n} résident(s)",
+            "CeilingTodo": "Plafond à définir",
+            "Grid": "Grille {w} × {d} · {n} niveaux"
         },
         "Legend": {
             "Slab": "Dalle : plafond du dessous ou sol peint",
@@ -945,9 +956,7 @@
             "Untitled": "Plan sans nom"
         },
         "Catalog": {
-            "All": "Tous",
             "Tables": "Tables",
-            "Furniture": "Mobilier",
             "Doors": "Portes",
             "Others": "Autres",
             "Misc": "Divers",
@@ -962,58 +971,74 @@
         },
         "Inspector": {
             "Room": "Pièce",
-            "Height": "Hauteur (vide = hauteur des murs)",
+            "Height": "Hauteur",
             "DefaultMaterial": "Par défaut",
-            "LockCategory": "Catégorie de pièce",
-            "AutoCategory": "Automatique (comme en jeu)",
             "Contained": "Fermée",
-            "Volume": "Volume",
+            "NotContained": "Non fermée",
             "Tier": "Tier",
-            "WallBlocks": "blocs de mur",
-            "Composition": "Composition",
-            "VolumeUsed": "Volume utilisé par les tables",
             "Z": "Hauteur (z)",
             "AttachedTo": "Posé sur {parent}",
             "Placed": "Posé",
             "NotPlaced": "Non posé",
-            "NoRoom": "Hors de toute pièce",
+            "NoRoom": "Hors pièce",
             "UnknownType": "Absent de ce serveur",
-            "RequiredTier": "Exige tier",
-            "RequiredVolume": "volume",
-            "NothingSelected": "Sélectionnez la graine d'une pièce ou un objet pour l'éditer. Le double-clic sur le plan sélectionne aussi."
+            "NothingSelected": "Cliquez une pièce ou un objet sur le plan pour l'éditer."
         },
         "Results": {
-            "Validation": "Validation",
             "Housing": "Housing",
-            "Tables": "Tables",
+            "HousingByRoom": "Housing par pièce",
+            "Issues": "Avertissements",
+            "IssuesCount": "{n} avertissements",
+            "ErrorsCount": "{n} erreurs",
+            "Objects": "Mobilier",
             "Materials": "Matériaux",
             "Pending": "Dessinez des murs et ajoutez une pièce pour lancer l'analyse.",
-            "RoomsOk": "pièces fermées",
-            "TablesOk": "tables satisfaites",
-            "NoIssue": "Tout est bon."
+            "NoIssue": "Tout est bon.",
+            "Theme": {
+                "Rooms": "Pièces",
+                "Housing": "Housing",
+                "Tables": "Tables",
+                "Data": "Données"
+            }
         },
         "Housing": {
-            "Category": "Catégorie",
-            "RoomValue": "Valeur de la pièce",
-            "Contribution": "Contribution",
             "Total": "Total",
+            "Outdoor": "Extérieur",
+            "OutdoorHelp": "Objets hors de toute pièce, tous niveaux confondus (jardin, balcon non couvert). Pas de plafond de tier ; au plus 100 % des pièces principales.",
             "PerDay": "XP housing / jour",
             "BeforeOccupancy": "Avant multiplicateur de résidents",
-            "CategoryCapped": "{category} plafonnée à {after} (au lieu de {before}) : cette catégorie vaut au plus {percent} de la valeur des pièces principales (actuellement {rest}).",
-            "Excluded": "ne compte pas pour cette catégorie de pièce"
+            "Ignored": "Ignoré : ne soutient pas {category}",
+            "Support": "(soutien)",
+            "RepeatInfo": "{rank}e objet de type « {type} » dans la pièce : × {percent} (rendement décroissant).",
+            "PropertyInfo": "Déjà présent ailleurs sur la propriété : × {percent}.",
+            "RankInfo": "{category} n°{rank} : {percent} de sa valeur. La 1re pièce d'une catégorie compte en entier (une par résident, ici {n}), les suivantes de moins en moins.",
+            "SupportCapInfo": "Catégorie de soutien : au plus {percent} de la catégorie principale {category} ({primary}).",
+            "TierCapInfo": "Tier {tier} : soft-cap à {softcap}. Au-delà, la valeur supplémentaire diminue exponentiellement.",
+            "SoftCapped": "Valeur de la pièce plafonnée de {from} à {to} par les matériaux (tier {tier}, soft-cap {softcap}) : −{percent}.",
+            "ShowRoom": "Voir la pièce sur le plan",
+            "CategoryCapInfo": "Les pièces « {category} » valent au plus {percent} de la valeur des pièces principales (actuellement {rest}). Valeur ramenée de {before} à {after} : −{reduction}."
         },
         "Tables": {
             "Tier": "Tier de la pièce",
-            "Volume": "Volume",
             "Containment": "Doit être dans une pièce fermée",
-            "ModulesInactive": "table OK, modules inactifs",
-            "None": "Aucune table de craft avec exigences de pièce sur le plan."
+            "ModulesInactive": "table OK, modules inactifs"
+        },
+        "Objects": {
+            "NoSkill": "Sans spécialité",
+            "None": "Aucun objet posé sur le plan."
         },
         "Materials": {
             "Walls": "Murs",
             "Floors": "Sols",
-            "Ceilings": "Plafonds",
-            "Total": "Total"
+            "Ceilings": "Plafonds"
+        },
+        "Price": {
+            "Object": "Objet",
+            "Quantity": "Qté",
+            "Unit": "Prix u.",
+            "Total": "Total",
+            "Missing": "{n} sans prix",
+            "DefaultHelp": "Moyenne des prix des joueurs du serveur (Economy viewer). Saisissez un prix pour la remplacer, × pour y revenir."
         },
         "Dialog": {
             "NoPlans": "Aucun plan sauvegardé pour l'instant.",
@@ -1071,7 +1096,7 @@
             "NoRoomDefined": "Aucune pièce détectée : entoure une zone avec des murs (outil Murs, touche 2), la pièce est créée automatiquement.",
             "NoSupportBelow": "« {type} » n'a rien de solide dessous.",
             "RoomTooBig": "La pièce « {room} » est trop grande : une cellule est à plus de 70 m de la graine.",
-            "NoCeiling": "La pièce « {room} » fuit : rien de solide au-dessus à la hauteur {height} (mur, plafond ou angle manquant).",
+            "NoCeiling": "La pièce « {room} » n'est pas couverte à la hauteur {height} (mur, plafond ou angle manquant) : ses objets comptent en extérieur.",
             "VolumeTooSmall": "La pièce « {room} » est trop petite (volume minimum 3).",
             "RoomInvalid": "La pièce « {room} » est invalide.",
             "EmptyEdges": "Pièce « {room} » : {count} arête(s) vide(s) (air en diagonale) comptée(s) en tier 0 — sans elles le tier serait {tier}.",
@@ -1093,7 +1118,7 @@
             "Paint": "Blocs peints : bonus non appliqué (0).",
             "Pollution": "Pénalité de pollution du sol : non appliquée.",
             "Culture": "Multiplicateur culturel du deed : ×1. Boosts admin : 0.",
-            "Deed": "Un seul deed entièrement possédé ; les objets hors pièce ne donnent pas de housing.",
+            "Deed": "Un seul deed entièrement possédé ; les objets hors pièce forment sa pièce « Extérieur ».",
             "Efficiency": "Tous les objets activés à 100 % d'efficacité, pas de valeur dynamique (cadres…).",
             "Talents": "Talents Lavish / Frugal sur les exigences de tier ignorés.",
             "Modules": "Les bumps de tier des modules viennent des modules installés sur chaque type de table dans votre contexte de données par défaut.",

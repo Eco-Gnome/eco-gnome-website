@@ -23,22 +23,24 @@
 
 /* La puce de tier fait 32 px de haut alors que la ligne du champ dense en fait 19 : le contenu
    descendait sous la bordure. On la ramène à la hauteur de la ligne. */
-::deep .bp-toolbar .mud-select div.mud-input-slot .mud-chip {
+::deep .bp-toolbar .mud-select div.mud-input-slot .mud-chip,
+.bp-settings ::deep .mud-select div.mud-input-slot .mud-chip {
     height: 20px;
     margin: 0;
     font-size: 0.7rem;
 }
 
 .bp-body {
+    --bp-panel-w: 390px;   /* largeur du volet de droite, lue par le JS pour cadrer le plan comme si le volet était ouvert */
     display: grid;
-    grid-template-columns: 260px minmax(0, 1fr) 390px;
+    grid-template-columns: 260px minmax(0, 1fr) auto;
     gap: 6px;
     flex: 1 1 auto;
     min-height: 0;
 }
 
-/* .bp-side/.bp-right sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
-   directe ne matche jamais — on ancre sur .bp-body comme pour .bp-table plus bas. Sans ça le
+/* .bp-side/.bp-left/.bp-panel/.bp-rail sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
+   directe ne matche jamais — on ancre sur .bp-body, vrai div de cette page. Sans ça le
    panneau droit ne scrolle pas en interne et déborde de la hauteur de page (scroll global). */
 .bp-body ::deep .bp-side {
     min-height: 0;
@@ -47,21 +49,385 @@
     flex-direction: column;
 }
 
-.bp-body ::deep .bp-right {
+/* Colonne droite : volet (390) optionnel + rail (56). Les deux sont des MudPaper → ::deep depuis .bp-body. */
+.bp-right-col {
+    display: flex;
+    gap: 6px;
+    min-height: 0;
+}
+
+.bp-body ::deep .bp-panel {
+    width: 390px;
+    flex: 0 0 auto;
+}
+
+.bp-body ::deep .bp-rail {
+    width: 56px;
+    flex: 0 0 auto;
+    padding: 10px 0;
+    align-items: center;
+    gap: 6px;
+}
+
+.bp-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex: 0 0 auto;
+}
+
+.bp-panel-title {
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.bp-count-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: #ff9800;
+    color: #2b1a00;
+    font-size: 11px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+.bp-count-badge.error,
+.bp-rail-badge.error {
+    background: #f44336;
+    color: #fff;
+}
+
+.bp-panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    padding: 12px 16px;
 }
 
-/* hr.mud-divider a flex-grow:1 chez MudBlazor : dans le panneau devenu flex column,
-   il s'étirait et poussait les résultats tout en bas. */
-.bp-body ::deep .bp-right > .mud-divider {
-    flex-grow: 0;
+.bp-rail-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-/* .bp-right est posé sur un MudPaper (composant) : l'isolation CSS ne lui met pas l'attribut de scope,
-   donc une règle ancrée dessus ne matche jamais. On ancre sur .bp-body, vrai div de cette page. */
-.bp-body ::deep .bp-table td,
-.bp-body ::deep .bp-table th {
-    padding: 6px 8px;
+.bp-rail-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bp-rail-btn.warn {
+    color: #ffb74d;
+}
+
+.bp-rail-btn.error {
+    color: #ff8a80;
+}
+
+.bp-rail-btn.active {
+    background: rgba(79, 163, 247, 0.18);
+    box-shadow: inset 3px 0 0 #4fa3f7;
+    color: #fff;
+}
+
+.bp-rail-btn ::deep .mud-icon-root {
+    font-size: 20px;
+}
+
+.bp-rail-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: #ff9800;
+    color: #2b1a00;
+    font-size: 10px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+.bp-rail-spacer {
+    flex: 1 1 auto;
+}
+
+/* Panneau gauche : le catalogue (recherche + liste) prend la place restante au-dessus de la zone Sélection (300 px). */
+.bp-catalog {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 4px;
+}
+
+/* Le champ de recherche (mud-input-control, flex-grow chez MudBlazor) ne doit pas pousser la liste vers le bas. */
+.bp-catalog ::deep .mud-input-control {
+    flex: 0 0 auto;
+}
+
+.bp-selection {
+    flex: 0 0 300px;
+    min-height: 0;
+    overflow-y: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.18);
+    padding: 12px 14px 14px;
+}
+
+/* Bandeau droit de la toolbar : score housing + chip d'état + bouton Réglages du plan. */
+.bp-housing-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 6px 0 14px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.bp-housing-score {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.bp-housing-score ::deep .bp-housing-icon {
+    color: #ffb74d;
+    font-size: 18px;
+}
+
+.bp-housing-value {
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffb74d;
+    line-height: 1;
+    margin-left: 4px;
+}
+
+.bp-housing-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+.bp-vsep {
+    display: inline-block;
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.15);
+    flex: none;
+}
+
+.bp-vsep-sm {
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.bp-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 13px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+
+.bp-status-chip ::deep .mud-icon-root {
+    font-size: 13px;
+}
+
+.bp-status-chip.warn {
+    background: #ff9800;
+    color: #2b1a00;
+}
+
+.bp-status-chip.error {
+    background: #f44336;
+    color: #fff;
+}
+
+.bp-status-chip.ok {
+    background: #3ec26a;
+    color: #0d2a17;
+}
+
+.bp-settings-anchor {
+    position: relative;
+}
+
+.bp-settings-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 6px 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.bp-settings-btn ::deep .bp-settings-icon {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.bp-settings-btn ::deep .bp-settings-caret {
+    font-size: 18px;
+    opacity: 0.7;
+}
+
+.bp-settings-title {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.bp-settings-summary {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* État « à faire » : plafond par défaut vide. */
+.bp-settings-btn.todo {
+    border-color: var(--mud-palette-warning);
+}
+
+.bp-settings-btn.todo ::deep .bp-settings-icon,
+.bp-settings-btn.todo .bp-settings-summary {
+    color: var(--mud-palette-warning);
+}
+
+.bp-settings-dot {
+    position: absolute;
+    top: 8px;
+    left: 22px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mud-palette-warning);
+    border: 1px solid #3a3b46;
+}
+
+/* Contenu du popover Réglages : div de cette page, il garde son attribut de scope une fois téléporté. */
+.bp-settings {
+    padding: 18px 18px 14px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.bp-settings-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.bp-settings-heading {
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.bp-settings-help {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.bp-settings-section {
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 10px;
+}
+
+.bp-settings-grid {
+    display: grid;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 18px;
+}
+
+/* minmax(0, 1fr) : un long matériau (libellé + puce + croix) élargirait sinon la colonne et déborderait du popover. */
+.bp-settings-grid-3 {
+    grid-template-columns: 100px minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.bp-settings-grid-2 {
+    grid-template-columns: 100px minmax(0, 1fr);
+}
+
+.bp-settings-grid ::deep .mud-select,
+.bp-settings-grid ::deep .mud-input-control,
+.bp-settings-grid ::deep .mud-input-slot,
+.bp-settings-grid ::deep .mud-input-slot > div {
+    min-width: 0;
+}
+
+.bp-settings-grid ::deep .mud-input-slot {
+    overflow: hidden;
+}
+
+/* Plafond manquant = avertissement (orange), pas une erreur rouge ; !important car MudBlazor est plus spécifique. */
+.bp-settings-grid ::deep .mud-input-error .mud-input-outlined-border,
+.bp-settings-grid ::deep .mud-input-error.mud-input-outlined:hover .mud-input-outlined-border {
+    border-color: var(--mud-palette-warning) !important;
+}
+
+.bp-settings-grid ::deep .mud-input-control.mud-input-error .mud-input-label,
+.bp-settings-grid ::deep .mud-input-control.mud-input-error .mud-input-helper-text {
+    color: var(--mud-palette-warning) !important;
+}
+
+/* La puce de tier reste dans la liste déroulante ; dans la valeur sélectionnée elle n'a pas la place. */
+.bp-settings-grid ::deep .mud-input-slot .mud-chip {
+    display: none;
+}
+
+/* MudStack se rend en div.d-flex (pas de classe .mud-stack). */
+.bp-settings-grid ::deep .mud-input-slot > div > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bp-settings-foot {
+    margin-top: -2px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.bp-link {
+    color: #4fa3f7;
+    font-weight: 500;
+    cursor: pointer;
 }
 
 .bp-canvas-wrap {
@@ -134,7 +500,6 @@
     overflow-y: auto;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: calc(100vh - 220px);
 }
 
 /* En-tête de sous-catégorie repliable : vrai div de cette page (un composant Mud n'aurait pas l'attribut de scope). */
@@ -209,7 +574,12 @@
 
 @media (max-width: 1280px) {
     .bp-body {
-        grid-template-columns: 220px minmax(0, 1fr) 330px;
+        --bp-panel-w: 330px;
+        grid-template-columns: 220px minmax(0, 1fr) auto;
+    }
+
+    .bp-body ::deep .bp-panel {
+        width: 330px;
     }
 }
 
@@ -219,8 +589,28 @@
     }
 
     .bp-body {
+        --bp-panel-w: 0px;   /* le volet passe sous le plan : rien à réserver */
         grid-template-columns: 1fr;
         grid-template-rows: 260px 60vh auto;
+    }
+
+    .bp-right-col {
+        flex-direction: column-reverse;
+    }
+
+    .bp-body ::deep .bp-rail {
+        width: auto;
+        flex-direction: row;
+        padding: 0 10px;
+    }
+
+    .bp-body ::deep .bp-panel {
+        width: auto;
+    }
+
+    .bp-selection {
+        flex-basis: auto;
+        max-height: 300px;
     }
 }
 
