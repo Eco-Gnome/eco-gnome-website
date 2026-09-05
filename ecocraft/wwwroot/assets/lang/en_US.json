@@ -917,6 +917,15 @@
             "Terrain": "Terrain (tier 0)",
             "None": "None"
         },
+        "Settings": {
+            "Title": "Plan settings",
+            "Help": "Apply to the whole plan · Ctrl+S to save",
+            "Construction": "Construction",
+            "Housing": "Housing",
+            "ResidentsHelp": "The residents multiplier applies to the total. With {n} resident(s): ×{m}.",
+            "Summary": "Walls {height} · {n} resident(s)",
+            "Grid": "Grid {w} × {d} · {n} levels"
+        },
         "Legend": {
             "Slab": "Slab: ceiling below or painted floor",
             "LowCeiling": "Lower ceiling below → no floor",
@@ -987,17 +996,26 @@
             "UnknownType": "Not available on this server",
             "RequiredTier": "Requires tier",
             "RequiredVolume": "volume",
+            "Selection": "Selection",
             "NothingSelected": "Select a room seed or an object to edit it. Double-click on the plan also selects."
         },
         "Results": {
-            "Validation": "Validation",
             "Housing": "Housing",
+            "HousingByRoom": "Housing per room",
+            "Issues": "Warnings",
+            "IssuesCount": "{n} warnings",
+            "ErrorsCount": "{n} errors",
             "Tables": "Tables",
             "Materials": "Materials",
             "Pending": "Draw walls and add a room to start the analysis.",
-            "RoomsOk": "rooms enclosed",
-            "TablesOk": "tables satisfied",
-            "NoIssue": "Everything checks out."
+            "NoIssue": "Everything checks out.",
+            "Detail": "Details",
+            "Theme": {
+                "Rooms": "Rooms",
+                "Housing": "Housing",
+                "Tables": "Tables",
+                "Data": "Data"
+            }
         },
         "Housing": {
             "Category": "Category",

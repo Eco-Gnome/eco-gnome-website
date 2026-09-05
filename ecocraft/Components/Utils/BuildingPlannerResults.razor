@@ -2,127 +2,121 @@
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-<MudTabs Elevation="0" Rounded="false" PanelClass="pa-2" MinimumTabWidth="60px" ApplyEffectsToContainer="true">
-    <MudTabPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Results.Validation")" BadgeData="@(ErrorCount > 0 ? ErrorCount : null)" BadgeColor="Color.Error">
-        @if (Analysis is null)
-        {
-            <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</MudText>
-        }
-        else
-        {
-            <MudStack Spacing="1">
-                <MudStack Row Spacing="1" Wrap="Wrap.Wrap">
-                    <MudChip T="string" Size="Size.Small" Color="@(Analysis.Rooms.Count > 0 && Analysis.Rooms.All(r => r.Contained) ? Color.Success : Color.Default)">
-                        @Analysis.Rooms.Count(r => r.Contained)/@Analysis.Rooms.Count @LocalizationService.GetTranslation("BuildingPlanner.Results.RoomsOk")
-                    </MudChip>
-                    <MudChip T="string" Size="Size.Small" Color="@(Analysis.Tables.Count > 0 && Analysis.Tables.All(t => t.Satisfied) ? Color.Success : Color.Default)">
-                        @Analysis.Tables.Count(t => t.Satisfied)/@Analysis.Tables.Count @LocalizationService.GetTranslation("BuildingPlanner.Results.TablesOk")
-                    </MudChip>
-                </MudStack>
-                @if (Analysis.Issues.Count == 0)
-                {
-                    <MudAlert Severity="Severity.Success" Dense="true">@LocalizationService.GetTranslation("BuildingPlanner.Results.NoIssue")</MudAlert>
-                }
-                @foreach (var issue in Analysis.Issues.Take(80))
-                {
-                    <MudAlert Severity="@ToSeverity(issue.Severity)" Dense="true" Class="bp-issue" Style="cursor: pointer;" OnClick="@(() => OnFocusIssue.InvokeAsync(issue))">
-                        <MudText Typo="Typo.caption">@LocalizationService.GetTranslation($"BuildingPlanner.Issue.{issue.Code}", issue.Args)</MudText>
-                    </MudAlert>
-                }
-                @if (Analysis.Issues.Count > 80)
-                {
-                    <MudText Typo="Typo.caption">… +@(Analysis.Issues.Count - 80)</MudText>
-                }
-                <MudExpansionPanels Dense="true" Elevation="0">
-                    <MudExpansionPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Assumptions.Title")" Dense="true">
-                        <ul class="bp-assumptions">
-                            @foreach (var key in AssumptionKeys)
-                            {
-                                <li><MudText Typo="Typo.caption">@LocalizationService.GetTranslation($"BuildingPlanner.Assumptions.{key}")</MudText></li>
-                            }
-                        </ul>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
-            </MudStack>
-        }
-    </MudTabPanel>
-
-    <MudTabPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Results.Housing")">
+@* Un volet à la fois (Panel) : le rail et l'entête du volet sont dans BuildingPlannerPage. *@
+@switch (Panel)
+{
+    case "housing":
         @if (Analysis?.Housing is { } housing)
         {
-            <MudStack Spacing="1">
-                <MudStack Row AlignItems="AlignItems.Baseline" Spacing="1">
-                    <MudText Typo="Typo.h5" Color="Color.Warning">@housing.Total.ToString("0.00")</MudText>
-                    <MudText Typo="Typo.caption" Class="ml-auto">@LocalizationService.GetTranslation("BuildingPlanner.Housing.PerDay")</MudText>
-                </MudStack>
-                <MudText Typo="Typo.caption">
-                    @LocalizationService.GetTranslation("BuildingPlanner.Housing.BeforeOccupancy"): @housing.TotalBeforeOccupancy.ToString("0.00")
-                    × @housing.OccupancyMultiplier.ToString("0.###") (@housing.Residents @LocalizationService.GetTranslation("BuildingPlanner.Residents").ToLowerInvariant())
-                </MudText>
-                @if (Analysis.HousingRulesAreDefaults)
+            <div class="bp-score">
+                <span class="bp-score-value">@housing.Total.ToString("0.00")</span>
+                <span class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Housing.PerDay")</span>
+            </div>
+            <div class="bp-muted bp-score-sub">
+                @LocalizationService.GetTranslation("BuildingPlanner.Housing.BeforeOccupancy"): @housing.TotalBeforeOccupancy.ToString("0.00")
+                × @housing.OccupancyMultiplier.ToString("0.###") (@housing.Residents @LocalizationService.GetTranslation("BuildingPlanner.Residents").ToLowerInvariant())
+            </div>
+            @if (Analysis.HousingRulesAreDefaults)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingConfigMissing")</MudAlert>
+            }
+            <div class="bp-hrows">
+                <div class="bp-hrow-head">
+                    <span>@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</span>
+                    <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue")</span>
+                    <span>×</span>
+                    <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</span>
+                </div>
+                @foreach (var row in housing.Rooms.OrderByDescending(r => r.Contribution))
                 {
-                    <MudAlert Severity="Severity.Info" Dense="true">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingConfigMissing")</MudAlert>
-                }
-                <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
-                    <thead>
-                    <tr>
-                        <th style="white-space: nowrap;">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</th>
-                        <th>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Category")</th>
-                        <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue")</th>
-                        <th style="text-align:right">×</th>
-                        <th style="text-align:right">@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var row in housing.Rooms.OrderByDescending(r => r.Contribution))
-                    {
-                        <tr>
-                            <td style="white-space: nowrap;">@RoomLabel(row.RoomId)</td>
-                            <td>@row.Category</td>
-                            <td style="text-align:right">@row.RoomValue.ToString("0.00")</td>
-                            <td style="text-align:right">@row.Multiplier.ToString("0.##")</td>
-                            <td style="text-align:right">@row.Contribution.ToString("0.00")</td>
-                        </tr>
-                    }
-                    </tbody>
-                </MudSimpleTable>
-                @foreach (var (cat, before) in housing.CapAppliedByCategory)
-                {
-                    var percent = Catalog?.Categories.FirstOrDefault(c => c.Name == cat)?.CapPercent ?? 0f;
-                    <MudText Typo="Typo.caption" Color="Color.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Housing.CategoryCapped", cat, housing.ByCategory.GetValueOrDefault(cat).ToString("0.00"), before.ToString("0.00"), percent.ToString("P0"), housing.UncappedTotal.ToString("0.00"))</MudText>
-                }
-                @foreach (var room in Analysis.Rooms.Where(r => r.Housing is not null && r.Housing.Objects.Count > 0))
-                {
-                    <MudExpansionPanels Dense="true" Elevation="0">
-                        <MudExpansionPanel Dense="true" Text="@($"{RoomLabel(room.RoomId)} — {room.Housing!.PrimaryCategory} {room.Housing.Value:0.00}")">
-                            @foreach (var line in room.Housing!.Objects)
+                    var entry = Document?.FindRoom(row.RoomId);
+                    var roomHousing = Analysis.Rooms.FirstOrDefault(r => r.RoomId == row.RoomId)?.Housing;
+                    var expanded = _expandedRooms.Contains(row.RoomId);
+                    <div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
+                        <div class="bp-hrow-main">
+                            <span class="bp-ellipsis"><span class="bp-strong">@(entry?.Room.Name ?? row.RoomId)</span><span class="bp-muted"> · @(entry is { } e ? LevelLabel(e.Level) : "") · @row.Category</span></span>
+                            <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
+                            <span class="bp-num">@row.Multiplier.ToString("0.##")</span>
+                            <span class="bp-num bp-strong">@row.Contribution.ToString("0.00")</span>
+                        </div>
+                        @if (roomHousing is { Objects.Count: > 0 })
+                        {
+                            <div class="bp-hrow-sub">
+                                <span>
+                                    @for (var i = 0; i < roomHousing.Objects.Count; i++)
+                                    {
+                                        var line = roomHousing.Objects[i];
+                                        if (i > 0) { <span> · </span> }
+                                        <span class="@(line.Excluded ? "bp-excluded" : null)">
+                                            @(Catalog?.Objects.FirstOrDefault(o => o.Name == line.Type)?.Label ?? line.Type) (@line.Category) : @line.Value.ToString("0.00")@(!line.Excluded && line.Multiplier < 0.999f ? $" × {line.Multiplier:0.##}" : "")@(line.Excluded ? $" — {LocalizationService.GetTranslation("BuildingPlanner.Housing.Excluded")}" : "")
+                                        </span>
+                                    }
+                                </span>
+                                <span class="bp-link" @onclick:stopPropagation="true" @onclick="@(() => ToggleDetail(row.RoomId))">@LocalizationService.GetTranslation("BuildingPlanner.Results.Detail") @(expanded ? "▾" : "▸")</span>
+                            </div>
+                            @if (expanded)
                             {
-                                <MudText Typo="Typo.caption" Color="@(line.Excluded ? Color.Warning : Color.Default)">
-                                    @(Catalog?.Objects.FirstOrDefault(o => o.Name == line.Type)?.Label ?? line.Type) (@line.Category): @line.Value.ToString("0.00")
-                                    @if (!line.Excluded && line.Multiplier < 0.999f) { <span> × @line.Multiplier.ToString("0.##")</span> }
-                                    @if (line.Excluded) { <span> — @LocalizationService.GetTranslation("BuildingPlanner.Housing.Excluded")</span> }
-                                </MudText>
+                                <div class="bp-hrow-detail">
+                                    @foreach (var (cat, value) in roomHousing.ValueByCategory)
+                                    {
+                                        <div><b>@cat</b>: @value.ToString("0.00")@(roomHousing.RawValueByCategory.TryGetValue(cat, out var raw) && raw > value + 0.005f ? $" (cap {raw:0.00})" : "")</div>
+                                    }
+                                    @if (roomHousing.CappedByTier)
+                                    {
+                                        <div class="bp-excluded">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingCapped", roomHousing.TotalBeforeCap.ToString("0.00"), roomHousing.Value.ToString("0.00"), roomHousing.TierSoftCap.ToString("0.##"))</div>
+                                    }
+                                </div>
                             }
-                            @foreach (var (cat, value) in room.Housing.ValueByCategory)
-                            {
-                                <MudText Typo="Typo.caption"><b>@cat</b>: @value.ToString("0.00")@(room.Housing.RawValueByCategory.TryGetValue(cat, out var raw) && raw > value + 0.005f ? $" (cap {raw:0.00})" : "")</MudText>
-                            }
-                            @if (room.Housing.CappedByTier)
-                            {
-                                <MudText Typo="Typo.caption" Color="Color.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingCapped", room.Housing.TotalBeforeCap.ToString("0.00"), room.Housing.Value.ToString("0.00"), room.Housing.TierSoftCap.ToString("0.##"))</MudText>
-                            }
-                        </MudExpansionPanel>
-                    </MudExpansionPanels>
+                        }
+                    </div>
                 }
-            </MudStack>
+            </div>
+            @foreach (var (cat, before) in housing.CapAppliedByCategory)
+            {
+                var percent = Catalog?.Categories.FirstOrDefault(c => c.Name == cat)?.CapPercent ?? 0f;
+                <div class="bp-excluded bp-caption">@LocalizationService.GetTranslation("BuildingPlanner.Housing.CategoryCapped", cat, housing.ByCategory.GetValueOrDefault(cat).ToString("0.00"), before.ToString("0.00"), percent.ToString("P0"), housing.UncappedTotal.ToString("0.00"))</div>
+            }
         }
         else
         {
-            <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</MudText>
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</div>
         }
-    </MudTabPanel>
+        break;
 
-    <MudTabPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Results.Tables")">
+    case "issues":
+        @if (Analysis is null)
+        {
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</div>
+        }
+        else if (Analysis.Issues.Count == 0)
+        {
+            <span class="bp-chip ok"><MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small"/>@LocalizationService.GetTranslation("BuildingPlanner.Results.NoIssue")</span>
+        }
+        else
+        {
+            var shown = Analysis.Issues.Take(80).ToList();
+            foreach (var theme in Themes)
+            {
+                var group = shown.Where(i => ThemeOf(i.Code) == theme).ToList();
+                if (group.Count == 0) continue;
+                <div class="bp-theme-title">@LocalizationService.GetTranslation($"BuildingPlanner.Results.Theme.{theme}")</div>
+                foreach (var issue in group)
+                {
+                    <div class="@IssueClass(issue)" @onclick="@(() => OnFocusIssue.InvokeAsync(issue))">
+                        <MudIcon Icon="@IssueIcon(issue.Severity)" Size="Size.Small"/>
+                        <span class="bp-issue-text">@LocalizationService.GetTranslation($"BuildingPlanner.Issue.{issue.Code}", issue.Args)</span>
+                        <MudIcon Icon="@Icons.Material.Filled.CenterFocusStrong" Size="Size.Small" Class="bp-issue-focus"/>
+                    </div>
+                }
+            }
+            @if (Analysis.Issues.Count > shown.Count)
+            {
+                <div class="bp-muted">… +@(Analysis.Issues.Count - shown.Count)</div>
+            }
+        }
+        break;
+
+    case "tables":
         @if (Analysis is { Tables.Count: > 0 })
         {
             <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
@@ -154,11 +148,11 @@
         }
         else
         {
-            <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Tables.None")</MudText>
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Tables.None")</div>
         }
-    </MudTabPanel>
+        break;
 
-    <MudTabPanel Text="@LocalizationService.GetTranslation("BuildingPlanner.Results.Materials")">
+    case "materials":
         @if (Analysis is not null && Analysis.Materials.Count > 0)
         {
             <MudSimpleTable Dense="true" Hover="true" Class="bp-table">
@@ -187,23 +181,77 @@
         }
         else
         {
-            <MudText Typo="Typo.caption">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</MudText>
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</div>
         }
-    </MudTabPanel>
-</MudTabs>
+        break;
+
+    case "assumptions":
+        <ul class="bp-assumptions">
+            @foreach (var key in AssumptionKeys)
+            {
+                <li>@LocalizationService.GetTranslation($"BuildingPlanner.Assumptions.{key}")</li>
+            }
+        </ul>
+        break;
+}
 
 @code {
+    [Parameter] public string Panel { get; set; } = "housing";
     [Parameter] public PlanDocument? Document { get; set; }
     [Parameter] public AnalysisResult? Analysis { get; set; }
     [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? SelectionKind { get; set; }
+    [Parameter] public string? SelectionId { get; set; }
     [Parameter] public EventCallback<PlanIssue> OnFocusIssue { get; set; }
+    [Parameter] public EventCallback<string> OnFocusRoom { get; set; }
+
+    private readonly HashSet<string> _expandedRooms = [];
 
     private static readonly string[] AssumptionKeys =
     [
         "EmptyEdges", "Holes", "Levels", "Paint", "Pollution", "Culture", "Deed", "Efficiency", "Talents", "Modules", "Terrain", "Rotations", "Forms", "Tie",
     ];
 
-    private int ErrorCount => Analysis?.Issues.Count(i => i.Severity == IssueSeverity.Error) ?? 0;
+    // Regroupement des avertissements par thème ; tout code absent tombe dans « Données » (validation, placement, références).
+    private static readonly string[] Themes = ["Rooms", "Housing", "Tables", "Data"];
+
+    private static readonly Dictionary<string, string> IssueTheme = new(StringComparer.Ordinal)
+    {
+        ["RoomSeedInWall"] = "Rooms", ["RoomNotEnclosed2D"] = "Rooms", ["RoomsShareSpace"] = "Rooms", ["MissingFloor"] = "Rooms", ["RoomTallerThanLevel"] = "Rooms",
+        ["MissingCeilingMaterial"] = "Rooms", ["CeilingConflict"] = "Rooms", ["DiagonalGap"] = "Rooms", ["NoRoomDefined"] = "Rooms", ["NoSupportBelow"] = "Rooms",
+        ["RoomTooBig"] = "Rooms", ["NoCeiling"] = "Rooms", ["VolumeTooSmall"] = "Rooms", ["RoomInvalid"] = "Rooms", ["EmptyEdges"] = "Rooms",
+        ["BuildingTooHigh"] = "Rooms", ["TooManyRooms"] = "Rooms", ["SeedOutOfGrid"] = "Rooms",
+        ["HousingNegated"] = "Housing", ["HousingObjectExcluded"] = "Housing", ["PrimaryCategoryTie"] = "Housing", ["HousingCapped"] = "Housing",
+        ["HousingConfigMissing"] = "Housing", ["DefaultOccupancy"] = "Housing", ["UnknownHousingCategory"] = "Housing", ["UnknownLockCategory"] = "Housing",
+        ["TableNotInRoom"] = "Tables", ["TableNotContained"] = "Tables", ["TableTierTooLow"] = "Tables", ["TableModulesInactive"] = "Tables", ["TableVolumeExceeded"] = "Tables",
+    };
+
+    private static string ThemeOf(string code) => IssueTheme.GetValueOrDefault(code, "Data");
+
+    private string IssueClass(PlanIssue issue)
+    {
+        var selected = SelectionKind == "object" ? issue.ObjectId == SelectionId
+            : SelectionKind == "room" && issue.ObjectId is null && issue.RoomId == SelectionId;
+        return "bp-issue" + issue.Severity switch { IssueSeverity.Error => " error", IssueSeverity.Info => " info", _ => "" } + (selected ? " selected" : "");
+    }
+
+    private static string IssueIcon(IssueSeverity severity) => severity switch
+    {
+        IssueSeverity.Error => Icons.Material.Filled.Error,
+        IssueSeverity.Info => Icons.Material.Filled.Info,
+        _ => Icons.Material.Filled.Warning,
+    };
+
+    private void ToggleDetail(string roomId)
+    {
+        if (!_expandedRooms.Remove(roomId)) _expandedRooms.Add(roomId);
+    }
+
+    private string LevelLabel(int level)
+    {
+        var name = Document is not null && level < Document.Levels.Count ? Document.Levels[level].Name : "";
+        return string.IsNullOrWhiteSpace(name) ? LocalizationService.GetTranslation("BuildingPlanner.Level.Default", Document?.DisplayNumber(level).ToString() ?? "") : name;
+    }
 
     // Nom de pièce préfixé par son niveau dès qu'il y a plusieurs niveaux.
     private string RoomLabel(string roomId)
@@ -211,15 +259,6 @@
         var entry = Document?.FindRoom(roomId);
         if (entry is null || Document is null) return roomId;
         if (Document.Levels.Count <= 1) return entry.Value.Room.Name;
-        var levelName = Document.Levels[entry.Value.Level].Name;
-        if (string.IsNullOrWhiteSpace(levelName)) levelName = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", Document.DisplayNumber(entry.Value.Level).ToString());
-        return $"{levelName} · {entry.Value.Room.Name}";
+        return $"{LevelLabel(entry.Value.Level)} · {entry.Value.Room.Name}";
     }
-
-    private static Severity ToSeverity(IssueSeverity severity) => severity switch
-    {
-        IssueSeverity.Error => Severity.Error,
-        IssueSeverity.Warning => Severity.Warning,
-        _ => Severity.Info,
-    };
 }

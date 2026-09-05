@@ -1,0 +1,190 @@
+/* Contenu des volets du rail (housing, avertissements, tables, matériaux, hypothèses).
+   Toutes ces classes sont sur des div/span de ce composant : règles scoped directes. */
+.bp-muted {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+}
+
+.bp-strong {
+    color: #fff;
+}
+
+.bp-caption {
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.45;
+}
+
+.bp-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.bp-score-value {
+    font-size: 28px;
+    font-weight: 500;
+    color: #ffb74d;
+    line-height: 1;
+}
+
+.bp-score-sub {
+    margin-top: 8px;
+}
+
+.bp-hrows {
+    margin-top: 12px;
+    font-size: 12.5px;
+}
+
+.bp-hrow-head,
+.bp-hrow-main {
+    display: grid;
+    grid-template-columns: 1fr 70px 32px 52px;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.bp-hrow-head {
+    padding: 6px 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bp-hrow-head span:not(:first-child),
+.bp-num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.bp-ellipsis {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bp-hrow {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+}
+
+.bp-hrow:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.bp-hrow-sub {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.bp-hrow-detail {
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+}
+
+.bp-excluded {
+    color: #ffb74d;
+}
+
+.bp-link {
+    color: #4fa3f7;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.bp-theme-title {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    padding: 10px 6px 6px;
+}
+
+.bp-theme-title:first-child {
+    padding-top: 0;
+}
+
+.bp-issue {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    background: #3e3833;
+    color: #ffb74d;
+    font-size: 12.5px;
+    line-height: 1.45;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+
+.bp-issue.error {
+    background: #3f2f31;
+    color: #ff8a80;
+}
+
+.bp-issue.info {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.bp-issue.selected {
+    outline: 1px solid #4fa3f7;
+}
+
+.bp-issue-text {
+    flex: 1 1 auto;
+}
+
+/* MudIcon (composant) : pas d'attribut de scope, on passe par ::deep depuis le div .bp-issue. */
+.bp-issue ::deep .mud-icon-root {
+    font-size: 16px;
+    flex: none;
+    margin-top: 1px;
+}
+
+.bp-issue ::deep .bp-issue-focus {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.bp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.bp-chip.ok {
+    background: #3ec26a;
+    color: #0d2a17;
+}
+
+.bp-chip ::deep .mud-icon-root {
+    font-size: 14px;
+}
+
+.bp-assumptions {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.bp-assumptions li {
+    margin-bottom: 6px;
+}

@@ -909,6 +909,15 @@
             "Terrain": "Terrain (tier 0)",
             "None": "Aucun"
         },
+        "Settings": {
+            "Title": "Réglages du plan",
+            "Help": "S'appliquent à tout le plan · Ctrl+S pour sauvegarder",
+            "Construction": "Construction",
+            "Housing": "Housing",
+            "ResidentsHelp": "Le multiplicateur de résidents s'applique au total. Avec {n} résident(s) : ×{m}.",
+            "Summary": "Murs {height} · {n} résident(s)",
+            "Grid": "Grille {w} × {d} · {n} niveaux"
+        },
         "Legend": {
             "Slab": "Dalle : plafond du dessous ou sol peint",
             "LowCeiling": "Plafond du dessous plus bas → pas de sol",
@@ -979,17 +988,26 @@
             "UnknownType": "Absent de ce serveur",
             "RequiredTier": "Exige tier",
             "RequiredVolume": "volume",
+            "Selection": "Sélection",
             "NothingSelected": "Sélectionnez la graine d'une pièce ou un objet pour l'éditer. Le double-clic sur le plan sélectionne aussi."
         },
         "Results": {
-            "Validation": "Validation",
             "Housing": "Housing",
+            "HousingByRoom": "Housing par pièce",
+            "Issues": "Avertissements",
+            "IssuesCount": "{n} avertissements",
+            "ErrorsCount": "{n} erreurs",
             "Tables": "Tables",
             "Materials": "Matériaux",
             "Pending": "Dessinez des murs et ajoutez une pièce pour lancer l'analyse.",
-            "RoomsOk": "pièces fermées",
-            "TablesOk": "tables satisfaites",
-            "NoIssue": "Tout est bon."
+            "NoIssue": "Tout est bon.",
+            "Detail": "Détail",
+            "Theme": {
+                "Rooms": "Pièces",
+                "Housing": "Housing",
+                "Tables": "Tables",
+                "Data": "Données"
+            }
         },
         "Housing": {
             "Category": "Catégorie",
