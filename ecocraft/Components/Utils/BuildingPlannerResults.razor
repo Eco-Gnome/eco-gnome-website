@@ -100,13 +100,12 @@
         }
         else
         {
-            @* Liste d'achat : quantité par type d'objet posé, groupée comme la palette (Tables, Portes, Mobilier, Autres). *@
-            foreach (var g in ObjectGroups)
+            @* Liste d'achat : quantité par type d'objet posé, groupée par spécialité qui le fabrique (sans spécialité en dernier)
+               pour faire ses courses boutique par boutique. *@
+            foreach (var g in Analysis.ObjectCounts.GroupBy(l => ObjectOf(l.Type)?.Skill).OrderBy(g => g.Key is null ? 1 : 0).ThenBy(g => SkillLabel(g.First().Type)))
             {
-                var lines = Analysis.ObjectCounts.Where(l => ObjectGroupOf(l.Type) == g.Group).OrderBy(l => ObjectLabel(l.Type)).ToList();
-                if (lines.Count == 0) continue;
-                <div class="bp-theme-title">@LocalizationService.GetTranslation(g.LabelKey)</div>
-                foreach (var line in lines)
+                <div class="bp-theme-title">@SkillLabel(g.First().Type)</div>
+                foreach (var line in g.OrderBy(l => ObjectLabel(l.Type)))
                 {
                     <div class="bp-orow">
                         <MudImage Src="@($"/assets/eco-icons/{line.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
@@ -169,7 +168,7 @@
     [Parameter] public string? SelectionKind { get; set; }
     [Parameter] public string? SelectionId { get; set; }
     [Parameter] public EventCallback<PlanIssue> OnFocusIssue { get; set; }
-    [Parameter] public EventCallback<string> OnFocusRoom { get; set; }
+    [Parameter] public EventCallback<string?> OnFocusRoom { get; set; }   // null = désélection (re-clic sur l'œil de la pièce sélectionnée)
 
     private static readonly string[] AssumptionKeys =
     [
@@ -195,13 +194,8 @@
 
     private static string ThemeOf(string code) => IssueTheme.GetValueOrDefault(code, "Data");
 
-    // Volet Mobilier : mêmes familles et même ordre que la palette d'objets (Group calculé par BuildingPlannerCatalogService).
-    private static readonly (string Group, string LabelKey)[] ObjectGroups =
-    [
-        ("table", "BuildingPlanner.Catalog.Tables"), ("door", "BuildingPlanner.Catalog.Doors"), ("housing", "BuildingPlanner.Objects.Furniture"), ("other", "BuildingPlanner.Catalog.Others"),
-    ];
-
-    private string ObjectGroupOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type)?.Group ?? "other";
+    private ClientObject? ObjectOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type);
+    private string SkillLabel(string type) => ObjectOf(type)?.SkillLabel ?? LocalizationService.GetTranslation("BuildingPlanner.Objects.NoSkill");
 
     // Pièces dépliées dans le volet Housing (toutes repliées par défaut) ; état perdu à la fermeture du volet, volontairement.
     private readonly HashSet<string> _expandedRooms = [];
@@ -212,7 +206,7 @@
     }
 
     // Une ligne de pièce : ce qu'elle apporte à la propriété (« valeur → apport » orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
-    // puis l'œil bleu (action) qui sélectionne la pièce sur le plan, plein quand elle est sélectionnée ; cliquer la ligne replie/déplie ses objets, présentés comme le panneau « Room Details »
+    // puis l'œil bleu (action) qui sélectionne la pièce sur le plan, plein quand elle est sélectionnée (re-clic = désélection) ; cliquer la ligne replie/déplie ses objets, présentés comme le panneau « Room Details »
     // du jeu : phrase de soft-cap des matériaux s'il s'applique, un objet par ligne avec sa valeur dans la pièce et « (x %) » orange + « i »
     // si le jeu l'a réduite (répétition, déjà présent sur la propriété), « Ignoré » si sa catégorie ne soutient pas la pièce, puis une ligne
     // Total « somme → valeur de la pièce » (« i » = plafonds de soutien, appliqués au total et non objet par objet).
@@ -237,7 +231,7 @@
                     else { <span class="bp-strong">@effective.ToString("0.00")</span> }
                     <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/>
                 </span>
-                <span class="@("bp-hrow-eye" + (selected ? " selected" : ""))" title="@LocalizationService.GetTranslation("BuildingPlanner.Housing.ShowRoom")" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))" @onclick:stopPropagation>
+                <span class="@("bp-hrow-eye" + (selected ? " selected" : ""))" title="@LocalizationService.GetTranslation("BuildingPlanner.Housing.ShowRoom")" @onclick="@(() => OnFocusRoom.InvokeAsync(selected ? null : row.RoomId))" @onclick:stopPropagation>
                     <MudIcon Icon="@(selected ? Icons.Material.Filled.Visibility : Icons.Material.Outlined.Visibility)" Size="Size.Small"/>
                 </span>
             </div>
