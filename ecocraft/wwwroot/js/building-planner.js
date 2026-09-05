@@ -622,27 +622,22 @@ window.ecoBuildingPlanner = (function () {
         const ordered = level.objects.slice().sort(function (a, b) { return (a.attachedTo ? 1 : 0) - (b.attachedTo ? 1 : 0); });
         ordered.forEach(function (o) { drawObject(st, ctx, o, cs); });
 
-        // Graines de pièce et noms.
+        // Noms des pièces (pièce sélectionnée ou survolée), ancrés sur la graine (centre de la pièce) ; les pièces
+        // étant détectées automatiquement, la graine elle-même n'est plus dessinée.
         level.rooms.forEach(function (room) {
             const p = toScreen(st, room.seed.x, room.seed.y);
             const ar = analysisRoom(st, room.id);
-            const fp = st.footprints[room.id];
-            const color = ar ? (ar.contained ? st.palette.success : st.palette.error) : (fp && fp.enclosed ? st.palette.primary : st.palette.warning);
-            ctx.strokeStyle = color; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(p.x + cs / 2, p.y + cs / 2, Math.max(4, cs * 0.28), 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(p.x + cs / 2, p.y + cs / 2, Math.max(2, cs * 0.1), 0, Math.PI * 2); ctx.fill();
             const showLabel = (st.selection && st.selection.kind === 'room' && st.selection.id === room.id)
-                || (st.hover && st.hover.x === room.seed.x && st.hover.y === room.seed.y);
+                || (st.hover && roomAt(st, st.hover.x, st.hover.y) === room.id);
             if (cs >= 12 && showLabel) {
                 ctx.font = 'bold ' + Math.max(10, cs * 0.45) + 'px sans-serif';
                 ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
                 ctx.fillStyle = 'rgba(0,0,0,0.6)';
                 const label = room.name + (ar ? '  ' + ar.volume + 'm³ T' + ar.averageTier.toFixed(2) : '');
                 const tw = ctx.measureText(label).width;
-                ctx.fillRect(p.x + cs + 2, p.y + cs / 2 - cs * 0.3, tw + 6, cs * 0.6);
+                ctx.fillRect(p.x + 2, p.y + cs / 2 - cs * 0.3, tw + 6, cs * 0.6);
                 ctx.fillStyle = '#fff';
-                ctx.fillText(label, p.x + cs + 5, p.y + cs / 2);
+                ctx.fillText(label, p.x + 5, p.y + cs / 2);
             }
             if (ar && !ar.contained && ar.failCell && (ar.failLevel == null || ar.failLevel === st.level)) {
                 const fp2 = toScreen(st, ar.failCell.x, ar.failCell.y);
