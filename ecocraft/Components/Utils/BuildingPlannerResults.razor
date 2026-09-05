@@ -101,10 +101,16 @@
         else
         {
             @* Liste d'achat : quantité par type d'objet posé, groupée par spécialité qui le fabrique (sans spécialité en dernier)
-               pour faire ses courses boutique par boutique. *@
-            foreach (var g in Analysis.ObjectCounts.GroupBy(l => ObjectOf(l.Type)?.Skill).OrderBy(g => g.Key is null ? 1 : 0).ThenBy(g => SkillLabel(g.First().Type)))
+               pour faire ses courses boutique par boutique ; cliquer l'en-tête replie le groupe. *@
+            foreach (var g in Analysis.ObjectCounts.GroupBy(l => ObjectOf(l.Type)?.Skill ?? "").OrderBy(g => g.Key == "" ? 1 : 0).ThenBy(g => SkillLabel(g.First().Type)))
             {
-                <div class="bp-theme-title">@SkillLabel(g.First().Type)</div>
+                var collapsed = _collapsedSkills.Contains(g.Key);
+                <div class="bp-theme-title bp-skill-title" @onclick="@(() => ToggleSkill(g.Key))">
+                    <MudIcon Icon="@(collapsed ? Icons.Material.Filled.ChevronRight : Icons.Material.Filled.ExpandMore)" Size="Size.Small"/>
+                    <span class="bp-ellipsis">@SkillLabel(g.First().Type)</span>
+                    <span class="bp-num">×@g.Sum(l => l.Count)</span>
+                </div>
+                if (collapsed) continue;
                 foreach (var line in g.OrderBy(l => ObjectLabel(l.Type)))
                 {
                     <div class="bp-orow">
@@ -196,6 +202,14 @@
 
     private ClientObject? ObjectOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type);
     private string SkillLabel(string type) => ObjectOf(type)?.SkillLabel ?? LocalizationService.GetTranslation("BuildingPlanner.Objects.NoSkill");
+
+    // Groupes repliés du volet Mobilier (tous dépliés par défaut) ; "" = sans spécialité.
+    private readonly HashSet<string> _collapsedSkills = [];
+
+    private void ToggleSkill(string skill)
+    {
+        if (!_collapsedSkills.Remove(skill)) _collapsedSkills.Add(skill);
+    }
 
     // Pièces dépliées dans le volet Housing (toutes repliées par défaut) ; état perdu à la fermeture du volet, volontairement.
     private readonly HashSet<string> _expandedRooms = [];

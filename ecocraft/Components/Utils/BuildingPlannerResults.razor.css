@@ -167,6 +167,24 @@
     padding-top: 0;
 }
 
+/* En-tête de spécialité repliable : chevron, libellé, total du groupe. */
+.bp-skill-title {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.bp-skill-title:hover {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.bp-skill-title ::deep .mud-icon-root {
+    font-size: 16px;
+}
+
 /* Liste d'achat (volet Mobilier) : icône, libellé, quantité. */
 .bp-orow {
     display: grid;
