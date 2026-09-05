@@ -891,7 +891,7 @@
         "Wip": "Work in progress",
         "WipTooltip": "This tool is still under development: results may differ from the game.",
         "NoData": "The building planner needs building data (occupancy, block tiers, room and housing configuration). Update [EcoGnomeMod](https://github.com/Eco-Gnome/eco-gnome-mod) on the server to the latest version (export version 5), then upload the newly generated data file.",
-        "Hint": "1: select · 2: walls · 3: opening · H: pan · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · Shift+click: place object again · R: rotate · Del: delete object · Ctrl+Z/Y: undo/redo · wheel: zoom · Alt+drag or middle drag: pan · middle click: copy the object or material under the cursor · double click: select · PgUp/PgDn: level",
+        "Hint": "1: select · 2: walls · 3: opening · H: pan · Esc: drop the tool, deselect, close the panel · rooms are created automatically inside wall-enclosed areas · drag: draw · Shift+drag (walls): filled floor · right click (hold): erase as you go · Shift+right drag: erase an area, objects included · right click on empty space: drop the tool · click: place the object · Shift+click: place again · drag an object: move it · R: rotate · Del: delete object · middle click: copy the object or material under the cursor · double click: select · wheel: zoom · Alt+drag or middle drag: pan · PgUp/PgDn: level · Ctrl+Z/Y: undo/redo · Ctrl+S: save",
         "Shortcuts": "Shortcuts",
         "RoomDefaultName": "Room",
         "Material": "Material",
