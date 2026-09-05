@@ -5,6 +5,9 @@ namespace ecocraft.BuildingPlanner;
 // Façade : Valider → Construire la grille → Poser → Pièces → Requirements → Housing → Coût. Fonction pure.
 public static class PlanAnalyzer
 {
+    // Pièce « Extérieur » du deed : une seule par propriété, tous niveaux confondus, comme dans le jeu.
+    public const string OutdoorRoomId = "outdoor";
+
     public static AnalysisResult Analyze(PlanDocument doc, Catalog catalog)
     {
         var validation = PlanValidator.Validate(doc);
@@ -51,7 +54,9 @@ public static class PlanAnalyzer
             if (!stats.Contained)
             {
                 var args = stats.FailCode == "NoCeiling" && analysis.FailHeight is { } fh ? new[] { room.Name, fh.ToString() } : new[] { room.Name };
-                ctx.Issues.Add(PlanIssue.Error(stats.FailCode ?? "RoomInvalid", args, analysis.FailCell, roomId: room.Id, level: failLevel));
+                // Une pièce non couverte n'est pas une erreur : le jeu compte ses objets en extérieur.
+                var severity = stats.FailCode == "NoCeiling" ? IssueSeverity.Warning : IssueSeverity.Error;
+                ctx.Issues.Add(new PlanIssue(severity, stats.FailCode ?? "RoomInvalid", args, analysis.FailCell, null, room.Id, failLevel));
                 continue;
             }
 
@@ -100,7 +105,12 @@ public static class PlanAnalyzer
         foreach (var table in tables)
         {
             if (table.RoomId is not null) rooms.First(r => r.RoomId == table.RoomId).Tables.Add(table);
-            if (!table.InRoom) { ctx.Issues.Add(PlanIssue.Error("TableNotInRoom", [table.Type], objectId: table.ObjectId)); continue; }
+            if (!table.InRoom)
+            {
+                // Hors pièce : erreur seulement si l'objet exige un confinement ou un tier ; un banc dehors est valide en jeu.
+                if (table.RequiresContainment || table.BaseTier is not null) ctx.Issues.Add(PlanIssue.Error("TableNotInRoom", [table.Type], objectId: table.ObjectId));
+                continue;
+            }
             if (!table.ContainmentOk) ctx.Issues.Add(PlanIssue.Error("TableNotContained", [table.Type], objectId: table.ObjectId, roomId: table.RoomId));
             if (!table.TierOk) ctx.Issues.Add(PlanIssue.Error("TableTierTooLow", [table.Type, table.EffectiveTier?.ToString("0.##") ?? "", table.RoomTier.ToString("0.##"), table.TierGap.ToString("0.##")], objectId: table.ObjectId, roomId: table.RoomId));
             else if (!table.ModulesOk) ctx.Issues.Add(PlanIssue.Warning("TableModulesInactive", [table.Type, table.EffectiveTier?.ToString("0.##") ?? "", table.RoomTier.ToString("0.##")], objectId: table.ObjectId, roomId: table.RoomId));
@@ -110,6 +120,14 @@ public static class PlanAnalyzer
 
         // Housing : valeur de meuble = base × D_propriété^(n−1), n = objets du même type sur toute la propriété.
         var typeCounts = ctx.Objects.Where(o => o.Placed && o.Info?.Housing is not null).GroupBy(o => o.Info!.Name).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+        HousingScorer.FurnishingInput Furnishing(PlacedObject o)
+        {
+            var h = o.Info!.Housing!;
+            var n = typeCounts.GetValueOrDefault(o.Info.Name, 1);
+            var propertyMult = h.DiminishingMultiplierAcrossFullProperty == 1f ? 1f : MathF.Pow(h.DiminishingMultiplierAcrossFullProperty, n - 1);
+            return new HousingScorer.FurnishingInput(o, h, h.BaseValue * propertyMult);
+        }
+
         var roomHousing = new List<RoomHousingResult>();
         foreach (var (_, room) in allRooms)
         {
@@ -117,17 +135,7 @@ public static class PlanAnalyzer
             var analysis = rooms.First(r => r.RoomId == room.Id);
             if (!stats.Contained) continue;
 
-            var furnishings = analysis.ObjectIds
-                .Select(id => objectsById[id])
-                .Where(o => o.Info?.Housing is not null)
-                .Select(o =>
-                {
-                    var h = o.Info!.Housing!;
-                    var n = typeCounts.GetValueOrDefault(o.Info.Name, 1);
-                    var propertyMult = h.DiminishingMultiplierAcrossFullProperty == 1f ? 1f : MathF.Pow(h.DiminishingMultiplierAcrossFullProperty, n - 1);
-                    return new HousingScorer.FurnishingInput(o, h, h.BaseValue * propertyMult);
-                })
-                .ToList();
+            var furnishings = analysis.ObjectIds.Select(id => objectsById[id]).Where(o => o.Info?.Housing is not null).Select(Furnishing).ToList();
 
             var housing = HousingScorer.Score(room.Id, room.Name, furnishings, stats, room.LockCategory, doc.Analysis.PropertyType, catalog, out var housingIssues);
             analysis.Housing = housing;
@@ -135,7 +143,21 @@ public static class PlanAnalyzer
             ctx.Issues.AddRange(housingIssues);
         }
 
-        var property = PropertyScorer.Score(roomHousing, doc.Analysis.Residents, doc.Analysis.TargetHousing, catalog);
+        // Pièce « Extérieur » du deed : objets housing placés hors de toute pièce contenue (jardin, balcon non couvert…),
+        // tous niveaux confondus ; catégorie Outdoor forcée, pas de plafond de tier, limitée à 100 % du reste par PropertyScorer.
+        RoomHousingResult? outdoor = null;
+        if (catalog.Housing.GetCategory("Outdoor") is not null)
+        {
+            var outside = ctx.Objects.Where(o => o.Placed && o.RoomId is null && o.Info?.Housing is not null).Select(Furnishing).ToList();
+            if (outside.Count > 0)
+            {
+                outdoor = HousingScorer.Score(OutdoorRoomId, "Outdoor", outside, new RoomStats(), "Outdoor", doc.Analysis.PropertyType, catalog, out var outdoorIssues);
+                roomHousing.Add(outdoor);
+                ctx.Issues.AddRange(outdoorIssues);
+            }
+        }
+
+        var property = PropertyScorer.Score(roomHousing, doc.Analysis.Residents, catalog);
         if (catalog.Housing.IsDefault) ctx.Issues.Add(PlanIssue.Info("HousingConfigMissing", []));
 
         // Références absentes du catalogue de ce serveur (plan partagé depuis un serveur aux mods différents) : un bilan en tête.
@@ -173,6 +195,7 @@ public static class PlanAnalyzer
             Rooms = rooms,
             Tables = tables,
             Housing = property,
+            OutdoorHousing = outdoor,
             Materials = materials,
             ObjectCounts = objectCounts,
             Objects = placed,

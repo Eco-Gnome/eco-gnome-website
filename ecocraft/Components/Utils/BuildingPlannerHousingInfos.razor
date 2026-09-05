@@ -1,0 +1,53 @@
+@using ecocraft.BuildingPlanner
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+@* « i » orange d'explication (comme ailleurs sur le site) : une note libre (règle d'une pièce), puis une par réduction appliquée par
+   le jeu — un icône par ligne, ou un seul icône listant tout (Combined : chaîne complète d'un objet). *@
+@if (Combined)
+{
+    var lines = (Note is null ? Enumerable.Empty<string>() : [Note]).Concat(Steps.Select(Text)).ToList();
+    if (lines.Count > 0)
+    {
+        <MudTooltip>
+            <ChildContent><MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="bp-info-icon"/></ChildContent>
+            <TooltipContent>
+                <div class="bp-info-lines">
+                    @foreach (var line in lines) { <div>@line</div> }
+                </div>
+            </TooltipContent>
+        </MudTooltip>
+    }
+}
+else
+{
+    @if (Note is not null)
+    {
+        <MudTooltip Text="@Note"><MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="bp-info-icon"/></MudTooltip>
+    }
+    @foreach (var step in Steps)
+    {
+        <MudTooltip Text="@Text(step)"><MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="bp-info-icon"/></MudTooltip>
+    }
+}
+
+@code {
+    [Parameter] public IEnumerable<HousingStep> Steps { get; set; } = [];
+    [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public bool Combined { get; set; }
+
+    private string Label(string category) => Catalog?.Categories.FirstOrDefault(c => c.Name == category)?.Label ?? category;
+
+    private string Text(HousingStep s) => s.Kind switch
+    {
+        "support" => $"{Label(s.Category)} {LocalizationService.GetTranslation("BuildingPlanner.Housing.Support")} : {s.Before:0.00} → {s.After:0.00}. "
+                     + LocalizationService.GetTranslation("BuildingPlanner.Housing.SupportCapInfo", s.Percent.ToString("P0"), Label(s.Primary), s.Reference.ToString("0.00")),
+        "tier" => $"{s.Before:0.00} → {s.After:0.00}. " + LocalizationService.GetTranslation("BuildingPlanner.Housing.TierCapInfo", s.Percent.ToString("0.#"), s.Reference.ToString("0.##")),
+        "rank" => $"{s.Before:0.00} → {s.After:0.00}. " + LocalizationService.GetTranslation("BuildingPlanner.Housing.RankInfo", Label(s.Category), s.Rank.ToString(), s.Percent.ToString("P0"), s.Residents.ToString()),
+        "repeat" => $"{s.Before:0.00} → {s.After:0.00}. " + LocalizationService.GetTranslation("BuildingPlanner.Housing.RepeatInfo", s.Rank.ToString(), s.Category, s.Percent.ToString("P0")),
+        "property" => $"{s.Before:0.00} → {s.After:0.00}. " + LocalizationService.GetTranslation("BuildingPlanner.Housing.PropertyInfo", s.Percent.ToString("P0")),
+        "excluded" => LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", Label(s.Primary)),
+        _ => LocalizationService.GetTranslation("BuildingPlanner.Housing.CategoryCapInfo", Label(s.Category), s.Percent.ToString("P0"), s.Reference.ToString("0.00"), s.Before.ToString("0.00"), s.After.ToString("0.00"), (s.Before - s.After).ToString("0.00")),
+    };
+}

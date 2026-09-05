@@ -67,7 +67,7 @@ public static class HousingScorer
                     var mult = EcoMath.DiminishingReturn(f.Housing.DiminishingReturnMultiplier, i);
                     var value = f.FurnishingValue * mult;
                     catValue += value;
-                    lines.Add(Line(f, mult, value, excluded: false));
+                    lines.Add(Line(f, mult, value, excluded: false, rank: i));
                     i++;
                 }
             }
@@ -146,14 +146,16 @@ public static class HousingScorer
         return new RoomTierInfo { TierVal = tierVal, SoftCap = soft, HardCap = hard, DiminishingReturnPercent = dim };
     }
 
-    private static ObjectHousingLine Line(FurnishingInput f, float mult, float value, bool excluded) => new()
+    private static ObjectHousingLine Line(FurnishingInput f, float mult, float value, bool excluded, int rank = 0) => new()
     {
         ObjectId = f.Object.Doc.Id,
         Type = f.Object.Info!.Name,
         Category = f.Housing.Category,
         TypeForRoomLimit = f.Housing.TypeForRoomLimit,
+        BaseValue = f.Housing.BaseValue,
         FurnishingValue = f.FurnishingValue,
         Multiplier = mult,
+        Rank = rank,
         Value = value,
         Excluded = excluded,
     };

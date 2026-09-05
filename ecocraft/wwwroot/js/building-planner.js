@@ -29,7 +29,7 @@ window.ecoBuildingPlanner = (function () {
             defaults: { wallHeight: 3, floorMaterial: null, ceilingMaterial: null },
             levels: [emptyLevel()],
             groundIndex: 0,
-            analysis: { residents: 1, targetHousing: null, propertyType: 'Residence' },
+            analysis: { residents: 1, propertyType: 'Residence' },
         };
     }
 
@@ -38,7 +38,8 @@ window.ecoBuildingPlanner = (function () {
         plan = plan || emptyPlan();
         if (!plan.grid) plan.grid = { width: 25, depth: 20 };
         if (!plan.defaults) plan.defaults = { wallHeight: 3, floorMaterial: null, ceilingMaterial: null };
-        if (!plan.analysis) plan.analysis = { residents: 1, targetHousing: null, propertyType: 'Residence' };
+        if (!plan.analysis) plan.analysis = { residents: 1, propertyType: 'Residence' };
+        if (!plan.prices) plan.prices = {};
         if (!plan.levels || !plan.levels.length) {
             plan.levels = [{ name: '', height: null, walls: plan.walls || {}, floors: plan.floors || {}, holes: {}, rooms: plan.rooms || [], objects: plan.objects || [] }];
         }
@@ -258,6 +259,10 @@ window.ecoBuildingPlanner = (function () {
     function notifyObjectType(st) {
         if (!st.dotnetRef) return;
         st.dotnetRef.invokeMethodAsync('OnObjectTypeChanged', st.objectType).catch(function () { });
+    }
+    function notifyMaterial(st) {
+        if (!st.dotnetRef) return;
+        st.dotnetRef.invokeMethodAsync('OnMaterialPicked', st.material).catch(function () { });
     }
 
     function draftKey(st) { return 'ecoBuildingPlanner.draft.' + (st.catalog.serverId || 'default'); }
@@ -622,18 +627,13 @@ window.ecoBuildingPlanner = (function () {
         const ordered = level.objects.slice().sort(function (a, b) { return (a.attachedTo ? 1 : 0) - (b.attachedTo ? 1 : 0); });
         ordered.forEach(function (o) { drawObject(st, ctx, o, cs); });
 
-        // Graines de pièce et noms.
+        // Noms des pièces (pièce sélectionnée ou survolée), ancrés sur la graine (centre de la pièce) ; les pièces
+        // étant détectées automatiquement, la graine elle-même n'est plus dessinée.
         level.rooms.forEach(function (room) {
             const p = toScreen(st, room.seed.x, room.seed.y);
             const ar = analysisRoom(st, room.id);
-            const fp = st.footprints[room.id];
-            const color = ar ? (ar.contained ? st.palette.success : st.palette.error) : (fp && fp.enclosed ? st.palette.primary : st.palette.warning);
-            ctx.strokeStyle = color; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(p.x + cs / 2, p.y + cs / 2, Math.max(4, cs * 0.28), 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(p.x + cs / 2, p.y + cs / 2, Math.max(2, cs * 0.1), 0, Math.PI * 2); ctx.fill();
             const showLabel = (st.selection && st.selection.kind === 'room' && st.selection.id === room.id)
-                || (st.hover && st.hover.x === room.seed.x && st.hover.y === room.seed.y);
+                || (st.hover && roomAt(st, st.hover.x, st.hover.y) === room.id);
             if (cs >= 12 && showLabel) {
                 ctx.font = 'bold ' + Math.max(10, cs * 0.45) + 'px sans-serif';
                 ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
@@ -817,7 +817,8 @@ window.ecoBuildingPlanner = (function () {
         st.dynamicCanvas.setPointerCapture(e.pointerId);
 
         if (e.button === 1 || st.tool === 'pan' || (e.button === 0 && e.altKey)) {
-            st.drag = { kind: 'pan', startPx: pc.px, startPy: pc.py, ox: st.view.ox, oy: st.view.oy };
+            // Clic milieu relâché sans bouger : pipette (voir onPointerUp) ; glissé : déplacement de la vue.
+            st.drag = { kind: 'pan', startPx: pc.px, startPy: pc.py, ox: st.view.ox, oy: st.view.oy, pick: e.button === 1 ? cell : null };
             return;
         }
         if (e.button === 2) {
@@ -899,7 +900,9 @@ window.ecoBuildingPlanner = (function () {
         const drag = st.drag;
         st.drag = null;
         if (!drag) return;
-        if (drag.kind === 'rect') {
+        if (drag.kind === 'pan') {
+            if (drag.pick && Math.abs(pc.px - drag.startPx) < 4 && Math.abs(pc.py - drag.startPy) < 4) pickAt(st, drag.pick.x, drag.pick.y);
+        } else if (drag.kind === 'rect') {
             const r = normRect(drag.start, pc.cell);
             applyRect(st, r, drag.tool);
         } else if (drag.kind === 'moveObject' && drag.moved) {
@@ -939,7 +942,7 @@ window.ecoBuildingPlanner = (function () {
         if (ctrl && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(st); return; }
         if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnSaveRequested').catch(function () { }); return; }
         if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelection(st); return; }
-        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); return; }
+        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnEscape').catch(function () { }); return; }
         if (e.key === 'PageUp') { e.preventDefault(); setLevelInternal(st, st.level + 1); return; }
         if (e.key === 'PageDown') { e.preventDefault(); setLevelInternal(st, st.level - 1); return; }
         if (e.key.toLowerCase() === 'r') { e.preventDefault(); rotateCurrent(st); return; }
@@ -1027,6 +1030,24 @@ window.ecoBuildingPlanner = (function () {
         select(st, 'object', obj.id);
     }
 
+    // Pipette : reprend l'objet (type + rotation) ou le matériau (mur, sinon sol) sous le curseur avec l'outil adapté.
+    function pickAt(st, x, y) {
+        const o = objectAt(st, x, y);
+        if (o) {
+            st.objectType = o.type; notifyObjectType(st);
+            st.rotation = o.rotation || 0;
+            if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnRotationChanged', st.rotation).catch(function () { });
+            setTool(st, 'object');
+            return;
+        }
+        const level = cur(st), k = key(x, y);
+        const material = level.walls[k] ? level.walls[k].material : level.floors[k];
+        if (!material) return;
+        st.material = material; notifyMaterial(st);
+        if (st.objectType) { st.objectType = null; notifyObjectType(st); }
+        setTool(st, 'wall');
+    }
+
     function rotateCurrent(st) {
         if (st.selection && st.selection.kind === 'object') {
             const f = findObject(st, st.selection.id);
@@ -1082,8 +1103,18 @@ window.ecoBuildingPlanner = (function () {
         restorePlan(st, st.future.pop());
     }
 
+    // Largeur à réserver à droite pour cadrer le plan comme si le volet de droite était ouvert (même fermé, il peut s'ouvrir
+    // ou être restauré juste après) : --bp-panel-w du .bp-body + l'écart de la colonne ; 0 si un volet est déjà ouvert,
+    // le conteneur étant alors déjà réduit d'autant.
+    function reservedRight(st) {
+        const body = st.container.closest('.bp-body');
+        if (!body || body.querySelector('.bp-panel')) return 0;
+        const v = parseFloat(getComputedStyle(body).getPropertyValue('--bp-panel-w'));
+        return v > 0 ? v + 6 : 0;
+    }
+
     function fit(st) {
-        const w = st.container.clientWidth, h = st.container.clientHeight;
+        const w = st.container.clientWidth - reservedRight(st), h = st.container.clientHeight;
         const gw = st.plan.grid.width, gh = st.plan.grid.depth;
         const scale = Math.max(0.2, Math.min(4, Math.min((w - 60) / (gw * CELL), (h - 60) / (gh * CELL))));
         st.view.scale = scale;
@@ -1174,6 +1205,12 @@ window.ecoBuildingPlanner = (function () {
             const st = get(id); if (!st) return;
             st.plan.analysis = Object.assign({}, st.plan.analysis, options);
             commit(st, 'analysis');
+        },
+        // Prix unitaire saisi pour un matériau/objet (null = retour à la moyenne du serveur) ; pas d'historique, comme les options d'analyse.
+        setPrice: function (id, name, value) {
+            const st = get(id); if (!st) return;
+            if (value == null) delete st.plan.prices[name]; else st.plan.prices[name] = value;
+            commit(st, 'price');
         },
         setName: function (id, name) { const st = get(id); if (st) { st.plan.name = name; saveDraft(st); } },
         // Niveaux.

@@ -1,0 +1,83 @@
+/* Fiche de sélection (tiers bas du panneau gauche, ~232 px utiles). Classes sur des div/span de ce composant ;
+   les classes posées sur des composants Mud (champs, corbeille) passent par ::deep depuis une ligne. */
+.bp-insp {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.bp-insp-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Ligne d'identité : le nom se tronque plutôt que de renvoyer la chip ou la corbeille à la ligne. */
+.bp-insp-row.bp-insp-ident {
+    flex-wrap: nowrap;
+}
+
+.bp-insp-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.bp-insp-row ::deep .bp-insp-delete {
+    margin-left: auto;
+    padding: 2px;
+}
+
+/* Champs : Class tombe sur .mud-input-control (l'élément flex) ; Style irait sur l'input interne. */
+.bp-insp-row ::deep .bp-insp-namefield {
+    flex: 1 1 110px;
+    min-width: 110px;
+}
+
+.bp-insp-row ::deep .bp-insp-half {
+    flex: 1 1 100px;
+    min-width: 100px;
+}
+
+.bp-insp-row ::deep .bp-insp-z {
+    flex: 1 1 96px;
+    min-width: 96px;
+}
+
+.bp-insp-muted {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.bp-insp-ok {
+    color: var(--mud-palette-success);
+}
+
+.bp-insp-bad {
+    color: var(--mud-palette-error);
+}
+
+.bp-insp-warn {
+    color: #ffb74d;
+}
+
+.bp-insp-muted b {
+    color: #fff;
+}
+
+.bp-insp ::deep .bp-info-icon {
+    font-size: 14px;
+    vertical-align: -3px;
+    margin-left: 2px;
+}
+
+.bp-insp-empty {
+    color: rgba(255, 255, 255, 0.5);
+}
