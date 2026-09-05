@@ -85,13 +85,6 @@
     line-height: 1.4;
 }
 
-/* Aide sous le titre « Extérieur » : mêmes proportions que la ligne des objets. */
-.bp-hrow-help {
-    font-size: 11.5px;
-    line-height: 1.4;
-    margin: -4px 0 6px;
-}
-
 .bp-excluded {
     color: #ffb74d;
 }

@@ -84,7 +84,7 @@
             <span class="bp-insp-name">@(info?.Label ?? obj.Type)</span>
             @if (placed is not null)
             {
-                <MudChip T="string" Size="Size.Small" Color="@(!placed.Placed ? Color.Error : outdoors ? Color.Info : placed.RoomId is null ? Color.Warning : Color.Success)">
+                <MudChip T="string" Size="Size.Small" Color="@(!placed.Placed ? Color.Error : outdoors || placed.RoomId is null ? Color.Warning : Color.Success)">
                     @LocalizationService.GetTranslation(!placed.Placed ? "BuildingPlanner.Inspector.NotPlaced" : outdoors ? "BuildingPlanner.Housing.Outdoor" : placed.RoomId is null ? "BuildingPlanner.Inspector.NoRoom" : "BuildingPlanner.Inspector.Placed")
                 </MudChip>
             }

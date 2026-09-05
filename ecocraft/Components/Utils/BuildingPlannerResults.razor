@@ -42,8 +42,7 @@
                 @if (Analysis.OutdoorHousing is { } outdoor && housing.Rooms.FirstOrDefault(r => r.RoomId == PlanAnalyzer.OutdoorRoomId) is { } outdoorRow)
                 {
                     <div class="bp-theme-title">@LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor")</div>
-                    <div class="bp-muted bp-hrow-help">@LocalizationService.GetTranslation("BuildingPlanner.Housing.OutdoorHelp")</div>
-                    @HousingRow(outdoorRow, LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor"), outdoor, true)
+                    @HousingRow(outdoorRow, LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor"), outdoor, true, LocalizationService.GetTranslation("BuildingPlanner.Housing.OutdoorHelp"))
                 }
             </div>
         }
@@ -204,8 +203,9 @@
     private static string ThemeOf(string code) => IssueTheme.GetValueOrDefault(code, "Data");
 
     // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
-    // puis ses objets avec leur valeur réellement comptée ; pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…).
-    private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel) =>
+    // puis ses objets avec leur valeur réellement comptée ; pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…)
+    // et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange comme les autres règles.
+    private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel, string? note = null) =>
         @<div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
             @{
                 var steps = roomHousing is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis!.Housing!, row.RoomId, CapPercent);
@@ -215,7 +215,7 @@
             <div class="bp-hrow-main">
                 <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
                 <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
-                <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Catalog="Catalog"/></span>
+                <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/></span>
             </div>
             @if (roomHousing is { Objects.Count: > 0 })
             {

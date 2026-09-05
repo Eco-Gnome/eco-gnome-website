@@ -2,7 +2,11 @@
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-@* « i » orange d'explication (comme ailleurs sur le site), un par réduction appliquée par le jeu. *@
+@* « i » orange d'explication (comme ailleurs sur le site) : une note libre (règle d'une pièce), puis un par réduction appliquée par le jeu. *@
+@if (Note is not null)
+{
+    <MudTooltip Text="@Note"><MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="bp-info-icon"/></MudTooltip>
+}
 @foreach (var step in Steps)
 {
     <MudTooltip Text="@Text(step)"><MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small" Class="bp-info-icon"/></MudTooltip>
@@ -11,6 +15,7 @@
 @code {
     [Parameter] public IEnumerable<HousingStep> Steps { get; set; } = [];
     [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? Note { get; set; }
 
     private string Label(string category) => Catalog?.Categories.FirstOrDefault(c => c.Name == category)?.Label ?? category;
 
