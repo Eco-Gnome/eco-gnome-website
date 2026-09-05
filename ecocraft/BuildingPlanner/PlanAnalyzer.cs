@@ -135,7 +135,7 @@ public static class PlanAnalyzer
             ctx.Issues.AddRange(housingIssues);
         }
 
-        var property = PropertyScorer.Score(roomHousing, doc.Analysis.Residents, doc.Analysis.TargetHousing, catalog);
+        var property = PropertyScorer.Score(roomHousing, doc.Analysis.Residents, catalog);
         if (catalog.Housing.IsDefault) ctx.Issues.Add(PlanIssue.Info("HousingConfigMissing", []));
 
         // Références absentes du catalogue de ce serveur (plan partagé depuis un serveur aux mods différents) : un bilan en tête.

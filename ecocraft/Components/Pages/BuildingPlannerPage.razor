@@ -158,8 +158,6 @@ else
                 </MudSelect>
                 <MudNumericField T="int" Value="@_document.Analysis.Residents" ValueChanged="OnResidentsChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Residents")" Class="flex-no-grow" Style="width: 100px;"/>
-                <MudNumericField T="float?" Value="@_document.Analysis.TargetHousing" ValueChanged="OnTargetChanged" Min="0" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                                 Label="@LocalizationService.GetTranslation("BuildingPlanner.Target")" Class="flex-no-grow" Style="width: 175px;"/>
 
             </MudStack>
         </MudPaper>
@@ -499,7 +497,6 @@ else
     private async Task OnFloorMaterialChanged(string value) => await Js("setDefaults", new { floorMaterial = string.IsNullOrEmpty(value) ? null : value });
     private async Task OnCeilingMaterialChanged(string value) => await Js("setDefaults", new { ceilingMaterial = string.IsNullOrEmpty(value) ? null : value });
     private async Task OnResidentsChanged(int value) => await Js("setAnalysisOptions", new { residents = Math.Clamp(value, 1, 50) });
-    private async Task OnTargetChanged(float? value) => await Js("setAnalysisOptions", new { targetHousing = value });
 
     private async Task UpdateRoomAsync(PlanRoom room) => await Js("updateRoom", PlanDocumentJson.SerializePart(room));
     private async Task UpdateObjectAsync(PlanObject obj) => await Js("updateObject", PlanDocumentJson.SerializePart(obj));

@@ -29,7 +29,7 @@ window.ecoBuildingPlanner = (function () {
             defaults: { wallHeight: 3, floorMaterial: null, ceilingMaterial: null },
             levels: [emptyLevel()],
             groundIndex: 0,
-            analysis: { residents: 1, targetHousing: null, propertyType: 'Residence' },
+            analysis: { residents: 1, propertyType: 'Residence' },
         };
     }
 
@@ -38,7 +38,7 @@ window.ecoBuildingPlanner = (function () {
         plan = plan || emptyPlan();
         if (!plan.grid) plan.grid = { width: 25, depth: 20 };
         if (!plan.defaults) plan.defaults = { wallHeight: 3, floorMaterial: null, ceilingMaterial: null };
-        if (!plan.analysis) plan.analysis = { residents: 1, targetHousing: null, propertyType: 'Residence' };
+        if (!plan.analysis) plan.analysis = { residents: 1, propertyType: 'Residence' };
         if (!plan.levels || !plan.levels.length) {
             plan.levels = [{ name: '', height: null, walls: plan.walls || {}, floors: plan.floors || {}, holes: {}, rooms: plan.rooms || [], objects: plan.objects || [] }];
         }

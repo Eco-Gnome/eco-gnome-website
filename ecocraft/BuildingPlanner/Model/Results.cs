@@ -115,7 +115,6 @@ public sealed class RoomContribution
 public sealed class PropertyHousingResult
 {
     public int Residents { get; init; }
-    public float? Target { get; init; }
     public float Total { get; set; }
     public float TotalBeforeOccupancy { get; set; }
     public float OccupancyMultiplier { get; set; } = 1f;
@@ -123,7 +122,6 @@ public sealed class PropertyHousingResult
     public Dictionary<string, float> CapAppliedByCategory { get; set; } = new();  // catégorie → plafond appliqué (valeur avant)
     public float UncappedTotal { get; set; }                                       // somme des pièces principales (base des plafonds)
     public List<RoomContribution> Rooms { get; set; } = [];
-    public bool TargetReached => Target is null || Total >= Target.Value;
 }
 
 public sealed class MaterialCostLine

@@ -52,17 +52,9 @@
         {
             <MudStack Spacing="1">
                 <MudStack Row AlignItems="AlignItems.Baseline" Spacing="1">
-                    <MudText Typo="Typo.h5" Color="@(housing.TargetReached ? Color.Success : Color.Warning)">@housing.Total.ToString("0.00")</MudText>
-                    @if (housing.Target is { } target)
-                    {
-                        <MudText Typo="Typo.body2">/ @target.ToString("0.##")</MudText>
-                    }
+                    <MudText Typo="Typo.h5" Color="Color.Warning">@housing.Total.ToString("0.00")</MudText>
                     <MudText Typo="Typo.caption" Class="ml-auto">@LocalizationService.GetTranslation("BuildingPlanner.Housing.PerDay")</MudText>
                 </MudStack>
-                @if (housing.Target is { } t2 && t2 > 0)
-                {
-                    <MudProgressLinear Color="@(housing.TargetReached ? Color.Success : Color.Warning)" Value="@Math.Min(100, housing.Total / t2 * 100)" Rounded="true"/>
-                }
                 <MudText Typo="Typo.caption">
                     @LocalizationService.GetTranslation("BuildingPlanner.Housing.BeforeOccupancy"): @housing.TotalBeforeOccupancy.ToString("0.00")
                     × @housing.OccupancyMultiplier.ToString("0.###") (@housing.Residents @LocalizationService.GetTranslation("BuildingPlanner.Residents").ToLowerInvariant())

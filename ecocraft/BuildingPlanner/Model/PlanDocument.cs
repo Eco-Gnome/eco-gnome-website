@@ -140,7 +140,6 @@ public sealed class PlanObject
 public sealed class AnalysisOptions
 {
     public int Residents { get; set; } = 1;
-    public float? TargetHousing { get; set; }
     public string PropertyType { get; set; } = "Residence";
 }
 
