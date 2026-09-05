@@ -128,6 +128,10 @@
     color: #ffb74d;
 }
 
+.bp-rail-btn.error {
+    color: #ff8a80;
+}
+
 .bp-rail-btn.active {
     background: rgba(79, 163, 247, 0.18);
     box-shadow: inset 3px 0 0 #4fa3f7;

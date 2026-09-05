@@ -630,6 +630,7 @@ else
     private int WarningCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Warning) ?? 0;
     private int IssueCount => ErrorCount + WarningCount;   // les Info ne sont pas comptées (décision Romain)
     private string StatusClass => ErrorCount > 0 ? "error" : WarningCount > 0 ? "warn" : "ok";
+    private string IssueTone => ErrorCount > 0 ? " error" : WarningCount > 0 ? " warn" : "";   // icône du rail : grise quand tout va bien
 
     private string StatusText
     {
@@ -678,7 +679,7 @@ else
     private RenderFragment RailButton(string key, string icon, string labelKey, RenderFragment? badge = null) => __builder =>
     {
         <MudTooltip Text="@LocalizationService.GetTranslation(labelKey)" Placement="Placement.Left">
-            <div class="@("bp-rail-btn" + (_rightPanel == key ? " active" : "") + (key == "issues" ? " warn" : ""))" @onclick="@(() => ToggleRightPanelAsync(key))">
+            <div class="@("bp-rail-btn" + (_rightPanel == key ? " active" : "") + (key == "issues" ? IssueTone : ""))" @onclick="@(() => ToggleRightPanelAsync(key))">
                 <MudIcon Icon="@icon"/>
                 @badge
             </div>
