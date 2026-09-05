@@ -366,11 +366,11 @@
 
 /* minmax(0, 1fr) : un long matériau (libellé + puce + croix) élargirait sinon la colonne et déborderait du popover. */
 .bp-settings-grid-3 {
-    grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .bp-settings-grid-2 {
-    grid-template-columns: 120px minmax(0, 1fr);
+    grid-template-columns: 110px minmax(0, 1fr);
 }
 
 .bp-settings-grid ::deep .mud-select,
