@@ -212,10 +212,11 @@
         if (!_expandedRooms.Remove(roomId)) _expandedRooms.Add(roomId);
     }
 
-    // Une ligne de pièce : valeur (« i » = soutiens et tier qui l'ont réduite), puis ce qu'elle apporte vraiment (orange si le rang ou la
-    // limite de catégorie l'a réduite, « i » = la règle) ; le chevron replie/déplie ses objets, un par ligne : valeur catalogue, puis
-    // « → valeur finale » orange dès que le jeu l'a réduite et un seul « i » listant chaque réduction (répétition, soutien, tier, rang…) ;
-    // pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…) et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange.
+    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
+    // le chevron replie/déplie ses objets, présentés comme le panneau « Room Details » du jeu : un par ligne avec sa valeur dans la pièce
+    // et « (x %) » orange si le jeu l'a réduite (répétition, déjà présent sur la propriété), « Ignoré » si sa catégorie ne soutient pas la pièce ;
+    // puis une ligne Total « somme → valeur de la pièce » (« i » = soutiens et soft-cap de tier, appliqués au total et non objet par objet).
+    // Pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…) et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange.
     private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel, string? note = null) =>
         @<div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
             @{
@@ -237,7 +238,7 @@
                     <span></span>
                 }
                 <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
-                <span class="bp-num">@row.RoomValue.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/></span>
+                <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
                 <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/></span>
             </div>
             @if (expanded)
@@ -247,7 +248,6 @@
                 <div class="bp-hrow-items">
                     @foreach (var line in lines)
                     {
-                        var final = HousingBreakdown.ObjectFinal(line, steps);
                         var level = groupByLevel ? Document?.FindObject(line.ObjectId)?.Level ?? 0 : (int?)null;
                         if (level is not null && level != currentLevel)
                         {
@@ -255,17 +255,32 @@
                             <div class="bp-hrow-item-level">@LevelLabel(level.Value)</div>
                         }
                         <div class="bp-hrow-item">
-                            <span class="bp-ellipsis">@ObjectLabel(line.Type)</span>
-                            <span class="bp-num">
-                                @line.BaseValue.ToString("0.00")
-                                @if (final < line.BaseValue - 0.005f)
-                                {
-                                    <span class="bp-excluded"> → @final.ToString("0.00")</span>
-                                    <BuildingPlannerHousingInfos Combined="true" Steps="@HousingBreakdown.ObjectSteps(line, steps, roomHousing!.PrimaryCategory)" Catalog="Catalog"/>
-                                }
-                            </span>
+                            <span class="@("bp-ellipsis" + (line.Excluded ? " bp-excluded" : ""))">@ObjectLabel(line.Type)</span>
+                            @if (line.Excluded)
+                            {
+                                <span class="bp-num bp-excluded">@LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", CategoryLabel(roomHousing!.PrimaryCategory))</span>
+                            }
+                            else
+                            {
+                                <span class="bp-num">
+                                    @line.Value.ToString("0.00")
+                                    @if (line.Value < line.BaseValue - 0.005f) { <span class="bp-excluded"> (@((line.Value / line.BaseValue).ToString("P0")))</span> }
+                                </span>
+                            }
                         </div>
                     }
+                    @{
+                        var raw = lines.Where(l => !l.Excluded).Sum(l => l.Value);
+                        var capped = raw > roomHousing!.Value + 0.005f;
+                    }
+                    <div class="bp-hrow-item bp-hrow-total">
+                        <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</span>
+                        <span class="bp-num">
+                            @if (capped) { <span>@raw.ToString("0.00")</span><span class="bp-excluded"> → @roomHousing.Value.ToString("0.00")</span> }
+                            else { <span>@roomHousing.Value.ToString("0.00")</span> }
+                            <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/>
+                        </span>
+                    </div>
                 </div>
             }
         </div>;
