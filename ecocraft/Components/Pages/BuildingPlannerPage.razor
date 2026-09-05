@@ -206,23 +206,10 @@ else
 
         <div class="bp-body">
             <MudPaper Class="bp-side bp-left" Elevation="1">
-                <MudTabs Elevation="0" Rounded="false" PanelClass="pa-1" MinimumTabWidth="40px" Position="Position.Top" ApplyEffectsToContainer="true" ShowToolTips="true" Class="bp-tabs">
-                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.All")" Icon="@Icons.Material.Filled.Apps">
-                        @RenderObjectList("all")
-                    </MudTabPanel>
-                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Tables")" Icon="@Icons.Material.Filled.Handyman">
-                        @RenderObjectList("table")
-                    </MudTabPanel>
-                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Furniture")" Icon="@MDIIcons.Filled.Sofa">
-                        @RenderObjectList("housing")
-                    </MudTabPanel>
-                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Doors")" Icon="@MDIIcons.Filled.DoorClosed">
-                        @RenderObjectList("door")
-                    </MudTabPanel>
-                    <MudTabPanel ToolTip="@LocalizationService.GetTranslation("BuildingPlanner.Catalog.Others")" Icon="@Icons.Material.Filled.Category">
-                        @RenderObjectList("other")
-                    </MudTabPanel>
-                </MudTabs>
+                @* Catalogue : recherche + liste unique groupée (catégories housing, Tables, Portes par tier, Autres). *@
+                <div class="bp-catalog">
+                    @RenderObjectList()
+                </div>
                 @* Zone Sélection : fiche de la pièce / de l'objet sélectionné, tiers bas du panneau, scroll interne. *@
                 <div class="bp-selection">
                     <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
@@ -725,7 +712,7 @@ else
     private sealed record ObjectGroup(string Key, string Label, string? Color, bool HasHeader, List<ClientObject> Items, List<ObjectGroup>? Children = null);
 
     // Regroupement de la palette : portes par tier, sinon par catégorie housing ; les items sans catégorie vont
-    // dans « Divers ». Les en-têtes n'apparaissent que si l'onglet a au moins un vrai groupe (l'onglet Autres reste plat).
+    // dans « Divers ». Les en-têtes n'apparaissent que si la liste a au moins un vrai groupe.
     private IEnumerable<ObjectGroup> GroupObjects(string group, bool byTier, List<ClientObject> objects)
     {
         var misc = LocalizationService.GetTranslation("BuildingPlanner.Catalog.Misc");
@@ -741,7 +728,7 @@ else
                 showHeaders, g.OrderBy(o => o.Label).ToList()));
     }
 
-    // Onglet « Tous » : les types de pièce (catégories housing : Cultural, Decoration, Lighting…) d'abord,
+    // Liste du catalogue : les types de pièce (catégories housing : Cultural, Decoration, Lighting…) d'abord,
     // puis Tables, Portes (sous-groupes par tier) et Autres.
     private IEnumerable<ObjectGroup> GroupAllObjects(List<ClientObject> objects)
     {
@@ -756,15 +743,14 @@ else
         if (others.Count > 0) yield return new ObjectGroup("all-other", LocalizationService.GetTranslation("BuildingPlanner.Catalog.Others"), null, true, others);
     }
 
-    private RenderFragment RenderObjectList(string group) => __builder =>
+    private RenderFragment RenderObjectList() => __builder =>
     {
         var searching = !string.IsNullOrWhiteSpace(_objectSearch);
-        var byTier = group == "door";
-        var filtered = _clientCatalog!.Objects.Where(o => (group == "all" || o.Group == group) && (!searching || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase))).ToList();
+        var filtered = _clientCatalog!.Objects.Where(o => !searching || o.Label.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase) || o.Name.Contains(_objectSearch, StringComparison.OrdinalIgnoreCase)).ToList();
         <MudTextField T="string" Value="@_objectSearch" ValueChanged="@(v => _objectSearch = v)" Immediate="true" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                       Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-1"/>
         <div class="bp-object-list">
-            @foreach (var g in group == "all" ? GroupAllObjects(filtered) : GroupObjects(group, byTier, filtered))
+            @foreach (var g in GroupAllObjects(filtered))
             {
                 @RenderGroup(g, searching)
             }

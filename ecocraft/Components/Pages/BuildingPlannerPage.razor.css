@@ -176,23 +176,17 @@
     flex: 1 1 auto;
 }
 
-/* Panneau gauche : le catalogue (MudTabs) prend la place restante au-dessus de la zone Sélection (300 px).
-   .mud-tabs est déjà flex column ; on propage flex/min-height jusqu'au wrapper du panneau actif. */
-.bp-body ::deep .bp-tabs {
-    flex: 1 1 auto;
-    min-height: 0;
-}
-
-.bp-body ::deep .bp-tabs .mud-tabs-panels,
-.bp-body ::deep .bp-tabs .mud-tabs-panels > div {
+/* Panneau gauche : le catalogue (recherche + liste) prend la place restante au-dessus de la zone Sélection (300 px). */
+.bp-catalog {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    padding: 4px;
 }
 
 /* Le champ de recherche (mud-input-control, flex-grow chez MudBlazor) ne doit pas pousser la liste vers le bas. */
-.bp-body ::deep .bp-tabs .mud-tabs-panels > div > .mud-input-control {
+.bp-catalog ::deep .mud-input-control {
     flex: 0 0 auto;
 }
 
