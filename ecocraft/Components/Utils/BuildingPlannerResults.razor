@@ -204,16 +204,17 @@
 
     private string ObjectGroupOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type)?.Group ?? "other";
 
-    // Pièces repliées dans le volet Housing (dépliées par défaut) ; état perdu à la fermeture du volet, volontairement.
-    private readonly HashSet<string> _collapsedRooms = [];
+    // Pièces dépliées dans le volet Housing (toutes repliées par défaut) ; état perdu à la fermeture du volet, volontairement.
+    private readonly HashSet<string> _expandedRooms = [];
 
     private void ToggleRoom(string roomId)
     {
-        if (!_collapsedRooms.Remove(roomId)) _collapsedRooms.Add(roomId);
+        if (!_expandedRooms.Remove(roomId)) _expandedRooms.Add(roomId);
     }
 
-    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
-    // le chevron replie/déplie la liste de ses objets (un par ligne, valeur réellement comptée, les « i » des réductions d'objets en dernière ligne) ;
+    // Une ligne de pièce : valeur (« i » = soutiens et tier qui l'ont réduite), puis ce qu'elle apporte vraiment (orange si le rang ou la
+    // limite de catégorie l'a réduite, « i » = la règle) ; le chevron replie/déplie ses objets, un par ligne : valeur catalogue, puis
+    // « → valeur finale » orange dès que le jeu l'a réduite et un seul « i » listant chaque réduction (répétition, soutien, tier, rang…) ;
     // pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…) et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange.
     private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel, string? note = null) =>
         @<div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
@@ -222,7 +223,7 @@
                 var effective = row.RoomValue * HousingBreakdown.RoomFactor(steps);
                 var reduced = effective < row.RoomValue - 0.005f;
                 var hasObjects = roomHousing is { Objects.Count: > 0 };
-                var expanded = hasObjects && !_collapsedRooms.Contains(row.RoomId);
+                var expanded = hasObjects && _expandedRooms.Contains(row.RoomId);
             }
             <div class="bp-hrow-main">
                 @if (hasObjects)
@@ -236,7 +237,7 @@
                     <span></span>
                 }
                 <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
-                <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
+                <span class="bp-num">@row.RoomValue.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/></span>
                 <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/></span>
             </div>
             @if (expanded)
@@ -246,7 +247,7 @@
                 <div class="bp-hrow-items">
                     @foreach (var line in lines)
                     {
-                        var adjusted = line.Value * HousingBreakdown.ObjectFactor(steps, line.Category);
+                        var final = HousingBreakdown.ObjectFinal(line, steps);
                         var level = groupByLevel ? Document?.FindObject(line.ObjectId)?.Level ?? 0 : (int?)null;
                         if (level is not null && level != currentLevel)
                         {
@@ -254,18 +255,15 @@
                             <div class="bp-hrow-item-level">@LevelLabel(level.Value)</div>
                         }
                         <div class="bp-hrow-item">
-                            <span class="@("bp-ellipsis" + (line.Excluded ? " bp-excluded" : ""))">@ObjectLabel(line.Type)</span>
-                            <span class="@("bp-num" + (line.Excluded ? " bp-excluded" : ""))">
-                                @ObjectValue(line, roomHousing!)
-                                @if (!line.Excluded && adjusted < line.Value - 0.005f) { <span class="bp-excluded"> → @adjusted.ToString("0.00")</span> }
+                            <span class="bp-ellipsis">@ObjectLabel(line.Type)</span>
+                            <span class="bp-num">
+                                @line.BaseValue.ToString("0.00")
+                                @if (final < line.BaseValue - 0.005f)
+                                {
+                                    <span class="bp-excluded"> → @final.ToString("0.00")</span>
+                                    <BuildingPlannerHousingInfos Combined="true" Steps="@HousingBreakdown.ObjectSteps(line, steps, roomHousing!.PrimaryCategory)" Catalog="Catalog"/>
+                                }
                             </span>
-                        </div>
-                    }
-                    @if (steps.Any(s => s.Kind is "support" or "tier"))
-                    {
-                        <div class="bp-hrow-item">
-                            <span></span>
-                            <span class="bp-num"><BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/></span>
                         </div>
                     }
                 </div>
@@ -289,11 +287,6 @@
     private string CategoryLabel(string name) => Catalog?.Categories.FirstOrDefault(c => c.Name == name)?.Label ?? name;
     private float CapPercent(string name) => Catalog?.Categories.FirstOrDefault(c => c.Name == name)?.CapPercent ?? 0f;
     private string ObjectLabel(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type)?.Label ?? type;
-
-    // « base × 50 % = valeur », « valeur », ou « Ignoré : ne soutient pas … » — même notation que la fiche objet.
-    private string ObjectValue(ObjectHousingLine line, RoomHousingResult room) => line.Excluded
-        ? LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", CategoryLabel(room.PrimaryCategory))
-        : line.Multiplier < 0.999f ? $"{line.FurnishingValue:0.##} × {line.Multiplier:P0} = {line.Value:0.00}" : line.Value.ToString("0.00");
 
     private string LevelLabel(int level)
     {
