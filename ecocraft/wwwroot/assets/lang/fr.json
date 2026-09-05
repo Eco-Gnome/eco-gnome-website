@@ -968,24 +968,18 @@
         },
         "Inspector": {
             "Room": "Pièce",
-            "Height": "Hauteur (vide = hauteur des murs)",
+            "Height": "Hauteur",
             "DefaultMaterial": "Par défaut",
             "Contained": "Fermée",
-            "Volume": "Volume",
+            "NotContained": "Non fermée",
             "Tier": "Tier",
-            "WallBlocks": "blocs de mur",
-            "Composition": "Composition",
-            "VolumeUsed": "Volume utilisé par les tables",
             "Z": "Hauteur (z)",
             "AttachedTo": "Posé sur {parent}",
             "Placed": "Posé",
             "NotPlaced": "Non posé",
             "NoRoom": "Hors de toute pièce",
             "UnknownType": "Absent de ce serveur",
-            "RequiredTier": "Exige tier",
-            "RequiredVolume": "volume",
-            "Selection": "Sélection",
-            "NothingSelected": "Sélectionnez la graine d'une pièce ou un objet pour l'éditer. Le double-clic sur le plan sélectionne aussi."
+            "NothingSelected": "Cliquez une pièce ou un objet sur le plan pour l'éditer."
         },
         "Results": {
             "Housing": "Housing",

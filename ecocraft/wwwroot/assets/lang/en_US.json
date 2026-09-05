@@ -976,24 +976,18 @@
         },
         "Inspector": {
             "Room": "Room",
-            "Height": "Height (empty = wall height)",
+            "Height": "Height",
             "DefaultMaterial": "Default",
             "Contained": "Enclosed",
-            "Volume": "Volume",
+            "NotContained": "Not enclosed",
             "Tier": "Tier",
-            "WallBlocks": "wall blocks",
-            "Composition": "Composition",
-            "VolumeUsed": "Volume used by tables",
             "Z": "Height (z)",
             "AttachedTo": "Stacked on {parent}",
             "Placed": "Placed",
             "NotPlaced": "Not placed",
             "NoRoom": "Outside any room",
             "UnknownType": "Not available on this server",
-            "RequiredTier": "Requires tier",
-            "RequiredVolume": "volume",
-            "Selection": "Selection",
-            "NothingSelected": "Select a room seed or an object to edit it. Double-click on the plan also selects."
+            "NothingSelected": "Click a room or an object on the plan to edit it."
         },
         "Results": {
             "Housing": "Housing",
