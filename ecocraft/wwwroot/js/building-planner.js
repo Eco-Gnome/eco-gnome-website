@@ -1102,8 +1102,18 @@ window.ecoBuildingPlanner = (function () {
         restorePlan(st, st.future.pop());
     }
 
+    // Largeur à réserver à droite pour cadrer le plan comme si le volet de droite était ouvert (même fermé, il peut s'ouvrir
+    // ou être restauré juste après) : --bp-panel-w du .bp-body + l'écart de la colonne ; 0 si un volet est déjà ouvert,
+    // le conteneur étant alors déjà réduit d'autant.
+    function reservedRight(st) {
+        const body = st.container.closest('.bp-body');
+        if (!body || body.querySelector('.bp-panel')) return 0;
+        const v = parseFloat(getComputedStyle(body).getPropertyValue('--bp-panel-w'));
+        return v > 0 ? v + 6 : 0;
+    }
+
     function fit(st) {
-        const w = st.container.clientWidth, h = st.container.clientHeight;
+        const w = st.container.clientWidth - reservedRight(st), h = st.container.clientHeight;
         const gw = st.plan.grid.width, gh = st.plan.grid.depth;
         const scale = Math.max(0.2, Math.min(4, Math.min((w - 60) / (gw * CELL), (h - 60) / (gh * CELL))));
         st.view.scale = scale;

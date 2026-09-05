@@ -31,6 +31,7 @@
 }
 
 .bp-body {
+    --bp-panel-w: 390px;   /* largeur du volet de droite, lue par le JS pour cadrer le plan comme si le volet était ouvert */
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr) auto;
     gap: 6px;
@@ -580,6 +581,7 @@
 
 @media (max-width: 1280px) {
     .bp-body {
+        --bp-panel-w: 330px;
         grid-template-columns: 220px minmax(0, 1fr) auto;
     }
 
@@ -594,6 +596,7 @@
     }
 
     .bp-body {
+        --bp-panel-w: 0px;   /* le volet passe sous le plan : rien à réserver */
         grid-template-columns: 1fr;
         grid-template-rows: 260px 60vh auto;
     }
