@@ -1002,7 +1002,6 @@
             }
         },
         "Housing": {
-            "RoomValue": "Valeur de la pièce",
             "Total": "Total",
             "Outdoor": "Extérieur",
             "OutdoorHelp": "Objets hors de toute pièce, tous niveaux confondus (jardin, balcon non couvert). Pas de plafond de tier ; au plus 100 % des pièces principales.",

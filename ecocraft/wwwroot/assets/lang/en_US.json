@@ -1,4 +1,4 @@
-{
+﻿{
     "Onboarding": {
         "Steps": {
             "Skills": {
@@ -1010,7 +1010,6 @@
             }
         },
         "Housing": {
-            "RoomValue": "Room value",
             "Total": "Total",
             "Outdoor": "Outdoor",
             "OutdoorHelp": "Objects outside any room, all levels together (garden, uncovered balcony). No tier cap; at most 100 % of the main rooms.",

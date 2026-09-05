@@ -22,13 +22,12 @@
             {
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">@LocalizationService.GetTranslation("BuildingPlanner.Issue.HousingConfigMissing")</MudAlert>
             }
-            @* Une ligne par pièce, regroupées par niveau puis par catégorie (catégories limitées en dernier, comme le jeu) : valeur de la pièce,
-               puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
+            @* Une ligne par pièce, regroupées par niveau puis par catégorie (catégories limitées en dernier, comme le jeu) : ce qu'elle apporte
+               vraiment à la propriété (« valeur → apport » orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
                la somme de la colonne Total retombe sur « avant multiplicateur ». *@
             <div class="bp-hrows">
                 <div class="bp-hrow-head">
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room")</span>
-                    <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue")</span>
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</span>
                 </div>
                 @foreach (var levelGroup in housing.Rooms.Where(r => r.RoomId != PlanAnalyzer.OutdoorRoomId).GroupBy(r => Document?.FindRoom(r.RoomId)?.Level ?? 0).OrderBy(g => g.Key))
@@ -212,8 +211,8 @@
         if (!_expandedRooms.Remove(roomId)) _expandedRooms.Add(roomId);
     }
 
-    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
-    // puis l'œil qui sélectionne la pièce sur le plan ; cliquer la ligne replie/déplie ses objets, présentés comme le panneau « Room Details »
+    // Une ligne de pièce : ce qu'elle apporte à la propriété (« valeur → apport » orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
+    // puis l'œil bleu (action) qui sélectionne la pièce sur le plan, plein quand elle est sélectionnée ; cliquer la ligne replie/déplie ses objets, présentés comme le panneau « Room Details »
     // du jeu : phrase de soft-cap des matériaux s'il s'applique, un objet par ligne avec sa valeur dans la pièce et « (x %) » orange + « i »
     // si le jeu l'a réduite (répétition, déjà présent sur la propriété), « Ignoré » si sa catégorie ne soutient pas la pièce, puis une ligne
     // Total « somme → valeur de la pièce » (« i » = plafonds de soutien, appliqués au total et non objet par objet).
@@ -226,16 +225,20 @@
                 var reduced = effective < row.RoomValue - 0.005f;
                 var hasObjects = roomHousing is { Objects.Count: > 0 };
                 var expanded = hasObjects && _expandedRooms.Contains(row.RoomId);
+                var selected = SelectionKind == "room" && SelectionId == row.RoomId;
             }
             <div class="bp-hrow-main">
                 <span class="bp-hrow-toggle">
                     @if (hasObjects) { <MudIcon Icon="@(expanded ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/> }
                 </span>
                 <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
-                <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
-                <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/></span>
-                <span class="bp-hrow-eye" title="@LocalizationService.GetTranslation("BuildingPlanner.Housing.ShowRoom")" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))" @onclick:stopPropagation>
-                    <MudIcon Icon="@Icons.Material.Filled.Visibility" Size="Size.Small"/>
+                <span class="bp-num">
+                    @if (reduced) { <span>@row.RoomValue.ToString("0.00")</span><span class="bp-excluded"> → @effective.ToString("0.00")</span> }
+                    else { <span class="bp-strong">@effective.ToString("0.00")</span> }
+                    <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/>
+                </span>
+                <span class="@("bp-hrow-eye" + (selected ? " selected" : ""))" title="@LocalizationService.GetTranslation("BuildingPlanner.Housing.ShowRoom")" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))" @onclick:stopPropagation>
+                    <MudIcon Icon="@(selected ? Icons.Material.Filled.Visibility : Icons.Material.Outlined.Visibility)" Size="Size.Small"/>
                 </span>
             </div>
             @if (expanded)

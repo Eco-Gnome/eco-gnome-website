@@ -40,14 +40,14 @@
 .bp-hrow-head,
 .bp-hrow-main {
     display: grid;
-    grid-template-columns: 1fr 60px 90px;
+    grid-template-columns: 1fr 110px;
     gap: 6px;
     align-items: baseline;
 }
 
 /* Colonne du chevron replier/déplier devant le nom et œil « voir sur le plan » à droite ; l'entête les compense par des retraits. */
 .bp-hrow-main {
-    grid-template-columns: 16px 1fr 60px 90px 20px;
+    grid-template-columns: 16px 1fr 110px 20px;
 }
 
 .bp-hrow-toggle,
@@ -57,13 +57,21 @@
     color: rgba(255, 255, 255, 0.55);
 }
 
+/* Œil = action utilisateur : bleu du site ; plein et lumineux quand la pièce est sélectionnée. */
 .bp-hrow-eye {
     justify-content: flex-end;
     cursor: pointer;
+    color: var(--mud-palette-primary);
+    opacity: 0.75;
 }
 
-.bp-hrow-eye:hover {
-    color: #fff;
+.bp-hrow-eye:hover,
+.bp-hrow-eye.selected {
+    opacity: 1;
+}
+
+.bp-hrow-eye.selected {
+    filter: drop-shadow(0 0 3px var(--mud-palette-primary));
 }
 
 .bp-hrow-toggle ::deep .mud-icon-root,
