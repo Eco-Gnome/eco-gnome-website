@@ -40,7 +40,7 @@
 .bp-hrow-head,
 .bp-hrow-main {
     display: grid;
-    grid-template-columns: 1fr 70px 32px 52px;
+    grid-template-columns: 1fr 60px 90px;
     gap: 6px;
     align-items: baseline;
 }
@@ -85,21 +85,15 @@
     line-height: 1.4;
 }
 
-.bp-hrow-detail {
-    margin-top: 6px;
-    font-size: 11.5px;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.6;
-}
-
 .bp-excluded {
     color: #ffb74d;
 }
 
-.bp-link {
-    color: #4fa3f7;
-    cursor: pointer;
-    white-space: nowrap;
+/* « i » orange d'explication (MudIcon dans un MudTooltip inline). */
+.bp-hrows ::deep .bp-info-icon {
+    font-size: 14px;
+    vertical-align: -3px;
+    margin-left: 2px;
 }
 
 .bp-theme-title {

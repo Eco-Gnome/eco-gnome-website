@@ -994,7 +994,6 @@
             "Materials": "Matériaux",
             "Pending": "Dessinez des murs et ajoutez une pièce pour lancer l'analyse.",
             "NoIssue": "Tout est bon.",
-            "Detail": "Détail",
             "Theme": {
                 "Rooms": "Pièces",
                 "Housing": "Housing",
@@ -1003,14 +1002,16 @@
             }
         },
         "Housing": {
-            "Category": "Catégorie",
             "RoomValue": "Valeur de la pièce",
-            "Contribution": "Contribution",
             "Total": "Total",
             "PerDay": "XP housing / jour",
             "BeforeOccupancy": "Avant multiplicateur de résidents",
-            "CategoryCapped": "{category} plafonnée à {after} (au lieu de {before}) : cette catégorie vaut au plus {percent} de la valeur des pièces principales (actuellement {rest}).",
-            "Excluded": "ne compte pas pour cette catégorie de pièce"
+            "Ignored": "Ignoré : ne soutient pas {category}",
+            "Support": "(soutien)",
+            "RankInfo": "{category} n°{rank} : {percent} de sa valeur. La 1re pièce d'une catégorie compte en entier (une par résident, ici {n}), les suivantes de moins en moins.",
+            "SupportCapInfo": "Catégorie de soutien : au plus {percent} de la catégorie principale {category} ({primary}).",
+            "TierCapInfo": "Tier {tier} : soft-cap à {softcap}. Au-delà, la valeur supplémentaire diminue exponentiellement.",
+            "CategoryCapInfo": "Les pièces « {category} » valent au plus {percent} de la valeur des pièces principales (actuellement {rest}). Valeur ramenée de {before} à {after} : −{reduction}."
         },
         "Tables": {
             "Tier": "Tier de la pièce",

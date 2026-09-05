@@ -68,6 +68,16 @@
     color: #ffb74d;
 }
 
+.bp-insp-muted b {
+    color: #fff;
+}
+
+.bp-insp ::deep .bp-info-icon {
+    font-size: 14px;
+    vertical-align: -3px;
+    margin-left: 2px;
+}
+
 .bp-insp-empty {
     color: rgba(255, 255, 255, 0.5);
 }

@@ -1002,7 +1002,6 @@
             "Materials": "Materials",
             "Pending": "Draw walls and add a room to start the analysis.",
             "NoIssue": "Everything checks out.",
-            "Detail": "Details",
             "Theme": {
                 "Rooms": "Rooms",
                 "Housing": "Housing",
@@ -1011,14 +1010,16 @@
             }
         },
         "Housing": {
-            "Category": "Category",
             "RoomValue": "Room value",
-            "Contribution": "Contribution",
             "Total": "Total",
             "PerDay": "housing XP / day",
             "BeforeOccupancy": "Before residents multiplier",
-            "CategoryCapped": "{category} capped to {after} (was {before}): this category can be at most {percent} of the value of the primary rooms (currently {rest}).",
-            "Excluded": "does not count for this room category"
+            "Ignored": "Ignored: doesn't support {category}",
+            "Support": "(support)",
+            "RankInfo": "{category} #{rank}: {percent} of its value. The first room of a category counts fully (one per resident, here {n}), the next ones less and less.",
+            "SupportCapInfo": "Support category: at most {percent} of the primary category {category} ({primary}).",
+            "TierCapInfo": "Tier {tier}: soft-cap at {softcap}. Above it, additional value diminishes exponentially.",
+            "CategoryCapInfo": "{category} rooms can be at most {percent} of the value of the primary rooms (currently {rest}). Dropping value from {before} to {after}: −{reduction}."
         },
         "Tables": {
             "Tier": "Room tier",

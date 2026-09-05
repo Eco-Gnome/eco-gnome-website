@@ -1,3 +1,4 @@
+@using ecocraft.BuildingPlanner
 @using ecocraft.BuildingPlanner.Model
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
@@ -30,9 +31,19 @@
         }
         <div class="bp-insp-muted">
             @LevelLabel(roomEntry.Level)
-            @if (analysis?.Housing is { } housing) { <span> · @housing.PrimaryCategory</span> }
+            @if (analysis?.Housing is { } cat) { <span> · @CategoryLabel(cat.PrimaryCategory)</span> }
             @if (analysis is { Contained: true }) { <span> · @analysis.RequiredVolumeTotal / @analysis.Volume m³</span> }
         </div>
+        @if (analysis?.Housing is { } housing)
+        {
+            var steps = HousingBreakdown.RoomSteps(housing, Analysis?.Housing, room.Id, CapPercent);
+            var effective = housing.Value * HousingBreakdown.RoomFactor(steps);
+            <div class="bp-insp-muted">
+                @LocalizationService.GetTranslation("BuildingPlanner.Results.Housing") : <b>@housing.Value.ToString("0.00")</b>
+                @if (effective < housing.Value - 0.005f) { <span class="bp-insp-warn"> → @effective.ToString("0.00")</span> }
+                <BuildingPlannerHousingInfos Steps="steps" Catalog="Catalog"/>
+            </div>
+        }
         <div class="bp-insp-row">
             <MudNumericField T="int?" Value="@room.Height" ValueChanged="@(v => RoomChanged(room, r => r.Height = v is { } h ? Math.Clamp(h, 1, 50) : null))" Min="1" Max="50" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                              Placeholder="@Document?.LevelHeight(roomEntry.Level).ToString()" Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Height")" Class="bp-insp-half"/>
@@ -62,7 +73,8 @@
         var info = Catalog?.Objects.FirstOrDefault(o => o.Name == obj.Type);
         var placed = Analysis?.Objects.FirstOrDefault(o => o.Id == obj.Id);
         var table = Analysis?.Tables.FirstOrDefault(t => t.ObjectId == obj.Id);
-        var housingLine = Analysis?.Rooms.SelectMany(r => r.Housing?.Objects ?? []).FirstOrDefault(l => l.ObjectId == obj.Id);
+        var roomHousing = placed?.RoomId is { } roomId ? Analysis?.Rooms.FirstOrDefault(r => r.RoomId == roomId)?.Housing : null;
+        var housingLine = roomHousing?.Objects.FirstOrDefault(l => l.ObjectId == obj.Id);
         var roomName = placed?.RoomId is { } rid ? Document?.FindRoom(rid)?.Room.Name : null;
         <div class="bp-insp-row bp-insp-ident">
             <MudImage Src="@($"/assets/eco-icons/{obj.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="32" Height="32"/>
@@ -109,11 +121,30 @@
         }
         else if (info.HousingCategory is not null)
         {
+            @* Chaîne de CET objet dans SA pièce : base × rendement = valeur, puis la part qui compte vraiment (orange) et les règles
+               qui l'ont réduite (« i ») ; enfin la valeur de la pièce. *@
+            var steps = roomHousing is null || placed?.RoomId is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis?.Housing, placed.RoomId, CapPercent);
+            var adjusted = housingLine is null ? 0f : housingLine.Value * HousingBreakdown.ObjectFactor(steps, housingLine.Category);
             <div class="@(housingLine is { Excluded: true } ? "bp-insp-warn" : "bp-insp-muted")">
-                @info.HousingCategory @(info.HousingValue is { } hv ? $"+{hv:0.##}" : "")
-                @if (housingLine is { Excluded: false }) { <span> → <b>@housingLine.Value.ToString("0.00")</b>@(housingLine.Multiplier < 0.999f ? $" (× {housingLine.Multiplier:0.##})" : "")</span> }
-                @if (housingLine is { Excluded: true }) { <span> — @LocalizationService.GetTranslation("BuildingPlanner.Housing.Excluded")</span> }
+                <span>@CategoryLabel(info.HousingCategory) </span>
+                @if (housingLine is null) { <span> +@(info.HousingValue?.ToString("0.##") ?? "?")</span> }
+                else if (housingLine.Excluded) { <span> : @LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", CategoryLabel(roomHousing!.PrimaryCategory))</span> }
+                else
+                {
+                    if (housingLine.Multiplier < 0.999f) { <span> @housingLine.FurnishingValue.ToString("0.##") × @housingLine.Multiplier.ToString("P0") = <b>@housingLine.Value.ToString("0.00")</b></span> }
+                    else { <span> <b>+@housingLine.Value.ToString("0.00")</b></span> }
+                    if (adjusted < housingLine.Value - 0.005f) { <span class="bp-insp-warn"> → @adjusted.ToString("0.00")</span> }
+                    <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind != "support" || s.Category == housingLine.Category)" Catalog="Catalog"/>
+                }
             </div>
+            @if (roomHousing is not null)
+            {
+                var effective = roomHousing.Value * HousingBreakdown.RoomFactor(steps);
+                <div class="bp-insp-muted">
+                    @LocalizationService.GetTranslation("BuildingPlanner.Inspector.Room") : @CategoryLabel(roomHousing.PrimaryCategory) <b>@roomHousing.Value.ToString("0.00")</b>
+                    @if (effective < roomHousing.Value - 0.005f) { <span class="bp-insp-warn"> → @effective.ToString("0.00")</span> }
+                </div>
+            }
         }
         @if (table is { RequiresContainment: true })
         {
@@ -138,6 +169,9 @@
 
     private (int Level, PlanRoom Room)? SelectedRoom => SelectionKind == "room" ? Document?.FindRoom(SelectionId) : null;
     private (int Level, PlanObject Object)? SelectedObject => SelectionKind == "object" ? Document?.FindObject(SelectionId) : null;
+
+    private string CategoryLabel(string name) => Catalog?.Categories.FirstOrDefault(c => c.Name == name)?.Label ?? name;
+    private float CapPercent(string name) => Catalog?.Categories.FirstOrDefault(c => c.Name == name)?.CapPercent ?? 0f;
 
     private string LevelLabel(int level)
     {
