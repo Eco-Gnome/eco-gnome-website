@@ -364,12 +364,31 @@
     margin-bottom: 18px;
 }
 
+/* minmax(0, 1fr) : un long matériau (libellé + puce + croix) élargirait sinon la colonne et déborderait du popover. */
 .bp-settings-grid-3 {
-    grid-template-columns: 120px 1fr 1fr;
+    grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .bp-settings-grid-2 {
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 120px minmax(0, 1fr);
+}
+
+.bp-settings-grid ::deep .mud-select,
+.bp-settings-grid ::deep .mud-input-control,
+.bp-settings-grid ::deep .mud-input-slot,
+.bp-settings-grid ::deep .mud-input-slot .mud-stack {
+    min-width: 0;
+}
+
+.bp-settings-grid ::deep .mud-input-slot {
+    overflow: hidden;
+}
+
+.bp-settings-grid ::deep .mud-input-slot .mud-stack > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .bp-settings-foot {
