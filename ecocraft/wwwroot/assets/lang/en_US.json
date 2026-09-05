@@ -1018,6 +1018,8 @@
             "BeforeOccupancy": "Before residents multiplier",
             "Ignored": "Ignored: doesn't support {category}",
             "Support": "(support)",
+            "RepeatInfo": "Object #{rank} of type « {type} » in the room: × {percent} (diminishing return).",
+            "PropertyInfo": "Already present elsewhere on the property: × {percent}.",
             "RankInfo": "{category} #{rank}: {percent} of its value. The first room of a category counts fully (one per resident, here {n}), the next ones less and less.",
             "SupportCapInfo": "Support category: at most {percent} of the primary category {category} ({primary}).",
             "TierCapInfo": "Tier {tier}: soft-cap at {softcap}. Above it, additional value diminishes exponentially.",

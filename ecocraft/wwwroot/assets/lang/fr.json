@@ -1010,6 +1010,8 @@
             "BeforeOccupancy": "Avant multiplicateur de résidents",
             "Ignored": "Ignoré : ne soutient pas {category}",
             "Support": "(soutien)",
+            "RepeatInfo": "{rank}e objet de type « {type} » dans la pièce : × {percent} (rendement décroissant).",
+            "PropertyInfo": "Déjà présent ailleurs sur la propriété : × {percent}.",
             "RankInfo": "{category} n°{rank} : {percent} de sa valeur. La 1re pièce d'une catégorie compte en entier (une par résident, ici {n}), les suivantes de moins en moins.",
             "SupportCapInfo": "Catégorie de soutien : au plus {percent} de la catégorie principale {category} ({primary}).",
             "TierCapInfo": "Tier {tier} : soft-cap à {softcap}. Au-delà, la valeur supplémentaire diminue exponentiellement.",

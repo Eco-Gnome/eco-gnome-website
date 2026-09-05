@@ -124,20 +124,21 @@
         }
         else if (info.HousingCategory is not null)
         {
-            @* Chaîne de CET objet dans SA pièce : base × rendement = valeur, puis la part qui compte vraiment (orange) et les règles
-               qui l'ont réduite (« i ») ; enfin la valeur de la pièce. *@
+            @* Chaîne de CET objet : valeur catalogue, puis « → valeur finale » orange dès que le jeu l'a réduite, un seul « i » listant
+               chaque réduction (répétition, soutien, tier, rang, catégorie, ou ignoré) ; enfin la valeur de la pièce. *@
             var steps = roomHousing is null || housingRoomId is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis?.Housing, housingRoomId, CapPercent);
-            var adjusted = housingLine is null ? 0f : housingLine.Value * HousingBreakdown.ObjectFactor(steps, housingLine.Category);
-            <div class="@(housingLine is { Excluded: true } ? "bp-insp-warn" : "bp-insp-muted")">
+            <div class="bp-insp-muted">
                 <span>@CategoryLabel(info.HousingCategory)&nbsp;</span>
                 @if (housingLine is null) { <span> +@(info.HousingValue?.ToString("0.##") ?? "?")</span> }
-                else if (housingLine.Excluded) { <span> : @LocalizationService.GetTranslation("BuildingPlanner.Housing.Ignored", CategoryLabel(roomHousing!.PrimaryCategory))</span> }
                 else
                 {
-                    if (housingLine.Multiplier < 0.999f) { <span> @housingLine.FurnishingValue.ToString("0.##") × @housingLine.Multiplier.ToString("P0") = <b>@housingLine.Value.ToString("0.00")</b></span> }
-                    else { <span> <b>+@housingLine.Value.ToString("0.00")</b></span> }
-                    if (adjusted < housingLine.Value - 0.005f) { <span class="bp-insp-warn"> → @adjusted.ToString("0.00")</span> }
-                    <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind != "support" || s.Category == housingLine.Category)" Catalog="Catalog"/>
+                    var final = HousingBreakdown.ObjectFinal(housingLine, steps);
+                    <span> <b>@housingLine.BaseValue.ToString("0.00")</b></span>
+                    if (final < housingLine.BaseValue - 0.005f)
+                    {
+                        <span class="bp-insp-warn"> → @final.ToString("0.00")</span>
+                        <BuildingPlannerHousingInfos Combined="true" Steps="@HousingBreakdown.ObjectSteps(housingLine, steps, roomHousing!.PrimaryCategory)" Catalog="Catalog"/>
+                    }
                 }
             </div>
             @if (roomHousing is not null)

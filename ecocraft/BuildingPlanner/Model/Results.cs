@@ -77,8 +77,10 @@ public sealed class ObjectHousingLine
     public required string Type { get; init; }
     public required string Category { get; init; }
     public string TypeForRoomLimit { get; init; } = "";
+    public float BaseValue { get; init; }               // valeur catalogue
     public float FurnishingValue { get; init; }         // valeur de base × pénalité propriété
     public float Multiplier { get; init; }              // rendement décroissant dans la pièce
+    public int Rank { get; init; }                      // rang dans son groupe TypeForRoomLimit (0 = premier)
     public float Value { get; init; }
     public bool Excluded { get; init; }
 }
