@@ -68,7 +68,7 @@ public sealed class TableCheck
     public bool RequiresContainment { get; init; }
     public bool ContainmentOk { get; init; }
     public bool InRoom { get; init; }
-    public bool Satisfied => InRoom && TierOk && VolumeOk && ContainmentOk;
+    public bool Satisfied => (InRoom || !RequiresContainment) && TierOk && VolumeOk && ContainmentOk;   // hors pièce : valide sans confinement ni tier exigés
 }
 
 public sealed class ObjectHousingLine
@@ -146,6 +146,7 @@ public sealed class AnalysisResult
     public List<RoomAnalysis> Rooms { get; init; } = [];
     public List<TableCheck> Tables { get; init; } = [];
     public PropertyHousingResult? Housing { get; init; }
+    public RoomHousingResult? OutdoorHousing { get; init; }  // pièce « Extérieur » du deed (RoomId = PlanAnalyzer.OutdoorRoomId), null sans objet dehors
     public List<MaterialCostLine> Materials { get; init; } = [];
     public List<ObjectCostLine> ObjectCounts { get; init; } = [];
     public List<PlacedObjectResult> Objects { get; init; } = [];

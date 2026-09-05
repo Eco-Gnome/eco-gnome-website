@@ -30,42 +30,20 @@
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.RoomValue")</span>
                     <span>@LocalizationService.GetTranslation("BuildingPlanner.Housing.Total")</span>
                 </div>
-                @foreach (var levelGroup in housing.Rooms.GroupBy(r => Document?.FindRoom(r.RoomId)?.Level ?? 0).OrderBy(g => g.Key))
+                @foreach (var levelGroup in housing.Rooms.Where(r => r.RoomId != PlanAnalyzer.OutdoorRoomId).GroupBy(r => Document?.FindRoom(r.RoomId)?.Level ?? 0).OrderBy(g => g.Key))
                 {
                     <div class="bp-theme-title">@LevelLabel(levelGroup.Key)</div>
                     foreach (var row in levelGroup.OrderBy(r => CapPercent(r.Category) > 0f ? 1 : 0).ThenBy(r => r.Category).ThenBy(r => r.Rank))
                     {
-                        var catLabel = CategoryLabel(row.Category);
-                        var entry = Document?.FindRoom(row.RoomId);
-                        var roomHousing = Analysis.Rooms.FirstOrDefault(r => r.RoomId == row.RoomId)?.Housing;
-                        var steps = roomHousing is null ? [] : HousingBreakdown.RoomSteps(roomHousing, housing, row.RoomId, CapPercent);
-                        var effective = row.RoomValue * HousingBreakdown.RoomFactor(steps);
-                        var reduced = effective < row.RoomValue - 0.005f;
-                        <div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
-                            <div class="bp-hrow-main">
-                                <span class="bp-ellipsis"><span class="bp-strong">@(entry?.Room.Name ?? row.RoomId)</span><span class="bp-muted"> · @catLabel</span></span>
-                                <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
-                                <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Catalog="Catalog"/></span>
-                            </div>
-                            @if (roomHousing is { Objects.Count: > 0 })
-                            {
-                                @* Objets de la pièce avec leur valeur réellement comptée (orange si réduite), et les règles appliquées. *@
-                                <div class="bp-hrow-sub">
-                                    <span>
-                                        @for (var i = 0; i < roomHousing.Objects.Count; i++)
-                                        {
-                                            var line = roomHousing.Objects[i];
-                                            var adjusted = line.Value * HousingBreakdown.ObjectFactor(steps, line.Category);
-                                            if (i > 0) { <span> · </span> }
-                                            <span class="@(line.Excluded ? "bp-excluded" : null)">@ObjectLabel(line.Type) @ObjectValue(line, roomHousing)</span>
-                                            @if (!line.Excluded && adjusted < line.Value - 0.005f) { <span class="bp-excluded"> → @adjusted.ToString("0.00")</span> }
-                                        }
-                                        <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/>
-                                    </span>
-                                </div>
-                            }
-                        </div>
+                        @HousingRow(row, Document?.FindRoom(row.RoomId)?.Room.Name ?? row.RoomId, Analysis.Rooms.FirstOrDefault(r => r.RoomId == row.RoomId)?.Housing, false)
                     }
+                }
+                @* Pièce « Extérieur » du deed : objets hors de toute pièce, tous niveaux confondus — une seule, en bas, comme dans le jeu. *@
+                @if (Analysis.OutdoorHousing is { } outdoor && housing.Rooms.FirstOrDefault(r => r.RoomId == PlanAnalyzer.OutdoorRoomId) is { } outdoorRow)
+                {
+                    <div class="bp-theme-title">@LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor")</div>
+                    <div class="bp-muted bp-hrow-help">@LocalizationService.GetTranslation("BuildingPlanner.Housing.OutdoorHelp")</div>
+                    @HousingRow(outdoorRow, LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor"), outdoor, true)
                 }
             </div>
         }
@@ -224,6 +202,46 @@
     };
 
     private static string ThemeOf(string code) => IssueTheme.GetValueOrDefault(code, "Data");
+
+    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
+    // puis ses objets avec leur valeur réellement comptée ; pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…).
+    private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel) =>
+        @<div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
+            @{
+                var steps = roomHousing is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis!.Housing!, row.RoomId, CapPercent);
+                var effective = row.RoomValue * HousingBreakdown.RoomFactor(steps);
+                var reduced = effective < row.RoomValue - 0.005f;
+            }
+            <div class="bp-hrow-main">
+                <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
+                <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
+                <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Catalog="Catalog"/></span>
+            </div>
+            @if (roomHousing is { Objects.Count: > 0 })
+            {
+                var lines = groupByLevel ? roomHousing.Objects.OrderBy(l => Document?.FindObject(l.ObjectId)?.Level ?? 0).ToList() : roomHousing.Objects;
+                int? currentLevel = null;
+                <div class="bp-hrow-sub">
+                    <span>
+                        @for (var i = 0; i < lines.Count; i++)
+                        {
+                            var line = lines[i];
+                            var adjusted = line.Value * HousingBreakdown.ObjectFactor(steps, line.Category);
+                            var level = groupByLevel ? Document?.FindObject(line.ObjectId)?.Level ?? 0 : (int?)null;
+                            if (level is not null && level != currentLevel)
+                            {
+                                currentLevel = level;
+                                <span class="bp-strong">@(i > 0 ? " — " : "")@LevelLabel(level.Value) : </span>
+                            }
+                            else if (i > 0) { <span> · </span> }
+                            <span class="@(line.Excluded ? "bp-excluded" : null)">@ObjectLabel(line.Type) @ObjectValue(line, roomHousing)</span>
+                            @if (!line.Excluded && adjusted < line.Value - 0.005f) { <span class="bp-excluded"> → @adjusted.ToString("0.00")</span> }
+                        }
+                        <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/>
+                    </span>
+                </div>
+            }
+        </div>;
 
     private string IssueClass(PlanIssue issue)
     {

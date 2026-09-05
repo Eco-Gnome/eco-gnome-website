@@ -73,16 +73,19 @@
         var info = Catalog?.Objects.FirstOrDefault(o => o.Name == obj.Type);
         var placed = Analysis?.Objects.FirstOrDefault(o => o.Id == obj.Id);
         var table = Analysis?.Tables.FirstOrDefault(t => t.ObjectId == obj.Id);
-        var roomHousing = placed?.RoomId is { } roomId ? Analysis?.Rooms.FirstOrDefault(r => r.RoomId == roomId)?.Housing : null;
+        // Hors de toute pièce, un objet housing compte dans la pièce « Extérieur » du deed.
+        var outdoors = placed is { Placed: true, RoomId: null } && Analysis?.OutdoorHousing?.Objects.Any(l => l.ObjectId == obj.Id) == true;
+        var housingRoomId = outdoors ? PlanAnalyzer.OutdoorRoomId : placed?.RoomId;
+        var roomHousing = outdoors ? Analysis!.OutdoorHousing : placed?.RoomId is { } roomId ? Analysis?.Rooms.FirstOrDefault(r => r.RoomId == roomId)?.Housing : null;
         var housingLine = roomHousing?.Objects.FirstOrDefault(l => l.ObjectId == obj.Id);
-        var roomName = placed?.RoomId is { } rid ? Document?.FindRoom(rid)?.Room.Name : null;
+        var roomName = outdoors ? LocalizationService.GetTranslation("BuildingPlanner.Housing.Outdoor") : placed?.RoomId is { } rid ? Document?.FindRoom(rid)?.Room.Name : null;
         <div class="bp-insp-row bp-insp-ident">
             <MudImage Src="@($"/assets/eco-icons/{obj.Type}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="32" Height="32"/>
             <span class="bp-insp-name">@(info?.Label ?? obj.Type)</span>
             @if (placed is not null)
             {
-                <MudChip T="string" Size="Size.Small" Color="@(!placed.Placed ? Color.Error : placed.RoomId is null ? Color.Warning : Color.Success)">
-                    @LocalizationService.GetTranslation(!placed.Placed ? "BuildingPlanner.Inspector.NotPlaced" : placed.RoomId is null ? "BuildingPlanner.Inspector.NoRoom" : "BuildingPlanner.Inspector.Placed")
+                <MudChip T="string" Size="Size.Small" Color="@(!placed.Placed ? Color.Error : outdoors ? Color.Info : placed.RoomId is null ? Color.Warning : Color.Success)">
+                    @LocalizationService.GetTranslation(!placed.Placed ? "BuildingPlanner.Inspector.NotPlaced" : outdoors ? "BuildingPlanner.Housing.Outdoor" : placed.RoomId is null ? "BuildingPlanner.Inspector.NoRoom" : "BuildingPlanner.Inspector.Placed")
                 </MudChip>
             }
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" Class="bp-insp-delete" OnClick="OnDeleteSelection"/>
@@ -123,7 +126,7 @@
         {
             @* Chaîne de CET objet dans SA pièce : base × rendement = valeur, puis la part qui compte vraiment (orange) et les règles
                qui l'ont réduite (« i ») ; enfin la valeur de la pièce. *@
-            var steps = roomHousing is null || placed?.RoomId is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis?.Housing, placed.RoomId, CapPercent);
+            var steps = roomHousing is null || housingRoomId is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis?.Housing, housingRoomId, CapPercent);
             var adjusted = housingLine is null ? 0f : housingLine.Value * HousingBreakdown.ObjectFactor(steps, housingLine.Category);
             <div class="@(housingLine is { Excluded: true } ? "bp-insp-warn" : "bp-insp-muted")">
                 <span>@CategoryLabel(info.HousingCategory)&nbsp;</span>
