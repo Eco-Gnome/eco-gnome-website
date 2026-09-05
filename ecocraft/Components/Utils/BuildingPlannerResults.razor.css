@@ -45,8 +45,24 @@
     align-items: baseline;
 }
 
+/* Colonne du chevron replier/déplier devant le nom ; l'entête la compense par un retrait. */
+.bp-hrow-main {
+    grid-template-columns: 16px 1fr 60px 90px;
+}
+
+.bp-hrow-toggle {
+    align-self: center;
+    display: flex;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+}
+
+.bp-hrow-toggle ::deep .mud-icon-root {
+    font-size: 16px;
+}
+
 .bp-hrow-head {
-    padding: 6px 0;
+    padding: 6px 0 6px 22px;
     color: rgba(255, 255, 255, 0.5);
     font-size: 11px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -75,14 +91,24 @@
     background: rgba(255, 255, 255, 0.03);
 }
 
-.bp-hrow-sub {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
+/* Objets de la pièce, un par ligne : libellé (ellipse) puis sa chaîne de valeur à droite ; sous-titres de niveau pour l'Extérieur. */
+.bp-hrow-items {
+    margin: 6px 0 0 22px;
     font-size: 11.5px;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.6);
     line-height: 1.4;
+}
+
+.bp-hrow-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.bp-hrow-item-level {
+    color: #fff;
+    padding: 4px 0 2px;
 }
 
 .bp-excluded {

@@ -204,43 +204,70 @@
 
     private string ObjectGroupOf(string type) => Catalog?.Objects.FirstOrDefault(o => o.Name == type)?.Group ?? "other";
 
-    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle),
-    // puis ses objets avec leur valeur réellement comptée ; pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…)
-    // et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange comme les autres règles.
+    // Pièces repliées dans le volet Housing (dépliées par défaut) ; état perdu à la fermeture du volet, volontairement.
+    private readonly HashSet<string> _collapsedRooms = [];
+
+    private void ToggleRoom(string roomId)
+    {
+        if (!_collapsedRooms.Remove(roomId)) _collapsedRooms.Add(roomId);
+    }
+
+    // Une ligne de pièce : valeur, puis ce qu'elle apporte vraiment (orange si le rang ou la limite de catégorie l'a réduite, « i » = la règle) ;
+    // le chevron replie/déplie la liste de ses objets (un par ligne, valeur réellement comptée, les « i » des réductions d'objets en dernière ligne) ;
+    // pour la pièce Extérieur les objets sont groupés par niveau (jardin, balcon…) et sa règle (pas de tier, 100 % du reste) tient dans un « i » orange.
     private RenderFragment HousingRow(RoomContribution row, string name, RoomHousingResult? roomHousing, bool groupByLevel, string? note = null) =>
         @<div class="bp-hrow" @onclick="@(() => OnFocusRoom.InvokeAsync(row.RoomId))">
             @{
                 var steps = roomHousing is null ? [] : HousingBreakdown.RoomSteps(roomHousing, Analysis!.Housing!, row.RoomId, CapPercent);
                 var effective = row.RoomValue * HousingBreakdown.RoomFactor(steps);
                 var reduced = effective < row.RoomValue - 0.005f;
+                var hasObjects = roomHousing is { Objects.Count: > 0 };
+                var expanded = hasObjects && !_collapsedRooms.Contains(row.RoomId);
             }
             <div class="bp-hrow-main">
+                @if (hasObjects)
+                {
+                    <span class="bp-hrow-toggle" @onclick="@(() => ToggleRoom(row.RoomId))" @onclick:stopPropagation>
+                        <MudIcon Icon="@(expanded ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/>
+                    </span>
+                }
+                else
+                {
+                    <span></span>
+                }
                 <span class="bp-ellipsis"><span class="bp-strong">@name</span><span class="bp-muted"> · @CategoryLabel(row.Category)</span></span>
                 <span class="bp-num">@row.RoomValue.ToString("0.00")</span>
                 <span class="@("bp-num " + (reduced ? "bp-excluded" : "bp-strong"))">@(reduced ? "→ " : "")@effective.ToString("0.00") <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "rank" or "category")" Note="@note" Catalog="Catalog"/></span>
             </div>
-            @if (roomHousing is { Objects.Count: > 0 })
+            @if (expanded)
             {
-                var lines = groupByLevel ? roomHousing.Objects.OrderBy(l => Document?.FindObject(l.ObjectId)?.Level ?? 0).ToList() : roomHousing.Objects;
+                var lines = groupByLevel ? roomHousing!.Objects.OrderBy(l => Document?.FindObject(l.ObjectId)?.Level ?? 0).ToList() : roomHousing!.Objects;
                 int? currentLevel = null;
-                <div class="bp-hrow-sub">
-                    <span>
-                        @for (var i = 0; i < lines.Count; i++)
+                <div class="bp-hrow-items">
+                    @foreach (var line in lines)
+                    {
+                        var adjusted = line.Value * HousingBreakdown.ObjectFactor(steps, line.Category);
+                        var level = groupByLevel ? Document?.FindObject(line.ObjectId)?.Level ?? 0 : (int?)null;
+                        if (level is not null && level != currentLevel)
                         {
-                            var line = lines[i];
-                            var adjusted = line.Value * HousingBreakdown.ObjectFactor(steps, line.Category);
-                            var level = groupByLevel ? Document?.FindObject(line.ObjectId)?.Level ?? 0 : (int?)null;
-                            if (level is not null && level != currentLevel)
-                            {
-                                currentLevel = level;
-                                <span class="bp-strong">@(i > 0 ? " — " : "")@LevelLabel(level.Value) : </span>
-                            }
-                            else if (i > 0) { <span> · </span> }
-                            <span class="@(line.Excluded ? "bp-excluded" : null)">@ObjectLabel(line.Type) @ObjectValue(line, roomHousing)</span>
-                            @if (!line.Excluded && adjusted < line.Value - 0.005f) { <span class="bp-excluded"> → @adjusted.ToString("0.00")</span> }
+                            currentLevel = level;
+                            <div class="bp-hrow-item-level">@LevelLabel(level.Value)</div>
                         }
-                        <BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/>
-                    </span>
+                        <div class="bp-hrow-item">
+                            <span class="@("bp-ellipsis" + (line.Excluded ? " bp-excluded" : ""))">@ObjectLabel(line.Type)</span>
+                            <span class="@("bp-num" + (line.Excluded ? " bp-excluded" : ""))">
+                                @ObjectValue(line, roomHousing!)
+                                @if (!line.Excluded && adjusted < line.Value - 0.005f) { <span class="bp-excluded"> → @adjusted.ToString("0.00")</span> }
+                            </span>
+                        </div>
+                    }
+                    @if (steps.Any(s => s.Kind is "support" or "tier"))
+                    {
+                        <div class="bp-hrow-item">
+                            <span></span>
+                            <span class="bp-num"><BuildingPlannerHousingInfos Steps="@steps.Where(s => s.Kind is "support" or "tier")" Catalog="Catalog"/></span>
+                        </div>
+                    }
                 </div>
             }
         </div>;
