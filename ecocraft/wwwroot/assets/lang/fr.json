@@ -1024,7 +1024,7 @@
             "ModulesInactive": "table OK, modules inactifs"
         },
         "Objects": {
-            "Furniture": "Mobilier",
+            "NoSkill": "Sans spécialité",
             "None": "Aucun objet posé sur le plan."
         },
         "Materials": {

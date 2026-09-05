@@ -1032,7 +1032,7 @@
             "ModulesInactive": "table works, modules inactive"
         },
         "Objects": {
-            "Furniture": "Furniture",
+            "NoSkill": "No specialty",
             "None": "No object placed on the plan."
         },
         "Materials": {
