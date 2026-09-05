@@ -970,8 +970,6 @@
             "Room": "Pièce",
             "Height": "Hauteur (vide = hauteur des murs)",
             "DefaultMaterial": "Par défaut",
-            "LockCategory": "Catégorie de pièce",
-            "AutoCategory": "Automatique (comme en jeu)",
             "Contained": "Fermée",
             "Volume": "Volume",
             "Tier": "Tier",

@@ -978,8 +978,6 @@
             "Room": "Room",
             "Height": "Height (empty = wall height)",
             "DefaultMaterial": "Default",
-            "LockCategory": "Room category",
-            "AutoCategory": "Automatic (like in game)",
             "Contained": "Enclosed",
             "Volume": "Volume",
             "Tier": "Tier",

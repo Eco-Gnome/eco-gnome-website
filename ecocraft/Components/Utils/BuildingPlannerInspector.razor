@@ -36,15 +36,6 @@
                 }
             </MudSelect>
         </MudStack>
-        <MudSelect T="string" Value="@(room.LockCategory ?? "")" ValueChanged="@(v => RoomChanged(room, r => r.LockCategory = string.IsNullOrEmpty(v) ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                   Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.LockCategory")">
-            <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.AutoCategory")</MudSelectItem>
-            @foreach (var c in Catalog?.Categories ?? [])
-            {
-                <MudSelectItem T="string" Value="@c.Name">@c.Label</MudSelectItem>
-            }
-        </MudSelect>
-
         @if (analysis is not null)
         {
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap">
