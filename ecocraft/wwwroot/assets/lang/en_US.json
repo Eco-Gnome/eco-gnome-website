@@ -985,7 +985,7 @@
             "AttachedTo": "Stacked on {parent}",
             "Placed": "Placed",
             "NotPlaced": "Not placed",
-            "NoRoom": "Outside any room",
+            "NoRoom": "No room",
             "UnknownType": "Not available on this server",
             "NothingSelected": "Click a room or an object on the plan to edit it."
         },

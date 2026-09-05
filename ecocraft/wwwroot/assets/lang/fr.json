@@ -977,7 +977,7 @@
             "AttachedTo": "Posé sur {parent}",
             "Placed": "Posé",
             "NotPlaced": "Non posé",
-            "NoRoom": "Hors de toute pièce",
+            "NoRoom": "Hors pièce",
             "UnknownType": "Absent de ce serveur",
             "NothingSelected": "Cliquez une pièce ou un objet sur le plan pour l'éditer."
         },
