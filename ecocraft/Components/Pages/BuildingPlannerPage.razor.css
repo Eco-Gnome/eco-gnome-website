@@ -366,17 +366,17 @@
 
 /* minmax(0, 1fr) : un long matériau (libellé + puce + croix) élargirait sinon la colonne et déborderait du popover. */
 .bp-settings-grid-3 {
-    grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 100px minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .bp-settings-grid-2 {
-    grid-template-columns: 110px minmax(0, 1fr);
+    grid-template-columns: 100px minmax(0, 1fr);
 }
 
 .bp-settings-grid ::deep .mud-select,
 .bp-settings-grid ::deep .mud-input-control,
 .bp-settings-grid ::deep .mud-input-slot,
-.bp-settings-grid ::deep .mud-input-slot .mud-stack {
+.bp-settings-grid ::deep .mud-input-slot > div {
     min-width: 0;
 }
 
@@ -389,7 +389,8 @@
     display: none;
 }
 
-.bp-settings-grid ::deep .mud-input-slot .mud-stack > span {
+/* MudStack se rend en div.d-flex (pas de classe .mud-stack). */
+.bp-settings-grid ::deep .mud-input-slot > div > span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;

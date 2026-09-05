@@ -161,7 +161,7 @@ else
                     </div>
                     <MudOverlay Visible="_settingsOpen" VisibleChanged="@(v => _settingsOpen = v)" AutoClose="true" LockScroll="false"/>
                     @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style, le reste sur le div intérieur. *@
-                    <MudPopover Open="_settingsOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8" Style="width: 600px; background: #3a3b46; border-radius: 6px;">
+                    <MudPopover Open="_settingsOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8" Style="width: 640px; background: #3a3b46; border-radius: 6px;">
                         <div class="bp-settings">
                             <div class="bp-settings-head">
                                 <span class="bp-settings-heading">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
