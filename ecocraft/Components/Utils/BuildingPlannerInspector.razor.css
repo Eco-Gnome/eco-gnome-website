@@ -1,0 +1,75 @@
+/* Fiche de sélection (tiers bas du panneau gauche, ~232 px utiles). Classes sur des div/span de ce composant. */
+.bp-insp {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.bp-insp-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+}
+
+.bp-insp-label {
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* MudIconButton (composant) : ::deep depuis le div d'entête. */
+.bp-insp-head ::deep .bp-insp-delete {
+    margin-left: auto;
+    padding: 2px;
+}
+
+.bp-insp-ident {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bp-insp-name {
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.bp-insp-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.bp-insp-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Champ z : Class tombe sur .mud-input-control (l'élément flex) ; Style irait sur l'input interne. */
+.bp-insp-controls ::deep .bp-insp-z {
+    flex: 1 1 96px;
+    min-width: 96px;
+}
+
+.bp-insp-info {
+    line-height: 1.7;
+}
+
+/* MudText caption est un span inline : une ligne par information, comme dans l'ancien MudStack. */
+.bp-insp-info ::deep .mud-typography {
+    display: block;
+}
+
+.bp-insp-muted {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.bp-insp-empty {
+    color: rgba(255, 255, 255, 0.5);
+}
