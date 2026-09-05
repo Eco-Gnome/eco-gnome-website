@@ -321,6 +321,27 @@
     color: rgba(255, 255, 255, 0.75);
 }
 
+/* État « à faire » : plafond par défaut vide. */
+.bp-settings-btn.todo {
+    border-color: var(--mud-palette-warning);
+}
+
+.bp-settings-btn.todo ::deep .bp-settings-icon,
+.bp-settings-btn.todo .bp-settings-summary {
+    color: var(--mud-palette-warning);
+}
+
+.bp-settings-dot {
+    position: absolute;
+    top: 8px;
+    left: 22px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mud-palette-warning);
+    border: 1px solid #3a3b46;
+}
+
 /* Contenu du popover Réglages : div de cette page, il garde son attribut de scope une fois téléporté. */
 .bp-settings {
     padding: 18px 18px 14px;
@@ -358,7 +379,7 @@
 .bp-settings-grid {
     display: grid;
     gap: 12px;
-    align-items: center;
+    align-items: start;
     margin-bottom: 18px;
 }
 
@@ -380,6 +401,17 @@
 
 .bp-settings-grid ::deep .mud-input-slot {
     overflow: hidden;
+}
+
+/* Plafond manquant = avertissement (orange), pas une erreur rouge ; !important car MudBlazor est plus spécifique. */
+.bp-settings-grid ::deep .mud-input-error .mud-input-outlined-border,
+.bp-settings-grid ::deep .mud-input-error.mud-input-outlined:hover .mud-input-outlined-border {
+    border-color: var(--mud-palette-warning) !important;
+}
+
+.bp-settings-grid ::deep .mud-input-control.mud-input-error .mud-input-label,
+.bp-settings-grid ::deep .mud-input-control.mud-input-error .mud-input-helper-text {
+    color: var(--mud-palette-warning) !important;
 }
 
 /* La puce de tier reste dans la liste déroulante ; dans la valeur sélectionnée elle n'a pas la place. */

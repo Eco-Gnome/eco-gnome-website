@@ -915,6 +915,8 @@
             "Floor": "Default floor",
             "Ceiling": "Default ceiling",
             "Terrain": "Terrain (tier 0)",
+            "TerrainHelp": "Terrain = tier 0, caps housing",
+            "CeilingRequired": "Required: without a ceiling every room leaks (tier 0, no housing)",
             "None": "None"
         },
         "Settings": {
@@ -924,6 +926,7 @@
             "Housing": "Housing",
             "ResidentsHelp": "The residents multiplier applies to the total. With {n} resident(s): ×{m}.",
             "Summary": "Walls {height} · {n} resident(s)",
+            "CeilingTodo": "Ceiling to set",
             "Grid": "Grid {w} × {d} · {n} levels"
         },
         "Legend": {

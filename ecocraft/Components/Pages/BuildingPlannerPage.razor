@@ -152,11 +152,16 @@ else
 
                 @* Réglages du plan : les champs écrivent dans le document via JS comme avant (setDefaults / setAnalysisOptions). *@
                 <div class="bp-settings-anchor">
-                    <div class="bp-settings-btn" @onclick="@(() => _settingsOpen = !_settingsOpen)">
+                    @* Plafond par défaut vide = toutes les pièces fuient : le bouton passe en état « à faire » jusqu'au choix. *@
+                    <div class="@("bp-settings-btn" + (CeilingMissing ? " todo" : ""))" @onclick="@(() => _settingsOpen = !_settingsOpen)">
                         <MudIcon Icon="@Icons.Material.Filled.Settings" Class="bp-settings-icon"/>
+                        @if (CeilingMissing)
+                        {
+                            <i class="bp-settings-dot"></i>
+                        }
                         <span class="bp-settings-title">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
                         <i class="bp-vsep bp-vsep-sm"></i>
-                        <span class="bp-settings-summary">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString())</span>
+                        <span class="bp-settings-summary">@(CeilingMissing ? LocalizationService.GetTranslation("BuildingPlanner.Settings.CeilingTodo") : LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString()))</span>
                         <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Class="bp-settings-caret"/>
                     </div>
                     <MudOverlay Visible="_settingsOpen" VisibleChanged="@(v => _settingsOpen = v)" AutoClose="true" LockScroll="false"/>
@@ -172,7 +177,8 @@ else
                                 <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")"/>
                                 <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")">
+                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")"
+                                           HelperText="@(string.IsNullOrEmpty(_document.Defaults.FloorMaterial) ? LocalizationService.GetTranslation("BuildingPlanner.Defaults.TerrainHelp") : null)">
                                     <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Terrain")</MudSelectItem>
                                     @foreach (var m in _clientCatalog!.Materials)
                                     {
@@ -180,7 +186,8 @@ else
                                     }
                                 </MudSelect>
                                 <MudSelect T="string" Value="@(_document.Defaults.CeilingMaterial ?? "")" ValueChanged="OnCeilingMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")">
+                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")"
+                                           Error="CeilingMissing" ErrorText="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.CeilingRequired")">
                                     <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.None")</MudSelectItem>
                                     @foreach (var m in _clientCatalog!.Materials)
                                     {
@@ -613,6 +620,7 @@ else
         await ResizeAsync();
     }
 
+    private bool CeilingMissing => string.IsNullOrEmpty(_document.Defaults.CeilingMaterial);
     private int ErrorCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Error) ?? 0;
     private int WarningCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Warning) ?? 0;
     private int IssueCount => ErrorCount + WarningCount;   // les Info ne sont pas comptées (décision Romain)
@@ -685,6 +693,8 @@ else
 
     private async Task FocusIssueAsync(PlanIssue issue)
     {
+        // Le plafond manquant se corrige dans les réglages, pas sur la pièce.
+        if (issue.Code == "MissingCeilingMaterial") { _settingsOpen = true; return; }
         if (issue.Level is { } level) await Js("setLevel", level);
         if (issue.ObjectId is not null) await Js("selectObject", issue.ObjectId);
         else if (issue.RoomId is not null) await Js("selectRoom", issue.RoomId);

@@ -907,6 +907,8 @@
             "Floor": "Sol par défaut",
             "Ceiling": "Plafond par défaut",
             "Terrain": "Terrain (tier 0)",
+            "TerrainHelp": "Terrain = tier 0, limite le housing",
+            "CeilingRequired": "Requis : sans plafond, toutes les pièces fuient (tier 0, housing nul)",
             "None": "Aucun"
         },
         "Settings": {
@@ -916,6 +918,7 @@
             "Housing": "Housing",
             "ResidentsHelp": "Le multiplicateur de résidents s'applique au total. Avec {n} résident(s) : ×{m}.",
             "Summary": "Murs {height} · {n} résident(s)",
+            "CeilingTodo": "Plafond à définir",
             "Grid": "Grille {w} × {d} · {n} niveaux"
         },
         "Legend": {
