@@ -635,9 +635,9 @@ window.ecoBuildingPlanner = (function () {
                 ctx.fillStyle = 'rgba(0,0,0,0.6)';
                 const label = room.name + (ar ? '  ' + ar.volume + 'm³ T' + ar.averageTier.toFixed(2) : '');
                 const tw = ctx.measureText(label).width;
-                ctx.fillRect(p.x + 2, p.y + cs / 2 - cs * 0.3, tw + 6, cs * 0.6);
+                ctx.fillRect(p.x + cs + 2, p.y + cs / 2 - cs * 0.3, tw + 6, cs * 0.6);
                 ctx.fillStyle = '#fff';
-                ctx.fillText(label, p.x + 5, p.y + cs / 2);
+                ctx.fillText(label, p.x + cs + 5, p.y + cs / 2);
             }
             if (ar && !ar.contained && ar.failCell && (ar.failLevel == null || ar.failLevel === st.level)) {
                 const fp2 = toScreen(st, ar.failCell.x, ar.failCell.y);
