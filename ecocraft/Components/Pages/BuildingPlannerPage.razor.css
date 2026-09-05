@@ -384,6 +384,11 @@
     overflow: hidden;
 }
 
+/* La puce de tier reste dans la liste déroulante ; dans la valeur sélectionnée elle n'a pas la place. */
+.bp-settings-grid ::deep .mud-input-slot .mud-chip {
+    display: none;
+}
+
 .bp-settings-grid ::deep .mud-input-slot .mud-stack > span {
     min-width: 0;
     overflow: hidden;
