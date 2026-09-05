@@ -259,6 +259,10 @@ window.ecoBuildingPlanner = (function () {
         if (!st.dotnetRef) return;
         st.dotnetRef.invokeMethodAsync('OnObjectTypeChanged', st.objectType).catch(function () { });
     }
+    function notifyMaterial(st) {
+        if (!st.dotnetRef) return;
+        st.dotnetRef.invokeMethodAsync('OnMaterialPicked', st.material).catch(function () { });
+    }
 
     function draftKey(st) { return 'ecoBuildingPlanner.draft.' + (st.catalog.serverId || 'default'); }
     function saveDraft(st) { try { localStorage.setItem(draftKey(st), JSON.stringify(st.plan)); } catch (e) { /* quota / privé */ } }
@@ -812,7 +816,8 @@ window.ecoBuildingPlanner = (function () {
         st.dynamicCanvas.setPointerCapture(e.pointerId);
 
         if (e.button === 1 || st.tool === 'pan' || (e.button === 0 && e.altKey)) {
-            st.drag = { kind: 'pan', startPx: pc.px, startPy: pc.py, ox: st.view.ox, oy: st.view.oy };
+            // Clic milieu relâché sans bouger : pipette (voir onPointerUp) ; glissé : déplacement de la vue.
+            st.drag = { kind: 'pan', startPx: pc.px, startPy: pc.py, ox: st.view.ox, oy: st.view.oy, pick: e.button === 1 ? cell : null };
             return;
         }
         if (e.button === 2) {
@@ -894,7 +899,9 @@ window.ecoBuildingPlanner = (function () {
         const drag = st.drag;
         st.drag = null;
         if (!drag) return;
-        if (drag.kind === 'rect') {
+        if (drag.kind === 'pan') {
+            if (drag.pick && Math.abs(pc.px - drag.startPx) < 4 && Math.abs(pc.py - drag.startPy) < 4) pickAt(st, drag.pick.x, drag.pick.y);
+        } else if (drag.kind === 'rect') {
             const r = normRect(drag.start, pc.cell);
             applyRect(st, r, drag.tool);
         } else if (drag.kind === 'moveObject' && drag.moved) {
@@ -1020,6 +1027,24 @@ window.ecoBuildingPlanner = (function () {
         cur(st).objects.push(obj);
         commit(st, 'object');
         select(st, 'object', obj.id);
+    }
+
+    // Pipette : reprend l'objet (type + rotation) ou le matériau (mur, sinon sol) sous le curseur avec l'outil adapté.
+    function pickAt(st, x, y) {
+        const o = objectAt(st, x, y);
+        if (o) {
+            st.objectType = o.type; notifyObjectType(st);
+            st.rotation = o.rotation || 0;
+            if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnRotationChanged', st.rotation).catch(function () { });
+            setTool(st, 'object');
+            return;
+        }
+        const level = cur(st), k = key(x, y);
+        const material = level.walls[k] ? level.walls[k].material : level.floors[k];
+        if (!material) return;
+        st.material = material; notifyMaterial(st);
+        if (st.objectType) { st.objectType = null; notifyObjectType(st); }
+        setTool(st, 'wall');
     }
 
     function rotateCurrent(st) {

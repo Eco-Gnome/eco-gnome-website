@@ -475,6 +475,13 @@ else
     }
 
     [JSInvokable]
+    public void OnMaterialPicked(string material)
+    {
+        _material = material;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
     public void OnRotationChanged(int rotation)
     {
         _rotation = rotation;
