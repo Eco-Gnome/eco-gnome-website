@@ -45,24 +45,34 @@
     align-items: baseline;
 }
 
-/* Colonne du chevron replier/déplier devant le nom ; l'entête la compense par un retrait. */
+/* Colonne du chevron replier/déplier devant le nom et œil « voir sur le plan » à droite ; l'entête les compense par des retraits. */
 .bp-hrow-main {
-    grid-template-columns: 16px 1fr 60px 90px;
+    grid-template-columns: 16px 1fr 60px 90px 20px;
 }
 
-.bp-hrow-toggle {
+.bp-hrow-toggle,
+.bp-hrow-eye {
     align-self: center;
     display: flex;
     color: rgba(255, 255, 255, 0.55);
+}
+
+.bp-hrow-eye {
+    justify-content: flex-end;
     cursor: pointer;
 }
 
-.bp-hrow-toggle ::deep .mud-icon-root {
+.bp-hrow-eye:hover {
+    color: #fff;
+}
+
+.bp-hrow-toggle ::deep .mud-icon-root,
+.bp-hrow-eye ::deep .mud-icon-root {
     font-size: 16px;
 }
 
 .bp-hrow-head {
-    padding: 6px 0 6px 22px;
+    padding: 6px 26px 6px 22px;
     color: rgba(255, 255, 255, 0.5);
     font-size: 11px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -84,6 +94,9 @@
 .bp-hrow {
     padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bp-hrow-foldable {
     cursor: pointer;
 }
 
@@ -109,6 +122,11 @@
 .bp-hrow-item-level {
     color: #fff;
     padding: 4px 0 2px;
+}
+
+/* Phrase de soft-cap des matériaux, comme dans le jeu. */
+.bp-hrow-note {
+    padding: 2px 0 6px;
 }
 
 .bp-hrow-total {
