@@ -17,6 +17,7 @@ window.ecoBuildingPlanner = (function () {
     const instances = {};
     const CELL = 26;
     const MAX_HISTORY = 100;
+    const MAX_PLAN_FILE_BYTES = 1536 * 1024;   // import JSON : le document traverse SignalR (limite 2 Mo côté serveur)
     const KIND = { OCCUPIED: 0, WALL: 1, SOLID: 2, WATER: 3, NONE: 4 };
     const TIER_COLORS = ['#7d7d7d', '#c2a26a', '#8fa3b5', '#b0784a', '#6f8f9c', '#d4af37'];
     const N8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
@@ -103,9 +104,13 @@ window.ecoBuildingPlanner = (function () {
         const fileInput = document.createElement('input');
         fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
         container.appendChild(fileInput);
+        // Sélecteur de fichier pour l'import d'un plan JSON (menu Plan).
+        const planInput = document.createElement('input');
+        planInput.type = 'file'; planInput.accept = 'application/json,.json'; planInput.style.display = 'none';
+        container.appendChild(planInput);
 
         const st = {
-            container, staticCanvas, dynamicCanvas, fileInput, dotnetRef,
+            container, staticCanvas, dynamicCanvas, fileInput, planInput, dotnetRef,
             options: options || {},
             plan: emptyPlan(),
             level: 0,                 // niveau affiché / édité (état de vue, hors historique)
@@ -123,6 +128,7 @@ window.ecoBuildingPlanner = (function () {
             hover: null,              // { x, y }
             pointerOver: false,       // souris réellement au-dessus du canvas (hover peut être posé par focusCell)
             drag: null,
+            pending: null,            // courbe tracée, en attente de son point de contrôle : { op, side } (side : née dans la coupe)
             footprints: {},           // roomId → { cells:Set, enclosed, seedInWall, level }
             icons: {},
             // Mode architecture (état de vue, hors historique).
@@ -161,6 +167,7 @@ window.ecoBuildingPlanner = (function () {
         view3dCanvas.addEventListener('webglcontextrestored', function () { st.view3d.gl = null; st.view3d.dirty = true; requestRender(st); });
         bindEvents(st);
         fileInput.addEventListener('change', function (e) { importBackgroundFile(st, e.target.files && e.target.files[0]); e.target.value = ''; });
+        planInput.addEventListener('change', function (e) { importPlanFile(st, e.target.files && e.target.files[0]); e.target.value = ''; });
         resize(st);
         st.resizeObserver = new ResizeObserver(function () { resize(st); });
         st.resizeObserver.observe(container);
@@ -285,8 +292,8 @@ window.ecoBuildingPlanner = (function () {
     function opsH(st) { return st.plan.architecture.height; }
 
     function opBounds(op) {
-        const a = op.a, b = op.b;
-        return { x0: Math.min(a[0], b[0]), x1: Math.max(a[0], b[0]), y0: Math.min(a[1], b[1]), y1: Math.max(a[1], b[1]), z0: Math.min(a[2], b[2]), z1: Math.max(a[2], b[2]) };
+        const a = op.a, b = op.b, c = op.kind === 'curve' ? op.c : a;
+        return { x0: Math.min(a[0], b[0], c[0]), x1: Math.max(a[0], b[0], c[0]), y0: Math.min(a[1], b[1], c[1]), y1: Math.max(a[1], b[1], c[1]), z0: Math.min(a[2], b[2], c[2]), z1: Math.max(a[2], b[2], c[2]) };
     }
     function shrinkBounds(b, t, sx, sy, sz) {
         const r = { x0: b.x0 + (sx ? t : 0), x1: b.x1 - (sx ? t : 0), y0: b.y0 + (sy ? t : 0), y1: b.y1 - (sy ? t : 0), z0: b.z0 + (sz ? t : 0), z1: b.z1 - (sz ? t : 0) };
@@ -320,8 +327,25 @@ window.ecoBuildingPlanner = (function () {
         }
         return out;
     }
+    // Courbe de Bézier quadratique a → b tirée par c : 2·max(|c−a|, |b−c|) + 1 échantillons (un pas ≤ 1 case par axe,
+    // donc une chaîne 26-connexe), coordonnées arrondies au plus proche, doublons consécutifs fusionnés. Même
+    // arithmétique entière que ArchShapes.CurveCells.
+    function curveCells(a, c, b) {
+        const cheb = function (p, q) { return Math.max(Math.abs(q[0] - p[0]), Math.abs(q[1] - p[1]), Math.abs(q[2] - p[2])); };
+        const n = 2 * Math.max(cheb(a, c), cheb(c, b));
+        if (n === 0) return [[a[0], a[1], a[2]]];
+        const den = n * n, out = [];
+        for (let k = 0; k <= n; k++) {
+            const p = [0, 1, 2].map(function (i) { return Math.floor((2 * ((n - k) * (n - k) * a[i] + 2 * k * (n - k) * c[i] + k * k * b[i]) + den) / (2 * den)); });
+            const last = out[out.length - 1];
+            if (!last || last[0] !== p[0] || last[1] !== p[1] || last[2] !== p[2]) out.push(p);
+        }
+        return out;
+    }
+    function shapeCells(op) { return op.kind === 'curve' ? curveCells(op.a, op.c, op.b) : lineCells(op.a, op.b); }
     function validOp(op) {
         if (op.kind === 'cells') return Array.isArray(op.cells);
+        if (op.kind === 'curve' && !(Array.isArray(op.c) && op.c.length === 3)) return false;
         return Array.isArray(op.a) && op.a.length === 3 && Array.isArray(op.b) && op.b.length === 3;
     }
 
@@ -334,7 +358,7 @@ window.ecoBuildingPlanner = (function () {
             cells[i] = value; if (owner) owner[i] = opIndex + 1;
         }
         if (op.kind === 'cells') { for (let i = 0; i + 2 < op.cells.length; i += 3) set(op.cells[i], op.cells[i + 1], op.cells[i + 2]); return; }
-        if (op.kind === 'line') { lineCells(op.a, op.b).forEach(function (c) { set(c[0], c[1], c[2]); }); return; }
+        if (op.kind === 'line' || op.kind === 'curve') { shapeCells(op).forEach(function (c) { set(c[0], c[1], c[2]); }); return; }
         const outer = opBounds(op), inner = innerBounds(op, outer), axis = opAxis(op);
         for (let z = Math.max(0, outer.z0); z <= Math.min(H - 1, outer.z1); z++)
             for (let y = Math.max(0, outer.y0); y <= Math.min(D - 1, outer.y1); y++)
@@ -550,10 +574,11 @@ window.ecoBuildingPlanner = (function () {
         const op = { kind: drag.tool, subtract: !!drag.subtract, material: drag.subtract ? null : st.material, hollow: false, thickness: 1 };
         const h = drag.flat ? 1 : Math.max(1, s.height | 0);
         const z0 = Math.max(0, z - Math.floor((h - 1) / 2)), z1 = Math.min(H - 1, z - Math.floor((h - 1) / 2) + h - 1);
-        if (drag.tool === 'box' || drag.tool === 'line') {
-            op.a = [drag.start.x, drag.start.y, drag.tool === 'line' ? z : z0];
-            op.b = [cell.x, cell.y, drag.tool === 'line' ? z : z1];
+        if (drag.tool === 'box' || drag.tool === 'line' || drag.tool === 'curve') {
+            op.a = [drag.start.x, drag.start.y, drag.tool === 'box' ? z0 : z];
+            op.b = [cell.x, cell.y, drag.tool === 'box' ? z1 : z];
             if (drag.tool === 'box') { op.hollow = !!s.hollow; op.thickness = Math.max(1, s.thickness | 0); }
+            if (drag.tool === 'curve') op.c = midpoint(op.a, op.b);
         } else {
             const r = Math.max(Math.abs(cell.x - drag.start.x), Math.abs(cell.y - drag.start.y));
             op.a = [drag.start.x - r, drag.start.y - r, drag.tool === 'sphere' ? z - r : drag.tool === 'disc' ? z : z0];
@@ -561,9 +586,12 @@ window.ecoBuildingPlanner = (function () {
             else { op.kind = 'cylinder'; op.axis = 'z'; op.b = [drag.start.x + r, drag.start.y + r, drag.tool === 'disc' ? z : z1]; }
             op.hollow = !!s.hollow; op.thickness = Math.max(1, s.thickness | 0);
         }
-        if (op.kind === 'line') { op.hollow = false; op.thickness = 1; }
+        if (op.kind === 'line' || op.kind === 'curve') { op.hollow = false; op.thickness = 1; }
         return op;
     }
+
+    // Point de contrôle initial d'une courbe : le milieu de a–b (la courbe naît droite, puis suit la souris).
+    function midpoint(a, b) { return [0, 1, 2].map(function (i) { return Math.floor((a[i] + b[i]) / 2); }); }
 
     function opLabel(op) {
         if (op.kind === 'cells') return (op.cells.length / 3) + ' cells';
@@ -571,6 +599,7 @@ window.ecoBuildingPlanner = (function () {
         const w = b.x1 - b.x0 + 1, d = b.y1 - b.y0 + 1, h = b.z1 - b.z0 + 1;
         if (op.kind === 'box') return w + '×' + d + ' h' + h;
         if (op.kind === 'line') return 'L' + (Math.max(w, d, h));
+        if (op.kind === 'curve') return 'C' + (Math.max(w, d, h));
         if (op.kind === 'sphere') return 'Ø' + Math.max(w, d);
         // Cylindre : diamètre sur les axes radiaux, longueur sur l'axe (h debout, L couché).
         const axis = opAxis(op), dia = axis === 'x' ? Math.max(d, h) : axis === 'y' ? Math.max(w, h) : Math.max(w, d), len = axis === 'x' ? w : axis === 'y' ? d : h;
@@ -581,6 +610,7 @@ window.ecoBuildingPlanner = (function () {
         dz = dz || 0;
         if (op.kind === 'cells') { for (let i = 0; i + 2 < op.cells.length; i += 3) { op.cells[i] += dx; op.cells[i + 1] += dy; op.cells[i + 2] += dz; } return; }
         op.a[0] += dx; op.a[1] += dy; op.a[2] += dz; op.b[0] += dx; op.b[1] += dy; op.b[2] += dz;
+        if (op.kind === 'curve') { op.c[0] += dx; op.c[1] += dy; op.c[2] += dz; }
     }
 
     // Déplacement clavier de la forme sélectionnée (flèches : une case ; Maj+PgUp/PgDn : une couche, la couche suit).
@@ -657,6 +687,14 @@ window.ecoBuildingPlanner = (function () {
         };
         img.onerror = function () { URL.revokeObjectURL(url); };
         img.src = url;
+    }
+
+    // Import d'un plan JSON : le texte est remis à Blazor qui le valide (PlanDocumentJson) et le charge par setPlan ;
+    // null signale un fichier trop grand.
+    function importPlanFile(st, file) {
+        if (!file || !st.dotnetRef) return;
+        if (file.size > MAX_PLAN_FILE_BYTES) { st.dotnetRef.invokeMethodAsync('OnPlanFileImported', null).catch(function () { }); return; }
+        file.text().then(function (text) { return st.dotnetRef.invokeMethodAsync('OnPlanFileImported', text); }).catch(function () { });
     }
 
     // ---- Historique -------------------------------------------------------------------------------------
@@ -1214,12 +1252,23 @@ window.ecoBuildingPlanner = (function () {
     }
 
     // ---- Architecture : bandes (élévation à gauche, coupe du côté regardé) et zone de vue du plan ----------
-    const STRIP_W = 150, SECTION_W = 300, SECTION_H = 220, GAP = 8;
+    const STRIP_W = 150, STRIP_MAX_W = 320, STRIP_MAX_CELL = 8, STRIP_PAD = 12, STRIP_TOP = 30, STRIP_BOTTOM = 48, SECTION_W = 300, SECTION_H = 220, GAP = 8;
+
+    // Bande d'élévation : cases carrées, jamais étirées (une tour de 179 couches sur 75 colonnes était déformée 2,4×).
+    // La case est imposée par la hauteur disponible (plafonnée), la bande s'élargit pour contenir le plus grand côté de
+    // la grille entre STRIP_W et 30 % du conteneur ; au-delà la case se réduit et le sol reste en bas.
+    function stripLayout(st, w, h) {
+        const maxW = Math.min(STRIP_MAX_W, Math.floor(w * 0.3)), minW = Math.min(STRIP_W, maxW), vox = st.vox;
+        if (!vox) return { w: minW, cell: 1 };
+        const cols = Math.max(1, vox.W, vox.D), avail = Math.max(1, h - STRIP_TOP - STRIP_BOTTOM);
+        const cell = Math.max(1, Math.min(avail / Math.max(1, vox.H), (maxW - 2 * STRIP_PAD) / cols, STRIP_MAX_CELL));
+        return { w: Math.round(Math.max(minW, Math.min(maxW, cols * cell + 2 * STRIP_PAD))), cell: cell };
+    }
 
     function bands(st) {
         if (!isArch(st) && !st.view3d.on) return { strip: null, section: null };
         const w = st.container.clientWidth, h = st.container.clientHeight;
-        const strip = { x: 0, y: 0, w: Math.min(STRIP_W, Math.floor(w * 0.2)), h: h };
+        const strip = { x: 0, y: 0, w: stripLayout(st, w, h).w, h: h };
         let section = null;
         if (st.cut && !st.view3d.on) {
             const sw = Math.min(SECTION_W, Math.floor(w * 0.35)), sh = Math.min(SECTION_H, Math.floor(h * 0.35));
@@ -1379,17 +1428,16 @@ window.ecoBuildingPlanner = (function () {
             // Pointe vers l'extérieur : ◂ à gauche (delta −1), ▸ à droite (delta +1).
             ctx.beginPath(); ctx.moveTo(a.x - a.delta * 4, a.y - 6); ctx.lineTo(a.x + a.delta * 5, a.y); ctx.lineTo(a.x - a.delta * 4, a.y + 6); ctx.closePath(); ctx.fill();
         });
-        // Même largeur de colonne pour les quatre faces (calée sur le plus grand côté de la grille) : la silhouette ne change
-        // pas quand on tourne. Les couches remplissent toute la hauteur de la bande (couche max en haut : c'est d'abord le
-        // curseur de couche) ; la ligne de sol laisse la place à la pilule annuler/zoom.
-        const pad = 12, top = r.y + 30, bottom = r.y + r.h - 48;
-        const cols = Math.max(vox.W, vox.D), colW = (r.w - 2 * pad) / cols, rowH = Math.max(1, (bottom - top) / vox.H);
-        const x0 = r.x + pad + (cols - view.cols) * colW / 2;
+        // Cases carrées (stripLayout), même case pour les quatre faces : la silhouette ne change pas quand on tourne.
+        // Le sol reste en bas (la bande est aussi le curseur de couche) ; la ligne de sol laisse la place à la pilule annuler/zoom.
+        const top = r.y + STRIP_TOP, bottom = r.y + r.h - STRIP_BOTTOM;
+        const cell = stripLayout(st, st.container.clientWidth, st.container.clientHeight).cell, colW = cell, rowH = cell;
+        const x0 = r.x + (r.w - view.cols * colW) / 2;
         const zy = function (z) { return bottom - (z + 1) * rowH; };
         for (let z = 0; z < vox.H; z++) for (let c = 0; c < view.cols; c++) {
             const o = c + view.cols * z, v = view.beyond[o];
             if (!v) continue;
-            ctx.fillStyle = sideColor(st, v, view.depth[o], 0.9, 0.9);
+            ctx.fillStyle = sideColor(st, v, 0, 0.9, 0.9);   // silhouette uniforme : pas d'ombrage par profondeur dans l'élévation (dégradé illisible sur une tour)
             ctx.fillRect(x0 + c * colW, zy(z), Math.max(1, colW - 0.5), Math.max(1, rowH - 0.5));
         }
         // Sol, couche courante (bande + trait) et son numéro.
@@ -1430,7 +1478,7 @@ window.ecoBuildingPlanner = (function () {
         const h = Math.max(1, s.height | 0), kk = g.index - Math.floor((h - 1) / 2);
         const k0 = Math.max(0, kk), k1 = Math.min(along - 1, kk + h - 1);
         if (drag.tool === 'box') { op.a = pos(u0, k0, z0); op.b = pos(u1, k1, z1); op.hollow = !!s.hollow; op.thickness = Math.max(1, s.thickness | 0); }
-        else if (drag.tool === 'line') { op.a = pos(u0, g.index, z0); op.b = pos(u1, g.index, z1); }
+        else if (drag.tool === 'line' || drag.tool === 'curve') { op.a = pos(u0, g.index, z0); op.b = pos(u1, g.index, z1); if (drag.tool === 'curve') op.c = midpoint(op.a, op.b); }
         else {
             const r = Math.max(Math.abs(u1 - u0), Math.abs(z1 - z0));
             if (drag.tool === 'sphere') { op.a = pos(u0 - r, g.index - r, z0 - r); op.b = pos(u0 + r, g.index + r, z0 + r); }
@@ -1447,7 +1495,7 @@ window.ecoBuildingPlanner = (function () {
         const ax = g.axis === 'x' ? 0 : 1, au = 1 - ax, mirror = g.axis === 'x' ? g.dir < 0 : g.dir > 0;
         const put = function (c) { if (c[ax] !== g.index || c[2] < 0 || c[2] >= rows) return; const u = c[au]; if (u >= 0 && u < cols) mask[(mirror ? cols - 1 - u : u) + cols * c[2]] = 1; };
         if (op.kind === 'cells') { for (let i = 0; i + 2 < op.cells.length; i += 3) put([op.cells[i], op.cells[i + 1], op.cells[i + 2]]); return mask; }
-        if (op.kind === 'line') { lineCells(op.a, op.b).forEach(put); return mask; }
+        if (op.kind === 'line' || op.kind === 'curve') { shapeCells(op).forEach(put); return mask; }
         const outer = opBounds(op), inner = innerBounds(op, outer), axis = opAxis(op);
         for (let z = Math.max(0, outer.z0); z <= Math.min(rows - 1, outer.z1); z++)
             for (let u = 0; u < cols; u++) {
@@ -1827,7 +1875,14 @@ window.ecoBuildingPlanner = (function () {
                     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,183,77,0.6)';
                     ctx.strokeRect(p.x + 0.5, p.y + 0.5, (b.x1 - b.x0 + 1) * cs - 1, (b.y1 - b.y0 + 1) * cs - 1);
                 }
+                if (op.kind === 'curve' && validOp(op)) drawCurveGuides(st, ctx, cs, op);
             }
+        }
+        if (st.pending && !st.pending.side) {
+            // Courbe en attente de son point de contrôle : ses cellules sur la couche, puis les guides.
+            const op = st.pending.op;
+            fillMask(st, ctx, opLayerMask(op, st.layer, plan.grid.width, plan.grid.depth), cs, op.subtract ? 'rgba(255,152,0,0.45)' : 'rgba(100,181,246,0.45)', false);
+            drawCurveGuides(st, ctx, cs, op);
         }
         drawPreviewArch(st, ctx, cs);
         ctx.restore();
@@ -1847,7 +1902,34 @@ window.ecoBuildingPlanner = (function () {
             const tw = ctx.measureText(label).width;
             ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(lx - 2, ly - 2, tw + 8, 16);
             ctx.fillStyle = '#fff'; ctx.fillText(label, lx + 2, ly);
+        } else if (st.pending && st.pending.side && st.cut && st.sectionGeom) {
+            const g = st.sectionGeom, op = st.pending.op, mask = opPlaneMask(op, g), cols = g.view.cols;
+            ctx.fillStyle = op.subtract ? 'rgba(255,152,0,0.45)' : 'rgba(100,181,246,0.45)';
+            for (let i = 0; i < mask.length; i++) if (mask[i]) ctx.fillRect(g.x0 + (i % cols) * g.colW, g.bottom - (((i / cols) | 0) + 1) * g.rowH, Math.max(1, g.colW - 0.5), Math.max(1, g.rowH - 0.5));
+            drawSideCurveGuides(st, ctx, g, op);
         }
+        const curve = selectedCurve(st);
+        if (curve && st.cut && st.sectionGeom) drawSideCurveGuides(st, ctx, st.sectionGeom, curve);
+    }
+
+    // Guides d'une courbe dans le plan : polygone de contrôle a–c–b en pointillé fin, poignée ronde sur c (tirable en sélection).
+    function drawCurveGuides(st, ctx, cs, op) {
+        const ctr = function (p) { const s = toScreen(st, p[0], p[1]); return { x: s.x + cs / 2, y: s.y + cs / 2 }; };
+        const a = ctr(op.a), c = ctr(op.c), b = ctr(op.b);
+        ctx.strokeStyle = st.palette.secondary; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.setLineDash([]);
+        drawHandle(st, ctx, c.x, c.y, Math.max(4, cs * 0.3));
+    }
+    // Dans la coupe : la poignée seulement, et seulement si c est sur le plan de coupe.
+    function drawSideCurveGuides(st, ctx, g, op) {
+        const h = sideHandleCell(op, g);
+        if (h) drawHandle(st, ctx, g.x0 + (h.c + 0.5) * g.colW, g.bottom - (h.z + 0.5) * g.rowH, Math.max(4, Math.min(g.colW, g.rowH) * 0.3));
+    }
+    function drawHandle(st, ctx, x, y, r) {
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = st.palette.secondary; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
     }
 
     function fillMask(st, ctx, mask, cs, fill, stroke) {
@@ -1982,6 +2064,12 @@ window.ecoBuildingPlanner = (function () {
     // Architecture : bandes et yeux d'abord, puis outils de forme. Renvoie true si l'événement est consommé.
     function onPointerDownArch(st, e, pc) {
         const cell = pc.cell, b = bands(st);
+        if (st.pending) {
+            // Courbe en attente : clic gauche = poser avec le point de contrôle courant, clic droit = abandonner.
+            const p = st.pending; st.pending = null;
+            if (e.button === 0) addOp(st, p.op); else requestRender(st);
+            return true;
+        }
         for (const eye of st.cutEyes) {
             if (Math.hypot(pc.px - eye.x, pc.py - eye.y) <= eye.r) {
                 if (st.cut.dir === eye.dir) st.cut = null; else st.cut.dir = eye.dir;   // re-clic sur l'œil actif : fin de la coupe
@@ -2005,12 +2093,14 @@ window.ecoBuildingPlanner = (function () {
         const subtract = e.shiftKey ? !st.shape.subtract : !!st.shape.subtract;   // Maj capturé au pointerdown
         switch (st.tool) {
             case 'select': {
+                const handle = selectedCurve(st);
+                if (handle && handle.c[0] === cell.x && handle.c[1] === cell.y) { st.drag = { kind: 'curveHandle', id: handle.id, moved: false }; break; }
                 const op = ownerAt(st, cell.x, cell.y, st.layer);
                 if (op) { select(st, 'op', op.id); st.drag = { kind: 'moveOp', id: op.id, last: cell, moved: false }; }
                 else select(st, null, null);
                 break;
             }
-            case 'box': case 'sphere': case 'cylinder': case 'disc': case 'line':
+            case 'box': case 'sphere': case 'cylinder': case 'disc': case 'line': case 'curve':
                 if (!subtract && !st.material) break;
                 st.drag = { kind: 'shape', tool: st.tool, start: cell, subtract: subtract };
                 break;
@@ -2035,9 +2125,11 @@ window.ecoBuildingPlanner = (function () {
     function startSideDrag(st, e, pc, g) {
         const cell = sideCellAt(g, pc.px, pc.py);
         if (!g || !cell) return;
-        const shapeTool = st.tool === 'box' || st.tool === 'sphere' || st.tool === 'cylinder' || st.tool === 'disc' || st.tool === 'line';
+        const shapeTool = st.tool === 'box' || st.tool === 'sphere' || st.tool === 'cylinder' || st.tool === 'disc' || st.tool === 'line' || st.tool === 'curve';
         const subtract = e.shiftKey ? !st.shape.subtract : !!st.shape.subtract;
-        if (e.button === 2) { st.drag = Object.assign(newEraseDrag(null), { kind: 'sideErase', geom: g, last: cell }); sideBrush(st, st.drag, cell); }
+        const handle = st.tool === 'select' ? selectedCurve(st) : null, hc = handle ? sideHandleCell(handle, g) : null;
+        if (e.button === 0 && hc && hc.c === cell.c && hc.z === cell.z) st.drag = { kind: 'sideCurveHandle', id: handle.id, geom: g, moved: false };
+        else if (e.button === 2) { st.drag = Object.assign(newEraseDrag(null), { kind: 'sideErase', geom: g, last: cell }); sideBrush(st, st.drag, cell); }
         else if (e.button === 0 && shapeTool && (subtract || st.material)) st.drag = { kind: 'sideShape', tool: st.tool, geom: g, start: cell, cur: cell, subtract: subtract };
         else if (e.button === 0 && st.material) { st.drag = { kind: 'sideDraw', geom: g, cells: {}, last: cell }; sideBrush(st, st.drag, cell); }
         requestRender(st);
@@ -2052,6 +2144,38 @@ window.ecoBuildingPlanner = (function () {
         }
         const p = sideTarget(g, cell.c, cell.z, false);
         if (p && !voxAt(st.vox, p.x, p.y, p.z)) { drag.cells[p.x + ',' + p.y + ',' + p.z] = p; drag.cellsView = drag.cellsView || []; drag.cellsView.push(cell); }
+    }
+
+    // Courbe sélectionnée (son point de contrôle se tire à la souris), sinon null.
+    function selectedCurve(st) {
+        const op = st.selection && st.selection.kind === 'op' ? findOp(st, st.selection.id) : null;
+        return op && op.kind === 'curve' && validOp(op) ? op : null;
+    }
+    // Cellule (colonne, couche) du point de contrôle dans la coupe, ou null s'il n'est pas sur le plan de coupe.
+    function sideHandleCell(op, g) {
+        const ax = g.axis === 'x' ? 0 : 1, au = 1 - ax, c = op.c;
+        if (c[ax] !== g.index || c[au] < 0 || c[au] >= g.view.cols || c[2] < 0 || c[2] >= g.view.rows) return null;
+        return { c: sideCol(g, c[au]), z: c[2] };
+    }
+    // Point du plan visé par la cellule (colonne, couche) de la coupe.
+    function sidePoint(g, c, z) { const u = sideCol(g, c); return g.axis === 'x' ? [g.index, u, z] : [u, g.index, z]; }
+    // Courbe en attente : le point de contrôle suit la souris (dans la coupe si elle y est née, sinon sur sa couche).
+    function trackPending(st, pc) {
+        const p = st.pending, op = p.op;
+        if (p.side) {
+            const g = st.sectionGeom, sec = bands(st).section;
+            if (!g || !inRect(sec, pc.px, pc.py)) return;
+            const cell = sideCellClamped(g, pc.px, pc.py);
+            op.c = sidePoint(g, cell.c, cell.z);
+        } else if (inRect(viewRect(st), pc.px, pc.py)) op.c = [pc.cell.x, pc.cell.y, op.a[2]];
+    }
+    // Déplacement du point de contrôle d'une courbe posée (première modification : entrée d'historique).
+    function moveHandle(st, drag, c) {
+        const op = findOp(st, drag.id);
+        if (!op || (op.c[0] === c[0] && op.c[1] === c[1] && op.c[2] === c[2])) return;
+        if (!drag.moved) { pushHistory(st); drag.moved = true; }
+        op.c = c;
+        refreshVox(st); st.staticDirty = true;
     }
 
     // Trait crayon (ajout) : une cellule de la couche par passage.
@@ -2135,6 +2259,7 @@ window.ecoBuildingPlanner = (function () {
             }
             return;
         }
+        if (st.pending) { trackPending(st, pc); requestRender(st); return; }
         if (!st.drag && isArch(st) && st.cut) {
             // Curseur de déplacement au survol du trait de coupe, sinon celui de l'outil.
             const on = onCutLine(st, pc.px, pc.py);
@@ -2174,6 +2299,12 @@ window.ecoBuildingPlanner = (function () {
                 setLayerInternal(st, stripLayerAt(st, pc.py));
             } else if (st.drag.kind === 'sideShape') {
                 st.drag.cur = sideCellClamped(st.drag.geom, pc.px, pc.py);
+            } else if (st.drag.kind === 'curveHandle') {
+                const op = findOp(st, st.drag.id);
+                if (op) moveHandle(st, st.drag, [pc.cell.x, pc.cell.y, op.c[2]]);
+            } else if (st.drag.kind === 'sideCurveHandle') {
+                const g = st.drag.geom, cell = sideCellAt(g, pc.px, pc.py);
+                if (cell) moveHandle(st, st.drag, sidePoint(g, cell.c, cell.z));
             } else if (st.drag.kind === 'sideDraw' || st.drag.kind === 'sideErase') {
                 // Interpolation dans la grille de la vue (colonne, couche), comme le trait du plan.
                 const drag = st.drag, cell = sideCellAt(drag.geom, pc.px, pc.py);
@@ -2207,7 +2338,11 @@ window.ecoBuildingPlanner = (function () {
     function onPointerUpArch(st, e, pc, drag) {
         if (drag.kind === 'shape') {
             const op = shapeOpFromDrag(st, drag, pc.cell);
-            addOp(st, op);
+            if (drag.tool === 'curve') st.pending = { op: op, side: false }; else addOp(st, op);
+        } else if (drag.kind === 'sideShape' && drag.tool === 'curve') {
+            st.pending = { op: sideShapeOp(st, drag, drag.cur), side: true };
+        } else if (drag.kind === 'curveHandle' || drag.kind === 'sideCurveHandle') {
+            if (drag.moved) commit(st, 'move');
         } else if (drag.kind === 'cells') {
             if (drag.cells.size) {
                 const W = st.plan.grid.width, cells = [];
@@ -2308,7 +2443,7 @@ window.ecoBuildingPlanner = (function () {
             if (e.key === 'PageDown') { e.preventDefault(); setLayerInternal(st, st.layer - 1); return; }
             return;   // pas d'outils en 3D
         }
-        if (e.key === 'Escape') { if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnEscape').catch(function () { }); return; }
+        if (e.key === 'Escape') { if (st.pending) { st.pending = null; requestRender(st); return; } if (st.objectType) { st.objectType = null; notifyObjectType(st); } setTool(st, 'select'); select(st, null, null); if (st.dotnetRef) st.dotnetRef.invokeMethodAsync('OnEscape').catch(function () { }); return; }
         const arch = isArch(st);
         if (arch && e.shiftKey && (e.key === 'PageUp' || e.key === 'PageDown') && moveSelectedOp(st, 0, 0, e.key === 'PageUp' ? 1 : -1)) { e.preventDefault(); return; }
         if (e.key === 'PageUp') { e.preventDefault(); if (arch) setLayerInternal(st, st.layer + 1); else setLevelInternal(st, st.level + 1); return; }
@@ -2323,7 +2458,7 @@ window.ecoBuildingPlanner = (function () {
         }
         if (!arch && e.key.toLowerCase() === 'r') { e.preventDefault(); rotateCurrent(st); return; }
         const tools = arch
-            ? { '1': 'select', '2': 'box', '3': 'sphere', '4': 'cylinder', '5': 'disc', '6': 'line', '7': 'pencil', '8': 'eraser', '9': 'cut', 'h': 'pan' }
+            ? { '1': 'select', '2': 'box', '3': 'sphere', '4': 'cylinder', '5': 'disc', '6': 'line', '7': 'curve', '8': 'pencil', '9': 'eraser', '0': 'cut', 'h': 'pan' }
             : { '1': 'select', '2': 'wall', '3': 'hole', 'h': 'pan' };
         const t = tools[e.key.toLowerCase()];
         if (t === 'hole' && st.level === 0) return;   // pas d'ouverture au rez-de-chaussée
@@ -2481,7 +2616,7 @@ window.ecoBuildingPlanner = (function () {
 
     function setTool(st, tool) {
         st.tool = tool;
-        st.drag = null;
+        st.drag = null; st.pending = null;
         st.dynamicCanvas.style.cursor = tool === 'pan' ? 'grab' : tool === 'select' ? 'default' : 'crosshair';
         notifyTool(st);
         requestRender(st);
@@ -2769,6 +2904,16 @@ window.ecoBuildingPlanner = (function () {
             commit(st, 'op');
         },
         pickBackgroundImage: function (id) { const st = get(id); if (st) { st.fileInput.value = ''; st.fileInput.click(); } },
+        pickPlanFile: function (id) { const st = get(id); if (st) { st.planInput.value = ''; st.planInput.click(); } },
+        exportJson: function (id, filename) {
+            const st = get(id); if (!st) return;
+            const url = URL.createObjectURL(new Blob([JSON.stringify(st.plan, null, 2)], { type: 'application/json' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (filename || 'building-plan') + '.json';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        },
         setBackgroundImage: function (id, dataUrl) { const st = get(id); if (st) loadBgImage(st, dataUrl); },
         // Placement : historique sauf pour l'opacité seule (glissière).
         updateBackgroundImage: function (id, patch) {
@@ -2795,7 +2940,7 @@ window.ecoBuildingPlanner = (function () {
         setView3d: function (id, on) { const st = get(id); if (st) setView3dInternal(st, on); },
         setView3dCap: function (id, on) { const st = get(id); if (!st) return; st.view3d.cap = !!on; st.view3d.dirty = true; notifyView3d(st); requestRender(st); },
         getView3d: function (id) { const st = get(id); if (!st) return null; const v = st.view3d; if (v.on && v.dirty && st.vox) view3dBuild(st); return { on: v.on, cap: v.cap, yaw: v.yaw, pitch: v.pitch, dist: v.dist, faces: v.faces, tooMany: v.tooMany }; },
-        getView: function (id) { const st = get(id); return st ? { scale: st.view.scale, ox: st.view.ox, oy: st.view.oy, cell: CELL, layer: st.layer, elevSide: st.elevSide } : null; },
+        getView: function (id) { const st = get(id); return st ? { scale: st.view.scale, ox: st.view.ox, oy: st.view.oy, cell: CELL, layer: st.layer, elevSide: st.elevSide, strip: st.stripGeom ? { colW: st.stripGeom.colW, rowH: st.stripGeom.rowH, x0: st.stripGeom.x0, w: bands(st).strip ? bands(st).strip.w : 0 } : null } : null; },
         // Fonctions pures exposées pour le test de parité avec ArchitectureEvaluator (Node).
         evalOps: evalOps, countByMaterial: countByMaterial, elevation: elevation, section: section, normalizePlan: normalizePlan,
         resizePlan: function (id, width, depth) {

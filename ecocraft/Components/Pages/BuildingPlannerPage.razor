@@ -50,6 +50,8 @@ else
                     <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FileExport" OnClick="@(() => Js("exportJson", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportJson")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FileImport" OnClick="ImportJsonAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ImportJson")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
                 </MudMenu>
 
@@ -414,6 +416,7 @@ else
         new("cylinder", MDIIcons.Filled.Cylinder),
         new("disc", MDIIcons.Filled.Circle),
         new("line", MDIIcons.Filled.VectorLine),
+        new("curve", MDIIcons.Filled.VectorCurve),
         new("pencil", MDIIcons.Filled.Pencil),
         new("eraser", MDIIcons.Filled.Eraser),
         new("cut", MDIIcons.Filled.ContentCut),
@@ -628,6 +631,22 @@ else
         StateHasChanged();
     }
 
+    // Fichier JSON choisi par l'utilisateur (null = trop grand) : le plan importé remplace le plan courant comme un
+    // brouillon non sauvegardé, sans fond de plan (les pixels ne sont pas dans le document).
+    [JSInvokable]
+    public async Task OnPlanFileImported(string? json)
+    {
+        var doc = PlanDocumentJson.TryParse(json);
+        if (doc is null) { Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.ImportInvalid"), Severity.Warning); return; }
+        _savedPlan = null;
+        await RememberLastPlanAsync(null);
+        await Js("clearDraft");
+        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(doc), false);
+        _backgroundImage = null;
+        await Js("setBackgroundImage", null);
+        Navigation.NavigateTo("/building-planner", replace: true);
+    }
+
     [JSInvokable]
     public async Task OnBackgroundImageChanged(string? dataUrl)
     {
@@ -772,22 +791,26 @@ else
         "sphere" => MDIIcons.Filled.Sphere,
         "cylinder" => MDIIcons.Filled.Cylinder,
         "line" => MDIIcons.Filled.VectorLine,
+        "curve" => MDIIcons.Filled.VectorCurve,
         "cells" => MDIIcons.Filled.Pencil,
         _ => MDIIcons.Filled.Cube,
     };
 
     private string MaterialLabel(string? name) => _clientCatalog?.Materials.FirstOrDefault(m => m.Name == name)?.Label ?? name ?? "";
 
-    // Dimensions d'une forme : « 12×8 h3 », « Ø7 h4 », « L9 », « 24 cases ».
+    // Dimensions d'une forme : « 12×8 h3 », « Ø7 h4 », « L9 », « C9 » (boîte englobante, point de contrôle compris), « 24 cases ».
     private string OpDims(ArchOp op)
     {
         if (op.Kind == "cells") return LocalizationService.GetTranslation("BuildingPlanner.Shape.Cells", ((op.Cells?.Length ?? 0) / 3).ToString());
         if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return "";
-        int w = Math.Abs(op.B[0] - op.A[0]) + 1, d = Math.Abs(op.B[1] - op.A[1]) + 1, h = Math.Abs(op.B[2] - op.A[2]) + 1;
+        var c = op.Kind == "curve" && op.C is { Length: 3 } ? op.C : op.A;
+        int Extent(int i) => Math.Max(op.A[i], Math.Max(op.B[i], c[i])) - Math.Min(op.A[i], Math.Min(op.B[i], c[i])) + 1;
+        int w = Extent(0), d = Extent(1), h = Extent(2);
         return op.Kind switch
         {
             "box" => $"{w}×{d} h{h}",
             "line" => $"L{Math.Max(w, Math.Max(d, h))}",
+            "curve" => $"C{Math.Max(w, Math.Max(d, h))}",
             "sphere" => $"Ø{Math.Max(w, d)}",
             _ => CylinderDims(op.Axis, w, d, h),
         };
@@ -1061,6 +1084,12 @@ else
         _backgroundImage = null;
         await Js("setBackgroundImage", null);
         Navigation.NavigateTo("/building-planner", replace: true);
+    }
+
+    private async Task ImportJsonAsync()
+    {
+        if (_dirty && !await ConfirmDiscardAsync()) return;
+        await Js("pickPlanFile");
     }
 
     private async Task OpenPlanAsync()

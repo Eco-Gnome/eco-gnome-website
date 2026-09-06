@@ -906,9 +906,10 @@
             "cylinder": "Cylindre (4) — glissez le rayon depuis le centre ; hauteur dans les options",
             "disc": "Disque (5) — cylindre d'une seule couche",
             "line": "Ligne (6) — diagonale sur la couche (pente 3D via z1 dans la fiche)",
-            "pencil": "Crayon (7) — case par case",
-            "eraser": "Gomme (8) — supprime au passage : case crayon, mur, dalle, forme entière",
-            "cut": "Plan de coupe (9) — glissez un trait, puis cliquez un œil pour le sens du regard"
+            "curve": "Courbe (7) — glissez d'un bout à l'autre, puis déplacez la souris pour la tirer et cliquez ; la poignée reste tirable en sélection",
+            "pencil": "Crayon (8) — case par case",
+            "eraser": "Gomme (9) — supprime au passage : case crayon, mur, dalle, forme entière",
+            "cut": "Plan de coupe (0) — glissez un trait, puis cliquez un œil pour le sens du regard"
         },
         "Defaults": {
             "WallHeight": "Hauteur des murs",
@@ -964,6 +965,8 @@
             "Rename": "Renommer…",
             "Share": "Partager…",
             "ExportPng": "Exporter en PNG",
+            "ExportJson": "Exporter en JSON",
+            "ImportJson": "Importer un JSON…",
             "Resize": "Redimensionner la grille…",
             "Untitled": "Plan sans nom"
         },
@@ -1066,7 +1069,8 @@
             "LinkInvalid": "Lien de plan invalide ou tronqué.",
             "ShareNeedsSave": "Ce plan est trop grand pour un lien : il doit d'abord être sauvegardé.",
             "Copied": "Lien copié",
-            "CopyFailed": "Copie impossible — sélectionnez le lien et copiez-le manuellement."
+            "CopyFailed": "Copie impossible — sélectionnez le lien et copiez-le manuellement.",
+            "ImportInvalid": "Fichier de plan invalide ou trop grand."
         },
         "Issue": {
             "GridSizeInvalid": "La grille doit faire entre 1 et {max} de côté.",
@@ -1170,6 +1174,7 @@
                 "sphere": "Sphère",
                 "cylinder": "Cylindre",
                 "line": "Ligne",
+                "curve": "Courbe",
                 "cells": "Cases"
             }
         },
@@ -1189,7 +1194,7 @@
             "Title": "Coupe"
         },
         "Hint3d": "glisser : tourner autour du bâtiment · clic droit ou molette glissé : déplacer · molette : zoom · PgUp/PgDn, molette ou glisser sur l'élévation : changer de couche (surlignée en bleu) · bouton ⤓ : couper au-dessus de la couche pour voir l'intérieur · flèches de l'élévation : tourner la face regardée · Adapter : recadrer · Échap : retour au plan · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer",
-        "HintArch": "1 : sélection · 2 : pavé · 3 : sphère · 4 : cylindre · 5 : disque · 6 : ligne · 7 : crayon · 8 : gomme · 9 : plan de coupe · H : déplacer la vue · glisser : dessiner la forme centrée sur la couche courante (barre bleue au milieu de la hauteur) · Maj+glisser : inverser ajout/soustraction · clic droit (maintenu) : supprimer le bloc au passage (case crayon, mur, dalle ; un bloc d'une forme géométrique est creusé, la forme entière se supprime depuis le panneau) · Maj+clic droit glissé : supprimer une zone · clic : sélectionner la forme · glisser une forme : la déplacer · flèches : déplacer la forme d'une case · Maj+PgUp/PgDn : d'une couche · Ctrl+C / Ctrl+X / Ctrl+V : copier / couper / coller la forme (collée sous le curseur, sur la couche courante) · Suppr : supprimer la forme · PgUp/PgDn, molette ou glisser sur l'élévation : changer de couche · I : afficher/masquer le fond de plan · clic milieu : copier le matériau · clic droit dans le vide ou Échap : reposer l'outil · molette : zoom · Alt+glisser ou clic milieu glissé : déplacer la vue · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer · flèches de l'élévation : tourner la face regardée · dans la coupe : clic = poser un cube du matériau sur le plan de coupe, clic droit = supprimer le bloc visible, maintien = trait · outils de forme dans la coupe : glisser trace la forme dans le plan de coupe (la hauteur des options devient la profondeur, centrée sur le plan ; un cylindre prend l'axe de la coupe)",
+        "HintArch": "1 : sélection · 2 : pavé · 3 : sphère · 4 : cylindre · 5 : disque · 6 : ligne · 7 : courbe · 8 : crayon · 9 : gomme · 0 : plan de coupe · H : déplacer la vue · glisser : dessiner la forme centrée sur la couche courante (barre bleue au milieu de la hauteur) · courbe : glisser d'un bout à l'autre, puis la souris tire la courbe et un clic la pose (clic droit ou Échap : abandon) ; en sélection, la poignée ronde se tire · Maj+glisser : inverser ajout/soustraction · clic droit (maintenu) : supprimer le bloc au passage (case crayon, mur, dalle ; un bloc d'une forme géométrique est creusé, la forme entière se supprime depuis le panneau) · Maj+clic droit glissé : supprimer une zone · clic : sélectionner la forme · glisser une forme : la déplacer · flèches : déplacer la forme d'une case · Maj+PgUp/PgDn : d'une couche · Ctrl+C / Ctrl+X / Ctrl+V : copier / couper / coller la forme (collée sous le curseur, sur la couche courante) · Suppr : supprimer la forme · PgUp/PgDn, molette ou glisser sur l'élévation : changer de couche · I : afficher/masquer le fond de plan · clic milieu : copier le matériau · clic droit dans le vide ou Échap : reposer l'outil · molette : zoom · Alt+glisser ou clic milieu glissé : déplacer la vue · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer · flèches de l'élévation : tourner la face regardée · dans la coupe : clic = poser un cube du matériau sur le plan de coupe, clic droit = supprimer le bloc visible, maintien = trait · outils de forme dans la coupe : glisser trace la forme dans le plan de coupe (la hauteur des options devient la profondeur, centrée sur le plan ; un cylindre prend l'axe de la coupe)",
         "Background": {
             "Import": "Importer une image…",
             "Opacity": "Opacité",

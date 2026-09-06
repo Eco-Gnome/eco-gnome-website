@@ -171,11 +171,12 @@ public sealed class ArchitecturePlan
 public sealed class ArchOp
 {
     public string Id { get; set; } = "";
-    public string Kind { get; set; } = "";                  // box | sphere | cylinder | line | cells
+    public string Kind { get; set; } = "";                  // box | sphere | cylinder | line | curve | cells
     public bool Subtract { get; set; }                      // false → pose Material ; true → vide
     public string? Material { get; set; }                   // requis si !Subtract
-    public int[]? A { get; set; }                           // [x,y,z] coin (box/sphere/cylinder) ou extrémité (line)
+    public int[]? A { get; set; }                           // [x,y,z] coin (box/sphere/cylinder) ou extrémité (line/curve)
     public int[]? B { get; set; }
+    public int[]? C { get; set; }                           // curve : point de contrôle de la Bézier quadratique A → B
     public string? Axis { get; set; }                       // cylinder : x | y | z (défaut z) ; disque = cylindre avec a.z == b.z
     public bool Hollow { get; set; }                        // box (4 murs), sphere (coque), cylinder (tube)
     public int Thickness { get; set; } = 1;                 // épaisseur de la coque si Hollow
