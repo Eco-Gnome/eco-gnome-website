@@ -914,9 +914,10 @@
             "cylinder": "Cylinder (4) — drag the radius from the centre; height in the options",
             "disc": "Disc (5) — one-layer cylinder",
             "line": "Line (6) — diagonal on the layer (3D slope via z1 in the card)",
-            "pencil": "Pencil (7) — cell by cell",
-            "eraser": "Eraser (8) — deletes as you go: pencil cell, wall, slab, whole shape",
-            "cut": "Section line (9) — drag a line, then click an eye for the viewing direction"
+            "curve": "Curve (7) — drag from end to end, then move the mouse to bend it and click; the handle stays draggable when selected",
+            "pencil": "Pencil (8) — cell by cell",
+            "eraser": "Eraser (9) — deletes as you go: pencil cell, wall, slab, whole shape",
+            "cut": "Section line (0) — drag a line, then click an eye for the viewing direction"
         },
         "Defaults": {
             "WallHeight": "Wall height",
@@ -972,6 +973,8 @@
             "Rename": "Rename…",
             "Share": "Share…",
             "ExportPng": "Export as PNG",
+            "ExportJson": "Export as JSON",
+            "ImportJson": "Import a JSON…",
             "Resize": "Resize grid…",
             "Untitled": "Untitled plan"
         },
@@ -1074,7 +1077,8 @@
             "LinkInvalid": "Invalid or truncated plan link.",
             "ShareNeedsSave": "This plan is too large for a link: it must be saved first.",
             "Copied": "Link copied",
-            "CopyFailed": "Could not copy — select the link and copy it manually."
+            "CopyFailed": "Could not copy — select the link and copy it manually.",
+            "ImportInvalid": "Invalid or too large plan file."
         },
         "Issue": {
             "GridSizeInvalid": "Grid size must be between 1 and {max} on each side.",
@@ -1178,6 +1182,7 @@
                 "sphere": "Sphere",
                 "cylinder": "Cylinder",
                 "line": "Line",
+                "curve": "Curve",
                 "cells": "Cells"
             }
         },
@@ -1197,7 +1202,7 @@
             "Title": "Section"
         },
         "Hint3d": "drag: orbit around the building · right or middle drag: pan · wheel: zoom · PgUp/PgDn, wheel or drag on the elevation: change layer (highlighted in blue) · ⤓ button: cut above the layer to see inside · elevation arrows: rotate the viewed side · Fit: reframe · Esc: back to the plan · Ctrl+Z/Y: undo/redo · Ctrl+S: save",
-        "HintArch": "1: select · 2: box · 3: sphere · 4: cylinder · 5: disc · 6: line · 7: pencil · 8: eraser · 9: section line · H: pan · drag: draw the shape centred on the current layer (blue bar at mid-height) · Shift+drag: invert add/subtract · right click (hold): delete the block as you go (pencil cell, wall, slab; a block of a geometric shape is carved, the whole shape is deleted from the panel) · Shift+right drag: delete an area · click: select the shape · drag a shape: move it · arrows: move the shape one cell · Shift+PgUp/PgDn: one layer · Ctrl+C / Ctrl+X / Ctrl+V: copy / cut / paste the shape (pasted under the cursor, on the current layer) · Del: delete the shape · PgUp/PgDn, wheel or drag on the elevation: change layer · I: show/hide the background image · middle click: copy the material · right click on empty space or Esc: drop the tool · wheel: zoom · Alt+drag or middle drag: pan · Ctrl+Z/Y: undo/redo · Ctrl+S: save · elevation arrows: rotate the viewed side · in the section: click = place a cube of the material on the cut plane, right click = delete the visible block, hold = stroke · shape tools in the section: drag draws the shape in the cut plane (the height option becomes the depth, centred on the plane; a cylinder takes the cut axis)",
+        "HintArch": "1: select · 2: box · 3: sphere · 4: cylinder · 5: disc · 6: line · 7: curve · 8: pencil · 9: eraser · 0: section line · H: pan · drag: draw the shape centred on the current layer (blue bar at mid-height) · curve: drag from end to end, then the mouse bends it and a click places it (right click or Esc: cancel); when selected, the round handle is draggable · Shift+drag: invert add/subtract · right click (hold): delete the block as you go (pencil cell, wall, slab; a block of a geometric shape is carved, the whole shape is deleted from the panel) · Shift+right drag: delete an area · click: select the shape · drag a shape: move it · arrows: move the shape one cell · Shift+PgUp/PgDn: one layer · Ctrl+C / Ctrl+X / Ctrl+V: copy / cut / paste the shape (pasted under the cursor, on the current layer) · Del: delete the shape · PgUp/PgDn, wheel or drag on the elevation: change layer · I: show/hide the background image · middle click: copy the material · right click on empty space or Esc: drop the tool · wheel: zoom · Alt+drag or middle drag: pan · Ctrl+Z/Y: undo/redo · Ctrl+S: save · elevation arrows: rotate the viewed side · in the section: click = place a cube of the material on the cut plane, right click = delete the visible block, hold = stroke · shape tools in the section: drag draws the shape in the cut plane (the height option becomes the depth, centred on the plane; a cylinder takes the cut axis)",
         "Background": {
             "Import": "Import an image…",
             "Opacity": "Opacity",

@@ -11,7 +11,7 @@ namespace ecocraft.BuildingPlanner;
 // Les cellules hors [0,w)×[0,d)×[0,h) sont ignorées. Coordonnées du plan : (x, y, z) avec z vertical.
 public static class ArchShapes
 {
-    public static readonly string[] Kinds = ["box", "sphere", "cylinder", "line", "cells"];
+    public static readonly string[] Kinds = ["box", "sphere", "cylinder", "line", "curve", "cells"];
 
     private readonly record struct Bounds(int X0, int X1, int Y0, int Y1, int Z0, int Z1)
     {
@@ -48,6 +48,10 @@ public static class ArchShapes
                 if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return;
                 foreach (var (x, y, z) in LineCells(op.A, op.B)) Set(x, y, z);
                 return;
+            case "curve":
+                if (op.A is not { Length: 3 } || op.B is not { Length: 3 } || op.C is not { Length: 3 }) return;
+                foreach (var (x, y, z) in CurveCells(op.A, op.C, op.B)) Set(x, y, z);
+                return;
             case "box": case "sphere": case "cylinder":
                 if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return;
                 var outer = Bounds.From(op.A, op.B);
@@ -76,7 +80,9 @@ public static class ArchShapes
             if (op.Cells is not null) for (var i = 2; i < op.Cells.Length; i += 3) max = Math.Max(max, op.Cells[i]);
             return max;
         }
-        return op.A is { Length: 3 } && op.B is { Length: 3 } ? Math.Max(op.A[2], op.B[2]) : -1;
+        if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return -1;
+        var top = Math.Max(op.A[2], op.B[2]);
+        return op.Kind == "curve" && op.C is { Length: 3 } ? Math.Max(top, op.C[2]) : top;
     }
 
     // Nombre de cellules visitées par Paint (boîte englobante ∩ grille ; ligne : n + 1 ; cells : triplets) — budget du validateur.
@@ -87,7 +93,10 @@ public static class ArchShapes
             case "cells": return (op.Cells?.Length ?? 0) / 3;
             case "line":
                 if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return 0;
-                return Math.Max(Math.Abs(op.B[0] - op.A[0]), Math.Max(Math.Abs(op.B[1] - op.A[1]), Math.Abs(op.B[2] - op.A[2]))) + 1;
+                return Cheb(op.A, op.B) + 1;
+            case "curve":
+                if (op.A is not { Length: 3 } || op.B is not { Length: 3 } || op.C is not { Length: 3 }) return 0;
+                return 2 * Math.Max(Cheb(op.A, op.C), Cheb(op.C, op.B)) + 1;
             default:
                 if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return 0;
                 var b = Bounds.From(op.A, op.B);
@@ -133,9 +142,30 @@ public static class ArchShapes
             yield return (Step(a[0], b[0], k, n), Step(a[1], b[1], k, n), Step(a[2], b[2], k, n));
     }
 
-    private static int Step(int a, int b, int k, int n)
+    private static int Step(int a, int b, int k, int n) => FloorDiv(2L * a * n + 2L * (b - a) * k + n, 2L * n);
+
+    // Bézier quadratique a → b tirée par c : 2·max(|c−a|, |b−c|) + 1 échantillons (un pas ≤ 1 case par axe, donc
+    // une chaîne 26-connexe), arrondis au plus proche, doublons consécutifs fusionnés — même arithmétique que curveCells en JS.
+    public static IEnumerable<(int X, int Y, int Z)> CurveCells(int[] a, int[] c, int[] b)
     {
-        long num = 2L * a * n + 2L * (b - a) * k + n, den = 2L * n;
+        var n = 2 * Math.Max(Cheb(a, c), Cheb(c, b));
+        if (n == 0) { yield return (a[0], a[1], a[2]); yield break; }
+        long den = (long)n * n;
+        (int X, int Y, int Z)? last = null;
+        for (var k = 0; k <= n; k++)
+        {
+            int At(int i) => FloorDiv(2L * ((long)(n - k) * (n - k) * a[i] + 2L * k * (n - k) * c[i] + (long)k * k * b[i]) + den, 2L * den);
+            var p = (At(0), At(1), At(2));
+            if (p == last) continue;
+            last = p;
+            yield return p;
+        }
+    }
+
+    private static int Cheb(int[] p, int[] q) => Math.Max(Math.Abs(q[0] - p[0]), Math.Max(Math.Abs(q[1] - p[1]), Math.Abs(q[2] - p[2])));
+
+    private static int FloorDiv(long num, long den)
+    {
         var q = num / den;
         if (num % den != 0 && num < 0) q--;
         return (int)q;

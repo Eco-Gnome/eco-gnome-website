@@ -115,7 +115,7 @@ public static class PlanValidator
             var index = i.ToString();
             var valid = ArchShapes.Kinds.Contains(op.Kind) && op.Thickness >= 1;
             if (op.Kind == "cells") valid &= op.Cells is not null && op.Cells.Length % 3 == 0;
-            else valid &= op.A is { Length: 3 } && op.B is { Length: 3 } && (op.Kind != "cylinder" || op.Axis is null or "x" or "y" or "z");
+            else valid &= op.A is { Length: 3 } && op.B is { Length: 3 } && (op.Kind != "cylinder" || op.Axis is null or "x" or "y" or "z") && (op.Kind != "curve" || op.C is { Length: 3 });
             if (!valid) { issues.Add(PlanIssue.Error("InvalidOp", [index])); continue; }
             if (op.Kind == "cells" && op.Cells!.Length / 3 > MaxCellsPerOp) issues.Add(PlanIssue.Error("TooManyCells", [index, MaxCellsPerOp.ToString()]));
             if (!op.Subtract && string.IsNullOrWhiteSpace(op.Material)) issues.Add(PlanIssue.Error("MissingOpMaterial", [index]));
