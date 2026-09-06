@@ -134,7 +134,7 @@
             @CostHead("BuildingPlanner.Material")
             foreach (var m in Analysis.Materials)
             {
-                @CostRow(m.Material, Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material, m.Total, MaterialParts(m))
+                @CostRow(m.Material, Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material, m.Total, Document?.IsArchitecture == true ? null : MaterialParts(m))
             }
             @CostFoot(Analysis.Materials.Select(m => (m.Material, m.Total)))
         }

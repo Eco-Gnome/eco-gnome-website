@@ -1,4 +1,4 @@
-/* Le layout (MudMainContent pa-6) met 24px de padding autour de la page : on en récupère 16px
+﻿/* Le layout (MudMainContent pa-6) met 24px de padding autour de la page : on en récupère 16px
    en haut et en bas (reste 8px), et la hauteur compte l'appbar (64) + 2 × 8 de padding restant.
    L'ancien calc(100vh - 88px) ignorait le padding bas → 24px de scroll global permanent. */
 .bp-page {
@@ -37,6 +37,11 @@
     gap: 6px;
     flex: 1 1 auto;
     min-height: 0;
+}
+
+/* Rendu 3D : pas de panneau gauche, le canvas prend sa colonne. */
+.bp-body.bp-body-3d {
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 
 /* .bp-side/.bp-left/.bp-panel/.bp-rail sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
@@ -181,6 +186,7 @@
     flex: 0 0 300px;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(0, 0, 0, 0.18);
     padding: 12px 14px 14px;
@@ -496,6 +502,14 @@
     touch-action: none;
 }
 
+::deep .bp-layer-3d {
+    pointer-events: none;
+}
+
+::deep .bp-layer-chip .bp-on {
+    color: var(--mud-palette-primary);
+}
+
 .bp-object-list {
     overflow-y: auto;
     flex: 1 1 auto;
@@ -594,6 +608,10 @@
         grid-template-rows: 260px 60vh auto;
     }
 
+    .bp-body.bp-body-3d {
+        grid-template-rows: 60vh auto;
+    }
+
     .bp-right-col {
         flex-direction: column-reverse;
     }
@@ -645,3 +663,70 @@
 .bp-swatch-hole { background: rgba(0, 0, 0, 0.6) repeating-linear-gradient(45deg, transparent 0 2px, rgba(255, 255, 255, 0.35) 2px 3px); }
 .bp-swatch-watermark { background: rgba(194, 162, 106, 0.35); }
 .bp-swatch-hole-above { border: 2px dashed rgba(255, 255, 255, 0.7); }
+
+/* Mode architecture : bascule de mode, chip de couche, options des formes et liste des formes (panneau gauche). */
+.bp-layer-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 40px;
+    padding: 0 4px 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.bp-arch-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 4px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bp-arch-ops {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-top: 4px;
+}
+
+.bp-op-row {
+    font-size: 0.8rem;
+}
+
+.bp-op-mode {
+    width: 12px;
+    text-align: center;
+    color: var(--mud-palette-primary);
+    font-weight: 700;
+}
+
+.bp-op-mode.sub {
+    color: #ffb74d;
+}
+
+.bp-op-dims {
+    margin-left: auto;
+    opacity: 0.6;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+/* Fond de plan (réglages, mode architecture) : bouton Importer, œil, corbeille, aide ; glissière d'opacité. */
+.bp-settings-grid-img {
+    grid-template-columns: auto auto auto minmax(0, 1fr);
+    align-items: center;
+}
+
+.bp-settings-grid-img ::deep .bp-bg-opacity {
+    min-width: 160px;
+}
+
+/* Grisé sans Disabled : un bouton disabled ne reçoit plus la souris, donc plus d'infobulle. */
+::deep .bp-off {
+    opacity: 0.38;
+    pointer-events: none;
+}

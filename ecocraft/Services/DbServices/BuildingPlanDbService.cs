@@ -60,6 +60,7 @@ public class BuildingPlanDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			Name = buildingPlan.Name,
 			SchemaVersion = buildingPlan.SchemaVersion,
 			Document = buildingPlan.Document,
+			BackgroundImage = buildingPlan.BackgroundImage,
 			CreationDateTime = buildingPlan.CreationDateTime,
 			UpdateDateTime = buildingPlan.UpdateDateTime,
 		};
@@ -78,6 +79,7 @@ public class BuildingPlanDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			Name = buildingPlan.Name,
 			SchemaVersion = buildingPlan.SchemaVersion,
 			Document = buildingPlan.Document,
+			BackgroundImage = buildingPlan.BackgroundImage,
 			UpdateDateTime = buildingPlan.UpdateDateTime,
 		};
 		var entry = context.Entry(stub);
@@ -85,6 +87,7 @@ public class BuildingPlanDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		entry.Property(x => x.Name).IsModified = true;
 		entry.Property(x => x.SchemaVersion).IsModified = true;
 		entry.Property(x => x.Document).IsModified = true;
+		entry.Property(x => x.BackgroundImage).IsModified = true;
 		entry.Property(x => x.UpdateDateTime).IsModified = true;
 	}
 

@@ -1,4 +1,4 @@
-using ecocraft.BuildingPlanner.Model;
+﻿using ecocraft.BuildingPlanner.Model;
 
 namespace ecocraft.BuildingPlanner;
 
@@ -8,6 +8,24 @@ public static class PlanAnalyzer
     // Pièce « Extérieur » du deed : une seule par propriété, tous niveaux confondus, comme dans le jeu.
     public const string OutdoorRoomId = "outdoor";
 
+    // Mode architecture : nomenclature de la maison + formes, pas d'objets, de pièces ni de housing ; les voxels de la
+    // maison partent au canvas (HouseRuns) qui compose les formes lui-même.
+    private static AnalysisResult ArchitectureResult(Catalog catalog, BuildContext ctx, List<PlanIssue> validation)
+    {
+        var unknown = ctx.Materials.Where(m => !m.Known).Select(m => m.Name).Distinct(StringComparer.Ordinal).ToList();
+        if (unknown.Count > 0) ctx.Issues.Insert(0, PlanIssue.Warning("IncompatibleReferences", [unknown.Count.ToString(), string.Join(", ", unknown)]));
+        var (materials, _) = MaterialCostCalculator.Compute(ctx);
+        return new AnalysisResult
+        {
+            Issues = validation.Concat(ctx.Issues).OrderBy(i => i.Severity == IssueSeverity.Error ? 0 : i.Severity == IssueSeverity.Warning ? 1 : 2).ToList(),
+            Materials = materials,
+            GridSizeY = ctx.Grid.SizeY,
+            HousingRulesAreDefaults = catalog.Housing.IsDefault,
+            HouseRuns = ctx.HouseRuns,
+            HouseMaterials = ctx.Materials.Select(m => m.Name).ToList(),
+        };
+    }
+
     public static AnalysisResult Analyze(PlanDocument doc, Catalog catalog)
     {
         var validation = PlanValidator.Validate(doc);
@@ -15,6 +33,7 @@ public static class PlanAnalyzer
             return new AnalysisResult { Issues = validation, Blocked = true, HousingRulesAreDefaults = catalog.Housing.IsDefault };
 
         var ctx = GridBuilder.Build(doc, catalog);
+        if (doc.IsArchitecture) return ArchitectureResult(catalog, ctx, validation);
         ObjectPlacer.PlaceAll(ctx);
 
         // Détection des pièces et appartenance des objets (≥ 51 % des cellules posées ; empilés → pièce du parent).
@@ -200,6 +219,8 @@ public static class PlanAnalyzer
             ObjectCounts = objectCounts,
             Objects = placed,
             GridSizeY = ctx.Grid.SizeY,
+            HouseRuns = ctx.HouseRuns,
+            HouseMaterials = ctx.Materials.Select(m => m.Name).ToList(),
             HousingRulesAreDefaults = catalog.Housing.IsDefault,
         };
     }
