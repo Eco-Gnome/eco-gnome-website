@@ -900,7 +900,15 @@
             "pan": "Déplacer la vue (H)",
             "wall": "Murs (2) — glissez un rectangle, seul son contour est construit ; Maj+glisser : sol plein",
             "hole": "Ouverture dans la dalle (3) — cage d'escalier, trappe (pas au niveau le plus bas)",
-            "holeDisabled": "Ouverture dans la dalle — indisponible au niveau le plus bas : son sol est le terrain"
+            "holeDisabled": "Ouverture dans la dalle — indisponible au niveau le plus bas : son sol est le terrain",
+            "box": "Pavé (2) — glissez le rectangle ; hauteur dans les options",
+            "sphere": "Sphère (3) — glissez le rayon depuis le centre ; posée sur la couche courante",
+            "cylinder": "Cylindre (4) — glissez le rayon depuis le centre ; hauteur dans les options",
+            "disc": "Disque (5) — cylindre d'une seule couche",
+            "line": "Ligne (6) — diagonale sur la couche (pente 3D via z1 dans la fiche)",
+            "pencil": "Crayon (7) — case par case",
+            "eraser": "Gomme (8) — supprime au passage : case crayon, mur, dalle, forme entière",
+            "cut": "Plan de coupe (9) — glissez un trait, puis cliquez un œil pour le sens du regard"
         },
         "Defaults": {
             "WallHeight": "Hauteur des murs",
@@ -919,7 +927,11 @@
             "ResidentsHelp": "Le multiplicateur de résidents s'applique au total. Avec {n} résident(s) : ×{m}.",
             "Summary": "Murs {height} · {n} résident(s)",
             "CeilingTodo": "Plafond à définir",
-            "Grid": "Grille {w} × {d} · {n} niveaux"
+            "Grid": "Grille {w} × {d} · {n} niveaux",
+            "Building": "Bâtiment",
+            "Height": "Hauteur (couches)",
+            "ArchSummary": "Hauteur {h}",
+            "Background": "Fond de plan"
         },
         "Legend": {
             "Slab": "Dalle : plafond du dessous ou sol peint",
@@ -1109,7 +1121,14 @@
             "HousingObjectExcluded": "{type} ({category}) ne compte pas dans {room} (pièce {primary}).",
             "PrimaryCategoryTie": "Plusieurs catégories sont à égalité pour cette pièce ; « {category} » a été retenue (le jeu choisit aussi arbitrairement).",
             "HousingCapped": "Valeur de pièce {before} plafonnée à {after} par les matériaux (soft cap {softCap}).",
-            "HousingConfigMissing": "Configuration housing non exportée par ce serveur : valeurs vanilla utilisées."
+            "HousingConfigMissing": "Configuration housing non exportée par ce serveur : valeurs vanilla utilisées.",
+            "InvalidArchitectureHeight": "La hauteur du bâtiment doit être entre 1 et {max} couches.",
+            "TooManyOps": "Trop de formes (max {max}).",
+            "InvalidOp": "Forme n° {index} invalide.",
+            "MissingOpMaterial": "La forme n° {index} n'a pas de matériau.",
+            "TooManyCells": "La forme n° {index} a trop de cases (max {max}).",
+            "ArchitectureTooComplex": "Trop de volume à évaluer (max {max} cases) : réduisez les formes ou la hauteur.",
+            "GridTooLarge": "Bâtiment trop grand pour l'analyse (grille × hauteur > {max} cases) : réduisez la grille, la hauteur ou les formes."
         },
         "Assumptions": {
             "Title": "Hypothèses de cette version",
@@ -1127,6 +1146,60 @@
             "Forms": "Toute forme de bloc (escaliers, toits…) est un cube plein pour la détection de pièce, exactement comme en jeu.",
             "Levels": "La dalle entre deux niveaux est un bloc unique : sol peint à l'étage, sinon plafond de la pièce du dessous ; elle compte dans le tier des deux pièces.",
             "Tie": "Les égalités de catégorie de pièce sont tranchées par l'ordre du catalogue."
+        },
+        "Mode": {
+            "house": "Mode maison : pièces, housing, mobilier",
+            "architecture": "Mode architecture : formes 3D, nomenclature",
+            "view3d": "Rendu 3D : le bâtiment et son mobilier en volume (lecture seule)"
+        },
+        "View3d": {
+            "Cap": "Couper au-dessus de la couche courante",
+            "TooManyBlocks": "Trop de blocs pour le rendu 3D"
+        },
+        "Shape": {
+            "Add": "Ajouter",
+            "Subtract": "Soustraire",
+            "Hollow": "Creux",
+            "Thickness": "Épaisseur",
+            "Height": "Hauteur (pavé, cylindre)",
+            "Axis": "Axe",
+            "Cells": "{n} cases",
+            "None": "Aucune forme. Choisissez un outil et glissez sur le plan.",
+            "Kind": {
+                "box": "Pavé",
+                "sphere": "Sphère",
+                "cylinder": "Cylindre",
+                "line": "Ligne",
+                "cells": "Cases"
+            }
+        },
+        "Layer": {
+            "Label": "Couche {z} / {h}",
+            "Up": "Couche supérieure (PgUp)",
+            "Down": "Couche inférieure (PgDn)"
+        },
+        "Elevation": {
+            "Title": "Élévation",
+            "South": "Sud",
+            "East": "Est",
+            "North": "Nord",
+            "West": "Ouest"
+        },
+        "Section": {
+            "Title": "Coupe"
+        },
+        "Hint3d": "glisser : tourner autour du bâtiment · clic droit ou molette glissé : déplacer · molette : zoom · PgUp/PgDn, molette ou glisser sur l'élévation : changer de couche (surlignée en bleu) · bouton ⤓ : couper au-dessus de la couche pour voir l'intérieur · flèches de l'élévation : tourner la face regardée · Adapter : recadrer · Échap : retour au plan · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer",
+        "HintArch": "1 : sélection · 2 : pavé · 3 : sphère · 4 : cylindre · 5 : disque · 6 : ligne · 7 : crayon · 8 : gomme · 9 : plan de coupe · H : déplacer la vue · glisser : dessiner la forme centrée sur la couche courante (barre bleue au milieu de la hauteur) · Maj+glisser : inverser ajout/soustraction · clic droit (maintenu) : supprimer le bloc au passage (case crayon, mur, dalle ; un bloc d'une forme géométrique est creusé, la forme entière se supprime depuis le panneau) · Maj+clic droit glissé : supprimer une zone · clic : sélectionner la forme · glisser une forme : la déplacer · flèches : déplacer la forme d'une case · Maj+PgUp/PgDn : d'une couche · Ctrl+C / Ctrl+X / Ctrl+V : copier / couper / coller la forme (collée sous le curseur, sur la couche courante) · Suppr : supprimer la forme · PgUp/PgDn, molette ou glisser sur l'élévation : changer de couche · I : afficher/masquer le fond de plan · clic milieu : copier le matériau · clic droit dans le vide ou Échap : reposer l'outil · molette : zoom · Alt+glisser ou clic milieu glissé : déplacer la vue · Ctrl+Z/Y : annuler/rétablir · Ctrl+S : enregistrer · flèches de l'élévation : tourner la face regardée · dans la coupe : clic = poser un cube du matériau sur le plan de coupe, clic droit = supprimer le bloc visible, maintien = trait · outils de forme dans la coupe : glisser trace la forme dans le plan de coupe (la hauteur des options devient la profondeur, centrée sur le plan ; un cylindre prend l'axe de la coupe)",
+        "Background": {
+            "Import": "Importer une image…",
+            "Opacity": "Opacité",
+            "X": "Décalage X (cases)",
+            "Y": "Décalage Y (cases)",
+            "Width": "Largeur (cases)",
+            "FitGrid": "Adapter à la grille",
+            "Show": "Afficher / masquer (I)",
+            "Remove": "Supprimer l'image",
+            "None": "Aucune image. Elle est réduite à 1024 px et enregistrée avec le plan (pas dans le lien de partage court)."
         }
     }
 }

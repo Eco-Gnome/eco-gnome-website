@@ -38,6 +38,7 @@ public sealed class BuildContext
     public Dictionary<string, HashSet<(int X, int Y)>> RoomFootprints { get; } = new(StringComparer.Ordinal);
     public Dictionary<string, int> RoomLevel { get; } = new(StringComparer.Ordinal);
     public Dictionary<string, int> RoomCeilingY { get; } = new(StringComparer.Ordinal);
+    public List<int[]>? HouseRuns { get; set; }     // mode architecture : voxels de la maison avant les formes (HouseRuns.Encode)
     public List<PlacedObject> Objects { get; } = [];
     public List<PlanIssue> Issues { get; } = [];
 

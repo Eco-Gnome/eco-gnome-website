@@ -1039,6 +1039,7 @@ public class BuildingPlan
     public string Name { get; set; } = "";
     public int SchemaVersion { get; set; } = 1;
     public string Document { get; set; } = "{}";
+    public string? BackgroundImage { get; set; }   // fond de plan du mode architecture : data URL (image/jpeg|png|webp, ≤ ~1 Mo), hors du document JSON
     public DateTimeOffset CreationDateTime { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdateDateTime { get; set; } = DateTimeOffset.UtcNow;
 
