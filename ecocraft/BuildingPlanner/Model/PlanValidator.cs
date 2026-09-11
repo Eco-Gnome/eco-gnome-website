@@ -1,4 +1,4 @@
-namespace ecocraft.BuildingPlanner.Model;
+﻿namespace ecocraft.BuildingPlanner.Model;
 
 // Validation d'entrée (bloquante) du document : bornes, clés, identifiants, références. Les matériaux ou
 // types inconnus ne sont pas rejetés ici : l'analyse les signale et dégrade (tier 0 / objet ignoré).
@@ -10,6 +10,11 @@ public static class PlanValidator
     public const int MaxLevels = 10;
     public const int MaxHeight = 50;
     public const int MaxDocumentBytes = 256 * 1024;
+    public const int MaxArchitectureHeight = 320;   // hauteur max d'un monde Eco
+    public const int MaxOps = 500;
+    public const int MaxCellsPerOp = 2000;
+    public const long MaxOpWork = 50_000_000;       // cellules visitées par l'évaluation (≈ 8 grilles pleines)
+    public const long MaxVoxels = 13_000_000;       // grille voxel dense (12 o/voxel, ~156 Mo au pire) : 200×200×320 entièrement construit
 
     public static List<PlanIssue> Validate(PlanDocument doc)
     {
@@ -17,6 +22,7 @@ public static class PlanValidator
 
         if (doc.Grid.Width < 1 || doc.Grid.Depth < 1 || doc.Grid.Width > MaxGridSide || doc.Grid.Depth > MaxGridSide)
             issues.Add(PlanIssue.Error("GridSizeInvalid", [MaxGridSide.ToString()]));
+        ValidateArchitecture(doc, issues);
         if (doc.Levels.Count == 0 || doc.Levels.Count > MaxLevels) { issues.Add(PlanIssue.Error("TooManyLevels", [MaxLevels.ToString()])); return issues; }
         if (doc.GroundIndex < 0 || doc.GroundIndex >= doc.Levels.Count) issues.Add(PlanIssue.Error("InvalidGroundIndex", [doc.GroundIndex.ToString()]));
         if (doc.Levels.Sum(l => l.Objects.Count) > MaxObjects) issues.Add(PlanIssue.Error("TooManyObjects", [MaxObjects.ToString()]));
@@ -25,6 +31,7 @@ public static class PlanValidator
 
         var ids = new HashSet<string>(StringComparer.Ordinal);
         var objectIds = new HashSet<string>(StringComparer.Ordinal);
+        var gridTop = 3;   // estimation du sommet de la grille voxel (comme GridBuilder), pour borner sa taille
         for (var k = 0; k < doc.Levels.Count; k++)
         {
             var level = doc.Levels[k];
@@ -63,7 +70,14 @@ public static class PlanValidator
             }
 
             if (doc.LevelBaseY(k) + top + 1 > MaxHeight) issues.Add(PlanIssue.Error("BuildingTooHigh", [MaxHeight.ToString()], level: k));
+            gridTop = Math.Max(gridTop, doc.LevelBaseY(k) + top + 1);
         }
+
+        // Taille de la grille dense avec les formes (rognées à Architecture.Height) : la mémoire d'une analyse reste bornée.
+        var archHeight = Math.Clamp(doc.Architecture.Height, 1, MaxArchitectureHeight);
+        foreach (var op in doc.Architecture.Ops) gridTop = Math.Max(gridTop, Math.Min(ArchShapes.MaxZ(op) + 1, archHeight));
+        if ((long)Math.Clamp(doc.Grid.Width, 1, MaxGridSide) * Math.Clamp(doc.Grid.Depth, 1, MaxGridSide) * (gridTop + 2) > MaxVoxels)
+            issues.Add(PlanIssue.Error("GridTooLarge", [MaxVoxels.ToString()]));
 
         var byId = doc.AllObjects().Select(e => e.Object).Where(o => !string.IsNullOrWhiteSpace(o.Id)).GroupBy(o => o.Id).ToDictionary(g => g.Key, g => g.First());
         foreach (var obj in byId.Values.Where(o => o.AttachedTo is not null))
@@ -83,6 +97,31 @@ public static class PlanValidator
         }
 
         return issues;
+    }
+
+    // Données du mode architecture, validées même en mode maison (elles restent dans le document). Pas de borne sur les
+    // coordonnées : l'évaluation rogne. Le budget de travail borne le temps d'évaluation (JS et C#).
+    private static void ValidateArchitecture(PlanDocument doc, List<PlanIssue> issues)
+    {
+        var arch = doc.Architecture;
+        if (arch.Height < 1 || arch.Height > MaxArchitectureHeight) issues.Add(PlanIssue.Error("InvalidArchitectureHeight", [MaxArchitectureHeight.ToString()]));
+        if (arch.Ops.Count > MaxOps) { issues.Add(PlanIssue.Error("TooManyOps", [MaxOps.ToString()])); return; }
+
+        int w = Math.Clamp(doc.Grid.Width, 1, MaxGridSide), d = Math.Clamp(doc.Grid.Depth, 1, MaxGridSide), h = Math.Clamp(arch.Height, 1, MaxArchitectureHeight);
+        long work = 0;
+        for (var i = 0; i < arch.Ops.Count; i++)
+        {
+            var op = arch.Ops[i];
+            var index = i.ToString();
+            var valid = ArchShapes.Kinds.Contains(op.Kind) && op.Thickness >= 1;
+            if (op.Kind == "cells") valid &= op.Cells is not null && op.Cells.Length % 3 == 0;
+            else valid &= op.A is { Length: 3 } && op.B is { Length: 3 } && (op.Kind != "cylinder" || op.Axis is null or "x" or "y" or "z") && (op.Kind != "curve" || op.C is { Length: 3 });
+            if (!valid) { issues.Add(PlanIssue.Error("InvalidOp", [index])); continue; }
+            if (op.Kind == "cells" && op.Cells!.Length / 3 > MaxCellsPerOp) issues.Add(PlanIssue.Error("TooManyCells", [index, MaxCellsPerOp.ToString()]));
+            if (!op.Subtract && string.IsNullOrWhiteSpace(op.Material)) issues.Add(PlanIssue.Error("MissingOpMaterial", [index]));
+            work += ArchShapes.WorkVolume(op, w, d, h);
+        }
+        if (work > MaxOpWork) issues.Add(PlanIssue.Error("ArchitectureTooComplex", [MaxOpWork.ToString()]));
     }
 
     public static bool InGrid(PlanDocument doc, int x, int y) => x >= 0 && y >= 0 && x < doc.Grid.Width && y < doc.Grid.Depth;

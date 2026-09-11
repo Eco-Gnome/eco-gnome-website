@@ -154,4 +154,6 @@ public sealed class AnalysisResult
     public List<PlacedObjectResult> Objects { get; init; } = [];
     public int GridSizeY { get; init; }
     public bool HousingRulesAreDefaults { get; init; }
+    public List<int[]>? HouseRuns { get; init; }       // mode architecture : voxels maison [z, y, x0, len, matériau] (HouseRuns.Encode)
+    public List<string>? HouseMaterials { get; init; } // noms des matériaux indexés par HouseRuns
 }

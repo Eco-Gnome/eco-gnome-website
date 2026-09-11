@@ -1,4 +1,4 @@
-/* Fiche de sélection (tiers bas du panneau gauche, ~232 px utiles). Classes sur des div/span de ce composant ;
+﻿/* Fiche de sélection (tiers bas du panneau gauche, ~232 px utiles). Classes sur des div/span de ce composant ;
    les classes posées sur des composants Mud (champs, corbeille) passent par ::deep depuis une ligne. */
 .bp-insp {
     display: flex;
@@ -44,8 +44,17 @@
 
 .bp-insp-row ::deep .bp-insp-half {
     flex: 1 1 100px;
-    min-width: 100px;
+    min-width: 0;
+    max-width: 100%;
 }
+
+/* Les listes (matériau, axe) : la racine .mud-select est l'enfant flex, elle doit pouvoir rétrécir ; le libellé du
+   matériau choisi (icône + nom + chip) se tronque au lieu d'élargir la fiche (pas de scroll horizontal). */
+.bp-insp-row ::deep .mud-select { flex: 1 1 100px; min-width: 0; max-width: 100%; overflow: hidden; }
+.bp-insp-row ::deep .mud-select .mud-input-slot { min-width: 0; }
+.bp-insp-row ::deep .mud-select .mud-input-slot > div { min-width: 0; }
+.bp-insp-row ::deep .mud-select .mud-input-slot > div > span { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bp-insp-row ::deep .mud-select .mud-input-slot .mud-chip { flex: 0 0 auto; }
 
 .bp-insp-row ::deep .bp-insp-z {
     flex: 1 1 96px;
@@ -80,4 +89,11 @@
 
 .bp-insp-empty {
     color: rgba(255, 255, 255, 0.5);
+}
+
+/* Boîte englobante d'une forme (mode architecture) : x0 y0 z0 / x1 y1 z1. */
+.bp-insp-geom {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
 }

@@ -1,4 +1,4 @@
-@page "/building-planner"
+﻿@page "/building-planner"
 @implements IAsyncDisposable
 @using System.Text.Json
 @using ecocraft.BuildingPlanner
@@ -50,11 +50,23 @@ else
                     <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FileExport" OnClick="@(() => Js("exportJson", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportJson")</MudMenuItem>
+                    <MudMenuItem Icon="@MDIIcons.Filled.FileImport" OnClick="ImportJsonAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ImportJson")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
                 </MudMenu>
 
                 <MudDivider Vertical="true" FlexItem="true"/>
 
+                @* Mode : maison (pièces, housing) ou architecture (formes 3D, nomenclature) — stocké dans le document — ou rendu 3D
+                   (état de vue, lecture seule : le document garde son mode en dessous). *@
+                <MudToggleGroup T="string" Value="@(_view3d ? View3d : _document.Mode)" ValueChanged="SetModeAsync" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-mode">
+                    <MudToggleItem T="string" Value="@PlanMode.House"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.house")"><MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                    <MudToggleItem T="string" Value="@PlanMode.Architecture"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.architecture")"><MudIcon Icon="@MDIIcons.Filled.OfficeBuilding" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                    <MudToggleItem T="string" Value="@View3d"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.view3d")"><MudIcon Icon="@Icons.Material.Filled.ViewInAr" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                </MudToggleGroup>
+
+                @if (!_view3d)
+                {
                 <MudToggleGroup T="string" Value="@_tool" ValueChanged="SetTool" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-tools">
                     @foreach (var tool in Tools)
                     {
@@ -76,7 +88,26 @@ else
                         <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
                     }
                 </MudSelect>
+                }
 
+                @if (IsArch || _view3d)
+                {
+                    <MudDivider Vertical="true" FlexItem="true"/>
+                    @* Couche z affichée / éditée (le curseur de la bande d'élévation fait la même chose). *@
+                    <div class="bp-layer-chip">
+                        <MudIcon Icon="@MDIIcons.Filled.Layers" Size="Size.Small"/>
+                        <span>@LocalizationService.GetTranslation("BuildingPlanner.Layer.Label", _layer.ToString(), _layerCount.ToString())</span>
+                        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowUp" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Layer.Up")" OnClick="@(() => Js("setLayer", _layer + 1))"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Layer.Down")" OnClick="@(() => Js("setLayer", _layer - 1))"/>
+                        @if (_view3d)
+                        {
+                            @* Rendu 3D : masquer tout ce qui est au-dessus de la couche pour voir l'intérieur. *@
+                            <MudIconButton Icon="@MDIIcons.Filled.ArrowCollapseDown" Size="Size.Small" Class="@(_cap ? "bp-on" : null)" Title="@LocalizationService.GetTranslation("BuildingPlanner.View3d.Cap")" OnClick="@(() => Js("setView3dCap", !_cap))"/>
+                        }
+                    </div>
+                }
+                else
+                {
                 <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Rotate")">
                     <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="RotateAsync">r@(_rotation)</MudButton>
                 </MudTooltip>
@@ -130,6 +161,7 @@ else
                         </TooltipContent>
                     </MudTooltip>
                 }
+                }
 
                 <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.WipTooltip")" Placement="Placement.Bottom">
                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.Construction">@LocalizationService.GetTranslation("BuildingPlanner.Wip")</MudChip>
@@ -139,12 +171,15 @@ else
 
                 @* Bandeau housing + état des avertissements, toujours visibles ; un clic ouvre le volet correspondant. *@
                 <div class="bp-housing-block">
-                    <div class="bp-housing-score" @onclick="@(() => SetRightPanelAsync("housing"))">
-                        <MudIcon Icon="@Icons.Material.Filled.Home" Class="bp-housing-icon"/>
-                        <span class="bp-housing-value">@((_analysis?.Housing?.Total ?? 0f).ToString("0.00"))</span>
-                        <span class="bp-housing-label">@PerDayLines.First<br/>@PerDayLines.Second · ×@((_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</span>
-                    </div>
-                    <i class="bp-vsep"></i>
+                    @if (!IsArch)
+                    {
+                        <div class="bp-housing-score" @onclick="@(() => SetRightPanelAsync("housing"))">
+                            <MudIcon Icon="@Icons.Material.Filled.Home" Class="bp-housing-icon"/>
+                            <span class="bp-housing-value">@((_analysis?.Housing?.Total ?? 0f).ToString("0.00"))</span>
+                            <span class="bp-housing-label">@PerDayLines.First<br/>@PerDayLines.Second · ×@((_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</span>
+                        </div>
+                        <i class="bp-vsep"></i>
+                    }
                     <div class="@("bp-status-chip " + StatusClass)" @onclick="@(() => SetRightPanelAsync("issues"))">
                         <MudIcon Icon="@(ErrorCount > 0 ? Icons.Material.Filled.Error : WarningCount > 0 ? Icons.Material.Filled.Warning : Icons.Material.Filled.Check)"/>
                         <span>@StatusText</span>
@@ -162,7 +197,7 @@ else
                         }
                         <span class="bp-settings-title">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
                         <i class="bp-vsep bp-vsep-sm"></i>
-                        <span class="bp-settings-summary">@(CeilingMissing ? LocalizationService.GetTranslation("BuildingPlanner.Settings.CeilingTodo") : LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString()))</span>
+                        <span class="bp-settings-summary">@(IsArch ? LocalizationService.GetTranslation("BuildingPlanner.Settings.ArchSummary", _document.Architecture.Height.ToString()) : CeilingMissing ? LocalizationService.GetTranslation("BuildingPlanner.Settings.CeilingTodo") : LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString()))</span>
                         <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Class="bp-settings-caret"/>
                     </div>
                     <MudOverlay Visible="_settingsOpen" VisibleChanged="@(v => _settingsOpen = v)" AutoClose="true" LockScroll="false"/>
@@ -173,6 +208,40 @@ else
                                 <span class="bp-settings-heading">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
                                 <span class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Help")</span>
                             </div>
+                            @if (IsArch)
+                            {
+                                <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Building")</div>
+                                <div class="bp-settings-grid bp-settings-grid-3">
+                                    <MudNumericField T="int" Value="@_document.Architecture.Height" ValueChanged="OnArchHeightChanged" Min="1" Max="@PlanValidator.MaxArchitectureHeight" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                                     Label="@LocalizationService.GetTranslation("BuildingPlanner.Settings.Height")"/>
+                                </div>
+                                @* Fond de plan : image importée (réduite côté client, stockée avec le plan), placement dans le document. *@
+                                <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Background")</div>
+                                <div class="bp-settings-grid bp-settings-grid-img">
+                                    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.Image" OnClick="@(() => Js("pickBackgroundImage"))">@LocalizationService.GetTranslation("BuildingPlanner.Background.Import")</MudButton>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Background.Show")" Class="@(_backgroundImage is null ? "bp-off" : null)" OnClick="@(() => Js("toggleBackgroundVisible"))"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" Title="@LocalizationService.GetTranslation("BuildingPlanner.Background.Remove")" Class="@(_backgroundImage is null ? "bp-off" : null)" OnClick="@(() => Js("clearBackgroundImage"))"/>
+                                    @if (_document.Architecture.Image is null)
+                                    {
+                                        <span class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Background.None")</span>
+                                    }
+                                </div>
+                                @if (_document.Architecture.Image is { } img)
+                                {
+                                    <div class="bp-settings-grid bp-settings-grid-3">
+                                        <MudNumericField T="double" Value="@img.X" ValueChanged="@(v => Js("updateBackgroundImage", new { x = v }))" Step="0.5" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@LocalizationService.GetTranslation("BuildingPlanner.Background.X")"/>
+                                        <MudNumericField T="double" Value="@img.Y" ValueChanged="@(v => Js("updateBackgroundImage", new { y = v }))" Step="0.5" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@LocalizationService.GetTranslation("BuildingPlanner.Background.Y")"/>
+                                        <MudNumericField T="double" Value="@img.Width" ValueChanged="@(v => Js("updateBackgroundImage", new { width = Math.Clamp(v, 1, PlanValidator.MaxGridSide) }))" Min="1" Max="@PlanValidator.MaxGridSide" Step="1" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@LocalizationService.GetTranslation("BuildingPlanner.Background.Width")"/>
+                                    </div>
+                                    <div class="bp-settings-grid bp-settings-grid-img">
+                                        <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.FitToScreen" OnClick="@(() => Js("fitBackgroundImage"))">@LocalizationService.GetTranslation("BuildingPlanner.Background.FitGrid")</MudButton>
+                                        <span class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Background.Opacity")</span>
+                                        <MudSlider T="double" Value="@img.Opacity" ValueChanged="@(v => Js("updateBackgroundImage", new { opacity = v }))" Min="0" Max="1" Step="0.05" Size="Size.Small" Class="bp-bg-opacity"/>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
                             <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Construction")</div>
                             <div class="bp-settings-grid bp-settings-grid-3">
                                 <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
@@ -202,6 +271,7 @@ else
                                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Residents")"/>
                                 <div class="bp-settings-help">@LocalizationService.GetTranslation("BuildingPlanner.Settings.ResidentsHelp", _document.Analysis.Residents.ToString(), (_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</div>
                             </div>
+                            }
                             <div class="bp-settings-foot">
                                 <span>@LocalizationService.GetTranslation("BuildingPlanner.Settings.Grid", _document.Grid.Width.ToString(), _document.Grid.Depth.ToString(), _document.Levels.Count.ToString())</span>
                                 <span class="bp-link" @onclick="OpenResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</span>
@@ -212,18 +282,57 @@ else
             </MudStack>
         </MudPaper>
 
-        <div class="bp-body">
+        <div class="@("bp-body" + (_view3d ? " bp-body-3d" : ""))">
+            @if (!_view3d)
+            {
             <MudPaper Class="bp-side bp-left" Elevation="1">
+                @if (IsArch)
+                {
+                    @* Options des outils de forme (état de la page, comme le matériau) puis la liste des formes posées, dernière en haut. *@
+                    <div class="bp-catalog">
+                        <div class="bp-arch-opts">
+                            <MudToggleGroup T="bool" Value="@_shape.Subtract" ValueChanged="@(v => SetShapeAsync(_shape with { Subtract = v }))" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-arch-mode">
+                                <MudToggleItem T="bool" Value="false"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Add")"><MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                                <MudToggleItem T="bool" Value="true"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Subtract")"><MudIcon Icon="@Icons.Material.Filled.Remove" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                            </MudToggleGroup>
+                            <MudCheckBox T="bool" Value="@_shape.Hollow" ValueChanged="@(v => SetShapeAsync(_shape with { Hollow = v }))" Dense="true" Size="Size.Small" Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Hollow")"/>
+                            <MudNumericField T="int" Value="@_shape.Thickness" ValueChanged="@(v => SetShapeAsync(_shape with { Thickness = Math.Clamp(v, 1, 10) }))" Min="1" Max="10" Disabled="!_shape.Hollow" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                             Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Thickness")"/>
+                            <MudNumericField T="int" Value="@_shape.Height" ValueChanged="@(v => SetShapeAsync(_shape with { Height = Math.Clamp(v, 1, PlanValidator.MaxArchitectureHeight) }))" Min="1" Max="@PlanValidator.MaxArchitectureHeight" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                             Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Height")"/>
+                        </div>
+                        <div class="bp-arch-ops">
+                            @if (_document.Architecture.Ops.Count == 0)
+                            {
+                                <MudText Typo="Typo.caption" Class="pa-2 d-block">@LocalizationService.GetTranslation("BuildingPlanner.Shape.None")</MudText>
+                            }
+                            @for (var i = _document.Architecture.Ops.Count - 1; i >= 0; i--)
+                            {
+                                var op = _document.Architecture.Ops[i];
+                                <div class="@("bp-object-item bp-op-row" + (_selectionKind == "op" && _selectionId == op.Id ? " selected" : ""))" @onclick="@(() => Js("selectOp", op.Id))">
+                                    <MudIcon Icon="@KindIcon(op.Kind)" Size="Size.Small"/>
+                                    <span class="@("bp-op-mode" + (op.Subtract ? " sub" : ""))">@(op.Subtract ? "−" : "+")</span>
+                                    <span class="bp-ellipsis">@(op.Subtract ? LocalizationService.GetTranslation($"BuildingPlanner.Shape.Kind.{op.Kind}") : MaterialLabel(op.Material))</span>
+                                    <span class="bp-op-dims">@OpDims(op)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
                 @* Catalogue : recherche + liste unique groupée (catégories housing, Tables, Portes par tier, Autres). *@
                 <div class="bp-catalog">
                     @RenderObjectList()
                 </div>
-                @* Zone Sélection : fiche de la pièce / de l'objet sélectionné, tiers bas du panneau, scroll interne. *@
+                }
+                @* Zone Sélection : fiche de la pièce / de l'objet / de la forme sélectionnée, tiers bas du panneau, scroll interne. *@
                 <div class="bp-selection">
                     <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
-                                              OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
+                                              OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnOpChanged="UpdateOpAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
                 </div>
             </MudPaper>
+            }
 
             <div class="bp-canvas-wrap">
                 <div id="@_containerId" class="bp-canvas"></div>
@@ -240,7 +349,7 @@ else
                         <TooltipContent>
                             <div class="bp-hint-lines">
                                 <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Shortcuts")</MudText>
-                                @foreach (var line in LocalizationService.GetTranslation("BuildingPlanner.Hint").Split(" · "))
+                                @foreach (var line in LocalizationService.GetTranslation(_view3d ? "BuildingPlanner.Hint3d" : IsArch ? "BuildingPlanner.HintArch" : "BuildingPlanner.Hint").Split(" · "))
                                 {
                                     <div>@line</div>
                                 }
@@ -272,12 +381,15 @@ else
                     </MudPaper>
                 }
                 <MudPaper Class="bp-side bp-rail" Elevation="1">
-                    @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom")
+                    @if (!IsArch) { @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom") }
                     @RailButton("issues", Icons.Material.Filled.Warning, "BuildingPlanner.Results.Issues", IssueCount > 0 ? IssueBadge : null)
-                    @RailButton("objects", Icons.Material.Filled.Chair, "BuildingPlanner.Results.Objects")
+                    @if (!IsArch) { @RailButton("objects", Icons.Material.Filled.Chair, "BuildingPlanner.Results.Objects") }
                     @RailButton("materials", Icons.Material.Filled.GridView, "BuildingPlanner.Results.Materials")
-                    <div class="bp-rail-spacer"></div>
-                    @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
+                    @if (!IsArch)
+                    {
+                        <div class="bp-rail-spacer"></div>
+                        @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
+                    }
                 </MudPaper>
             </div>
         </div>
@@ -287,13 +399,39 @@ else
 @code {
     private sealed record ToolDef(string Key, string Icon);
 
-    private static readonly ToolDef[] Tools =
+    private static readonly ToolDef[] HouseTools =
     [
         new("select", MDIIcons.Filled.CursorDefault),
         new("pan", MDIIcons.Filled.HandBackRight),
         new("wall", MDIIcons.Filled.Wall),
         new("hole", MDIIcons.Filled.Stairs),
     ];
+
+    private static readonly ToolDef[] ArchTools =
+    [
+        new("select", MDIIcons.Filled.CursorDefault),
+        new("pan", MDIIcons.Filled.HandBackRight),
+        new("box", MDIIcons.Filled.Cube),
+        new("sphere", MDIIcons.Filled.Sphere),
+        new("cylinder", MDIIcons.Filled.Cylinder),
+        new("disc", MDIIcons.Filled.Circle),
+        new("line", MDIIcons.Filled.VectorLine),
+        new("curve", MDIIcons.Filled.VectorCurve),
+        new("pencil", MDIIcons.Filled.Pencil),
+        new("eraser", MDIIcons.Filled.Eraser),
+        new("cut", MDIIcons.Filled.ContentCut),
+    ];
+
+    private ToolDef[] Tools => IsArch ? ArchTools : HouseTools;
+    private bool IsArch => _document.IsArchitecture;
+    private const string View3d = "3d";   // valeur du toggle de mode pour le rendu 3D (état de vue, hors document)
+    private bool _view3d, _cap;
+
+    // Options des outils de forme (état de la page, pas du document, comme le matériau courant).
+    private sealed record ShapeOptions(bool Subtract = false, bool Hollow = false, int Thickness = 1, int Height = 3);
+    private ShapeOptions _shape = new();
+    private int _layer, _layerCount = 20;
+    private string? _backgroundImage;   // fond de plan (data URL), colonne BuildingPlan.BackgroundImage ; le placement est dans le document
 
     private const int AnalyzeDebounceMs = 150;
 
@@ -382,7 +520,24 @@ else
     private async Task InitializeJsAsync()
     {
         _selfRef ??= DotNetObjectReference.Create(this);
-        var ok = await JS.InvokeAsync<bool>("ecoBuildingPlanner.init", _containerId, _selfRef, new { roomLabel = LocalizationService.GetTranslation("BuildingPlanner.RoomDefaultName") });
+        var ok = await JS.InvokeAsync<bool>("ecoBuildingPlanner.init", _containerId, _selfRef, new
+        {
+            roomLabel = LocalizationService.GetTranslation("BuildingPlanner.RoomDefaultName"),
+            // Libellés dessinés dans le canvas (bandes d'élévation et de coupe du mode architecture).
+            labels = new
+            {
+                elevation = LocalizationService.GetTranslation("BuildingPlanner.Elevation.Title"),
+                section = LocalizationService.GetTranslation("BuildingPlanner.Section.Title"),
+                tooManyBlocks = LocalizationService.GetTranslation("BuildingPlanner.View3d.TooManyBlocks"),
+                sides = new
+                {
+                    s = LocalizationService.GetTranslation("BuildingPlanner.Elevation.South"),
+                    e = LocalizationService.GetTranslation("BuildingPlanner.Elevation.East"),
+                    n = LocalizationService.GetTranslation("BuildingPlanner.Elevation.North"),
+                    w = LocalizationService.GetTranslation("BuildingPlanner.Elevation.West"),
+                },
+            },
+        });
         if (!ok) return;
         _jsInitialized = true;
 
@@ -440,6 +595,9 @@ else
 
         var fromDraft = await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, initialJson, true);
         if (fromDraft) Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.DraftRestored"), Severity.Info);
+        // Les pixels du fond de plan ne sont pas dans le brouillon : ceux du plan sauvegardé (s'il y en a un) sont repris.
+        _backgroundImage = plan?.BackgroundImage;
+        await Js("setBackgroundImage", _backgroundImage);
     }
 
     // ---- Callbacks JS ---------------------------------------------------------------------------------
@@ -452,7 +610,48 @@ else
         _dirty = dirty;
         var parsed = PlanDocumentJson.TryParse(json);
         if (parsed is not null) _document = parsed;
+        if (IsArch && _rightPanel is "housing" or "objects" or "assumptions") _rightPanel = null;   // volets sans objet en architecture (dont un volet restauré)
         ScheduleAnalysis();
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnView3dChanged(bool on, bool cap)
+    {
+        _view3d = on;
+        _cap = cap;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnLayerChanged(int layer, int layerCount)
+    {
+        _layer = layer;
+        _layerCount = layerCount;   // hauteur effective : couches des formes + maison (calculée par le canvas)
+        StateHasChanged();
+    }
+
+    // Fichier JSON choisi par l'utilisateur (null = trop grand) : le plan importé remplace le plan courant comme un
+    // brouillon non sauvegardé, sans fond de plan (les pixels ne sont pas dans le document).
+    [JSInvokable]
+    public async Task OnPlanFileImported(string? json)
+    {
+        var doc = PlanDocumentJson.TryParse(json);
+        if (doc is null) { Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.ImportInvalid"), Severity.Warning); return; }
+        _savedPlan = null;
+        await RememberLastPlanAsync(null);
+        await Js("clearDraft");
+        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(doc), false);
+        _backgroundImage = null;
+        await Js("setBackgroundImage", null);
+        Navigation.NavigateTo("/building-planner", replace: true);
+    }
+
+    [JSInvokable]
+    public async Task OnBackgroundImageChanged(string? dataUrl)
+    {
+        _backgroundImage = BuildingPlannerService.IsValidBackgroundImage(dataUrl) ? dataUrl : null;
+        await Js("markDirty");
         StateHasChanged();
     }
 
@@ -568,7 +767,60 @@ else
     {
         _material = material;
         await Js("setMaterial", material);
-        if (_tool != "wall") await SetTool("wall");
+        if (!IsArch && _tool != "wall") await SetTool("wall");
+    }
+
+    private async Task SetModeAsync(string mode)
+    {
+        if (mode == View3d) { await Js("setView3d", true); return; }
+        if (_view3d) await Js("setView3d", false);
+        if (mode != _document.Mode) await Js("setMode", mode);
+    }
+
+    private async Task SetShapeAsync(ShapeOptions shape)
+    {
+        _shape = shape;
+        await Js("setShapeOptions", new { subtract = shape.Subtract, hollow = shape.Hollow, thickness = shape.Thickness, height = shape.Height });
+    }
+
+    private async Task OnArchHeightChanged(int value) => await Js("setArchitecture", new { height = Math.Clamp(value, 1, PlanValidator.MaxArchitectureHeight) });
+    private async Task UpdateOpAsync(ArchOp op) => await Js("updateOp", PlanDocumentJson.SerializePart(op));
+
+    private static string KindIcon(string kind) => kind switch
+    {
+        "sphere" => MDIIcons.Filled.Sphere,
+        "cylinder" => MDIIcons.Filled.Cylinder,
+        "line" => MDIIcons.Filled.VectorLine,
+        "curve" => MDIIcons.Filled.VectorCurve,
+        "cells" => MDIIcons.Filled.Pencil,
+        _ => MDIIcons.Filled.Cube,
+    };
+
+    private string MaterialLabel(string? name) => _clientCatalog?.Materials.FirstOrDefault(m => m.Name == name)?.Label ?? name ?? "";
+
+    // Dimensions d'une forme : « 12×8 h3 », « Ø7 h4 », « L9 », « C9 » (boîte englobante, point de contrôle compris), « 24 cases ».
+    private string OpDims(ArchOp op)
+    {
+        if (op.Kind == "cells") return LocalizationService.GetTranslation("BuildingPlanner.Shape.Cells", ((op.Cells?.Length ?? 0) / 3).ToString());
+        if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return "";
+        var c = op.Kind == "curve" && op.C is { Length: 3 } ? op.C : op.A;
+        int Extent(int i) => Math.Max(op.A[i], Math.Max(op.B[i], c[i])) - Math.Min(op.A[i], Math.Min(op.B[i], c[i])) + 1;
+        int w = Extent(0), d = Extent(1), h = Extent(2);
+        return op.Kind switch
+        {
+            "box" => $"{w}×{d} h{h}",
+            "line" => $"L{Math.Max(w, Math.Max(d, h))}",
+            "curve" => $"C{Math.Max(w, Math.Max(d, h))}",
+            "sphere" => $"Ø{Math.Max(w, d)}",
+            _ => CylinderDims(op.Axis, w, d, h),
+        };
+    }
+
+    // Cylindre : diamètre sur les axes radiaux, longueur sur l'axe (h debout, L couché).
+    private static string CylinderDims(string? axis, int w, int d, int h)
+    {
+        var (dia, len) = axis == "x" ? (Math.Max(d, h), w) : axis == "y" ? (Math.Max(w, h), d) : (Math.Max(w, d), h);
+        return $"Ø{dia}" + (len > 1 ? $" {(axis is "x" or "y" ? "L" : "h")}{len}" : "");
     }
 
     private async Task SelectObjectType(ClientObject obj)
@@ -631,7 +883,7 @@ else
         await ResizeAsync();
     }
 
-    private bool CeilingMissing => string.IsNullOrEmpty(_document.Defaults.CeilingMaterial);
+    private bool CeilingMissing => !IsArch && string.IsNullOrEmpty(_document.Defaults.CeilingMaterial);
     private int ErrorCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Error) ?? 0;
     private int WarningCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Warning) ?? 0;
     private int IssueCount => ErrorCount + WarningCount;   // les Info ne sont pas comptées (décision Romain)
@@ -829,7 +1081,15 @@ else
         await RememberLastPlanAsync(null);
         await Js("clearDraft");
         await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(PlanDocument.Empty()), true);
+        _backgroundImage = null;
+        await Js("setBackgroundImage", null);
         Navigation.NavigateTo("/building-planner", replace: true);
+    }
+
+    private async Task ImportJsonAsync()
+    {
+        if (_dirty && !await ConfirmDiscardAsync()) return;
+        await Js("pickPlanFile");
     }
 
     private async Task OpenPlanAsync()
@@ -854,6 +1114,8 @@ else
         _savedPlan = full;
         await RememberLastPlanAsync(full.Id);
         await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, full.Document, true);
+        _backgroundImage = full.BackgroundImage;
+        await Js("setBackgroundImage", _backgroundImage);
         Navigation.NavigateTo($"/building-planner?id={full.Id}", replace: true);
     }
 
@@ -880,7 +1142,7 @@ else
             var latest = await JS.InvokeAsync<string?>("ecoBuildingPlanner.getPlan", _containerId);
             var doc = PlanDocumentJson.TryParse(latest) ?? _document;
             doc.Name = newName;
-            _savedPlan = await BuildingPlannerService.SavePlanAsync(_savedPlan, newName, doc);
+            _savedPlan = await BuildingPlannerService.SavePlanAsync(_savedPlan, newName, doc, _backgroundImage);
             _document = doc;
             await Js("markSaved");
         }
@@ -902,7 +1164,7 @@ else
 
         var latest = await JS.InvokeAsync<string?>("ecoBuildingPlanner.getPlan", _containerId);
         var doc = PlanDocumentJson.TryParse(latest) ?? _document;
-        _savedPlan = await BuildingPlannerService.SavePlanAsync(saveAs ? null : _savedPlan, name, doc);
+        _savedPlan = await BuildingPlannerService.SavePlanAsync(saveAs ? null : _savedPlan, name, doc, _backgroundImage);
         await RememberLastPlanAsync(_savedPlan.Id);
         _document = doc;
         await Js("setName", name);

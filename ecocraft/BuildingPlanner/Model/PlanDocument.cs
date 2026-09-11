@@ -8,13 +8,17 @@ namespace ecocraft.BuildingPlanner.Model;
 // y → Eco Z, z → Eco Y (vertical). Le bâtiment est une pile de niveaux : le niveau k occupe les couches
 // Y = base_k (sa dalle) .. base_k + hauteur_k (air) ; la dalle du niveau k+1 est le plafond du niveau k.
 // Dans un niveau, z = 1 est la première couche d'air au-dessus de sa dalle.
+// Mode « architecture » : le même document porte une liste d'opérations de formes 3D (Architecture) évaluées
+// en blocs unitaires, sans pièces ni housing ; repasser en mode maison masque ces données sans les supprimer.
 public sealed class PlanDocument
 {
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
     public string Name { get; set; } = "";
+    public string Mode { get; set; } = PlanMode.House;             // PlanMode.House | PlanMode.Architecture
     public GridSize Grid { get; set; } = new();
+    public ArchitecturePlan Architecture { get; set; } = new();
     public PlanDefaults Defaults { get; set; } = new();
     public List<PlanLevel> Levels { get; set; } = [];
     public int GroundIndex { get; set; }          // index du niveau posé au sol ; numéro affiché = k − GroundIndex, index < GroundIndex = sous-sol
@@ -27,15 +31,18 @@ public sealed class PlanDocument
     public List<PlanRoom>? Rooms { get; set; }
     public List<PlanObject>? Objects { get; set; }
 
+    [JsonIgnore] public bool IsArchitecture => Mode == PlanMode.Architecture;
+
     public static PlanDocument Empty(int width = 25, int depth = 20) => new() { Grid = new GridSize { Width = width, Depth = depth }, Levels = [new PlanLevel()] };
 
-    // Document v1 (ou sans niveau) → un niveau 0 contenant les collections racine.
+    // Document v1 (ou sans niveau) → un niveau 0 contenant les collections racine ; v2 → mode maison.
     public void Migrate()
     {
         if (Levels.Count == 0)
             Levels.Add(new PlanLevel { Walls = Walls ?? new(), Floors = Floors ?? new(), Rooms = Rooms ?? [], Objects = Objects ?? [] });
         Walls = null; Floors = null; Rooms = null; Objects = null;
         GroundIndex = Math.Clamp(GroundIndex, 0, Levels.Count - 1);
+        if (Mode != PlanMode.Architecture) Mode = PlanMode.House;
         SchemaVersion = CurrentSchemaVersion;
     }
 
@@ -142,6 +149,46 @@ public sealed class AnalysisOptions
 {
     public int Residents { get; set; } = 1;
     public string PropertyType { get; set; } = "Residence";
+}
+
+public static class PlanMode
+{
+    public const string House = "house";
+    public const string Architecture = "architecture";
+}
+
+// Mode architecture : formes évaluées dans l'ordre en blocs unitaires ; les cellules hors grille ou au-dessus de
+// Height sont rognées à l'évaluation (jamais rejetées), un redimensionnement ne perd donc rien.
+public sealed class ArchitecturePlan
+{
+    public int Height { get; set; } = 20;                   // couches z, 1..PlanValidator.MaxArchitectureHeight
+    public List<ArchOp> Ops { get; set; } = [];
+    public ImagePlacement? Image { get; set; }              // placement du fond de plan ; les pixels sont dans BuildingPlan.BackgroundImage
+}
+
+// Une seule représentation géométrique : la boîte englobante inclusive A..B (ordre libre). Le diamètre d'une
+// sphère ou d'un cylindre est l'étendue de la boîte par axe (centre demi-entier pour un diamètre pair).
+public sealed class ArchOp
+{
+    public string Id { get; set; } = "";
+    public string Kind { get; set; } = "";                  // box | sphere | cylinder | line | curve | cells
+    public bool Subtract { get; set; }                      // false → pose Material ; true → vide
+    public string? Material { get; set; }                   // requis si !Subtract
+    public int[]? A { get; set; }                           // [x,y,z] coin (box/sphere/cylinder) ou extrémité (line/curve)
+    public int[]? B { get; set; }
+    public int[]? C { get; set; }                           // curve : point de contrôle de la Bézier quadratique A → B
+    public string? Axis { get; set; }                       // cylinder : x | y | z (défaut z) ; disque = cylindre avec a.z == b.z
+    public bool Hollow { get; set; }                        // box (4 murs), sphere (coque), cylinder (tube)
+    public int Thickness { get; set; } = 1;                 // épaisseur de la coque si Hollow
+    public int[]? Cells { get; set; }                       // cells : triplets aplatis [x,y,z, x,y,z, …]
+}
+
+public sealed class ImagePlacement
+{
+    public double X { get; set; }                           // coin haut-gauche en cellules (fractionnaire autorisé)
+    public double Y { get; set; }
+    public double Width { get; set; } = 20;                 // largeur en cellules ; hauteur déduite du ratio de l'image
+    public double Opacity { get; set; } = 0.5;
 }
 
 public static class PlanKeys

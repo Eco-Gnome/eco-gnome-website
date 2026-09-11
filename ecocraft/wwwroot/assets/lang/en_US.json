@@ -908,7 +908,16 @@
             "pan": "Pan (H)",
             "wall": "Walls (2) — drag a rectangle, only its outline is built; Shift+drag: filled floor",
             "hole": "Opening in the slab (3) — stairwell, hatch (not on the lowest level)",
-            "holeDisabled": "Opening in the slab — unavailable on the lowest level: its floor is the terrain"
+            "holeDisabled": "Opening in the slab — unavailable on the lowest level: its floor is the terrain",
+            "box": "Box (2) — drag the rectangle; height in the options",
+            "sphere": "Sphere (3) — drag the radius from the centre; rests on the current layer",
+            "cylinder": "Cylinder (4) — drag the radius from the centre; height in the options",
+            "disc": "Disc (5) — one-layer cylinder",
+            "line": "Line (6) — diagonal on the layer (3D slope via z1 in the card)",
+            "curve": "Curve (7) — drag from end to end, then move the mouse to bend it and click; the handle stays draggable when selected",
+            "pencil": "Pencil (8) — cell by cell",
+            "eraser": "Eraser (9) — deletes as you go: pencil cell, wall, slab, whole shape",
+            "cut": "Section line (0) — drag a line, then click an eye for the viewing direction"
         },
         "Defaults": {
             "WallHeight": "Wall height",
@@ -927,7 +936,11 @@
             "ResidentsHelp": "The residents multiplier applies to the total. With {n} resident(s): ×{m}.",
             "Summary": "Walls {height} · {n} resident(s)",
             "CeilingTodo": "Ceiling to set",
-            "Grid": "Grid {w} × {d} · {n} levels"
+            "Grid": "Grid {w} × {d} · {n} levels",
+            "Building": "Building",
+            "Height": "Height (layers)",
+            "ArchSummary": "Height {h}",
+            "Background": "Background image"
         },
         "Legend": {
             "Slab": "Slab: ceiling below or painted floor",
@@ -960,6 +973,8 @@
             "Rename": "Rename…",
             "Share": "Share…",
             "ExportPng": "Export as PNG",
+            "ExportJson": "Export as JSON",
+            "ImportJson": "Import a JSON…",
             "Resize": "Resize grid…",
             "Untitled": "Untitled plan"
         },
@@ -1062,7 +1077,8 @@
             "LinkInvalid": "Invalid or truncated plan link.",
             "ShareNeedsSave": "This plan is too large for a link: it must be saved first.",
             "Copied": "Link copied",
-            "CopyFailed": "Could not copy — select the link and copy it manually."
+            "CopyFailed": "Could not copy — select the link and copy it manually.",
+            "ImportInvalid": "Invalid or too large plan file."
         },
         "Issue": {
             "GridSizeInvalid": "Grid size must be between 1 and {max} on each side.",
@@ -1117,7 +1133,14 @@
             "HousingObjectExcluded": "{type} ({category}) does not count in {room} ({primary} room).",
             "PrimaryCategoryTie": "Several categories tie for this room; « {category} » was kept (the game picks arbitrarily too).",
             "HousingCapped": "Room value {before} capped to {after} by the materials (soft cap {softCap}).",
-            "HousingConfigMissing": "Housing configuration not exported by this server: vanilla values are used."
+            "HousingConfigMissing": "Housing configuration not exported by this server: vanilla values are used.",
+            "InvalidArchitectureHeight": "Building height must be between 1 and {max} layers.",
+            "TooManyOps": "Too many shapes (max {max}).",
+            "InvalidOp": "Shape #{index} is invalid.",
+            "MissingOpMaterial": "Shape #{index} has no material.",
+            "TooManyCells": "Shape #{index} has too many cells (max {max}).",
+            "ArchitectureTooComplex": "Too much volume to evaluate (max {max} cells): reduce the shapes or the height.",
+            "GridTooLarge": "Building too large to analyse (grid × height > {max} cells): reduce the grid, the height or the shapes."
         },
         "Assumptions": {
             "Title": "Assumptions of this version",
@@ -1135,6 +1158,61 @@
             "Forms": "Every block form (stairs, roofs…) is a full cube for room detection, exactly as in the game.",
             "Levels": "The slab between two levels is a single block: floor painted upstairs, else the ceiling of the room below; it counts in both rooms' tier.",
             "Tie": "Room category ties are resolved by catalog order."
+        },
+        "Mode": {
+            "house": "House mode: rooms, housing, furniture",
+            "architecture": "Architecture mode: 3D shapes, bill of materials",
+            "view3d": "3D view: the building and its furniture in volume (read-only)"
+        },
+        "View3d": {
+            "Cap": "Cut above the current layer",
+            "TooManyBlocks": "Too many blocks for the 3D view"
+        },
+        "Shape": {
+            "Add": "Add",
+            "Subtract": "Subtract",
+            "Hollow": "Hollow",
+            "Thickness": "Thickness",
+            "Height": "Height (box, cylinder)",
+            "Axis": "Axis",
+            "Cells": "{n} cells",
+            "None": "No shape yet. Pick a tool and drag on the plan.",
+            "Kind": {
+                "box": "Box",
+                "sphere": "Sphere",
+                "cylinder": "Cylinder",
+                "line": "Line",
+                "curve": "Curve",
+                "cells": "Cells"
+            }
+        },
+        "Layer": {
+            "Label": "Layer {z} / {h}",
+            "Up": "Layer up (PgUp)",
+            "Down": "Layer down (PgDn)"
+        },
+        "Elevation": {
+            "Title": "Elevation",
+            "South": "South",
+            "East": "East",
+            "North": "North",
+            "West": "West"
+        },
+        "Section": {
+            "Title": "Section"
+        },
+        "Hint3d": "drag: orbit around the building · right or middle drag: pan · wheel: zoom · PgUp/PgDn, wheel or drag on the elevation: change layer (highlighted in blue) · ⤓ button: cut above the layer to see inside · elevation arrows: rotate the viewed side · Fit: reframe · Esc: back to the plan · Ctrl+Z/Y: undo/redo · Ctrl+S: save",
+        "HintArch": "1: select · 2: box · 3: sphere · 4: cylinder · 5: disc · 6: line · 7: curve · 8: pencil · 9: eraser · 0: section line · H: pan · drag: draw the shape centred on the current layer (blue bar at mid-height) · curve: drag from end to end, then the mouse bends it and a click places it (right click or Esc: cancel); when selected, the round handle is draggable · Shift+drag: invert add/subtract · right click (hold): delete the block as you go (pencil cell, wall, slab; a block of a geometric shape is carved, the whole shape is deleted from the panel) · Shift+right drag: delete an area · click: select the shape · drag a shape: move it · arrows: move the shape one cell · Shift+PgUp/PgDn: one layer · Ctrl+C / Ctrl+X / Ctrl+V: copy / cut / paste the shape (pasted under the cursor, on the current layer) · Del: delete the shape · PgUp/PgDn, wheel or drag on the elevation: change layer · I: show/hide the background image · middle click: copy the material · right click on empty space or Esc: drop the tool · wheel: zoom · Alt+drag or middle drag: pan · Ctrl+Z/Y: undo/redo · Ctrl+S: save · elevation arrows: rotate the viewed side · in the section: click = place a cube of the material on the cut plane, right click = delete the visible block, hold = stroke · shape tools in the section: drag draws the shape in the cut plane (the height option becomes the depth, centred on the plane; a cylinder takes the cut axis)",
+        "Background": {
+            "Import": "Import an image…",
+            "Opacity": "Opacity",
+            "X": "Offset X (cells)",
+            "Y": "Offset Y (cells)",
+            "Width": "Width (cells)",
+            "FitGrid": "Fit to grid",
+            "Show": "Show / hide (I)",
+            "Remove": "Remove image",
+            "None": "No image. It is downscaled to 1024 px and saved with the plan (not in the short share link)."
         }
     }
 }

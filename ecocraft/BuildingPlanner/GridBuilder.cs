@@ -1,4 +1,4 @@
-using ecocraft.BuildingPlanner.Model;
+﻿using ecocraft.BuildingPlanner.Model;
 
 namespace ecocraft.BuildingPlanner;
 
@@ -71,6 +71,11 @@ public static class GridBuilder
                 sizeY = Math.Max(sizeY, baseY + (o.Z ?? 1) + info.Cells.Max(c => c.Offset.Y) - Math.Min(0, info.Cells.Min(c => c.Offset.Y)));
             }
         }
+        // Formes du mode architecture : la grille les contient jusqu'à Architecture.Height (leur plafond, comme côté JS) ;
+        // en mode architecture toutes les couches éditables existent, même vides.
+        // La grille couvre le contenu réel (maison + formes rognées à Architecture.Height), pas la hauteur réglée : le canvas
+        // gère seul les couches vides éditables.
+        foreach (var op in doc.Architecture.Ops) sizeY = Math.Max(sizeY, Math.Min(ArchShapes.MaxZ(op) + 1, doc.Architecture.Height));
         sizeY += 2;
 
         var grid = new VoxelGrid(doc.Grid.Width, sizeY, doc.Grid.Depth);
@@ -148,6 +153,11 @@ public static class GridBuilder
                 }
             }
         }
+
+        // Formes du mode architecture par-dessus la maison (une soustraction creuse aussi un mur) ; le canvas reçoit
+        // les voxels de la maison seuls (rendu 3D, mode architecture) et compose lui-même les formes.
+        ctx.HouseRuns = HouseRuns.Encode(grid);
+        ArchShapes.PaintAll(ctx);
 
         for (var k = 0; k < levelCount; k++)
         {

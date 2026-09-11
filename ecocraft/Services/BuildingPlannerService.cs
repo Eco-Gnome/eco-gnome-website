@@ -32,18 +32,27 @@ public sealed class BuildingPlannerService(
 
     public bool OwnsPlan(BuildingPlan plan) => contextService.CurrentUserServer?.Id == plan.UserServerId;
 
-    public async Task<BuildingPlan> SavePlanAsync(BuildingPlan? existing, string name, PlanDocument document)
+    // Fond de plan (mode architecture) : data URL d'une image réduite côté client ; au-delà de ~1 Mo binaire ou d'un autre type, ignoré.
+    public const int MaxBackgroundImageChars = 1_400_000;
+    private static readonly string[] BackgroundImagePrefixes = ["data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,"];
+
+    public static bool IsValidBackgroundImage(string? dataUrl) =>
+        dataUrl is not null && dataUrl.Length <= MaxBackgroundImageChars && BackgroundImagePrefixes.Any(p => dataUrl.StartsWith(p, StringComparison.Ordinal));
+
+    public async Task<BuildingPlan> SavePlanAsync(BuildingPlan? existing, string name, PlanDocument document, string? backgroundImage = null)
     {
         var userServer = contextService.CurrentUserServer ?? throw new InvalidOperationException("No current user server.");
         var now = DateTimeOffset.UtcNow;
         document.Name = name;
         var json = PlanDocumentJson.Serialize(document);
+        backgroundImage = IsValidBackgroundImage(backgroundImage) ? backgroundImage : null;
 
         if (existing is not null && OwnsPlan(existing))
         {
             existing.Name = name;
             existing.SchemaVersion = document.SchemaVersion;
             existing.Document = json;
+            existing.BackgroundImage = backgroundImage;
             existing.UpdateDateTime = now;
             await EcoCraftDbContext.ContextSaveAsync(factory, context =>
             {
@@ -59,6 +68,7 @@ public sealed class BuildingPlannerService(
             Name = name,
             SchemaVersion = document.SchemaVersion,
             Document = json,
+            BackgroundImage = backgroundImage,
             CreationDateTime = now,
             UpdateDateTime = now,
         };
