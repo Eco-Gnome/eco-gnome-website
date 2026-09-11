@@ -13,6 +13,20 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.5.1",
+            "2026-09-11",
+            "Building Planner: Architecture Mode & 3D View",
+            """
+            - Architecture mode: each plan can switch to a free-form 3D mode with shape tools (box, sphere, cylinder, disc, line, curve, pencil) in add or subtract, hollow shells, layer navigation, a side elevation strip and industrial-style section planes (first-angle projection, draggable cut line, drawing and shape tools directly in the section). A background reference image can be attached to the plan and placed under the grid.
+            - One building in both modes: house walls, floors and ceilings share the voxel grid with the shapes, so switching modes never loses your construction; the eraser removes a single block everywhere. Selected shapes can be copied, cut, pasted and moved with the keyboard. Maximum height raised to 320 blocks.
+            - 3D view: a third, read-only mode renders the whole building in WebGL with an orbit camera, furniture shown with item icons, the current layer highlighted and an option to cut everything above it.
+            - JSON import/export: a plan can be downloaded as a JSON file and imported back, to back it up or share it outside the site.
+            - Building planner improvements: basements and level reordering, automatically detected rooms, continuous erase, a housing panel that matches the game's Room Details (base → final values with one explanation per reduced object), shopping lists with server prices for materials and furniture, and a new side rail with flyouts. The planner is now open to every player, with a work-in-progress notice.
+            - Site: players are encouraged to set a pseudo; super admins see live counters of connected users.
+            - Fixes: the browser's automatic page translation is disabled because it broke several features; a session is now closed when its tab is closed; module percent bonuses stack multiplicatively with talents (#99).
+            """
+        ),
+        new ReleaseVersion(
             "1.5.0",
             "2026-08-29",
             "Building Planner",
