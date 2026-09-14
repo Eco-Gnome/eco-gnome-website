@@ -643,7 +643,7 @@ else
         await Js("clearDraft");
         await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(doc), false);
         _backgroundImage = null;
-        await Js("setBackgroundImage", null);
+        await Js("setBackgroundImage", (string?)null);
         Navigation.NavigateTo("/building-planner", replace: true);
     }
 
@@ -961,10 +961,11 @@ else
 
     private string IconUrl(string name) => $"/assets/eco-icons/{name}.png?serverId={ContextService.CurrentServer?.Id}";
 
-    // Ligne de matériau (icône, libellé, tier) partagée par les sélecteurs matériau / sol / plafond.
+    // Ligne de matériau (pastille de couleur, icône, libellé, tier) partagée par les sélecteurs matériau / sol / plafond.
     private RenderFragment MaterialItem(ClientMaterial m) => __builder =>
     {
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <i class="bp-mat-dot" style="background: @m.Color"></i>
             <MudImage Src="@IconUrl(m.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
             <span>@m.Label</span>
             <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
@@ -1082,7 +1083,7 @@ else
         await Js("clearDraft");
         await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(PlanDocument.Empty()), true);
         _backgroundImage = null;
-        await Js("setBackgroundImage", null);
+        await Js("setBackgroundImage", (string?)null);
         Navigation.NavigateTo("/building-planner", replace: true);
     }
 

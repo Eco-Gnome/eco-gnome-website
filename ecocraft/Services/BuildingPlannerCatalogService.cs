@@ -149,6 +149,18 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
         ];
     }
 
+    // Blocs sans tier proposés malgré tout dans les listes de matériaux : sols et revêtements d'aménagement
+    // extérieur, concassés compris. Les autres blocs T0 (minerais bruts, lingots, rondins, déchets…) restent
+    // écartés, ils noieraient les listes.
+    private static readonly string[] Tier0Materials =
+    [
+        "DirtItem", "GardenGravelItem", "StoneRoadItem", "AsphaltConcreteItem",
+        "CrushedBasaltItem", "CrushedCoalItem", "CrushedCopperOreItem", "CrushedGneissItem",
+        "CrushedGoldOreItem", "CrushedGraniteItem", "CrushedIronOreItem", "CrushedLimestoneItem",
+        "CrushedMixedRockItem", "CrushedSandstoneItem", "CrushedShaleItem", "CrushedSlagItem",
+        "CrushedSulfurItem",
+    ];
+
     // Catalogue pour l'îlot JS : libellés traduits, icônes, cellules brutes (le JS applique la rotation lui-même).
     public ClientCatalog BuildClientCatalog(Catalog catalog, Server serverData)
     {
@@ -164,15 +176,16 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
             .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Recipe.Skill is null ? 0 : 1).ThenBy(x => x.Recipe.SkillLevel).First().Recipe.Skill, StringComparer.Ordinal);
 
         var materials = catalog.Materials.Values
-            .Where(m => m.CountsAsWall && m.Tier >= 1)
+            .Where(m => m.CountsAsWall && (m.Tier >= 1 || Tier0Materials.Contains(m.Name)))
             .Select(m => new ClientMaterial
             {
                 Name = m.Name,
                 Label = Label(m.Name),
                 Tier = m.Tier,
                 IsRoomMaterialOption = m.IsRoomMaterialOption,
+                Color = BlockColors.For(m.Name, m.Tier),
             })
-            .OrderBy(m => m.Tier).ThenBy(m => m.Label)
+            .OrderBy(m => m.Tier == 0).ThenBy(m => m.Tier).ThenBy(m => m.Label)   // les T0 en fin de liste
             .ToList();
 
         // Tout objet avec une empreinte est proposé (stockages, véhicules... → onglet « Autres »), sauf les panneaux
@@ -233,6 +246,7 @@ public sealed class ClientMaterial
     public required string Label { get; init; }
     public int Tier { get; init; }
     public bool IsRoomMaterialOption { get; init; }
+    public required string Color { get; init; }
 }
 
 public sealed class ClientObject

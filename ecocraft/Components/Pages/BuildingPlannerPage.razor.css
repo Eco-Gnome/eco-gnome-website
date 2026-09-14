@@ -657,6 +657,16 @@
     border-radius: 2px;
 }
 
+/* Pastille de la couleur du bloc, en tête des lignes de matériau : fait le lien avec la case dessinée sur le plan. */
+.bp-mat-dot {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+}
+
 .bp-swatch-slab { background: rgba(255, 255, 255, 0.28); }
 .bp-swatch-low { background: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.35) 3px 4px); }
 .bp-swatch-missing { background: rgba(244, 67, 54, 0.35); }

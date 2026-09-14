@@ -54,6 +54,7 @@
                 {
                     <MudSelectItem T="string" Value="@m.Name">
                         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                            <i class="bp-mat-dot" style="background: @m.Color"></i>
                             <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
                             <span>@m.Label</span>
                             <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
@@ -178,6 +179,7 @@
                     {
                         <MudSelectItem T="string" Value="@m.Name">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                <i class="bp-mat-dot" style="background: @m.Color"></i>
                                 <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
                                 <span>@m.Label</span>
                                 <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
