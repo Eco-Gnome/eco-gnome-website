@@ -317,3 +317,15 @@
 .bp-assumptions li {
     margin-bottom: 6px;
 }
+
+/* Pastille de la couleur du bloc, en tête des lignes de matériau : fait le lien avec la case dessinée sur le plan. */
+.bp-mat-dot {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+}
+
+.bp-crow .bp-mat-dot { margin-right: 6px; }

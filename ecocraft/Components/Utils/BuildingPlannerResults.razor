@@ -194,6 +194,9 @@
     private string SkillLabel(string type) => ObjectOf(type)?.SkillLabel ?? LocalizationService.GetTranslation("BuildingPlanner.Objects.NoSkill");
     private string IconUrl(string name) => $"/assets/eco-icons/{name}.png?serverId={ContextService.CurrentServer?.Id}";
 
+    // Couleur du bloc, pour les lignes de matériau : null sur les lignes de mobilier, qui n'ont pas de pastille.
+    private string? MaterialColor(string name) => Catalog?.Materials.FirstOrDefault(m => m.Name == name)?.Color;
+
     // Prix unitaire d'une ligne : saisie du plan, sinon moyenne des prix du serveur, sinon aucun (ligne hors total).
     private decimal? Override(string name) => Document is not null && Document.Prices.TryGetValue(name, out var p) ? p : null;
     private decimal? DefaultPrice(string name) => DefaultPrices is not null && DefaultPrices.TryGetValue(name, out var p) ? p : null;
@@ -231,6 +234,7 @@
         @<div class="bp-orow bp-crow">
             <MudImage Src="@IconUrl(name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
             <div class="bp-ellipsis">
+                @if (MaterialColor(name) is { } color) { <i class="bp-mat-dot" style="background: @color"></i> }
                 @label
                 @if (sub is not null) { <div class="bp-crow-sub bp-muted">@sub</div> }
             </div>

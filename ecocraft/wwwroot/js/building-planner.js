@@ -19,9 +19,12 @@ window.ecoBuildingPlanner = (function () {
     const MAX_HISTORY = 100;
     const MAX_PLAN_FILE_BYTES = 1536 * 1024;   // import JSON : le document traverse SignalR (limite 2 Mo côté serveur)
     const KIND = { OCCUPIED: 0, WALL: 1, SOLID: 2, WATER: 3, NONE: 4 };
-    const TIER_COLORS = ['#7d7d7d', '#c2a26a', '#8fa3b5', '#b0784a', '#6f8f9c', '#d4af37'];
+    const TIER_COLORS = ['#7d7d7d', '#c2a26a', '#8fa3b5', '#b0784a', '#6f8f9c', '#d4af37'];   // repli des matériaux absents du catalogue (blocs de mods)
     const N8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
     const MAX_ARCH_HEIGHT = 320;   // = PlanValidator.MaxArchitectureHeight
+    const ICON_MIN_CELL = 22;      // taille de case à partir de laquelle l'icône du bloc reste lisible
+    const ICON_MIN_CELL_HOUSE = 67;   // plan de maison : cinq crans de zoom (x 1.25) plus loin, sinon les icônes noient le plan
+    const LEGEND_BTN = 16;         // côté du chevron qui replie / rouvre la légende
 
     function emptyLevel() {
         return { name: '', height: null, walls: {}, floors: {}, holes: {}, rooms: [], objects: [] };
@@ -131,6 +134,11 @@ window.ecoBuildingPlanner = (function () {
             pending: null,            // courbe tracée, en attente de son point de contrôle : { op, side } (side : née dans la coupe)
             footprints: {},           // roomId → { cells:Set, enclosed, seedInWall, level }
             icons: {},
+            materialsByName: {},
+            matRgb: {},               // nom → [r,g,b] résolu une fois (materialColor est appelé par cellule dessinée)
+            legend: true,             // légende des matériaux (préférence d'affichage, pas une donnée du plan)
+            legendHit: null,          // zone cliquable du chevron de la légende, posée au rendu
+            exporting: false,         // le temps d'un export PNG : la légende s'y dessine sans ses commandes
             // Mode architecture (état de vue, hors historique).
             layer: 0,                 // couche z affichée / éditée
             shape: { subtract: false, hollow: false, thickness: 1, height: 3 },   // options des outils de forme
@@ -1010,8 +1018,7 @@ window.ecoBuildingPlanner = (function () {
         const objs = v3dObjectCells(st);
         const sel = st.selection && st.selection.kind === 'op' ? st.plan.architecture.ops.findIndex(function (o) { return o.id === st.selection.id; }) + 1 : 0;
         const selColor = parseColor(st.palette.secondary, [255, 183, 77]), objColor = [207, 212, 218];
-        const tierRgb = TIER_COLORS.map(function (h) { return parseColor(h, [125, 125, 125]); });
-        const matColor = vox.palette.map(function (name) { return tierRgb[Math.max(0, Math.min(5, materialTier(st, name)))]; });
+        const matColor = vox.palette.map(function (name) { return materialRgb(st, name); });
         const idx = function (x, y, z) { return x + W * (y + D * z); };
         const solid = function (x, y, z) {
             if (x < 0 || y < 0 || z < 0 || x >= W || y >= D || z > cap) return false;
@@ -1322,7 +1329,7 @@ window.ecoBuildingPlanner = (function () {
                 for (let i = 0; i < cells.length; i++) {
                     if (!cells[i]) continue;
                     const p = toScreen(st, i % vox.W, (i / vox.W) | 0);
-                    ctx.fillStyle = tierColor(st, vox.palette[cells[i] - 1], alpha);
+                    ctx.fillStyle = materialColor(st, vox.palette[cells[i] - 1], alpha);
                     ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2);
                 }
             });
@@ -1331,9 +1338,10 @@ window.ecoBuildingPlanner = (function () {
             for (let i = 0; i < cells.length; i++) {
                 if (!cells[i]) continue;
                 const p = toScreen(st, i % vox.W, (i / vox.W) | 0);
-                ctx.fillStyle = tierColor(st, vox.palette[cells[i] - 1], 0.9);
+                ctx.fillStyle = materialColor(st, vox.palette[cells[i] - 1], 0.9);
                 ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2);
                 ctx.strokeRect(p.x + 1.5, p.y + 1.5, cs - 3, cs - 3);
+                drawBlockIcon(st, ctx, vox.palette[cells[i] - 1], p, cs);
             }
         }
 
@@ -1397,7 +1405,7 @@ window.ecoBuildingPlanner = (function () {
 
     // Couleur d'un bloc vu de côté : plein sur le plan de coupe, atténué avec la distance au-delà.
     function sideColor(st, v, depth, cutAlpha, farAlpha) {
-        return tierColor(st, st.vox.palette[v - 1], depth === 0 ? cutAlpha : Math.max(0.12, farAlpha - depth * 0.06));
+        return materialColor(st, st.vox.palette[v - 1], depth === 0 ? cutAlpha : Math.max(0.12, farAlpha - depth * 0.06));
     }
 
     function bandFrame(st, ctx, r, title) {
@@ -1560,7 +1568,7 @@ window.ecoBuildingPlanner = (function () {
             const below = plan.levels[st.level - 1];
             for (const k in below.walls) {
                 const c = parseKey(k); const p = toScreen(st, c.x, c.y);
-                ctx.fillStyle = tierColor(st, below.walls[k].material, 0.18);
+                ctx.fillStyle = materialColor(st, below.walls[k].material, 0.18);
                 ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2);
             }
         }
@@ -1584,7 +1592,7 @@ window.ecoBuildingPlanner = (function () {
             // Sols surchargés.
             for (const k in level.floors) {
                 const c = parseKey(k); const p = toScreen(st, c.x, c.y);
-                ctx.fillStyle = tierColor(st, level.floors[k], 0.35);
+                ctx.fillStyle = materialColor(st, level.floors[k], 0.35);
                 ctx.fillRect(p.x, p.y, cs, cs);
             }
         } else {
@@ -1594,7 +1602,7 @@ window.ecoBuildingPlanner = (function () {
             for (const k in slab) {
                 if (slab[k].inherited && below.walls[k]) continue;
                 const c = parseKey(k); const p = toScreen(st, c.x, c.y);
-                ctx.fillStyle = tierColor(st, slab[k].material, slab[k].inherited ? 0.18 : 0.35);
+                ctx.fillStyle = materialColor(st, slab[k].material, slab[k].inherited ? 0.18 : 0.35);
                 ctx.fillRect(p.x, p.y, cs, cs);
             }
             ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
@@ -1642,10 +1650,11 @@ window.ecoBuildingPlanner = (function () {
         for (const k in level.walls) {
             const c = parseKey(k); const p = toScreen(st, c.x, c.y);
             const wall = level.walls[k];
-            ctx.fillStyle = tierColor(st, wall.material, 0.9);
+            ctx.fillStyle = materialColor(st, wall.material, 0.9);
             ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2);
             ctx.strokeStyle = 'rgba(0,0,0,0.5)';
             ctx.strokeRect(p.x + 1.5, p.y + 1.5, cs - 3, cs - 3);
+            drawBlockIcon(st, ctx, wall.material, p, cs);
             if (wall.height && cs >= 18) {
                 ctx.fillStyle = 'rgba(0,0,0,0.75)';
                 ctx.font = Math.max(9, cs * 0.38) + 'px sans-serif';
@@ -1666,9 +1675,12 @@ window.ecoBuildingPlanner = (function () {
                     if (!cells[i]) { if (owner[i] && (level.walls[key(x, y)] || (floor && level.floors[key(x, y)]))) carved[key(x, y)] = true; continue; }
                     if (!owner[i]) continue;   // voxel de la maison (murs, dalles, plafonds) : déjà dessiné par le plan
                     const p = toScreen(st, x, y);
-                    ctx.fillStyle = tierColor(st, vox.palette[cells[i] - 1], floor ? 0.35 : 0.9);
+                    ctx.fillStyle = materialColor(st, vox.palette[cells[i] - 1], floor ? 0.35 : 0.9);
                     if (floor) ctx.fillRect(p.x, p.y, cs, cs);
-                    else { ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2); ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.strokeRect(p.x + 1.5, p.y + 1.5, cs - 3, cs - 3); }
+                    else {
+                        ctx.fillRect(p.x + 1, p.y + 1, cs - 2, cs - 2); ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.strokeRect(p.x + 1.5, p.y + 1.5, cs - 3, cs - 3);
+                        drawBlockIcon(st, ctx, vox.palette[cells[i] - 1], p, cs);
+                    }
                 }
             }
             for (const k in carved) { const c = parseKey(k); drawHatch(ctx, toScreen(st, c.x, c.y), cs); }
@@ -1677,15 +1689,163 @@ window.ecoBuildingPlanner = (function () {
         drawRuler(st, ctx, cs, origin);
     }
 
-    function materialTier(st, name) {
-        const m = st.catalog.materials.find(function (x) { return x.name === name; });
-        return m ? m.tier : 0;
+    // Couleur du bloc dans le jeu, extraite de son icône côté serveur (ClientMaterial.Color) ; un matériau
+    // que le catalogue ne connaît pas (bloc d'un mod) retombe sur la couleur de son tier.
+    function materialRgb(st, name) {
+        let rgb = st.matRgb[name];
+        if (rgb === undefined) {
+            const m = st.materialsByName[name];
+            rgb = parseColor(m && m.color, parseColor(TIER_COLORS[Math.max(0, Math.min(5, m ? m.tier : 0))], [125, 125, 125]));
+            st.matRgb[name] = rgb;
+        }
+        return rgb;
     }
-    function tierColor(st, material, alpha) {
-        const t = Math.max(0, Math.min(5, materialTier(st, material)));
-        const hex = TIER_COLORS[t];
-        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-        return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    function materialColor(st, material, alpha) {
+        const c = materialRgb(st, material);
+        return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + alpha + ')';
+    }
+
+    // Icône du bloc par-dessus la couleur de la case : c'est elle qui sépare les matériaux qu'aucune couleur ne
+    // peut distinguer (onze bois composites d'un même brun). En dessous du seuil elle n'est plus que du bruit ;
+    // le plan de maison, plus dense (objets, cotes, pièces), demande un zoom bien plus fort que l'architecture.
+    function drawBlockIcon(st, ctx, material, p, cs) {
+        if (cs < (isArch(st) ? ICON_MIN_CELL : ICON_MIN_CELL_HOUSE) || !material) return;
+        const icon = iconFor(st, material + '_FG');
+        if (icon) ctx.drawImage(icon, p.x + 2, p.y + 2, cs - 4, cs - 4);
+    }
+
+    // Contour clair autour de ce qui est déjà posé dans le matériau courant : on repère d'un coup d'œil, en
+    // construisant, où il est employé. Seules les arêtes de bord sont tracées (comme les ouvertures) : un cadre
+    // par case noierait un mur entier d'un même matériau.
+    function drawMaterialHighlight(st, ctx, cs) {
+        if (!st.material || cs < 8) return;
+        let same;
+        if (isArch(st)) {
+            const vox = st.vox;
+            if (!vox) return;
+            const cells = layerCells(vox, st.layer);
+            same = function (x, y) {
+                if (x < 0 || y < 0 || x >= vox.W || y >= vox.D) return false;
+                const v = cells[x + vox.W * y];
+                return !!v && vox.palette[v - 1] === st.material;
+            };
+        } else {
+            const level = cur(st);
+            same = function (x, y) {
+                const k = key(x, y), wall = level.walls[k];
+                return (wall ? wall.material : level.floors[k]) === st.material;
+            };
+        }
+        // Balayage borné à la zone visible : la couche dynamique est redessinée à chaque frame et un plan peut
+        // faire 200 x 200 cases.
+        const g = st.plan.grid, vr = viewRect(st);
+        const a = toCell(st, vr.x, vr.y), b = toCell(st, vr.x + vr.w, vr.y + vr.h);
+        const x0 = Math.max(0, a.x), x1 = Math.min(g.width - 1, b.x), y0 = Math.max(0, a.y), y1 = Math.min(g.depth - 1, b.y);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+                if (!same(x, y)) continue;
+                const p = toScreen(st, x, y);
+                if (!same(x, y - 1)) { ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + cs, p.y); }
+                if (!same(x, y + 1)) { ctx.moveTo(p.x, p.y + cs); ctx.lineTo(p.x + cs, p.y + cs); }
+                if (!same(x - 1, y)) { ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + cs); }
+                if (!same(x + 1, y)) { ctx.moveTo(p.x + cs, p.y); ctx.lineTo(p.x + cs, p.y + cs); }
+            }
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function materialLabel(st, name) {
+        const m = st.materialsByName[name];
+        return m && m.label || name;
+    }
+
+    // Matériaux à légender : ceux de la maquette 3D quand elle est affichée (tout le bâtiment), sinon ceux
+    // posés sur le niveau ou la couche en cours d'édition.
+    function legendMaterials(st) {
+        const seen = {};
+        if (st.vox && (isArch(st) || st.view3d.on)) st.vox.palette.forEach(function (n) { if (n) seen[n] = true; });
+        else {
+            const level = cur(st);
+            for (const k in level.walls) seen[level.walls[k].material] = true;
+            for (const k in level.floors) seen[level.floors[k]] = true;
+        }
+        const order = st.catalog.materials || [];
+        return Object.keys(seen).filter(function (n) { return n; })
+            .sort(function (a, b) {
+                const ia = order.findIndex(function (m) { return m.name === a; }), ib = order.findIndex(function (m) { return m.name === b; });
+                return (ia < 0 ? 1e9 : ia) - (ib < 0 ? 1e9 : ib);
+            });
+    }
+
+    function legendFrame(ctx, x, y, w, h) {
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    }
+
+    function legendSwatch(st, ctx, name, x, y, sw) {
+        ctx.fillStyle = materialColor(st, name, 1);
+        ctx.fillRect(x, y, sw, sw);
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, y + 0.5, sw - 1, sw - 1);
+    }
+
+    // Chevron cliquable, dans l'encadré : pointe vers le bas quand la légende est ouverte (elle se replie),
+    // vers le haut sur la pastille repliée (elle se rouvre).
+    function legendToggle(st, ctx, x, y, open) {
+        st.legendHit = { x: x, y: y, w: LEGEND_BTN, h: LEGEND_BTN };
+        const cx = x + LEGEND_BTN / 2, cy = y + LEGEND_BTN / 2, d = open ? 1 : -1;
+        ctx.fillStyle = st.palette.text;
+        ctx.beginPath();
+        ctx.moveTo(cx - 4, cy - 2 * d); ctx.lineTo(cx + 4, cy - 2 * d); ctx.lineTo(cx, cy + 3 * d);
+        ctx.closePath(); ctx.fill();
+    }
+
+    // Légende des matériaux employés : pastille + libellé, dans le coin bas-gauche de la zone de vue. Son chevron
+    // la replie en une pastille de trois couleurs, d'où on la rouvre. L'export d'image (qui compose les trois
+    // calques) emporte la légende ouverte, mais ni le chevron ni la pastille repliée : ce sont des commandes.
+    function drawLegend(st, ctx) {
+        st.legendHit = null;
+        let names = legendMaterials(st);
+        if (!names.length) return;
+        const vr = viewRect(st), pad = 8, sw = 12, gap = 7, line = 18;
+        ctx.save();
+        if (!st.legend) {
+            if (!st.exporting) {
+                const n = Math.min(3, names.length), bh = pad * 2 + sw;
+                const bw = pad * 2 + n * (sw + 3) - 3 + gap + LEGEND_BTN;
+                const x = Math.round(vr.x + 10), y = Math.round(vr.y + vr.h - 10 - bh);
+                legendFrame(ctx, x, y, bw, bh);
+                for (let i = 0; i < n; i++) legendSwatch(st, ctx, names[i], x + pad + i * (sw + 3), y + pad, sw);
+                legendToggle(st, ctx, x + bw - pad - LEGEND_BTN, y + (bh - LEGEND_BTN) / 2, false);
+            }
+            ctx.restore();
+            return;
+        }
+        const room = Math.max(2, Math.floor((vr.h - 40 - pad * 2) / line));
+        let extra = 0;
+        if (names.length > room) { extra = names.length - room + 1; names = names.slice(0, room - 1); }
+        ctx.font = '12px sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        const labels = names.map(function (n) { return materialLabel(st, n); });
+        if (extra) labels.push('+' + extra);
+        let tw = 0;
+        labels.forEach(function (l) { tw = Math.max(tw, ctx.measureText(l).width); });
+        const bw = pad * 2 + sw + gap + tw + gap + LEGEND_BTN, bh = pad * 2 + line * labels.length;
+        const x = Math.round(vr.x + 10), y = Math.round(vr.y + vr.h - 10 - bh);
+        legendFrame(ctx, x, y, bw, bh);
+        labels.forEach(function (label, i) {
+            const cy = y + pad + line * i + line / 2;
+            if (i < names.length) legendSwatch(st, ctx, names[i], x + pad, cy - sw / 2, sw);
+            ctx.fillStyle = st.palette.text;
+            ctx.fillText(label, x + pad + sw + gap, cy);
+        });
+        if (!st.exporting) legendToggle(st, ctx, x + bw - pad - LEGEND_BTN, y + pad + (line - LEGEND_BTN) / 2, true);
+        ctx.restore();
     }
 
     function renderDynamic(st) {
@@ -1699,11 +1859,14 @@ window.ecoBuildingPlanner = (function () {
                 ctx.fillStyle = st.palette.text; ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillText(label, vr.x + vr.w / 2, vr.y + vr.h / 2);
             }
+            drawLegend(st, ctx);
             return;
         }
         const cs = cellSize(st);
         if (isArch(st)) { renderDynamicArch(st, ctx, cs); return; }
         const level = cur(st);
+
+        drawMaterialHighlight(st, ctx, cs);
 
         // Objets au sol puis empilés.
         const ordered = level.objects.slice().sort(function (a, b) { return (a.attachedTo ? 1 : 0) - (b.attachedTo ? 1 : 0); });
@@ -1758,6 +1921,8 @@ window.ecoBuildingPlanner = (function () {
 
         // Aperçu de l'outil.
         drawPreview(st, ctx, cs);
+
+        drawLegend(st, ctx);
     }
 
     function drawObject(st, ctx, o, cs) {
@@ -1863,6 +2028,8 @@ window.ecoBuildingPlanner = (function () {
         ctx.save();
         ctx.beginPath(); ctx.rect(vr.x, vr.y, vr.w, vr.h); ctx.clip();
 
+        drawMaterialHighlight(st, ctx, cs);
+
         // Forme sélectionnée : ses cellules sur la couche en pointillé, sa boîte englobante en trait fin.
         if (st.selection && st.selection.kind === 'op') {
             const op = findOp(st, st.selection.id);
@@ -1910,6 +2077,8 @@ window.ecoBuildingPlanner = (function () {
         }
         const curve = selectedCurve(st);
         if (curve && st.cut && st.sectionGeom) drawSideCurveGuides(st, ctx, st.sectionGeom, curve);
+
+        drawLegend(st, ctx);
     }
 
     // Guides d'une courbe dans le plan : polygone de contrôle a–c–b en pointillé fin, poignée ronde sur c (tirable en sélection).
@@ -2190,6 +2359,8 @@ window.ecoBuildingPlanner = (function () {
         const cell = pc.cell;
         st.dynamicCanvas.setPointerCapture(e.pointerId);
 
+        // Chevron de la légende : avant tout le reste, dans les trois modes.
+        if (e.button === 0 && inRect(st.legendHit, pc.px, pc.py)) { st.legend = !st.legend; requestRender(st); return; }
         if (st.view3d.on) { onPointerDown3d(st, e, pc); return; }
         if (isArch(st) && onPointerDownArch(st, e, pc)) return;
 
@@ -2719,6 +2890,8 @@ window.ecoBuildingPlanner = (function () {
             st.catalog = catalog || { materials: [], objects: [], categories: [] };
             st.objectsByName = {};
             (st.catalog.objects || []).forEach(function (o) { st.objectsByName[o.name] = o; });
+            st.materialsByName = {}; st.matRgb = {};
+            (st.catalog.materials || []).forEach(function (m) { st.materialsByName[m.name] = m; });
             if (!st.material && st.catalog.materials && st.catalog.materials.length) st.material = st.catalog.materials[0].name;
             st.staticDirty = true; requestRender(st);
         },
@@ -2974,7 +3147,9 @@ window.ecoBuildingPlanner = (function () {
             const ctx = out.getContext('2d');
             ctx.drawImage(st.staticCanvas, 0, 0);
             if (st.view3d.on) { view3dRender(st); const vr = viewRect(st), d = st.dpr || 1; ctx.drawImage(st.view3d.canvas, Math.round(vr.x * d), Math.round(vr.y * d), Math.round(vr.w * d), Math.round(vr.h * d)); }
+            st.exporting = true; renderDynamic(st);
             ctx.drawImage(st.dynamicCanvas, 0, 0);
+            st.exporting = false; renderDynamic(st);
             const a = document.createElement('a');
             a.href = out.toDataURL('image/png');
             a.download = (filename || 'building-plan') + '.png';
