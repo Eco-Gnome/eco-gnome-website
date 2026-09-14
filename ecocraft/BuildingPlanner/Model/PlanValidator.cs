@@ -7,8 +7,8 @@ public static class PlanValidator
     public const int MaxGridSide = 200;
     public const int MaxObjects = 2000;
     public const int MaxRooms = 200;
-    public const int MaxLevels = 10;
-    public const int MaxHeight = 50;
+    public const int MaxLevels = 20;
+    public const int MaxHeight = 50;                // par niveau, mur ou pièce ; la hauteur totale suit MaxArchitectureHeight
     public const int MaxDocumentBytes = 256 * 1024;
     public const int MaxArchitectureHeight = 320;   // hauteur max d'un monde Eco
     public const int MaxOps = 500;
@@ -69,7 +69,7 @@ public static class PlanValidator
                 if (string.IsNullOrWhiteSpace(obj.Type)) issues.Add(PlanIssue.Error("MissingObjectType", [obj.Id], objectId: obj.Id, level: k));
             }
 
-            if (doc.LevelBaseY(k) + top + 1 > MaxHeight) issues.Add(PlanIssue.Error("BuildingTooHigh", [MaxHeight.ToString()], level: k));
+            if (doc.LevelBaseY(k) + top + 1 > MaxArchitectureHeight) issues.Add(PlanIssue.Error("BuildingTooHigh", [MaxArchitectureHeight.ToString()], level: k));
             gridTop = Math.Max(gridTop, doc.LevelBaseY(k) + top + 1);
         }
 

@@ -954,7 +954,16 @@
             "Remove": "Supprimer le niveau",
             "Name": "Nom du niveau",
             "Height": "Hauteur (couches d'air)",
-            "HeightHelp": "Vide : hauteur des murs par défaut. La dalle du niveau suivant est posée juste au-dessus."
+            "HeightHelp": "Vide : hauteur des murs par défaut. La dalle du niveau suivant est posée juste au-dessus.",
+            "Detect": "Niveaux depuis le bâtiment…",
+            "DetectHelp": "Les dalles détectées dans le bâtiment (formes et murs) deviennent des niveaux : chaque niveau va de sa dalle à la suivante. Décochez une dalle pour la fusionner avec le niveau du dessous ; les hauteurs restent modifiables.",
+            "DetectNone": "Aucune dalle détectée : construisez d'abord quelque chose (mode architecture ou murs).",
+            "DetectLowSlab": "Une dalle se trouve à la couche 1 : elle est ignorée (un niveau a au moins une couche d'air). Descendez le bâtiment d'une couche pour qu'elle serve de sol.",
+            "DetectTruncated": "Plus de {max} dalles : seules les {max} premières deviennent des niveaux.",
+            "DetectSlabHeader": "Dalle",
+            "DetectSlab": "couche {z} · {coverage} % de l'emprise",
+            "DetectBase": "Socle",
+            "DetectGround": "sol"
         },
         "Plan": {
             "Menu": "Plan",

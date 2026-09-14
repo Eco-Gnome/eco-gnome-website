@@ -1,0 +1,106 @@
+@using ecocraft.BuildingPlanner.Model
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+@* Niveaux déduits des dalles du bâtiment (ecoBuildingPlanner.detectLevels) : une ligne par dalle, du haut vers le bas.
+   Décocher une dalle la fusionne avec le niveau du dessous (hauteurs recalculées) ; le socle et le sol restent cochés. *@
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("BuildingPlanner.Level.DetectHelp")</MudText>
+            @if (Proposal.LowSlab)
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true">@LocalizationService.GetTranslation("BuildingPlanner.Level.DetectLowSlab")</MudAlert>
+            }
+            @if (Proposal.Truncated)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">@LocalizationService.GetTranslation("BuildingPlanner.Level.DetectTruncated", PlanValidator.MaxLevels.ToString())</MudAlert>
+            }
+            <MudSimpleTable Dense="true" Class="bp-detect-levels">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@LocalizationService.GetTranslation("Level")</th>
+                        <th>@LocalizationService.GetTranslation("BuildingPlanner.Level.DetectSlabHeader")</th>
+                        <th>@LocalizationService.GetTranslation("BuildingPlanner.Level.Height")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = Proposal.Levels.Count - 1; i >= 0; i--)
+                    {
+                        var row = Proposal.Levels[i];
+                        var fixedRow = i == 0 || row.Ground;
+                        <tr>
+                            <td><MudCheckBox T="bool" Value="@row.Selected" ValueChanged="@(v => Toggle(row, v))" Disabled="@fixedRow" Dense="true"/></td>
+                            <td>@RowLabel(row)</td>
+                            <td>@(row.Coverage is { } c ? LocalizationService.GetTranslation("BuildingPlanner.Level.DetectSlab", row.Z.ToString(), Math.Round(c * 100).ToString()) : "—")</td>
+                            <td><MudNumericField T="int" Value="@row.Height" ValueChanged="@(v => row.Height = v)" Min="1" Max="@PlanValidator.MaxHeight" Disabled="@(!row.Selected)" Variant="Variant.Outlined" Margin="Margin.Dense"/></td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Validate">@LocalizationService.GetTranslation("Validate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public LevelProposal Proposal { get; set; } = new();
+
+    // Résultat de ecoBuildingPlanner.detectLevels : une entrée par niveau proposé, du bas vers le haut (Z = couche de la dalle,
+    // Coverage = part de l'emprise, null pour le socle ; Ground = niveau du sol).
+    public sealed class DetectedLevel
+    {
+        public int Z { get; set; }
+        public double? Coverage { get; set; }
+        public int Height { get; set; }
+        public bool Ground { get; set; }
+        public bool Selected { get; set; } = true;
+    }
+
+    public sealed class LevelProposal
+    {
+        public List<DetectedLevel> Levels { get; set; } = [];
+        public int GroundIndex { get; set; }
+        public bool LowSlab { get; set; }
+        public bool Truncated { get; set; }
+        public bool Matches { get; set; }   // la pile actuelle a déjà ces hauteurs
+        public bool Empty { get; set; }     // aucun niveau ne porte murs, sols, trous ou objets
+    }
+
+    private List<DetectedLevel> Selected => Proposal.Levels.Where(l => l.Selected).ToList();
+
+    private string RowLabel(DetectedLevel row)
+    {
+        if (row.Coverage is null) return LocalizationService.GetTranslation("BuildingPlanner.Level.DetectBase");
+        var selected = Selected;
+        var number = selected.IndexOf(row) - selected.FindIndex(l => l.Ground);
+        var label = LocalizationService.GetTranslation("BuildingPlanner.Level.Default", number.ToString());
+        return row.Ground ? $"{label} ({LocalizationService.GetTranslation("BuildingPlanner.Level.DetectGround")})" : label;
+    }
+
+    // Une dalle décochée rejoint le niveau du dessous : h = dalle suivante cochée − dalle − 1 ; le dernier monte jusqu'au
+    // sommet détecté (toit ou plus haut bloc), quelles que soient les dalles décochées.
+    private void Toggle(DetectedLevel row, bool selected)
+    {
+        row.Selected = selected;
+        var kept = Selected;
+        var last = Proposal.Levels[^1];
+        var top = last.Z + last.Height + 1;
+        for (var i = 0; i < kept.Count; i++)
+        {
+            var next = i + 1 < kept.Count ? kept[i + 1].Z : top;
+            kept[i].Height = Math.Clamp(next - kept[i].Z - 1, 1, PlanValidator.MaxHeight);
+        }
+    }
+
+    private void Validate()
+    {
+        var kept = Selected;
+        MudDialog.Close(DialogResult.Ok((kept.Select(l => l.Height).ToList(), Math.Max(0, kept.FindIndex(l => l.Ground)))));
+    }
+}

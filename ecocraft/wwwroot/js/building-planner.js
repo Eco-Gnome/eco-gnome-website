@@ -4,9 +4,9 @@
 // Axes : x → colonne, y → ligne (Eco Z) ; z = hauteur (Eco Y). Le plan est une pile de niveaux ; un seul est
 // affiché et édité à la fois (st.level), avec les murs du niveau inférieur en filigrane et la couverture de la
 // dalle (sol peint, plafond du dessous, ouverture). Les pièces sont détectées automatiquement : toute zone
-// 4-connexe fermée par des murs porte une pièce (reconcileRooms) ; la graine reste un détail interne conservé
-// pour le schéma et l'analyse C#. L'aperçu des pièces (flood fill 2D 4-connexe) est indicatif : seule
-// l'analyse C# connaît les diagonales, arêtes vides et plafonds.
+// 4-connexe fermée par des murs ou des blocs de forme à la première couche d'air du niveau porte une pièce
+// (reconcileRooms) ; la graine reste un détail interne conservé pour le schéma et l'analyse C#. L'aperçu des
+// pièces (flood fill 2D 4-connexe) est indicatif : seule l'analyse C# connaît les diagonales, arêtes vides et plafonds.
 // Mode architecture (plan.mode === 'architecture') : le plan porte une liste ordonnée de formes 3D
 // (plan.architecture.ops) évaluées ici en blocs unitaires (evalOps, même spécification qu'ArchShapes.cs) ;
 // on affiche et édite une couche z à la fois (st.layer), avec une bande d'élévation à gauche et, à la
@@ -22,6 +22,8 @@ window.ecoBuildingPlanner = (function () {
     const TIER_COLORS = ['#7d7d7d', '#c2a26a', '#8fa3b5', '#b0784a', '#6f8f9c', '#d4af37'];   // repli des matériaux absents du catalogue (blocs de mods)
     const N8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
     const MAX_ARCH_HEIGHT = 320;   // = PlanValidator.MaxArchitectureHeight
+    const MAX_LEVELS = 20;         // = PlanValidator.MaxLevels
+    const MAX_LEVEL_HEIGHT = 50;   // = PlanValidator.MaxHeight
     const ICON_MIN_CELL = 22;      // taille de case à partir de laquelle l'icône du bloc reste lisible
     const ICON_MIN_CELL_HOUSE = 67;   // plan de maison : cinq crans de zoom (x 1.25) plus loin, sinon les icônes noient le plan
     const LEGEND_BTN = 16;         // côté du chevron qui replie / rouvre la légende
@@ -282,6 +284,74 @@ window.ecoBuildingPlanner = (function () {
         return out;
     }
 
+    // ---- Niveaux déduits du bâtiment (formes + maison) ----------------------------------------------------
+    // Une dalle est une couche où au moins SLAB_COVERAGE de l'emprise (colonnes ayant un bloc) est un bloc surmonté
+    // d'air, à au moins une couche d'air de la précédente ; le dernier plateau sans rien au-dessus est un toit, pas un
+    // niveau. Hauteurs : h_k = z_{k+1} − z_k − 1 (levelBaseY) ; le dernier monte jusqu'au toit ou au plus haut bloc.
+    // Une première dalle au-dessus de 1 reçoit un « socle » en dessous (le niveau 0 est toujours à y = 0) ; à 1,
+    // elle est ignorée (pas de niveau de hauteur 0) et signalée.
+    const SLAB_COVERAGE = 0.3;
+
+    function levelIsEmpty(l) {
+        return !Object.keys(l.walls).length && !Object.keys(l.floors).length && !Object.keys(l.holes).length && !l.objects.length;   // les pièces sont dérivées
+    }
+
+    function detectLevels(st) {
+        const v = st.vox; if (!v) return null;
+        const W = v.W, D = v.D, H = v.H, WD = W * D;
+        const column = new Uint8Array(WD), surf = new Int32Array(H), solid = new Int32Array(H);
+        for (let z = 0; z < H; z++) for (let i = 0; i < WD; i++) {
+            if (!v.cells[i + WD * z]) continue;
+            column[i] = 1; solid[z]++;
+            if (z + 1 >= H || !v.cells[i + WD * (z + 1)]) surf[z]++;
+        }
+        let footprint = 0; for (let i = 0; i < WD; i++) footprint += column[i];
+        if (!footprint) return null;
+        let top = 0; for (let z = 0; z < H; z++) if (solid[z]) top = z;
+        const slabs = [];
+        for (let z = 0; z <= top; z++) if (surf[z] >= SLAB_COVERAGE * footprint && (!slabs.length || z >= slabs[slabs.length - 1] + 2)) slabs.push(z);
+        const roof = slabs.length > 1 && slabs[slabs.length - 1] === top ? slabs.pop() : null;
+        const lowSlab = slabs.length > 0 && slabs[0] === 1;
+        if (lowSlab) slabs.shift();
+        if (!slabs.length) slabs.push(0);
+        const levels = [];
+        if (slabs[0] > 1) levels.push({ z: 0, coverage: null, height: slabs[0] - 1, ground: false });
+        slabs.forEach(function (z, i) {
+            let h;
+            if (i + 1 < slabs.length) h = slabs[i + 1] - z - 1;
+            else if (roof !== null) h = roof - z - 1;
+            else if (top > z) h = top - z;
+            else h = st.plan.defaults.wallHeight;
+            levels.push({ z: z, coverage: surf[z] / footprint, height: Math.max(1, Math.min(MAX_LEVEL_HEIGHT, h)), ground: i === 0 });
+        });
+        const truncated = levels.length > MAX_LEVELS;
+        if (truncated) levels.length = MAX_LEVELS;
+        const groundIndex = Math.max(0, levels.findIndex(function (l) { return l.ground; }));
+        const plan = st.plan;
+        const matches = plan.levels.length === levels.length && plan.groundIndex === groundIndex && levels.every(function (l, k) { return levelHeight(st, k) === l.height; });
+        return { levels: levels, groundIndex: groundIndex, lowSlab: lowSlab, truncated: truncated, matches: matches, empty: plan.levels.every(levelIsEmpty) };
+    }
+
+    // Remplace la pile par ces hauteurs : le niveau k existant garde son contenu (sa hauteur est ajustée), les niveaux
+    // manquants sont créés, les niveaux en trop sont conservés s'ils ont du contenu. Annulable.
+    function applyLevels(st, heights, groundIndex) {
+        if (!heights || !heights.length) return;
+        pushHistory(st);
+        const plan = st.plan, out = [];
+        heights.slice(0, MAX_LEVELS).forEach(function (h, k) {
+            const l = plan.levels[k] || emptyLevel();
+            l.height = Math.max(1, Math.min(MAX_LEVEL_HEIGHT, h | 0));
+            out.push(l);
+        });
+        for (let k = out.length; k < plan.levels.length; k++) if (!levelIsEmpty(plan.levels[k])) out.push(plan.levels[k]);
+        plan.levels = out;
+        plan.groundIndex = Math.max(0, Math.min(out.length - 1, groundIndex | 0));
+        st.level = plan.groundIndex;
+        select(st, null, null);
+        commit(st, 'levels');
+        notifyLevel(st);
+    }
+
     // ---- Architecture : évaluation des formes --------------------------------------------------------
     // Spécification partagée avec ArchShapes.cs (tout en entiers, exacts en double jusqu'à 2^53) : boîte englobante
     // inclusive a..b ; R = étendue par axe ; d = 2·coord − x0 − x1. Sphère : Σ d²·(autres R²) ≤ ΠR² ; cylindre :
@@ -451,8 +521,8 @@ window.ecoBuildingPlanner = (function () {
             .sort(function (a, b) { return b.count - a.count || (a.material < b.material ? -1 : a.material > b.material ? 1 : 0); });
     }
 
-    // Dans les deux modes : en mode maison st.house est vide (l'analyse n'exporte les voxels maison qu'en architecture),
-    // st.vox ne contient donc que les formes, dessinées par-dessus les murs du niveau courant.
+    // Dans les deux modes : voxels de la maison (reçus de l'analyse, owner 0) puis les formes (owner = op) ; en mode
+    // maison les formes sont dessinées par-dessus les murs du niveau courant et ferment les pièces (columnBlocked).
     function refreshVox(st) {
         const h = archH(st);
         st.vox = evalOps(st.plan, st.house, h);
@@ -485,6 +555,18 @@ window.ecoBuildingPlanner = (function () {
     function levelIndexAtY(st, z) {
         for (let k = st.plan.levels.length - 1; k >= 0; k--) if (z >= levelBaseY(st, k)) return k;
         return 0;
+    }
+
+    // Bloc posé par une forme en (x, y, z) : la dernière op couvrant la cellule est un ajout (les voxels maison, owner 0, ne comptent pas).
+    function archSolidAt(st, x, y, z) {
+        const v = st.vox;
+        if (!v || x < 0 || y < 0 || z < 0 || x >= v.W || y >= v.D || z >= v.H) return false;
+        const i = x + v.W * (y + v.D * z);
+        return v.owner[i] !== 0 && v.cells[i] !== 0;
+    }
+    // Barrière 2D du niveau k pour les pièces : mur du document ou bloc de forme à la première couche d'air (miroir de GridBuilder).
+    function columnBlocked(st, level, k, x, y) {
+        return !!level.walls[key(x, y)] || archSolidAt(st, x, y, levelBaseY(st, k) + 1);
     }
 
     // ---- Gomme unifiée (clic droit maintenu, outil gomme, crayon en soustraction) --------------------------
@@ -716,9 +798,9 @@ window.ecoBuildingPlanner = (function () {
     function commit(st, label) {
         st.dirty = true;
         st.staticDirty = true;
+        refreshVox(st);   // avant les pièces : les formes les ferment
         reconcileRooms(st);
         recomputeFootprints(st);
-        refreshVox(st);
         saveDraft(st);
         notifyPlan(st);
         requestRender(st);
@@ -757,7 +839,7 @@ window.ecoBuildingPlanner = (function () {
     // bord de la grille) porte exactement une pièce. Une pièce existante dont la graine reste dans une zone
     // garde id/nom/réglages (en cas de fusion, la première — ordre de création — gagne) ; une zone orpheline
     // reçoit une pièce neuve (graine au centroïde) ; le reste est supprimé. Mêmes règles de blocage que
-    // recomputeFootprints et GridBuilder.FloodFill2D côté C# : les murs seulement.
+    // recomputeFootprints et GridBuilder.FloodFill2D côté C# : columnBlocked (murs et blocs de forme).
     // Appelé par commit et setPlanInternal — PAS par restorePlan : undo/redo restaurent la liste exacte.
     const MIN_ROOM_CELLS = 1;   // taille minimale d'une zone pour créer une pièce (1 = toutes)
     const MAX_ROOMS = 200;      // = PlanValidator.MaxRooms (Error bloquante côté C#)
@@ -781,13 +863,10 @@ window.ecoBuildingPlanner = (function () {
         let total = st.plan.levels.reduce(function (a, l) { return a + l.rooms.length; }, 0);
         let nextNum = 0;   // calculé paresseusement, seulement si une pièce est créée
 
-        st.plan.levels.forEach(function (level) {
-            // labels : 0 libre, -1 mur, -2 extérieur, n > 0 région fermée n.
+        st.plan.levels.forEach(function (level, lk) {
+            // labels : 0 libre, -1 barrière, -2 extérieur, n > 0 région fermée n.
             const labels = new Int32Array(W * D);
-            for (const k in level.walls) {
-                const c = parseKey(k);
-                if (c.x >= 0 && c.y >= 0 && c.x < W && c.y < D) labels[c.y * W + c.x] = -1;
-            }
+            for (let y = 0; y < D; y++) for (let x = 0; x < W; x++) if (columnBlocked(st, level, lk, x, y)) labels[y * W + x] = -1;
             const stack = [];
             function flood(start, lbl) {
                 labels[start] = lbl;
@@ -851,7 +930,7 @@ window.ecoBuildingPlanner = (function () {
                 const cells = new Set();
                 let enclosed = true;
                 const seedKey = key(room.seed.x, room.seed.y);
-                if (level.walls[seedKey] || !inGrid(st, room.seed.x, room.seed.y)) { st.footprints[room.id] = { cells, enclosed: false, seedInWall: true, level: k }; return; }
+                if (!inGrid(st, room.seed.x, room.seed.y) || columnBlocked(st, level, k, room.seed.x, room.seed.y)) { st.footprints[room.id] = { cells, enclosed: false, seedInWall: true, level: k }; return; }
                 const stack = [[room.seed.x, room.seed.y]];
                 cells.add(seedKey);
                 while (stack.length) {
@@ -860,7 +939,7 @@ window.ecoBuildingPlanner = (function () {
                         const nx = c[0] + d[0], ny = c[1] + d[1];
                         if (!inGrid(st, nx, ny)) { enclosed = false; return; }
                         const kk = key(nx, ny);
-                        if (level.walls[kk] || cells.has(kk)) return;
+                        if (cells.has(kk) || columnBlocked(st, level, k, nx, ny)) return;
                         cells.add(kk);
                         stack.push([nx, ny]);
                     });
@@ -2002,10 +2081,11 @@ window.ecoBuildingPlanner = (function () {
             const target = objectAt(st, hx, hy);
             const info = st.objectsByName[st.objectType];
             const canAttach = target && !target.attachedTo && st.objectsByName[target.type] && st.objectsByName[target.type].hasTableSurface && info && info.canBeOnSurface;
-            const walls = cur(st).walls;
+            const walls = cur(st).walls, floorZ = levelBaseY(st, st.level) + 1;
             cells.forEach(function (c) {
                 const p = toScreen(st, c.x, c.y);
-                const blocked = !canAttach && (!inGrid(st, c.x, c.y) || (walls[key(c.x, c.y)] && c.kind !== KIND.WALL) || (objectAt(st, c.x, c.y) && c.kind !== KIND.WALL));
+                const blocked = !canAttach && (!inGrid(st, c.x, c.y) || (walls[key(c.x, c.y)] && c.kind !== KIND.WALL) || (objectAt(st, c.x, c.y) && c.kind !== KIND.WALL)
+                    || (c.kind !== KIND.WALL && archSolidAt(st, c.x, c.y, floorZ + c.dz)));
                 ctx.fillStyle = canAttach ? 'rgba(255,183,77,0.8)' : blocked ? 'rgba(244,67,54,0.7)' : (c.kind === KIND.WALL ? 'rgba(255,183,77,0.9)' : 'rgba(100,181,246,0.7)');
                 ctx.fillRect(p.x + 2, p.y + 2, cs - 4, cs - 4);
             });
@@ -2848,9 +2928,9 @@ window.ecoBuildingPlanner = (function () {
         st.staticDirty = true;
         // Purge/complète les pièces des plans chargés (graine dans un mur, zone ouverte, zone sans pièce)
         // avant le premier aller-retour d'analyse ; ne touche pas à markClean.
+        refreshVox(st);
         reconcileRooms(st);
         recomputeFootprints(st);
-        refreshVox(st);
         if (markClean) clearDraft(st); else saveDraft(st);   // le brouillon ne reflète que des modifications non sauvegardées
         fit(st);
         notifySelection(st);
@@ -2999,6 +3079,9 @@ window.ecoBuildingPlanner = (function () {
             const st = get(id); if (!st || st.level >= st.plan.levels.length - 1) return;
             copyWallsFrom(st, st.plan.levels[st.level + 1]);
         },
+        // Niveaux déduits des dalles du bâtiment (null : rien de construit) ; applyLevels pose les hauteurs choisies.
+        detectLevels: function (id) { const st = get(id); return st ? detectLevels(st) : null; },
+        applyLevels: function (id, heights, groundIndex) { const st = get(id); if (st) applyLevels(st, heights, groundIndex); },
         updateRoom: function (id, roomJson) {
             const st = get(id); if (!st) return;
             const room = JSON.parse(roomJson);

@@ -962,7 +962,16 @@
             "Remove": "Remove this level",
             "Name": "Level name",
             "Height": "Height (air layers)",
-            "HeightHelp": "Empty: default wall height. The next level's slab sits right above."
+            "HeightHelp": "Empty: default wall height. The next level's slab sits right above.",
+            "Detect": "Levels from the building…",
+            "DetectHelp": "Slabs detected in the building (shapes and walls) become levels: each level spans from its slab to the next one. Untick a slab to merge it into the level below; heights stay editable.",
+            "DetectNone": "No slab detected: build something first (architecture mode or walls).",
+            "DetectLowSlab": "A slab sits on layer 1: it is ignored (a level has at least one air layer). Lower the building by one layer to use it as the ground.",
+            "DetectTruncated": "More than {max} slabs: only the first {max} become levels.",
+            "DetectSlabHeader": "Slab",
+            "DetectSlab": "layer {z} · {coverage} % of the footprint",
+            "DetectBase": "Base",
+            "DetectGround": "ground"
         },
         "Plan": {
             "Menu": "Plan",

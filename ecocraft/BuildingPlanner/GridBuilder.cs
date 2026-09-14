@@ -5,7 +5,9 @@ namespace ecocraft.BuildingPlanner;
 // Document par niveaux → grille voxel. Niveau k : dalle à Y = base_k (niveau 0 : sol partout ; étages : cellules
 // de sol explicites), murs Y = base_k + 1..h, plafond par pièce à Y = base_k + hauteur + 1 couvrant l'intérieur
 // et l'anneau de murs, seulement là où il y a de l'air — un sol peint à l'étage l'emporte donc sur le plafond
-// de la pièce du dessous, et les ouvertures de l'étage restent de l'air. Les objets sont posés ensuite.
+// de la pièce du dessous, et les ouvertures de l'étage restent de l'air. Les formes du mode architecture (ArchLayer)
+// ferment les pièces comme des murs à la première couche d'air du niveau ; elles sont fondues dans la grille après les
+// plafonds. Les objets sont posés ensuite.
 public static class GridBuilder
 {
     public static BuildContext Build(PlanDocument doc, Catalog catalog)
@@ -14,10 +16,16 @@ public static class GridBuilder
         var walls = new Dictionary<(int X, int Y), WallCell>[levelCount];
         var floors = new Dictionary<(int X, int Y), string>[levelCount];
         var holes = new HashSet<(int X, int Y)>[levelCount];
+        var blocked = new Func<(int X, int Y), bool>[levelCount];
         var footprints = new Dictionary<string, HashSet<(int X, int Y)>>(StringComparer.Ordinal);
         var wallHeights = new Dictionary<(int Level, int X, int Y), int>();
         var issues = new List<PlanIssue>();
         var sizeY = 3;
+
+        // Formes rognées à Architecture.Height (leur plafond, comme côté JS) ; la grille couvre le contenu réel, pas la hauteur réglée.
+        var archTop = 0;
+        foreach (var op in doc.Architecture.Ops) archTop = Math.Max(archTop, Math.Min(ArchShapes.MaxZ(op) + 1, doc.Architecture.Height));
+        var arch = ArchLayer.Evaluate(doc, archTop);
 
         for (var k = 0; k < levelCount; k++)
         {
@@ -28,6 +36,11 @@ public static class GridBuilder
             walls[k] = new Dictionary<(int X, int Y), WallCell>();
             foreach (var (key, wall) in level.Walls)
                 if (PlanKeys.TryParse(key, out var x, out var y) && PlanValidator.InGrid(doc, x, y)) walls[k][(x, y)] = wall;
+            // Barrière 2D du niveau : mur du document ou bloc de forme à la première couche d'air (un mur creusé reste une
+            // barrière ici ; l'analyse 3D signale la fuite).
+            var levelWalls = walls[k];
+            var firstAirY = baseY + 1;
+            blocked[k] = c => levelWalls.ContainsKey(c) || arch.IsSolid(c.X, c.Y, firstAirY);
             floors[k] = new Dictionary<(int X, int Y), string>();
             foreach (var (key, material) in level.Floors)
                 if (PlanKeys.TryParse(key, out var x, out var y) && PlanValidator.InGrid(doc, x, y) && !string.IsNullOrWhiteSpace(material)) floors[k][(x, y)] = material;
@@ -40,9 +53,9 @@ public static class GridBuilder
             foreach (var room in level.Rooms)
             {
                 var seed = (room.Seed.X, room.Seed.Y);
-                if (walls[k].ContainsKey(seed)) { footprints[room.Id] = []; issues.Add(PlanIssue.Error("RoomSeedInWall", [room.Name], new GridPoint { X = seed.Item1, Y = seed.Item2 }, roomId: room.Id, level: k)); continue; }
+                if (blocked[k](seed)) { footprints[room.Id] = []; issues.Add(PlanIssue.Error("RoomSeedInWall", [room.Name], new GridPoint { X = seed.Item1, Y = seed.Item2 }, roomId: room.Id, level: k)); continue; }
 
-                var (footprint, enclosed) = FloodFill2D(doc, walls[k], seed);
+                var (footprint, enclosed) = FloodFill2D(doc, blocked[k], seed);
                 footprints[room.Id] = footprint;
                 if (!enclosed) issues.Add(PlanIssue.Warning("RoomNotEnclosed2D", [room.Name], new GridPoint { X = seed.Item1, Y = seed.Item2 }, roomId: room.Id, level: k));
                 if (footprintOwner.TryGetValue(seed, out var otherRoom)) issues.Add(PlanIssue.Warning("RoomsShareSpace", [room.Name, level.Rooms.First(r => r.Id == otherRoom).Name], roomId: room.Id, level: k));
@@ -71,12 +84,7 @@ public static class GridBuilder
                 sizeY = Math.Max(sizeY, baseY + (o.Z ?? 1) + info.Cells.Max(c => c.Offset.Y) - Math.Min(0, info.Cells.Min(c => c.Offset.Y)));
             }
         }
-        // Formes du mode architecture : la grille les contient jusqu'à Architecture.Height (leur plafond, comme côté JS) ;
-        // en mode architecture toutes les couches éditables existent, même vides.
-        // La grille couvre le contenu réel (maison + formes rognées à Architecture.Height), pas la hauteur réglée : le canvas
-        // gère seul les couches vides éditables.
-        foreach (var op in doc.Architecture.Ops) sizeY = Math.Max(sizeY, Math.Min(ArchShapes.MaxZ(op) + 1, doc.Architecture.Height));
-        sizeY += 2;
+        sizeY = Math.Max(sizeY, archTop) + 2;
 
         var grid = new VoxelGrid(doc.Grid.Width, sizeY, doc.Grid.Depth);
         var ctx = new BuildContext { Document = doc, Catalog = catalog, Grid = grid };
@@ -92,7 +100,7 @@ public static class GridBuilder
         var defaultFloorCells = new HashSet<(int X, int Y)>();
         if (defaultFloorIndex >= 0)
             foreach (var room in doc.Levels[0].Rooms)
-                defaultFloorCells.UnionWith(Covered(footprints[room.Id], walls[0]));
+                defaultFloorCells.UnionWith(Covered(footprints[room.Id], blocked[0]));
         for (var y = 0; y < doc.Grid.Depth; y++)
         for (var x = 0; x < doc.Grid.Width; x++)
         {
@@ -121,7 +129,9 @@ public static class GridBuilder
             }
         }
 
-        // Plafonds : intérieur + murs adjacents (8-voisinage), seulement là où il y a de l'air, hors ouvertures de l'étage.
+        // Plafonds : intérieur + barrières adjacentes (8-voisinage), seulement là où il y a de l'air, hors ouvertures de
+        // l'étage. Sans matériau, l'avertissement n'est émis que si une cellule à couvrir n'a ni bloc ni forme au-dessus
+        // (toit dessiné en architecture : le vrai plafond est déjà là).
         for (var k = 0; k < levelCount; k++)
         {
             var baseY = doc.LevelBaseY(k);
@@ -132,17 +142,23 @@ public static class GridBuilder
                 var ceilingY = baseY + doc.RoomHeight(k, room) + 1;
                 ctx.RoomCeilingY[room.Id] = ceilingY;
 
-                var material = room.CeilingMaterial ?? doc.Defaults.CeilingMaterial;
-                if (string.IsNullOrWhiteSpace(material)) { ctx.Issues.Add(PlanIssue.Warning("MissingCeilingMaterial", [room.Name], roomId: room.Id, level: k)); continue; }
-                var materialIndex = ctx.GetOrAddMaterial(material);
                 var upperHoles = k + 1 < levelCount && ceilingY == doc.LevelBaseY(k + 1) ? holes[k + 1] : null;
+                var cells = Covered(footprint, blocked[k])
+                    .Where(cell => !(upperHoles?.Contains(cell) ?? false) && grid.InBounds(new Vec3i(cell.X, ceilingY, cell.Y)))
+                    .ToList();
+                var material = room.CeilingMaterial ?? doc.Defaults.CeilingMaterial;
+                if (string.IsNullOrWhiteSpace(material))
+                {
+                    if (cells.Any(cell => grid.Get(new Vec3i(cell.X, ceilingY, cell.Y)).Kind == VoxelKind.Air && !arch.HasSolidAtOrAbove(cell.X, cell.Y, ceilingY)))
+                        ctx.Issues.Add(PlanIssue.Warning("MissingCeilingMaterial", [room.Name], roomId: room.Id, level: k));
+                    continue;
+                }
+                var materialIndex = ctx.GetOrAddMaterial(material);
 
                 var conflictReported = false;
-                foreach (var cell in Covered(footprint, walls[k]))
+                foreach (var cell in cells)
                 {
-                    if (upperHoles is not null && upperHoles.Contains(cell)) continue;
                     var pos = new Vec3i(cell.X, ceilingY, cell.Y);
-                    if (!grid.InBounds(pos)) continue;
                     var existing = grid.Get(pos);
                     if (existing.Kind == VoxelKind.Air) grid.Set(pos, new Voxel { Kind = VoxelKind.Block, MaterialIndex = materialIndex, ObjectIndex = -1, IsCeiling = true });
                     else if (existing.Kind == VoxelKind.Block && existing.IsCeiling && existing.MaterialIndex != materialIndex && !conflictReported)
@@ -157,7 +173,7 @@ public static class GridBuilder
         // Formes du mode architecture par-dessus la maison (une soustraction creuse aussi un mur) ; le canvas reçoit
         // les voxels de la maison seuls (rendu 3D, mode architecture) et compose lui-même les formes.
         ctx.HouseRuns = HouseRuns.Encode(grid);
-        ArchShapes.PaintAll(ctx);
+        arch.MergeInto(ctx);
 
         for (var k = 0; k < levelCount; k++)
         {
@@ -175,7 +191,7 @@ public static class GridBuilder
                 if (footprint.Count == 0) continue;
                 var missing = 0;
                 (int X, int Y)? first = null;
-                foreach (var cell in Covered(footprint, walls[k]))
+                foreach (var cell in Covered(footprint, blocked[k]))
                 {
                     if (holes[k].Contains(cell) || grid.Get(new Vec3i(cell.X, baseY, cell.Y)).Kind != VoxelKind.Air) continue;
                     missing++;
@@ -189,22 +205,22 @@ public static class GridBuilder
         return ctx;
     }
 
-    // Empreinte de la pièce plus les murs qui la touchent (8-voisinage) : ce que couvrent sa dalle et son plafond.
-    private static HashSet<(int X, int Y)> Covered(HashSet<(int X, int Y)> footprint, Dictionary<(int X, int Y), WallCell> walls)
+    // Empreinte de la pièce plus les barrières qui la touchent (8-voisinage) : ce que couvrent sa dalle et son plafond.
+    private static HashSet<(int X, int Y)> Covered(HashSet<(int X, int Y)> footprint, Func<(int X, int Y), bool> blocked)
     {
         var covered = new HashSet<(int X, int Y)>(footprint);
         foreach (var cell in footprint)
         foreach (var (dx, dy) in Geometry.PlanNeighbors8)
         {
             var n = (cell.X + dx, cell.Y + dy);
-            if (walls.ContainsKey(n)) covered.Add(n);
+            if (blocked(n)) covered.Add(n);
         }
         return covered;
     }
 
-    // Flood fill 4-connexe dans le plan, barrières = murs ; sortir de la grille = pièce non fermée (on continue
-    // pour avoir l'empreinte complète).
-    private static (HashSet<(int X, int Y)> Footprint, bool Enclosed) FloodFill2D(PlanDocument doc, Dictionary<(int X, int Y), WallCell> walls, (int X, int Y) seed)
+    // Flood fill 4-connexe dans le plan, barrières = murs et blocs de forme ; sortir de la grille = pièce non fermée
+    // (on continue pour avoir l'empreinte complète).
+    private static (HashSet<(int X, int Y)> Footprint, bool Enclosed) FloodFill2D(PlanDocument doc, Func<(int X, int Y), bool> blocked, (int X, int Y) seed)
     {
         var footprint = new HashSet<(int X, int Y)>();
         var stack = new Stack<(int X, int Y)>();
@@ -219,7 +235,7 @@ public static class GridBuilder
             {
                 var n = (X: cell.X + dx, Y: cell.Y + dy);
                 if (!PlanValidator.InGrid(doc, n.X, n.Y)) { enclosed = false; continue; }
-                if (walls.ContainsKey(n) || !footprint.Add(n)) continue;
+                if (blocked(n) || !footprint.Add(n)) continue;
                 stack.Push(n);
             }
         }

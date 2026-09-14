@@ -22,20 +22,7 @@ public static class ArchShapes
         public bool IsEmpty => X0 > X1 || Y0 > Y1 || Z0 > Z1;
     }
 
-    // Peint les formes du document dans la grille, dans l'ordre : ajout = bloc du matériau, soustraction = air.
-    // Rognées à Architecture.Height (même plafond que le JS), après les plafonds et avant les objets.
-    public static void PaintAll(BuildContext ctx)
-    {
-        var grid = ctx.Grid;
-        var h = Math.Min(grid.SizeY, ctx.Document.Architecture.Height);
-        foreach (var op in ctx.Document.Architecture.Ops)
-        {
-            var voxel = op.Subtract ? Voxel.Air : new Voxel { Kind = VoxelKind.Block, MaterialIndex = ctx.GetOrAddMaterial(op.Material ?? ""), ObjectIndex = -1 };
-            Paint(op, grid.SizeX, grid.SizeZ, h, (x, y, z) => grid.Set(new Vec3i(x, z, y), voxel));
-        }
-    }
-
-    // Appelle set(x, y, z) pour chaque cellule de l'opération dans [0,w)×[0,d)×[0,h).
+    // Appelle set(x, y, z) pour chaque cellule de l'opération dans [0,w)×[0,d)×[0,h) (ArchLayer.Evaluate les accumule).
     public static void Paint(ArchOp op, int w, int d, int h, Action<int, int, int> set)
     {
         switch (op.Kind)

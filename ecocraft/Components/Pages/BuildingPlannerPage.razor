@@ -136,6 +136,7 @@ else
                     <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level == 0)" OnClick="@(() => Js("copyWallsFromBelow"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromBelow")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level >= _document.Levels.Count - 1)" OnClick="@(() => Js("copyWallsFromAbove"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromAbove")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Pencil" OnClick="EditLevelAsync">@LocalizationService.GetTranslation("BuildingPlanner.Level.Edit")</MudMenuItem>
+                    <MudMenuItem Icon="@Icons.Material.Filled.AutoFixHigh" OnClick="@(() => DetectLevelsAsync(false))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Detect")</MudMenuItem>
                 </MudMenu>
                 @if (_level > 0 || _level + 1 < _document.Levels.Count)
                 {
@@ -645,6 +646,7 @@ else
         _backgroundImage = null;
         await Js("setBackgroundImage", (string?)null);
         Navigation.NavigateTo("/building-planner", replace: true);
+        if (!doc.IsArchitecture) await DetectLevelsAsync(auto: true);
     }
 
     [JSInvokable]
@@ -774,7 +776,9 @@ else
     {
         if (mode == View3d) { await Js("setView3d", true); return; }
         if (_view3d) await Js("setView3d", false);
-        if (mode != _document.Mode) await Js("setMode", mode);
+        if (mode == _document.Mode) return;
+        await Js("setMode", mode);
+        if (mode == PlanMode.House) await DetectLevelsAsync(auto: true);
     }
 
     private async Task SetShapeAsync(ShapeOptions shape)
@@ -864,6 +868,24 @@ else
         if (result is null || result.Canceled || result.Data is not (string name, int height)) return;
         // height 0 = hauteur par défaut (évite de dépendre de la sérialisation des null vers le JS).
         await Js("updateLevel", _level, new { name, height });
+    }
+
+    // Niveaux déduits des dalles du bâtiment (formes + maison). Automatique au passage en mode maison et après un import
+    // quand aucun niveau ne porte encore de contenu et que la pile ne correspond pas déjà ; à la demande depuis le menu.
+    private async Task DetectLevelsAsync(bool auto)
+    {
+        var proposal = await JS.InvokeAsync<BuildingPlanDetectLevelsDialog.LevelProposal?>("ecoBuildingPlanner.detectLevels", _containerId);
+        if (proposal is null || proposal.Levels.Count == 0)
+        {
+            if (!auto) Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Level.DetectNone"), Severity.Info);
+            return;
+        }
+        if (auto && (!proposal.Empty || proposal.Matches)) return;
+        var parameters = new DialogParameters<BuildingPlanDetectLevelsDialog> { { d => d.Proposal, proposal } };
+        var dialog = await DialogService.ShowAsync<BuildingPlanDetectLevelsDialog>(LocalizationService.GetTranslation("BuildingPlanner.Level.Detect"), parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not (List<int> heights, int groundIndex)) return;
+        await Js("applyLevels", heights, groundIndex);
     }
 
     // ---- Rail / volet droit / bandeau -------------------------------------------------------------
