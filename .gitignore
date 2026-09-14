@@ -387,3 +387,4 @@ FodyWeavers.xsd
 /dumps
 Trace-*.json
 deploy/backups/
+/3d/
