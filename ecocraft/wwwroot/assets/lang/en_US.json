@@ -1205,7 +1205,8 @@
             "South": "South",
             "East": "East",
             "North": "North",
-            "West": "West"
+            "West": "West",
+            "Toggle": "Elevation band (side view)"
         },
         "Section": {
             "Title": "Section"

@@ -358,6 +358,17 @@ else
                         </TooltipContent>
                     </MudTooltip>
                 </div>
+                @if (!IsArch && !_view3d)
+                {
+                    @* Bande d'élévation (vue de côté du bâtiment, curseur de niveau) : elle agit sur la zone de dessin,
+                       le bouton est donc posé dessus ; il se décale de la largeur de la bande quand elle est ouverte. *@
+                    <div class="bp-canvas-elev">
+                        <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Elevation.Toggle")" Placement="Placement.Right">
+                            <MudIconButton Icon="@MDIIcons.Filled.PageLayoutSidebarLeft" Color="Color.Primary" Size="Size.Small"
+                                           Variant="@(_houseElev ? Variant.Filled : Variant.Outlined)" OnClick="ToggleHouseElevAsync"/>
+                        </MudTooltip>
+                    </div>
+                }
             </div>
 
             @* Colonne droite : volet à la demande (un seul à la fois) + rail d'icônes toujours présent. *@
@@ -427,6 +438,7 @@ else
     private bool IsArch => _document.IsArchitecture;
     private const string View3d = "3d";   // valeur du toggle de mode pour le rendu 3D (état de vue, hors document)
     private bool _view3d, _cap;
+    private bool _houseElev;   // mode maison : bande d'élévation affichée (préférence d'affichage, pas une donnée du plan)
 
     // Options des outils de forme (état de la page, pas du document, comme le matériau courant).
     private sealed record ShapeOptions(bool Subtract = false, bool Hollow = false, int Thickness = 1, int Height = 3);
@@ -847,6 +859,12 @@ else
 
     private async Task UpdateRoomAsync(PlanRoom room) => await Js("updateRoom", PlanDocumentJson.SerializePart(room));
     private async Task UpdateObjectAsync(PlanObject obj) => await Js("updateObject", PlanDocumentJson.SerializePart(obj));
+
+    private async Task ToggleHouseElevAsync()
+    {
+        _houseElev = !_houseElev;
+        await Js("setHouseElev", _houseElev);
+    }
 
     private string LevelLabel(int level)
     {

@@ -450,6 +450,15 @@
     inset: 0;
 }
 
+/* Bascule de la bande d'élévation : en surimpression haut-gauche de la zone de dessin ; --bp-strip-w est
+   posée par le canvas (building-planner.js) pour que le bouton longe la bande quand elle est ouverte. */
+.bp-canvas-elev {
+    position: absolute;
+    top: 6px;
+    left: calc(var(--bp-strip-w, 0px) + 6px);
+    z-index: 1;
+}
+
 /* Boutons annuler/zoom + « i » des raccourcis, en surimpression bas-gauche du canvas.
    pointer-events: none sur le conteneur (le canvas reste cliquable), réactivé sur chaque bouton. */
 .bp-canvas-actions {

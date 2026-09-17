@@ -1197,7 +1197,8 @@
             "South": "Sud",
             "East": "Est",
             "North": "Nord",
-            "West": "Ouest"
+            "West": "Ouest",
+            "Toggle": "Bande d’élévation (vue de côté)"
         },
         "Section": {
             "Title": "Coupe"

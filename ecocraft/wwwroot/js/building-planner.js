@@ -151,6 +151,7 @@ window.ecoBuildingPlanner = (function () {
             cutEyes: [],              // zones cliquables des yeux du plan de coupe (écran)
             bgImage: null,            // Image du fond de plan (pixels), placement dans plan.architecture.image
             bgVisible: true,
+            houseElev: false,         // mode maison : bande d'élévation affichée (bascule de la barre d'outils, non persistée)
             // Rendu 3D (état de vue) : caméra orbitale, coupe au-dessus de la couche, maillage et atlas d'icônes.
             view3d: { on: false, cap: false, yaw: -0.6, pitch: 0.55, dist: 40, target: [0, 0, 0], canvas: view3dCanvas, gl: null, data: null, bbox: null, faces: 0, dirty: true, upload: false, tooMany: false,
                 atlas: { canvas: null, ctx: null, slots: {}, pending: {}, next: 0, dirty: false } },
@@ -493,23 +494,31 @@ window.ecoBuildingPlanner = (function () {
     // Vue de côté : projection le long de axis ('x' ou 'y') vers dir (+1 : indices croissants). cut = cellules du plan
     // index (null pour une élévation depuis le bord), beyond = premier bloc rencontré au-delà, depth = sa distance.
     // cols = l'autre axe horizontal (miroir si le spectateur le voit de droite à gauche), rows = z.
-    function sideView(vox, axis, index, dir) {
+    // objs (mode maison) = cellules de meubles : obj[o] vaut 1 si le meuble est devant tout bloc, 2 s'il est derrière
+    // (un meuble dans une pièce fermée est toujours masqué par un mur : il se dessine alors en transparence).
+    function sideView(vox, axis, index, dir, objs) {
         const along = axis === 'x' ? vox.W : vox.D, cols = axis === 'x' ? vox.D : vox.W, rows = vox.H;
         const mirror = axis === 'x' ? dir < 0 : dir > 0;
         const cut = index == null ? null : new Uint16Array(cols * rows), beyond = new Uint16Array(cols * rows), depth = new Int16Array(cols * rows).fill(-1);
+        const obj = objs ? new Uint8Array(cols * rows) : null;   // meuble rencontré avant tout bloc (mode maison)
         const start = index == null ? (dir > 0 ? 0 : along - 1) : index + dir;
         for (let z = 0; z < rows; z++) for (let c = 0; c < cols; c++) {
             const cc = mirror ? cols - 1 - c : c;
             const o = c + cols * z;
             if (cut) cut[o] = axis === 'x' ? voxAt(vox, index, cc, z) : voxAt(vox, cc, index, z);
+            let hitBlock = false, hitObj = 0;
             for (let k = start, d = 0; k >= 0 && k < along; k += dir, d++) {
-                const v = axis === 'x' ? voxAt(vox, k, cc, z) : voxAt(vox, cc, k, z);
-                if (v) { beyond[o] = v; depth[o] = d; break; }
+                const x = axis === 'x' ? k : cc, y = axis === 'x' ? cc : k;
+                const v = voxAt(vox, x, y, z);
+                if (v && !hitBlock) { beyond[o] = v; depth[o] = d; hitBlock = true; if (!objs) break; }
+                if (objs && !hitObj && objs.has(x + vox.W * (y + vox.D * z))) hitObj = hitBlock ? 2 : 1;
+                if (hitBlock && hitObj) break;
             }
+            if (obj) obj[o] = hitObj;
         }
-        return { cols: cols, rows: rows, cut: cut, beyond: beyond, depth: depth };
+        return { cols: cols, rows: rows, cut: cut, beyond: beyond, depth: depth, obj: obj };
     }
-    function elevation(vox, axis, dir) { return sideView(vox, axis, null, dir); }
+    function elevation(vox, axis, dir, objs) { return sideView(vox, axis, null, dir, objs); }
     function section(vox, axis, index, dir) { return sideView(vox, axis, index, dir); }
 
     // Même tri qu'ArchitectureEvaluator : total décroissant puis nom.
@@ -1310,8 +1319,13 @@ window.ecoBuildingPlanner = (function () {
         const w = st.container.clientWidth, h = st.container.clientHeight;
         ctx.fillStyle = st.palette.bg;
         ctx.fillRect(0, 0, w, h);
-        if (st.view3d.on) { const b = bands(st); if (b.strip && st.vox) drawElevationStrip(st, ctx, b.strip); return; }   // le centre est le canvas WebGL
-        if (isArch(st)) renderStaticArch(st, ctx); else renderStaticHouse(st, ctx);
+        const b = bands(st);
+        // Largeur de la bande pour les surcouches HTML (la bascule de la bande longe son bord).
+        if (st.container.parentElement) st.container.parentElement.style.setProperty('--bp-strip-w', (b.strip ? b.strip.w : 0) + 'px');
+        if (st.view3d.on) { if (b.strip && st.vox) drawElevationStrip(st, ctx, b.strip); return; }   // le centre est le canvas WebGL
+        if (isArch(st)) { renderStaticArch(st, ctx); return; }
+        renderStaticHouse(st, ctx);
+        if (b.strip && st.vox) drawElevationStrip(st, ctx, b.strip);
     }
 
     // Grille et coordonnées, communes aux deux modes.
@@ -1343,20 +1357,36 @@ window.ecoBuildingPlanner = (function () {
     // Bande d'élévation : cases carrées, jamais étirées (une tour de 179 couches sur 75 colonnes était déformée 2,4×).
     // La case est imposée par la hauteur disponible (plafonnée), la bande s'élargit pour contenir le plus grand côté de
     // la grille entre STRIP_W et 30 % du conteneur ; au-delà la case se réduit et le sol reste en bas.
+    // Hauteur montrée par la bande : toutes les couches en architecture / 3D, le seul bâtiment en mode maison
+    // (architecture.height, 20 par défaut, laisserait la moitié de la bande vide au-dessus d'une maison de 9 couches).
+    function stripH(st) {
+        const vox = st.vox;
+        if (!vox) return 1;
+        if (isArch(st) || st.view3d.on) return vox.H;
+        let h = levelBaseY(st, st.plan.levels.length) + 1;
+        st.plan.architecture.ops.forEach(function (op) {
+            if (op.subtract || !validOp(op)) return;
+            // Un trait de crayon (kind 'cells') n'a pas de boîte englobante : sa hauteur est celle de ses triplets.
+            if (op.kind === 'cells') { for (let i = 2; i < op.cells.length; i += 3) h = Math.max(h, op.cells[i] + 1); }
+            else h = Math.max(h, opBounds(op).z1 + 1);
+        });
+        return Math.max(1, Math.min(vox.H, h));
+    }
+
     function stripLayout(st, w, h) {
         const maxW = Math.min(STRIP_MAX_W, Math.floor(w * 0.3)), minW = Math.min(STRIP_W, maxW), vox = st.vox;
         if (!vox) return { w: minW, cell: 1 };
         const cols = Math.max(1, vox.W, vox.D), avail = Math.max(1, h - STRIP_TOP - STRIP_BOTTOM);
-        const cell = Math.max(1, Math.min(avail / Math.max(1, vox.H), (maxW - 2 * STRIP_PAD) / cols, STRIP_MAX_CELL));
+        const cell = Math.max(1, Math.min(avail / Math.max(1, stripH(st)), (maxW - 2 * STRIP_PAD) / cols, STRIP_MAX_CELL));
         return { w: Math.round(Math.max(minW, Math.min(maxW, cols * cell + 2 * STRIP_PAD))), cell: cell };
     }
 
     function bands(st) {
-        if (!isArch(st) && !st.view3d.on) return { strip: null, section: null };
+        if (!isArch(st) && !st.view3d.on && !st.houseElev) return { strip: null, section: null };
         const w = st.container.clientWidth, h = st.container.clientHeight;
         const strip = { x: 0, y: 0, w: stripLayout(st, w, h).w, h: h };
         let section = null;
-        if (st.cut && !st.view3d.on) {
+        if (st.cut && !st.view3d.on && isArch(st)) {
             const sw = Math.min(SECTION_W, Math.floor(w * 0.35)), sh = Math.min(SECTION_H, Math.floor(h * 0.35));
             if (st.cut.axis === 'x') section = st.cut.dir > 0 ? { x: w - sw, y: 0, w: sw, h: h } : { x: strip.w + GAP, y: 0, w: sw, h: h };
             else section = st.cut.dir > 0 ? { x: strip.w + GAP, y: h - sh, w: w - strip.w - GAP, h: sh } : { x: strip.w + GAP, y: 0, w: w - strip.w - GAP, h: sh };
@@ -1499,10 +1529,16 @@ window.ecoBuildingPlanner = (function () {
     // Face regardée par l'élévation → axe de projection et sens (sideView gère le miroir : la vue est celle d'un spectateur debout de ce côté).
     const ELEV_SIDES = { s: { axis: 'y', dir: -1 }, e: { axis: 'x', dir: -1 }, n: { axis: 'y', dir: 1 }, w: { axis: 'x', dir: 1 } };
     const ELEV_ORDER = ['s', 'e', 'n', 'w'];
+    const OBJ_SIDE_COLOR = 'rgba(207,212,218,0.9)';    // meubles dans l'élévation : même gris clair que les cubes de meubles en 3D
+    const OBJ_SIDE_XRAY = 'rgba(207,212,218,0.45)';   // meuble derrière un mur : en transparence par-dessus la façade
 
     // Élévation : vue depuis la face choisie (sud par défaut = bord bas du plan), échelles indépendantes — c'est d'abord le curseur de couche.
     function drawElevationStrip(st, ctx, r) {
-        const vox = st.vox, side = ELEV_SIDES[st.elevSide] || ELEV_SIDES.s, view = elevation(vox, side.axis, side.dir);
+        const vox = st.vox, side = ELEV_SIDES[st.elevSide] || ELEV_SIDES.s;
+        // Mode maison : la bande montre aussi le mobilier et son curseur désigne un niveau entier, pas une couche.
+        const house = !isArch(st) && !st.view3d.on;
+        const objs = house ? v3dObjectCells(st) : null;
+        const view = elevation(vox, side.axis, side.dir, objs && objs.size ? objs : null);
         const labels = st.options.labels || {}, sides = labels.sides || {};
         bandFrame(st, ctx, r, '');
         // En-tête : flèches bleues de part et d'autre pour tourner la face regardée, titre centré « Élévation · Sud ».
@@ -1521,21 +1557,35 @@ window.ecoBuildingPlanner = (function () {
         const cell = stripLayout(st, st.container.clientWidth, st.container.clientHeight).cell, colW = cell, rowH = cell;
         const x0 = r.x + (r.w - view.cols * colW) / 2;
         const zy = function (z) { return bottom - (z + 1) * rowH; };
-        for (let z = 0; z < vox.H; z++) for (let c = 0; c < view.cols; c++) {
-            const o = c + view.cols * z, v = view.beyond[o];
-            if (!v) continue;
-            ctx.fillStyle = sideColor(st, v, 0, 0.9, 0.9);   // silhouette uniforme : pas d'ombrage par profondeur dans l'élévation (dégradé illisible sur une tour)
-            ctx.fillRect(x0 + c * colW, zy(z), Math.max(1, colW - 0.5), Math.max(1, rowH - 0.5));
+        const rows = stripH(st);
+        for (let z = 0; z < rows; z++) for (let c = 0; c < view.cols; c++) {
+            const o = c + view.cols * z, v = view.beyond[o], furniture = view.obj ? view.obj[o] : 0;
+            if (!v && !furniture) continue;
+            const px = x0 + c * colW, py = zy(z), pw = Math.max(1, colW - 0.5), ph = Math.max(1, rowH - 0.5);
+            // Silhouette uniforme : pas d'ombrage par profondeur dans l'élévation (dégradé illisible sur une tour).
+            if (v) { ctx.fillStyle = sideColor(st, v, 0, 0.9, 0.9); ctx.fillRect(px, py, pw, ph); }
+            if (furniture) { ctx.fillStyle = furniture === 1 ? OBJ_SIDE_COLOR : OBJ_SIDE_XRAY; ctx.fillRect(px, py, pw, ph); }
         }
         // Sol, couche courante (bande + trait) et son numéro.
         ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(r.x + 4, bottom + 0.5); ctx.lineTo(r.x + r.w - 4, bottom + 0.5); ctx.stroke();
+        // Mode maison : un trait fin sous chaque dalle pour lire les étages dans la silhouette.
+        if (house) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1;
+            for (let k = 1; k < st.plan.levels.length; k++) {
+                const y = Math.round(zy(levelBaseY(st, k)) + rowH) + 0.5;
+                ctx.beginPath(); ctx.moveTo(r.x + 4, y); ctx.lineTo(r.x + r.w - 4, y); ctx.stroke();
+            }
+        }
+        // Curseur : une couche en architecture / 3D, la tranche complète du niveau courant en maison.
+        const z0 = house ? levelBaseY(st, st.level) : st.layer;
+        const z1 = house ? Math.max(z0, Math.min(rows - 1, levelBaseY(st, st.level + 1) - 1)) : st.layer;
         ctx.fillStyle = 'rgba(79,163,247,0.25)';
-        ctx.fillRect(r.x + 2, zy(st.layer), r.w - 4, rowH);
+        ctx.fillRect(r.x + 2, zy(z1), r.w - 4, (z1 - z0 + 1) * rowH);
         ctx.strokeStyle = st.palette.primary; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(r.x + 2, zy(st.layer)); ctx.lineTo(r.x + r.w - 2, zy(st.layer)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(r.x + 2, zy(z1)); ctx.lineTo(r.x + r.w - 2, zy(z1)); ctx.stroke();
         ctx.fillStyle = st.palette.primary; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-        ctx.fillText('z ' + st.layer, r.x + r.w - 8, r.y + 24);
+        ctx.fillText(house ? 'N ' + (st.level - (st.plan.groundIndex || 0)) : 'z ' + st.layer, r.x + r.w - 8, r.y + 24);
         st.stripGeom = { top: top, bottom: bottom, rowH: rowH, x0: x0, colW: colW, view: view, axis: side.axis, dir: side.dir, index: null };
     }
 
@@ -1637,6 +1687,10 @@ window.ecoBuildingPlanner = (function () {
 
         const origin = toScreen(st, 0, 0);
         const gw = plan.grid.width * cs, gh = plan.grid.depth * cs;
+
+        const vr = viewRect(st);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(vr.x, vr.y, vr.w, vr.h); ctx.clip();   // le plan ne déborde pas sur la bande d'élévation
 
         // Terrain de la grille.
         ctx.fillStyle = 'rgba(255,255,255,0.03)';
@@ -1766,6 +1820,7 @@ window.ecoBuildingPlanner = (function () {
         }
 
         drawRuler(st, ctx, cs, origin);
+        ctx.restore();
     }
 
     // Couleur du bloc dans le jeu, extraite de son icône côté serveur (ClientMaterial.Color) ; un matériau
@@ -1944,6 +1999,9 @@ window.ecoBuildingPlanner = (function () {
         const cs = cellSize(st);
         if (isArch(st)) { renderDynamicArch(st, ctx, cs); return; }
         const level = cur(st);
+        const vr = viewRect(st);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(vr.x, vr.y, vr.w, vr.h); ctx.clip();
 
         drawMaterialHighlight(st, ctx, cs);
 
@@ -2000,6 +2058,7 @@ window.ecoBuildingPlanner = (function () {
 
         // Aperçu de l'outil.
         drawPreview(st, ctx, cs);
+        ctx.restore();
 
         drawLegend(st, ctx);
     }
@@ -2284,6 +2343,13 @@ window.ecoBuildingPlanner = (function () {
         return Math.floor((g.bottom - py) / g.rowH);
     }
 
+    // Clic ou glisser dans la bande : couche en architecture / 3D, niveau contenant la couche visée en mode maison.
+    function stripSetFromY(st, py) {
+        const z = stripLayerAt(st, py);
+        if (isArch(st) || st.view3d.on) setLayerInternal(st, z);
+        else setLevelInternal(st, levelIndexAtY(st, Math.max(0, z)));
+    }
+
     // Le pointeur est-il sur le trait de coupe (à 6 px près) ?
     function onCutLine(st, px, py) {
         const l = st.cutLine; if (!l) return false;
@@ -2299,7 +2365,7 @@ window.ecoBuildingPlanner = (function () {
             if (Math.hypot(pc.px - a.x, pc.py - a.y) <= a.r) { st.elevSide = ELEV_ORDER[(ELEV_ORDER.indexOf(st.elevSide) + a.delta + 4) % 4]; st.staticDirty = true; requestRender(st); return true; }
         }
         if (pc.py < b.strip.y + 26) return true;   // reste de l'en-tête : rien
-        st.drag = { kind: 'layer' }; setLayerInternal(st, stripLayerAt(st, pc.py));
+        st.drag = { kind: 'layer' }; stripSetFromY(st, pc.py);
         return true;
     }
 
@@ -2443,6 +2509,7 @@ window.ecoBuildingPlanner = (function () {
         if (e.button === 0 && inRect(st.legendHit, pc.px, pc.py)) { st.legend = !st.legend; requestRender(st); return; }
         if (st.view3d.on) { onPointerDown3d(st, e, pc); return; }
         if (isArch(st) && onPointerDownArch(st, e, pc)) return;
+        if (!isArch(st) && stripPointerDown(st, e, pc, bands(st))) return;
 
         if (e.button === 1 || st.tool === 'pan' || (e.button === 0 && e.altKey)) {
             // Clic milieu relâché sans bouger : pipette (voir onPointerUp) ; glissé : déplacement de la vue.
@@ -2506,7 +2573,7 @@ window.ecoBuildingPlanner = (function () {
                 v.target[0] += -dx * cy - dy * sp * sy; v.target[1] += dx * sy - dy * sp * cy; v.target[2] += dy * cp;
                 d.px = pc.px; d.py = pc.py; requestRender(st);
             } else if (d && d.kind === 'layer') {
-                setLayerInternal(st, stripLayerAt(st, pc.py));
+                stripSetFromY(st, pc.py);
             }
             return;
         }
@@ -2547,7 +2614,7 @@ window.ecoBuildingPlanner = (function () {
                 drag.last = pc.cell;
                 if (drag.dirtyVox) { refreshVox(st); drag.dirtyVox = false; st.staticDirty = true; }
             } else if (st.drag.kind === 'layer') {
-                setLayerInternal(st, stripLayerAt(st, pc.py));
+                stripSetFromY(st, pc.py);
             } else if (st.drag.kind === 'sideShape') {
                 st.drag.cur = sideCellClamped(st.drag.geom, pc.px, pc.py);
             } else if (st.drag.kind === 'curveHandle') {
@@ -2661,11 +2728,13 @@ window.ecoBuildingPlanner = (function () {
     function onWheel(st, e) {
         e.preventDefault();
         const pc = pointerCell(st, e);
-        if (isArch(st) || st.view3d.on) {
-            const b = bands(st);
-            if (inRect(b.strip, pc.px, pc.py)) { setLayerInternal(st, st.layer + (e.deltaY < 0 ? 1 : -1)); return; }
-            if (inRect(b.section, pc.px, pc.py)) return;
+        const b = bands(st);
+        if (inRect(b.strip, pc.px, pc.py)) {
+            if (isArch(st) || st.view3d.on) setLayerInternal(st, st.layer + (e.deltaY < 0 ? 1 : -1));
+            else setLevelInternal(st, st.level + (e.deltaY < 0 ? 1 : -1));
+            return;
         }
+        if (inRect(b.section, pc.px, pc.py)) return;
         if (st.view3d.on) { st.view3d.dist = Math.max(2, Math.min(2000, st.view3d.dist * (e.deltaY < 0 ? 1 / 1.12 : 1.12))); requestRender(st); return; }
         const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
         zoomAt(st, factor, pc.px, pc.py);
@@ -3193,10 +3262,11 @@ window.ecoBuildingPlanner = (function () {
         },
         toggleBackgroundVisible: function (id) { const st = get(id); if (st) { st.bgVisible = !st.bgVisible; st.staticDirty = true; requestRender(st); } },
         getCut: function (id) { const st = get(id); return st ? st.cut : null; },
+        setHouseElev: function (id, on) { const st = get(id); if (!st) return; st.houseElev = !!on; st.staticDirty = true; fit(st); },
         setView3d: function (id, on) { const st = get(id); if (st) setView3dInternal(st, on); },
         setView3dCap: function (id, on) { const st = get(id); if (!st) return; st.view3d.cap = !!on; st.view3d.dirty = true; notifyView3d(st); requestRender(st); },
         getView3d: function (id) { const st = get(id); if (!st) return null; const v = st.view3d; if (v.on && v.dirty && st.vox) view3dBuild(st); return { on: v.on, cap: v.cap, yaw: v.yaw, pitch: v.pitch, dist: v.dist, faces: v.faces, tooMany: v.tooMany }; },
-        getView: function (id) { const st = get(id); return st ? { scale: st.view.scale, ox: st.view.ox, oy: st.view.oy, cell: CELL, layer: st.layer, elevSide: st.elevSide, strip: st.stripGeom ? { colW: st.stripGeom.colW, rowH: st.stripGeom.rowH, x0: st.stripGeom.x0, w: bands(st).strip ? bands(st).strip.w : 0 } : null } : null; },
+        getView: function (id) { const st = get(id); return st ? { scale: st.view.scale, ox: st.view.ox, oy: st.view.oy, cell: CELL, layer: st.layer, level: st.level, elevSide: st.elevSide, houseElev: st.houseElev, strip: st.stripGeom && bands(st).strip ? { colW: st.stripGeom.colW, rowH: st.stripGeom.rowH, x0: st.stripGeom.x0, w: bands(st).strip.w } : null } : null; },
         // Fonctions pures exposées pour le test de parité avec ArchitectureEvaluator (Node).
         evalOps: evalOps, countByMaterial: countByMaterial, elevation: elevation, section: section, normalizePlan: normalizePlan,
         resizePlan: function (id, width, depth) {
