@@ -1,0 +1,2159 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes Lumber",
+ "mode": "architecture",
+ "grid": {
+  "width": 47,
+  "depth": 34
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "Stairs rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 1,
+    "name": "Stairs rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 2,
+    "name": "Stairs rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 3,
+    "name": "Stairs rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "Ladder rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 1,
+    "name": "Ladder rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 2,
+    "name": "Ladder rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 3,
+    "name": "Ladder rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     8,
+     1
+    ],
+    "b": [
+     5,
+     8,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along x"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     9,
+     1
+    ],
+    "b": [
+     1,
+     11,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along y"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     8,
+     8,
+     1
+    ],
+    "b": [
+     12,
+     8,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T bar"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     9,
+     1
+    ],
+    "b": [
+     10,
+     11,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T stem"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     15,
+     8,
+     1
+    ],
+    "b": [
+     15,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of WindowGrilles"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     16,
+     8,
+     1
+    ],
+    "b": [
+     18,
+     8,
+     2
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "WindowGrilles 3x2 in a wall"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     16,
+     8,
+     3
+    ],
+    "b": [
+     18,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above WindowGrilles"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     19,
+     8,
+     1
+    ],
+    "b": [
+     19,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of WindowGrilles"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     22,
+     8,
+     1
+    ],
+    "b": [
+     22,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of Window"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     23,
+     8,
+     1
+    ],
+    "b": [
+     25,
+     8,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window 3x2 in a wall"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     23,
+     8,
+     3
+    ],
+    "b": [
+     25,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above Window"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     26,
+     8,
+     1
+    ],
+    "b": [
+     26,
+     8,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of Window"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     29,
+     8,
+     1
+    ],
+    "b": [
+     33,
+     11,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     36,
+     8,
+     1
+    ],
+    "b": [
+     36,
+     8,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column x3"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     38,
+     8,
+     1
+    ],
+    "b": [
+     38,
+     8,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     40,
+     8,
+     1
+    ],
+    "b": [
+     40,
+     8,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     42,
+     8,
+     1
+    ],
+    "b": [
+     42,
+     8,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     44,
+     8,
+     1
+    ],
+    "b": [
+     44,
+     8,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     14,
+     1
+    ],
+    "b": [
+     5,
+     14,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence L along x"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     15,
+     1
+    ],
+    "b": [
+     1,
+     17,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence L along y"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     8,
+     14,
+     1
+    ],
+    "b": [
+     12,
+     14,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence T bar"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     15,
+     1
+    ],
+    "b": [
+     10,
+     17,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence T stem"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     20,
+     1
+    ],
+    "b": [
+     7,
+     24,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube base of the hip roof"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     2,
+     20,
+     2
+    ],
+    "b": [
+     6,
+     20,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     2,
+     24,
+     2
+    ],
+    "b": [
+     6,
+     24,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     21,
+     2
+    ],
+    "b": [
+     1,
+     23,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     7,
+     21,
+     2
+    ],
+    "b": [
+     7,
+     23,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     20,
+     2
+    ],
+    "b": [
+     1,
+     20,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     7,
+     20,
+     2
+    ],
+    "b": [
+     7,
+     20,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     7,
+     24,
+     2
+    ],
+    "b": [
+     7,
+     24,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     1,
+     24,
+     2
+    ],
+    "b": [
+     1,
+     24,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     3,
+     21,
+     3
+    ],
+    "b": [
+     5,
+     21,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     3,
+     23,
+     3
+    ],
+    "b": [
+     5,
+     23,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     2,
+     22,
+     3
+    ],
+    "b": [
+     2,
+     22,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     6,
+     22,
+     3
+    ],
+    "b": [
+     6,
+     22,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     2,
+     21,
+     3
+    ],
+    "b": [
+     2,
+     21,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     6,
+     21,
+     3
+    ],
+    "b": [
+     6,
+     21,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     6,
+     23,
+     3
+    ],
+    "b": [
+     6,
+     23,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     2,
+     23,
+     3
+    ],
+    "b": [
+     2,
+     23,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     3,
+     22,
+     4
+    ],
+    "b": [
+     5,
+     22,
+     4
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "hip ridge along x"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     20,
+     1
+    ],
+    "b": [
+     16,
+     24,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube ring"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     11,
+     21,
+     1
+    ],
+    "b": [
+     15,
+     23,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube core"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     10,
+     20,
+     2
+    ],
+    "b": [
+     16,
+     24,
+     2
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 1"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     11,
+     21,
+     3
+    ],
+    "b": [
+     15,
+     23,
+     3
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 2"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     12,
+     22,
+     4
+    ],
+    "b": [
+     14,
+     22,
+     4
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof ridge"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     19,
+     22,
+     1
+    ],
+    "b": [
+     23,
+     22,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross along x"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     21,
+     20,
+     1
+    ],
+    "b": [
+     21,
+     21,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross north arm"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     21,
+     23,
+     1
+    ],
+    "b": [
+     21,
+     24,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross south arm"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     26,
+     20,
+     1
+    ],
+    "b": [
+     28,
+     20,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along x"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "LumberItem",
+    "a": [
+     26,
+     21,
+     1
+    ],
+    "b": [
+     26,
+     23,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along y"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     1,
+     27,
+     1
+    ],
+    "b": [
+     1,
+     27,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "HardwoodLumberItem Stairs"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     3,
+     27,
+     1
+    ],
+    "b": [
+     3,
+     27,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "HardwoodLumberItem Wall"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     5,
+     27,
+     1
+    ],
+    "b": [
+     5,
+     27,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "HardwoodLumberItem Floor"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     7,
+     27,
+     1
+    ],
+    "b": [
+     7,
+     27,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "HardwoodLumberItem Column"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     9,
+     27,
+     1
+    ],
+    "b": [
+     9,
+     27,
+     1
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "HardwoodLumberItem Roof"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     11,
+     27,
+     1
+    ],
+    "b": [
+     11,
+     27,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "HardwoodLumberItem Stacked1"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     13,
+     27,
+     1
+    ],
+    "b": [
+     13,
+     27,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "HardwoodLumberItem Stacked2"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     15,
+     27,
+     1
+    ],
+    "b": [
+     15,
+     27,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "HardwoodLumberItem Stacked3"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     17,
+     27,
+     1
+    ],
+    "b": [
+     17,
+     27,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "HardwoodLumberItem WindowGrilles"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     19,
+     27,
+     1
+    ],
+    "b": [
+     19,
+     27,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "HardwoodLumberItem Window"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     21,
+     27,
+     1
+    ],
+    "b": [
+     21,
+     27,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "HardwoodLumberItem Fence"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     23,
+     27,
+     1
+    ],
+    "b": [
+     23,
+     27,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "HardwoodLumberItem Cube"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     25,
+     27,
+     1
+    ],
+    "b": [
+     25,
+     27,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "HardwoodLumberItem Ladder"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     27,
+     27,
+     1
+    ],
+    "b": [
+     27,
+     27,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofPeakSet"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     29,
+     27,
+     1
+    ],
+    "b": [
+     29,
+     27,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofSide"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     31,
+     27,
+     1
+    ],
+    "b": [
+     31,
+     27,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofTurn"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     33,
+     27,
+     1
+    ],
+    "b": [
+     33,
+     27,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofCorner"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     35,
+     27,
+     1
+    ],
+    "b": [
+     35,
+     27,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofPeak"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodLumberItem",
+    "a": [
+     37,
+     27,
+     1
+    ],
+    "b": [
+     37,
+     27,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "HardwoodLumberItem RoofCube"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     1,
+     30,
+     1
+    ],
+    "b": [
+     1,
+     30,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Stairs"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     3,
+     30,
+     1
+    ],
+    "b": [
+     3,
+     30,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Wall"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     5,
+     30,
+     1
+    ],
+    "b": [
+     5,
+     30,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Floor"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     7,
+     30,
+     1
+    ],
+    "b": [
+     7,
+     30,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Column"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     9,
+     30,
+     1
+    ],
+    "b": [
+     9,
+     30,
+     1
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Roof"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     11,
+     30,
+     1
+    ],
+    "b": [
+     11,
+     30,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Stacked1"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     13,
+     30,
+     1
+    ],
+    "b": [
+     13,
+     30,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Stacked2"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     15,
+     30,
+     1
+    ],
+    "b": [
+     15,
+     30,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Stacked3"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     17,
+     30,
+     1
+    ],
+    "b": [
+     17,
+     30,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "SoftwoodLumberItem WindowGrilles"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     19,
+     30,
+     1
+    ],
+    "b": [
+     19,
+     30,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Window"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     21,
+     30,
+     1
+    ],
+    "b": [
+     21,
+     30,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Fence"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     23,
+     30,
+     1
+    ],
+    "b": [
+     23,
+     30,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Cube"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     25,
+     30,
+     1
+    ],
+    "b": [
+     25,
+     30,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "SoftwoodLumberItem Ladder"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     27,
+     30,
+     1
+    ],
+    "b": [
+     27,
+     30,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofPeakSet"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     29,
+     30,
+     1
+    ],
+    "b": [
+     29,
+     30,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofSide"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     31,
+     30,
+     1
+    ],
+    "b": [
+     31,
+     30,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofTurn"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     33,
+     30,
+     1
+    ],
+    "b": [
+     33,
+     30,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofCorner"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     35,
+     30,
+     1
+    ],
+    "b": [
+     35,
+     30,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofPeak"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodLumberItem",
+    "a": [
+     37,
+     30,
+     1
+    ],
+    "b": [
+     37,
+     30,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "SoftwoodLumberItem RoofCube"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

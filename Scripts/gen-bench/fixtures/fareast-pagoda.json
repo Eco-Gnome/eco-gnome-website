@@ -1,0 +1,36 @@
+{
+  "name": "Pagode",
+  "grid": { "width": 24, "depth": 24 },
+  "defaults": { "wallMaterial": "FarEastLumberItem" },
+  "volumes": [
+    { "id": "v1", "x": 6, "y": 6, "width": 12, "depth": 12, "baseZ": 0, "height": 4, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_03", "wallThickness": 1, "floorMaterial": "FarEastLumberItem", "ceilingMaterial": "FarEastLumberItem" },
+    { "id": "v2", "x": 7, "y": 7, "width": 10, "depth": 10, "baseZ": 5, "height": 3, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_05", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "FarEastLumberItem" },
+    { "id": "v3", "x": 8, "y": 8, "width": 8, "depth": 8, "baseZ": 9, "height": 3, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_12", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "FarEastLumberItem" },
+    { "id": "v4", "x": 9, "y": 9, "width": 6, "depth": 6, "baseZ": 13, "height": 3, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_01", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "FarEastLumberItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 6, "y": 6, "width": 12, "depth": 12, "baseZ": 5, "style": "hip", "ridgeAxis": "x", "courses": 2, "overhang": 1, "material": "FarEastLumberItem", "parapet": false },
+    { "x": 7, "y": 7, "width": 10, "depth": 10, "baseZ": 9, "style": "hip", "ridgeAxis": "x", "courses": 2, "overhang": 1, "material": "FarEastLumberItem", "parapet": false },
+    { "x": 8, "y": 8, "width": 8, "depth": 8, "baseZ": 13, "style": "hip", "ridgeAxis": "x", "courses": 2, "overhang": 1, "material": "FarEastLumberItem", "parapet": false },
+    { "x": 9, "y": 9, "width": 6, "depth": 6, "baseZ": 17, "style": "hip", "ridgeAxis": "x", "courses": 0, "overhang": 1, "material": "FarEastLumberItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [],
+  "stairs": [
+    { "x": 8, "y": 15, "fromZ": 0, "toZ": 5, "direction": "north", "width": 1, "material": "FarEastLumberItem" },
+    { "x": 9, "y": 14, "fromZ": 5, "toZ": 9, "direction": "north", "width": 1, "material": "FarEastLumberItem" },
+    { "x": 10, "y": 13, "fromZ": 9, "toZ": 13, "direction": "north", "width": 1, "material": "FarEastLumberItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 5, "width": 2, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "v1", "side": "north", "offset": 3, "width": 2, "height": 2, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v1", "side": "east", "offset": 5, "width": 2, "height": 2, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v2", "side": "north", "offset": 4, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v2", "side": "south", "offset": 4, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v3", "side": "east", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v4", "side": "west", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" }
+  ],
+  "blocks": [],
+  "furniture": []
+}

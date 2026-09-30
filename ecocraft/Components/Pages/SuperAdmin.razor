@@ -302,6 +302,12 @@
                                                    Size="Size.Small"
                                                    OnClick="@(() => ToggleAutomationPlanner(context))"/>
                                 </MudTooltip>
+                                <MudTooltip Text="@(context.IsAiGenerationEnabled ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.DisableAiGeneration") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.EnableAiGeneration"))">
+                                    <MudIconButton Icon="@Icons.Material.Filled.AutoAwesome"
+                                                   Color="@(context.IsAiGenerationEnabled ? Color.Tertiary : Color.Default)"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => ToggleAiGeneration(context))"/>
+                                </MudTooltip>
                                 <MudTooltip Text="@(context.IsDefault ? LocalizationService.GetTranslation("SuperAdmin.ServerTable.UnsetDefault") : LocalizationService.GetTranslation("SuperAdmin.ServerTable.SetDefault"))">
                                     <MudIconButton Icon="@(context.IsDefault ? MDIIcons.Filled.SmartCard : MDIIcons.Filled.SmartCardOff)"
                                                    Color="@(context.IsDefault ? Color.Warning : Color.Default)"
@@ -558,6 +564,25 @@
         if (ContextService.CurrentServer?.Id == server.Id)
         {
             ContextService.CurrentServer.IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled;
+            ContextService.InvokeContextChanged();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ToggleAiGeneration(Server server)
+    {
+        server.IsAiGenerationEnabled = !server.IsAiGenerationEnabled;
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            ServerDbService.UpdateIsAiGenerationEnabled(context, server);
+            return Task.CompletedTask;
+        });
+
+        if (ContextService.CurrentServer?.Id == server.Id)
+        {
+            ContextService.CurrentServer.IsAiGenerationEnabled = server.IsAiGenerationEnabled;
             ContextService.InvokeContextChanged();
         }
 

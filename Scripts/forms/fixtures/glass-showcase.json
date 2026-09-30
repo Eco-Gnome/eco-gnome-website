@@ -1,0 +1,620 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes Glass",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 22
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "ThinWallStraight",
+    "rot": 0,
+    "name": "ThinWallStraight rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "ThinWallStraight",
+    "rot": 1,
+    "name": "ThinWallStraight rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "ThinWallStraight",
+    "rot": 2,
+    "name": "ThinWallStraight rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "ThinWallStraight",
+    "rot": 3,
+    "name": "ThinWallStraight rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "ThinWallCorner",
+    "rot": 0,
+    "name": "ThinWallCorner rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "ThinWallCorner",
+    "rot": 1,
+    "name": "ThinWallCorner rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "ThinWallCorner",
+    "rot": 2,
+    "name": "ThinWallCorner rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "ThinWallCorner",
+    "rot": 3,
+    "name": "ThinWallCorner rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "EdgeWall",
+    "rot": 0,
+    "name": "EdgeWall rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "EdgeWall",
+    "rot": 1,
+    "name": "EdgeWall rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "EdgeWall",
+    "rot": 2,
+    "name": "EdgeWall rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "EdgeWall",
+    "rot": 3,
+    "name": "EdgeWall rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "EdgeWallTurn",
+    "rot": 0,
+    "name": "EdgeWallTurn rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "EdgeWallTurn",
+    "rot": 1,
+    "name": "EdgeWallTurn rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "EdgeWallTurn",
+    "rot": 2,
+    "name": "EdgeWallTurn rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "EdgeWallTurn",
+    "rot": 3,
+    "name": "EdgeWallTurn rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     1,
+     5,
+     1
+    ],
+    "b": [
+     1,
+     5,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     3,
+     5,
+     1
+    ],
+    "b": [
+     3,
+     5,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     5,
+     5,
+     1
+    ],
+    "b": [
+     5,
+     5,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     7,
+     5,
+     1
+    ],
+    "b": [
+     7,
+     5,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     9,
+     5,
+     1
+    ],
+    "b": [
+     9,
+     5,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "Stacked4 x1"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window cross along x"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     3,
+     11,
+     1
+    ],
+    "b": [
+     3,
+     15,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window cross along y"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     8,
+     11,
+     1
+    ],
+    "b": [
+     12,
+     11,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window T bar"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     10,
+     12,
+     1
+    ],
+    "b": [
+     10,
+     14,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window T stem"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     15,
+     11,
+     1
+    ],
+    "b": [
+     19,
+     11,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window L along x"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     15,
+     12,
+     1
+    ],
+    "b": [
+     15,
+     14,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window L along y"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     22,
+     11,
+     1
+    ],
+    "b": [
+     26,
+     11,
+     3
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube wall 5x3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     1,
+     17,
+     2
+    ],
+    "b": [
+     3,
+     19,
+     2
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "FlatRoof 3x3"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     6,
+     17,
+     1
+    ],
+    "b": [
+     8,
+     19,
+     1
+    ],
+    "form": "ThinFloorTop",
+    "rot": 0,
+    "name": "ThinFloorTop 3x3"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "GlassItem",
+    "a": [
+     11,
+     17,
+     1
+    ],
+    "b": [
+     13,
+     19,
+     1
+    ],
+    "form": "ThinFloorBottom",
+    "rot": 0,
+    "name": "ThinFloorBottom 3x3"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

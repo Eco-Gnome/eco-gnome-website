@@ -4,7 +4,7 @@ public enum VoxelKind : byte
 {
     Air,
     Terrain,        // sol par défaut (tier 0, mur)
-    Block,          // bloc de construction posé par le plan (mur, sol, plafond)
+    Block,          // bloc de construction posé par une op du plan
     ObjectOccupied, // WorldObjectBlock [Occupied] : bloque la pose, traversé par la détection de pièce, compte dans le volume
     ObjectWall,     // BuildingWorldObjectBlock [Solid, Wall] : portes, interrupteurs
     ObjectSolid,    // PipeSlotBlock [Solid]
@@ -15,11 +15,9 @@ public struct Voxel
     public VoxelKind Kind;
     public int MaterialIndex;   // index dans BuildContext.Materials (Block), sinon -1
     public int ObjectIndex;     // index de l'objet posé (Object*), sinon -1
-    public bool IsCeiling;
-    public bool IsFloor;
 
     public static readonly Voxel Air = new() { Kind = VoxelKind.Air, MaterialIndex = -1, ObjectIndex = -1 };
-    public static readonly Voxel Terrain = new() { Kind = VoxelKind.Terrain, MaterialIndex = -1, ObjectIndex = -1, IsFloor = true };
+    public static readonly Voxel Terrain = new() { Kind = VoxelKind.Terrain, MaterialIndex = -1, ObjectIndex = -1 };
 
     public bool IsSolid => VoxelGrid.IsSolidKind(Kind);
     public bool IsObject => Kind is VoxelKind.ObjectOccupied or VoxelKind.ObjectWall or VoxelKind.ObjectSolid;

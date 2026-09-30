@@ -47,6 +47,10 @@ TIER0 = {"DirtItem", "GardenGravelItem", "StoneRoadItem", "AsphaltConcreteItem"}
     "CrushedSulfurItem",
 }
 
+# Tuyaux (PipeMaterials de BuildingPlannerCatalogService) : pas des murs, proposés quand même ; couleur de l'icône,
+# tenus hors de l'écartement en luminosité pour ne pas décaler les couleurs des matériaux de construction.
+PIPES = {"CopperPipeItem", "IronPipeItem", "SteelPipeItem"}
+
 # Quelques blocs en vrac sont illustrés dans une caisse ou sur une palette : c'est le bois de l'emballage qui
 # domine l'icône, pas le matériau. Pour ceux-là on part de la couleur minimap du jeu, qui traverse ensuite le
 # même pipeline (Eco/Server/Eco.Simulation/WorldLayers/History/AutoGenBlockColorMap.cs).
@@ -163,9 +167,9 @@ def main():
     mats = []
     for item in data["Items"]:
         b = item.get("BuildingBlock")
-        if not b or not b.get("IsWall") or b.get("IgnoreRooms"):
+        if not b or b.get("IgnoreRooms"):
             continue
-        if b["Tier"] >= 1 or item["Name"] in TIER0:
+        if item["Name"] in PIPES or b.get("IsWall") and (b["Tier"] >= 1 or item["Name"] in TIER0):
             mats.append((item["Name"], b["Tier"], item["LocalizedName"]["en-US"]))
 
     raw, skipped = {}, []
@@ -180,7 +184,8 @@ def main():
         else:
             raw[name] = normalize(*got)
 
-    final = spread(raw)
+    final = spread({k: v for k, v in raw.items() if k not in PIPES})
+    final.update({k: v for k, v in raw.items() if k in PIPES})
     lines = []
     for name, tier, label in sorted(mats, key=lambda m: (m[1], m[2])):
         if name in final:

@@ -1,0 +1,20 @@
+.bp-formrot {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    font-size: 0.8rem;
+}
+
+.bp-formrot-label {
+    opacity: 0.8;
+}
+
+.bp-formrot-low {
+    display: inline-block;
+    min-width: 18px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--mud-palette-primary);
+}

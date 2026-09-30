@@ -1,0 +1,23 @@
+{
+  "set": "ObjectsCrafting",
+  "note": "Tables d'artisanat et machines des spécialités Logging et Carpentry (pose de repos, meshes skinnés posés par leurs os ; pas d'animation ni d'effets). MachinistTable : dans ObjectsCrafting2 (seuls les overrides de transform de la racine d'une instance la déplacent).",
+  "prefabs": [
+    "CarpentryTableObject",
+    "SawmillObject",
+    "KitchenObject",
+    "LoomObject",
+    "TailoringTableObject",
+    "BlacksmithTableObject",
+    "ButcheryTableObject",
+    "FarmersTableObject",
+    "FletchingTableObject",
+    "FiberScutchingStationObject",
+    "PotteryTableObject",
+    "PaintMixerObject",
+    "WainwrightTableObject",
+    "RegistrarObject",
+    "SmallShipyardObject",
+    "HeatedDisplayCabinetObject",
+    "RefrigeratedDisplayCabinetObject"
+  ]
+}

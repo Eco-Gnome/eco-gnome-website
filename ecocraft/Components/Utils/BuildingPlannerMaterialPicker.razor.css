@@ -1,0 +1,88 @@
+/* Sélecteur de matériau (palette de Structure, fiche d'un volume). */
+.bp-matpick {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.bp-matpick-current,
+.bp-matpick-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.82rem;
+}
+
+.bp-matpick-current {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    min-height: 34px;
+}
+
+.bp-matpick-current:hover,
+.bp-matpick-current.open {
+    border-color: var(--mud-palette-primary);
+}
+
+.bp-matpick-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.bp-matpick-item.selected {
+    background: rgba(100, 181, 246, 0.18);
+    outline: 1px solid rgba(100, 181, 246, 0.6);
+}
+
+.bp-matpick-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bp-matpick-tier {
+    flex: 0 0 auto;
+    padding: 0 6px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.7rem;
+}
+
+.bp-matpick ::deep .bp-matpick-caret {
+    flex: 0 0 auto;
+    opacity: 0.7;
+}
+
+/* Class d'un MudTextField = .mud-input-control, flex-grow chez MudBlazor : il ne doit pas s'étirer. */
+.bp-matpick ::deep .bp-matpick-search {
+    flex: 0 0 auto;
+}
+
+.bp-matpick-list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.bp-matpick-group {
+    padding: 6px 6px 2px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+}
+
+/* Pastille de la couleur du bloc : fait le lien avec la case dessinée sur le plan. */
+.bp-mat-dot {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+}

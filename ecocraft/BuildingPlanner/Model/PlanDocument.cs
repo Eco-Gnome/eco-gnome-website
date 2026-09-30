@@ -5,14 +5,15 @@ namespace ecocraft.BuildingPlanner.Model;
 
 // Contrat du document de plan, partagé avec l'îlot JavaScript (JSON camelCase). Les références aux données du
 // jeu se font par Name technique (ex. « LumberItem »), jamais par Guid. Coordonnées du plan : x → Eco X,
-// y → Eco Z, z → Eco Y (vertical). Le bâtiment est une pile de niveaux : le niveau k occupe les couches
-// Y = base_k (sa dalle) .. base_k + hauteur_k (air) ; la dalle du niveau k+1 est le plafond du niveau k.
-// Dans un niveau, z = 1 est la première couche d'air au-dessus de sa dalle.
-// Mode « architecture » : le même document porte une liste d'opérations de formes 3D (Architecture) évaluées
-// en blocs unitaires, sans pièces ni housing ; repasser en mode maison masque ces données sans les supprimer.
+// y → Eco Z, z → Eco Y (vertical). Tout le bâti est dans Architecture.Ops (formes 3D évaluées en blocs unitaires,
+// posées sur le terrain à z = 0) : ni sol ni plafond implicites, comme en jeu. Une pièce est une poche d'air fermée
+// par des blocs, désignée par sa graine. Les niveaux sont des tranches d'affichage et de pose : le niveau k occupe
+// les couches base_k .. base_k + hauteur_k, z = 1 y est la première couche au-dessus de sa base ; ils portent les
+// pièces et les objets. Mode = vue de l'îlot (Structure / Aménagement), l'analyse est la même dans les deux.
+// Un document de schéma < 4 est migré par PlanDocumentJson.Parse (LegacyPlanV3).
 public sealed class PlanDocument
 {
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
     public string Name { get; set; } = "";
@@ -25,22 +26,14 @@ public sealed class PlanDocument
     public AnalysisOptions Analysis { get; set; } = new();
     public Dictionary<string, decimal> Prices { get; set; } = new();   // prix unitaire saisi par Name d'item ; absent → moyenne des prix du serveur
 
-    // Schéma 1 : un seul niveau, collections à la racine. Relues pour la migration, jamais réécrites.
-    public Dictionary<string, WallCell>? Walls { get; set; }
-    public Dictionary<string, string>? Floors { get; set; }
-    public List<PlanRoom>? Rooms { get; set; }
-    public List<PlanObject>? Objects { get; set; }
-
     [JsonIgnore] public bool IsArchitecture => Mode == PlanMode.Architecture;
 
     public static PlanDocument Empty(int width = 25, int depth = 20) => new() { Grid = new GridSize { Width = width, Depth = depth }, Levels = [new PlanLevel()] };
 
-    // Document v1 (ou sans niveau) → un niveau 0 contenant les collections racine ; v2 → mode maison.
+    // Normalisation après lecture (schéma < 4 déjà migré par LegacyPlanV3) : au moins un niveau ; v2 → mode maison.
     public void Migrate()
     {
-        if (Levels.Count == 0)
-            Levels.Add(new PlanLevel { Walls = Walls ?? new(), Floors = Floors ?? new(), Rooms = Rooms ?? [], Objects = Objects ?? [] });
-        Walls = null; Floors = null; Rooms = null; Objects = null;
+        if (Levels.Count == 0) Levels.Add(new PlanLevel());
         GroundIndex = Math.Clamp(GroundIndex, 0, Levels.Count - 1);
         if (Mode != PlanMode.Architecture) Mode = PlanMode.House;
         SchemaVersion = CurrentSchemaVersion;
@@ -66,9 +59,6 @@ public sealed class PlanDocument
             if (y >= LevelBaseY(k)) return k;
         return 0;
     }
-
-    // Hauteur effective d'une pièce : surcharge, sinon la hauteur de son niveau (changer le défaut suit partout).
-    public int RoomHeight(int level, PlanRoom room) => room.Height ?? LevelHeight(level);
 
     public IEnumerable<(int Level, PlanRoom Room)> AllRooms() => Levels.SelectMany((l, k) => l.Rooms.Select(r => (k, r)));
     public IEnumerable<(int Level, PlanObject Object)> AllObjects() => Levels.SelectMany((l, k) => l.Objects.Select(o => (k, o)));
@@ -96,26 +86,15 @@ public sealed class GridSize
 
 public sealed class PlanDefaults
 {
-    public int WallHeight { get; set; } = 3;
-    public string? FloorMaterial { get; set; }    // null → terrain (tier 0) ; niveau 0 seulement
-    public string? CeilingMaterial { get; set; }
+    public int WallHeight { get; set; } = 3;      // hauteur d'un niveau sans surcharge
 }
 
 public sealed class PlanLevel
 {
-    public string Name { get; set; } = "";                                  // vide → libellé par défaut dans l'UI
-    public int? Height { get; set; }                                        // couches d'air ; null → Defaults.WallHeight
-    public Dictionary<string, WallCell> Walls { get; set; } = new();        // clé « x,y »
-    public Dictionary<string, string> Floors { get; set; } = new();         // clé « x,y » → matériau (niveau 0 : surcharge du sol par défaut ; étages : dalle explicite)
-    public Dictionary<string, bool> Holes { get; set; } = new();            // clé « x,y » : ouverture dans la dalle (étages seulement)
+    public string Name { get; set; } = "";        // vide → libellé par défaut dans l'UI
+    public int? Height { get; set; }              // couches au-dessus de la base ; null → Defaults.WallHeight
     public List<PlanRoom> Rooms { get; set; } = [];
     public List<PlanObject> Objects { get; set; } = [];
-}
-
-public sealed class WallCell
-{
-    public string Material { get; set; } = "";
-    public int? Height { get; set; }              // surcharge ; sinon hauteur des pièces adjacentes puis celle du niveau
 }
 
 public sealed class GridPoint
@@ -124,13 +103,19 @@ public sealed class GridPoint
     public int Y { get; set; }
 }
 
+// Graine d'une pièce : Z relatif à la base de son niveau, comme PlanObject.Z (1 = première couche au-dessus).
+public sealed class RoomSeed
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Z { get; set; } = 1;
+}
+
 public sealed class PlanRoom
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public GridPoint Seed { get; set; } = new();
-    public int? Height { get; set; }              // couches d'air ; null → hauteur du niveau ; plafond posé à z = hauteur + 1
-    public string? CeilingMaterial { get; set; }
+    public RoomSeed Seed { get; set; } = new();   // cellule d'air de la poche ; niveau de la pièce = celui de sa cellule la plus basse
     public string? LockCategory { get; set; }     // catégorie housing forcée (comme dans le jeu), sinon estimée
 }
 
@@ -157,7 +142,7 @@ public static class PlanMode
     public const string Architecture = "architecture";
 }
 
-// Mode architecture : formes évaluées dans l'ordre en blocs unitaires ; les cellules hors grille ou au-dessus de
+// Bâti : formes évaluées dans l'ordre en blocs unitaires ; les cellules hors grille ou au-dessus de
 // Height sont rognées à l'évaluation (jamais rejetées), un redimensionnement ne perd donc rien.
 public sealed class ArchitecturePlan
 {
@@ -179,8 +164,14 @@ public sealed class ArchOp
     public int[]? C { get; set; }                           // curve : point de contrôle de la Bézier quadratique A → B
     public string? Axis { get; set; }                       // cylinder : x | y | z (défaut z) ; disque = cylindre avec a.z == b.z
     public bool Hollow { get; set; }                        // box (4 murs), sphere (coque), cylinder (tube)
+    public bool Closed { get; set; }                        // Hollow box / cylinder : fermé aux deux bouts (pavé creux, tube bouché)
     public int Thickness { get; set; } = 1;                 // épaisseur de la coque si Hollow
     public int[]? Cells { get; set; }                       // cells : triplets aplatis [x,y,z, x,y,z, …]
+    // Forme du jeu portée par chaque cellule de l'op (Wall, Floor, RoofSide, RoofCorner, RoofTurn, RoofPeak, Stairs,
+    // Column, Cube) et rotation 0..3 : lues par l'affichage seulement (3D, icône et côté bas en 2D). Pour les pièces et le coût une forme reste un
+    // cube plein, comme en jeu.
+    public string? Form { get; set; }
+    public int? Rot { get; set; }
 }
 
 public sealed class ImagePlacement
@@ -189,19 +180,6 @@ public sealed class ImagePlacement
     public double Y { get; set; }
     public double Width { get; set; } = 20;                 // largeur en cellules ; hauteur déduite du ratio de l'image
     public double Opacity { get; set; } = 0.5;
-}
-
-public static class PlanKeys
-{
-    public static string Make(int x, int y) => $"{x},{y}";
-
-    public static bool TryParse(string key, out int x, out int y)
-    {
-        x = y = 0;
-        var comma = key.IndexOf(',');
-        if (comma <= 0 || comma >= key.Length - 1) return false;
-        return int.TryParse(key.AsSpan(0, comma), out x) && int.TryParse(key.AsSpan(comma + 1), out y);
-    }
 }
 
 public static class PlanDocumentJson
@@ -221,6 +199,8 @@ public static class PlanDocumentJson
     {
         var document = JsonSerializer.Deserialize<PlanDocument>(json, Options);
         if (document is null) throw new JsonException("Empty plan document.");
+        if (document.SchemaVersion < PlanDocument.CurrentSchemaVersion)
+            LegacyPlanV3.Migrate(JsonSerializer.Deserialize<LegacyPlanV3>(json, Options)!, document);
         document.Migrate();
         return document;
     }

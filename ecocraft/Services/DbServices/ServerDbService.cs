@@ -294,6 +294,7 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 		    JoinCode = server.JoinCode,
 		    ApiKey = server.ApiKey,
 		    IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled,
+		    IsAiGenerationEnabled = server.IsAiGenerationEnabled,
 		    HasBuildingData = server.HasBuildingData,
 		    BuildingConfigJson = server.BuildingConfigJson,
 		    HousingConfigJson = server.HousingConfigJson,
@@ -390,12 +391,29 @@ public class ServerDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGe
 	    entry.Property(x => x.IsDefault).IsModified = true;
     }
 
+    public void UpdateAiKeys(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server { Id = server.Id, AiProvider = server.AiProvider, AiKeysJson = server.AiKeysJson };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.AiProvider).IsModified = true;
+	    entry.Property(x => x.AiKeysJson).IsModified = true;
+    }
+
     public void UpdateIsAutomationPlannerEnabled(EcoCraftDbContext context, Server server)
     {
 	    var stub = new Server { Id = server.Id, IsAutomationPlannerEnabled = server.IsAutomationPlannerEnabled };
 	    var entry = context.Entry(stub);
 	    entry.State = EntityState.Unchanged;
 	    entry.Property(x => x.IsAutomationPlannerEnabled).IsModified = true;
+    }
+
+    public void UpdateIsAiGenerationEnabled(EcoCraftDbContext context, Server server)
+    {
+	    var stub = new Server { Id = server.Id, IsAiGenerationEnabled = server.IsAiGenerationEnabled };
+	    var entry = context.Entry(stub);
+	    entry.State = EntityState.Unchanged;
+	    entry.Property(x => x.IsAiGenerationEnabled).IsModified = true;
     }
 
     public void Destroy(EcoCraftDbContext context, Server server)

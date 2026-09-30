@@ -1,0 +1,39 @@
+{
+  "name": "Ferme en planches",
+  "grid": { "width": 28, "depth": 20 },
+  "defaults": { "wallMaterial": "LumberItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 22, "depth": 14, "baseZ": 0, "height": 3, "wallMaterial": "LumberItem", "wallThickness": 1, "floorMaterial": "MortaredStoneItem", "ceilingMaterial": "LumberItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 22, "depth": 14, "baseZ": 4, "style": "hip", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "LumberItem", "parapet": false }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 10, "y0": 4, "x1": 10, "y1": 15, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p2", "x0": 17, "y0": 4, "x1": 17, "y1": 15, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p3", "x0": 11, "y0": 10, "x1": 16, "y1": 10, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p4", "x0": 18, "y0": 10, "x1": 23, "y1": 10, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 }
+  ],
+  "columns": [
+    { "x": 4, "y": 18, "baseZ": 0, "height": 3, "size": 1, "material": "MortaredStoneItem", "count": 6, "stepX": 4, "stepY": 0 }
+  ],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 11, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p1", "side": "west", "offset": 4, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p3", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p2", "side": "west", "offset": 3, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p2", "side": "west", "offset": 9, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p4", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 9, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 17, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 16, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "west", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "west", "offset": 9, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 9, "width": 2, "height": 1, "sill": 1, "kind": "window" }
+  ]
+}

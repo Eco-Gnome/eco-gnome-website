@@ -673,6 +673,13 @@ namespace ecocraft.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AiKeysJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AiProvider")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("ApiKey")
                         .HasColumnType("uuid");
 
@@ -699,6 +706,9 @@ namespace ecocraft.Migrations
 
                     b.Property<string>("HousingConfigJson")
                         .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsAiGenerationEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsAutomationPlannerEnabled")
                         .HasColumnType("boolean");

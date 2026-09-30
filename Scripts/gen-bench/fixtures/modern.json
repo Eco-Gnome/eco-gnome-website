@@ -1,0 +1,31 @@
+{
+  "name": "Modern",
+  "grid": { "width": 30, "depth": 24 },
+  "defaults": { "wallMaterial": "MortaredSandstoneItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 24, "depth": 16, "baseZ": 3, "height": 4, "wallMaterial": "MortaredSandstoneItem", "wallThickness": 1, "floorMaterial": "HewnLogItem", "ceilingMaterial": "HewnLogItem" }
+  ],
+  "slabs": [
+    { "x": 27, "y": 8, "width": 2, "depth": 8, "z": 3, "material": "HewnLogItem", "thickness": 1 }
+  ],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 24, "depth": 16, "baseZ": 8, "style": "flat", "ridgeAxis": "x", "pitch": 1, "overhang": 0, "material": "MortaredSandstoneItem", "parapet": true }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 14, "y0": 4, "x1": 14, "y1": 17, "baseZ": 3, "height": 4, "material": "HewnLogItem", "thickness": 1 }
+  ],
+  "columns": [
+    { "x": 5, "y": 5, "baseZ": 0, "height": 3, "size": 1, "material": "MortaredSandstoneItem", "count": 4, "stepX": 6, "stepY": 0 },
+    { "x": 5, "y": 16, "baseZ": 0, "height": 3, "size": 1, "material": "MortaredSandstoneItem", "count": 4, "stepX": 6, "stepY": 0 }
+  ],
+  "stairs": [
+    { "x": 0, "y": 10, "fromZ": 0, "toZ": 3, "direction": "east", "width": 2, "material": "MortaredSandstoneItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "west", "offset": 7, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "south", "offset": 2, "width": 6, "height": 3, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 14, "width": 6, "height": 3, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 4, "width": 4, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "p1", "side": "west", "offset": 6, "width": 1, "height": 2, "sill": 0, "kind": "door" }
+  ]
+}

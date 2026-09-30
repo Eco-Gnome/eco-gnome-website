@@ -1,0 +1,47 @@
+{
+  "name": "Villa moderne en brique",
+  "grid": { "width": 30, "depth": 24 },
+  "defaults": { "wallMaterial": "BrickItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 20, "depth": 14, "baseZ": 0, "height": 3, "wallMaterial": "BrickItem", "wallThickness": 1, "floorMaterial": "BrickItem", "ceilingMaterial": "LumberItem" },
+    { "id": "v2", "x": 8, "y": 6, "width": 14, "depth": 10, "baseZ": 4, "height": 3, "wallMaterial": "LumberItem", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "LumberItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 20, "depth": 14, "baseZ": 4, "style": "flat", "ridgeAxis": "x", "pitch": 1, "overhang": 0, "material": "LumberItem", "parapet": false },
+    { "x": 8, "y": 6, "width": 14, "depth": 10, "baseZ": 8, "style": "flat", "ridgeAxis": "x", "pitch": 1, "overhang": 0, "material": "LumberItem", "parapet": true }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 9, "y0": 4, "x1": 9, "y1": 15, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p2", "x0": 16, "y0": 4, "x1": 16, "y1": 15, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p3", "x0": 10, "y0": 9, "x1": 15, "y1": 9, "baseZ": 0, "height": 3, "material": "LumberItem", "thickness": 1 },
+    { "id": "p4", "x0": 14, "y0": 7, "x1": 14, "y1": 14, "baseZ": 4, "height": 3, "material": "LumberItem", "thickness": 1 }
+  ],
+  "columns": [
+    { "x": 24, "y": 4, "baseZ": 0, "height": 4, "size": 1, "material": "LumberItem", "count": 4, "stepX": 0, "stepY": 4 }
+  ],
+  "stairs": [
+    { "x": 17, "y": 12, "fromZ": 0, "toZ": 4, "direction": "east", "width": 1, "material": "LumberItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 12, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p1", "side": "west", "offset": 4, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p3", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p2", "side": "west", "offset": 3, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p4", "side": "west", "offset": 3, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 8, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 14, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 15, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "west", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 8, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "north", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "north", "offset": 8, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "south", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "south", "offset": 8, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "west", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "east", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" }
+  ]
+}

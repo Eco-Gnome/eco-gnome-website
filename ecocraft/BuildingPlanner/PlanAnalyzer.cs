@@ -2,29 +2,12 @@
 
 namespace ecocraft.BuildingPlanner;
 
-// Façade : Valider → Construire la grille → Poser → Pièces → Requirements → Housing → Coût. Fonction pure.
+// Façade : Valider → Construire la grille → Poser → Pièces → Requirements → Housing → Coût. Fonction pure, la même
+// dans les deux modes (le mode n'est qu'une vue de l'îlot JS).
 public static class PlanAnalyzer
 {
     // Pièce « Extérieur » du deed : une seule par propriété, tous niveaux confondus, comme dans le jeu.
     public const string OutdoorRoomId = "outdoor";
-
-    // Mode architecture : nomenclature de la maison + formes, pas d'objets, de pièces ni de housing ; les voxels de la
-    // maison partent au canvas (HouseRuns) qui compose les formes lui-même.
-    private static AnalysisResult ArchitectureResult(Catalog catalog, BuildContext ctx, List<PlanIssue> validation)
-    {
-        var unknown = ctx.Materials.Where(m => !m.Known).Select(m => m.Name).Distinct(StringComparer.Ordinal).ToList();
-        if (unknown.Count > 0) ctx.Issues.Insert(0, PlanIssue.Warning("IncompatibleReferences", [unknown.Count.ToString(), string.Join(", ", unknown)]));
-        var (materials, _) = MaterialCostCalculator.Compute(ctx);
-        return new AnalysisResult
-        {
-            Issues = validation.Concat(ctx.Issues).OrderBy(i => i.Severity == IssueSeverity.Error ? 0 : i.Severity == IssueSeverity.Warning ? 1 : 2).ToList(),
-            Materials = materials,
-            GridSizeY = ctx.Grid.SizeY,
-            HousingRulesAreDefaults = catalog.Housing.IsDefault,
-            HouseRuns = ctx.HouseRuns,
-            HouseMaterials = ctx.Materials.Select(m => m.Name).ToList(),
-        };
-    }
 
     public static AnalysisResult Analyze(PlanDocument doc, Catalog catalog)
     {
@@ -33,7 +16,6 @@ public static class PlanAnalyzer
             return new AnalysisResult { Issues = validation, Blocked = true, HousingRulesAreDefaults = catalog.Housing.IsDefault };
 
         var ctx = GridBuilder.Build(doc, catalog);
-        if (doc.IsArchitecture) return ArchitectureResult(catalog, ctx, validation);
         ObjectPlacer.PlaceAll(ctx);
 
         // Détection des pièces et appartenance des objets (≥ 51 % des cellules posées ; empilés → pièce du parent).
@@ -44,7 +26,7 @@ public static class PlanAnalyzer
         foreach (var (level, room) in doc.AllRooms())
         {
             var baseY = doc.LevelBaseY(level);
-            var seed = Geometry.PlanToEco(room.Seed.X, room.Seed.Y, baseY + 1);
+            var seed = Geometry.PlanToEco(room.Seed.X, room.Seed.Y, baseY + room.Seed.Z);
             var stats = RoomChecker.GetRoomStats(ctx, seed);
             roomStats[room.Id] = stats;
             roomSeeds[room.Id] = seed;
@@ -65,8 +47,7 @@ public static class PlanAnalyzer
                 AverageTier = stats.AverageTier,
                 EmptyEdgeCount = stats.EmptyEdgeCount,
                 AverageTierWithoutEmptyEdges = stats.AverageTierExcludingEmptyEdges(),
-                FootprintCellCount = ctx.RoomFootprints.GetValueOrDefault(room.Id)?.Count ?? 0,
-                Height = doc.RoomHeight(level, room),
+                EmptyEdges = stats.EmptyEdges.SelectMany(e => new[] { e.X, e.Z, e.Y }).ToArray(),   // Eco → plan
             };
             rooms.Add(analysis);
 
@@ -90,15 +71,14 @@ public static class PlanAnalyzer
             }
         }
 
-        // Pièces de niveaux différents reliées (ouverture dans la dalle, dalle absente) : un seul espace dans le jeu,
-        // qui serait compté deux fois ici.
+        // Deux graines dans la même poche, tous niveaux confondus : un seul espace dans le jeu, qui serait compté deux fois ici.
         var allRooms = doc.AllRooms().ToList();
         for (var i = 0; i < allRooms.Count; i++)
         for (var j = i + 1; j < allRooms.Count; j++)
         {
-            var (levelA, a) = allRooms[i];
-            var (levelB, b) = allRooms[j];
-            if (levelA == levelB || !roomStats[a.Id].Contained || !roomStats[a.Id].EmptySpace.Contains(roomSeeds[b.Id])) continue;
+            var (_, a) = allRooms[i];
+            var (_, b) = allRooms[j];
+            if (!roomStats[a.Id].Contained || !roomStats[a.Id].EmptySpace.Contains(roomSeeds[b.Id])) continue;
             ctx.Issues.Add(PlanIssue.Warning("RoomsShareSpace", [b.Name, a.Name], roomId: b.Id));
         }
 
@@ -219,8 +199,6 @@ public static class PlanAnalyzer
             ObjectCounts = objectCounts,
             Objects = placed,
             GridSizeY = ctx.Grid.SizeY,
-            HouseRuns = ctx.HouseRuns,
-            HouseMaterials = ctx.Materials.Select(m => m.Name).ToList(),
             HousingRulesAreDefaults = catalog.Housing.IsDefault,
         };
     }

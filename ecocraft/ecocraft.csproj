@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Anthropic" Version="12.49.0" />
     <PackageReference Include="MudBlazor" Version="9.3.0" />
     <PackageReference Include="MudBlazor.Markdown" Version="9.0.0" />
     <PackageReference Include="Z.Blazor.Diagrams" Version="3.0.3" />

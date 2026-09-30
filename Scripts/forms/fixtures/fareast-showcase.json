@@ -1,0 +1,4667 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes FarEastLumberItem",
+ "mode": "architecture",
+ "grid": {
+  "width": 44,
+  "depth": 35
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     2
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "Wall_01 rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     3,
+     1
+    ],
+    "b": [
+     1,
+     3,
+     2
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "Wall_01 rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     2
+    ],
+    "form": "Wall_02",
+    "rot": 0,
+    "name": "Wall_02 rot 0"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     3,
+     1
+    ],
+    "b": [
+     3,
+     3,
+     2
+    ],
+    "form": "Wall_02",
+    "rot": 1,
+    "name": "Wall_02 rot 1"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     2
+    ],
+    "form": "Wall_03",
+    "rot": 0,
+    "name": "Wall_03 rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     3,
+     1
+    ],
+    "b": [
+     5,
+     3,
+     2
+    ],
+    "form": "Wall_03",
+    "rot": 1,
+    "name": "Wall_03 rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     2
+    ],
+    "form": "Wall_04",
+    "rot": 0,
+    "name": "Wall_04 rot 0"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     3,
+     1
+    ],
+    "b": [
+     7,
+     3,
+     2
+    ],
+    "form": "Wall_04",
+    "rot": 1,
+    "name": "Wall_04 rot 1"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     9,
+     1,
+     1
+    ],
+    "b": [
+     9,
+     1,
+     2
+    ],
+    "form": "Wall_05",
+    "rot": 0,
+    "name": "Wall_05 rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     9,
+     3,
+     1
+    ],
+    "b": [
+     9,
+     3,
+     2
+    ],
+    "form": "Wall_05",
+    "rot": 1,
+    "name": "Wall_05 rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     11,
+     1,
+     1
+    ],
+    "b": [
+     11,
+     1,
+     2
+    ],
+    "form": "Wall_06",
+    "rot": 0,
+    "name": "Wall_06 rot 0"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     11,
+     3,
+     1
+    ],
+    "b": [
+     11,
+     3,
+     2
+    ],
+    "form": "Wall_06",
+    "rot": 1,
+    "name": "Wall_06 rot 1"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     13,
+     1,
+     1
+    ],
+    "b": [
+     13,
+     1,
+     2
+    ],
+    "form": "Wall_07",
+    "rot": 0,
+    "name": "Wall_07 rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     13,
+     3,
+     1
+    ],
+    "b": [
+     13,
+     3,
+     2
+    ],
+    "form": "Wall_07",
+    "rot": 1,
+    "name": "Wall_07 rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     15,
+     1,
+     1
+    ],
+    "b": [
+     15,
+     1,
+     2
+    ],
+    "form": "Wall_08",
+    "rot": 0,
+    "name": "Wall_08 rot 0"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     15,
+     3,
+     1
+    ],
+    "b": [
+     15,
+     3,
+     2
+    ],
+    "form": "Wall_08",
+    "rot": 1,
+    "name": "Wall_08 rot 1"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     17,
+     1,
+     1
+    ],
+    "b": [
+     17,
+     1,
+     2
+    ],
+    "form": "Wall_09",
+    "rot": 0,
+    "name": "Wall_09 rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     17,
+     3,
+     1
+    ],
+    "b": [
+     17,
+     3,
+     2
+    ],
+    "form": "Wall_09",
+    "rot": 1,
+    "name": "Wall_09 rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     2
+    ],
+    "form": "Wall_10",
+    "rot": 0,
+    "name": "Wall_10 rot 0"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     3,
+     1
+    ],
+    "b": [
+     19,
+     3,
+     2
+    ],
+    "form": "Wall_10",
+    "rot": 1,
+    "name": "Wall_10 rot 1"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     2
+    ],
+    "form": "Wall_11",
+    "rot": 0,
+    "name": "Wall_11 rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     3,
+     1
+    ],
+    "b": [
+     21,
+     3,
+     2
+    ],
+    "form": "Wall_11",
+    "rot": 1,
+    "name": "Wall_11 rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     2
+    ],
+    "form": "Wall_12",
+    "rot": 0,
+    "name": "Wall_12 rot 0"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     3,
+     1
+    ],
+    "b": [
+     23,
+     3,
+     2
+    ],
+    "form": "Wall_12",
+    "rot": 1,
+    "name": "Wall_12 rot 1"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     2
+    ],
+    "form": "Wall_13",
+    "rot": 0,
+    "name": "Wall_13 rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     3,
+     1
+    ],
+    "b": [
+     25,
+     3,
+     2
+    ],
+    "form": "Wall_13",
+    "rot": 1,
+    "name": "Wall_13 rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     1,
+     1
+    ],
+    "b": [
+     27,
+     1,
+     2
+    ],
+    "form": "Wall_14",
+    "rot": 0,
+    "name": "Wall_14 rot 0"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     3,
+     1
+    ],
+    "b": [
+     27,
+     3,
+     2
+    ],
+    "form": "Wall_14",
+    "rot": 1,
+    "name": "Wall_14 rot 1"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     29,
+     1,
+     1
+    ],
+    "b": [
+     29,
+     1,
+     2
+    ],
+    "form": "Wall_15",
+    "rot": 0,
+    "name": "Wall_15 rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     29,
+     3,
+     1
+    ],
+    "b": [
+     29,
+     3,
+     2
+    ],
+    "form": "Wall_15",
+    "rot": 1,
+    "name": "Wall_15 rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     1,
+     1
+    ],
+    "b": [
+     31,
+     1,
+     2
+    ],
+    "form": "Wall_16",
+    "rot": 0,
+    "name": "Wall_16 rot 0"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     3,
+     1
+    ],
+    "b": [
+     31,
+     3,
+     2
+    ],
+    "form": "Wall_16",
+    "rot": 1,
+    "name": "Wall_16 rot 1"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     33,
+     1,
+     1
+    ],
+    "b": [
+     33,
+     1,
+     2
+    ],
+    "form": "Wall_17",
+    "rot": 0,
+    "name": "Wall_17 rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     33,
+     3,
+     1
+    ],
+    "b": [
+     33,
+     3,
+     2
+    ],
+    "form": "Wall_17",
+    "rot": 1,
+    "name": "Wall_17 rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     1,
+     1
+    ],
+    "b": [
+     35,
+     1,
+     2
+    ],
+    "form": "Wall_18",
+    "rot": 0,
+    "name": "Wall_18 rot 0"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     3,
+     1
+    ],
+    "b": [
+     35,
+     3,
+     2
+    ],
+    "form": "Wall_18",
+    "rot": 1,
+    "name": "Wall_18 rot 1"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     1,
+     1
+    ],
+    "b": [
+     37,
+     1,
+     2
+    ],
+    "form": "Wall_19",
+    "rot": 0,
+    "name": "Wall_19 rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     3,
+     1
+    ],
+    "b": [
+     37,
+     3,
+     2
+    ],
+    "form": "Wall_19",
+    "rot": 1,
+    "name": "Wall_19 rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     6,
+     1
+    ],
+    "b": [
+     1,
+     6,
+     2
+    ],
+    "form": "WallCorner_01",
+    "rot": 0,
+    "name": "WallCorner_01 rot 0"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     6,
+     1
+    ],
+    "b": [
+     3,
+     6,
+     2
+    ],
+    "form": "WallCorner_02",
+    "rot": 0,
+    "name": "WallCorner_02 rot 0"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     6,
+     1
+    ],
+    "b": [
+     5,
+     6,
+     2
+    ],
+    "form": "WallCorner_03",
+    "rot": 0,
+    "name": "WallCorner_03 rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     6,
+     1
+    ],
+    "b": [
+     7,
+     6,
+     2
+    ],
+    "form": "WallCorner_04",
+    "rot": 0,
+    "name": "WallCorner_04 rot 0"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     9,
+     6,
+     1
+    ],
+    "b": [
+     9,
+     6,
+     2
+    ],
+    "form": "WallT_01",
+    "rot": 0,
+    "name": "WallT_01 rot 0"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     11,
+     6,
+     1
+    ],
+    "b": [
+     11,
+     6,
+     2
+    ],
+    "form": "WallT_02",
+    "rot": 0,
+    "name": "WallT_02 rot 0"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     13,
+     6,
+     1
+    ],
+    "b": [
+     13,
+     6,
+     2
+    ],
+    "form": "WallT_03",
+    "rot": 0,
+    "name": "WallT_03 rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     15,
+     6,
+     1
+    ],
+    "b": [
+     15,
+     6,
+     2
+    ],
+    "form": "WallT_04",
+    "rot": 0,
+    "name": "WallT_04 rot 0"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     17,
+     6,
+     1
+    ],
+    "b": [
+     17,
+     6,
+     2
+    ],
+    "form": "WallX_01",
+    "rot": 0,
+    "name": "WallX_01 rot 0"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     6,
+     1
+    ],
+    "b": [
+     19,
+     6,
+     2
+    ],
+    "form": "WallX_02",
+    "rot": 0,
+    "name": "WallX_02 rot 0"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     6,
+     1
+    ],
+    "b": [
+     21,
+     6,
+     2
+    ],
+    "form": "WallX_03",
+    "rot": 0,
+    "name": "WallX_03 rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     6,
+     1
+    ],
+    "b": [
+     23,
+     6,
+     2
+    ],
+    "form": "WallX_04",
+    "rot": 0,
+    "name": "WallX_04 rot 0"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     6,
+     1
+    ],
+    "b": [
+     25,
+     6,
+     3
+    ],
+    "form": "Column_01",
+    "rot": 0,
+    "name": "Column_01 rot 0"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     6,
+     1
+    ],
+    "b": [
+     27,
+     6,
+     3
+    ],
+    "form": "Column_02",
+    "rot": 0,
+    "name": "Column_02 rot 0"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     29,
+     6,
+     1
+    ],
+    "b": [
+     29,
+     6,
+     3
+    ],
+    "form": "Column_03",
+    "rot": 0,
+    "name": "Column_03 rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     9,
+     1
+    ],
+    "b": [
+     1,
+     9,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window rot 0"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     9,
+     1
+    ],
+    "b": [
+     3,
+     9,
+     2
+    ],
+    "form": "Window",
+    "rot": 1,
+    "name": "Window rot 1"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     9,
+     1
+    ],
+    "b": [
+     7,
+     9,
+     2
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "WindowGrilles 3x2"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     9,
+     9,
+     1
+    ],
+    "b": [
+     9,
+     9,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column stack of 3"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     11,
+     9,
+     1
+    ],
+    "b": [
+     11,
+     9,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube rot 0"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     13,
+     9,
+     1
+    ],
+    "b": [
+     13,
+     9,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube rot 0"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     15,
+     9,
+     1
+    ],
+    "b": [
+     15,
+     9,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 rot 0"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     17,
+     9,
+     1
+    ],
+    "b": [
+     17,
+     9,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 rot 0"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     9,
+     1
+    ],
+    "b": [
+     19,
+     9,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 rot 0"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     9,
+     1
+    ],
+    "b": [
+     21,
+     9,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "Wall_01 behind the ladder"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     10,
+     1
+    ],
+    "b": [
+     21,
+     10,
+     3
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "Ladder 3 high"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     2,
+     13,
+     1
+    ],
+    "b": [
+     2,
+     13,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     2,
+     17,
+     1
+    ],
+    "b": [
+     2,
+     17,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     17,
+     1
+    ],
+    "b": [
+     3,
+     17,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     4,
+     13,
+     1
+    ],
+    "b": [
+     4,
+     13,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     17,
+     1
+    ],
+    "b": [
+     5,
+     17,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     6,
+     17,
+     1
+    ],
+    "b": [
+     6,
+     17,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid along x"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     14,
+     1
+    ],
+    "b": [
+     1,
+     14,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     14,
+     1
+    ],
+    "b": [
+     7,
+     14,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     15,
+     1
+    ],
+    "b": [
+     1,
+     15,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     15,
+     1
+    ],
+    "b": [
+     7,
+     15,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     16,
+     1
+    ],
+    "b": [
+     1,
+     16,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     16,
+     1
+    ],
+    "b": [
+     7,
+     16,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     1,
+     13,
+     2
+    ],
+    "form": "FenceCorner",
+    "rot": 2,
+    "name": "FenceCorner ES"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     13,
+     1
+    ],
+    "b": [
+     7,
+     13,
+     2
+    ],
+    "form": "FenceCorner",
+    "rot": 1,
+    "name": "FenceCorner WS"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     17,
+     1
+    ],
+    "b": [
+     7,
+     17,
+     2
+    ],
+    "form": "FenceCorner",
+    "rot": 0,
+    "name": "FenceCorner WN"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     17,
+     1
+    ],
+    "b": [
+     1,
+     17,
+     2
+    ],
+    "form": "FenceCorner",
+    "rot": 3,
+    "name": "FenceCorner EN"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     4,
+     17,
+     1
+    ],
+    "b": [
+     4,
+     17,
+     2
+    ],
+    "form": "FenceT",
+    "rot": 0,
+    "name": "FenceT"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     4,
+     16,
+     1
+    ],
+    "b": [
+     4,
+     16,
+     2
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid along y"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     4,
+     15,
+     1
+    ],
+    "b": [
+     4,
+     15,
+     2
+    ],
+    "form": "FenceX",
+    "rot": 0,
+    "name": "FenceX"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     15,
+     1
+    ],
+    "b": [
+     3,
+     15,
+     2
+    ],
+    "form": "FenceEnd",
+    "rot": 0,
+    "name": "FenceEnd toward E"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     15,
+     1
+    ],
+    "b": [
+     5,
+     15,
+     2
+    ],
+    "form": "FenceEnd",
+    "rot": 2,
+    "name": "FenceEnd toward W"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     4,
+     14,
+     1
+    ],
+    "b": [
+     4,
+     14,
+     2
+    ],
+    "form": "FenceEnd",
+    "rot": 3,
+    "name": "FenceEnd toward S"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     9,
+     13,
+     1
+    ],
+    "b": [
+     9,
+     13,
+     2
+    ],
+    "form": "FenceSolo",
+    "rot": 0,
+    "name": "FenceSolo 2 high"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     20,
+     1
+    ],
+    "b": [
+     1,
+     20,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 0,
+    "name": "StairsMid rot 0"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     20,
+     1
+    ],
+    "b": [
+     3,
+     20,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 1,
+    "name": "StairsMid rot 1"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     20,
+     1
+    ],
+    "b": [
+     5,
+     20,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 2,
+    "name": "StairsMid rot 2"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     20,
+     1
+    ],
+    "b": [
+     7,
+     20,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 3,
+    "name": "StairsMid rot 3"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     10,
+     20,
+     1
+    ],
+    "b": [
+     10,
+     20,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 0,
+    "name": "StairsEndLeft rot 0"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     12,
+     20,
+     1
+    ],
+    "b": [
+     12,
+     20,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 1,
+    "name": "StairsEndLeft rot 1"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     14,
+     20,
+     1
+    ],
+    "b": [
+     14,
+     20,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 2,
+    "name": "StairsEndLeft rot 2"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     16,
+     20,
+     1
+    ],
+    "b": [
+     16,
+     20,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 3,
+    "name": "StairsEndLeft rot 3"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     20,
+     1
+    ],
+    "b": [
+     19,
+     20,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 0,
+    "name": "StairsEndRight rot 0"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     20,
+     1
+    ],
+    "b": [
+     21,
+     20,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 1,
+    "name": "StairsEndRight rot 1"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     20,
+     1
+    ],
+    "b": [
+     23,
+     20,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 2,
+    "name": "StairsEndRight rot 2"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     20,
+     1
+    ],
+    "b": [
+     25,
+     20,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 3,
+    "name": "StairsEndRight rot 3"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     20,
+     1
+    ],
+    "b": [
+     28,
+     20,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "StairsTurn rot 0"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     20,
+     1
+    ],
+    "b": [
+     30,
+     20,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 1,
+    "name": "StairsTurn rot 1"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     20,
+     1
+    ],
+    "b": [
+     32,
+     20,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 2,
+    "name": "StairsTurn rot 2"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     34,
+     20,
+     1
+    ],
+    "b": [
+     34,
+     20,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 3,
+    "name": "StairsTurn rot 3"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     20,
+     1
+    ],
+    "b": [
+     37,
+     20,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "StairsCorner rot 0"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     39,
+     20,
+     1
+    ],
+    "b": [
+     39,
+     20,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 1,
+    "name": "StairsCorner rot 1"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     20,
+     1
+    ],
+    "b": [
+     41,
+     20,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 2,
+    "name": "StairsCorner rot 2"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     43,
+     20,
+     1
+    ],
+    "b": [
+     43,
+     20,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 3,
+    "name": "StairsCorner rot 3"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     22,
+     13,
+     1
+    ],
+    "b": [
+     22,
+     13,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 0,
+    "name": "flight rot 0 step 0"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     22,
+     14,
+     1
+    ],
+    "b": [
+     22,
+     14,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 0,
+    "name": "flight rot 0 step 0"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     22,
+     15,
+     1
+    ],
+    "b": [
+     22,
+     15,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 0,
+    "name": "flight rot 0 step 0"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     13,
+     2
+    ],
+    "b": [
+     21,
+     13,
+     2
+    ],
+    "form": "StairsEndLeft",
+    "rot": 0,
+    "name": "flight rot 0 step 1"
+   },
+   {
+    "id": "g113",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     14,
+     2
+    ],
+    "b": [
+     21,
+     14,
+     2
+    ],
+    "form": "StairsMid",
+    "rot": 0,
+    "name": "flight rot 0 step 1"
+   },
+   {
+    "id": "g114",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     15,
+     2
+    ],
+    "b": [
+     21,
+     15,
+     2
+    ],
+    "form": "StairsEndRight",
+    "rot": 0,
+    "name": "flight rot 0 step 1"
+   },
+   {
+    "id": "g115",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     20,
+     13,
+     3
+    ],
+    "b": [
+     20,
+     13,
+     3
+    ],
+    "form": "StairsEndLeft",
+    "rot": 0,
+    "name": "flight rot 0 step 2"
+   },
+   {
+    "id": "g116",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     20,
+     14,
+     3
+    ],
+    "b": [
+     20,
+     14,
+     3
+    ],
+    "form": "StairsMid",
+    "rot": 0,
+    "name": "flight rot 0 step 2"
+   },
+   {
+    "id": "g117",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     20,
+     15,
+     3
+    ],
+    "b": [
+     20,
+     15,
+     3
+    ],
+    "form": "StairsEndRight",
+    "rot": 0,
+    "name": "flight rot 0 step 2"
+   },
+   {
+    "id": "g118",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     13,
+     1
+    ],
+    "b": [
+     30,
+     16,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g119",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     13,
+     1
+    ],
+    "b": [
+     36,
+     16,
+     1
+    ],
+    "form": "Ceiling",
+    "rot": 0,
+    "name": "Ceiling 5x4"
+   },
+   {
+    "id": "g120",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     23,
+     1
+    ],
+    "b": [
+     1,
+     23,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g121",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     23,
+     1
+    ],
+    "b": [
+     3,
+     23,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g122",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     23,
+     1
+    ],
+    "b": [
+     5,
+     23,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g123",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     23,
+     1
+    ],
+    "b": [
+     7,
+     23,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g124",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     10,
+     23,
+     1
+    ],
+    "b": [
+     10,
+     23,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g125",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     12,
+     23,
+     1
+    ],
+    "b": [
+     12,
+     23,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g126",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     14,
+     23,
+     1
+    ],
+    "b": [
+     14,
+     23,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g127",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     16,
+     23,
+     1
+    ],
+    "b": [
+     16,
+     23,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g128",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     23,
+     1
+    ],
+    "b": [
+     19,
+     23,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g129",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     23,
+     1
+    ],
+    "b": [
+     21,
+     23,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g130",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     23,
+     1
+    ],
+    "b": [
+     23,
+     23,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g131",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     23,
+     1
+    ],
+    "b": [
+     25,
+     23,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g132",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     23,
+     1
+    ],
+    "b": [
+     28,
+     23,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g133",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     23,
+     1
+    ],
+    "b": [
+     30,
+     23,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g134",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     23,
+     1
+    ],
+    "b": [
+     32,
+     23,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g135",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     34,
+     23,
+     1
+    ],
+    "b": [
+     34,
+     23,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g136",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     26,
+     1
+    ],
+    "b": [
+     1,
+     26,
+     1
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 0,
+    "name": "RoofEdgeSide rot 0"
+   },
+   {
+    "id": "g137",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     26,
+     1
+    ],
+    "b": [
+     3,
+     26,
+     1
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 1,
+    "name": "RoofEdgeSide rot 1"
+   },
+   {
+    "id": "g138",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     26,
+     1
+    ],
+    "b": [
+     5,
+     26,
+     1
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 2,
+    "name": "RoofEdgeSide rot 2"
+   },
+   {
+    "id": "g139",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     26,
+     1
+    ],
+    "b": [
+     7,
+     26,
+     1
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 3,
+    "name": "RoofEdgeSide rot 3"
+   },
+   {
+    "id": "g140",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     10,
+     26,
+     1
+    ],
+    "b": [
+     10,
+     26,
+     1
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 0,
+    "name": "RoofEdgeCorner rot 0"
+   },
+   {
+    "id": "g141",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     12,
+     26,
+     1
+    ],
+    "b": [
+     12,
+     26,
+     1
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 1,
+    "name": "RoofEdgeCorner rot 1"
+   },
+   {
+    "id": "g142",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     14,
+     26,
+     1
+    ],
+    "b": [
+     14,
+     26,
+     1
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 2,
+    "name": "RoofEdgeCorner rot 2"
+   },
+   {
+    "id": "g143",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     16,
+     26,
+     1
+    ],
+    "b": [
+     16,
+     26,
+     1
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 3,
+    "name": "RoofEdgeCorner rot 3"
+   },
+   {
+    "id": "g144",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     26,
+     1
+    ],
+    "b": [
+     19,
+     26,
+     1
+    ],
+    "form": "RoofEdgeTurn",
+    "rot": 0,
+    "name": "RoofEdgeTurn rot 0"
+   },
+   {
+    "id": "g145",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     26,
+     1
+    ],
+    "b": [
+     21,
+     26,
+     1
+    ],
+    "form": "RoofEdgeTurn",
+    "rot": 1,
+    "name": "RoofEdgeTurn rot 1"
+   },
+   {
+    "id": "g146",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     26,
+     1
+    ],
+    "b": [
+     23,
+     26,
+     1
+    ],
+    "form": "RoofEdgeTurn",
+    "rot": 2,
+    "name": "RoofEdgeTurn rot 2"
+   },
+   {
+    "id": "g147",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     26,
+     1
+    ],
+    "b": [
+     25,
+     26,
+     1
+    ],
+    "form": "RoofEdgeTurn",
+    "rot": 3,
+    "name": "RoofEdgeTurn rot 3"
+   },
+   {
+    "id": "g148",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     26,
+     1
+    ],
+    "b": [
+     28,
+     26,
+     1
+    ],
+    "form": "RoofPeakCorner",
+    "rot": 0,
+    "name": "RoofPeakCorner rot 0"
+   },
+   {
+    "id": "g149",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     26,
+     1
+    ],
+    "b": [
+     30,
+     26,
+     1
+    ],
+    "form": "RoofPeakCorner",
+    "rot": 1,
+    "name": "RoofPeakCorner rot 1"
+   },
+   {
+    "id": "g150",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     26,
+     1
+    ],
+    "b": [
+     32,
+     26,
+     1
+    ],
+    "form": "RoofPeakCorner",
+    "rot": 2,
+    "name": "RoofPeakCorner rot 2"
+   },
+   {
+    "id": "g151",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     34,
+     26,
+     1
+    ],
+    "b": [
+     34,
+     26,
+     1
+    ],
+    "form": "RoofPeakCorner",
+    "rot": 3,
+    "name": "RoofPeakCorner rot 3"
+   },
+   {
+    "id": "g152",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     29,
+     1
+    ],
+    "b": [
+     1,
+     29,
+     1
+    ],
+    "form": "RoofPeakT",
+    "rot": 0,
+    "name": "RoofPeakT rot 0"
+   },
+   {
+    "id": "g153",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     29,
+     1
+    ],
+    "b": [
+     3,
+     29,
+     1
+    ],
+    "form": "RoofPeakT",
+    "rot": 1,
+    "name": "RoofPeakT rot 1"
+   },
+   {
+    "id": "g154",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     29,
+     1
+    ],
+    "b": [
+     5,
+     29,
+     1
+    ],
+    "form": "RoofPeakT",
+    "rot": 2,
+    "name": "RoofPeakT rot 2"
+   },
+   {
+    "id": "g155",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     29,
+     1
+    ],
+    "b": [
+     7,
+     29,
+     1
+    ],
+    "form": "RoofPeakT",
+    "rot": 3,
+    "name": "RoofPeakT rot 3"
+   },
+   {
+    "id": "g156",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     10,
+     29,
+     1
+    ],
+    "b": [
+     10,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeSide",
+    "rot": 0,
+    "name": "RoofUnderslopeSide rot 0"
+   },
+   {
+    "id": "g157",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     12,
+     29,
+     1
+    ],
+    "b": [
+     12,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeSide",
+    "rot": 1,
+    "name": "RoofUnderslopeSide rot 1"
+   },
+   {
+    "id": "g158",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     14,
+     29,
+     1
+    ],
+    "b": [
+     14,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeSide",
+    "rot": 2,
+    "name": "RoofUnderslopeSide rot 2"
+   },
+   {
+    "id": "g159",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     16,
+     29,
+     1
+    ],
+    "b": [
+     16,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeSide",
+    "rot": 3,
+    "name": "RoofUnderslopeSide rot 3"
+   },
+   {
+    "id": "g160",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     19,
+     29,
+     1
+    ],
+    "b": [
+     19,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeTurn",
+    "rot": 0,
+    "name": "RoofUnderslopeTurn rot 0"
+   },
+   {
+    "id": "g161",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     21,
+     29,
+     1
+    ],
+    "b": [
+     21,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeTurn",
+    "rot": 1,
+    "name": "RoofUnderslopeTurn rot 1"
+   },
+   {
+    "id": "g162",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     23,
+     29,
+     1
+    ],
+    "b": [
+     23,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeTurn",
+    "rot": 2,
+    "name": "RoofUnderslopeTurn rot 2"
+   },
+   {
+    "id": "g163",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     25,
+     29,
+     1
+    ],
+    "b": [
+     25,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeTurn",
+    "rot": 3,
+    "name": "RoofUnderslopeTurn rot 3"
+   },
+   {
+    "id": "g164",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     29,
+     1
+    ],
+    "b": [
+     28,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeCorner",
+    "rot": 0,
+    "name": "RoofUnderslopeCorner rot 0"
+   },
+   {
+    "id": "g165",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     29,
+     1
+    ],
+    "b": [
+     30,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeCorner",
+    "rot": 1,
+    "name": "RoofUnderslopeCorner rot 1"
+   },
+   {
+    "id": "g166",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     29,
+     1
+    ],
+    "b": [
+     32,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeCorner",
+    "rot": 2,
+    "name": "RoofUnderslopeCorner rot 2"
+   },
+   {
+    "id": "g167",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     34,
+     29,
+     1
+    ],
+    "b": [
+     34,
+     29,
+     1
+    ],
+    "form": "RoofUnderslopeCorner",
+    "rot": 3,
+    "name": "RoofUnderslopeCorner rot 3"
+   },
+   {
+    "id": "g168",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     1,
+     32,
+     1
+    ],
+    "b": [
+     1,
+     32,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "UnderInnerPeak rot 0"
+   },
+   {
+    "id": "g169",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     3,
+     32,
+     1
+    ],
+    "b": [
+     3,
+     32,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 1,
+    "name": "UnderInnerPeak rot 1"
+   },
+   {
+    "id": "g170",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     5,
+     32,
+     1
+    ],
+    "b": [
+     5,
+     32,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 2,
+    "name": "UnderInnerPeak rot 2"
+   },
+   {
+    "id": "g171",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     7,
+     32,
+     1
+    ],
+    "b": [
+     7,
+     32,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 3,
+    "name": "UnderInnerPeak rot 3"
+   },
+   {
+    "id": "g172",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     10,
+     32,
+     1
+    ],
+    "b": [
+     10,
+     32,
+     1
+    ],
+    "form": "RoofPeakX",
+    "rot": 0,
+    "name": "RoofPeakX rot 0"
+   },
+   {
+    "id": "g173",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     1,
+     1
+    ],
+    "b": [
+     27,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g174",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     5,
+     1
+    ],
+    "b": [
+     27,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g175",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g176",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     5,
+     1
+    ],
+    "b": [
+     28,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g177",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     29,
+     5,
+     1
+    ],
+    "b": [
+     29,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g178",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g179",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     30,
+     5,
+     1
+    ],
+    "b": [
+     30,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g180",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     1,
+     1
+    ],
+    "b": [
+     31,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g181",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     5,
+     1
+    ],
+    "b": [
+     31,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g182",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     2,
+     1
+    ],
+    "b": [
+     26,
+     2,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g183",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     2,
+     1
+    ],
+    "b": [
+     32,
+     2,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g184",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     3,
+     1
+    ],
+    "b": [
+     26,
+     3,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g185",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     3,
+     1
+    ],
+    "b": [
+     32,
+     3,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g186",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     4,
+     1
+    ],
+    "b": [
+     26,
+     4,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g187",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g188",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     1,
+     1
+    ],
+    "b": [
+     26,
+     1,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 2,
+    "name": "house corner ES"
+   },
+   {
+    "id": "g189",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 1,
+    "name": "house corner WS"
+   },
+   {
+    "id": "g190",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     5,
+     1
+    ],
+    "b": [
+     32,
+     5,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 0,
+    "name": "house corner WN"
+   },
+   {
+    "id": "g191",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     5,
+     1
+    ],
+    "b": [
+     26,
+     5,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 3,
+    "name": "house corner EN"
+   },
+   {
+    "id": "g192",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     1,
+     4
+    ],
+    "b": [
+     31,
+     1,
+     4
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "roof N"
+   },
+   {
+    "id": "g193",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     5,
+     4
+    ],
+    "b": [
+     31,
+     5,
+     4
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "roof S"
+   },
+   {
+    "id": "g194",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     2,
+     4
+    ],
+    "b": [
+     26,
+     4,
+     4
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "roof W"
+   },
+   {
+    "id": "g195",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     2,
+     4
+    ],
+    "b": [
+     32,
+     4,
+     4
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "roof E"
+   },
+   {
+    "id": "g196",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     1,
+     4
+    ],
+    "b": [
+     26,
+     1,
+     4
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "roof corner"
+   },
+   {
+    "id": "g197",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     1,
+     4
+    ],
+    "b": [
+     32,
+     1,
+     4
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "roof corner"
+   },
+   {
+    "id": "g198",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     26,
+     5,
+     4
+    ],
+    "b": [
+     26,
+     5,
+     4
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "roof corner"
+   },
+   {
+    "id": "g199",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     32,
+     5,
+     4
+    ],
+    "b": [
+     32,
+     5,
+     4
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "roof corner"
+   },
+   {
+    "id": "g200",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     2,
+     5
+    ],
+    "b": [
+     30,
+     2,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "roof N"
+   },
+   {
+    "id": "g201",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     4,
+     5
+    ],
+    "b": [
+     30,
+     4,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "roof S"
+   },
+   {
+    "id": "g202",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     3,
+     5
+    ],
+    "b": [
+     27,
+     3,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "roof W"
+   },
+   {
+    "id": "g203",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     3,
+     5
+    ],
+    "b": [
+     31,
+     3,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "roof E"
+   },
+   {
+    "id": "g204",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     2,
+     5
+    ],
+    "b": [
+     27,
+     2,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "roof corner"
+   },
+   {
+    "id": "g205",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     2,
+     5
+    ],
+    "b": [
+     31,
+     2,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "roof corner"
+   },
+   {
+    "id": "g206",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     27,
+     4,
+     5
+    ],
+    "b": [
+     27,
+     4,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "roof corner"
+   },
+   {
+    "id": "g207",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     31,
+     4,
+     5
+    ],
+    "b": [
+     31,
+     4,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "roof corner"
+   },
+   {
+    "id": "g208",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     28,
+     3,
+     6
+    ],
+    "b": [
+     30,
+     3,
+     6
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "ridge along x"
+   },
+   {
+    "id": "g209",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     1,
+     1
+    ],
+    "b": [
+     36,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g210",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     5,
+     1
+    ],
+    "b": [
+     36,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g211",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     1,
+     1
+    ],
+    "b": [
+     37,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g212",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     5,
+     1
+    ],
+    "b": [
+     37,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g213",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     38,
+     5,
+     1
+    ],
+    "b": [
+     38,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g214",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     39,
+     1,
+     1
+    ],
+    "b": [
+     39,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g215",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     39,
+     5,
+     1
+    ],
+    "b": [
+     39,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g216",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     40,
+     1,
+     1
+    ],
+    "b": [
+     40,
+     1,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g217",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     40,
+     5,
+     1
+    ],
+    "b": [
+     40,
+     5,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 0,
+    "name": "house wall x"
+   },
+   {
+    "id": "g218",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     2,
+     1
+    ],
+    "b": [
+     35,
+     2,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g219",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     2,
+     1
+    ],
+    "b": [
+     41,
+     2,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g220",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     3,
+     1
+    ],
+    "b": [
+     35,
+     3,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g221",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     3,
+     1
+    ],
+    "b": [
+     41,
+     3,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g222",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     4,
+     1
+    ],
+    "b": [
+     35,
+     4,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g223",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     4,
+     1
+    ],
+    "b": [
+     41,
+     4,
+     3
+    ],
+    "form": "Wall_01",
+    "rot": 1,
+    "name": "house wall y"
+   },
+   {
+    "id": "g224",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     1,
+     1
+    ],
+    "b": [
+     35,
+     1,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 2,
+    "name": "house corner ES"
+   },
+   {
+    "id": "g225",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     1,
+     1
+    ],
+    "b": [
+     41,
+     1,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 1,
+    "name": "house corner WS"
+   },
+   {
+    "id": "g226",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     5,
+     1
+    ],
+    "b": [
+     41,
+     5,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 0,
+    "name": "house corner WN"
+   },
+   {
+    "id": "g227",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     5,
+     1
+    ],
+    "b": [
+     35,
+     5,
+     3
+    ],
+    "form": "WallCorner_01",
+    "rot": 3,
+    "name": "house corner EN"
+   },
+   {
+    "id": "g228",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     1,
+     4
+    ],
+    "b": [
+     40,
+     1,
+     4
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 1,
+    "name": "roof N"
+   },
+   {
+    "id": "g229",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     5,
+     4
+    ],
+    "b": [
+     40,
+     5,
+     4
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 3,
+    "name": "roof S"
+   },
+   {
+    "id": "g230",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     2,
+     4
+    ],
+    "b": [
+     35,
+     4,
+     4
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 2,
+    "name": "roof W"
+   },
+   {
+    "id": "g231",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     2,
+     4
+    ],
+    "b": [
+     41,
+     4,
+     4
+    ],
+    "form": "RoofEdgeSide",
+    "rot": 0,
+    "name": "roof E"
+   },
+   {
+    "id": "g232",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     1,
+     4
+    ],
+    "b": [
+     35,
+     1,
+     4
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 2,
+    "name": "roof corner"
+   },
+   {
+    "id": "g233",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     1,
+     4
+    ],
+    "b": [
+     41,
+     1,
+     4
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 1,
+    "name": "roof corner"
+   },
+   {
+    "id": "g234",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     35,
+     5,
+     4
+    ],
+    "b": [
+     35,
+     5,
+     4
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 3,
+    "name": "roof corner"
+   },
+   {
+    "id": "g235",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     41,
+     5,
+     4
+    ],
+    "b": [
+     41,
+     5,
+     4
+    ],
+    "form": "RoofEdgeCorner",
+    "rot": 0,
+    "name": "roof corner"
+   },
+   {
+    "id": "g236",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     2,
+     5
+    ],
+    "b": [
+     39,
+     2,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "roof N"
+   },
+   {
+    "id": "g237",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     4,
+     5
+    ],
+    "b": [
+     39,
+     4,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "roof S"
+   },
+   {
+    "id": "g238",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     3,
+     5
+    ],
+    "b": [
+     36,
+     3,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "roof W"
+   },
+   {
+    "id": "g239",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     40,
+     3,
+     5
+    ],
+    "b": [
+     40,
+     3,
+     5
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "roof E"
+   },
+   {
+    "id": "g240",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     2,
+     5
+    ],
+    "b": [
+     36,
+     2,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "roof corner"
+   },
+   {
+    "id": "g241",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     40,
+     2,
+     5
+    ],
+    "b": [
+     40,
+     2,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "roof corner"
+   },
+   {
+    "id": "g242",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     36,
+     4,
+     5
+    ],
+    "b": [
+     36,
+     4,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "roof corner"
+   },
+   {
+    "id": "g243",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     40,
+     4,
+     5
+    ],
+    "b": [
+     40,
+     4,
+     5
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "roof corner"
+   },
+   {
+    "id": "g244",
+    "kind": "box",
+    "subtract": false,
+    "material": "FarEastLumberItem",
+    "a": [
+     37,
+     3,
+     6
+    ],
+    "b": [
+     39,
+     3,
+     6
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "ridge along x"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

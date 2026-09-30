@@ -1,0 +1,2 @@
+{ "name": "", "grid": { "width": 20, "depth": 20 }, "defaults": { "wallMaterial": "HewnLogItem" },
+  "volumes": [], "slabs": [], "roofs": [], "partitions": [], "columns": [], "stairs": [], "openings": [] }

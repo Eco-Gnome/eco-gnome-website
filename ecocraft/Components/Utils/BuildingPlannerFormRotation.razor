@@ -1,0 +1,24 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+@* Rotation d'une forme de bloc (palette de Structure, fiche d'un volume) : ⟲ = Q (rot − 1), ⟳ = R (rot + 1), flèche du côté bas. *@
+<div class="bp-formrot">
+    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.FormRot.Back")">
+        <MudIconButton Icon="@Icons.Material.Filled.RotateLeft" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OnRotate.InvokeAsync(-1))"/>
+    </MudTooltip>
+    <span class="bp-formrot-label">@LocalizationService.GetTranslation("BuildingPlanner.FormRot.Label")</span>
+    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.FormRot.LowSide")">
+        <span class="bp-formrot-low">@LowSide[Rot & 3]</span>
+    </MudTooltip>
+    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.FormRot.Forward")">
+        <MudIconButton Icon="@Icons.Material.Filled.RotateRight" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OnRotate.InvokeAsync(1))"/>
+    </MudTooltip>
+</div>
+
+@code {
+    [Parameter] public int Rot { get; set; }
+    [Parameter] public EventCallback<int> OnRotate { get; set; }
+
+    // Côté bas pour rot 0..3 : est, nord, ouest, sud (BuildingGenerator.LowToward ; nord en haut du plan).
+    private static readonly string[] LowSide = ["→", "↑", "←", "↓"];
+}

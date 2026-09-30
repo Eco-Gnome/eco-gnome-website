@@ -88,6 +88,11 @@ public partial class LocalizationService(LocalStorageService localStorageService
         return key;
     }
 
+    // Clé présente dans la langue courante ou la langue par défaut (GetTranslation renvoie la clé elle-même sinon).
+    public bool HasTranslation(string key) =>
+        AllTranslations.TryGetValue(CurrentLanguageCode, out var translations) && TryGetTranslation(translations, key, out _)
+        || TryGetTranslation(AllTranslations[DefaultLanguageCode], key, out _);
+
     private static bool TryGetTranslation(Dictionary<string, object> translations, string key, out string value)
     {
         value = string.Empty;

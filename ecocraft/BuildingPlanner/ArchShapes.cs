@@ -7,7 +7,8 @@ namespace ecocraft.BuildingPlanner;
 // les mêmes blocs. Boîte englobante inclusive [x0..x1]×[y0..y1]×[z0..z1] ; R = étendue par axe, d = 2·coord − x0 − x1
 // (double de l'écart au centre, entier même pour un diamètre pair). Sphère : Σ d²·(produit des autres R²) ≤ ΠR².
 // Creux : dans l'extérieur et hors de la boîte rétrécie de Thickness sur les axes concernés (box : x,y ; sphere :
-// x,y,z ; cylinder : les deux axes radiaux) ; une boîte intérieure qui s'inverse rend la forme pleine.
+// x,y,z ; cylinder : les deux axes radiaux ; Closed ajoute l'axe restant d'une box ou d'un cylinder : fermé aux deux
+// bouts) ; une boîte intérieure qui s'inverse rend la forme pleine.
 // Les cellules hors [0,w)×[0,d)×[0,h) sont ignorées. Coordonnées du plan : (x, y, z) avec z vertical.
 public static class ArchShapes
 {
@@ -43,7 +44,7 @@ public static class ArchShapes
                 if (op.A is not { Length: 3 } || op.B is not { Length: 3 }) return;
                 var outer = Bounds.From(op.A, op.B);
                 var axis = op.Kind == "cylinder" ? NormalizeAxis(op.Axis) : 'z';
-                var inner = op.Hollow ? Shrunk(op.Kind, axis, outer, Math.Max(1, op.Thickness)) : null;
+                var inner = op.Hollow ? Shrunk(op.Kind, axis, outer, Math.Max(1, op.Thickness), op.Closed) : null;
                 for (var z = Math.Max(0, outer.Z0); z <= Math.Min(h - 1, outer.Z1); z++)
                     for (var y = Math.Max(0, outer.Y0); y <= Math.Min(d - 1, outer.Y1); y++)
                         for (var x = Math.Max(0, outer.X0); x <= Math.Min(w - 1, outer.X1); x++)
@@ -94,13 +95,13 @@ public static class ArchShapes
 
     public static char NormalizeAxis(string? axis) => axis is "x" or "y" ? axis[0] : 'z';
 
-    private static Bounds? Shrunk(string kind, char axis, Bounds outer, int t)
+    private static Bounds? Shrunk(string kind, char axis, Bounds outer, int t, bool closed)
     {
         var inner = kind switch
         {
-            "box" => outer.Shrink(t, true, true, false),
+            "box" => outer.Shrink(t, true, true, closed),
             "sphere" => outer.Shrink(t, true, true, true),
-            _ => outer.Shrink(t, axis != 'x', axis != 'y', axis != 'z'),
+            _ => outer.Shrink(t, axis != 'x' || closed, axis != 'y' || closed, axis != 'z' || closed),
         };
         return inner.IsEmpty ? null : inner;
     }

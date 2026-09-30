@@ -1,0 +1,46 @@
+{
+  "name": "Maison à colombages",
+  "grid": { "width": 30, "depth": 20 },
+  "defaults": { "wallMaterial": "FarEastLumberItem" },
+  "volumes": [
+    { "id": "v1", "x": 4, "y": 3, "width": 16, "depth": 11, "baseZ": 0, "height": 3, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_12", "wallThickness": 2, "floorMaterial": "FarEastLumberItem", "ceilingMaterial": "FarEastLumberItem" },
+    { "id": "v2", "x": 4, "y": 3, "width": 16, "depth": 11, "baseZ": 4, "height": 3, "wallMaterial": "FarEastLumberItem", "wallForm": "Wall_03", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "FarEastLumberItem" },
+    { "id": "v3", "x": 22, "y": 5, "width": 5, "depth": 5, "baseZ": 0, "height": 3, "wallMaterial": "HewnLogItem", "wallForm": "", "wallThickness": 1, "floorMaterial": "HewnLogItem", "ceilingMaterial": "HewnLogItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 4, "y": 3, "width": 16, "depth": 11, "baseZ": 8, "style": "hip", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "FarEastLumberItem", "parapet": false }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 10, "y0": 4, "x1": 10, "y1": 12, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "wallForm": "Wall_12", "thickness": 1 },
+    { "id": "p2", "x0": 11, "y0": 8, "x1": 18, "y1": 8, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "wallForm": "Wall_12", "thickness": 1 },
+    { "id": "p3", "x0": 14, "y0": 4, "x1": 14, "y1": 7, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "wallForm": "Wall_05", "thickness": 1 },
+    { "id": "p4", "x0": 14, "y0": 9, "x1": 14, "y1": 12, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "wallForm": "Wall", "thickness": 1 },
+    { "id": "p5", "x0": 12, "y0": 4, "x1": 12, "y1": 12, "baseZ": 4, "height": 3, "material": "FarEastLumberItem", "wallForm": "", "thickness": 1 }
+  ],
+  "columns": [],
+  "stairs": [
+    { "x": 5, "y": 12, "fromZ": 0, "toZ": 4, "direction": "east", "width": 1, "material": "FarEastLumberItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 7, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "p1", "side": "west", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "p2", "side": "north", "offset": 1, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v1", "side": "west", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v2", "side": "south", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v2", "side": "east", "offset": 4, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v3", "side": "south", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" }
+  ],
+  "blocks": [
+    { "x": 22, "y": 5, "width": 5, "depth": 5, "z": 5, "height": 1, "form": "Roof", "rot": 0, "material": "HewnLogItem" },
+    { "x": 23, "y": 6, "width": 3, "depth": 3, "z": 6, "height": 1, "form": "Roof", "rot": 0, "material": "HewnLogItem" },
+    { "x": 24, "y": 7, "width": 1, "depth": 1, "z": 7, "height": 1, "form": "Roof", "rot": 0, "material": "HewnLogItem" },
+    { "x": 22, "y": 12, "width": 5, "depth": 1, "z": 1, "height": 1, "form": "RoofPeakSet", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 17, "width": 14, "depth": 1, "z": 1, "height": 1, "form": "FenceMid", "rot": 0, "material": "FarEastLumberItem" },
+    { "x": 4, "y": 17, "width": 1, "depth": 1, "z": 1, "height": 1, "form": "FenceEnd", "rot": 0, "material": "FarEastLumberItem" },
+    { "x": 19, "y": 17, "width": 1, "depth": 1, "z": 1, "height": 1, "form": "FenceEnd", "rot": 2, "material": "FarEastLumberItem" },
+    { "x": 21, "y": 7, "width": 1, "depth": 1, "z": 1, "height": 3, "form": "Ladder", "rot": 1, "material": "HewnLogItem" }
+  ],
+  "furniture": []
+}

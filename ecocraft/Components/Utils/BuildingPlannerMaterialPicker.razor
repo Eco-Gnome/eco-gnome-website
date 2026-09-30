@@ -1,0 +1,82 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+@inject ContextService ContextService
+
+@* Sélecteur de matériau : une ligne pour le matériau courant ; un clic ouvre sur place une recherche et la liste groupée
+   (T1..T5, puis sols / terrain, puis tuyaux) ; un choix la referme. Palette de Structure et fiche d'un volume. *@
+<div class="bp-matpick">
+    <div class="@("bp-matpick-current" + (_open ? " open" : ""))" @onclick="Toggle" title="@LocalizationService.GetTranslation("BuildingPlanner.Material")">
+        @if (Current is { } current)
+        {
+            @Row(current)
+        }
+        else
+        {
+            <span class="bp-matpick-label">@LocalizationService.GetTranslation("BuildingPlanner.Material")</span>
+        }
+        <MudIcon Icon="@(_open ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small" Class="bp-matpick-caret"/>
+    </div>
+    @if (_open)
+    {
+        <MudTextField T="string" Value="@_search" ValueChanged="@(v => _search = v ?? "")" Immediate="true" Clearable="true" AutoFocus="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                      Placeholder="@LocalizationService.GetTranslation("Search")" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="bp-matpick-search"/>
+        <div class="bp-matpick-list">
+            @foreach (var group in Groups())
+            {
+                <div class="bp-matpick-group">@group.Title</div>
+                @foreach (var m in group.Items)
+                {
+                    <div class="@("bp-matpick-item" + (m.Name == Value ? " selected" : ""))" @onclick="@(() => PickAsync(m))">@Row(m)</div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private bool _open;
+    private string _search = "";
+
+    private ClientMaterial? Current => Catalog?.Materials.FirstOrDefault(m => m.Name == Value);
+
+    private void Toggle()
+    {
+        _open = !_open;
+        _search = "";
+    }
+
+    private async Task PickAsync(ClientMaterial m)
+    {
+        _open = false;
+        _search = "";
+        if (m.Name != Value) await ValueChanged.InvokeAsync(m.Name);
+    }
+
+    private IEnumerable<(string Title, List<ClientMaterial> Items)> Groups()
+    {
+        var items = (Catalog?.Materials ?? [])
+            .Where(m => string.IsNullOrWhiteSpace(_search) || m.Label.Contains(_search, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var pipes = items.Where(m => BuildingPlannerCatalogService.PipeMaterials.Contains(m.Name)).ToList();
+        foreach (var tier in items.Except(pipes).GroupBy(m => m.Tier).OrderBy(g => g.Key == 0).ThenBy(g => g.Key))
+        {
+            yield return (tier.Key == 0 ? LocalizationService.GetTranslation("BuildingPlanner.MaterialGroup.Ground") : $"{LocalizationService.GetTranslation("BuildingPlanner.Inspector.Tier")} {tier.Key}", tier.ToList());
+        }
+        if (pipes.Count > 0) yield return (LocalizationService.GetTranslation("BuildingPlanner.MaterialGroup.Pipes"), pipes);
+    }
+
+    private RenderFragment Row(ClientMaterial m) => __builder =>
+    {
+        <i class="bp-mat-dot" style="background: @m.Color"></i>
+        <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+        <span class="bp-matpick-label">@m.Label</span>
+        @if (m.Tier > 0)
+        {
+            <span class="bp-matpick-tier">T@(m.Tier)</span>
+        }
+    };
+}

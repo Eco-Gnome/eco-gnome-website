@@ -1,0 +1,620 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes FabricBlocks",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 24
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 0,
+    "name": "CanopyWindow rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 1,
+    "name": "CanopyWindow rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 2,
+    "name": "CanopyWindow rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 3,
+    "name": "CanopyWindow rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     1,
+     5,
+     1
+    ],
+    "b": [
+     5,
+     8,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     8,
+     5,
+     1
+    ],
+    "b": [
+     12,
+     8,
+     1
+    ],
+    "form": "SimpleFloor",
+    "rot": 0,
+    "name": "SimpleFloor 5x4"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     15,
+     5,
+     1
+    ],
+    "b": [
+     15,
+     5,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     17,
+     5,
+     1
+    ],
+    "b": [
+     17,
+     5,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     19,
+     5,
+     1
+    ],
+    "b": [
+     19,
+     5,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     21,
+     5,
+     1
+    ],
+    "b": [
+     21,
+     5,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     23,
+     5,
+     1
+    ],
+    "b": [
+     23,
+     5,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "Stacked4 x1"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     1,
+     11,
+     1
+    ],
+    "b": [
+     5,
+     11,
+     2
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "FullWall L along x"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "CottonCarpetItem",
+    "a": [
+     1,
+     12,
+     1
+    ],
+    "b": [
+     1,
+     14,
+     2
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "FullWall L along y"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     1,
+     17,
+     1
+    ],
+    "b": [
+     1,
+     17,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "NylonCarpetItem Floor"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     3,
+     17,
+     1
+    ],
+    "b": [
+     3,
+     17,
+     1
+    ],
+    "form": "SimpleFloor",
+    "rot": 0,
+    "name": "NylonCarpetItem SimpleFloor"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     5,
+     17,
+     1
+    ],
+    "b": [
+     5,
+     17,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "NylonCarpetItem FullWall"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     7,
+     17,
+     1
+    ],
+    "b": [
+     7,
+     17,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "NylonCarpetItem Cube"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     9,
+     17,
+     1
+    ],
+    "b": [
+     9,
+     17,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "NylonCarpetItem Stacked1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     11,
+     17,
+     1
+    ],
+    "b": [
+     11,
+     17,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "NylonCarpetItem Stacked2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     13,
+     17,
+     1
+    ],
+    "b": [
+     13,
+     17,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "NylonCarpetItem Stacked3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     15,
+     17,
+     1
+    ],
+    "b": [
+     15,
+     17,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "NylonCarpetItem Stacked4"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "NylonCarpetItem",
+    "a": [
+     17,
+     17,
+     1
+    ],
+    "b": [
+     17,
+     17,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 0,
+    "name": "NylonCarpetItem CanopyWindow"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     1,
+     20,
+     1
+    ],
+    "b": [
+     1,
+     20,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "WoolCarpetItem Floor"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     3,
+     20,
+     1
+    ],
+    "b": [
+     3,
+     20,
+     1
+    ],
+    "form": "SimpleFloor",
+    "rot": 0,
+    "name": "WoolCarpetItem SimpleFloor"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     5,
+     20,
+     1
+    ],
+    "b": [
+     5,
+     20,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "WoolCarpetItem FullWall"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     7,
+     20,
+     1
+    ],
+    "b": [
+     7,
+     20,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "WoolCarpetItem Cube"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     9,
+     20,
+     1
+    ],
+    "b": [
+     9,
+     20,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "WoolCarpetItem Stacked1"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     11,
+     20,
+     1
+    ],
+    "b": [
+     11,
+     20,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "WoolCarpetItem Stacked2"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     13,
+     20,
+     1
+    ],
+    "b": [
+     13,
+     20,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "WoolCarpetItem Stacked3"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     15,
+     20,
+     1
+    ],
+    "b": [
+     15,
+     20,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "WoolCarpetItem Stacked4"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "WoolCarpetItem",
+    "a": [
+     17,
+     20,
+     1
+    ],
+    "b": [
+     17,
+     20,
+     1
+    ],
+    "form": "CanopyWindow",
+    "rot": 0,
+    "name": "WoolCarpetItem CanopyWindow"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

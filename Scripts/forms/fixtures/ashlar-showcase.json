@@ -1,0 +1,8809 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes AshlarStone",
+ "mode": "architecture",
+ "grid": {
+  "width": 64,
+  "depth": 90
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "Stairs rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 1,
+    "name": "Stairs rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 2,
+    "name": "Stairs rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 3,
+    "name": "Stairs rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "Ladder rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 1,
+    "name": "Ladder rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 2,
+    "name": "Ladder rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 3,
+    "name": "Ladder rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "UnderStairs rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 1,
+    "name": "UnderStairs rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 2,
+    "name": "UnderStairs rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 3,
+    "name": "UnderStairs rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "Brace rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "Brace",
+    "rot": 1,
+    "name": "Brace rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "Brace",
+    "rot": 2,
+    "name": "Brace rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "Brace",
+    "rot": 3,
+    "name": "Brace rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "UnderBrace rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 1,
+    "name": "UnderBrace rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 2,
+    "name": "UnderBrace rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 3,
+    "name": "UnderBrace rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "BraceCorner rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 1,
+    "name": "BraceCorner rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 2,
+    "name": "BraceCorner rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 3,
+    "name": "BraceCorner rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     4,
+     1
+    ],
+    "b": [
+     19,
+     4,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "UnderBraceCorner rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     4,
+     1
+    ],
+    "b": [
+     21,
+     4,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 1,
+    "name": "UnderBraceCorner rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     4,
+     1
+    ],
+    "b": [
+     23,
+     4,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 2,
+    "name": "UnderBraceCorner rot 2"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     4,
+     1
+    ],
+    "b": [
+     25,
+     4,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 3,
+    "name": "UnderBraceCorner rot 3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     4,
+     1
+    ],
+    "b": [
+     28,
+     4,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "SideBrace rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     4,
+     1
+    ],
+    "b": [
+     30,
+     4,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 1,
+    "name": "SideBrace rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 2,
+    "name": "SideBrace rot 2"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     4,
+     1
+    ],
+    "b": [
+     34,
+     4,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 3,
+    "name": "SideBrace rot 3"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "BraceTurn rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     7,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 1,
+    "name": "BraceTurn rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 2,
+    "name": "BraceTurn rot 2"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 3,
+    "name": "BraceTurn rot 3"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     7,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "UnderBraceTurn rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     7,
+     1
+    ],
+    "b": [
+     12,
+     7,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 1,
+    "name": "UnderBraceTurn rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 2,
+    "name": "UnderBraceTurn rot 2"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     7,
+     1
+    ],
+    "b": [
+     16,
+     7,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 3,
+    "name": "UnderBraceTurn rot 3"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "HalfSlopeA rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     21,
+     7,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 1,
+    "name": "HalfSlopeA rot 1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     7,
+     1
+    ],
+    "b": [
+     23,
+     7,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 2,
+    "name": "HalfSlopeA rot 2"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     25,
+     7,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 3,
+    "name": "HalfSlopeA rot 3"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     7,
+     1
+    ],
+    "b": [
+     28,
+     7,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "HalfSlopeB rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     7,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 1,
+    "name": "HalfSlopeB rot 1"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     7,
+     1
+    ],
+    "b": [
+     32,
+     7,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 2,
+    "name": "HalfSlopeB rot 2"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     7,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 3,
+    "name": "HalfSlopeB rot 3"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     10,
+     1
+    ],
+    "b": [
+     1,
+     10,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "RampA rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     10,
+     1
+    ],
+    "b": [
+     3,
+     10,
+     1
+    ],
+    "form": "RampA",
+    "rot": 1,
+    "name": "RampA rot 1"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     10,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA rot 2"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     10,
+     1
+    ],
+    "b": [
+     7,
+     10,
+     1
+    ],
+    "form": "RampA",
+    "rot": 3,
+    "name": "RampA rot 3"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     10,
+     1
+    ],
+    "b": [
+     10,
+     10,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "RampB rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     10,
+     1
+    ],
+    "b": [
+     12,
+     10,
+     1
+    ],
+    "form": "RampB",
+    "rot": 1,
+    "name": "RampB rot 1"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     10,
+     1
+    ],
+    "b": [
+     14,
+     10,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB rot 2"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     10,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "RampB",
+    "rot": 3,
+    "name": "RampB rot 3"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     10,
+     1
+    ],
+    "b": [
+     19,
+     10,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "RampC rot 0"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     10,
+     1
+    ],
+    "b": [
+     21,
+     10,
+     1
+    ],
+    "form": "RampC",
+    "rot": 1,
+    "name": "RampC rot 1"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     10,
+     1
+    ],
+    "b": [
+     23,
+     10,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC rot 2"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     10,
+     1
+    ],
+    "b": [
+     25,
+     10,
+     1
+    ],
+    "form": "RampC",
+    "rot": 3,
+    "name": "RampC rot 3"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     10,
+     1
+    ],
+    "b": [
+     28,
+     10,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "RampD rot 0"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     10,
+     1
+    ],
+    "b": [
+     30,
+     10,
+     1
+    ],
+    "form": "RampD",
+    "rot": 1,
+    "name": "RampD rot 1"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     10,
+     1
+    ],
+    "b": [
+     32,
+     10,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD rot 2"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     10,
+     1
+    ],
+    "b": [
+     34,
+     10,
+     1
+    ],
+    "form": "RampD",
+    "rot": 3,
+    "name": "RampD rot 3"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     1,
+     13,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "BasicSlopeSide rot 0"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     13,
+     1
+    ],
+    "b": [
+     3,
+     13,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 1,
+    "name": "BasicSlopeSide rot 1"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 2,
+    "name": "BasicSlopeSide rot 2"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     13,
+     1
+    ],
+    "b": [
+     7,
+     13,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 3,
+    "name": "BasicSlopeSide rot 3"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     13,
+     1
+    ],
+    "b": [
+     10,
+     13,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "BasicSlopeCorner rot 0"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     13,
+     1
+    ],
+    "b": [
+     12,
+     13,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 1,
+    "name": "BasicSlopeCorner rot 1"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     13,
+     1
+    ],
+    "b": [
+     14,
+     13,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 2,
+    "name": "BasicSlopeCorner rot 2"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     13,
+     1
+    ],
+    "b": [
+     16,
+     13,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 3,
+    "name": "BasicSlopeCorner rot 3"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     13,
+     1
+    ],
+    "b": [
+     19,
+     13,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "BasicSlopeTurn rot 0"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     13,
+     1
+    ],
+    "b": [
+     21,
+     13,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 1,
+    "name": "BasicSlopeTurn rot 1"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     13,
+     1
+    ],
+    "b": [
+     23,
+     13,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 2,
+    "name": "BasicSlopeTurn rot 2"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     13,
+     1
+    ],
+    "b": [
+     25,
+     13,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 3,
+    "name": "BasicSlopeTurn rot 3"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     13,
+     1
+    ],
+    "b": [
+     28,
+     13,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "BasicSlopePoint rot 0"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     13,
+     1
+    ],
+    "b": [
+     30,
+     13,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 1,
+    "name": "BasicSlopePoint rot 1"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     13,
+     1
+    ],
+    "b": [
+     32,
+     13,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 2,
+    "name": "BasicSlopePoint rot 2"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     13,
+     1
+    ],
+    "b": [
+     34,
+     13,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 3,
+    "name": "BasicSlopePoint rot 3"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     16,
+     1
+    ],
+    "b": [
+     1,
+     16,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "FloatStairsTurn rot 0"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     16,
+     1
+    ],
+    "b": [
+     3,
+     16,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 1,
+    "name": "FloatStairsTurn rot 1"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     16,
+     1
+    ],
+    "b": [
+     5,
+     16,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 2,
+    "name": "FloatStairsTurn rot 2"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     16,
+     1
+    ],
+    "b": [
+     7,
+     16,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 3,
+    "name": "FloatStairsTurn rot 3"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     16,
+     1
+    ],
+    "b": [
+     10,
+     16,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "FloatStairsCorner rot 0"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     16,
+     1
+    ],
+    "b": [
+     12,
+     16,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 1,
+    "name": "FloatStairsCorner rot 1"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     16,
+     1
+    ],
+    "b": [
+     14,
+     16,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 2,
+    "name": "FloatStairsCorner rot 2"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     16,
+     1
+    ],
+    "b": [
+     16,
+     16,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 3,
+    "name": "FloatStairsCorner rot 3"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     16,
+     1
+    ],
+    "b": [
+     19,
+     16,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "StairsCorner rot 0"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     16,
+     1
+    ],
+    "b": [
+     21,
+     16,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 1,
+    "name": "StairsCorner rot 1"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     16,
+     1
+    ],
+    "b": [
+     23,
+     16,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 2,
+    "name": "StairsCorner rot 2"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     16,
+     1
+    ],
+    "b": [
+     25,
+     16,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 3,
+    "name": "StairsCorner rot 3"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     16,
+     1
+    ],
+    "b": [
+     28,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "StairsTurn rot 0"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     16,
+     1
+    ],
+    "b": [
+     30,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 1,
+    "name": "StairsTurn rot 1"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     16,
+     1
+    ],
+    "b": [
+     32,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 2,
+    "name": "StairsTurn rot 2"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     16,
+     1
+    ],
+    "b": [
+     34,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 3,
+    "name": "StairsTurn rot 3"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     19,
+     1
+    ],
+    "b": [
+     1,
+     19,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "FloatStairs rot 0"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     19,
+     1
+    ],
+    "b": [
+     3,
+     19,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 1,
+    "name": "FloatStairs rot 1"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     19,
+     1
+    ],
+    "b": [
+     5,
+     19,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 2,
+    "name": "FloatStairs rot 2"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     19,
+     1
+    ],
+    "b": [
+     7,
+     19,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 3,
+    "name": "FloatStairs rot 3"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     19,
+     1
+    ],
+    "b": [
+     10,
+     19,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "UnderSlopeSide rot 0"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     19,
+     1
+    ],
+    "b": [
+     12,
+     19,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 1,
+    "name": "UnderSlopeSide rot 1"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     19,
+     1
+    ],
+    "b": [
+     14,
+     19,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 2,
+    "name": "UnderSlopeSide rot 2"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     19,
+     1
+    ],
+    "b": [
+     16,
+     19,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 3,
+    "name": "UnderSlopeSide rot 3"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     19,
+     1
+    ],
+    "b": [
+     19,
+     19,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "UnderSlopeCorner rot 0"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     19,
+     1
+    ],
+    "b": [
+     21,
+     19,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 1,
+    "name": "UnderSlopeCorner rot 1"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     19,
+     1
+    ],
+    "b": [
+     23,
+     19,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 2,
+    "name": "UnderSlopeCorner rot 2"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     19,
+     1
+    ],
+    "b": [
+     25,
+     19,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 3,
+    "name": "UnderSlopeCorner rot 3"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     19,
+     1
+    ],
+    "b": [
+     28,
+     19,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "UnderSlopeTurn rot 0"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     19,
+     1
+    ],
+    "b": [
+     30,
+     19,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 1,
+    "name": "UnderSlopeTurn rot 1"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     19,
+     1
+    ],
+    "b": [
+     32,
+     19,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 2,
+    "name": "UnderSlopeTurn rot 2"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     19,
+     1
+    ],
+    "b": [
+     34,
+     19,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 3,
+    "name": "UnderSlopeTurn rot 3"
+   },
+   {
+    "id": "g113",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     22,
+     1
+    ],
+    "b": [
+     1,
+     22,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "UnderSlopePeak rot 0"
+   },
+   {
+    "id": "g114",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     22,
+     1
+    ],
+    "b": [
+     3,
+     22,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 1,
+    "name": "UnderSlopePeak rot 1"
+   },
+   {
+    "id": "g115",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     22,
+     1
+    ],
+    "b": [
+     5,
+     22,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 2,
+    "name": "UnderSlopePeak rot 2"
+   },
+   {
+    "id": "g116",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     22,
+     1
+    ],
+    "b": [
+     7,
+     22,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 3,
+    "name": "UnderSlopePeak rot 3"
+   },
+   {
+    "id": "g117",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     22,
+     1
+    ],
+    "b": [
+     10,
+     22,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g118",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     22,
+     1
+    ],
+    "b": [
+     12,
+     22,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g119",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     22,
+     1
+    ],
+    "b": [
+     14,
+     22,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g120",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     22,
+     1
+    ],
+    "b": [
+     16,
+     22,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g121",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     22,
+     1
+    ],
+    "b": [
+     19,
+     22,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g122",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     22,
+     1
+    ],
+    "b": [
+     21,
+     22,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g123",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     22,
+     1
+    ],
+    "b": [
+     23,
+     22,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g124",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     25,
+     22,
+     1
+    ],
+    "b": [
+     25,
+     22,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g125",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     28,
+     22,
+     1
+    ],
+    "b": [
+     28,
+     22,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g126",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     30,
+     22,
+     1
+    ],
+    "b": [
+     30,
+     22,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g127",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     32,
+     22,
+     1
+    ],
+    "b": [
+     32,
+     22,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g128",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     34,
+     22,
+     1
+    ],
+    "b": [
+     34,
+     22,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g129",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     25,
+     1
+    ],
+    "b": [
+     1,
+     25,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g130",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     25,
+     1
+    ],
+    "b": [
+     3,
+     25,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g131",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     5,
+     25,
+     1
+    ],
+    "b": [
+     5,
+     25,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g132",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     25,
+     1
+    ],
+    "b": [
+     7,
+     25,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g133",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     25,
+     1
+    ],
+    "b": [
+     10,
+     25,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "UnderInnerPeak rot 0"
+   },
+   {
+    "id": "g134",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     12,
+     25,
+     1
+    ],
+    "b": [
+     12,
+     25,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 1,
+    "name": "UnderInnerPeak rot 1"
+   },
+   {
+    "id": "g135",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     14,
+     25,
+     1
+    ],
+    "b": [
+     14,
+     25,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 2,
+    "name": "UnderInnerPeak rot 2"
+   },
+   {
+    "id": "g136",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     25,
+     1
+    ],
+    "b": [
+     16,
+     25,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 3,
+    "name": "UnderInnerPeak rot 3"
+   },
+   {
+    "id": "g137",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     29,
+     1
+    ],
+    "b": [
+     5,
+     29,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along x"
+   },
+   {
+    "id": "g138",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     30,
+     1
+    ],
+    "b": [
+     1,
+     32,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along y"
+   },
+   {
+    "id": "g139",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     8,
+     29,
+     1
+    ],
+    "b": [
+     12,
+     29,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T bar"
+   },
+   {
+    "id": "g140",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     30,
+     1
+    ],
+    "b": [
+     10,
+     32,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T stem"
+   },
+   {
+    "id": "g141",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     15,
+     29,
+     1
+    ],
+    "b": [
+     15,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of Window"
+   },
+   {
+    "id": "g142",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     29,
+     1
+    ],
+    "b": [
+     18,
+     29,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window 3x2 in a wall"
+   },
+   {
+    "id": "g143",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     16,
+     29,
+     3
+    ],
+    "b": [
+     18,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above Window"
+   },
+   {
+    "id": "g144",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     29,
+     1
+    ],
+    "b": [
+     19,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of Window"
+   },
+   {
+    "id": "g145",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     22,
+     29,
+     1
+    ],
+    "b": [
+     22,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of DoubleWindow"
+   },
+   {
+    "id": "g146",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     29,
+     1
+    ],
+    "b": [
+     25,
+     29,
+     2
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "DoubleWindow 3x2 in a wall"
+   },
+   {
+    "id": "g147",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     23,
+     29,
+     3
+    ],
+    "b": [
+     25,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above DoubleWindow"
+   },
+   {
+    "id": "g148",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     26,
+     29,
+     1
+    ],
+    "b": [
+     26,
+     29,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of DoubleWindow"
+   },
+   {
+    "id": "g149",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     29,
+     29,
+     1
+    ],
+    "b": [
+     33,
+     32,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g150",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     36,
+     29,
+     1
+    ],
+    "b": [
+     40,
+     32,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "FlatRoof 5x4"
+   },
+   {
+    "id": "g151",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     43,
+     29,
+     1
+    ],
+    "b": [
+     43,
+     31,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA 3 wide, rising east"
+   },
+   {
+    "id": "g152",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     44,
+     29,
+     1
+    ],
+    "b": [
+     44,
+     31,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB 3 wide, rising east"
+   },
+   {
+    "id": "g153",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     45,
+     29,
+     1
+    ],
+    "b": [
+     45,
+     31,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC 3 wide, rising east"
+   },
+   {
+    "id": "g154",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     46,
+     29,
+     1
+    ],
+    "b": [
+     46,
+     31,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD 3 wide, rising east"
+   },
+   {
+    "id": "g155",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     49,
+     29,
+     1
+    ],
+    "b": [
+     49,
+     29,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column x3"
+   },
+   {
+    "id": "g156",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     51,
+     29,
+     1
+    ],
+    "b": [
+     51,
+     29,
+     3
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "Chimney x3"
+   },
+   {
+    "id": "g157",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     53,
+     29,
+     1
+    ],
+    "b": [
+     53,
+     29,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g158",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     55,
+     29,
+     1
+    ],
+    "b": [
+     55,
+     29,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g159",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     57,
+     29,
+     1
+    ],
+    "b": [
+     57,
+     29,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g160",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     59,
+     29,
+     1
+    ],
+    "b": [
+     59,
+     29,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g161",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     61,
+     29,
+     1
+    ],
+    "b": [
+     61,
+     29,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "Stacked4 x1"
+   },
+   {
+    "id": "g162",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     35,
+     1
+    ],
+    "b": [
+     5,
+     35,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence L along x"
+   },
+   {
+    "id": "g163",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     36,
+     1
+    ],
+    "b": [
+     1,
+     38,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence L along y"
+   },
+   {
+    "id": "g164",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     8,
+     35,
+     1
+    ],
+    "b": [
+     12,
+     35,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence T bar"
+   },
+   {
+    "id": "g165",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     36,
+     1
+    ],
+    "b": [
+     10,
+     38,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "Fence T stem"
+   },
+   {
+    "id": "g166",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     41,
+     1
+    ],
+    "b": [
+     5,
+     41,
+     2
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "FullWall L along x"
+   },
+   {
+    "id": "g167",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     42,
+     1
+    ],
+    "b": [
+     1,
+     44,
+     2
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "FullWall L along y"
+   },
+   {
+    "id": "g168",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     47,
+     1
+    ],
+    "b": [
+     7,
+     51,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube base of the hip roof"
+   },
+   {
+    "id": "g169",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     2,
+     47,
+     2
+    ],
+    "b": [
+     6,
+     47,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g170",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     2,
+     51,
+     2
+    ],
+    "b": [
+     6,
+     51,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g171",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     48,
+     2
+    ],
+    "b": [
+     1,
+     50,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g172",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     48,
+     2
+    ],
+    "b": [
+     7,
+     50,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g173",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     47,
+     2
+    ],
+    "b": [
+     1,
+     47,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g174",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     47,
+     2
+    ],
+    "b": [
+     7,
+     47,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g175",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     7,
+     51,
+     2
+    ],
+    "b": [
+     7,
+     51,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g176",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     1,
+     51,
+     2
+    ],
+    "b": [
+     1,
+     51,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g177",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     48,
+     3
+    ],
+    "b": [
+     5,
+     48,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g178",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     50,
+     3
+    ],
+    "b": [
+     5,
+     50,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g179",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     2,
+     49,
+     3
+    ],
+    "b": [
+     2,
+     49,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g180",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     6,
+     49,
+     3
+    ],
+    "b": [
+     6,
+     49,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g181",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     2,
+     48,
+     3
+    ],
+    "b": [
+     2,
+     48,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g182",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     6,
+     48,
+     3
+    ],
+    "b": [
+     6,
+     48,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g183",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     6,
+     50,
+     3
+    ],
+    "b": [
+     6,
+     50,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g184",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     2,
+     50,
+     3
+    ],
+    "b": [
+     2,
+     50,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g185",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     3,
+     49,
+     4
+    ],
+    "b": [
+     5,
+     49,
+     4
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "hip ridge along x"
+   },
+   {
+    "id": "g186",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     10,
+     47,
+     1
+    ],
+    "b": [
+     16,
+     51,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube ring"
+   },
+   {
+    "id": "g187",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     11,
+     48,
+     1
+    ],
+    "b": [
+     15,
+     50,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube core"
+   },
+   {
+    "id": "g188",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     19,
+     49,
+     1
+    ],
+    "b": [
+     23,
+     49,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross along x"
+   },
+   {
+    "id": "g189",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     47,
+     1
+    ],
+    "b": [
+     21,
+     48,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross north arm"
+   },
+   {
+    "id": "g190",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     21,
+     50,
+     1
+    ],
+    "b": [
+     21,
+     51,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross south arm"
+   },
+   {
+    "id": "g191",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     26,
+     47,
+     1
+    ],
+    "b": [
+     28,
+     47,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along x"
+   },
+   {
+    "id": "g192",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     26,
+     48,
+     1
+    ],
+    "b": [
+     26,
+     50,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along y"
+   },
+   {
+    "id": "g193",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     31,
+     49,
+     1
+    ],
+    "b": [
+     35,
+     49,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "PeakSet cross along x"
+   },
+   {
+    "id": "g194",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     33,
+     47,
+     1
+    ],
+    "b": [
+     33,
+     48,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "PeakSet cross north arm"
+   },
+   {
+    "id": "g195",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     33,
+     50,
+     1
+    ],
+    "b": [
+     33,
+     51,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "PeakSet cross south arm"
+   },
+   {
+    "id": "g196",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     38,
+     47,
+     1
+    ],
+    "b": [
+     40,
+     47,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "PeakSet L along x"
+   },
+   {
+    "id": "g197",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     38,
+     48,
+     1
+    ],
+    "b": [
+     38,
+     50,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "PeakSet L along y"
+   },
+   {
+    "id": "g198",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     43,
+     49,
+     1
+    ],
+    "b": [
+     47,
+     49,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "UnderPeakSet cross along x"
+   },
+   {
+    "id": "g199",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     45,
+     47,
+     1
+    ],
+    "b": [
+     45,
+     48,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "UnderPeakSet cross north arm"
+   },
+   {
+    "id": "g200",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     45,
+     50,
+     1
+    ],
+    "b": [
+     45,
+     51,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "UnderPeakSet cross south arm"
+   },
+   {
+    "id": "g201",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     50,
+     47,
+     1
+    ],
+    "b": [
+     52,
+     47,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "UnderPeakSet L along x"
+   },
+   {
+    "id": "g202",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarBasaltItem",
+    "a": [
+     50,
+     48,
+     1
+    ],
+    "b": [
+     50,
+     50,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "UnderPeakSet L along y"
+   },
+   {
+    "id": "g203",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     1,
+     54,
+     1
+    ],
+    "b": [
+     1,
+     54,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "AshlarGneissItem Stairs"
+   },
+   {
+    "id": "g204",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     3,
+     54,
+     1
+    ],
+    "b": [
+     3,
+     54,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "AshlarGneissItem FullWall"
+   },
+   {
+    "id": "g205",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     5,
+     54,
+     1
+    ],
+    "b": [
+     5,
+     54,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "AshlarGneissItem FlatRoof"
+   },
+   {
+    "id": "g206",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     7,
+     54,
+     1
+    ],
+    "b": [
+     7,
+     54,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "AshlarGneissItem Column"
+   },
+   {
+    "id": "g207",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     9,
+     54,
+     1
+    ],
+    "b": [
+     9,
+     54,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "AshlarGneissItem Stacked1"
+   },
+   {
+    "id": "g208",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     11,
+     54,
+     1
+    ],
+    "b": [
+     11,
+     54,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "AshlarGneissItem Stacked2"
+   },
+   {
+    "id": "g209",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     13,
+     54,
+     1
+    ],
+    "b": [
+     13,
+     54,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "AshlarGneissItem Stacked3"
+   },
+   {
+    "id": "g210",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     15,
+     54,
+     1
+    ],
+    "b": [
+     15,
+     54,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "AshlarGneissItem Window"
+   },
+   {
+    "id": "g211",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     17,
+     54,
+     1
+    ],
+    "b": [
+     17,
+     54,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "AshlarGneissItem Fence"
+   },
+   {
+    "id": "g212",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     19,
+     54,
+     1
+    ],
+    "b": [
+     19,
+     54,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "AshlarGneissItem Stacked4"
+   },
+   {
+    "id": "g213",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     21,
+     54,
+     1
+    ],
+    "b": [
+     21,
+     54,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "AshlarGneissItem Cube"
+   },
+   {
+    "id": "g214",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     23,
+     54,
+     1
+    ],
+    "b": [
+     23,
+     54,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "AshlarGneissItem Ladder"
+   },
+   {
+    "id": "g215",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     25,
+     54,
+     1
+    ],
+    "b": [
+     25,
+     54,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderStairs"
+   },
+   {
+    "id": "g216",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     27,
+     54,
+     1
+    ],
+    "b": [
+     27,
+     54,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "AshlarGneissItem Brace"
+   },
+   {
+    "id": "g217",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     29,
+     54,
+     1
+    ],
+    "b": [
+     29,
+     54,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderBrace"
+   },
+   {
+    "id": "g218",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     31,
+     54,
+     1
+    ],
+    "b": [
+     31,
+     54,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem BraceCorner"
+   },
+   {
+    "id": "g219",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     33,
+     54,
+     1
+    ],
+    "b": [
+     33,
+     54,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderBraceCorner"
+   },
+   {
+    "id": "g220",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     35,
+     54,
+     1
+    ],
+    "b": [
+     35,
+     54,
+     1
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "AshlarGneissItem Chimney"
+   },
+   {
+    "id": "g221",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     37,
+     54,
+     1
+    ],
+    "b": [
+     37,
+     54,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "AshlarGneissItem Wall"
+   },
+   {
+    "id": "g222",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     39,
+     54,
+     1
+    ],
+    "b": [
+     39,
+     54,
+     1
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "AshlarGneissItem DoubleWindow"
+   },
+   {
+    "id": "g223",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     41,
+     54,
+     1
+    ],
+    "b": [
+     41,
+     54,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "AshlarGneissItem Floor"
+   },
+   {
+    "id": "g224",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     43,
+     54,
+     1
+    ],
+    "b": [
+     43,
+     54,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "AshlarGneissItem SideBrace"
+   },
+   {
+    "id": "g225",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     1,
+     56,
+     1
+    ],
+    "b": [
+     1,
+     56,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem BraceTurn"
+   },
+   {
+    "id": "g226",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     3,
+     56,
+     1
+    ],
+    "b": [
+     3,
+     56,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderBraceTurn"
+   },
+   {
+    "id": "g227",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     5,
+     56,
+     1
+    ],
+    "b": [
+     5,
+     56,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "AshlarGneissItem HalfSlopeA"
+   },
+   {
+    "id": "g228",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     7,
+     56,
+     1
+    ],
+    "b": [
+     7,
+     56,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "AshlarGneissItem HalfSlopeB"
+   },
+   {
+    "id": "g229",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     9,
+     56,
+     1
+    ],
+    "b": [
+     9,
+     56,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "AshlarGneissItem RampA"
+   },
+   {
+    "id": "g230",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     11,
+     56,
+     1
+    ],
+    "b": [
+     11,
+     56,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "AshlarGneissItem RampB"
+   },
+   {
+    "id": "g231",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     13,
+     56,
+     1
+    ],
+    "b": [
+     13,
+     56,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "AshlarGneissItem RampC"
+   },
+   {
+    "id": "g232",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     15,
+     56,
+     1
+    ],
+    "b": [
+     15,
+     56,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "AshlarGneissItem RampD"
+   },
+   {
+    "id": "g233",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     17,
+     56,
+     1
+    ],
+    "b": [
+     17,
+     56,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "AshlarGneissItem BasicSlopeSide"
+   },
+   {
+    "id": "g234",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     19,
+     56,
+     1
+    ],
+    "b": [
+     19,
+     56,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem BasicSlopeCorner"
+   },
+   {
+    "id": "g235",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     21,
+     56,
+     1
+    ],
+    "b": [
+     21,
+     56,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem BasicSlopeTurn"
+   },
+   {
+    "id": "g236",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     23,
+     56,
+     1
+    ],
+    "b": [
+     23,
+     56,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "AshlarGneissItem BasicSlopePoint"
+   },
+   {
+    "id": "g237",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     25,
+     56,
+     1
+    ],
+    "b": [
+     25,
+     56,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem FloatStairsTurn"
+   },
+   {
+    "id": "g238",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     27,
+     56,
+     1
+    ],
+    "b": [
+     27,
+     56,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem FloatStairsCorner"
+   },
+   {
+    "id": "g239",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     29,
+     56,
+     1
+    ],
+    "b": [
+     29,
+     56,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem StairsCorner"
+   },
+   {
+    "id": "g240",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     31,
+     56,
+     1
+    ],
+    "b": [
+     31,
+     56,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem StairsTurn"
+   },
+   {
+    "id": "g241",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     33,
+     56,
+     1
+    ],
+    "b": [
+     33,
+     56,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "AshlarGneissItem FloatStairs"
+   },
+   {
+    "id": "g242",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     35,
+     56,
+     1
+    ],
+    "b": [
+     35,
+     56,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderSlopeSide"
+   },
+   {
+    "id": "g243",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     37,
+     56,
+     1
+    ],
+    "b": [
+     37,
+     56,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderSlopeCorner"
+   },
+   {
+    "id": "g244",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     39,
+     56,
+     1
+    ],
+    "b": [
+     39,
+     56,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderSlopeTurn"
+   },
+   {
+    "id": "g245",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     41,
+     56,
+     1
+    ],
+    "b": [
+     41,
+     56,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderSlopePeak"
+   },
+   {
+    "id": "g246",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     43,
+     56,
+     1
+    ],
+    "b": [
+     43,
+     56,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderPeakSet"
+   },
+   {
+    "id": "g247",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     1,
+     58,
+     1
+    ],
+    "b": [
+     1,
+     58,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "AshlarGneissItem PeakSet"
+   },
+   {
+    "id": "g248",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     3,
+     58,
+     1
+    ],
+    "b": [
+     3,
+     58,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofPeakSet"
+   },
+   {
+    "id": "g249",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     5,
+     58,
+     1
+    ],
+    "b": [
+     5,
+     58,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofSide"
+   },
+   {
+    "id": "g250",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     7,
+     58,
+     1
+    ],
+    "b": [
+     7,
+     58,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofTurn"
+   },
+   {
+    "id": "g251",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     9,
+     58,
+     1
+    ],
+    "b": [
+     9,
+     58,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofCorner"
+   },
+   {
+    "id": "g252",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     11,
+     58,
+     1
+    ],
+    "b": [
+     11,
+     58,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofPeak"
+   },
+   {
+    "id": "g253",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     13,
+     58,
+     1
+    ],
+    "b": [
+     13,
+     58,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "AshlarGneissItem RoofCube"
+   },
+   {
+    "id": "g254",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGneissItem",
+    "a": [
+     15,
+     58,
+     1
+    ],
+    "b": [
+     15,
+     58,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "AshlarGneissItem UnderInnerPeak"
+   },
+   {
+    "id": "g255",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     1,
+     61,
+     1
+    ],
+    "b": [
+     1,
+     61,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "AshlarGraniteItem Stairs"
+   },
+   {
+    "id": "g256",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     3,
+     61,
+     1
+    ],
+    "b": [
+     3,
+     61,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "AshlarGraniteItem FullWall"
+   },
+   {
+    "id": "g257",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     5,
+     61,
+     1
+    ],
+    "b": [
+     5,
+     61,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "AshlarGraniteItem FlatRoof"
+   },
+   {
+    "id": "g258",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     7,
+     61,
+     1
+    ],
+    "b": [
+     7,
+     61,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "AshlarGraniteItem Column"
+   },
+   {
+    "id": "g259",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     9,
+     61,
+     1
+    ],
+    "b": [
+     9,
+     61,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "AshlarGraniteItem Stacked1"
+   },
+   {
+    "id": "g260",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     11,
+     61,
+     1
+    ],
+    "b": [
+     11,
+     61,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "AshlarGraniteItem Stacked2"
+   },
+   {
+    "id": "g261",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     13,
+     61,
+     1
+    ],
+    "b": [
+     13,
+     61,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "AshlarGraniteItem Stacked3"
+   },
+   {
+    "id": "g262",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     15,
+     61,
+     1
+    ],
+    "b": [
+     15,
+     61,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "AshlarGraniteItem Window"
+   },
+   {
+    "id": "g263",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     17,
+     61,
+     1
+    ],
+    "b": [
+     17,
+     61,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "AshlarGraniteItem Fence"
+   },
+   {
+    "id": "g264",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     19,
+     61,
+     1
+    ],
+    "b": [
+     19,
+     61,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "AshlarGraniteItem Stacked4"
+   },
+   {
+    "id": "g265",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     21,
+     61,
+     1
+    ],
+    "b": [
+     21,
+     61,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "AshlarGraniteItem Cube"
+   },
+   {
+    "id": "g266",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     23,
+     61,
+     1
+    ],
+    "b": [
+     23,
+     61,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "AshlarGraniteItem Ladder"
+   },
+   {
+    "id": "g267",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     25,
+     61,
+     1
+    ],
+    "b": [
+     25,
+     61,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderStairs"
+   },
+   {
+    "id": "g268",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     27,
+     61,
+     1
+    ],
+    "b": [
+     27,
+     61,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "AshlarGraniteItem Brace"
+   },
+   {
+    "id": "g269",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     29,
+     61,
+     1
+    ],
+    "b": [
+     29,
+     61,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderBrace"
+   },
+   {
+    "id": "g270",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     31,
+     61,
+     1
+    ],
+    "b": [
+     31,
+     61,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem BraceCorner"
+   },
+   {
+    "id": "g271",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     33,
+     61,
+     1
+    ],
+    "b": [
+     33,
+     61,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderBraceCorner"
+   },
+   {
+    "id": "g272",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     35,
+     61,
+     1
+    ],
+    "b": [
+     35,
+     61,
+     1
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "AshlarGraniteItem Chimney"
+   },
+   {
+    "id": "g273",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     37,
+     61,
+     1
+    ],
+    "b": [
+     37,
+     61,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "AshlarGraniteItem Wall"
+   },
+   {
+    "id": "g274",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     39,
+     61,
+     1
+    ],
+    "b": [
+     39,
+     61,
+     1
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "AshlarGraniteItem DoubleWindow"
+   },
+   {
+    "id": "g275",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     41,
+     61,
+     1
+    ],
+    "b": [
+     41,
+     61,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "AshlarGraniteItem Floor"
+   },
+   {
+    "id": "g276",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     43,
+     61,
+     1
+    ],
+    "b": [
+     43,
+     61,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "AshlarGraniteItem SideBrace"
+   },
+   {
+    "id": "g277",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     1,
+     63,
+     1
+    ],
+    "b": [
+     1,
+     63,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem BraceTurn"
+   },
+   {
+    "id": "g278",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     3,
+     63,
+     1
+    ],
+    "b": [
+     3,
+     63,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderBraceTurn"
+   },
+   {
+    "id": "g279",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     5,
+     63,
+     1
+    ],
+    "b": [
+     5,
+     63,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "AshlarGraniteItem HalfSlopeA"
+   },
+   {
+    "id": "g280",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     7,
+     63,
+     1
+    ],
+    "b": [
+     7,
+     63,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "AshlarGraniteItem HalfSlopeB"
+   },
+   {
+    "id": "g281",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     9,
+     63,
+     1
+    ],
+    "b": [
+     9,
+     63,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "AshlarGraniteItem RampA"
+   },
+   {
+    "id": "g282",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     11,
+     63,
+     1
+    ],
+    "b": [
+     11,
+     63,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "AshlarGraniteItem RampB"
+   },
+   {
+    "id": "g283",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     13,
+     63,
+     1
+    ],
+    "b": [
+     13,
+     63,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "AshlarGraniteItem RampC"
+   },
+   {
+    "id": "g284",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     15,
+     63,
+     1
+    ],
+    "b": [
+     15,
+     63,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "AshlarGraniteItem RampD"
+   },
+   {
+    "id": "g285",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     17,
+     63,
+     1
+    ],
+    "b": [
+     17,
+     63,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "AshlarGraniteItem BasicSlopeSide"
+   },
+   {
+    "id": "g286",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     19,
+     63,
+     1
+    ],
+    "b": [
+     19,
+     63,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem BasicSlopeCorner"
+   },
+   {
+    "id": "g287",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     21,
+     63,
+     1
+    ],
+    "b": [
+     21,
+     63,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem BasicSlopeTurn"
+   },
+   {
+    "id": "g288",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     23,
+     63,
+     1
+    ],
+    "b": [
+     23,
+     63,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "AshlarGraniteItem BasicSlopePoint"
+   },
+   {
+    "id": "g289",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     25,
+     63,
+     1
+    ],
+    "b": [
+     25,
+     63,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem FloatStairsTurn"
+   },
+   {
+    "id": "g290",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     27,
+     63,
+     1
+    ],
+    "b": [
+     27,
+     63,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem FloatStairsCorner"
+   },
+   {
+    "id": "g291",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     29,
+     63,
+     1
+    ],
+    "b": [
+     29,
+     63,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem StairsCorner"
+   },
+   {
+    "id": "g292",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     31,
+     63,
+     1
+    ],
+    "b": [
+     31,
+     63,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem StairsTurn"
+   },
+   {
+    "id": "g293",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     33,
+     63,
+     1
+    ],
+    "b": [
+     33,
+     63,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "AshlarGraniteItem FloatStairs"
+   },
+   {
+    "id": "g294",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     35,
+     63,
+     1
+    ],
+    "b": [
+     35,
+     63,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderSlopeSide"
+   },
+   {
+    "id": "g295",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     37,
+     63,
+     1
+    ],
+    "b": [
+     37,
+     63,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderSlopeCorner"
+   },
+   {
+    "id": "g296",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     39,
+     63,
+     1
+    ],
+    "b": [
+     39,
+     63,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderSlopeTurn"
+   },
+   {
+    "id": "g297",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     41,
+     63,
+     1
+    ],
+    "b": [
+     41,
+     63,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderSlopePeak"
+   },
+   {
+    "id": "g298",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     43,
+     63,
+     1
+    ],
+    "b": [
+     43,
+     63,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderPeakSet"
+   },
+   {
+    "id": "g299",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     1,
+     65,
+     1
+    ],
+    "b": [
+     1,
+     65,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "AshlarGraniteItem PeakSet"
+   },
+   {
+    "id": "g300",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     3,
+     65,
+     1
+    ],
+    "b": [
+     3,
+     65,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofPeakSet"
+   },
+   {
+    "id": "g301",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     5,
+     65,
+     1
+    ],
+    "b": [
+     5,
+     65,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofSide"
+   },
+   {
+    "id": "g302",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     7,
+     65,
+     1
+    ],
+    "b": [
+     7,
+     65,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofTurn"
+   },
+   {
+    "id": "g303",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     9,
+     65,
+     1
+    ],
+    "b": [
+     9,
+     65,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofCorner"
+   },
+   {
+    "id": "g304",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     11,
+     65,
+     1
+    ],
+    "b": [
+     11,
+     65,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofPeak"
+   },
+   {
+    "id": "g305",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     13,
+     65,
+     1
+    ],
+    "b": [
+     13,
+     65,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "AshlarGraniteItem RoofCube"
+   },
+   {
+    "id": "g306",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarGraniteItem",
+    "a": [
+     15,
+     65,
+     1
+    ],
+    "b": [
+     15,
+     65,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "AshlarGraniteItem UnderInnerPeak"
+   },
+   {
+    "id": "g307",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     1,
+     68,
+     1
+    ],
+    "b": [
+     1,
+     68,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Stairs"
+   },
+   {
+    "id": "g308",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     3,
+     68,
+     1
+    ],
+    "b": [
+     3,
+     68,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "AshlarLimestoneItem FullWall"
+   },
+   {
+    "id": "g309",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     5,
+     68,
+     1
+    ],
+    "b": [
+     5,
+     68,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "AshlarLimestoneItem FlatRoof"
+   },
+   {
+    "id": "g310",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     7,
+     68,
+     1
+    ],
+    "b": [
+     7,
+     68,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Column"
+   },
+   {
+    "id": "g311",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     9,
+     68,
+     1
+    ],
+    "b": [
+     9,
+     68,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Stacked1"
+   },
+   {
+    "id": "g312",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     11,
+     68,
+     1
+    ],
+    "b": [
+     11,
+     68,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Stacked2"
+   },
+   {
+    "id": "g313",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     13,
+     68,
+     1
+    ],
+    "b": [
+     13,
+     68,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Stacked3"
+   },
+   {
+    "id": "g314",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     15,
+     68,
+     1
+    ],
+    "b": [
+     15,
+     68,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Window"
+   },
+   {
+    "id": "g315",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     17,
+     68,
+     1
+    ],
+    "b": [
+     17,
+     68,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Fence"
+   },
+   {
+    "id": "g316",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     19,
+     68,
+     1
+    ],
+    "b": [
+     19,
+     68,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Stacked4"
+   },
+   {
+    "id": "g317",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     21,
+     68,
+     1
+    ],
+    "b": [
+     21,
+     68,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Cube"
+   },
+   {
+    "id": "g318",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     23,
+     68,
+     1
+    ],
+    "b": [
+     23,
+     68,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Ladder"
+   },
+   {
+    "id": "g319",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     25,
+     68,
+     1
+    ],
+    "b": [
+     25,
+     68,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderStairs"
+   },
+   {
+    "id": "g320",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     27,
+     68,
+     1
+    ],
+    "b": [
+     27,
+     68,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Brace"
+   },
+   {
+    "id": "g321",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     29,
+     68,
+     1
+    ],
+    "b": [
+     29,
+     68,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderBrace"
+   },
+   {
+    "id": "g322",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     31,
+     68,
+     1
+    ],
+    "b": [
+     31,
+     68,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BraceCorner"
+   },
+   {
+    "id": "g323",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     33,
+     68,
+     1
+    ],
+    "b": [
+     33,
+     68,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderBraceCorner"
+   },
+   {
+    "id": "g324",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     35,
+     68,
+     1
+    ],
+    "b": [
+     35,
+     68,
+     1
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Chimney"
+   },
+   {
+    "id": "g325",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     37,
+     68,
+     1
+    ],
+    "b": [
+     37,
+     68,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Wall"
+   },
+   {
+    "id": "g326",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     39,
+     68,
+     1
+    ],
+    "b": [
+     39,
+     68,
+     1
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "AshlarLimestoneItem DoubleWindow"
+   },
+   {
+    "id": "g327",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     41,
+     68,
+     1
+    ],
+    "b": [
+     41,
+     68,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "AshlarLimestoneItem Floor"
+   },
+   {
+    "id": "g328",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     43,
+     68,
+     1
+    ],
+    "b": [
+     43,
+     68,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "AshlarLimestoneItem SideBrace"
+   },
+   {
+    "id": "g329",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     1,
+     70,
+     1
+    ],
+    "b": [
+     1,
+     70,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BraceTurn"
+   },
+   {
+    "id": "g330",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     3,
+     70,
+     1
+    ],
+    "b": [
+     3,
+     70,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderBraceTurn"
+   },
+   {
+    "id": "g331",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     5,
+     70,
+     1
+    ],
+    "b": [
+     5,
+     70,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "AshlarLimestoneItem HalfSlopeA"
+   },
+   {
+    "id": "g332",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     7,
+     70,
+     1
+    ],
+    "b": [
+     7,
+     70,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "AshlarLimestoneItem HalfSlopeB"
+   },
+   {
+    "id": "g333",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     9,
+     70,
+     1
+    ],
+    "b": [
+     9,
+     70,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RampA"
+   },
+   {
+    "id": "g334",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     11,
+     70,
+     1
+    ],
+    "b": [
+     11,
+     70,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RampB"
+   },
+   {
+    "id": "g335",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     13,
+     70,
+     1
+    ],
+    "b": [
+     13,
+     70,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RampC"
+   },
+   {
+    "id": "g336",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     15,
+     70,
+     1
+    ],
+    "b": [
+     15,
+     70,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RampD"
+   },
+   {
+    "id": "g337",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     17,
+     70,
+     1
+    ],
+    "b": [
+     17,
+     70,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BasicSlopeSide"
+   },
+   {
+    "id": "g338",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     19,
+     70,
+     1
+    ],
+    "b": [
+     19,
+     70,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BasicSlopeCorner"
+   },
+   {
+    "id": "g339",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     21,
+     70,
+     1
+    ],
+    "b": [
+     21,
+     70,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BasicSlopeTurn"
+   },
+   {
+    "id": "g340",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     23,
+     70,
+     1
+    ],
+    "b": [
+     23,
+     70,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "AshlarLimestoneItem BasicSlopePoint"
+   },
+   {
+    "id": "g341",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     25,
+     70,
+     1
+    ],
+    "b": [
+     25,
+     70,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem FloatStairsTurn"
+   },
+   {
+    "id": "g342",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     27,
+     70,
+     1
+    ],
+    "b": [
+     27,
+     70,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem FloatStairsCorner"
+   },
+   {
+    "id": "g343",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     29,
+     70,
+     1
+    ],
+    "b": [
+     29,
+     70,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem StairsCorner"
+   },
+   {
+    "id": "g344",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     31,
+     70,
+     1
+    ],
+    "b": [
+     31,
+     70,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem StairsTurn"
+   },
+   {
+    "id": "g345",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     33,
+     70,
+     1
+    ],
+    "b": [
+     33,
+     70,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "AshlarLimestoneItem FloatStairs"
+   },
+   {
+    "id": "g346",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     35,
+     70,
+     1
+    ],
+    "b": [
+     35,
+     70,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderSlopeSide"
+   },
+   {
+    "id": "g347",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     37,
+     70,
+     1
+    ],
+    "b": [
+     37,
+     70,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderSlopeCorner"
+   },
+   {
+    "id": "g348",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     39,
+     70,
+     1
+    ],
+    "b": [
+     39,
+     70,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderSlopeTurn"
+   },
+   {
+    "id": "g349",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     41,
+     70,
+     1
+    ],
+    "b": [
+     41,
+     70,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderSlopePeak"
+   },
+   {
+    "id": "g350",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     43,
+     70,
+     1
+    ],
+    "b": [
+     43,
+     70,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderPeakSet"
+   },
+   {
+    "id": "g351",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     1,
+     72,
+     1
+    ],
+    "b": [
+     1,
+     72,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "AshlarLimestoneItem PeakSet"
+   },
+   {
+    "id": "g352",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     3,
+     72,
+     1
+    ],
+    "b": [
+     3,
+     72,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofPeakSet"
+   },
+   {
+    "id": "g353",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     5,
+     72,
+     1
+    ],
+    "b": [
+     5,
+     72,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofSide"
+   },
+   {
+    "id": "g354",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     7,
+     72,
+     1
+    ],
+    "b": [
+     7,
+     72,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofTurn"
+   },
+   {
+    "id": "g355",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     9,
+     72,
+     1
+    ],
+    "b": [
+     9,
+     72,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofCorner"
+   },
+   {
+    "id": "g356",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     11,
+     72,
+     1
+    ],
+    "b": [
+     11,
+     72,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofPeak"
+   },
+   {
+    "id": "g357",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     13,
+     72,
+     1
+    ],
+    "b": [
+     13,
+     72,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "AshlarLimestoneItem RoofCube"
+   },
+   {
+    "id": "g358",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarLimestoneItem",
+    "a": [
+     15,
+     72,
+     1
+    ],
+    "b": [
+     15,
+     72,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "AshlarLimestoneItem UnderInnerPeak"
+   },
+   {
+    "id": "g359",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     1,
+     75,
+     1
+    ],
+    "b": [
+     1,
+     75,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Stairs"
+   },
+   {
+    "id": "g360",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     3,
+     75,
+     1
+    ],
+    "b": [
+     3,
+     75,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "AshlarSandstoneItem FullWall"
+   },
+   {
+    "id": "g361",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     5,
+     75,
+     1
+    ],
+    "b": [
+     5,
+     75,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "AshlarSandstoneItem FlatRoof"
+   },
+   {
+    "id": "g362",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     7,
+     75,
+     1
+    ],
+    "b": [
+     7,
+     75,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Column"
+   },
+   {
+    "id": "g363",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     9,
+     75,
+     1
+    ],
+    "b": [
+     9,
+     75,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Stacked1"
+   },
+   {
+    "id": "g364",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     11,
+     75,
+     1
+    ],
+    "b": [
+     11,
+     75,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Stacked2"
+   },
+   {
+    "id": "g365",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     13,
+     75,
+     1
+    ],
+    "b": [
+     13,
+     75,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Stacked3"
+   },
+   {
+    "id": "g366",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     15,
+     75,
+     1
+    ],
+    "b": [
+     15,
+     75,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Window"
+   },
+   {
+    "id": "g367",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     17,
+     75,
+     1
+    ],
+    "b": [
+     17,
+     75,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Fence"
+   },
+   {
+    "id": "g368",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     19,
+     75,
+     1
+    ],
+    "b": [
+     19,
+     75,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Stacked4"
+   },
+   {
+    "id": "g369",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     21,
+     75,
+     1
+    ],
+    "b": [
+     21,
+     75,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Cube"
+   },
+   {
+    "id": "g370",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     23,
+     75,
+     1
+    ],
+    "b": [
+     23,
+     75,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Ladder"
+   },
+   {
+    "id": "g371",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     25,
+     75,
+     1
+    ],
+    "b": [
+     25,
+     75,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderStairs"
+   },
+   {
+    "id": "g372",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     27,
+     75,
+     1
+    ],
+    "b": [
+     27,
+     75,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Brace"
+   },
+   {
+    "id": "g373",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     29,
+     75,
+     1
+    ],
+    "b": [
+     29,
+     75,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderBrace"
+   },
+   {
+    "id": "g374",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     31,
+     75,
+     1
+    ],
+    "b": [
+     31,
+     75,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BraceCorner"
+   },
+   {
+    "id": "g375",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     33,
+     75,
+     1
+    ],
+    "b": [
+     33,
+     75,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderBraceCorner"
+   },
+   {
+    "id": "g376",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     35,
+     75,
+     1
+    ],
+    "b": [
+     35,
+     75,
+     1
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Chimney"
+   },
+   {
+    "id": "g377",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     37,
+     75,
+     1
+    ],
+    "b": [
+     37,
+     75,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Wall"
+   },
+   {
+    "id": "g378",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     39,
+     75,
+     1
+    ],
+    "b": [
+     39,
+     75,
+     1
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "AshlarSandstoneItem DoubleWindow"
+   },
+   {
+    "id": "g379",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     41,
+     75,
+     1
+    ],
+    "b": [
+     41,
+     75,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "AshlarSandstoneItem Floor"
+   },
+   {
+    "id": "g380",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     43,
+     75,
+     1
+    ],
+    "b": [
+     43,
+     75,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "AshlarSandstoneItem SideBrace"
+   },
+   {
+    "id": "g381",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     1,
+     77,
+     1
+    ],
+    "b": [
+     1,
+     77,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BraceTurn"
+   },
+   {
+    "id": "g382",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     3,
+     77,
+     1
+    ],
+    "b": [
+     3,
+     77,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderBraceTurn"
+   },
+   {
+    "id": "g383",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     5,
+     77,
+     1
+    ],
+    "b": [
+     5,
+     77,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "AshlarSandstoneItem HalfSlopeA"
+   },
+   {
+    "id": "g384",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     7,
+     77,
+     1
+    ],
+    "b": [
+     7,
+     77,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "AshlarSandstoneItem HalfSlopeB"
+   },
+   {
+    "id": "g385",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     9,
+     77,
+     1
+    ],
+    "b": [
+     9,
+     77,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RampA"
+   },
+   {
+    "id": "g386",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     11,
+     77,
+     1
+    ],
+    "b": [
+     11,
+     77,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RampB"
+   },
+   {
+    "id": "g387",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     13,
+     77,
+     1
+    ],
+    "b": [
+     13,
+     77,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RampC"
+   },
+   {
+    "id": "g388",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     15,
+     77,
+     1
+    ],
+    "b": [
+     15,
+     77,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RampD"
+   },
+   {
+    "id": "g389",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     17,
+     77,
+     1
+    ],
+    "b": [
+     17,
+     77,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BasicSlopeSide"
+   },
+   {
+    "id": "g390",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     19,
+     77,
+     1
+    ],
+    "b": [
+     19,
+     77,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BasicSlopeCorner"
+   },
+   {
+    "id": "g391",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     21,
+     77,
+     1
+    ],
+    "b": [
+     21,
+     77,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BasicSlopeTurn"
+   },
+   {
+    "id": "g392",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     23,
+     77,
+     1
+    ],
+    "b": [
+     23,
+     77,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "AshlarSandstoneItem BasicSlopePoint"
+   },
+   {
+    "id": "g393",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     25,
+     77,
+     1
+    ],
+    "b": [
+     25,
+     77,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem FloatStairsTurn"
+   },
+   {
+    "id": "g394",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     27,
+     77,
+     1
+    ],
+    "b": [
+     27,
+     77,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem FloatStairsCorner"
+   },
+   {
+    "id": "g395",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     29,
+     77,
+     1
+    ],
+    "b": [
+     29,
+     77,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem StairsCorner"
+   },
+   {
+    "id": "g396",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     31,
+     77,
+     1
+    ],
+    "b": [
+     31,
+     77,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem StairsTurn"
+   },
+   {
+    "id": "g397",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     33,
+     77,
+     1
+    ],
+    "b": [
+     33,
+     77,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "AshlarSandstoneItem FloatStairs"
+   },
+   {
+    "id": "g398",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     35,
+     77,
+     1
+    ],
+    "b": [
+     35,
+     77,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderSlopeSide"
+   },
+   {
+    "id": "g399",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     37,
+     77,
+     1
+    ],
+    "b": [
+     37,
+     77,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderSlopeCorner"
+   },
+   {
+    "id": "g400",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     39,
+     77,
+     1
+    ],
+    "b": [
+     39,
+     77,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderSlopeTurn"
+   },
+   {
+    "id": "g401",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     41,
+     77,
+     1
+    ],
+    "b": [
+     41,
+     77,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderSlopePeak"
+   },
+   {
+    "id": "g402",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     43,
+     77,
+     1
+    ],
+    "b": [
+     43,
+     77,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderPeakSet"
+   },
+   {
+    "id": "g403",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     1,
+     79,
+     1
+    ],
+    "b": [
+     1,
+     79,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "AshlarSandstoneItem PeakSet"
+   },
+   {
+    "id": "g404",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     3,
+     79,
+     1
+    ],
+    "b": [
+     3,
+     79,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofPeakSet"
+   },
+   {
+    "id": "g405",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     5,
+     79,
+     1
+    ],
+    "b": [
+     5,
+     79,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofSide"
+   },
+   {
+    "id": "g406",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     7,
+     79,
+     1
+    ],
+    "b": [
+     7,
+     79,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofTurn"
+   },
+   {
+    "id": "g407",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     9,
+     79,
+     1
+    ],
+    "b": [
+     9,
+     79,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofCorner"
+   },
+   {
+    "id": "g408",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     11,
+     79,
+     1
+    ],
+    "b": [
+     11,
+     79,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofPeak"
+   },
+   {
+    "id": "g409",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     13,
+     79,
+     1
+    ],
+    "b": [
+     13,
+     79,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "AshlarSandstoneItem RoofCube"
+   },
+   {
+    "id": "g410",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarSandstoneItem",
+    "a": [
+     15,
+     79,
+     1
+    ],
+    "b": [
+     15,
+     79,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "AshlarSandstoneItem UnderInnerPeak"
+   },
+   {
+    "id": "g411",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     1,
+     82,
+     1
+    ],
+    "b": [
+     1,
+     82,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "AshlarShaleItem Stairs"
+   },
+   {
+    "id": "g412",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     3,
+     82,
+     1
+    ],
+    "b": [
+     3,
+     82,
+     1
+    ],
+    "form": "FullWall",
+    "rot": 0,
+    "name": "AshlarShaleItem FullWall"
+   },
+   {
+    "id": "g413",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     5,
+     82,
+     1
+    ],
+    "b": [
+     5,
+     82,
+     1
+    ],
+    "form": "FlatRoof",
+    "rot": 0,
+    "name": "AshlarShaleItem FlatRoof"
+   },
+   {
+    "id": "g414",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     7,
+     82,
+     1
+    ],
+    "b": [
+     7,
+     82,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "AshlarShaleItem Column"
+   },
+   {
+    "id": "g415",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     9,
+     82,
+     1
+    ],
+    "b": [
+     9,
+     82,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "AshlarShaleItem Stacked1"
+   },
+   {
+    "id": "g416",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     11,
+     82,
+     1
+    ],
+    "b": [
+     11,
+     82,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "AshlarShaleItem Stacked2"
+   },
+   {
+    "id": "g417",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     13,
+     82,
+     1
+    ],
+    "b": [
+     13,
+     82,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "AshlarShaleItem Stacked3"
+   },
+   {
+    "id": "g418",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     15,
+     82,
+     1
+    ],
+    "b": [
+     15,
+     82,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "AshlarShaleItem Window"
+   },
+   {
+    "id": "g419",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     17,
+     82,
+     1
+    ],
+    "b": [
+     17,
+     82,
+     1
+    ],
+    "form": "Fence",
+    "rot": 0,
+    "name": "AshlarShaleItem Fence"
+   },
+   {
+    "id": "g420",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     19,
+     82,
+     1
+    ],
+    "b": [
+     19,
+     82,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "AshlarShaleItem Stacked4"
+   },
+   {
+    "id": "g421",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     21,
+     82,
+     1
+    ],
+    "b": [
+     21,
+     82,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "AshlarShaleItem Cube"
+   },
+   {
+    "id": "g422",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     23,
+     82,
+     1
+    ],
+    "b": [
+     23,
+     82,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "AshlarShaleItem Ladder"
+   },
+   {
+    "id": "g423",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     25,
+     82,
+     1
+    ],
+    "b": [
+     25,
+     82,
+     1
+    ],
+    "form": "UnderStairs",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderStairs"
+   },
+   {
+    "id": "g424",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     27,
+     82,
+     1
+    ],
+    "b": [
+     27,
+     82,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "AshlarShaleItem Brace"
+   },
+   {
+    "id": "g425",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     29,
+     82,
+     1
+    ],
+    "b": [
+     29,
+     82,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderBrace"
+   },
+   {
+    "id": "g426",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     31,
+     82,
+     1
+    ],
+    "b": [
+     31,
+     82,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem BraceCorner"
+   },
+   {
+    "id": "g427",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     33,
+     82,
+     1
+    ],
+    "b": [
+     33,
+     82,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderBraceCorner"
+   },
+   {
+    "id": "g428",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     35,
+     82,
+     1
+    ],
+    "b": [
+     35,
+     82,
+     1
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "AshlarShaleItem Chimney"
+   },
+   {
+    "id": "g429",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     37,
+     82,
+     1
+    ],
+    "b": [
+     37,
+     82,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "AshlarShaleItem Wall"
+   },
+   {
+    "id": "g430",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     39,
+     82,
+     1
+    ],
+    "b": [
+     39,
+     82,
+     1
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "AshlarShaleItem DoubleWindow"
+   },
+   {
+    "id": "g431",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     41,
+     82,
+     1
+    ],
+    "b": [
+     41,
+     82,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "AshlarShaleItem Floor"
+   },
+   {
+    "id": "g432",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     43,
+     82,
+     1
+    ],
+    "b": [
+     43,
+     82,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "AshlarShaleItem SideBrace"
+   },
+   {
+    "id": "g433",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     1,
+     84,
+     1
+    ],
+    "b": [
+     1,
+     84,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem BraceTurn"
+   },
+   {
+    "id": "g434",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     3,
+     84,
+     1
+    ],
+    "b": [
+     3,
+     84,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderBraceTurn"
+   },
+   {
+    "id": "g435",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     5,
+     84,
+     1
+    ],
+    "b": [
+     5,
+     84,
+     1
+    ],
+    "form": "HalfSlopeA",
+    "rot": 0,
+    "name": "AshlarShaleItem HalfSlopeA"
+   },
+   {
+    "id": "g436",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     7,
+     84,
+     1
+    ],
+    "b": [
+     7,
+     84,
+     1
+    ],
+    "form": "HalfSlopeB",
+    "rot": 0,
+    "name": "AshlarShaleItem HalfSlopeB"
+   },
+   {
+    "id": "g437",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     9,
+     84,
+     1
+    ],
+    "b": [
+     9,
+     84,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "AshlarShaleItem RampA"
+   },
+   {
+    "id": "g438",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     11,
+     84,
+     1
+    ],
+    "b": [
+     11,
+     84,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "AshlarShaleItem RampB"
+   },
+   {
+    "id": "g439",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     13,
+     84,
+     1
+    ],
+    "b": [
+     13,
+     84,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "AshlarShaleItem RampC"
+   },
+   {
+    "id": "g440",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     15,
+     84,
+     1
+    ],
+    "b": [
+     15,
+     84,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "AshlarShaleItem RampD"
+   },
+   {
+    "id": "g441",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     17,
+     84,
+     1
+    ],
+    "b": [
+     17,
+     84,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "AshlarShaleItem BasicSlopeSide"
+   },
+   {
+    "id": "g442",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     19,
+     84,
+     1
+    ],
+    "b": [
+     19,
+     84,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem BasicSlopeCorner"
+   },
+   {
+    "id": "g443",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     21,
+     84,
+     1
+    ],
+    "b": [
+     21,
+     84,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem BasicSlopeTurn"
+   },
+   {
+    "id": "g444",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     23,
+     84,
+     1
+    ],
+    "b": [
+     23,
+     84,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "AshlarShaleItem BasicSlopePoint"
+   },
+   {
+    "id": "g445",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     25,
+     84,
+     1
+    ],
+    "b": [
+     25,
+     84,
+     1
+    ],
+    "form": "FloatStairsTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem FloatStairsTurn"
+   },
+   {
+    "id": "g446",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     27,
+     84,
+     1
+    ],
+    "b": [
+     27,
+     84,
+     1
+    ],
+    "form": "FloatStairsCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem FloatStairsCorner"
+   },
+   {
+    "id": "g447",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     29,
+     84,
+     1
+    ],
+    "b": [
+     29,
+     84,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem StairsCorner"
+   },
+   {
+    "id": "g448",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     31,
+     84,
+     1
+    ],
+    "b": [
+     31,
+     84,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem StairsTurn"
+   },
+   {
+    "id": "g449",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     33,
+     84,
+     1
+    ],
+    "b": [
+     33,
+     84,
+     1
+    ],
+    "form": "FloatStairs",
+    "rot": 0,
+    "name": "AshlarShaleItem FloatStairs"
+   },
+   {
+    "id": "g450",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     35,
+     84,
+     1
+    ],
+    "b": [
+     35,
+     84,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderSlopeSide"
+   },
+   {
+    "id": "g451",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     37,
+     84,
+     1
+    ],
+    "b": [
+     37,
+     84,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderSlopeCorner"
+   },
+   {
+    "id": "g452",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     39,
+     84,
+     1
+    ],
+    "b": [
+     39,
+     84,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderSlopeTurn"
+   },
+   {
+    "id": "g453",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     41,
+     84,
+     1
+    ],
+    "b": [
+     41,
+     84,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderSlopePeak"
+   },
+   {
+    "id": "g454",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     43,
+     84,
+     1
+    ],
+    "b": [
+     43,
+     84,
+     1
+    ],
+    "form": "UnderPeakSet",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderPeakSet"
+   },
+   {
+    "id": "g455",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     1,
+     86,
+     1
+    ],
+    "b": [
+     1,
+     86,
+     1
+    ],
+    "form": "PeakSet",
+    "rot": 0,
+    "name": "AshlarShaleItem PeakSet"
+   },
+   {
+    "id": "g456",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     3,
+     86,
+     1
+    ],
+    "b": [
+     3,
+     86,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofPeakSet"
+   },
+   {
+    "id": "g457",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     5,
+     86,
+     1
+    ],
+    "b": [
+     5,
+     86,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofSide"
+   },
+   {
+    "id": "g458",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     7,
+     86,
+     1
+    ],
+    "b": [
+     7,
+     86,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofTurn"
+   },
+   {
+    "id": "g459",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     9,
+     86,
+     1
+    ],
+    "b": [
+     9,
+     86,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofCorner"
+   },
+   {
+    "id": "g460",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     11,
+     86,
+     1
+    ],
+    "b": [
+     11,
+     86,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofPeak"
+   },
+   {
+    "id": "g461",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     13,
+     86,
+     1
+    ],
+    "b": [
+     13,
+     86,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "AshlarShaleItem RoofCube"
+   },
+   {
+    "id": "g462",
+    "kind": "box",
+    "subtract": false,
+    "material": "AshlarShaleItem",
+    "a": [
+     15,
+     86,
+     1
+    ],
+    "b": [
+     15,
+     86,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "AshlarShaleItem UnderInnerPeak"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

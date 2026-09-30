@@ -1,6 +1,6 @@
 ﻿namespace ecocraft.BuildingPlanner.Model;
 
-// Validation d'entrée (bloquante) du document : bornes, clés, identifiants, références. Les matériaux ou
+// Validation d'entrée (bloquante) du document : bornes, identifiants, références. Les matériaux ou
 // types inconnus ne sont pas rejetés ici : l'analyse les signale et dégrade (tier 0 / objet ignoré).
 public static class PlanValidator
 {
@@ -8,7 +8,7 @@ public static class PlanValidator
     public const int MaxObjects = 2000;
     public const int MaxRooms = 200;
     public const int MaxLevels = 20;
-    public const int MaxHeight = 50;                // par niveau, mur ou pièce ; la hauteur totale suit MaxArchitectureHeight
+    public const int MaxHeight = 50;                // par niveau ; la hauteur totale suit MaxArchitectureHeight
     public const int MaxDocumentBytes = 256 * 1024;
     public const int MaxArchitectureHeight = 320;   // hauteur max d'un monde Eco
     public const int MaxOps = 500;
@@ -37,29 +37,11 @@ public static class PlanValidator
             var level = doc.Levels[k];
             if (level.Height is < 1 or > MaxHeight) { issues.Add(PlanIssue.Error("InvalidHeight", [$"levels[{k}]"], level: k)); continue; }
 
-            // Sommet du niveau, surcharges comprises : la grille voxel doit rester bornée.
             var top = doc.LevelHeight(k);
-            foreach (var (key, wall) in level.Walls)
-            {
-                if (!PlanKeys.TryParse(key, out var x, out var y)) { issues.Add(PlanIssue.Error("InvalidCellKey", [key], level: k)); continue; }
-                if (!InGrid(doc, x, y)) issues.Add(PlanIssue.Error("CellOutOfGrid", [key], level: k));
-                if (wall.Height is < 1 or > MaxHeight) issues.Add(PlanIssue.Error("InvalidHeight", [key], level: k));
-                else if (wall.Height is { } wh) top = Math.Max(top, wh);
-                if (string.IsNullOrWhiteSpace(wall.Material)) issues.Add(PlanIssue.Error("MissingWallMaterial", [key], level: k));
-            }
-
-            foreach (var key in level.Floors.Keys.Concat(level.Holes.Keys))
-            {
-                if (!PlanKeys.TryParse(key, out var x, out var y)) { issues.Add(PlanIssue.Error("InvalidCellKey", [key], level: k)); continue; }
-                if (!InGrid(doc, x, y)) issues.Add(PlanIssue.Error("CellOutOfGrid", [key], level: k));
-            }
-
             foreach (var room in level.Rooms)
             {
                 if (string.IsNullOrWhiteSpace(room.Id) || !ids.Add(room.Id)) issues.Add(PlanIssue.Error("DuplicateId", [room.Id], roomId: room.Id, level: k));
-                if (room.Height is < 1 or > MaxHeight) issues.Add(PlanIssue.Error("InvalidHeight", [room.Name], roomId: room.Id, level: k));
-                else if (room.Height is { } rh) top = Math.Max(top, rh);
-                if (!InGrid(doc, room.Seed.X, room.Seed.Y)) issues.Add(PlanIssue.Error("SeedOutOfGrid", [room.Name], roomId: room.Id, level: k));
+                if (!InGrid(doc, room.Seed.X, room.Seed.Y) || room.Seed.Z < 0 || doc.LevelBaseY(k) + room.Seed.Z >= MaxArchitectureHeight) issues.Add(PlanIssue.Error("SeedOutOfGrid", [room.Name], roomId: room.Id, level: k));
             }
 
             foreach (var obj in level.Objects)
@@ -99,8 +81,7 @@ public static class PlanValidator
         return issues;
     }
 
-    // Données du mode architecture, validées même en mode maison (elles restent dans le document). Pas de borne sur les
-    // coordonnées : l'évaluation rogne. Le budget de travail borne le temps d'évaluation (JS et C#).
+    // Bâti (ops), dans les deux modes. Pas de borne sur les coordonnées : l'évaluation rogne. Le budget de travail borne le temps d'évaluation (JS et C#).
     private static void ValidateArchitecture(PlanDocument doc, List<PlanIssue> issues)
     {
         var arch = doc.Architecture;

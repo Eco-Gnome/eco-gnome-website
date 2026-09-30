@@ -42,12 +42,6 @@
     min-width: 110px;
 }
 
-.bp-insp-row ::deep .bp-insp-half {
-    flex: 1 1 100px;
-    min-width: 0;
-    max-width: 100%;
-}
-
 /* Les listes (matériau, axe) : la racine .mud-select est l'enfant flex, elle doit pouvoir rétrécir ; le libellé du
    matériau choisi (icône + nom + chip) se tronque au lieu d'élargir la fiche (pas de scroll horizontal). */
 .bp-insp-row ::deep .mud-select { flex: 1 1 100px; min-width: 0; max-width: 100%; overflow: hidden; }
@@ -91,19 +85,16 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* Boîte englobante d'une forme (mode architecture) : x0 y0 z0 / x1 y1 z1. */
+/* Boîte englobante d'une forme (mode architecture) : point 1 (x y z), point 2 (x y z), point de contrôle de la courbe. */
 .bp-insp-geom {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
 }
 
-/* Pastille de la couleur du bloc, en tête des lignes de matériau : fait le lien avec la case dessinée sur le plan. */
-.bp-mat-dot {
-    display: inline-block;
-    flex: 0 0 auto;
-    width: 10px;
-    height: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
+.bp-insp-geom-title {
+    grid-column: 1 / -1;
+    margin-bottom: -4px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
 }

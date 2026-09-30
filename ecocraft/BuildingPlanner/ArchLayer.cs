@@ -2,10 +2,8 @@ using ecocraft.BuildingPlanner.Model;
 
 namespace ecocraft.BuildingPlanner;
 
-// Formes du mode architecture évaluées à part de la maison : par cellule, rien / bloc d'un matériau / air creusé par une
-// soustraction. GridBuilder interroge la couche pour fermer les pièces (un bloc de forme à la première couche d'air
-// d'un niveau est un mur) et pour savoir si une colonne est couverte par une forme (toit dessiné : pas d'avertissement
-// de plafond manquant), puis la fond dans la grille après les plafonds (une soustraction creuse aussi un mur).
+// Ops du plan évaluées dans l'ordre : par cellule, rien / bloc d'un matériau / air creusé par une soustraction.
+// GridBuilder la fond dans la grille par-dessus le terrain (une soustraction à z = 0 creuse le terrain).
 // Coordonnées du plan : (x, y, z) avec z vertical, rognées à Architecture.Height comme evalOps côté JS.
 public sealed class ArchLayer
 {
@@ -42,16 +40,7 @@ public sealed class ArchLayer
 
     public bool IsSolid(int x, int y, int z) => x >= 0 && y >= 0 && z >= 0 && x < _w && y < _d && z < _h && _cells[Index(x, y, z)] >= 0;
 
-    // Un bloc de forme dans la colonne (x, y) à z ou au-dessus : la pièce a une couverture dessinée.
-    public bool HasSolidAtOrAbove(int x, int y, int z)
-    {
-        if (x < 0 || y < 0 || x >= _w || y >= _d) return false;
-        for (var k = Math.Max(0, z); k < _h; k++) if (_cells[Index(x, y, k)] >= 0) return true;
-        return false;
-    }
-
-    // Fond les formes dans la grille : ajout = bloc du matériau, soustraction = air. Les matériaux sont déclarés au
-    // contexte ici, après la maison, pour conserver l'ordre des index (HouseRuns).
+    // Fond les formes dans la grille : ajout = bloc du matériau, soustraction = air.
     public void MergeInto(BuildContext ctx)
     {
         var grid = ctx.Grid;

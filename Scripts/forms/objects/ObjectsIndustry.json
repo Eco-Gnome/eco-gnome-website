@@ -1,0 +1,32 @@
+{
+  "set": "ObjectsIndustry",
+  "note": "Catégorie Industrial : générateurs, centrales de tri des déchets, incinérateur, traitement du minerai, raffinerie, pompe à balancier, laser, dessalinisateur, roue à aubes, éolienne. Moulin à vent : échelle 100 des racines du FBX ramenée à 1 par des overrides (Transform au fileID haché), quatre pales sur une même géométrie ; les pales descendent 3 blocs sous l'ancre (disque 7 × 7 de l'occupancy) et le socle est sur la case d'ancrage, absente de l'occupancy du prefab (CustomSurfaceAttachment côté serveur). Chantier naval moyen : 1 bloc au-delà de son occupancy côté eau et 1 bloc sous le sol (rampe immergée), comme le LODGroup du prefab (centre et taille exacts).",
+  "prefabs": [
+    "ArrastraObject",
+    "BiowasteSorterObject",
+    "ConstructionScrapSorterObject",
+    "GarbageSorterObject",
+    "IndustrialWasteSorterObject",
+    "MetalScrapSorterObject",
+    "ResidualWasteSorterObject",
+    "CombustionGeneratorObject",
+    "DesalinatorObject",
+    "FrothFloatationCellObject",
+    "IncineratorObject",
+    "IndustrialGeneratorObject",
+    "JawCrusherObject",
+    "LaserObject",
+    "OilRefineryObject",
+    "PumpJackObject",
+    "RockerBoxObject",
+    "ScreeningMachineObject",
+    "SensorBasedBeltSorterObject",
+    "SolarGeneratorObject",
+    "StampMillObject",
+    "SteamEngineObject",
+    "WaterwheelObject",
+    "WindTurbineObject",
+    "WindmillObject",
+    "MediumShipyardObject"
+  ]
+}

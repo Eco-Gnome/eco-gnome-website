@@ -71,7 +71,7 @@ public static class ObjectPlacer
         var structure = rotated.Where(c => c.Kind is OccupancyKind.Occupied or OccupancyKind.Wall or OccupancyKind.Solid).ToList();
         if (structure.Count == 0) structure = [(Vec3i.Zero, OccupancyKind.Occupied)];
 
-        var originOnWall = BuildContext.IsWallBlock(grid.Get(new Vec3i(p.Doc.X, levelBase + 1, p.Doc.Y)));
+        var originOnWall = BuildContext.IsBlock(grid.Get(new Vec3i(p.Doc.X, levelBase + 1, p.Doc.Y)));
         p.IsDoorCarving = originOnWall && info.HasWallCells;
 
         var minDy = structure.Min(c => c.Offset.Y);
@@ -115,10 +115,10 @@ public static class ObjectPlacer
             var existing = grid.Get(pos);
             if (existing.Kind != VoxelKind.Air)
             {
-                var carvable = p.IsDoorCarving && kind == OccupancyKind.Wall && BuildContext.IsWallBlock(existing);
+                var carvable = p.IsDoorCarving && kind == OccupancyKind.Wall && BuildContext.IsBlock(existing);
                 if (!carvable)
                 {
-                    ReportBlocked(ctx, p, existing, pos, minDy, levelBase);
+                    ReportBlocked(ctx, p, existing, pos);
                     return;
                 }
             }
@@ -145,20 +145,10 @@ public static class ObjectPlacer
         p.Placed = true;
     }
 
-    private static void ReportBlocked(BuildContext ctx, PlacedObject p, Voxel blocker, Vec3i pos, int minDy, int levelBase)
+    private static void ReportBlocked(BuildContext ctx, PlacedObject p, Voxel blocker, Vec3i pos)
     {
         var info = p.Info!;
         var cell = new GridPoint { X = pos.X, Y = pos.Z };
-        if (blocker.Kind == VoxelKind.Block && (blocker.IsCeiling || (blocker.IsFloor && pos.Y > levelBase)))
-        {
-            // Un plafond (ou la dalle de l'étage) bloque : la pièce doit avoir au moins autant de couches d'air que
-            // le sommet de l'objet, compté depuis la dalle du niveau.
-            var objectHeight = p.MaxDy - minDy + 1;
-            var requiredHeight = p.Origin.Y + p.MaxDy - levelBase;
-            ctx.Issues.Add(PlanIssue.Error("BlockedByCeiling", [info.Name, objectHeight.ToString(), requiredHeight.ToString()], cell, objectId: p.Doc.Id));
-            return;
-        }
-
         var blockerName = blocker.Kind switch
         {
             VoxelKind.Terrain => "terrain",

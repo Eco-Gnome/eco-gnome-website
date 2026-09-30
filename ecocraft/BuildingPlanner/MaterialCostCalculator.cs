@@ -2,7 +2,7 @@ using ecocraft.BuildingPlanner.Model;
 
 namespace ecocraft.BuildingPlanner;
 
-// Coût en matériaux : voxels de bloc par matériau et usage (mur / sol / plafond) + objets par type.
+// Coût en matériaux : voxels de bloc par matériau + objets par type.
 public static class MaterialCostCalculator
 {
     public static (List<MaterialCostLine> Materials, List<ObjectCostLine> Objects) Compute(BuildContext ctx)
@@ -21,9 +21,7 @@ public static class MaterialCostCalculator
                 line = new MaterialCostLine { Material = ctx.Materials[v.MaterialIndex].Name };
                 lines[v.MaterialIndex] = line;
             }
-            if (v.IsFloor) line.Floors++;
-            else if (v.IsCeiling) line.Ceilings++;
-            else line.Walls++;
+            line.Count++;
         }
 
         var objects = ctx.Objects
@@ -33,6 +31,6 @@ public static class MaterialCostCalculator
             .OrderByDescending(l => l.Count).ThenBy(l => l.Type)
             .ToList();
 
-        return (lines.Values.OrderByDescending(l => l.Total).ThenBy(l => l.Material).ToList(), objects);
+        return (lines.Values.OrderByDescending(l => l.Count).ThenBy(l => l.Material).ToList(), objects);
     }
 }

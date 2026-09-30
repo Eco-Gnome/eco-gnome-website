@@ -27,7 +27,7 @@ public sealed class PlacedObject
     public int MaxDy { get; set; }     // plus haute cellule relative à l'origine (pour empiler dessus)
 }
 
-// État partagé de l'analyse : grille voxel, matériaux indexés, empreintes 2D, objets posés, problèmes.
+// État partagé de l'analyse : grille voxel, matériaux indexés, objets posés, problèmes.
 public sealed class BuildContext
 {
     public required PlanDocument Document { get; init; }
@@ -35,10 +35,6 @@ public sealed class BuildContext
     public required VoxelGrid Grid { get; init; }
     public List<MaterialSlot> Materials { get; } = [];
     public Dictionary<string, int> MaterialIndexByName { get; } = new(StringComparer.Ordinal);
-    public Dictionary<string, HashSet<(int X, int Y)>> RoomFootprints { get; } = new(StringComparer.Ordinal);
-    public Dictionary<string, int> RoomLevel { get; } = new(StringComparer.Ordinal);
-    public Dictionary<string, int> RoomCeilingY { get; } = new(StringComparer.Ordinal);
-    public List<int[]>? HouseRuns { get; set; }     // mode architecture : voxels de la maison avant les formes (HouseRuns.Encode)
     public List<PlacedObject> Objects { get; } = [];
     public List<PlanIssue> Issues { get; } = [];
 
@@ -61,8 +57,8 @@ public sealed class BuildContext
         return index;
     }
 
-    // Bloc de mur posé par le plan (ni dalle ni plafond) : ce qu'une porte peut creuser.
-    public static bool IsWallBlock(Voxel v) => v.Kind == VoxelKind.Block && !v.IsFloor && !v.IsCeiling;
+    // Bloc posé par le plan : ce qu'une porte peut creuser (tout bloc, le jeu ne distingue ni sol ni plafond).
+    public static bool IsBlock(Voxel v) => v.Kind == VoxelKind.Block;
 
     public bool IsWallVoxel(Voxel v) => v.Kind switch
     {

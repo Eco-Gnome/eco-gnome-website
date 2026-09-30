@@ -1,0 +1,2064 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes FramedGlass",
+ "mode": "architecture",
+ "grid": {
+  "width": 56,
+  "depth": 28
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "Stairs rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 1,
+    "name": "Stairs rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 2,
+    "name": "Stairs rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 3,
+    "name": "Stairs rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "BasicSlopeSide rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 1,
+    "name": "BasicSlopeSide rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 2,
+    "name": "BasicSlopeSide rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 3,
+    "name": "BasicSlopeSide rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     19,
+     4,
+     1
+    ],
+    "b": [
+     19,
+     4,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 0,
+    "name": "BasicSlopeCorner rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     21,
+     4,
+     1
+    ],
+    "b": [
+     21,
+     4,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 1,
+    "name": "BasicSlopeCorner rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     23,
+     4,
+     1
+    ],
+    "b": [
+     23,
+     4,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 2,
+    "name": "BasicSlopeCorner rot 2"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     25,
+     4,
+     1
+    ],
+    "b": [
+     25,
+     4,
+     1
+    ],
+    "form": "BasicSlopeCorner",
+    "rot": 3,
+    "name": "BasicSlopeCorner rot 3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     28,
+     4,
+     1
+    ],
+    "b": [
+     28,
+     4,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 0,
+    "name": "BasicSlopeTurn rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     30,
+     4,
+     1
+    ],
+    "b": [
+     30,
+     4,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 1,
+    "name": "BasicSlopeTurn rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 2,
+    "name": "BasicSlopeTurn rot 2"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     34,
+     4,
+     1
+    ],
+    "b": [
+     34,
+     4,
+     1
+    ],
+    "form": "BasicSlopeTurn",
+    "rot": 3,
+    "name": "BasicSlopeTurn rot 3"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "BasicSlopePoint rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     7,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 1,
+    "name": "BasicSlopePoint rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     7,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 2,
+    "name": "BasicSlopePoint rot 2"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 3,
+    "name": "BasicSlopePoint rot 3"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "UnderSlopeSide rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     12,
+     7,
+     1
+    ],
+    "b": [
+     12,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 1,
+    "name": "UnderSlopeSide rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     14,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 2,
+    "name": "UnderSlopeSide rot 2"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     7,
+     1
+    ],
+    "b": [
+     16,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 3,
+    "name": "UnderSlopeSide rot 3"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     19,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "UnderSlopePeak rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     21,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 1,
+    "name": "UnderSlopePeak rot 1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     23,
+     7,
+     1
+    ],
+    "b": [
+     23,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 2,
+    "name": "UnderSlopePeak rot 2"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     25,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 3,
+    "name": "UnderSlopePeak rot 3"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     28,
+     7,
+     1
+    ],
+    "b": [
+     28,
+     7,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 0,
+    "name": "UnderSlopeCorner rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     30,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     7,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 1,
+    "name": "UnderSlopeCorner rot 1"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     32,
+     7,
+     1
+    ],
+    "b": [
+     32,
+     7,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 2,
+    "name": "UnderSlopeCorner rot 2"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     34,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     7,
+     1
+    ],
+    "form": "UnderSlopeCorner",
+    "rot": 3,
+    "name": "UnderSlopeCorner rot 3"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     10,
+     1
+    ],
+    "b": [
+     1,
+     10,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 0,
+    "name": "UnderSlopeTurn rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     10,
+     1
+    ],
+    "b": [
+     3,
+     10,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 1,
+    "name": "UnderSlopeTurn rot 1"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     5,
+     10,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 2,
+    "name": "UnderSlopeTurn rot 2"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     10,
+     1
+    ],
+    "b": [
+     7,
+     10,
+     1
+    ],
+    "form": "UnderSlopeTurn",
+    "rot": 3,
+    "name": "UnderSlopeTurn rot 3"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     10,
+     1
+    ],
+    "b": [
+     10,
+     10,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 0,
+    "name": "UnderInnerPeak rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     12,
+     10,
+     1
+    ],
+    "b": [
+     12,
+     10,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 1,
+    "name": "UnderInnerPeak rot 1"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     14,
+     10,
+     1
+    ],
+    "b": [
+     14,
+     10,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 2,
+    "name": "UnderInnerPeak rot 2"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     10,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "UnderInnerPeak",
+    "rot": 3,
+    "name": "UnderInnerPeak rot 3"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     14,
+     1
+    ],
+    "b": [
+     5,
+     14,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along x"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     15,
+     1
+    ],
+    "b": [
+     1,
+     17,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along y"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     8,
+     14,
+     1
+    ],
+    "b": [
+     12,
+     14,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T bar"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     15,
+     1
+    ],
+    "b": [
+     10,
+     17,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T stem"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     15,
+     14,
+     1
+    ],
+    "b": [
+     15,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of WindowGrilles"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     14,
+     1
+    ],
+    "b": [
+     18,
+     14,
+     2
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "WindowGrilles 3x2 in a wall"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     16,
+     14,
+     3
+    ],
+    "b": [
+     18,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above WindowGrilles"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     19,
+     14,
+     1
+    ],
+    "b": [
+     19,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of WindowGrilles"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     22,
+     14,
+     1
+    ],
+    "b": [
+     22,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of Window"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     23,
+     14,
+     1
+    ],
+    "b": [
+     25,
+     14,
+     2
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window 3x2 in a wall"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     23,
+     14,
+     3
+    ],
+    "b": [
+     25,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above Window"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     26,
+     14,
+     1
+    ],
+    "b": [
+     26,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of Window"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     29,
+     14,
+     1
+    ],
+    "b": [
+     29,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of DoubleWindow"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     30,
+     14,
+     1
+    ],
+    "b": [
+     32,
+     14,
+     2
+    ],
+    "form": "DoubleWindow",
+    "rot": 0,
+    "name": "DoubleWindow 3x2 in a wall"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     30,
+     14,
+     3
+    ],
+    "b": [
+     32,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above DoubleWindow"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     33,
+     14,
+     1
+    ],
+    "b": [
+     33,
+     14,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of DoubleWindow"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     36,
+     14,
+     1
+    ],
+    "b": [
+     40,
+     17,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     43,
+     14,
+     1
+    ],
+    "b": [
+     43,
+     14,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column x3"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     45,
+     14,
+     1
+    ],
+    "b": [
+     45,
+     14,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     47,
+     14,
+     1
+    ],
+    "b": [
+     47,
+     14,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     49,
+     14,
+     1
+    ],
+    "b": [
+     49,
+     14,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     51,
+     14,
+     1
+    ],
+    "b": [
+     51,
+     14,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     53,
+     14,
+     1
+    ],
+    "b": [
+     53,
+     14,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "Stacked4 x1"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     20,
+     1
+    ],
+    "b": [
+     7,
+     24,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube base of the hip roof"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     2,
+     20,
+     2
+    ],
+    "b": [
+     6,
+     20,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     2,
+     24,
+     2
+    ],
+    "b": [
+     6,
+     24,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     21,
+     2
+    ],
+    "b": [
+     1,
+     23,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     21,
+     2
+    ],
+    "b": [
+     7,
+     23,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     20,
+     2
+    ],
+    "b": [
+     1,
+     20,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     20,
+     2
+    ],
+    "b": [
+     7,
+     20,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     7,
+     24,
+     2
+    ],
+    "b": [
+     7,
+     24,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     1,
+     24,
+     2
+    ],
+    "b": [
+     1,
+     24,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     21,
+     3
+    ],
+    "b": [
+     5,
+     21,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     23,
+     3
+    ],
+    "b": [
+     5,
+     23,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     2,
+     22,
+     3
+    ],
+    "b": [
+     2,
+     22,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     6,
+     22,
+     3
+    ],
+    "b": [
+     6,
+     22,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     2,
+     21,
+     3
+    ],
+    "b": [
+     2,
+     21,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     6,
+     21,
+     3
+    ],
+    "b": [
+     6,
+     21,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     6,
+     23,
+     3
+    ],
+    "b": [
+     6,
+     23,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     2,
+     23,
+     3
+    ],
+    "b": [
+     2,
+     23,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     3,
+     22,
+     4
+    ],
+    "b": [
+     5,
+     22,
+     4
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "hip ridge along x"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     20,
+     1
+    ],
+    "b": [
+     16,
+     24,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube ring"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     11,
+     21,
+     1
+    ],
+    "b": [
+     15,
+     23,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube core"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     10,
+     20,
+     2
+    ],
+    "b": [
+     16,
+     24,
+     2
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 1"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     11,
+     21,
+     3
+    ],
+    "b": [
+     15,
+     23,
+     3
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 2"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     12,
+     22,
+     4
+    ],
+    "b": [
+     14,
+     22,
+     4
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof ridge"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     19,
+     22,
+     1
+    ],
+    "b": [
+     23,
+     22,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross along x"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     21,
+     20,
+     1
+    ],
+    "b": [
+     21,
+     21,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross north arm"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     21,
+     23,
+     1
+    ],
+    "b": [
+     21,
+     24,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross south arm"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     26,
+     20,
+     1
+    ],
+    "b": [
+     28,
+     20,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along x"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "FramedGlassItem",
+    "a": [
+     26,
+     21,
+     1
+    ],
+    "b": [
+     26,
+     23,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along y"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

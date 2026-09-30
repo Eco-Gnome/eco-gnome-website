@@ -11,6 +11,7 @@ public static partial class BlockColors
     static readonly FrozenDictionary<string, string> Generated = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         { "AsphaltConcreteItem", "#606060" },                     // T0 Asphalt Concrete
+        { "CopperPipeItem", "#b45800" },                          // T0 Copper Pipe
         { "CrushedBasaltItem", "#4c5055" },                       // T0 Crushed Basalt
         { "CrushedCoalItem", "#595857" },                         // T0 Crushed Coal
         { "CrushedCopperOreItem", "#a16348" },                    // T0 Crushed Copper Ore
@@ -26,6 +27,8 @@ public static partial class BlockColors
         { "CrushedSulfurItem", "#b89605" },                       // T0 Crushed Sulfur
         { "DirtItem", "#6f3700" },                                // T0 Dirt
         { "GardenGravelItem", "#cecece" },                        // T0 Garden Gravel
+        { "IronPipeItem", "#786150" },                            // T0 Iron Pipe
+        { "SteelPipeItem", "#8d8c8e" },                           // T0 Steel Pipe
         { "StoneRoadItem", "#8080a9" },                           // T0 Stone Road
         { "AdobeItem", "#a77e5b" },                               // T1 Adobe
         { "HardwoodHewnLogItem", "#72431b" },                     // T2 Hardwood Hewn Log

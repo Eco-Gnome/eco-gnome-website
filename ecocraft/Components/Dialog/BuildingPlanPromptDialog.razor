@@ -1,0 +1,44 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">@LocalizationService.GetTranslation(IsEdit ? "BuildingPlanner.Ai.EditHelp" : "BuildingPlanner.Ai.Help")</MudText>
+        <MudTextField T="string" @bind-Value="Prompt" Label="@LocalizationService.GetTranslation("BuildingPlanner.Ai.Prompt")" Variant="Variant.Outlined"
+                      Lines="4" MaxLength="2000" Counter="2000" Immediate="true" AutoFocus="true"/>
+        @if (!IsEdit)
+        {
+            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mt-2">
+                @foreach (var example in Examples)
+                {
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" OnClick="@(() => Prompt = example)">@example</MudChip>
+                }
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@LocalizationService.GetTranslation("Cancel")</MudButton>
+        @if (IsEdit)
+        {
+            <MudButton Disabled="@string.IsNullOrWhiteSpace(Prompt)" OnClick="@(() => Submit(false))">@LocalizationService.GetTranslation("BuildingPlanner.Ai.NewBuilding")</MudButton>
+        }
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@string.IsNullOrWhiteSpace(Prompt)" OnClick="@(() => Submit(IsEdit))">@LocalizationService.GetTranslation(IsEdit ? "BuildingPlanner.Ai.Edit" : "BuildingPlanner.Ai.Generate")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public string Prompt { get; set; } = "";
+    // Plan non vide : mode « Modifier » (le plan courant est repris), « Nouveau bâtiment » en second choix.
+    [Parameter] public bool IsEdit { get; set; }
+
+    public sealed record Request(string Prompt, bool Edit);
+
+    private IEnumerable<string> Examples => new[] { "Example1", "Example2", "Example3" }.Select(k => LocalizationService.GetTranslation("BuildingPlanner.Ai." + k));
+
+    private void Submit(bool edit)
+    {
+        if (string.IsNullOrWhiteSpace(Prompt)) return;
+        MudDialog.Close(DialogResult.Ok(new Request(Prompt.Trim(), edit)));
+    }
+}

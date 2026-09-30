@@ -15,6 +15,10 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
     private DateTimeOffset? _cachedUploadTime;
     private Catalog? _cachedBase;
 
+    // Emprises exportées par le serveur que le jeu dément : le WorldObjectOccupancyAutoGen.cs de la barge en bois (x 0..6) date
+    // d'un ancien prefab ; le prefab actuel (occupancyOffset x −6), que le client affiche et prévisualise, l'occupe en x −6..0.
+    private static readonly Dictionary<string, Vec3i> OccupancyShift = new(StringComparer.Ordinal) { ["WoodenBargeItem"] = new Vec3i(-6, 0, 0) };
+
     public Catalog GetCatalog(Server serverData, DataContext? dataContext)
     {
         var baseCatalog = GetBaseCatalog(serverData);
@@ -67,7 +71,9 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
                 objects[item.Name] = new WorldObjectInfo
                 {
                     Name = item.Name,
-                    Cells = ParseOccupancy(item.WorldObjectOccupancyJson),
+                    Cells = OccupancyShift.TryGetValue(item.Name, out var shift)
+                        ? ParseOccupancy(item.WorldObjectOccupancyJson).Select(c => c with { Offset = c.Offset + shift }).ToList()
+                        : ParseOccupancy(item.WorldObjectOccupancyJson),
                     IsDefaultOccupancy = item.WorldObjectOccupancyIsDefault,
                     Tier = item.WorldObjectTier,
                     HasTableSurface = item.WorldObjectHasTableSurface,
@@ -161,11 +167,16 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
         "CrushedSulfurItem",
     ];
 
+    // Tuyaux (T0, pas des murs : la pièce passe au travers) : proposés pour les réseaux d'eau, dessinés avec leurs formes
+    // (bundle Pipes) ; jamais offerts à l'IA comme matériau de construction.
+    public static readonly string[] PipeMaterials = ["CopperPipeItem", "IronPipeItem", "SteelPipeItem"];
+
     // Catalogue pour l'îlot JS : libellés traduits, icônes, cellules brutes (le JS applique la rotation lui-même).
     public ClientCatalog BuildClientCatalog(Catalog catalog, Server serverData)
     {
         var itemsByName = serverData.ItemOrTags.Where(i => !i.IsTag).ToDictionary(i => i.Name, i => i, StringComparer.Ordinal);
         string Label(string name) => itemsByName.TryGetValue(name, out var item) ? localizationService.GetTranslation(item) : name;
+        var formIndex = ReadFormIndex();
 
         // Spécialité qui fabrique chaque objet (liste d'achat) : une recette sans spécialité l'emporte (tout le monde peut la faire),
         // sinon celle demandant le niveau le plus bas.
@@ -176,7 +187,7 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
             .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Recipe.Skill is null ? 0 : 1).ThenBy(x => x.Recipe.SkillLevel).First().Recipe.Skill, StringComparer.Ordinal);
 
         var materials = catalog.Materials.Values
-            .Where(m => m.CountsAsWall && (m.Tier >= 1 || Tier0Materials.Contains(m.Name)))
+            .Where(m => m.CountsAsWall && (m.Tier >= 1 || Tier0Materials.Contains(m.Name)) || PipeMaterials.Contains(m.Name))
             .Select(m => new ClientMaterial
             {
                 Name = m.Name,
@@ -184,6 +195,8 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
                 Tier = m.Tier,
                 IsRoomMaterialOption = m.IsRoomMaterialOption,
                 Color = BlockColors.For(m.Name, m.Tier),
+                Forms = formIndex.MaterialForms?.GetValueOrDefault(m.Name)
+                    ?.Select(f => new ClientForm(f.Name, formIndex.FormMeta?.GetValueOrDefault(f.Name)?.Group ?? "", f.Rotatable)).ToList() ?? [],
             })
             .OrderBy(m => m.Tier == 0).ThenBy(m => m.Tier).ThenBy(m => m.Label)   // les T0 en fin de liste
             .ToList();
@@ -216,7 +229,9 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
             .OrderBy(o => o.Group).ThenBy(o => o.HousingCategory).ThenBy(o => o.Label)
             .ToList();
 
-        var categories = catalog.Housing.Categories.Select(c => new ClientCategory { Name = c.Name, Label = c.Name, Color = c.Color, CapPercent = c.CapToPercentOfRestOfProperty }).ToList();
+        // Catégories du jeu traduites (BuildingPlanner.HousingCategory.<Nom>) ; catégorie de mod inconnue : son nom brut.
+        string CategoryLabel(string name) => localizationService.HasTranslation($"BuildingPlanner.HousingCategory.{name}") ? localizationService.GetTranslation($"BuildingPlanner.HousingCategory.{name}") : name;
+        var categories = catalog.Housing.Categories.Select(c => new ClientCategory { Name = c.Name, Label = CategoryLabel(c.Name), Color = c.Color, CapPercent = c.CapToPercentOfRestOfProperty }).ToList();
 
         return new ClientCatalog
         {
@@ -226,7 +241,36 @@ public sealed class BuildingPlannerCatalogService(LocalizationService localizati
             Objects = objects,
             Categories = categories,
             ModuleBumps = catalog.ModuleTierBumpByTable,
+            FormGroups = formIndex.FormGroups ?? [],
         };
+    }
+
+    // Formes du marteau par matériau, dans l'ordre du jeu : index.json des bundles (wwwroot/assets/forms, clés écrites par
+    // Scripts/forms/make_form_meta.py). Fichier ou clés absents : aucune forme, le planner ne pose que des cubes.
+    private static FormIndex ReadFormIndex()
+    {
+        var path = Path.Combine(ecocraft.Extensions.StaticEnvironmentAccessor.WebHostEnvironment?.WebRootPath ?? "", "assets", "forms", "index.json");
+        if (!File.Exists(path)) return new FormIndex();
+        try { return JsonSerializer.Deserialize<FormIndex>(File.ReadAllText(path)) ?? new FormIndex(); }
+        catch (JsonException) { return new FormIndex(); }
+    }
+
+    private sealed class FormIndex
+    {
+        [JsonPropertyName("formGroups")] public List<string>? FormGroups { get; set; }
+        [JsonPropertyName("formMeta")] public Dictionary<string, FormMetaEntry>? FormMeta { get; set; }
+        [JsonPropertyName("materialForms")] public Dictionary<string, List<MaterialFormEntry>>? MaterialForms { get; set; }
+    }
+
+    private sealed class FormMetaEntry
+    {
+        [JsonPropertyName("group")] public string Group { get; set; } = "";
+    }
+
+    private sealed class MaterialFormEntry
+    {
+        [JsonPropertyName("name")] public string Name { get; set; } = "";
+        [JsonPropertyName("rotatable")] public bool Rotatable { get; set; }
     }
 }
 
@@ -238,6 +282,7 @@ public sealed class ClientCatalog
     public List<ClientObject> Objects { get; init; } = [];
     public List<ClientCategory> Categories { get; init; } = [];
     public Dictionary<string, float> ModuleBumps { get; init; } = new();
+    public List<string> FormGroups { get; init; } = [];  // groupes de formes du marteau, dans l'ordre du jeu
 }
 
 public sealed class ClientMaterial
@@ -247,7 +292,11 @@ public sealed class ClientMaterial
     public int Tier { get; init; }
     public bool IsRoomMaterialOption { get; init; }
     public required string Color { get; init; }
+    public List<ClientForm> Forms { get; init; } = [];   // formes du marteau ayant un mesh, triées par groupe puis ordre du jeu ; vide = cube seul
 }
+
+// Forme du marteau d'un matériau ; Rotatable = le joueur choisit la rotation (sinon elle suit les voisins).
+public sealed record ClientForm(string Name, string Group, bool Rotatable);
 
 public sealed class ClientObject
 {

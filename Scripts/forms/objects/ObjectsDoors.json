@@ -1,0 +1,11 @@
+{
+  "set": "ObjectsDoors",
+  "note": "Portes métalliques et en verre (acier ondulé, acier plat, verre encadré).",
+  "prefabs": [
+    "CorrugatedSteelDoorObject",
+    "CorrugatedSteelFenceDoorObject",
+    "LargeCorrugatedSteelDoorObject",
+    "FlatSteelDoorObject",
+    "FramedGlassDoorObject"
+  ]
+}

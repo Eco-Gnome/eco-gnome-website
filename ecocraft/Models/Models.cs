@@ -1322,6 +1322,17 @@ public class Server
 	public string? BuildingConfigJson { get; set; }  // Bloc « Building » de l'export (RoomConfig, constantes), brut.
 	public string? HousingConfigJson { get; set; }   // Bloc « HousingConfig » de l'export (catégories, tiers), brut.
 
+	// Autorise la génération IA (saisie de la clé dans « Gestion du serveur », menu du building planner) pour ce
+	// serveur. Activable uniquement par un super-admin ; désactivée, la clé éventuelle reste en base mais n'est plus utilisée.
+	public bool IsAiGenerationEnabled { get; set; } = false;
+
+	// Génération IA du building planner : une clé par fournisseur (AiProviders), posée par un admin du serveur et chiffrée
+	// via Data Protection ; AiProvider = fournisseur actif, choisi par n'importe quel admin. Changer de fournisseur garde les
+	// autres clés. Seul le propriétaire d'une clé peut la relire, la révoquer ou l'ouvrir aux joueurs ; les appels sont
+	// facturés à sa clé.
+	public string AiProvider { get; set; } = AiProviders.Anthropic;
+	public string? AiKeysJson { get; set; }   // List<ServerAiKey> en JSON, lue et écrite par ServerAiKey.Read / Write
+
     [NotMapped]
     public bool IsEmpty { get; set; }
 
@@ -1334,6 +1345,47 @@ public class Server
     public List<Recipe> Recipes { get; set; } = [];
     public List<DynamicValue> DynamicValues { get; set; } = [];
     public List<ModUploadHistory> ModUploadHistories { get; set; } = [];
+}
+
+// Clé IA d'un fournisseur pour un serveur (colonne Server.AiKeysJson) : clé chiffrée, son propriétaire, la date de
+// validation, l'ouverture aux joueurs (accord du propriétaire, qui paie) et le modèle choisi parmi AiProviders.Models.
+public sealed class ServerAiKey
+{
+	public string Provider { get; set; } = "";
+	public string KeyProtected { get; set; } = "";
+	public Guid UserId { get; set; }
+	public DateTimeOffset ValidatedAt { get; set; }
+	public bool OpenToPlayers { get; set; }
+	public string Model { get; set; } = "";
+
+	private static readonly System.Text.Json.JsonSerializerOptions Options = new(System.Text.Json.JsonSerializerDefaults.Web);
+
+	public static List<ServerAiKey> Read(Server server)
+	{
+		if (string.IsNullOrEmpty(server.AiKeysJson)) return [];
+		try { return System.Text.Json.JsonSerializer.Deserialize<List<ServerAiKey>>(server.AiKeysJson, Options) ?? []; }
+		catch (System.Text.Json.JsonException) { return []; }
+	}
+
+	public static void Write(Server server, List<ServerAiKey> keys)
+		=> server.AiKeysJson = keys.Count == 0 ? null : System.Text.Json.JsonSerializer.Serialize(keys, Options);
+
+	// Clé du fournisseur actif, null s'il n'en a pas.
+	public static ServerAiKey? Active(Server server) => Read(server).FirstOrDefault(k => k.Provider == server.AiProvider);
+}
+
+// Fournisseurs IA proposés et leurs modèles, le premier par défaut. Mistral : la clé gratuite ne couvre que Codestral et
+// Ministral (Large, Medium : 403 tier_not_allowed), d'où Codestral en premier.
+public static class AiProviders
+{
+	public const string Anthropic = "anthropic";
+	public const string Mistral = "mistral";
+
+	public static readonly IReadOnlyDictionary<string, string[]> Models = new Dictionary<string, string[]>
+	{
+		[Anthropic] = ["claude-opus-5-5"],
+		[Mistral] = ["codestral-latest", "ministral-14b-latest", "mistral-large-latest", "mistral-medium-latest"],
+	};
 }
 
 // History

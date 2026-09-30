@@ -1,0 +1,11 @@
+{
+  "set": "ObjectsHewn",
+  "note": "Objets en hewn log (spécialité Logging, AutoGen/WorldObject RequiresSkill LoggingSkill). FancyHewnDoorObject (objet payant) n'a pas de prefab dans le checkout.",
+  "prefabs": [
+    "HewnDoorObject", "HewnHardwoodDoorObject", "HewnSoftwoodDoorObject",
+    "HewnBenchObject", "HewnHardwoodBenchObject", "HewnSoftwoodBenchObject",
+    "HewnChairObject", "HewnHardwoodChairObject", "HewnSoftwoodChairObject",
+    "HewnTableObject", "HewnHardwoodTableObject", "HewnSoftwoodTableObject",
+    "HewnDresserObject", "HewnNightstandObject"
+  ]
+}

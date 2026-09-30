@@ -1,0 +1,10 @@
+{
+  "set": "ObjectsSignsMisc",
+  "note": "Panneaux en acier (suspendus, sur pied, verre), très grands panneaux et bannières (bois, fer, acier), stop et plaque de rue. Vitre du panneau en part verre (Car Glass). Panneau de magasin (StoreSignObject) : rangé dans ObjectsOutdoor (ses 4 tuiles feraient passer ce set de 13 à 17 textures, tuiles 1024 → 512).",
+  "prefabs": [
+    "HangingLongSteelSignObject", "HangingSteelFramedSignObject", "HangingSteelMineSignObject", "HangingSteelPlainSignObject", "HangingSteelShopSignObject",
+    "StandingLongSteelSignObject", "StandingSteelBrickSignObject", "StandingGlassSignObject",
+    "HugeBannerSignObject", "HugeWoodenBannerSignObject", "HugeIronBannerSignObject", "HugeIronSignObject", "HugeSteelBannerSignObject", "HugeSteelSignObject",
+    "StopSignObject", "StreetSignObject"
+  ]
+}

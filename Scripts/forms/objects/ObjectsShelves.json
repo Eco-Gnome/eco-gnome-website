@@ -1,0 +1,18 @@
+{
+  "set": "ObjectsShelves",
+  "note": "Étagères murales (Long/Short : Basic, Floating, Veneer, Thin, Curved, Lumber, Steel) et DoubleShelf ×3, dossier Player Housing/Shelving. FBX importés en « Bake Axis Conversion » (demi-tour autour de Y de plus, correctif de node_pose) : sans lui, les étagères longues et doubles sortent de leurs cases en X et le dos de toutes est côté +Z au lieu du mur (Backward, −Z).",
+  "prefabs": [
+    "HardwoodDoubleShelfObject", "LongBasicHardwoodShelfObject", "LongBasicSoftwoodShelfObject",
+    "LongBasicWoodShelfObject", "LongFloatingHardwoodShelfObject", "LongFloatingSoftwoodShelfObject",
+    "LongFloatingWoodShelfObject", "LongHardwoodLumberShelfObject", "LongHardwoodVeneerShelfObject",
+    "LongLumberShelfObject", "LongSoftwoodLumberShelfObject", "LongSoftwoodVeneerShelfObject",
+    "LongSteelShelfObject", "LongThinHardwoodVeneerShelfObject", "LongThinSoftwoodVeneerShelfObject",
+    "LongThinWoodVeneerShelfObject", "LongWoodVeneerShelfObject", "ShortBasicHardwoodShelfObject",
+    "ShortBasicSoftwoodShelfObject", "ShortBasicWoodShelfObject", "ShortCurvedHardwoodVeneerShelfObject",
+    "ShortCurvedSoftwoodVeneerShelfObject", "ShortCurvedWoodVeneerShelfObject", "ShortFloatingHardwoodShelfObject",
+    "ShortFloatingSoftwoodShelfObject", "ShortFloatingWoodShelfObject", "ShortHardwoodVeneerShelfObject",
+    "ShortSoftwoodVeneerShelfObject", "ShortSteelShelfObject", "ShortThinHardwoodVeneerShelfObject",
+    "ShortThinSoftwoodVeneerShelfObject", "ShortThinWoodVeneerShelfObject", "ShortWoodVeneerShelfObject",
+    "SoftwoodDoubleShelfObject", "WoodDoubleShelfObject"
+  ]
+}

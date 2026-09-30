@@ -85,6 +85,7 @@ public class ContextService(
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
             server.IsAutomationPlannerEnabled = serverWithUsers.IsAutomationPlannerEnabled;
+            server.IsAiGenerationEnabled = serverWithUsers.IsAiGenerationEnabled;
             server.HasBuildingData = serverWithUsers.HasBuildingData;
             server.BuildingConfigJson = serverWithUsers.BuildingConfigJson;
             server.HousingConfigJson = serverWithUsers.HousingConfigJson;

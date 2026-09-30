@@ -39,11 +39,6 @@
     min-height: 0;
 }
 
-/* Rendu 3D : pas de panneau gauche, le canvas prend sa colonne. */
-.bp-body.bp-body-3d {
-    grid-template-columns: minmax(0, 1fr) auto;
-}
-
 /* .bp-side/.bp-left/.bp-panel/.bp-rail sont sur des MudPaper (composants) : pas d'attribut de scope, une règle
    directe ne matche jamais — on ancre sur .bp-body, vrai div de cette page. Sans ça le
    panneau droit ne scrolle pas en interne et déborde de la hauteur de page (scroll global). */
@@ -192,6 +187,12 @@
     padding: 12px 14px 14px;
 }
 
+/* 3D : la fiche seule occupe le panneau. */
+.bp-selection.bp-selection-full {
+    flex: 1 1 auto;
+    border-top: none;
+}
+
 /* Bandeau droit de la toolbar : score housing + chip d'état + bouton Réglages du plan. */
 .bp-housing-block {
     display: flex;
@@ -312,27 +313,6 @@
 .bp-settings-summary {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.75);
-}
-
-/* État « à faire » : plafond par défaut vide. */
-.bp-settings-btn.todo {
-    border-color: var(--mud-palette-warning);
-}
-
-.bp-settings-btn.todo ::deep .bp-settings-icon,
-.bp-settings-btn.todo .bp-settings-summary {
-    color: var(--mud-palette-warning);
-}
-
-.bp-settings-dot {
-    position: absolute;
-    top: 8px;
-    left: 22px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--mud-palette-warning);
-    border: 1px solid #3a3b46;
 }
 
 /* Contenu du popover Réglages : div de cette page, il garde son attribut de scope une fois téléporté. */
@@ -459,11 +439,36 @@
     z-index: 1;
 }
 
-/* Boutons annuler/zoom + « i » des raccourcis, en surimpression bas-gauche du canvas.
+/* « Combler les arêtes vides » (Structure) : même place, haut-gauche de la zone de dessin le long de la bande. */
+.bp-canvas-fill {
+    position: absolute;
+    top: 6px;
+    left: calc(var(--bp-strip-w, 0px) + 6px);
+    z-index: 1;
+}
+
+/* Rendu 3D : « Masquer au-dessus de la couche » et « Coupe face caméra », même place, côte à côte. */
+.bp-canvas-3d {
+    position: absolute;
+    top: 6px;
+    left: calc(var(--bp-strip-w, 0px) + 6px);
+    z-index: 1;
+    display: flex;
+    gap: 4px;
+}
+
+/* Aide du bouton : texte long, replié sur une colonne étroite pour rester dans l'écran. */
+.bp-fill-tip {
+    max-width: 300px;
+    white-space: normal;
+    text-align: left;
+}
+
+/* Boutons annuler/zoom + « i » des raccourcis, en surimpression bas-gauche du canvas, le long de la bande d'élévation.
    pointer-events: none sur le conteneur (le canvas reste cliquable), réactivé sur chaque bouton. */
 .bp-canvas-actions {
     position: absolute;
-    left: 6px;
+    left: calc(var(--bp-strip-w, 0px) + 6px);
     bottom: 6px;
     display: flex;
     align-items: center;
@@ -489,12 +494,6 @@
     white-space: nowrap;
 }
 
-/* Ouverture au rez-de-chaussée : grisée mais pas Disabled, pour que son tooltip explicatif s'affiche. */
-::deep .bp-tools .bp-tool-off {
-    opacity: 0.38;
-    cursor: default;
-}
-
 ::deep .bp-container {
     position: relative;
     width: 100%;
@@ -513,10 +512,6 @@
 
 ::deep .bp-layer-3d {
     pointer-events: none;
-}
-
-::deep .bp-layer-chip .bp-on {
-    color: var(--mud-palette-primary);
 }
 
 .bp-object-list {
@@ -617,10 +612,6 @@
         grid-template-rows: 260px 60vh auto;
     }
 
-    .bp-body.bp-body-3d {
-        grid-template-rows: 60vh auto;
-    }
-
     .bp-right-col {
         flex-direction: column-reverse;
     }
@@ -640,48 +631,6 @@
         max-height: 300px;
     }
 }
-
-/* Légende de la dalle (niveaux ≥ 1) et des ouvertures de l'étage au-dessus, dans l'infobulle du « i » à côté du menu de niveau. */
-.bp-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 2px 0;
-    font-size: 0.75rem;
-    text-align: left;
-}
-
-.bp-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap;
-}
-
-.bp-swatch {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 2px;
-}
-
-/* Pastille de la couleur du bloc, en tête des lignes de matériau : fait le lien avec la case dessinée sur le plan. */
-.bp-mat-dot {
-    display: inline-block;
-    flex: 0 0 auto;
-    width: 10px;
-    height: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
-}
-
-.bp-swatch-slab { background: rgba(255, 255, 255, 0.28); }
-.bp-swatch-low { background: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.35) 3px 4px); }
-.bp-swatch-missing { background: rgba(244, 67, 54, 0.35); }
-.bp-swatch-hole { background: rgba(0, 0, 0, 0.6) repeating-linear-gradient(45deg, transparent 0 2px, rgba(255, 255, 255, 0.35) 2px 3px); }
-.bp-swatch-watermark { background: rgba(194, 162, 106, 0.35); }
-.bp-swatch-hole-above { border: 2px dashed rgba(255, 255, 255, 0.7); }
 
 /* Mode architecture : bascule de mode, chip de couche, options des formes et liste des formes (panneau gauche). */
 .bp-layer-chip {
@@ -710,6 +659,55 @@
     min-height: 0;
     overflow-y: auto;
     padding-top: 4px;
+}
+
+/* Palette de Structure : matériau, formes, rotation, options, volumes défilent d'un bloc (FarEast : 67 formes). */
+.bp-catalog.bp-palette {
+    display: block;
+    overflow-y: auto;
+}
+
+.bp-palette .bp-arch-ops {
+    overflow: visible;
+}
+
+.bp-forms-group {
+    padding: 6px 2px 2px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+}
+
+.bp-forms-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.bp-form-tile {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+}
+
+.bp-form-tile:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.bp-form-tile.selected {
+    background: rgba(100, 181, 246, 0.18);
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+.bp-palette .bp-arch-opts {
+    margin-top: 6px;
 }
 
 .bp-op-row {

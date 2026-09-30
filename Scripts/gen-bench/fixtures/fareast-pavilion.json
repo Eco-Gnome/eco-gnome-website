@@ -1,0 +1,40 @@
+{
+  "name": "Pavillon d'Extrême-Orient",
+  "grid": { "width": 26, "depth": 22 },
+  "defaults": { "wallMaterial": "FarEastLumberItem" },
+  "volumes": [
+    { "id": "v1", "x": 4, "y": 3, "width": 18, "depth": 12, "baseZ": 0, "height": 3, "wallMaterial": "FarEastLumberItem", "wallThickness": 1, "floorMaterial": "BrickItem", "ceilingMaterial": "FarEastLumberItem" }
+  ],
+  "slabs": [
+    { "x": 4, "y": 16, "width": 18, "depth": 3, "z": 4, "material": "FarEastLumberItem", "thickness": 1 }
+  ],
+  "roofs": [
+    { "x": 4, "y": 3, "width": 18, "depth": 12, "baseZ": 4, "style": "flat", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "FarEastLumberItem", "parapet": true }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 9, "y0": 4, "x1": 9, "y1": 13, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "thickness": 1 },
+    { "id": "p2", "x0": 16, "y0": 4, "x1": 16, "y1": 13, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "thickness": 1 },
+    { "id": "p3", "x0": 10, "y0": 8, "x1": 15, "y1": 8, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "thickness": 1 },
+    { "id": "p4", "x0": 17, "y0": 8, "x1": 20, "y1": 8, "baseZ": 0, "height": 3, "material": "FarEastLumberItem", "thickness": 1 }
+  ],
+  "columns": [
+    { "x": 4, "y": 18, "baseZ": 0, "height": 4, "size": 1, "material": "FarEastLumberItem", "count": 6, "stepX": 3, "stepY": 0 },
+    { "x": 21, "y": 18, "baseZ": 0, "height": 4, "size": 1, "material": "FarEastLumberItem", "count": 1, "stepX": 0, "stepY": 0 }
+  ],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 8, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p1", "side": "west", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p3", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p2", "side": "west", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "p4", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 8, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 14, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "south", "offset": 13, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "west", "offset": 4, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 8, "width": 2, "height": 1, "sill": 1, "kind": "window" }
+  ]
+}

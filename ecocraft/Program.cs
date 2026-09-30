@@ -107,6 +107,7 @@ builder.Services.AddScoped<EconomyViewerService>();
 builder.Services.AddScoped<EconomyViewerDisplayService>();
 builder.Services.AddScoped<BuildingPlannerCatalogService>();
 builder.Services.AddScoped<BuildingPlannerService>();
+builder.Services.AddSingleton<BuildingPlannerPromptService>();   // sans état : clé du fournisseur IA par serveur, déchiffrée à l'appel
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
@@ -190,7 +191,15 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseStaticFiles();
+// Bundles de formes 3D : ré-extraits sans changer de nom, le navigateur doit les revalider (ETag) à chaque chargement.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        if (ctx.Context.Request.Path.StartsWithSegments("/assets/forms"))
+            ctx.Context.Response.Headers.CacheControl = "no-cache";
+    }
+});
 app.MapControllers();
 app.UseAntiforgery();
 

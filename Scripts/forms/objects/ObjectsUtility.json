@@ -1,0 +1,23 @@
+{
+  "set": "ObjectsUtility",
+  "note": "Objets divers : pièges de pêche, bouées, pieux d'amarrage, pompes, pylône, appels d'ascenseur, explosifs, chevalet, appareil photo, camp de départ, rampe, salle informatique.",
+  "prefabs": [
+    "CrabPotObject",
+    "FishTrapObject",
+    "PlasticBuoyObject",
+    "SteelBuoyObject",
+    "SteelMooragePostObject",
+    "WoodenMooragePostObject",
+    "ElectricWaterPumpObject",
+    "MechanicalWaterPumpObject",
+    "TransmissionPoleObject",
+    "ElevatorCallPostObject",
+    "DynamiteObject",
+    "MiningChargeObject",
+    "EaselObject",
+    "TripodCameraObject",
+    "StarterCampObject",
+    "DirtRampObject",
+    "ComputerLabObject"
+  ]
+}

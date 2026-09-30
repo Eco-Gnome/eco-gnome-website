@@ -1,0 +1,449 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes StoneRoad",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 19
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "RampA rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "RampA",
+    "rot": 1,
+    "name": "RampA rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "RampA",
+    "rot": 3,
+    "name": "RampA rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "RampB rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "RampB",
+    "rot": 1,
+    "name": "RampB rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "RampB",
+    "rot": 3,
+    "name": "RampB rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "RampC rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "RampC",
+    "rot": 1,
+    "name": "RampC rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "RampC",
+    "rot": 3,
+    "name": "RampC rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "RampD rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "RampD",
+    "rot": 1,
+    "name": "RampD rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "RampD",
+    "rot": 3,
+    "name": "RampD rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     1,
+     5,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA 3 wide, rising east"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     2,
+     5,
+     1
+    ],
+    "b": [
+     2,
+     7,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB 3 wide, rising east"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     3,
+     5,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC 3 wide, rising east"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     4,
+     5,
+     1
+    ],
+    "b": [
+     4,
+     7,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD 3 wide, rising east"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     7,
+     5,
+     1
+    ],
+    "b": [
+     7,
+     5,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "StoneRoadItem",
+    "a": [
+     1,
+     11,
+     1
+    ],
+    "b": [
+     10,
+     15,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "road 10x5"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

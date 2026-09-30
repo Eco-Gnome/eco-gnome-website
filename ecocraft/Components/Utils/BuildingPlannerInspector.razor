@@ -44,25 +44,6 @@
                 <BuildingPlannerHousingInfos Steps="steps" Catalog="Catalog"/>
             </div>
         }
-        <div class="bp-insp-row">
-            <MudNumericField T="int?" Value="@room.Height" ValueChanged="@(v => RoomChanged(room, r => r.Height = v is { } h ? Math.Clamp(h, 1, 50) : null))" Min="1" Max="50" Clearable="true" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                             Placeholder="@Document?.LevelHeight(roomEntry.Level).ToString()" Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Height")" Class="bp-insp-half"/>
-            <MudSelect T="string" Value="@(room.CeilingMaterial ?? "")" ValueChanged="@(v => RoomChanged(room, r => r.CeilingMaterial = string.IsNullOrEmpty(v) ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                       Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")" Class="bp-insp-half">
-                <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.DefaultMaterial")</MudSelectItem>
-                @foreach (var m in Catalog?.Materials ?? [])
-                {
-                    <MudSelectItem T="string" Value="@m.Name">
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <i class="bp-mat-dot" style="background: @m.Color"></i>
-                            <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
-                            <span>@m.Label</span>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
-                        </MudStack>
-                    </MudSelectItem>
-                }
-            </MudSelect>
-        </div>
         @if (analysis is { Contained: true, EmptyEdgeCount: > 0 })
         {
             <div class="bp-insp-warn">@LocalizationService.GetTranslation("BuildingPlanner.Issue.EmptyEdges", analysis.Name, analysis.EmptyEdgeCount.ToString(), analysis.AverageTierWithoutEmptyEdges.ToString("0.00"))</div>
@@ -110,7 +91,7 @@
         <div class="bp-insp-row">
             @if (obj.AttachedTo is null)
             {
-                <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="@(() => ObjectChanged(obj, o => o.Rotation = (o.Rotation + 1) & 3))">r@(obj.Rotation)</MudButton>
+                <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="@(() => ObjectChanged(obj, o => o.Rotation = (o.Rotation + 1) & 3))">@(obj.Rotation * 90)°</MudButton>
                 <MudNumericField T="int?" Value="@obj.Z" ValueChanged="@(v => ObjectChanged(obj, o => o.Z = v))" Min="0" Max="60" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Z")" Class="bp-insp-z"/>
             }
@@ -167,34 +148,53 @@
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" Class="bp-insp-delete" OnClick="OnDeleteSelection"/>
         </div>
         <div class="bp-insp-row">
-            <MudToggleGroup T="bool" Value="@op.Subtract" ValueChanged="@(v => OpChanged(op, o => { o.Subtract = v; if (v) o.Material = null; else o.Material ??= Catalog?.Materials.FirstOrDefault()?.Name; }))" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false">
+            <MudToggleGroup T="bool" Value="@op.Subtract" ValueChanged="@(v => OpChanged(op, o => { o.Subtract = v; if (v) o.Material = null; else o.Material ??= CurrentMaterial ?? Catalog?.Materials.FirstOrDefault()?.Name; }))" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false">
                 <MudToggleItem T="bool" Value="false"><MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/></MudToggleItem>
                 <MudToggleItem T="bool" Value="true"><MudIcon Icon="@Icons.Material.Filled.Remove" Size="Size.Small"/></MudToggleItem>
             </MudToggleGroup>
-            @if (!op.Subtract)
-            {
-                <MudSelect T="string" Value="@(op.Material ?? "")" ValueChanged="@(v => OpChanged(op, o => o.Material = string.IsNullOrEmpty(v) ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Material")" Class="bp-insp-half">
-                    @foreach (var m in Catalog?.Materials ?? [])
-                    {
-                        <MudSelectItem T="string" Value="@m.Name">
-                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                <i class="bp-mat-dot" style="background: @m.Color"></i>
-                                <MudImage Src="@($"/assets/eco-icons/{m.Name}.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
-                                <span>@m.Label</span>
-                                <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
-                            </MudStack>
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            }
         </div>
+        @if (!op.Subtract)
+        {
+            @* Matériau puis forme du marteau (limitée aux formes de ce matériau) et rotation si elle se tourne. *@
+            var forms = Catalog?.Materials.FirstOrDefault(m => m.Name == op.Material)?.Forms ?? [];
+            var form = op.Form ?? "Cube";
+            <BuildingPlannerMaterialPicker Catalog="Catalog" Value="@op.Material" ValueChanged="@(v => OpMaterialChanged(op, v))"/>
+            @if (_formResetFor == op.Id && op.Form is null)
+            {
+                <div class="bp-insp-warn">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.FormReset")</div>
+            }
+            @if (forms.Count > 1)
+            {
+                <div class="bp-insp-row">
+                    <MudSelect T="string" Value="@form" ValueChanged="@(v => OpChanged(op, o => { o.Form = v == "Cube" ? null : v; o.Rot = forms.FirstOrDefault(f => f.Name == v)?.Rotatable == true ? o.Rot ?? 0 : null; }))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                               Label="@LocalizationService.GetTranslation("BuildingPlanner.Inspector.Form")">
+                        @foreach (var f in forms)
+                        {
+                            <MudSelectItem T="string" Value="@f.Name">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudImage Src="@($"/assets/eco-icons/{f.Name}Form.png?serverId={ContextService.CurrentServer?.Id}")" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
+                                    <span>@LocalizationService.GetTranslation($"BuildingPlanner.Form.{f.Name}")</span>
+                                </MudStack>
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+                @if (forms.FirstOrDefault(f => f.Name == form)?.Rotatable == true)
+                {
+                    <BuildingPlannerFormRotation Rot="@(op.Rot ?? 0)" OnRotate="@(d => OpChanged(op, o => o.Rot = ((o.Rot ?? 0) + d) & 3))"/>
+                }
+            }
+        }
         @if (geometric)
         {
             <div class="bp-insp-row">
                 <MudCheckBox T="bool" Value="@op.Hollow" ValueChanged="@(v => OpChanged(op, o => o.Hollow = v))" Dense="true" Size="Size.Small" Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Hollow")"/>
                 <MudNumericField T="int" Value="@op.Thickness" ValueChanged="@(v => OpChanged(op, o => o.Thickness = Math.Clamp(v, 1, 10)))" Min="1" Max="10" Disabled="!op.Hollow" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Thickness")" Class="bp-insp-z"/>
+                @if (op.Hollow && op.Kind != "sphere")
+                {
+                    <MudCheckBox T="bool" Value="@op.Closed" ValueChanged="@(v => OpChanged(op, o => o.Closed = v))" Dense="true" Size="Size.Small" Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Closed")"/>
+                }
                 @if (op.Kind == "cylinder")
                 {
                     <MudSelect T="string" Value="@(op.Axis ?? "z")" ValueChanged="@(v => OpChanged(op, o => o.Axis = v == "z" ? null : v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
@@ -213,23 +213,26 @@
         else if (op.A is { Length: 3 } && op.B is { Length: 3 })
         {
             <div class="bp-insp-geom">
+                <div class="bp-insp-geom-title">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.PointA")</div>
                 @for (var i = 0; i < 3; i++)
                 {
                     var k = i;
-                    <MudNumericField T="int" Value="@op.A[k]" ValueChanged="@(v => OpChanged(op, o => o.A![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@($"{"xyz"[k]}0")"/>
+                    <MudNumericField T="int" Value="@op.A[k]" ValueChanged="@(v => OpChanged(op, o => o.A![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@AxisLabel(k)"/>
                 }
+                <div class="bp-insp-geom-title">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.PointB")</div>
                 @for (var i = 0; i < 3; i++)
                 {
                     var k = i;
-                    <MudNumericField T="int" Value="@op.B[k]" ValueChanged="@(v => OpChanged(op, o => o.B![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@($"{"xyz"[k]}1")"/>
+                    <MudNumericField T="int" Value="@op.B[k]" ValueChanged="@(v => OpChanged(op, o => o.B![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@AxisLabel(k)"/>
                 }
                 @if (op.Kind == "curve" && op.C is { Length: 3 })
                 {
                     @* Point de contrôle de la courbe (se tire aussi à la souris, poignée ronde sur le plan ou la coupe). *@
+                    <div class="bp-insp-geom-title">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.PointC")</div>
                     @for (var i = 0; i < 3; i++)
                     {
                         var k = i;
-                        <MudNumericField T="int" Value="@op.C[k]" ValueChanged="@(v => OpChanged(op, o => o.C![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@($"{"xyz"[k]}c")"/>
+                        <MudNumericField T="int" Value="@op.C[k]" ValueChanged="@(v => OpChanged(op, o => o.C![k] = v))" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Label="@AxisLabel(k)"/>
                     }
                 }
             </div>
@@ -237,14 +240,16 @@
     }
     else
     {
-        <div class="bp-insp-empty">@LocalizationService.GetTranslation("BuildingPlanner.Inspector.NothingSelected")</div>
+        <div class="bp-insp-empty">@LocalizationService.GetTranslation(Mode switch { PlanMode.Architecture => "BuildingPlanner.Inspector.NothingSelectedArch", "3d" => "BuildingPlanner.Inspector.NothingSelected3d", _ => "BuildingPlanner.Inspector.NothingSelectedHouse" })</div>
     }
 </div>
 
 @code {
+    [Parameter] public string? Mode { get; set; }   // architecture | house | 3d : texte de la fiche vide
     [Parameter] public PlanDocument? Document { get; set; }
     [Parameter] public AnalysisResult? Analysis { get; set; }
     [Parameter] public ClientCatalog? Catalog { get; set; }
+    [Parameter] public string? CurrentMaterial { get; set; }
     [Parameter] public string? SelectionKind { get; set; }
     [Parameter] public string? SelectionId { get; set; }
     [Parameter] public EventCallback<PlanRoom> OnRoomChanged { get; set; }
@@ -266,9 +271,22 @@
         _ => MDIIcons.Filled.Cube,
     };
 
+    // x (vers l'est), y (vers le sud), z (couche).
+    private string AxisLabel(int k) => LocalizationService.GetTranslation($"BuildingPlanner.Inspector.Axis{"XYZ"[k]}");
+
+    private string? _formResetFor;   // volume dont la forme vient de repasser en Cube au changement de matériau (note orange)
+
+    // Nouveau matériau : la forme reste s'il l'a, sinon le volume repasse en Cube.
+    private async Task OpMaterialChanged(ArchOp op, string material)
+    {
+        var keep = op.Form is null || Catalog?.Materials.FirstOrDefault(m => m.Name == material)?.Forms.Any(f => f.Name == op.Form) == true;
+        _formResetFor = keep ? null : op.Id;
+        await OpChanged(op, o => { o.Material = material; if (!keep) { o.Form = null; o.Rot = null; } });
+    }
+
     private async Task OpChanged(ArchOp op, Action<ArchOp> mutate)
     {
-        var copy = new ArchOp { Id = op.Id, Kind = op.Kind, Subtract = op.Subtract, Material = op.Material, A = op.A?.ToArray(), B = op.B?.ToArray(), C = op.C?.ToArray(), Axis = op.Axis, Hollow = op.Hollow, Thickness = op.Thickness, Cells = op.Cells };
+        var copy = new ArchOp { Id = op.Id, Kind = op.Kind, Subtract = op.Subtract, Material = op.Material, A = op.A?.ToArray(), B = op.B?.ToArray(), C = op.C?.ToArray(), Axis = op.Axis, Hollow = op.Hollow, Closed = op.Closed, Thickness = op.Thickness, Cells = op.Cells, Form = op.Form, Rot = op.Rot };
         mutate(copy);
         await OnOpChanged.InvokeAsync(copy);
     }
@@ -284,7 +302,7 @@
 
     private async Task RoomChanged(PlanRoom room, Action<PlanRoom> mutate)
     {
-        var copy = new PlanRoom { Id = room.Id, Name = room.Name, Seed = new GridPoint { X = room.Seed.X, Y = room.Seed.Y }, Height = room.Height, CeilingMaterial = room.CeilingMaterial, LockCategory = room.LockCategory };
+        var copy = new PlanRoom { Id = room.Id, Name = room.Name, Seed = new RoomSeed { X = room.Seed.X, Y = room.Seed.Y, Z = room.Seed.Z }, LockCategory = room.LockCategory };
         mutate(copy);
         await OnRoomChanged.InvokeAsync(copy);
     }

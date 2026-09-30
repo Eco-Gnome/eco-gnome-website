@@ -1,4 +1,4 @@
-﻿@page "/server-management"
+@page "/server-management"
 @implements IDisposable
 @using ecocraft.Models
 @using ecocraft.Extensions
@@ -22,6 +22,7 @@
 @inject DataContextDbService DataContextDbService
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
+@inject BuildingPlannerPromptService PromptService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
@@ -83,6 +84,81 @@
 							<MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => RefreshApiKey())"/>
 						</MudTooltip>
 					</MudStack>
+					@if (ContextService.CurrentServer!.IsAiGenerationEnabled)
+					{
+					<MudStack Spacing="1" Class="mt-2">
+						<MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("ServerManagement.AiKey.Title")</MudText>
+						<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("ServerManagement.AiKey.Help")</MudText>
+						<MudSelect T="string" Value="AiProvider" ValueChanged="OnAiProviderChanged" Dense Variant="Variant.Outlined"
+						           Label="@LocalizationService.GetTranslation("ServerManagement.AiKey.Provider")" Style="max-width: 360px">
+							@foreach (var provider in AiProviders.Models.Keys)
+							{
+								<MudSelectItem Value="@provider">@ProviderName(provider)@(HasAiKey(provider) ? " — " + LocalizationService.GetTranslation("ServerManagement.AiKey.SavedKeyMark") : "")</MudSelectItem>
+							}
+						</MudSelect>
+						<MudText Typo="Typo.caption">@LocalizationService.GetTranslation("ServerManagement.AiKey.ProviderHelp." + AiProvider)</MudText>
+						@if (AiKey is null)
+						{
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudTextField @bind-Value="_aiKeyInput"
+								              Label="@LocalizationService.GetTranslation("ServerManagement.AiKey.Label", ProviderName(AiProvider))"
+								              InputType="InputType.Password"
+								              Variant="Variant.Outlined"
+								              Disabled="_aiKeySaving"
+								              Class="flex-1"/>
+								<MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(_aiKeySaving || string.IsNullOrWhiteSpace(_aiKeyInput))" OnClick="SaveAiKey">@LocalizationService.GetTranslation("ServerManagement.AiKey.Save")</MudButton>
+							</MudStack>
+						}
+						else
+						{
+							@if (IsAiKeyOwner)
+							{
+								<MudStack Row AlignItems="AlignItems.Center">
+									<MudTextField Value="@(_aiKeyPlain ?? "")"
+									              ReadOnly
+									              Label="@LocalizationService.GetTranslation("ServerManagement.AiKey.Label", ProviderName(AiProvider))"
+									              ShrinkLabel
+									              InputType="InputType.Password"
+									              Variant="Variant.Outlined"
+									              Class="flex-1"
+									              Adornment="Adornment.End"
+									              AdornmentIcon="@Icons.Material.Outlined.ContentCopy"
+									              OnAdornmentClick="@(() => CopyToClipboard(_aiKeyPlain ?? ""))"/>
+									<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.AiKey.Revoke")">
+										<MudIconButton Size="Size.Medium" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="RevokeAiKey"/>
+									</MudTooltip>
+								</MudStack>
+								<MudSwitch T="bool"
+								           Color="Color.Primary"
+								           Value="AiKey!.OpenToPlayers"
+								           ValueChanged="OnAiOpenToPlayersChanged"
+								           Label="@LocalizationService.GetTranslation("ServerManagement.AiKey.OpenToPlayers")"/>
+							}
+							<MudSelect T="string" Value="AiModel" ValueChanged="OnAiModelChanged" Dense Variant="Variant.Outlined"
+							           Label="@LocalizationService.GetTranslation("ServerManagement.AiKey.Model")" Style="max-width: 360px">
+								@foreach (var model in AiProviders.Models[AiProvider])
+								{
+									<MudSelectItem Value="@model">@model</MudSelectItem>
+								}
+							</MudSelect>
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudText Typo="Typo.body2">
+									@LocalizationService.GetTranslation("ServerManagement.AiKey.Status", AiKey!.ValidatedAt.ToString("yyyy-MM-dd"), AiKeyOwnerPseudo)
+									@if (!IsAiKeyOwner)
+									{
+										@(AiKey!.OpenToPlayers ? LocalizationService.GetTranslation("ServerManagement.AiKey.OpenToPlayersOn") : LocalizationService.GetTranslation("ServerManagement.AiKey.OpenToPlayersOff"))
+									}
+								</MudText>
+								@if (!IsAiKeyOwner && ContextService.CurrentUser?.SuperAdmin == true)
+								{
+									<MudTooltip Text="@LocalizationService.GetTranslation("ServerManagement.AiKey.Revoke")">
+										<MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="RevokeAiKey"/>
+									</MudTooltip>
+								}
+							</MudStack>
+						}
+					</MudStack>
+					}
 					<MudStack Row Class="flex-no-grow" AlignItems="AlignItems.Start" Spacing="6">
 						<MudStack Spacing="0" Style="min-width: 220px">
 							@if (!_isLoadingData)
@@ -671,7 +747,11 @@
 			ContextService.CurrentServer.MarginDefault = refreshedServer.MarginDefault;
 			ContextService.CurrentServer.MarginMax = refreshedServer.MarginMax;
 			ContextService.CurrentServer.LastDataUploadTime = refreshedServer.LastDataUploadTime;
+			ContextService.CurrentServer.AiProvider = refreshedServer.AiProvider;
+			ContextService.CurrentServer.AiKeysJson = refreshedServer.AiKeysJson;
 		}
+
+		LoadAiKeyFromCurrentServer();
 
 		LoadCalorieCostPolicyFromCurrentServer();
 		LoadMarginPolicyFromCurrentServer();
@@ -1267,6 +1347,110 @@
 		await PersistMarginPolicy();
 		await RefreshCurrentServerDataAndStats();
 		await RefreshItemsTableAsync();
+	}
+
+	// Clés IA du serveur, une par fournisseur : le fournisseur actif et le modèle se choisissent par n'importe quel admin ;
+	// une clé est saisie par n'importe quel admin, relue / révoquée / ouverte aux joueurs par son seul propriétaire (un
+	// super-admin peut révoquer). Validée chez le fournisseur avant d'être enregistrée. Changer de fournisseur garde les
+	// autres clés.
+	private string _aiKeyInput = "";
+	private string? _aiKeyPlain;   // clé déchiffrée, calculée une fois par chargement, seulement pour le propriétaire
+	private bool _aiKeySaving;
+	private List<ServerAiKey> _aiKeys = [];
+
+	private string AiProvider => ContextService.CurrentServer?.AiProvider ?? AiProviders.Anthropic;
+	private ServerAiKey? AiKey => _aiKeys.FirstOrDefault(k => k.Provider == AiProvider);
+	private string AiModel => AiKey is { } key && AiProviders.Models[AiProvider].Contains(key.Model) ? key.Model : AiProviders.Models[AiProvider][0];
+	private bool HasAiKey(string provider) => _aiKeys.Any(k => k.Provider == provider);
+	private string ProviderName(string provider) => LocalizationService.GetTranslation("ServerManagement.AiKey.Providers." + provider);
+	private bool IsAiKeyOwner => AiKey is { } key && key.UserId == ContextService.CurrentUser?.Id;
+	private string AiKeyOwnerPseudo => ContextService.CurrentServer?.UserServers.FirstOrDefault(us => us.UserId == AiKey?.UserId)?.GetPseudo() ?? "?";
+
+	private void LoadAiKeyFromCurrentServer()
+	{
+		_aiKeys = ContextService.CurrentServer is { } server ? ServerAiKey.Read(server) : [];
+		_aiKeyPlain = IsAiKeyOwner ? PromptService.Unprotect(AiKey!.KeyProtected) : null;
+	}
+
+	private async Task OnAiProviderChanged(string provider)
+	{
+		if (!AiProviders.Models.ContainsKey(provider) || provider == AiProvider) return;
+		ContextService.CurrentServer!.AiProvider = provider;
+		_aiKeyInput = "";
+		await SaveAiKeysAsync();
+	}
+
+	private async Task SaveAiKey()
+	{
+		var key = _aiKeyInput.Trim();
+		if (key.Length == 0 || _aiKeySaving) return;
+		var provider = AiProvider;
+		_aiKeySaving = true;
+		StateHasChanged();
+		try
+		{
+			using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+			var error = await PromptService.ValidateAsync(provider, key, cts.Token);
+			if (error is not null)
+			{
+				Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.AiKey.Error." + error + "." + provider, ProviderName(provider)), Severity.Error);
+				return;
+			}
+
+			_aiKeys.RemoveAll(k => k.Provider == provider);
+			_aiKeys.Add(new ServerAiKey
+			{
+				Provider = provider,
+				KeyProtected = PromptService.Protect(key),
+				UserId = ContextService.CurrentUser!.Id,
+				ValidatedAt = DateTimeOffset.UtcNow,
+				Model = AiProviders.Models[provider][0],
+			});
+			await SaveAiKeysAsync();
+			_aiKeyInput = "";
+			Snackbar.Add(LocalizationService.GetTranslation("ServerManagement.AiKey.Saved"), Severity.Success);
+		}
+		finally
+		{
+			_aiKeySaving = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task RevokeAiKey()
+	{
+		var confirmed = await JsRuntime.InvokeAsync<bool>("confirm", LocalizationService.GetTranslation("ServerManagement.AiKey.ConfirmRevoke", ProviderName(AiProvider)));
+		if (!confirmed) return;
+
+		_aiKeys.RemoveAll(k => k.Provider == AiProvider);
+		await SaveAiKeysAsync();
+		StateHasChanged();
+	}
+
+	private async Task OnAiOpenToPlayersChanged(bool open)
+	{
+		if (AiKey is not { } key) return;
+		key.OpenToPlayers = open;
+		await SaveAiKeysAsync();
+	}
+
+	private async Task OnAiModelChanged(string model)
+	{
+		if (AiKey is not { } key || !AiProviders.Models[AiProvider].Contains(model)) return;
+		key.Model = model;
+		await SaveAiKeysAsync();
+	}
+
+	// Écrit la liste des clés et le fournisseur actif dans le serveur courant et en base, puis relit l'état affiché.
+	private async Task SaveAiKeysAsync()
+	{
+		ServerAiKey.Write(ContextService.CurrentServer!, _aiKeys);
+		await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+		{
+			ServerDbService.UpdateAiKeys(context, ContextService.CurrentServer!);
+			return Task.CompletedTask;
+		});
+		LoadAiKeyFromCurrentServer();
 	}
 
 	private async Task CopyToClipboard(string text)

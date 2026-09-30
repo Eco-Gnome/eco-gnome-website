@@ -1,0 +1,26 @@
+{
+  "name": "T4 depot",
+  "grid": { "width": 34, "depth": 26 },
+  "defaults": { "wallMaterial": "ReinforcedConcreteItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 16, "depth": 12, "baseZ": 0, "height": 4, "wallMaterial": "ReinforcedConcreteItem", "wallThickness": 1, "floorMaterial": "ReinforcedConcreteItem", "ceilingMaterial": "ReinforcedConcreteItem" },
+    { "id": "v2", "x": 21, "y": 3, "width": 10, "depth": 10, "baseZ": 0, "height": 4, "wallMaterial": "CorrugatedSteelItem", "wallThickness": 1, "floorMaterial": "ReinforcedConcreteItem", "ceilingMaterial": "CorrugatedSteelItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 16, "depth": 12, "baseZ": 6, "style": "hip", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "ReinforcedConcreteItem", "parapet": false },
+    { "x": 21, "y": 3, "width": 10, "depth": 10, "baseZ": 6, "style": "gable", "ridgeAxis": "y", "pitch": 1, "overhang": 1, "material": "CorrugatedSteelItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [
+    { "x": 5, "y": 18, "baseZ": 0, "height": 3, "size": 1, "material": "ReinforcedConcreteItem", "count": 3, "stepX": 5, "stepY": 0 }
+  ],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 7, "width": 2, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "south", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "north", "offset": 5, "width": 4, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "south", "offset": 4, "width": 2, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v2", "side": "east", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" }
+  ]
+}

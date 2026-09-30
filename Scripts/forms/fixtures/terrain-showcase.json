@@ -1,0 +1,297 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes Terrain",
+ "mode": "architecture",
+ "grid": {
+  "width": 42,
+  "depth": 30
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "DirtItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     2,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "DirtItem"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedBasaltItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     6,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedBasaltItem"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedCoalItem",
+    "a": [
+     9,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedCoalItem"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedCopperOreItem",
+    "a": [
+     13,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedCopperOreItem"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedGneissItem",
+    "a": [
+     17,
+     7,
+     1
+    ],
+    "b": [
+     18,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedGneissItem"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedGoldOreItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     22,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedGoldOreItem"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedGraniteItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     26,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedGraniteItem"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedIronOreItem",
+    "a": [
+     29,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedIronOreItem"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedLimestoneItem",
+    "a": [
+     33,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedLimestoneItem"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedMixedRockItem",
+    "a": [
+     37,
+     7,
+     1
+    ],
+    "b": [
+     38,
+     8,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedMixedRockItem"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedSandstoneItem",
+    "a": [
+     1,
+     11,
+     1
+    ],
+    "b": [
+     2,
+     12,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedSandstoneItem"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedShaleItem",
+    "a": [
+     5,
+     11,
+     1
+    ],
+    "b": [
+     6,
+     12,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedShaleItem"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedSulfurItem",
+    "a": [
+     9,
+     11,
+     1
+    ],
+    "b": [
+     10,
+     12,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedSulfurItem"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "CrushedSlagItem",
+    "a": [
+     13,
+     11,
+     1
+    ],
+    "b": [
+     14,
+     12,
+     2
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "CrushedSlagItem"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

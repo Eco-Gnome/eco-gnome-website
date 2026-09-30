@@ -1,0 +1,535 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes Pipes",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 22
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "CopperPipe run along x"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     7,
+     8,
+     1
+    ],
+    "b": [
+     7,
+     11,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "CopperPipe elbow then run along y"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     4,
+     8,
+     1
+    ],
+    "b": [
+     4,
+     10,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "CopperPipe T branch through the cross"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     3,
+     9,
+     1
+    ],
+    "b": [
+     5,
+     9,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "CopperPipe cross"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     1,
+     8,
+     1
+    ],
+    "b": [
+     1,
+     8,
+     4
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "CopperPipe riser"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     13,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "IronPipe run along x"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     19,
+     8,
+     1
+    ],
+    "b": [
+     19,
+     11,
+     1
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "IronPipe elbow then run along y"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     16,
+     8,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "IronPipe T branch through the cross"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     15,
+     9,
+     1
+    ],
+    "b": [
+     17,
+     9,
+     1
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "IronPipe cross"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     13,
+     8,
+     1
+    ],
+    "b": [
+     13,
+     8,
+     4
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "IronPipe riser"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "SteelPipeItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     31,
+     7,
+     1
+    ],
+    "form": "SteelPipe",
+    "rot": 0,
+    "name": "SteelPipe run along x"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "SteelPipeItem",
+    "a": [
+     31,
+     8,
+     1
+    ],
+    "b": [
+     31,
+     11,
+     1
+    ],
+    "form": "SteelPipe",
+    "rot": 0,
+    "name": "SteelPipe elbow then run along y"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "SteelPipeItem",
+    "a": [
+     28,
+     8,
+     1
+    ],
+    "b": [
+     28,
+     10,
+     1
+    ],
+    "form": "SteelPipe",
+    "rot": 0,
+    "name": "SteelPipe T branch through the cross"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "SteelPipeItem",
+    "a": [
+     27,
+     9,
+     1
+    ],
+    "b": [
+     29,
+     9,
+     1
+    ],
+    "form": "SteelPipe",
+    "rot": 0,
+    "name": "SteelPipe cross"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "SteelPipeItem",
+    "a": [
+     25,
+     8,
+     1
+    ],
+    "b": [
+     25,
+     8,
+     4
+    ],
+    "form": "SteelPipe",
+    "rot": 0,
+    "name": "SteelPipe riser"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     2,
+     18,
+     1
+    ],
+    "b": [
+     2,
+     19,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "pump intake"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     2,
+     14,
+     1
+    ],
+    "b": [
+     5,
+     14,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "pump to tank"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "MortaredStoneItem",
+    "a": [
+     10,
+     13,
+     1
+    ],
+    "b": [
+     10,
+     18,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "wall crossed by the water pipe"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     9,
+     14,
+     1
+    ],
+    "b": [
+     15,
+     14,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "tank to engine, through the wall"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "CopperPipeItem",
+    "a": [
+     15,
+     15,
+     1
+    ],
+    "b": [
+     15,
+     17,
+     1
+    ],
+    "form": "CopperPipe",
+    "rot": 0,
+    "name": "into the engine water port"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "MortaredStoneItem",
+    "a": [
+     11,
+     14,
+     5
+    ],
+    "b": [
+     16,
+     18,
+     5
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "slab crossed by the chimney"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     13,
+     16,
+     4
+    ],
+    "b": [
+     13,
+     16,
+     7
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "engine chimney, through the slab"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "MortaredStoneItem",
+    "a": [
+     22,
+     13,
+     1
+    ],
+    "b": [
+     22,
+     17,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "wall crossed by the stove pipe"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     21,
+     15,
+     2
+    ],
+    "b": [
+     24,
+     15,
+     2
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "stove pipe, through the wall"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "IronPipeItem",
+    "a": [
+     24,
+     15,
+     3
+    ],
+    "b": [
+     24,
+     15,
+     5
+    ],
+    "form": "IronPipe",
+    "rot": 0,
+    "name": "stove pipe riser"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": [
+    {
+     "id": "m1",
+     "type": "MechanicalWaterPumpItem",
+     "x": 2,
+     "y": 16,
+     "rotation": 0
+    },
+    {
+     "id": "m2",
+     "type": "WoodenLiquidTankItem",
+     "x": 6,
+     "y": 15,
+     "rotation": 0
+    },
+    {
+     "id": "m3",
+     "type": "SteamEngineItem",
+     "x": 12,
+     "y": 15,
+     "rotation": 0
+    },
+    {
+     "id": "m4",
+     "type": "StoveItem",
+     "x": 20,
+     "y": 15,
+     "rotation": 0
+    }
+   ]
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

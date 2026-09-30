@@ -1,0 +1,11 @@
+{
+  "set": "ObjectsCulture",
+  "note": "Objets culturels et de gouvernement : fondations de ville, de pays et de fédération (état « fondé », sans la bâche de l'animation de dévoilement), cloche de ville, lampe de phare.",
+  "prefabs": [
+    "CountryFoundationObject",
+    "FederationFoundationObject",
+    "LighthouseLampObject",
+    "TownBellObject",
+    "TownFoundationObject"
+  ]
+}

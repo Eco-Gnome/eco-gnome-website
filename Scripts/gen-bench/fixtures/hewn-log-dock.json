@@ -1,0 +1,36 @@
+{
+  "name": "Chantier naval",
+  "grid": { "width": 30, "depth": 22 },
+  "defaults": { "wallMaterial": "HewnLogItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 10, "depth": 8, "baseZ": 0, "height": 4, "wallMaterial": "HewnLogItem", "wallThickness": 1, "floorMaterial": "HewnLogItem", "ceilingMaterial": "HewnLogItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 10, "depth": 8, "baseZ": 6, "style": "gable", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "HewnLogItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 4, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "east", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" }
+  ],
+  "blocks": [
+    { "x": 5, "y": 13, "width": 18, "depth": 6, "z": 2, "height": 1, "form": "DocksPlatform", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 14, "width": 18, "depth": 4, "z": 2, "height": 1, "form": "DocksPlatformFill", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 13, "width": 18, "depth": 1, "z": 1, "height": 1, "form": "DocksPillarBeam", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 18, "width": 18, "depth": 1, "z": 1, "height": 1, "form": "DocksPillarBeam", "rot": 2, "material": "HewnLogItem" },
+    { "x": 5, "y": 13, "width": 1, "depth": 6, "z": 0, "height": 2, "form": "DocksPillar", "rot": 0, "material": "HewnLogItem" },
+    { "x": 14, "y": 13, "width": 1, "depth": 6, "z": 0, "height": 2, "form": "DocksPillar", "rot": 0, "material": "HewnLogItem" },
+    { "x": 22, "y": 13, "width": 1, "depth": 6, "z": 0, "height": 2, "form": "DocksPillar", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 13, "width": 18, "depth": 1, "z": 3, "height": 1, "form": "DocksFenceMid", "rot": 0, "material": "HewnLogItem" },
+    { "x": 5, "y": 18, "width": 18, "depth": 1, "z": 3, "height": 1, "form": "DocksFenceMid", "rot": 2, "material": "HewnLogItem" },
+    { "x": 22, "y": 14, "width": 1, "depth": 4, "z": 3, "height": 1, "form": "DocksFenceEndCap", "rot": 1, "material": "HewnLogItem" },
+    { "x": 4, "y": 15, "width": 1, "depth": 2, "z": 2, "height": 1, "form": "DocksRamps", "rot": 2, "material": "HewnLogItem" },
+    { "x": 9, "y": 12, "width": 1, "depth": 1, "z": 0, "height": 3, "form": "Ladder", "rot": 1, "material": "HewnLogItem" },
+    { "x": 16, "y": 15, "width": 2, "depth": 1, "z": 3, "height": 1, "form": "Stacked2", "rot": 0, "material": "HewnLogItem" },
+    { "x": 19, "y": 16, "width": 1, "depth": 1, "z": 3, "height": 1, "form": "DocksBarrelPlatform", "rot": 0, "material": "HewnLogItem" },
+    { "x": 25, "y": 15, "width": 1, "depth": 1, "z": 0, "height": 3, "form": "DocksColumn", "rot": 0, "material": "HewnLogItem" }
+  ]
+}

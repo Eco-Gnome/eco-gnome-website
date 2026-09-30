@@ -1,0 +1,1125 @@
+{
+ "name": "Port du phare",
+ "grid": {
+  "width": 46,
+  "depth": 38
+ },
+ "defaults": {
+  "wallMaterial": "MortaredStoneItem"
+ },
+ "volumes": [
+  {
+   "id": "l1",
+   "x": 2,
+   "y": 27,
+   "width": 7,
+   "depth": 7,
+   "baseZ": 3,
+   "height": 4,
+   "wallMaterial": "MortaredStoneItem",
+   "wallThickness": 1,
+   "floorMaterial": "MortaredStoneItem",
+   "ceilingMaterial": "MortaredStoneItem"
+  },
+  {
+   "id": "shop",
+   "x": 14,
+   "y": 3,
+   "width": 14,
+   "depth": 9,
+   "baseZ": 3,
+   "height": 4,
+   "wallMaterial": "HewnLogItem",
+   "wallThickness": 1,
+   "floorMaterial": "HewnLogItem",
+   "ceilingMaterial": "HewnLogItem"
+  },
+  {
+   "id": "store",
+   "x": 33,
+   "y": 4,
+   "width": 9,
+   "depth": 7,
+   "baseZ": 3,
+   "height": 3,
+   "wallMaterial": "MortaredStoneItem",
+   "wallThickness": 1,
+   "floorMaterial": "MortaredStoneItem",
+   "ceilingMaterial": "HewnLogItem"
+  }
+ ],
+ "slabs": [
+  {
+   "x": 0,
+   "y": 0,
+   "width": 46,
+   "depth": 16,
+   "z": 0,
+   "material": "MortaredStoneItem",
+   "thickness": 3
+  },
+  {
+   "x": 1,
+   "y": 1,
+   "width": 44,
+   "depth": 14,
+   "z": 2,
+   "material": "GardenGravelItem",
+   "thickness": 1
+  },
+  {
+   "x": 2,
+   "y": 16,
+   "width": 7,
+   "depth": 18,
+   "z": 0,
+   "material": "MortaredStoneItem",
+   "thickness": 3
+  },
+  {
+   "x": 4,
+   "y": 29,
+   "width": 3,
+   "depth": 3,
+   "z": 12,
+   "material": "MortaredStoneItem",
+   "thickness": 1
+  },
+  {
+   "x": 4,
+   "y": 29,
+   "width": 3,
+   "depth": 3,
+   "z": 16,
+   "material": "MortaredStoneItem",
+   "thickness": 1
+  },
+  {
+   "x": 2,
+   "y": 27,
+   "width": 7,
+   "depth": 7,
+   "z": 20,
+   "material": "HewnLogItem",
+   "thickness": 1
+  }
+ ],
+ "roofs": [
+  {
+   "x": 3,
+   "y": 28,
+   "width": 5,
+   "depth": 5,
+   "baseZ": 24,
+   "style": "hip",
+   "ridgeAxis": "x",
+   "pitch": 1,
+   "overhang": 1,
+   "material": "HewnLogItem",
+   "parapet": false
+  },
+  {
+   "x": 14,
+   "y": 3,
+   "width": 14,
+   "depth": 9,
+   "baseZ": 8,
+   "style": "gable",
+   "ridgeAxis": "x",
+   "pitch": 1,
+   "overhang": 1,
+   "material": "HewnLogItem",
+   "parapet": false
+  },
+  {
+   "x": 8,
+   "y": 3,
+   "width": 5,
+   "depth": 5,
+   "baseZ": 8,
+   "style": "shed",
+   "ridgeAxis": "x",
+   "pitch": 1,
+   "overhang": 0,
+   "material": "HewnLogItem",
+   "parapet": false
+  },
+  {
+   "x": 33,
+   "y": 4,
+   "width": 9,
+   "depth": 7,
+   "baseZ": 7,
+   "style": "hip",
+   "ridgeAxis": "x",
+   "pitch": 1,
+   "overhang": 1,
+   "material": "HewnLogItem",
+   "parapet": false
+  }
+ ],
+ "partitions": [],
+ "columns": [
+  {
+   "x": 8,
+   "y": 3,
+   "baseZ": 3,
+   "height": 5,
+   "size": 1,
+   "material": "HewnLogItem",
+   "count": 2,
+   "stepX": 0,
+   "stepY": 4
+  },
+  {
+   "x": 12,
+   "y": 3,
+   "baseZ": 3,
+   "height": 5,
+   "size": 1,
+   "material": "HewnLogItem",
+   "count": 2,
+   "stepX": 0,
+   "stepY": 4
+  },
+  {
+   "x": 18,
+   "y": 14,
+   "baseZ": 3,
+   "height": 3,
+   "size": 1,
+   "material": "HewnLogItem",
+   "count": 2,
+   "stepX": 7,
+   "stepY": 0
+  }
+ ],
+ "stairs": [],
+ "openings": [
+  {
+   "targetId": "l1",
+   "side": "north",
+   "offset": 3,
+   "width": 1,
+   "height": 2,
+   "sill": 0,
+   "kind": "door"
+  },
+  {
+   "targetId": "l1",
+   "side": "east",
+   "offset": 3,
+   "width": 1,
+   "height": 1,
+   "sill": 2,
+   "kind": "window"
+  },
+  {
+   "targetId": "l1",
+   "side": "south",
+   "offset": 3,
+   "width": 1,
+   "height": 1,
+   "sill": 2,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "south",
+   "offset": 6,
+   "width": 2,
+   "height": 2,
+   "sill": 0,
+   "kind": "door"
+  },
+  {
+   "targetId": "shop",
+   "side": "south",
+   "offset": 2,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "south",
+   "offset": 10,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "north",
+   "offset": 2,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "north",
+   "offset": 6,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "north",
+   "offset": 10,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "east",
+   "offset": 3,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "shop",
+   "side": "west",
+   "offset": 3,
+   "width": 2,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "store",
+   "side": "south",
+   "offset": 4,
+   "width": 1,
+   "height": 2,
+   "sill": 0,
+   "kind": "door"
+  },
+  {
+   "targetId": "store",
+   "side": "south",
+   "offset": 1,
+   "width": 1,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "store",
+   "side": "south",
+   "offset": 6,
+   "width": 1,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "store",
+   "side": "east",
+   "offset": 2,
+   "width": 1,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "store",
+   "side": "north",
+   "offset": 2,
+   "width": 1,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  },
+  {
+   "targetId": "store",
+   "side": "north",
+   "offset": 5,
+   "width": 1,
+   "height": 1,
+   "sill": 1,
+   "kind": "window"
+  }
+ ],
+ "blocks": [
+  {
+   "x": 3,
+   "y": 28,
+   "width": 5,
+   "depth": 1,
+   "z": 9,
+   "height": 11,
+   "form": "Wall",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 3,
+   "y": 32,
+   "width": 5,
+   "depth": 1,
+   "z": 9,
+   "height": 11,
+   "form": "Wall",
+   "rot": 2,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 3,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 9,
+   "height": 11,
+   "form": "Wall",
+   "rot": 1,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 7,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 9,
+   "height": 11,
+   "form": "Wall",
+   "rot": 3,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 7,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 10,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 5,
+   "y": 32,
+   "width": 1,
+   "depth": 1,
+   "z": 10,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 7,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 14,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 5,
+   "y": 32,
+   "width": 1,
+   "depth": 1,
+   "z": 14,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 7,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 18,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 5,
+   "y": 32,
+   "width": 1,
+   "depth": 1,
+   "z": 18,
+   "height": 1,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "MortaredStoneItem"
+  },
+  {
+   "x": 3,
+   "y": 28,
+   "width": 5,
+   "depth": 1,
+   "z": 21,
+   "height": 3,
+   "form": "Wall",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 3,
+   "y": 32,
+   "width": 5,
+   "depth": 1,
+   "z": 21,
+   "height": 3,
+   "form": "Wall",
+   "rot": 2,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 3,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 21,
+   "height": 3,
+   "form": "Wall",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 7,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 21,
+   "height": 3,
+   "form": "Wall",
+   "rot": 3,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 4,
+   "y": 28,
+   "width": 3,
+   "depth": 1,
+   "z": 22,
+   "height": 2,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 4,
+   "y": 32,
+   "width": 3,
+   "depth": 1,
+   "z": 22,
+   "height": 2,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 3,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 22,
+   "height": 2,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 7,
+   "y": 29,
+   "width": 1,
+   "depth": 3,
+   "z": 22,
+   "height": 2,
+   "form": "WindowGrilles",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 2,
+   "y": 27,
+   "width": 7,
+   "depth": 1,
+   "z": 21,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 2,
+   "y": 33,
+   "width": 7,
+   "depth": 1,
+   "z": 21,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 2,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 2,
+   "y": 28,
+   "width": 1,
+   "depth": 5,
+   "z": 21,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 8,
+   "y": 28,
+   "width": 1,
+   "depth": 5,
+   "z": 21,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 3,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 29,
+   "y": 10,
+   "width": 2,
+   "depth": 2,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked3",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 31,
+   "y": 11,
+   "width": 2,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked2",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 29,
+   "y": 12,
+   "width": 1,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked1",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 12,
+   "y": 11,
+   "width": 1,
+   "depth": 2,
+   "z": 3,
+   "height": 1,
+   "form": "DocksBarrelPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 9,
+   "y": 4,
+   "width": 3,
+   "depth": 2,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked3",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 9,
+   "y": 6,
+   "width": 3,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked1",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 9,
+   "y": 9,
+   "width": 2,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "Stacked2",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 16,
+   "width": 6,
+   "depth": 14,
+   "z": 2,
+   "height": 1,
+   "form": "DocksPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 30,
+   "width": 18,
+   "depth": 4,
+   "z": 2,
+   "height": 1,
+   "form": "DocksPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 16,
+   "width": 1,
+   "depth": 14,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPillarBeam",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 16,
+   "width": 1,
+   "depth": 14,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPillarBeam",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 33,
+   "width": 18,
+   "depth": 1,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPillarBeam",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 30,
+   "width": 1,
+   "depth": 4,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPillarBeam",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 30,
+   "y": 30,
+   "width": 1,
+   "depth": 4,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPillarBeam",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 17,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 21,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 25,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 17,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 21,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 25,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 33,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 17,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 17,
+   "y": 33,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 21,
+   "y": 33,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 26,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 26,
+   "y": 33,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 30,
+   "y": 30,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 30,
+   "y": 33,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 2,
+   "form": "DocksPillar",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 19,
+   "y": 16,
+   "width": 1,
+   "depth": 14,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 16,
+   "width": 1,
+   "depth": 5,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 3,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 24,
+   "y": 23,
+   "width": 1,
+   "depth": 7,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 3,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 33,
+   "width": 18,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 2,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 30,
+   "width": 6,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 25,
+   "y": 30,
+   "width": 6,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 13,
+   "y": 31,
+   "width": 1,
+   "depth": 2,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 1,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 30,
+   "y": 31,
+   "width": 1,
+   "depth": 2,
+   "z": 3,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 3,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 14,
+   "y": 31,
+   "width": 1,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksColumn",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 29,
+   "y": 31,
+   "width": 1,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksColumn",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 21,
+   "y": 31,
+   "width": 1,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksColumn",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 15,
+   "y": 32,
+   "width": 2,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksBarrelPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 27,
+   "y": 32,
+   "width": 1,
+   "depth": 1,
+   "z": 3,
+   "height": 1,
+   "form": "DocksBarrelPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 18,
+   "y": 27,
+   "width": 1,
+   "depth": 1,
+   "z": 0,
+   "height": 3,
+   "form": "Ladder",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 26,
+   "y": 19,
+   "width": 6,
+   "depth": 6,
+   "z": 1,
+   "height": 1,
+   "form": "DocksPlatform",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 25,
+   "y": 21,
+   "width": 1,
+   "depth": 2,
+   "z": 1,
+   "height": 1,
+   "form": "DocksRamps",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 31,
+   "y": 19,
+   "width": 1,
+   "depth": 1,
+   "z": 2,
+   "height": 1,
+   "form": "DocksColumn",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 31,
+   "y": 24,
+   "width": 1,
+   "depth": 1,
+   "z": 2,
+   "height": 1,
+   "form": "DocksColumn",
+   "rot": 0,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 26,
+   "y": 24,
+   "width": 6,
+   "depth": 1,
+   "z": 2,
+   "height": 1,
+   "form": "DocksFenceMid",
+   "rot": 2,
+   "material": "HewnLogItem"
+  }
+ ]
+}

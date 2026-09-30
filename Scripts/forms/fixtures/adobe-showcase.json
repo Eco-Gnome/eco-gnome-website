@@ -1,0 +1,2425 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes AdobeBrick",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 34
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "WallSolo",
+    "rot": 0,
+    "name": "WallSolo rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "WallSolo",
+    "rot": 1,
+    "name": "WallSolo rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "WallSolo",
+    "rot": 2,
+    "name": "WallSolo rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "WallSolo",
+    "rot": 3,
+    "name": "WallSolo rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "WallEnd",
+    "rot": 0,
+    "name": "WallEnd rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "WallEnd",
+    "rot": 1,
+    "name": "WallEnd rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "WallEnd",
+    "rot": 2,
+    "name": "WallEnd rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "WallEnd",
+    "rot": 3,
+    "name": "WallEnd rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "WallCorner",
+    "rot": 0,
+    "name": "WallCorner rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "WallCorner",
+    "rot": 1,
+    "name": "WallCorner rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "WallCorner",
+    "rot": 2,
+    "name": "WallCorner rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "WallCorner",
+    "rot": 3,
+    "name": "WallCorner rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "WallMid",
+    "rot": 0,
+    "name": "WallMid rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "WallMid",
+    "rot": 1,
+    "name": "WallMid rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "WallMid",
+    "rot": 2,
+    "name": "WallMid rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "WallMid",
+    "rot": 3,
+    "name": "WallMid rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "WallT",
+    "rot": 0,
+    "name": "WallT rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "WallT",
+    "rot": 1,
+    "name": "WallT rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "WallT",
+    "rot": 2,
+    "name": "WallT rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "WallT",
+    "rot": 3,
+    "name": "WallT rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "RoofSolo",
+    "rot": 0,
+    "name": "RoofSolo rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "RoofSolo",
+    "rot": 1,
+    "name": "RoofSolo rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "RoofSolo",
+    "rot": 2,
+    "name": "RoofSolo rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "RoofSolo",
+    "rot": 3,
+    "name": "RoofSolo rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     4,
+     1
+    ],
+    "b": [
+     19,
+     4,
+     1
+    ],
+    "form": "RoofT",
+    "rot": 0,
+    "name": "RoofT rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     4,
+     1
+    ],
+    "b": [
+     21,
+     4,
+     1
+    ],
+    "form": "RoofT",
+    "rot": 1,
+    "name": "RoofT rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     4,
+     1
+    ],
+    "b": [
+     23,
+     4,
+     1
+    ],
+    "form": "RoofT",
+    "rot": 2,
+    "name": "RoofT rot 2"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     4,
+     1
+    ],
+    "b": [
+     25,
+     4,
+     1
+    ],
+    "form": "RoofT",
+    "rot": 3,
+    "name": "RoofT rot 3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     4,
+     1
+    ],
+    "b": [
+     28,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     4,
+     1
+    ],
+    "b": [
+     30,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     4,
+     1
+    ],
+    "b": [
+     34,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 0,
+    "name": "RoofMid rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     7,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 1,
+    "name": "RoofMid rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     7,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 2,
+    "name": "RoofMid rot 2"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 3,
+    "name": "RoofMid rot 3"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     7,
+     1
+    ],
+    "form": "RoofEnd",
+    "rot": 0,
+    "name": "RoofEnd rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     7,
+     1
+    ],
+    "b": [
+     12,
+     7,
+     1
+    ],
+    "form": "RoofEnd",
+    "rot": 1,
+    "name": "RoofEnd rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "RoofEnd",
+    "rot": 2,
+    "name": "RoofEnd rot 2"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     7,
+     1
+    ],
+    "b": [
+     16,
+     7,
+     1
+    ],
+    "form": "RoofEnd",
+    "rot": 3,
+    "name": "RoofEnd rot 3"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     21,
+     7,
+     1
+    ],
+    "form": "Window",
+    "rot": 1,
+    "name": "Window rot 1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     7,
+     1
+    ],
+    "b": [
+     23,
+     7,
+     1
+    ],
+    "form": "Window",
+    "rot": 2,
+    "name": "Window rot 2"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     25,
+     7,
+     1
+    ],
+    "form": "Window",
+    "rot": 3,
+    "name": "Window rot 3"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     7,
+     1
+    ],
+    "b": [
+     28,
+     7,
+     1
+    ],
+    "form": "FenceCorner",
+    "rot": 0,
+    "name": "FenceCorner rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     7,
+     1
+    ],
+    "form": "FenceCorner",
+    "rot": 1,
+    "name": "FenceCorner rot 1"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     7,
+     1
+    ],
+    "b": [
+     32,
+     7,
+     1
+    ],
+    "form": "FenceCorner",
+    "rot": 2,
+    "name": "FenceCorner rot 2"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     7,
+     1
+    ],
+    "form": "FenceCorner",
+    "rot": 3,
+    "name": "FenceCorner rot 3"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     10,
+     1
+    ],
+    "b": [
+     1,
+     10,
+     1
+    ],
+    "form": "FenceMid",
+    "rot": 0,
+    "name": "FenceMid rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     10,
+     1
+    ],
+    "b": [
+     3,
+     10,
+     1
+    ],
+    "form": "FenceMid",
+    "rot": 1,
+    "name": "FenceMid rot 1"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     10,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "FenceMid",
+    "rot": 2,
+    "name": "FenceMid rot 2"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     10,
+     1
+    ],
+    "b": [
+     7,
+     10,
+     1
+    ],
+    "form": "FenceMid",
+    "rot": 3,
+    "name": "FenceMid rot 3"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     10,
+     1
+    ],
+    "b": [
+     10,
+     10,
+     1
+    ],
+    "form": "FenceSolo",
+    "rot": 0,
+    "name": "FenceSolo rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     10,
+     1
+    ],
+    "b": [
+     12,
+     10,
+     1
+    ],
+    "form": "FenceSolo",
+    "rot": 1,
+    "name": "FenceSolo rot 1"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     10,
+     1
+    ],
+    "b": [
+     14,
+     10,
+     1
+    ],
+    "form": "FenceSolo",
+    "rot": 2,
+    "name": "FenceSolo rot 2"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     10,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "FenceSolo",
+    "rot": 3,
+    "name": "FenceSolo rot 3"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     10,
+     1
+    ],
+    "b": [
+     19,
+     10,
+     1
+    ],
+    "form": "FenceT",
+    "rot": 0,
+    "name": "FenceT rot 0"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     10,
+     1
+    ],
+    "b": [
+     21,
+     10,
+     1
+    ],
+    "form": "FenceT",
+    "rot": 1,
+    "name": "FenceT rot 1"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     10,
+     1
+    ],
+    "b": [
+     23,
+     10,
+     1
+    ],
+    "form": "FenceT",
+    "rot": 2,
+    "name": "FenceT rot 2"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     10,
+     1
+    ],
+    "b": [
+     25,
+     10,
+     1
+    ],
+    "form": "FenceT",
+    "rot": 3,
+    "name": "FenceT rot 3"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     10,
+     1
+    ],
+    "b": [
+     28,
+     10,
+     1
+    ],
+    "form": "FenceEnd",
+    "rot": 0,
+    "name": "FenceEnd rot 0"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     10,
+     1
+    ],
+    "b": [
+     30,
+     10,
+     1
+    ],
+    "form": "FenceEnd",
+    "rot": 1,
+    "name": "FenceEnd rot 1"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     10,
+     1
+    ],
+    "b": [
+     32,
+     10,
+     1
+    ],
+    "form": "FenceEnd",
+    "rot": 2,
+    "name": "FenceEnd rot 2"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     10,
+     1
+    ],
+    "b": [
+     34,
+     10,
+     1
+    ],
+    "form": "FenceEnd",
+    "rot": 3,
+    "name": "FenceEnd rot 3"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     1,
+     13,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 0,
+    "name": "StairsCorner rot 0"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     13,
+     1
+    ],
+    "b": [
+     3,
+     13,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 1,
+    "name": "StairsCorner rot 1"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 2,
+    "name": "StairsCorner rot 2"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     13,
+     1
+    ],
+    "b": [
+     7,
+     13,
+     1
+    ],
+    "form": "StairsCorner",
+    "rot": 3,
+    "name": "StairsCorner rot 3"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     13,
+     1
+    ],
+    "b": [
+     10,
+     13,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 0,
+    "name": "StairsEndLeft rot 0"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     13,
+     1
+    ],
+    "b": [
+     12,
+     13,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 1,
+    "name": "StairsEndLeft rot 1"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     13,
+     1
+    ],
+    "b": [
+     14,
+     13,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 2,
+    "name": "StairsEndLeft rot 2"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     13,
+     1
+    ],
+    "b": [
+     16,
+     13,
+     1
+    ],
+    "form": "StairsEndLeft",
+    "rot": 3,
+    "name": "StairsEndLeft rot 3"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     13,
+     1
+    ],
+    "b": [
+     19,
+     13,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 0,
+    "name": "StairsEndRight rot 0"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     13,
+     1
+    ],
+    "b": [
+     21,
+     13,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 1,
+    "name": "StairsEndRight rot 1"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     13,
+     1
+    ],
+    "b": [
+     23,
+     13,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 2,
+    "name": "StairsEndRight rot 2"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     13,
+     1
+    ],
+    "b": [
+     25,
+     13,
+     1
+    ],
+    "form": "StairsEndRight",
+    "rot": 3,
+    "name": "StairsEndRight rot 3"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     13,
+     1
+    ],
+    "b": [
+     28,
+     13,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 0,
+    "name": "StairsMid rot 0"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     13,
+     1
+    ],
+    "b": [
+     30,
+     13,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 1,
+    "name": "StairsMid rot 1"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     13,
+     1
+    ],
+    "b": [
+     32,
+     13,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 2,
+    "name": "StairsMid rot 2"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     13,
+     1
+    ],
+    "b": [
+     34,
+     13,
+     1
+    ],
+    "form": "StairsMid",
+    "rot": 3,
+    "name": "StairsMid rot 3"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     16,
+     1
+    ],
+    "b": [
+     1,
+     16,
+     1
+    ],
+    "form": "StairsSolo",
+    "rot": 0,
+    "name": "StairsSolo rot 0"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     3,
+     16,
+     1
+    ],
+    "b": [
+     3,
+     16,
+     1
+    ],
+    "form": "StairsSolo",
+    "rot": 1,
+    "name": "StairsSolo rot 1"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     16,
+     1
+    ],
+    "b": [
+     5,
+     16,
+     1
+    ],
+    "form": "StairsSolo",
+    "rot": 2,
+    "name": "StairsSolo rot 2"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     16,
+     1
+    ],
+    "b": [
+     7,
+     16,
+     1
+    ],
+    "form": "StairsSolo",
+    "rot": 3,
+    "name": "StairsSolo rot 3"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     16,
+     1
+    ],
+    "b": [
+     10,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 0,
+    "name": "StairsTurn rot 0"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     16,
+     1
+    ],
+    "b": [
+     12,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 1,
+    "name": "StairsTurn rot 1"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     16,
+     1
+    ],
+    "b": [
+     14,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 2,
+    "name": "StairsTurn rot 2"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     16,
+     1
+    ],
+    "b": [
+     16,
+     16,
+     1
+    ],
+    "form": "StairsTurn",
+    "rot": 3,
+    "name": "StairsTurn rot 3"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     19,
+     16,
+     1
+    ],
+    "b": [
+     19,
+     16,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "UnderSlopeSide rot 0"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     21,
+     16,
+     1
+    ],
+    "b": [
+     21,
+     16,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 1,
+    "name": "UnderSlopeSide rot 1"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     23,
+     16,
+     1
+    ],
+    "b": [
+     23,
+     16,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 2,
+    "name": "UnderSlopeSide rot 2"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     25,
+     16,
+     1
+    ],
+    "b": [
+     25,
+     16,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 3,
+    "name": "UnderSlopeSide rot 3"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     28,
+     16,
+     1
+    ],
+    "b": [
+     28,
+     16,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "Ladder rot 0"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     30,
+     16,
+     1
+    ],
+    "b": [
+     30,
+     16,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 1,
+    "name": "Ladder rot 1"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     32,
+     16,
+     1
+    ],
+    "b": [
+     32,
+     16,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 2,
+    "name": "Ladder rot 2"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     34,
+     16,
+     1
+    ],
+    "b": [
+     34,
+     16,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 3,
+    "name": "Ladder rot 3"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     20,
+     1
+    ],
+    "b": [
+     5,
+     23,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     8,
+     20,
+     1
+    ],
+    "b": [
+     8,
+     20,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     20,
+     1
+    ],
+    "b": [
+     10,
+     20,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     12,
+     20,
+     1
+    ],
+    "b": [
+     12,
+     20,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     20,
+     1
+    ],
+    "b": [
+     14,
+     20,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     16,
+     20,
+     1
+    ],
+    "b": [
+     16,
+     20,
+     3
+    ],
+    "form": "WallX",
+    "rot": 0,
+    "name": "WallX x3"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     18,
+     20,
+     1
+    ],
+    "b": [
+     18,
+     20,
+     1
+    ],
+    "form": "RoofX",
+    "rot": 0,
+    "name": "RoofX x1"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     20,
+     20,
+     1
+    ],
+    "b": [
+     20,
+     20,
+     1
+    ],
+    "form": "RoofFill",
+    "rot": 0,
+    "name": "RoofFill x1"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     22,
+     20,
+     1
+    ],
+    "b": [
+     22,
+     20,
+     1
+    ],
+    "form": "FenceX",
+    "rot": 0,
+    "name": "FenceX x1"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     2,
+     26,
+     1
+    ],
+    "b": [
+     5,
+     26,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 0,
+    "name": "WallMid north"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     2,
+     30,
+     1
+    ],
+    "b": [
+     3,
+     30,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 0,
+    "name": "WallMid south, open at x1 - 2 (a closed ring gets an auto ceiling)"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     5,
+     30,
+     1
+    ],
+    "b": [
+     5,
+     30,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 0,
+    "name": "WallMid south"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     27,
+     1
+    ],
+    "b": [
+     1,
+     29,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 1,
+    "name": "WallMid west"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     6,
+     27,
+     1
+    ],
+    "b": [
+     6,
+     29,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 1,
+    "name": "WallMid east"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     26,
+     1
+    ],
+    "b": [
+     1,
+     26,
+     3
+    ],
+    "form": "WallCorner",
+    "rot": 2,
+    "name": "WallCorner NW"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     6,
+     26,
+     1
+    ],
+    "b": [
+     6,
+     26,
+     3
+    ],
+    "form": "WallCorner",
+    "rot": 1,
+    "name": "WallCorner NE"
+   },
+   {
+    "id": "g113",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     6,
+     30,
+     1
+    ],
+    "b": [
+     6,
+     30,
+     3
+    ],
+    "form": "WallCorner",
+    "rot": 0,
+    "name": "WallCorner SE"
+   },
+   {
+    "id": "g114",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     1,
+     30,
+     1
+    ],
+    "b": [
+     1,
+     30,
+     3
+    ],
+    "form": "WallCorner",
+    "rot": 3,
+    "name": "WallCorner SW"
+   },
+   {
+    "id": "g115",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     6,
+     28,
+     1
+    ],
+    "b": [
+     6,
+     28,
+     3
+    ],
+    "form": "WallT",
+    "rot": 3,
+    "name": "WallT branch east"
+   },
+   {
+    "id": "g116",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     7,
+     28,
+     1
+    ],
+    "b": [
+     9,
+     28,
+     3
+    ],
+    "form": "WallMid",
+    "rot": 0,
+    "name": "WallMid free wall"
+   },
+   {
+    "id": "g117",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     10,
+     28,
+     1
+    ],
+    "b": [
+     10,
+     28,
+     3
+    ],
+    "form": "WallEnd",
+    "rot": 2,
+    "name": "WallEnd rounded east"
+   },
+   {
+    "id": "g118",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     27,
+     1
+    ],
+    "b": [
+     17,
+     29,
+     1
+    ],
+    "form": "RoofFill",
+    "rot": 0,
+    "name": "RoofFill deck inside the parapet"
+   },
+   {
+    "id": "g119",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     26,
+     1
+    ],
+    "b": [
+     17,
+     26,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 0,
+    "name": "RoofMid north"
+   },
+   {
+    "id": "g120",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     14,
+     30,
+     1
+    ],
+    "b": [
+     17,
+     30,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 0,
+    "name": "RoofMid south"
+   },
+   {
+    "id": "g121",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     13,
+     27,
+     1
+    ],
+    "b": [
+     13,
+     29,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 1,
+    "name": "RoofMid west"
+   },
+   {
+    "id": "g122",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     18,
+     27,
+     1
+    ],
+    "b": [
+     18,
+     29,
+     1
+    ],
+    "form": "RoofMid",
+    "rot": 1,
+    "name": "RoofMid east"
+   },
+   {
+    "id": "g123",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     13,
+     26,
+     1
+    ],
+    "b": [
+     13,
+     26,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner NW"
+   },
+   {
+    "id": "g124",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     18,
+     26,
+     1
+    ],
+    "b": [
+     18,
+     26,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner NE"
+   },
+   {
+    "id": "g125",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     18,
+     30,
+     1
+    ],
+    "b": [
+     18,
+     30,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner SE"
+   },
+   {
+    "id": "g126",
+    "kind": "box",
+    "subtract": false,
+    "material": "AdobeItem",
+    "a": [
+     13,
+     30,
+     1
+    ],
+    "b": [
+     13,
+     30,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner SW"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

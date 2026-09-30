@@ -1,0 +1,494 @@
+{
+ "name": "Adversarial",
+ "grid": {
+  "width": 500,
+  "depth": 3
+ },
+ "defaults": {
+  "wallMaterial": "Unobtainium"
+ },
+ "volumes": [
+  {
+   "id": "v1",
+   "x": -50,
+   "y": 900,
+   "width": 0,
+   "depth": 999,
+   "baseZ": -5,
+   "height": 99,
+   "wallMaterial": "Unobtainium",
+   "wallThickness": 9,
+   "floorMaterial": "HewnLogItem",
+   "ceilingMaterial": "Nope"
+  },
+  {
+   "id": "v1",
+   "x": 10,
+   "y": 0,
+   "width": 6,
+   "depth": 6,
+   "baseZ": 1,
+   "height": 3,
+   "wallMaterial": "HewnLogItem",
+   "wallThickness": 1,
+   "floorMaterial": "HewnLogItem",
+   "ceilingMaterial": "HewnLogItem"
+  },
+  {
+   "id": "v3",
+   "x": 30,
+   "y": 0,
+   "width": 8,
+   "depth": 8,
+   "baseZ": 250,
+   "height": 5,
+   "wallMaterial": "HewnLogItem",
+   "wallThickness": 1,
+   "floorMaterial": "HewnLogItem",
+   "ceilingMaterial": "HewnLogItem"
+  }
+ ],
+ "slabs": [
+  {
+   "x": 0,
+   "y": 0,
+   "width": 9999,
+   "depth": 9999,
+   "z": 999,
+   "material": "HewnLogItem",
+   "thickness": 50
+  }
+ ],
+ "roofs": [
+  {
+   "x": -100,
+   "y": -100,
+   "width": 9999,
+   "depth": 9999,
+   "baseZ": 14,
+   "style": "hip",
+   "ridgeAxis": "x",
+   "pitch": 0,
+   "overhang": 99,
+   "material": "Cardboard",
+   "parapet": true
+  }
+ ],
+ "partitions": [
+  {
+   "id": "p1",
+   "x0": 0,
+   "y0": 0,
+   "x1": 50,
+   "y1": 30,
+   "baseZ": 0,
+   "height": 99,
+   "material": "HewnLogItem",
+   "thickness": 0
+  }
+ ],
+ "columns": [
+  {
+   "x": 2,
+   "y": 2,
+   "baseZ": 0,
+   "height": 999,
+   "size": 99,
+   "material": "HewnLogItem",
+   "count": 999,
+   "stepX": 0,
+   "stepY": 0
+  }
+ ],
+ "stairs": [
+  {
+   "x": 3,
+   "y": 3,
+   "fromZ": 10,
+   "toZ": 5,
+   "direction": "up",
+   "width": 99,
+   "material": "HewnLogItem"
+  },
+  {
+   "x": 3,
+   "y": 3,
+   "fromZ": 0,
+   "toZ": 200,
+   "direction": "east",
+   "width": 99,
+   "material": "HewnLogItem"
+  }
+ ],
+ "openings": [
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 0,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 1,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 2,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 3,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 4,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 5,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 6,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 7,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 8,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 9,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 10,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 11,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 12,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 13,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 14,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 15,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 16,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 17,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 18,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 19,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 20,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 21,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 22,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 23,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 24,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 25,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 26,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 27,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 28,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 29,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 30,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 31,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 32,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 33,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 34,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 35,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 36,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 37,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 38,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "door"
+  },
+  {
+   "targetId": "v1",
+   "side": "south",
+   "offset": 39,
+   "width": 50,
+   "height": 99,
+   "sill": -3,
+   "kind": "window"
+  },
+  {
+   "targetId": "ghost",
+   "side": "south",
+   "offset": 1,
+   "width": 1,
+   "height": 2,
+   "sill": 0,
+   "kind": "door"
+  }
+ ]
+}

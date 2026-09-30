@@ -1,8 +1,9 @@
-﻿@page "/building-planner"
+@page "/building-planner"
 @implements IAsyncDisposable
 @using System.Text.Json
 @using ecocraft.BuildingPlanner
 @using ecocraft.BuildingPlanner.Model
+@using ecocraft.BuildingPlanner.Generator
 @using ecocraft.Components.Dialog
 @using ecocraft.Components.Utils
 @using ecocraft.Models
@@ -21,6 +22,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject LocalStorageService LocalStorageService
+@inject BuildingPlannerPromptService PromptService
 
 <PageTitle>@LocalizationService.GetTranslation("BuildingPlanner.Title") - Eco Gnome</PageTitle>
 
@@ -37,6 +39,10 @@ else if (_loading)
 else
 {
     <div class="bp-page">
+        @if (_generating)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+        }
         <MudPaper Class="bp-toolbar pa-1" Elevation="1">
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Wrap="Wrap.Wrap">
                 <MudMenu Label="@PlanMenuLabel" Variant="Variant.Outlined" Size="Size.Small" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Dense="true">
@@ -50,18 +56,25 @@ else
                     <MudMenuItem Icon="@MDIIcons.Filled.RenameBox" OnClick="RenameAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Rename")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.ShareVariant" OnClick="ShareAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Share")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Image" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportPng")</MudMenuItem>
+                    @if (_view3d)
+                    {
+                        <MudMenuItem Icon="@Icons.Material.Filled.ViewInAr" OnClick="@(() => Js("exportPng", string.IsNullOrWhiteSpace(_document.Name) ? "building-render" : _document.Name + "-render", true))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportRender")</MudMenuItem>
+                    }
                     <MudMenuItem Icon="@MDIIcons.Filled.FileExport" OnClick="@(() => Js("exportJson", string.IsNullOrWhiteSpace(_document.Name) ? "building-plan" : _document.Name))">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ExportJson")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.FileImport" OnClick="ImportJsonAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.ImportJson")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.Resize" OnClick="ResizeAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.Resize")</MudMenuItem>
+                    @if (IsAiAllowed)
+                    {
+                        <MudMenuItem Icon="@Icons.Material.Filled.AutoAwesome" Disabled="@_generating" OnClick="GenerateWithAiAsync">@LocalizationService.GetTranslation("BuildingPlanner.Plan.GenerateAi")</MudMenuItem>
+                    }
                 </MudMenu>
 
                 <MudDivider Vertical="true" FlexItem="true"/>
 
-                @* Mode : maison (pièces, housing) ou architecture (formes 3D, nomenclature) — stocké dans le document — ou rendu 3D
+                @* Mode : Structure (architecture : blocs, formes, pièces) puis Aménagement (house : mobilier) — stocké dans le document — ou rendu 3D
                    (état de vue, lecture seule : le document garde son mode en dessous). *@
                 <MudToggleGroup T="string" Value="@(_view3d ? View3d : _document.Mode)" ValueChanged="SetModeAsync" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-mode">
-                    <MudToggleItem T="string" Value="@PlanMode.House"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.house")"><MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Small"/></MudTooltip></MudToggleItem>
                     <MudToggleItem T="string" Value="@PlanMode.Architecture"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.architecture")"><MudIcon Icon="@MDIIcons.Filled.OfficeBuilding" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                    <MudToggleItem T="string" Value="@PlanMode.House"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.house")"><MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Small"/></MudTooltip></MudToggleItem>
                     <MudToggleItem T="string" Value="@View3d"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Mode.view3d")"><MudIcon Icon="@Icons.Material.Filled.ViewInAr" Size="Size.Small"/></MudTooltip></MudToggleItem>
                 </MudToggleGroup>
 
@@ -70,24 +83,13 @@ else
                 <MudToggleGroup T="string" Value="@_tool" ValueChanged="SetTool" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-tools">
                     @foreach (var tool in Tools)
                     {
-                        @* L'ouverture au rez-de-chaussée n'est pas réellement Disabled (un bouton disabled ne reçoit
-                           plus d'événements souris, donc plus de tooltip) : on la grise et SetTool ignore le clic. *@
-                        var disabled = tool.Key == "hole" && _level == 0;
-                        <MudToggleItem T="string" Value="@tool.Key" Class="@(disabled ? "bp-tool-off" : null)">
-                            <MudTooltip Text="@LocalizationService.GetTranslation(disabled ? "BuildingPlanner.Tool.holeDisabled" : $"BuildingPlanner.Tool.{tool.Key}")">
+                        <MudToggleItem T="string" Value="@tool.Key" Disabled="@(tool.Key == "object" && _lastObjectType is null)">
+                            <MudTooltip Text="@ToolTooltip(tool.Key)">
                                 <MudIcon Icon="@tool.Icon" Size="Size.Small"/>
                             </MudTooltip>
                         </MudToggleItem>
                     }
                 </MudToggleGroup>
-
-                <MudSelect T="string" Value="@_material" ValueChanged="OnMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
-                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Material")" Style="min-width: 220px; max-width: 260px;">
-                    @foreach (var m in _clientCatalog!.Materials)
-                    {
-                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
-                    }
-                </MudSelect>
                 }
 
                 @if (IsArch || _view3d)
@@ -99,17 +101,12 @@ else
                         <span>@LocalizationService.GetTranslation("BuildingPlanner.Layer.Label", _layer.ToString(), _layerCount.ToString())</span>
                         <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowUp" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Layer.Up")" OnClick="@(() => Js("setLayer", _layer + 1))"/>
                         <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" Title="@LocalizationService.GetTranslation("BuildingPlanner.Layer.Down")" OnClick="@(() => Js("setLayer", _layer - 1))"/>
-                        @if (_view3d)
-                        {
-                            @* Rendu 3D : masquer tout ce qui est au-dessus de la couche pour voir l'intérieur. *@
-                            <MudIconButton Icon="@MDIIcons.Filled.ArrowCollapseDown" Size="Size.Small" Class="@(_cap ? "bp-on" : null)" Title="@LocalizationService.GetTranslation("BuildingPlanner.View3d.Cap")" OnClick="@(() => Js("setView3dCap", !_cap))"/>
-                        }
                     </div>
                 }
                 else
                 {
                 <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Rotate")">
-                    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="RotateAsync">r@(_rotation)</MudButton>
+                    <MudButton Size="Size.Small" Variant="Variant.Outlined" StartIcon="@MDIIcons.Filled.RotateRight" OnClick="RotateAsync">@(_rotation * 90)°</MudButton>
                 </MudTooltip>
 
                 <MudDivider Vertical="true" FlexItem="true"/>
@@ -133,54 +130,33 @@ else
                     <MudDivider/>
                     <MudMenuItem Icon="@Icons.Material.Filled.Add" Disabled="@(_document.Levels.Count >= PlanValidator.MaxLevels)" OnClick="@(() => Js("addLevel"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Add")</MudMenuItem>
                     <MudMenuItem Icon="@Icons.Material.Filled.Add" Disabled="@(_document.Levels.Count >= PlanValidator.MaxLevels)" OnClick="@(() => Js("addBasement"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.AddBasement")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level == 0)" OnClick="@(() => Js("copyWallsFromBelow"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromBelow")</MudMenuItem>
-                    <MudMenuItem Icon="@MDIIcons.Filled.ContentCopy" Disabled="@(_level >= _document.Levels.Count - 1)" OnClick="@(() => Js("copyWallsFromAbove"))">@LocalizationService.GetTranslation("BuildingPlanner.Level.CopyWallsFromAbove")</MudMenuItem>
                     <MudMenuItem Icon="@MDIIcons.Filled.Pencil" OnClick="EditLevelAsync">@LocalizationService.GetTranslation("BuildingPlanner.Level.Edit")</MudMenuItem>
                     <MudMenuItem Icon="@Icons.Material.Filled.AutoFixHigh" OnClick="@(() => DetectLevelsAsync(false))">@LocalizationService.GetTranslation("BuildingPlanner.Level.Detect")</MudMenuItem>
                 </MudMenu>
-                @if (_level > 0 || _level + 1 < _document.Levels.Count)
-                {
-                    <MudTooltip Placement="Placement.Bottom">
-                        <ChildContent>
-                            <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Info" Size="Size.Small" Class="d-flex align-center"/>
-                        </ChildContent>
-                        <TooltipContent>
-                            <div class="bp-legend">
-                                @if (_level > 0)
-                                {
-                                    <span><i class="bp-swatch bp-swatch-slab"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Slab")</span>
-                                    <span><i class="bp-swatch bp-swatch-low"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.LowCeiling")</span>
-                                    <span><i class="bp-swatch bp-swatch-missing"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Missing")</span>
-                                    <span><i class="bp-swatch bp-swatch-hole"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Hole")</span>
-                                    <span><i class="bp-swatch bp-swatch-watermark"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.Watermark")</span>
-                                }
-                                @if (_level + 1 < _document.Levels.Count)
-                                {
-                                    <span><i class="bp-swatch bp-swatch-hole-above"></i>@LocalizationService.GetTranslation("BuildingPlanner.Legend.HoleAbove")</span>
-                                }
-                            </div>
-                        </TooltipContent>
-                    </MudTooltip>
-                }
                 }
 
                 <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.WipTooltip")" Placement="Placement.Bottom">
                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.Construction">@LocalizationService.GetTranslation("BuildingPlanner.Wip")</MudChip>
                 </MudTooltip>
 
+                @if (_roomDetectionSkipped)
+                {
+                    @* Bâtiment trop grand pour la détection des poches en direct : les pièces du document sont gardées telles quelles. *@
+                    <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Rooms.DetectionSkippedHelp")" Placement="Placement.Bottom">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text" Icon="@Icons.Material.Filled.Warning">@LocalizationService.GetTranslation("BuildingPlanner.Rooms.DetectionSkipped")</MudChip>
+                    </MudTooltip>
+                }
+
                 <MudSpacer/>
 
                 @* Bandeau housing + état des avertissements, toujours visibles ; un clic ouvre le volet correspondant. *@
                 <div class="bp-housing-block">
-                    @if (!IsArch)
-                    {
-                        <div class="bp-housing-score" @onclick="@(() => SetRightPanelAsync("housing"))">
-                            <MudIcon Icon="@Icons.Material.Filled.Home" Class="bp-housing-icon"/>
-                            <span class="bp-housing-value">@((_analysis?.Housing?.Total ?? 0f).ToString("0.00"))</span>
-                            <span class="bp-housing-label">@PerDayLines.First<br/>@PerDayLines.Second · ×@((_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</span>
-                        </div>
-                        <i class="bp-vsep"></i>
-                    }
+                    <div class="bp-housing-score" @onclick="@(() => SetRightPanelAsync("housing"))">
+                        <MudIcon Icon="@Icons.Material.Filled.Home" Class="bp-housing-icon"/>
+                        <span class="bp-housing-value">@((_analysis?.Housing?.Total ?? 0f).ToString("0.00"))</span>
+                        <span class="bp-housing-label">@PerDayLines.First<br/>@PerDayLines.Second · ×@((_analysis?.Housing?.OccupancyMultiplier ?? 1f).ToString("0.##"))</span>
+                    </div>
+                    <i class="bp-vsep"></i>
                     <div class="@("bp-status-chip " + StatusClass)" @onclick="@(() => SetRightPanelAsync("issues"))">
                         <MudIcon Icon="@(ErrorCount > 0 ? Icons.Material.Filled.Error : WarningCount > 0 ? Icons.Material.Filled.Warning : Icons.Material.Filled.Check)"/>
                         <span>@StatusText</span>
@@ -189,16 +165,11 @@ else
 
                 @* Réglages du plan : les champs écrivent dans le document via JS comme avant (setDefaults / setAnalysisOptions). *@
                 <div class="bp-settings-anchor">
-                    @* Plafond par défaut vide = toutes les pièces fuient : le bouton passe en état « à faire » jusqu'au choix. *@
-                    <div class="@("bp-settings-btn" + (CeilingMissing ? " todo" : ""))" @onclick="@(() => _settingsOpen = !_settingsOpen)">
+                    <div class="bp-settings-btn" @onclick="@(() => _settingsOpen = !_settingsOpen)">
                         <MudIcon Icon="@Icons.Material.Filled.Settings" Class="bp-settings-icon"/>
-                        @if (CeilingMissing)
-                        {
-                            <i class="bp-settings-dot"></i>
-                        }
                         <span class="bp-settings-title">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Title")</span>
                         <i class="bp-vsep bp-vsep-sm"></i>
-                        <span class="bp-settings-summary">@(IsArch ? LocalizationService.GetTranslation("BuildingPlanner.Settings.ArchSummary", _document.Architecture.Height.ToString()) : CeilingMissing ? LocalizationService.GetTranslation("BuildingPlanner.Settings.CeilingTodo") : LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString()))</span>
+                        <span class="bp-settings-summary">@(IsArch ? LocalizationService.GetTranslation("BuildingPlanner.Settings.ArchSummary", _document.Architecture.Height.ToString()) : LocalizationService.GetTranslation("BuildingPlanner.Settings.Summary", _document.Defaults.WallHeight.ToString(), _document.Analysis.Residents.ToString()))</span>
                         <MudIcon Icon="@Icons.Material.Filled.ArrowDropDown" Class="bp-settings-caret"/>
                     </div>
                     <MudOverlay Visible="_settingsOpen" VisibleChanged="@(v => _settingsOpen = v)" AutoClose="true" LockScroll="false"/>
@@ -247,24 +218,6 @@ else
                             <div class="bp-settings-grid bp-settings-grid-3">
                                 <MudNumericField T="int" Value="@_document.Defaults.WallHeight" ValueChanged="OnWallHeightChanged" Min="1" Max="50" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                                  Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.WallHeight")"/>
-                                <MudSelect T="string" Value="@(_document.Defaults.FloorMaterial ?? "")" ValueChanged="OnFloorMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Floor")"
-                                           HelperText="@(string.IsNullOrEmpty(_document.Defaults.FloorMaterial) ? LocalizationService.GetTranslation("BuildingPlanner.Defaults.TerrainHelp") : null)">
-                                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Terrain")</MudSelectItem>
-                                    @foreach (var m in _clientCatalog!.Materials)
-                                    {
-                                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
-                                    }
-                                </MudSelect>
-                                <MudSelect T="string" Value="@(_document.Defaults.CeilingMaterial ?? "")" ValueChanged="OnCeilingMaterialChanged" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Clearable="true"
-                                           Label="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.Ceiling")"
-                                           Error="CeilingMissing" ErrorText="@LocalizationService.GetTranslation("BuildingPlanner.Defaults.CeilingRequired")">
-                                    <MudSelectItem T="string" Value="@("")">@LocalizationService.GetTranslation("BuildingPlanner.Defaults.None")</MudSelectItem>
-                                    @foreach (var m in _clientCatalog!.Materials)
-                                    {
-                                        <MudSelectItem T="string" Value="@m.Name">@MaterialItem(m)</MudSelectItem>
-                                    }
-                                </MudSelect>
                             </div>
                             <div class="bp-settings-section">@LocalizationService.GetTranslation("BuildingPlanner.Settings.Housing")</div>
                             <div class="bp-settings-grid bp-settings-grid-2">
@@ -283,18 +236,42 @@ else
             </MudStack>
         </MudPaper>
 
-        <div class="@("bp-body" + (_view3d ? " bp-body-3d" : ""))">
-            @if (!_view3d)
-            {
+        <div class="bp-body">
+            @* En 3D, le panneau ne garde que la fiche de la sélection (clic dans la vue), sur toute sa hauteur. *@
             <MudPaper Class="bp-side bp-left" Elevation="1">
-                @if (IsArch)
+                @if (IsArch && !_view3d)
                 {
-                    @* Options des outils de forme (état de la page, comme le matériau) puis la liste des formes posées, dernière en haut. *@
-                    <div class="bp-catalog">
+                    @* Palette de Structure : matériau, formes du marteau de ce matériau, rotation de pose, options des volumes,
+                       puis la liste des volumes posés (dernier en haut) ; le tout défile d'un bloc au-dessus de la fiche. *@
+                    <div class="bp-catalog bp-palette">
+                        <BuildingPlannerMaterialPicker Catalog="_clientCatalog" Value="@_material" ValueChanged="OnMaterialChanged"/>
+                        @if (CurrentForms.Count > 1)
+                        {
+                            <div class="bp-forms">
+                                @foreach (var group in CurrentForms.GroupBy(f => f.Group).OrderBy(g => FormGroupOrder(g.Key)))
+                                {
+                                    <div class="bp-forms-group">@LocalizationService.GetTranslation($"BuildingPlanner.FormGroup.{group.Key}")</div>
+                                    <div class="bp-forms-grid">
+                                        @foreach (var f in group)
+                                        {
+                                            <MudTooltip Text="@LocalizationService.GetTranslation($"BuildingPlanner.Form.{f.Name}")">
+                                                <div class="@("bp-form-tile" + (f.Name == _form ? " selected" : ""))" @onclick="@(() => SetFormAsync(f.Name, f.Rotatable ? _formRot : 0))">
+                                                    <img src="@IconUrl(f.Name + "Form")" alt="@f.Name" width="28" height="28"/>
+                                                </div>
+                                            </MudTooltip>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (CurrentForms.FirstOrDefault(f => f.Name == _form)?.Rotatable == true)
+                        {
+                            <BuildingPlannerFormRotation Rot="_formRot" OnRotate="@(d => SetFormAsync(_form, (_formRot + d) & 3))"/>
+                        }
                         <div class="bp-arch-opts">
                             <MudToggleGroup T="bool" Value="@_shape.Subtract" ValueChanged="@(v => SetShapeAsync(_shape with { Subtract = v }))" SelectionMode="SelectionMode.SingleSelection" Color="Color.Primary" Size="Size.Small" Outlined="true" CheckMark="false" Class="bp-arch-mode">
                                 <MudToggleItem T="bool" Value="false"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Add")"><MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small"/></MudTooltip></MudToggleItem>
-                                <MudToggleItem T="bool" Value="true"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Subtract")"><MudIcon Icon="@Icons.Material.Filled.Remove" Size="Size.Small"/></MudTooltip></MudToggleItem>
+                                <MudToggleItem T="bool" Value="true"><MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Shape.SubtractHint")"><MudIcon Icon="@Icons.Material.Filled.Remove" Size="Size.Small"/></MudTooltip></MudToggleItem>
                             </MudToggleGroup>
                             <MudCheckBox T="bool" Value="@_shape.Hollow" ValueChanged="@(v => SetShapeAsync(_shape with { Hollow = v }))" Dense="true" Size="Size.Small" Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Hollow")"/>
                             <MudNumericField T="int" Value="@_shape.Thickness" ValueChanged="@(v => SetShapeAsync(_shape with { Thickness = Math.Clamp(v, 1, 10) }))" Min="1" Max="10" Disabled="!_shape.Hollow" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
@@ -302,6 +279,12 @@ else
                             <MudNumericField T="int" Value="@_shape.Height" ValueChanged="@(v => SetShapeAsync(_shape with { Height = Math.Clamp(v, 1, PlanValidator.MaxArchitectureHeight) }))" Min="1" Max="@PlanValidator.MaxArchitectureHeight" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                              Label="@LocalizationService.GetTranslation("BuildingPlanner.Shape.Height")"/>
                         </div>
+                        <div class="bp-group-title" @onclick="@(() => _opsOpen = !_opsOpen)">
+                            <MudIcon Icon="@(_opsOpen ? Icons.Material.Filled.ExpandMore : Icons.Material.Filled.ChevronRight)" Size="Size.Small"/>
+                            <span>@LocalizationService.GetTranslation("BuildingPlanner.Shape.List", _document.Architecture.Ops.Count.ToString())</span>
+                        </div>
+                        @if (_opsOpen)
+                        {
                         <div class="bp-arch-ops">
                             @if (_document.Architecture.Ops.Count == 0)
                             {
@@ -318,9 +301,10 @@ else
                                 </div>
                             }
                         </div>
+                        }
                     </div>
                 }
-                else
+                else if (!_view3d)
                 {
                 @* Catalogue : recherche + liste unique groupée (catégories housing, Tables, Portes par tier, Autres). *@
                 <div class="bp-catalog">
@@ -328,12 +312,11 @@ else
                 </div>
                 }
                 @* Zone Sélection : fiche de la pièce / de l'objet / de la forme sélectionnée, tiers bas du panneau, scroll interne. *@
-                <div class="bp-selection">
-                    <BuildingPlannerInspector Document="_document" Analysis="_analysis" Catalog="_clientCatalog" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
+                <div class="@("bp-selection" + (_view3d ? " bp-selection-full" : ""))">
+                    <BuildingPlannerInspector Mode="@(_view3d ? View3d : _document.Mode)" Document="_document" Analysis="_analysis" Catalog="_clientCatalog" CurrentMaterial="@_material" SelectionKind="@_selectionKind" SelectionId="@_selectionId"
                                               OnRoomChanged="UpdateRoomAsync" OnObjectChanged="UpdateObjectAsync" OnOpChanged="UpdateOpAsync" OnDeleteSelection="@(() => Js("deleteSelection"))"/>
                 </div>
             </MudPaper>
-            }
 
             <div class="bp-canvas-wrap">
                 <div id="@_containerId" class="bp-canvas"></div>
@@ -352,7 +335,9 @@ else
                                 <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("BuildingPlanner.Shortcuts")</MudText>
                                 @foreach (var line in LocalizationService.GetTranslation(_view3d ? "BuildingPlanner.Hint3d" : IsArch ? "BuildingPlanner.HintArch" : "BuildingPlanner.Hint").Split(" · "))
                                 {
-                                    <div>@line</div>
+                                    var colon = line.IndexOf(':');
+                                    @* Thème de la ligne (avant « : ») en gras. *@
+                                    if (colon > 0) { <div><b>@line[..colon]</b>@line[colon..]</div> } else { <div>@line</div> }
                                 }
                             </div>
                         </TooltipContent>
@@ -366,6 +351,36 @@ else
                         <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.Elevation.Toggle")" Placement="Placement.Right">
                             <MudIconButton Icon="@MDIIcons.Filled.PageLayoutSidebarLeft" Color="Color.Primary" Size="Size.Small"
                                            Variant="@(_houseElev ? Variant.Filled : Variant.Outlined)" OnClick="ToggleHouseElevAsync"/>
+                        </MudTooltip>
+                    </div>
+                }
+                @if (_view3d)
+                {
+                    @* Rendu 3D : voir dedans (masquer au-dessus de la couche, coupe face caméra), commandes de la zone de dessin posées dessus. *@
+                    <div class="bp-canvas-3d">
+                        <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.View3d.Cap")" Placement="Placement.Bottom">
+                            <MudIconButton Icon="@MDIIcons.Filled.ArrowCollapseDown" Color="Color.Primary" Size="Size.Small"
+                                           Variant="@(_cap ? Variant.Filled : Variant.Outlined)" OnClick="@(() => Js("setView3dCap", !_cap))"/>
+                        </MudTooltip>
+                        <MudTooltip Text="@LocalizationService.GetTranslation("BuildingPlanner.View3d.Cutaway")" Placement="Placement.Bottom">
+                            <MudIconButton Icon="@MDIIcons.Filled.CubeScan" Color="Color.Primary" Size="Size.Small"
+                                           Variant="@(_cutaway ? Variant.Filled : Variant.Outlined)" OnClick="@(() => Js("setView3dCutaway", !_cutaway))"/>
+                        </MudTooltip>
+                    </div>
+                }
+                @if (IsArch && !_view3d && EmptyEdgeTotal > 0)
+                {
+                    @* Combler les arêtes vides : commande de la zone de dessin, posée dessus, seulement quand l'analyse en trouve. *@
+                    <div class="bp-canvas-fill">
+                        <MudTooltip Placement="Placement.Bottom">
+                            <ChildContent>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" StartIcon="@MDIIcons.Filled.Wall" OnClick="FillEmptyEdgesAsync">
+                                    @LocalizationService.GetTranslation(EmptyEdgeTotal == 1 ? "BuildingPlanner.Rooms.FillEdgesOne" : "BuildingPlanner.Rooms.FillEdges", EmptyEdgeTotal.ToString())
+                                </MudButton>
+                            </ChildContent>
+                            <TooltipContent>
+                                <div class="bp-fill-tip">@LocalizationService.GetTranslation("BuildingPlanner.Rooms.FillEdgesHelp")</div>
+                            </TooltipContent>
                         </MudTooltip>
                     </div>
                 }
@@ -393,15 +408,12 @@ else
                     </MudPaper>
                 }
                 <MudPaper Class="bp-side bp-rail" Elevation="1">
-                    @if (!IsArch) { @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom") }
+                    @RailButton("housing", Icons.Material.Filled.Home, "BuildingPlanner.Results.HousingByRoom")
                     @RailButton("issues", Icons.Material.Filled.Warning, "BuildingPlanner.Results.Issues", IssueCount > 0 ? IssueBadge : null)
-                    @if (!IsArch) { @RailButton("objects", Icons.Material.Filled.Chair, "BuildingPlanner.Results.Objects") }
+                    @RailButton("objects", Icons.Material.Filled.Chair, "BuildingPlanner.Results.Objects")
                     @RailButton("materials", Icons.Material.Filled.GridView, "BuildingPlanner.Results.Materials")
-                    @if (!IsArch)
-                    {
-                        <div class="bp-rail-spacer"></div>
-                        @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
-                    }
+                    <div class="bp-rail-spacer"></div>
+                    @RailButton("assumptions", MDIIcons.Outline.Information, "BuildingPlanner.Assumptions.Title")
                 </MudPaper>
             </div>
         </div>
@@ -411,18 +423,18 @@ else
 @code {
     private sealed record ToolDef(string Key, string Icon);
 
+    // Ordre des touches : 1, (outil objet), puis H.
     private static readonly ToolDef[] HouseTools =
     [
         new("select", MDIIcons.Filled.CursorDefault),
+        new("object", MDIIcons.Filled.Sofa),
         new("pan", MDIIcons.Filled.HandBackRight),
-        new("wall", MDIIcons.Filled.Wall),
-        new("hole", MDIIcons.Filled.Stairs),
     ];
 
+    // Ordre des touches : 1 à 9 puis 0, puis P et H.
     private static readonly ToolDef[] ArchTools =
     [
         new("select", MDIIcons.Filled.CursorDefault),
-        new("pan", MDIIcons.Filled.HandBackRight),
         new("box", MDIIcons.Filled.Cube),
         new("sphere", MDIIcons.Filled.Sphere),
         new("cylinder", MDIIcons.Filled.Cylinder),
@@ -432,13 +444,16 @@ else
         new("pencil", MDIIcons.Filled.Pencil),
         new("eraser", MDIIcons.Filled.Eraser),
         new("cut", MDIIcons.Filled.ContentCut),
+        new("room", MDIIcons.Filled.FloorPlan),
+        new("pan", MDIIcons.Filled.HandBackRight),
     ];
 
     private ToolDef[] Tools => IsArch ? ArchTools : HouseTools;
     private bool IsArch => _document.IsArchitecture;
     private const string View3d = "3d";   // valeur du toggle de mode pour le rendu 3D (état de vue, hors document)
-    private bool _view3d, _cap;
+    private bool _view3d, _cap, _cutaway;
     private bool _houseElev;   // mode maison : bande d'élévation affichée (préférence d'affichage, pas une donnée du plan)
+    private bool _roomDetectionSkipped;   // bâtiment trop grand : le canvas ne détecte plus les pièces en direct (OnRoomDetectionChanged)
 
     // Options des outils de forme (état de la page, pas du document, comme le matériau courant).
     private sealed record ShapeOptions(bool Subtract = false, bool Hollow = false, int Thickness = 1, int Height = 3);
@@ -452,6 +467,8 @@ else
     private DotNetObjectReference<BuildingPlannerPage>? _selfRef;
     private IDisposable? _locationChangingRegistration;
     private CancellationTokenSource? _analyzeCts;
+    private CancellationTokenSource? _generateCts;   // génération par IA en cours (timeout 90 s, annulée à la sortie)
+    private bool _generating;
 
     private bool _loading = true;
     private bool _jsInitialized;
@@ -464,7 +481,11 @@ else
 
     private string _tool = "select";
     private string? _material;
+    private string _form = "Cube";   // forme de pose de la palette (la mémoire par matériau est côté canvas)
+    private int _formRot;
+    private bool _opsOpen = true;
     private string? _objectType;
+    private string? _lastObjectType;   // dernier objet choisi : l'outil objet de la barre le réactive
     private int _rotation;
     private int _level;
     private bool _canUndo, _canRedo, _dirty;
@@ -475,6 +496,7 @@ else
     private bool _settingsOpen;
 
     private const string RightPanelKey = "BuildingPlanner.RightPanel";
+    private const string CatalogGroupsKey = "BuildingPlanner.CatalogGroups";   // groupes ouverts du catalogue (JSON, liste de clés)
     private static readonly string[] RightPanels = ["housing", "issues", "objects", "materials", "assumptions"];
 
     protected override void OnInitialized()
@@ -542,6 +564,8 @@ else
                 elevation = LocalizationService.GetTranslation("BuildingPlanner.Elevation.Title"),
                 section = LocalizationService.GetTranslation("BuildingPlanner.Section.Title"),
                 tooManyBlocks = LocalizationService.GetTranslation("BuildingPlanner.View3d.TooManyBlocks"),
+                emptyEdges = LocalizationService.GetTranslation("BuildingPlanner.Room.EmptyEdges"),
+                closed = LocalizationService.GetTranslation("BuildingPlanner.Shape.ClosedSuffix"),
                 sides = new
                 {
                     s = LocalizationService.GetTranslation("BuildingPlanner.Elevation.South"),
@@ -556,6 +580,7 @@ else
 
         var savedPanel = await LocalStorageService.GetItem(RightPanelKey);
         if (RightPanels.Contains(savedPanel)) _rightPanel = savedPanel;
+        await LoadExpandedGroupsAsync();
 
         await JS.InvokeVoidAsync("ecoBuildingPlanner.setCatalog", _containerId, _clientCatalog);
         await JS.InvokeVoidAsync("ecoBuildingPlanner.setMaterial", _containerId, _material);
@@ -585,7 +610,7 @@ else
         else if (linkedId is { } id)
         {
             plan = await BuildingPlannerService.LoadPlanAsync(id);
-            if (plan is not null) initialJson = plan.Document;
+            if (plan is not null) initialJson = Migrated(plan.Document);
             else Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.PlanNotFound"), Severity.Warning);
         }
         else if (Guid.TryParse(await LocalStorageService.GetItem(LastPlanKey), out var lastId))
@@ -595,7 +620,7 @@ else
             else
             {
                 // Le brouillon local prime (modifications en cours), _savedPlan reste renseigné pour que Enregistrer mette à jour le bon plan.
-                if (!await JS.InvokeAsync<bool>("ecoBuildingPlanner.hasDraft", _containerId)) initialJson = plan.Document;
+                if (!await JS.InvokeAsync<bool>("ecoBuildingPlanner.hasDraft", _containerId)) initialJson = Migrated(plan.Document);
                 Navigation.NavigateTo($"/building-planner?id={plan.Id}", replace: true);
             }
         }
@@ -606,7 +631,14 @@ else
             await RememberLastPlanAsync(plan.Id);
         }
 
-        var fromDraft = await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, initialJson, true);
+        // Sans plan à ouvrir : le brouillon local passe lui aussi par la migration C# (un v3 perdrait ses murs côté JS).
+        var markClean = true;
+        if (initialJson is null && PlanDocumentJson.TryParse(await JS.InvokeAsync<string?>("ecoBuildingPlanner.getDraft", _containerId)) is { } draft)
+        {
+            initialJson = PlanDocumentJson.Serialize(draft);
+            markClean = false;
+        }
+        var fromDraft = await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, initialJson, markClean) || !markClean;
         if (fromDraft) Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Snackbar.DraftRestored"), Severity.Info);
         // Les pixels du fond de plan ne sont pas dans le brouillon : ceux du plan sauvegardé (s'il y en a un) sont repris.
         _backgroundImage = plan?.BackgroundImage;
@@ -623,16 +655,23 @@ else
         _dirty = dirty;
         var parsed = PlanDocumentJson.TryParse(json);
         if (parsed is not null) _document = parsed;
-        if (IsArch && _rightPanel is "housing" or "objects" or "assumptions") _rightPanel = null;   // volets sans objet en architecture (dont un volet restauré)
         ScheduleAnalysis();
         StateHasChanged();
     }
 
     [JSInvokable]
-    public void OnView3dChanged(bool on, bool cap)
+    public void OnRoomDetectionChanged(bool skipped)
+    {
+        _roomDetectionSkipped = skipped;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnView3dChanged(bool on, bool cap, bool cutaway)
     {
         _view3d = on;
         _cap = cap;
+        _cutaway = cutaway;
         StateHasChanged();
     }
 
@@ -688,6 +727,7 @@ else
     public void OnObjectTypeChanged(string? objectType)
     {
         _objectType = objectType;
+        if (objectType is not null) _lastObjectType = objectType;
         StateHasChanged();
     }
 
@@ -695,6 +735,15 @@ else
     public void OnMaterialPicked(string material)
     {
         _material = material;
+        StateHasChanged();
+    }
+
+    // Forme de pose changée par le canvas (changement de matériau, pipette, R / Q).
+    [JSInvokable]
+    public void OnFormPicked(string form, int rot)
+    {
+        _form = form;
+        _formRot = rot;
         StateHasChanged();
     }
 
@@ -772,16 +821,47 @@ else
 
     private async Task SetTool(string tool)
     {
-        if (tool == "hole" && _level == 0) return;
+        if (tool == "object")
+        {
+            // Outil objet : reprend le dernier objet choisi dans le catalogue (bouton désactivé tant qu'il n'y en a pas).
+            if (_lastObjectType is null) return;
+            _objectType = _lastObjectType;
+            _tool = tool;
+            await Js("setObject", _lastObjectType);
+            return;
+        }
         _tool = tool;
         await Js("setTool", tool);
     }
 
+    // Infobulle d'outil ; celle de l'outil objet nomme l'objet qu'il pose.
+    private string ToolTooltip(string tool)
+    {
+        if (tool != "object") return LocalizationService.GetTranslation($"BuildingPlanner.Tool.{tool}");
+        var label = _clientCatalog?.Objects.FirstOrDefault(o => o.Name == _lastObjectType)?.Label ?? _lastObjectType;
+        return label is null ? LocalizationService.GetTranslation("BuildingPlanner.Tool.objectNone") : LocalizationService.GetTranslation("BuildingPlanner.Tool.object", label);
+    }
+
+    // Le canvas choisit la forme qui suit (dernière de ce matériau, sinon la même, sinon Cube) et la renvoie par OnFormPicked.
     private async Task OnMaterialChanged(string material)
     {
         _material = material;
         await Js("setMaterial", material);
-        if (!IsArch && _tool != "wall") await SetTool("wall");
+    }
+
+    private List<ClientForm> CurrentForms => _clientCatalog?.Materials.FirstOrDefault(m => m.Name == _material)?.Forms ?? [];
+
+    private int FormGroupOrder(string group)
+    {
+        var i = _clientCatalog?.FormGroups.IndexOf(group) ?? -1;
+        return i < 0 ? int.MaxValue : i;
+    }
+
+    private async Task SetFormAsync(string form, int rot)
+    {
+        _form = form;
+        _formRot = rot & 3;
+        await Js("setForm", form, _formRot);
     }
 
     private async Task SetModeAsync(string mode)
@@ -842,19 +922,15 @@ else
     private async Task SelectObjectType(ClientObject obj)
     {
         _objectType = obj.Name;
+        _lastObjectType = obj.Name;
         _tool = "object";
         await Js("setObject", obj.Name);
     }
 
-    private async Task RotateAsync()
-    {
-        _rotation = (_rotation + 1) & 3;
-        await Js("setRotation", _rotation);
-    }
+    // Comme R : l'objet sélectionné s'il se tourne, sinon la rotation de pose (renvoyée par OnRotationChanged).
+    private async Task RotateAsync() => await Js("rotate", 1);
 
     private async Task OnWallHeightChanged(int value) => await Js("setDefaults", new { wallHeight = Math.Clamp(value, 1, 50) });
-    private async Task OnFloorMaterialChanged(string value) => await Js("setDefaults", new { floorMaterial = string.IsNullOrEmpty(value) ? null : value });
-    private async Task OnCeilingMaterialChanged(string value) => await Js("setDefaults", new { ceilingMaterial = string.IsNullOrEmpty(value) ? null : value });
     private async Task OnResidentsChanged(int value) => await Js("setAnalysisOptions", new { residents = Math.Clamp(value, 1, 50) });
 
     private async Task UpdateRoomAsync(PlanRoom room) => await Js("updateRoom", PlanDocumentJson.SerializePart(room));
@@ -864,6 +940,21 @@ else
     {
         _houseElev = !_houseElev;
         await Js("setHouseElev", _houseElev);
+    }
+
+    // Arêtes vides des pièces de la dernière analyse (seules les pièces contenues en ont).
+    private int EmptyEdgeTotal => _analysis?.Rooms.Sum(r => r.EmptyEdgeCount) ?? 0;
+
+    // Comblement calculé sur le document courant (même moteur que l'analyse), ajouté au canvas en un seul geste annulable.
+    private async Task FillEmptyEdgesAsync()
+    {
+        if (_catalog is null) return;
+        var doc = _document;
+        var result = await Task.Run(() => EmptyEdgeFiller.Fill(doc, _catalog));
+        if (result.Ops.Count > 0) await Js("addOps", PlanDocumentJson.SerializePart(result.Ops));
+        Snackbar.Add(result.Skipped > 0
+            ? LocalizationService.GetTranslation("BuildingPlanner.Rooms.FillEdgesDoneSkipped", result.Placed.ToString(), result.Skipped.ToString())
+            : LocalizationService.GetTranslation("BuildingPlanner.Rooms.FillEdgesDone", result.Placed.ToString()), Severity.Success);
     }
 
     private string LevelLabel(int level)
@@ -923,7 +1014,6 @@ else
         await ResizeAsync();
     }
 
-    private bool CeilingMissing => !IsArch && string.IsNullOrEmpty(_document.Defaults.CeilingMaterial);
     private int ErrorCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Error) ?? 0;
     private int WarningCount => _analysis?.Issues.Count(i => i.Severity == IssueSeverity.Warning) ?? 0;
     private int IssueCount => ErrorCount + WarningCount;   // les Info ne sont pas comptées (décision Romain)
@@ -991,8 +1081,6 @@ else
 
     private async Task FocusIssueAsync(PlanIssue issue)
     {
-        // Le plafond manquant se corrige dans les réglages, pas sur la pièce.
-        if (issue.Code == "MissingCeilingMaterial") { _settingsOpen = true; return; }
         if (issue.Level is { } level) await Js("setLevel", level);
         if (issue.ObjectId is not null) await Js("selectObject", issue.ObjectId);
         else if (issue.RoomId is not null) await Js("selectRoom", issue.RoomId);
@@ -1001,21 +1089,23 @@ else
 
     private string IconUrl(string name) => $"/assets/eco-icons/{name}.png?serverId={ContextService.CurrentServer?.Id}";
 
-    // Ligne de matériau (pastille de couleur, icône, libellé, tier) partagée par les sélecteurs matériau / sol / plafond.
-    private RenderFragment MaterialItem(ClientMaterial m) => __builder =>
-    {
-        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-            <i class="bp-mat-dot" style="background: @m.Color"></i>
-            <MudImage Src="@IconUrl(m.Name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
-            <span>@m.Label</span>
-            <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-auto">T@(m.Tier)</MudChip>
-        </MudStack>
-    };
-
-    private void ToggleGroup(string key)
+    private async Task ToggleGroup(string key)
     {
         if (!string.IsNullOrWhiteSpace(_objectSearch)) return; // pendant une recherche, tout est déplié d'office
         if (!_expandedGroups.Add(key)) _expandedGroups.Remove(key);
+        try { await LocalStorageService.AddItem(CatalogGroupsKey, JsonSerializer.Serialize(_expandedGroups)); }
+        catch (JSException) { }   // stockage du navigateur refusé : l'état reste celui de la page
+    }
+
+    // Groupes ouverts mémorisés dans le navigateur ; première visite (rien de stocké) : le premier groupe seul.
+    private async Task LoadExpandedGroupsAsync()
+    {
+        string[]? saved = null;
+        try { saved = JsonSerializer.Deserialize<string[]>(await LocalStorageService.GetItem(CatalogGroupsKey) ?? ""); }
+        catch (Exception e) when (e is JsonException or JSException) { }
+        _expandedGroups.Clear();
+        if (saved is not null) _expandedGroups.UnionWith(saved);
+        else if (_clientCatalog is not null && GroupAllObjects(_clientCatalog.Objects).FirstOrDefault() is { } first) _expandedGroups.Add(first.Key);
     }
 
     private sealed record ObjectGroup(string Key, string Label, string? Color, bool HasHeader, List<ClientObject> Items, List<ObjectGroup>? Children = null);
@@ -1031,10 +1121,11 @@ else
                 .Select(g => new ObjectGroup($"{group}-T{g.Key}", g.Key is { } t ? $"T{t}" : misc, null, true, g.OrderBy(o => o.Label).ToList()));
         }
         var showHeaders = objects.Any(o => o.HousingCategory is not null);
-        return objects.GroupBy(o => o.HousingCategory ?? "").OrderBy(g => g.Key.Length == 0 ? 1 : 0).ThenBy(g => g.Key)
-            .Select(g => new ObjectGroup($"{group}-{g.Key}", g.Key.Length > 0 ? g.Key : misc,
+        return objects.GroupBy(o => o.HousingCategory ?? "")
+            .Select(g => new ObjectGroup($"{group}-{g.Key}", g.Key.Length > 0 ? _clientCatalog!.Categories.FirstOrDefault(c => c.Name == g.Key)?.Label ?? g.Key : misc,
                 g.Key.Length > 0 ? _clientCatalog!.Categories.FirstOrDefault(c => c.Name == g.Key)?.Color ?? "aaaaaa" : null,
-                showHeaders, g.OrderBy(o => o.Label).ToList()));
+                showHeaders, g.OrderBy(o => o.Label).ToList()))
+            .OrderBy(g => g.Color is null ? 1 : 0).ThenBy(g => g.Label);
     }
 
     // Liste du catalogue : les types de pièce (catégories housing : Cultural, Decoration, Lighting…) d'abord,
@@ -1133,6 +1224,119 @@ else
         await Js("pickPlanFile");
     }
 
+    // Il faut la clé du fournisseur IA actif du serveur (posée par un admin dans « Gestion du serveur ») ; réservé aux admins
+    // et aux super-admins tant que le propriétaire de cette clé n'a pas ouvert la génération aux joueurs.
+    private bool IsAiAllowed => ContextService.CurrentServer is { IsAiGenerationEnabled: true } server
+        && ServerAiKey.Active(server) is { } key
+        && (key.OpenToPlayers || ContextService.CurrentUserServer?.IsAdmin == true || ContextService.CurrentUser?.SuperAdmin == true);
+
+    // Prompt → programme (Claude) → PlanDocument (générateur) → même chemin que l'import d'un fichier : le plan généré
+    // est un brouillon non sauvegardé. Rien n'est gardé en champ : le canvas possède l'état, _document revient par
+    // OnPlanChanged et l'analyse se déclenche toute seule. Un plan non vide (généré ou dessiné) peut être modifié : Claude
+    // lit sa description (PlanDescriber) et renvoie une modification (PlanEditor), le plan est remplacé en une étape
+    // annulable et reste le même plan sauvegardé.
+    private async Task GenerateWithAiAsync()
+    {
+        if (_generating || _clientCatalog is null) return;
+        var canEdit = _document.Architecture.Ops.Count > 0 || _document.AllObjects().Any();
+        if (!canEdit && _dirty && !await ConfirmDiscardAsync()) return;
+        var parameters = new DialogParameters<BuildingPlanPromptDialog> { { d => d.IsEdit, canEdit } };
+        var title = LocalizationService.GetTranslation(canEdit ? "BuildingPlanner.Ai.EditTitle" : "BuildingPlanner.Ai.Title");
+        var dialog = await DialogService.ShowAsync<BuildingPlanPromptDialog>(title, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not BuildingPlanPromptDialog.Request request) return;
+        var prompt = request.Prompt;
+        var edit = request.Edit && canEdit;
+        if (canEdit && !edit && _dirty && !await ConfirmDiscardAsync()) return;
+
+        _generating = true;
+        StateHasChanged();
+        _generateCts?.Cancel();
+        _generateCts?.Dispose();
+        // Une génération a déjà pris 86 s ; un grand plan décrit en entrée allonge encore l'appel.
+        _generateCts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
+        try
+        {
+            var materials = _clientCatalog.Materials.Where(m => !BuildingPlannerCatalogService.PipeMaterials.Contains(m.Name)).Select(m => m.Name).ToList();
+            // Portes du catalogue, du plus bas tier au plus haut : l'IA en choisit une par embrasure, le générateur se replie
+            // sur la famille du mur puis sur la première (sans porte, la pièce reste ouverte en 3D).
+            var doors = _clientCatalog.Objects.Where(o => o.IsDoor).OrderBy(o => o.Tier ?? 0).ThenBy(o => o.Name, StringComparer.Ordinal)
+                .Select(o => new FurnitureInfo(o.Name, o.Cells.Where(c => c[3] is 0 or 1 or 2).Select(c => new Vec3i(c[0], c[1], c[2])).ToList())).ToList();
+            var furniture = RenderableFurniture(_clientCatalog);
+            var credentials = ContextService.CurrentServer is { } server ? PromptService.CredentialsFor(server) : null;
+            GeneratorResult gen;
+            if (edit)
+            {
+                var doc = _document;
+                var changes = await PromptService.EditAsync(credentials, prompt, PlanDescriber.Describe(doc, _analysis), materials, doors, furniture, _generateCts.Token);
+                if (changes.ErrorKey is not null)
+                {
+                    Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Ai.Error." + changes.ErrorKey), Severity.Error);
+                    return;
+                }
+                gen = PlanEditor.Apply(doc, changes.Edit!, materials, doors, furniture);
+            }
+            else
+            {
+                var generated = await PromptService.GenerateAsync(credentials, prompt, materials, doors, furniture, _generateCts.Token);
+                if (generated.ErrorKey is not null)
+                {
+                    Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Ai.Error." + generated.ErrorKey), Severity.Error);
+                    return;
+                }
+                gen = BuildingGenerator.Generate(generated.Program!, materials, doors, furniture);
+            }
+            if (gen.Document is null)
+            {
+                Snackbar.Add(LocalizationService.GetTranslation("BuildingPlanner.Ai.Error.Invalid"), Severity.Error);
+                return;
+            }
+            if (!_jsInitialized) return;   // l'utilisateur a changé de serveur pendant l'appel
+            if (edit)
+            {
+                try { await JS.InvokeVoidAsync("ecoBuildingPlanner.replacePlan", _containerId, PlanDocumentJson.Serialize(gen.Document)); }
+                catch (JSDisconnectedException) { return; }
+                if (gen.Notes.Count > 0) Snackbar.Add(string.Join(" · ", gen.Notes), Severity.Info);
+                return;
+            }
+            _savedPlan = null;
+            await RememberLastPlanAsync(null);
+            await Js("clearDraft");
+            try { await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, PlanDocumentJson.Serialize(gen.Document), false); }
+            catch (JSDisconnectedException) { return; }
+            _backgroundImage = null;
+            await Js("setBackgroundImage", (string?)null);
+            Navigation.NavigateTo("/building-planner", replace: true);
+            if (gen.Notes.Count > 0) Snackbar.Add(string.Join(" · ", gen.Notes), Severity.Info);
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            _generating = false;
+            StateHasChanged();
+        }
+    }
+
+    // Meubles proposés à l'IA : objets du catalogue (hors portes) que la vue 3D sait dessiner, c.-à-d. présents dans
+    // l'index des bundles de formes (wwwroot/assets/forms/index.json, clé « objects ») ; sans bundle, aucun meuble.
+    private static List<FurnitureInfo> RenderableFurniture(ClientCatalog catalog)
+    {
+        var path = Path.Combine(ecocraft.Extensions.StaticEnvironmentAccessor.WebHostEnvironment?.WebRootPath ?? "", "assets", "forms", "index.json");
+        if (!File.Exists(path)) return [];
+        HashSet<string> modeled;
+        try
+        {
+            using var index = JsonDocument.Parse(File.ReadAllText(path));
+            modeled = index.RootElement.TryGetProperty("objects", out var objects) && objects.ValueKind == JsonValueKind.Object
+                ? objects.EnumerateObject().Select(p => p.Name).ToHashSet(StringComparer.Ordinal) : [];
+        }
+        catch (JsonException) { return []; }
+        return catalog.Objects
+            .Where(o => !o.IsDoor && modeled.Contains(o.Name))
+            .Select(o => new FurnitureInfo(o.Name, o.Cells.Where(c => c[3] is 0 or 1 or 2).Select(c => new Vec3i(c[0], c[1], c[2])).ToList()))
+            .ToList();
+    }
+
     private async Task OpenPlanAsync()
     {
         var plans = await BuildingPlannerService.ListPlansAsync();
@@ -1154,11 +1358,14 @@ else
         if (full is null) return;
         _savedPlan = full;
         await RememberLastPlanAsync(full.Id);
-        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, full.Document, true);
+        await JS.InvokeAsync<bool>("ecoBuildingPlanner.setPlan", _containerId, Migrated(full.Document), true);
         _backgroundImage = full.BackgroundImage;
         await Js("setBackgroundImage", _backgroundImage);
         Navigation.NavigateTo($"/building-planner?id={full.Id}", replace: true);
     }
+
+    // JSON en base → schéma courant (migration C#, le JS ne sait pas matérialiser un v3) ; illisible → tel quel, comme avant.
+    private static string Migrated(string json) => PlanDocumentJson.TryParse(json) is { } doc ? PlanDocumentJson.Serialize(doc) : json;
 
     // Dernier plan ouvert, mémorisé par serveur pour le rouvrir quand on revient sur la page sans ?id=.
     private string LastPlanKey => $"BuildingPlanner.LastPlanId.{ContextService.CurrentServer?.Id}";
@@ -1264,6 +1471,7 @@ else
             }
             _analysis = null;
             _savedPlan = null;
+            _roomDetectionSkipped = false;   // le nouveau canvas ne signale que les changements
             await LoadAsync();
         });
     }
@@ -1274,6 +1482,8 @@ else
         _locationChangingRegistration?.Dispose();
         _analyzeCts?.Cancel();
         _analyzeCts?.Dispose();
+        _generateCts?.Cancel();
+        _generateCts?.Dispose();
         if (_jsInitialized)
         {
             try { await JS.InvokeVoidAsync("ecoBuildingPlanner.dispose", _containerId); }

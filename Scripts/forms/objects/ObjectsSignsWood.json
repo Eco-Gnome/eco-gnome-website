@@ -1,0 +1,20 @@
+{
+  "set": "ObjectsSignsWood",
+  "note": "Panneaux en bois (petit/grand, suspendu/sur pied) : composite par bois (planche seule, texte TMP ignoré), Lumber (texture Legacy OldLumber) et Wood (hewn log). Le .mat Joshua reprend la texture Hardwood avec une teinte _Color, cuite dans sa tuile (correctif _Color de extract_objects). Composite et hewn : Lcl Translation du nœud FBX compensée par son pivot, GameObject du prefab à l'origine ; la pose du nœud n'est pas dans le mesh importé d'un MeshFilter, sinon les panneaux sortent de leurs cases en X.",
+  "prefabs": [
+    "SmallHangingBirchSignObject", "SmallStandingBirchSignObject", "LargeHangingBirchSignObject", "LargeStandingBirchSignObject",
+    "SmallHangingCedarSignObject", "SmallStandingCedarSignObject", "LargeHangingCedarSignObject", "LargeStandingCedarSignObject",
+    "SmallHangingCeibaSignObject", "SmallStandingCeibaSignObject", "LargeHangingCeibaSignObject", "LargeStandingCeibaSignObject",
+    "SmallHangingFirSignObject", "SmallStandingFirSignObject", "LargeHangingFirSignObject", "LargeStandingFirSignObject",
+    "SmallHangingHardwoodSignObject", "SmallStandingHardwoodSignObject", "LargeHangingHardwoodSignObject", "LargeStandingHardwoodSignObject",
+    "SmallHangingJoshuaSignObject", "SmallStandingJoshuaSignObject", "LargeHangingJoshuaSignObject", "LargeStandingJoshuaSignObject",
+    "SmallHangingLumberSignObject", "SmallStandingLumberSignObject", "LargeHangingLumberSignObject", "LargeStandingLumberSignObject",
+    "SmallHangingOakSignObject", "SmallStandingOakSignObject", "LargeHangingOakSignObject", "LargeStandingOakSignObject",
+    "SmallHangingPalmSignObject", "SmallStandingPalmSignObject", "LargeHangingPalmSignObject", "LargeStandingPalmSignObject",
+    "SmallHangingRedwoodSignObject", "SmallStandingRedwoodSignObject", "LargeHangingRedwoodSignObject", "LargeStandingRedwoodSignObject",
+    "SmallHangingSaguaroSignObject", "SmallStandingSaguaroSignObject", "LargeHangingSaguaroSignObject", "LargeStandingSaguaroSignObject",
+    "SmallHangingSoftwoodSignObject", "SmallStandingSoftwoodSignObject", "LargeHangingSoftwoodSignObject", "LargeStandingSoftwoodSignObject",
+    "SmallHangingSpruceSignObject", "SmallStandingSpruceSignObject", "LargeHangingSpruceSignObject", "LargeStandingSpruceSignObject",
+    "SmallHangingWoodSignObject", "SmallStandingWoodSignObject", "LargeHangingWoodSignObject", "LargeStandingWoodSignObject"
+  ]
+}

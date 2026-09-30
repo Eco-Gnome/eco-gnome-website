@@ -1,0 +1,14 @@
+{
+  "set": "ObjectsSignsStone",
+  "note": "Panneaux en pierre (petit/grand, suspendu/sur pied) : ashlar des sept pierres et pierre simple (texture Alternate Signs). Mortared : ObjectsMortared.",
+  "prefabs": [
+    "SmallHangingAshlarBasaltSignObject", "SmallStandingAshlarBasaltSignObject", "LargeHangingAshlarBasaltSignObject", "LargeStandingAshlarBasaltSignObject",
+    "SmallHangingAshlarGneissSignObject", "SmallStandingAshlarGneissSignObject", "LargeHangingAshlarGneissSignObject", "LargeStandingAshlarGneissSignObject",
+    "SmallHangingAshlarGraniteSignObject", "SmallStandingAshlarGraniteSignObject", "LargeHangingAshlarGraniteSignObject", "LargeStandingAshlarGraniteSignObject",
+    "SmallHangingAshlarLimestoneSignObject", "SmallStandingAshlarLimestoneSignObject", "LargeHangingAshlarLimestoneSignObject", "LargeStandingAshlarLimestoneSignObject",
+    "SmallHangingAshlarSandstoneSignObject", "SmallStandingAshlarSandstoneSignObject", "LargeHangingAshlarSandstoneSignObject", "LargeStandingAshlarSandstoneSignObject",
+    "SmallHangingAshlarShaleSignObject", "SmallStandingAshlarShaleSignObject", "LargeHangingAshlarShaleSignObject", "LargeStandingAshlarShaleSignObject",
+    "SmallHangingAshlarStoneSignObject", "SmallStandingAshlarStoneSignObject", "LargeHangingAshlarStoneSignObject", "LargeStandingAshlarStoneSignObject",
+    "SmallHangingStoneSignObject", "SmallStandingStoneSignObject", "LargeHangingStoneSignObject", "LargeStandingStoneSignObject"
+  ]
+}

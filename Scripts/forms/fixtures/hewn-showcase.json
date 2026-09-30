@@ -1,0 +1,5313 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes HewnLogs",
+ "mode": "architecture",
+ "grid": {
+  "width": 46,
+  "depth": 57
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "Stairs rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 1,
+    "name": "Stairs rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 2,
+    "name": "Stairs rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 3,
+    "name": "Stairs rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "Ladder rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 1,
+    "name": "Ladder rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 2,
+    "name": "Ladder rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 3,
+    "name": "Ladder rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     4,
+     1
+    ],
+    "b": [
+     19,
+     4,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 0,
+    "name": "DocksPlatform rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     4,
+     1
+    ],
+    "b": [
+     21,
+     4,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 1,
+    "name": "DocksPlatform rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     4,
+     1
+    ],
+    "b": [
+     23,
+     4,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 2,
+    "name": "DocksPlatform rot 2"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     4,
+     1
+    ],
+    "b": [
+     25,
+     4,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 3,
+    "name": "DocksPlatform rot 3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     4,
+     1
+    ],
+    "b": [
+     28,
+     4,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 0,
+    "name": "DocksPlatformFill rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     4,
+     1
+    ],
+    "b": [
+     30,
+     4,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 1,
+    "name": "DocksPlatformFill rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 2,
+    "name": "DocksPlatformFill rot 2"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     4,
+     1
+    ],
+    "b": [
+     34,
+     4,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 3,
+    "name": "DocksPlatformFill rot 3"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 0,
+    "name": "DocksPillar rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     7,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 1,
+    "name": "DocksPillar rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     7,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 2,
+    "name": "DocksPillar rot 2"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 3,
+    "name": "DocksPillar rot 3"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 0,
+    "name": "DocksPillarBeamEnd rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     7,
+     1
+    ],
+    "b": [
+     12,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 1,
+    "name": "DocksPillarBeamEnd rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 2,
+    "name": "DocksPillarBeamEnd rot 2"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     7,
+     1
+    ],
+    "b": [
+     16,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 3,
+    "name": "DocksPillarBeamEnd rot 3"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 0,
+    "name": "DocksPillarBeamEndAlt rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     21,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 1,
+    "name": "DocksPillarBeamEndAlt rot 1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     7,
+     1
+    ],
+    "b": [
+     23,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 2,
+    "name": "DocksPillarBeamEndAlt rot 2"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     25,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 3,
+    "name": "DocksPillarBeamEndAlt rot 3"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     7,
+     1
+    ],
+    "b": [
+     28,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 0,
+    "name": "DocksPillarBeamJunction rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 1,
+    "name": "DocksPillarBeamJunction rot 1"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     7,
+     1
+    ],
+    "b": [
+     32,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 2,
+    "name": "DocksPillarBeamJunction rot 2"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     7,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 3,
+    "name": "DocksPillarBeamJunction rot 3"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     10,
+     1
+    ],
+    "b": [
+     1,
+     10,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 0,
+    "name": "DocksPillarBeam rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     10,
+     1
+    ],
+    "b": [
+     3,
+     10,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 1,
+    "name": "DocksPillarBeam rot 1"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     10,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 2,
+    "name": "DocksPillarBeam rot 2"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     10,
+     1
+    ],
+    "b": [
+     7,
+     10,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 3,
+    "name": "DocksPillarBeam rot 3"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     10,
+     1
+    ],
+    "b": [
+     10,
+     10,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 0,
+    "name": "DocksRamps rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     10,
+     1
+    ],
+    "b": [
+     12,
+     10,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 1,
+    "name": "DocksRamps rot 1"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     10,
+     1
+    ],
+    "b": [
+     14,
+     10,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 2,
+    "name": "DocksRamps rot 2"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     10,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 3,
+    "name": "DocksRamps rot 3"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     10,
+     1
+    ],
+    "b": [
+     19,
+     10,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 0,
+    "name": "DocksFenceCorner rot 0"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     10,
+     1
+    ],
+    "b": [
+     21,
+     10,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 1,
+    "name": "DocksFenceCorner rot 1"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     10,
+     1
+    ],
+    "b": [
+     23,
+     10,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 2,
+    "name": "DocksFenceCorner rot 2"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     10,
+     1
+    ],
+    "b": [
+     25,
+     10,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 3,
+    "name": "DocksFenceCorner rot 3"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     10,
+     1
+    ],
+    "b": [
+     28,
+     10,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 0,
+    "name": "DocksFenceX rot 0"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     10,
+     1
+    ],
+    "b": [
+     30,
+     10,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 1,
+    "name": "DocksFenceX rot 1"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     10,
+     1
+    ],
+    "b": [
+     32,
+     10,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 2,
+    "name": "DocksFenceX rot 2"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     10,
+     1
+    ],
+    "b": [
+     34,
+     10,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 3,
+    "name": "DocksFenceX rot 3"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     1,
+     13,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 0,
+    "name": "DocksFenceT rot 0"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     13,
+     1
+    ],
+    "b": [
+     3,
+     13,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 1,
+    "name": "DocksFenceT rot 1"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 2,
+    "name": "DocksFenceT rot 2"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     13,
+     1
+    ],
+    "b": [
+     7,
+     13,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 3,
+    "name": "DocksFenceT rot 3"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     13,
+     1
+    ],
+    "b": [
+     10,
+     13,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 0,
+    "name": "DocksFenceMid rot 0"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     13,
+     1
+    ],
+    "b": [
+     12,
+     13,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 1,
+    "name": "DocksFenceMid rot 1"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     13,
+     1
+    ],
+    "b": [
+     14,
+     13,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 2,
+    "name": "DocksFenceMid rot 2"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     13,
+     1
+    ],
+    "b": [
+     16,
+     13,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 3,
+    "name": "DocksFenceMid rot 3"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     13,
+     1
+    ],
+    "b": [
+     19,
+     13,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 0,
+    "name": "DocksFenceEndCap rot 0"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     13,
+     1
+    ],
+    "b": [
+     21,
+     13,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 1,
+    "name": "DocksFenceEndCap rot 1"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     13,
+     1
+    ],
+    "b": [
+     23,
+     13,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 2,
+    "name": "DocksFenceEndCap rot 2"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     13,
+     1
+    ],
+    "b": [
+     25,
+     13,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 3,
+    "name": "DocksFenceEndCap rot 3"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     13,
+     1
+    ],
+    "b": [
+     28,
+     13,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 0,
+    "name": "DocksBarrelPlatform rot 0"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     13,
+     1
+    ],
+    "b": [
+     30,
+     13,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 1,
+    "name": "DocksBarrelPlatform rot 1"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     13,
+     1
+    ],
+    "b": [
+     32,
+     13,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 2,
+    "name": "DocksBarrelPlatform rot 2"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     13,
+     1
+    ],
+    "b": [
+     34,
+     13,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 3,
+    "name": "DocksBarrelPlatform rot 3"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     16,
+     1
+    ],
+    "b": [
+     1,
+     16,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 0,
+    "name": "DocksFenceSolo rot 0"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     16,
+     1
+    ],
+    "b": [
+     3,
+     16,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 1,
+    "name": "DocksFenceSolo rot 1"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     16,
+     1
+    ],
+    "b": [
+     5,
+     16,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 2,
+    "name": "DocksFenceSolo rot 2"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     16,
+     1
+    ],
+    "b": [
+     7,
+     16,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 3,
+    "name": "DocksFenceSolo rot 3"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     16,
+     1
+    ],
+    "b": [
+     10,
+     16,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 0,
+    "name": "DocksRampA rot 0"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     16,
+     1
+    ],
+    "b": [
+     12,
+     16,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 1,
+    "name": "DocksRampA rot 1"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     16,
+     1
+    ],
+    "b": [
+     14,
+     16,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 2,
+    "name": "DocksRampA rot 2"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     16,
+     1
+    ],
+    "b": [
+     16,
+     16,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 3,
+    "name": "DocksRampA rot 3"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     16,
+     1
+    ],
+    "b": [
+     19,
+     16,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 0,
+    "name": "DocksRampB rot 0"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     16,
+     1
+    ],
+    "b": [
+     21,
+     16,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 1,
+    "name": "DocksRampB rot 1"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     16,
+     1
+    ],
+    "b": [
+     23,
+     16,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 2,
+    "name": "DocksRampB rot 2"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     16,
+     1
+    ],
+    "b": [
+     25,
+     16,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 3,
+    "name": "DocksRampB rot 3"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     16,
+     1
+    ],
+    "b": [
+     28,
+     16,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 0,
+    "name": "DocksRampC rot 0"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     16,
+     1
+    ],
+    "b": [
+     30,
+     16,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 1,
+    "name": "DocksRampC rot 1"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     16,
+     1
+    ],
+    "b": [
+     32,
+     16,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 2,
+    "name": "DocksRampC rot 2"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     16,
+     1
+    ],
+    "b": [
+     34,
+     16,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 3,
+    "name": "DocksRampC rot 3"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     19,
+     1
+    ],
+    "b": [
+     1,
+     19,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 0,
+    "name": "DocksRampD rot 0"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     19,
+     1
+    ],
+    "b": [
+     3,
+     19,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 1,
+    "name": "DocksRampD rot 1"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     19,
+     1
+    ],
+    "b": [
+     5,
+     19,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 2,
+    "name": "DocksRampD rot 2"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     19,
+     1
+    ],
+    "b": [
+     7,
+     19,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 3,
+    "name": "DocksRampD rot 3"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     19,
+     1
+    ],
+    "b": [
+     10,
+     19,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 0,
+    "name": "DocksRampsCorner rot 0"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     19,
+     1
+    ],
+    "b": [
+     12,
+     19,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 1,
+    "name": "DocksRampsCorner rot 1"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     19,
+     1
+    ],
+    "b": [
+     14,
+     19,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 2,
+    "name": "DocksRampsCorner rot 2"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     19,
+     1
+    ],
+    "b": [
+     16,
+     19,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 3,
+    "name": "DocksRampsCorner rot 3"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     19,
+     1
+    ],
+    "b": [
+     19,
+     19,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 0,
+    "name": "DocksFenceEndCapDouble rot 0"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     19,
+     1
+    ],
+    "b": [
+     21,
+     19,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 1,
+    "name": "DocksFenceEndCapDouble rot 1"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     23,
+     19,
+     1
+    ],
+    "b": [
+     23,
+     19,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 2,
+    "name": "DocksFenceEndCapDouble rot 2"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     19,
+     1
+    ],
+    "b": [
+     25,
+     19,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 3,
+    "name": "DocksFenceEndCapDouble rot 3"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     19,
+     1
+    ],
+    "b": [
+     28,
+     19,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 0,
+    "name": "DocksRampsCornerInverted rot 0"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     30,
+     19,
+     1
+    ],
+    "b": [
+     30,
+     19,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 1,
+    "name": "DocksRampsCornerInverted rot 1"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     32,
+     19,
+     1
+    ],
+    "b": [
+     32,
+     19,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 2,
+    "name": "DocksRampsCornerInverted rot 2"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     34,
+     19,
+     1
+    ],
+    "b": [
+     34,
+     19,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 3,
+    "name": "DocksRampsCornerInverted rot 3"
+   },
+   {
+    "id": "g113",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     22,
+     1
+    ],
+    "b": [
+     1,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 0,
+    "name": "DocksPillarBeamT rot 0"
+   },
+   {
+    "id": "g114",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     22,
+     1
+    ],
+    "b": [
+     3,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 1,
+    "name": "DocksPillarBeamT rot 1"
+   },
+   {
+    "id": "g115",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     5,
+     22,
+     1
+    ],
+    "b": [
+     5,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 2,
+    "name": "DocksPillarBeamT rot 2"
+   },
+   {
+    "id": "g116",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     22,
+     1
+    ],
+    "b": [
+     7,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 3,
+    "name": "DocksPillarBeamT rot 3"
+   },
+   {
+    "id": "g117",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     22,
+     1
+    ],
+    "b": [
+     10,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 0,
+    "name": "DocksPillarBeamCorner rot 0"
+   },
+   {
+    "id": "g118",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     22,
+     1
+    ],
+    "b": [
+     12,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 1,
+    "name": "DocksPillarBeamCorner rot 1"
+   },
+   {
+    "id": "g119",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     14,
+     22,
+     1
+    ],
+    "b": [
+     14,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 2,
+    "name": "DocksPillarBeamCorner rot 2"
+   },
+   {
+    "id": "g120",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     22,
+     1
+    ],
+    "b": [
+     16,
+     22,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 3,
+    "name": "DocksPillarBeamCorner rot 3"
+   },
+   {
+    "id": "g121",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     26,
+     1
+    ],
+    "b": [
+     5,
+     26,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along x"
+   },
+   {
+    "id": "g122",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     27,
+     1
+    ],
+    "b": [
+     1,
+     29,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along y"
+   },
+   {
+    "id": "g123",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     8,
+     26,
+     1
+    ],
+    "b": [
+     12,
+     26,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T bar"
+   },
+   {
+    "id": "g124",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     27,
+     1
+    ],
+    "b": [
+     10,
+     29,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T stem"
+   },
+   {
+    "id": "g125",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     15,
+     26,
+     1
+    ],
+    "b": [
+     15,
+     26,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of WindowGrilles"
+   },
+   {
+    "id": "g126",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     26,
+     1
+    ],
+    "b": [
+     18,
+     26,
+     2
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "WindowGrilles 3x2 in a wall"
+   },
+   {
+    "id": "g127",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     16,
+     26,
+     3
+    ],
+    "b": [
+     18,
+     26,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above WindowGrilles"
+   },
+   {
+    "id": "g128",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     26,
+     1
+    ],
+    "b": [
+     19,
+     26,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of WindowGrilles"
+   },
+   {
+    "id": "g129",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     22,
+     26,
+     1
+    ],
+    "b": [
+     26,
+     29,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g130",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     29,
+     26,
+     1
+    ],
+    "b": [
+     29,
+     26,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column x3"
+   },
+   {
+    "id": "g131",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     31,
+     26,
+     1
+    ],
+    "b": [
+     31,
+     26,
+     3
+    ],
+    "form": "DocksColumn",
+    "rot": 0,
+    "name": "DocksColumn x3"
+   },
+   {
+    "id": "g132",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     33,
+     26,
+     1
+    ],
+    "b": [
+     33,
+     26,
+     1
+    ],
+    "form": "DocksPillarBeamX",
+    "rot": 0,
+    "name": "DocksPillarBeamX x1"
+   },
+   {
+    "id": "g133",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     35,
+     26,
+     1
+    ],
+    "b": [
+     35,
+     26,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g134",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     37,
+     26,
+     1
+    ],
+    "b": [
+     37,
+     26,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g135",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     39,
+     26,
+     1
+    ],
+    "b": [
+     39,
+     26,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g136",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     41,
+     26,
+     1
+    ],
+    "b": [
+     41,
+     26,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g137",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     32,
+     1
+    ],
+    "b": [
+     7,
+     36,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube base of the hip roof"
+   },
+   {
+    "id": "g138",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     32,
+     2
+    ],
+    "b": [
+     6,
+     32,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g139",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     36,
+     2
+    ],
+    "b": [
+     6,
+     36,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g140",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     33,
+     2
+    ],
+    "b": [
+     1,
+     35,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g141",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     33,
+     2
+    ],
+    "b": [
+     7,
+     35,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g142",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     32,
+     2
+    ],
+    "b": [
+     1,
+     32,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g143",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     32,
+     2
+    ],
+    "b": [
+     7,
+     32,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g144",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     36,
+     2
+    ],
+    "b": [
+     7,
+     36,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g145",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     36,
+     2
+    ],
+    "b": [
+     1,
+     36,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g146",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     33,
+     3
+    ],
+    "b": [
+     5,
+     33,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g147",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     35,
+     3
+    ],
+    "b": [
+     5,
+     35,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g148",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     34,
+     3
+    ],
+    "b": [
+     2,
+     34,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g149",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     6,
+     34,
+     3
+    ],
+    "b": [
+     6,
+     34,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g150",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     33,
+     3
+    ],
+    "b": [
+     2,
+     33,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g151",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     6,
+     33,
+     3
+    ],
+    "b": [
+     6,
+     33,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g152",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     6,
+     35,
+     3
+    ],
+    "b": [
+     6,
+     35,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g153",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     35,
+     3
+    ],
+    "b": [
+     2,
+     35,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g154",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     3,
+     34,
+     4
+    ],
+    "b": [
+     5,
+     34,
+     4
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "hip ridge along x"
+   },
+   {
+    "id": "g155",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     32,
+     1
+    ],
+    "b": [
+     16,
+     36,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube ring"
+   },
+   {
+    "id": "g156",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     11,
+     33,
+     1
+    ],
+    "b": [
+     15,
+     35,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube core"
+   },
+   {
+    "id": "g157",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     32,
+     2
+    ],
+    "b": [
+     16,
+     36,
+     2
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 1"
+   },
+   {
+    "id": "g158",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     11,
+     33,
+     3
+    ],
+    "b": [
+     15,
+     35,
+     3
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 2"
+   },
+   {
+    "id": "g159",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     12,
+     34,
+     4
+    ],
+    "b": [
+     14,
+     34,
+     4
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof ridge"
+   },
+   {
+    "id": "g160",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     34,
+     1
+    ],
+    "b": [
+     23,
+     34,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross along x"
+   },
+   {
+    "id": "g161",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     32,
+     1
+    ],
+    "b": [
+     21,
+     33,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross north arm"
+   },
+   {
+    "id": "g162",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     21,
+     35,
+     1
+    ],
+    "b": [
+     21,
+     36,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross south arm"
+   },
+   {
+    "id": "g163",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     32,
+     1
+    ],
+    "b": [
+     28,
+     32,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along x"
+   },
+   {
+    "id": "g164",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     33,
+     1
+    ],
+    "b": [
+     26,
+     35,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along y"
+   },
+   {
+    "id": "g165",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     43,
+     1
+    ],
+    "b": [
+     6,
+     43,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 1,
+    "name": "DocksFenceMid along x"
+   },
+   {
+    "id": "g166",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     40,
+     1
+    ],
+    "b": [
+     1,
+     42,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 0,
+    "name": "DocksFenceMid along y"
+   },
+   {
+    "id": "g167",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     40,
+     1
+    ],
+    "b": [
+     7,
+     42,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 0,
+    "name": "DocksFenceMid along y"
+   },
+   {
+    "id": "g168",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     43,
+     1
+    ],
+    "b": [
+     1,
+     43,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 1,
+    "name": "DocksFenceCorner south-west"
+   },
+   {
+    "id": "g169",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     43,
+     1
+    ],
+    "b": [
+     7,
+     43,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 2,
+    "name": "DocksFenceCorner south-east"
+   },
+   {
+    "id": "g170",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     1,
+     39,
+     1
+    ],
+    "b": [
+     1,
+     39,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 0,
+    "name": "DocksFenceEndCap north"
+   },
+   {
+    "id": "g171",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     7,
+     39,
+     1
+    ],
+    "b": [
+     7,
+     39,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 0,
+    "name": "DocksFenceEndCap north"
+   },
+   {
+    "id": "g172",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     2,
+     39,
+     0
+    ],
+    "b": [
+     6,
+     42,
+     0
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 0,
+    "name": "DocksPlatformFill deck"
+   },
+   {
+    "id": "g173",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     39,
+     1
+    ],
+    "b": [
+     14,
+     41,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 0,
+    "name": "DocksPlatform 5x3"
+   },
+   {
+    "id": "g174",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     10,
+     43,
+     1
+    ],
+    "b": [
+     14,
+     43,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 0,
+    "name": "DocksRamps row"
+   },
+   {
+    "id": "g175",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     17,
+     39,
+     1
+    ],
+    "b": [
+     17,
+     39,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 2,
+    "name": "DocksRampA rising east"
+   },
+   {
+    "id": "g176",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     18,
+     39,
+     1
+    ],
+    "b": [
+     18,
+     39,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 2,
+    "name": "DocksRampB rising east"
+   },
+   {
+    "id": "g177",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     19,
+     39,
+     1
+    ],
+    "b": [
+     19,
+     39,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 2,
+    "name": "DocksRampC rising east"
+   },
+   {
+    "id": "g178",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     20,
+     39,
+     1
+    ],
+    "b": [
+     20,
+     39,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 2,
+    "name": "DocksRampD rising east"
+   },
+   {
+    "id": "g179",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     41,
+     1
+    ],
+    "b": [
+     26,
+     41,
+     2
+    ],
+    "form": "DocksPillar",
+    "rot": 0,
+    "name": "DocksPillar"
+   },
+   {
+    "id": "g180",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     41,
+     3
+    ],
+    "b": [
+     26,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 0,
+    "name": "DocksPillarBeamJunction lower"
+   },
+   {
+    "id": "g181",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     41,
+     4
+    ],
+    "b": [
+     26,
+     41,
+     4
+    ],
+    "form": "DocksPillar",
+    "rot": 0,
+    "name": "DocksPillar"
+   },
+   {
+    "id": "g182",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     26,
+     41,
+     5
+    ],
+    "b": [
+     26,
+     41,
+     5
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 0,
+    "name": "DocksPillarBeamJunction upper"
+   },
+   {
+    "id": "g183",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     27,
+     41,
+     1
+    ],
+    "b": [
+     27,
+     41,
+     2
+    ],
+    "form": "DocksPillar",
+    "rot": 2,
+    "name": "DocksPillar"
+   },
+   {
+    "id": "g184",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     27,
+     41,
+     3
+    ],
+    "b": [
+     27,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 2,
+    "name": "DocksPillarBeamJunction lower"
+   },
+   {
+    "id": "g185",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     27,
+     41,
+     4
+    ],
+    "b": [
+     27,
+     41,
+     4
+    ],
+    "form": "DocksPillar",
+    "rot": 2,
+    "name": "DocksPillar"
+   },
+   {
+    "id": "g186",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     27,
+     41,
+     5
+    ],
+    "b": [
+     27,
+     41,
+     5
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 2,
+    "name": "DocksPillarBeamJunction upper"
+   },
+   {
+    "id": "g187",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     41,
+     3
+    ],
+    "b": [
+     25,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 0,
+    "name": "DocksPillarBeam"
+   },
+   {
+    "id": "g188",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     41,
+     3
+    ],
+    "b": [
+     28,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 0,
+    "name": "DocksPillarBeam"
+   },
+   {
+    "id": "g189",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     24,
+     41,
+     3
+    ],
+    "b": [
+     24,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 0,
+    "name": "beam end west"
+   },
+   {
+    "id": "g190",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     29,
+     41,
+     3
+    ],
+    "b": [
+     29,
+     41,
+     3
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 0,
+    "name": "beam end east"
+   },
+   {
+    "id": "g191",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     25,
+     41,
+     5
+    ],
+    "b": [
+     25,
+     41,
+     5
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 0,
+    "name": "beam end west"
+   },
+   {
+    "id": "g192",
+    "kind": "box",
+    "subtract": false,
+    "material": "HewnLogItem",
+    "a": [
+     28,
+     41,
+     5
+    ],
+    "b": [
+     28,
+     41,
+     5
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 0,
+    "name": "beam end east"
+   },
+   {
+    "id": "g193",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     1,
+     46,
+     1
+    ],
+    "b": [
+     1,
+     46,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Stairs"
+   },
+   {
+    "id": "g194",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     3,
+     46,
+     1
+    ],
+    "b": [
+     3,
+     46,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Wall"
+   },
+   {
+    "id": "g195",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     5,
+     46,
+     1
+    ],
+    "b": [
+     5,
+     46,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Floor"
+   },
+   {
+    "id": "g196",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     7,
+     46,
+     1
+    ],
+    "b": [
+     7,
+     46,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Column"
+   },
+   {
+    "id": "g197",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     9,
+     46,
+     1
+    ],
+    "b": [
+     9,
+     46,
+     1
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Roof"
+   },
+   {
+    "id": "g198",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     11,
+     46,
+     1
+    ],
+    "b": [
+     11,
+     46,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Stacked1"
+   },
+   {
+    "id": "g199",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     13,
+     46,
+     1
+    ],
+    "b": [
+     13,
+     46,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Stacked2"
+   },
+   {
+    "id": "g200",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     15,
+     46,
+     1
+    ],
+    "b": [
+     15,
+     46,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Stacked3"
+   },
+   {
+    "id": "g201",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     17,
+     46,
+     1
+    ],
+    "b": [
+     17,
+     46,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem WindowGrilles"
+   },
+   {
+    "id": "g202",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     19,
+     46,
+     1
+    ],
+    "b": [
+     19,
+     46,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Cube"
+   },
+   {
+    "id": "g203",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     21,
+     46,
+     1
+    ],
+    "b": [
+     21,
+     46,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem Ladder"
+   },
+   {
+    "id": "g204",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     23,
+     46,
+     1
+    ],
+    "b": [
+     23,
+     46,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofPeakSet"
+   },
+   {
+    "id": "g205",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     25,
+     46,
+     1
+    ],
+    "b": [
+     25,
+     46,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofSide"
+   },
+   {
+    "id": "g206",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     27,
+     46,
+     1
+    ],
+    "b": [
+     27,
+     46,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofTurn"
+   },
+   {
+    "id": "g207",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     29,
+     46,
+     1
+    ],
+    "b": [
+     29,
+     46,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofCorner"
+   },
+   {
+    "id": "g208",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     31,
+     46,
+     1
+    ],
+    "b": [
+     31,
+     46,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofPeak"
+   },
+   {
+    "id": "g209",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     33,
+     46,
+     1
+    ],
+    "b": [
+     33,
+     46,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem RoofCube"
+   },
+   {
+    "id": "g210",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     35,
+     46,
+     1
+    ],
+    "b": [
+     35,
+     46,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPlatform"
+   },
+   {
+    "id": "g211",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     37,
+     46,
+     1
+    ],
+    "b": [
+     37,
+     46,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPlatformFill"
+   },
+   {
+    "id": "g212",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     39,
+     46,
+     1
+    ],
+    "b": [
+     39,
+     46,
+     1
+    ],
+    "form": "DocksColumn",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksColumn"
+   },
+   {
+    "id": "g213",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     41,
+     46,
+     1
+    ],
+    "b": [
+     41,
+     46,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillar"
+   },
+   {
+    "id": "g214",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     43,
+     46,
+     1
+    ],
+    "b": [
+     43,
+     46,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamEnd"
+   },
+   {
+    "id": "g215",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     1,
+     48,
+     1
+    ],
+    "b": [
+     1,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamEndAlt"
+   },
+   {
+    "id": "g216",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     3,
+     48,
+     1
+    ],
+    "b": [
+     3,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamJunction"
+   },
+   {
+    "id": "g217",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     5,
+     48,
+     1
+    ],
+    "b": [
+     5,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeam"
+   },
+   {
+    "id": "g218",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     7,
+     48,
+     1
+    ],
+    "b": [
+     7,
+     48,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRamps"
+   },
+   {
+    "id": "g219",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     9,
+     48,
+     1
+    ],
+    "b": [
+     9,
+     48,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceCorner"
+   },
+   {
+    "id": "g220",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     11,
+     48,
+     1
+    ],
+    "b": [
+     11,
+     48,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceX"
+   },
+   {
+    "id": "g221",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     13,
+     48,
+     1
+    ],
+    "b": [
+     13,
+     48,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceT"
+   },
+   {
+    "id": "g222",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     15,
+     48,
+     1
+    ],
+    "b": [
+     15,
+     48,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceMid"
+   },
+   {
+    "id": "g223",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     17,
+     48,
+     1
+    ],
+    "b": [
+     17,
+     48,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceEndCap"
+   },
+   {
+    "id": "g224",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     19,
+     48,
+     1
+    ],
+    "b": [
+     19,
+     48,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksBarrelPlatform"
+   },
+   {
+    "id": "g225",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     21,
+     48,
+     1
+    ],
+    "b": [
+     21,
+     48,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceSolo"
+   },
+   {
+    "id": "g226",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     23,
+     48,
+     1
+    ],
+    "b": [
+     23,
+     48,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampA"
+   },
+   {
+    "id": "g227",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     25,
+     48,
+     1
+    ],
+    "b": [
+     25,
+     48,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampB"
+   },
+   {
+    "id": "g228",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     27,
+     48,
+     1
+    ],
+    "b": [
+     27,
+     48,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampC"
+   },
+   {
+    "id": "g229",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     29,
+     48,
+     1
+    ],
+    "b": [
+     29,
+     48,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampD"
+   },
+   {
+    "id": "g230",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     31,
+     48,
+     1
+    ],
+    "b": [
+     31,
+     48,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampsCorner"
+   },
+   {
+    "id": "g231",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     33,
+     48,
+     1
+    ],
+    "b": [
+     33,
+     48,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksFenceEndCapDouble"
+   },
+   {
+    "id": "g232",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     35,
+     48,
+     1
+    ],
+    "b": [
+     35,
+     48,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksRampsCornerInverted"
+   },
+   {
+    "id": "g233",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     37,
+     48,
+     1
+    ],
+    "b": [
+     37,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeamX",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamX"
+   },
+   {
+    "id": "g234",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     39,
+     48,
+     1
+    ],
+    "b": [
+     39,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamT"
+   },
+   {
+    "id": "g235",
+    "kind": "box",
+    "subtract": false,
+    "material": "HardwoodHewnLogItem",
+    "a": [
+     41,
+     48,
+     1
+    ],
+    "b": [
+     41,
+     48,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 0,
+    "name": "HardwoodHewnLogItem DocksPillarBeamCorner"
+   },
+   {
+    "id": "g236",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     1,
+     51,
+     1
+    ],
+    "b": [
+     1,
+     51,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Stairs"
+   },
+   {
+    "id": "g237",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     3,
+     51,
+     1
+    ],
+    "b": [
+     3,
+     51,
+     1
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Wall"
+   },
+   {
+    "id": "g238",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     5,
+     51,
+     1
+    ],
+    "b": [
+     5,
+     51,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Floor"
+   },
+   {
+    "id": "g239",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     7,
+     51,
+     1
+    ],
+    "b": [
+     7,
+     51,
+     1
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Column"
+   },
+   {
+    "id": "g240",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     9,
+     51,
+     1
+    ],
+    "b": [
+     9,
+     51,
+     1
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Roof"
+   },
+   {
+    "id": "g241",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     11,
+     51,
+     1
+    ],
+    "b": [
+     11,
+     51,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Stacked1"
+   },
+   {
+    "id": "g242",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     13,
+     51,
+     1
+    ],
+    "b": [
+     13,
+     51,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Stacked2"
+   },
+   {
+    "id": "g243",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     15,
+     51,
+     1
+    ],
+    "b": [
+     15,
+     51,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Stacked3"
+   },
+   {
+    "id": "g244",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     17,
+     51,
+     1
+    ],
+    "b": [
+     17,
+     51,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem WindowGrilles"
+   },
+   {
+    "id": "g245",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     19,
+     51,
+     1
+    ],
+    "b": [
+     19,
+     51,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Cube"
+   },
+   {
+    "id": "g246",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     21,
+     51,
+     1
+    ],
+    "b": [
+     21,
+     51,
+     1
+    ],
+    "form": "Ladder",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem Ladder"
+   },
+   {
+    "id": "g247",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     23,
+     51,
+     1
+    ],
+    "b": [
+     23,
+     51,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofPeakSet"
+   },
+   {
+    "id": "g248",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     25,
+     51,
+     1
+    ],
+    "b": [
+     25,
+     51,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofSide"
+   },
+   {
+    "id": "g249",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     27,
+     51,
+     1
+    ],
+    "b": [
+     27,
+     51,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofTurn"
+   },
+   {
+    "id": "g250",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     29,
+     51,
+     1
+    ],
+    "b": [
+     29,
+     51,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofCorner"
+   },
+   {
+    "id": "g251",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     31,
+     51,
+     1
+    ],
+    "b": [
+     31,
+     51,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofPeak"
+   },
+   {
+    "id": "g252",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     33,
+     51,
+     1
+    ],
+    "b": [
+     33,
+     51,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem RoofCube"
+   },
+   {
+    "id": "g253",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     35,
+     51,
+     1
+    ],
+    "b": [
+     35,
+     51,
+     1
+    ],
+    "form": "DocksPlatform",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPlatform"
+   },
+   {
+    "id": "g254",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     37,
+     51,
+     1
+    ],
+    "b": [
+     37,
+     51,
+     1
+    ],
+    "form": "DocksPlatformFill",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPlatformFill"
+   },
+   {
+    "id": "g255",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     39,
+     51,
+     1
+    ],
+    "b": [
+     39,
+     51,
+     1
+    ],
+    "form": "DocksColumn",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksColumn"
+   },
+   {
+    "id": "g256",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     41,
+     51,
+     1
+    ],
+    "b": [
+     41,
+     51,
+     1
+    ],
+    "form": "DocksPillar",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillar"
+   },
+   {
+    "id": "g257",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     43,
+     51,
+     1
+    ],
+    "b": [
+     43,
+     51,
+     1
+    ],
+    "form": "DocksPillarBeamEnd",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamEnd"
+   },
+   {
+    "id": "g258",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     1,
+     53,
+     1
+    ],
+    "b": [
+     1,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeamEndAlt",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamEndAlt"
+   },
+   {
+    "id": "g259",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     3,
+     53,
+     1
+    ],
+    "b": [
+     3,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeamJunction",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamJunction"
+   },
+   {
+    "id": "g260",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     5,
+     53,
+     1
+    ],
+    "b": [
+     5,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeam",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeam"
+   },
+   {
+    "id": "g261",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     7,
+     53,
+     1
+    ],
+    "b": [
+     7,
+     53,
+     1
+    ],
+    "form": "DocksRamps",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRamps"
+   },
+   {
+    "id": "g262",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     9,
+     53,
+     1
+    ],
+    "b": [
+     9,
+     53,
+     1
+    ],
+    "form": "DocksFenceCorner",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceCorner"
+   },
+   {
+    "id": "g263",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     11,
+     53,
+     1
+    ],
+    "b": [
+     11,
+     53,
+     1
+    ],
+    "form": "DocksFenceX",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceX"
+   },
+   {
+    "id": "g264",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     13,
+     53,
+     1
+    ],
+    "b": [
+     13,
+     53,
+     1
+    ],
+    "form": "DocksFenceT",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceT"
+   },
+   {
+    "id": "g265",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     15,
+     53,
+     1
+    ],
+    "b": [
+     15,
+     53,
+     1
+    ],
+    "form": "DocksFenceMid",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceMid"
+   },
+   {
+    "id": "g266",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     17,
+     53,
+     1
+    ],
+    "b": [
+     17,
+     53,
+     1
+    ],
+    "form": "DocksFenceEndCap",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceEndCap"
+   },
+   {
+    "id": "g267",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     19,
+     53,
+     1
+    ],
+    "b": [
+     19,
+     53,
+     1
+    ],
+    "form": "DocksBarrelPlatform",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksBarrelPlatform"
+   },
+   {
+    "id": "g268",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     21,
+     53,
+     1
+    ],
+    "b": [
+     21,
+     53,
+     1
+    ],
+    "form": "DocksFenceSolo",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceSolo"
+   },
+   {
+    "id": "g269",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     23,
+     53,
+     1
+    ],
+    "b": [
+     23,
+     53,
+     1
+    ],
+    "form": "DocksRampA",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampA"
+   },
+   {
+    "id": "g270",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     25,
+     53,
+     1
+    ],
+    "b": [
+     25,
+     53,
+     1
+    ],
+    "form": "DocksRampB",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampB"
+   },
+   {
+    "id": "g271",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     27,
+     53,
+     1
+    ],
+    "b": [
+     27,
+     53,
+     1
+    ],
+    "form": "DocksRampC",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampC"
+   },
+   {
+    "id": "g272",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     29,
+     53,
+     1
+    ],
+    "b": [
+     29,
+     53,
+     1
+    ],
+    "form": "DocksRampD",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampD"
+   },
+   {
+    "id": "g273",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     31,
+     53,
+     1
+    ],
+    "b": [
+     31,
+     53,
+     1
+    ],
+    "form": "DocksRampsCorner",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampsCorner"
+   },
+   {
+    "id": "g274",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     33,
+     53,
+     1
+    ],
+    "b": [
+     33,
+     53,
+     1
+    ],
+    "form": "DocksFenceEndCapDouble",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksFenceEndCapDouble"
+   },
+   {
+    "id": "g275",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     35,
+     53,
+     1
+    ],
+    "b": [
+     35,
+     53,
+     1
+    ],
+    "form": "DocksRampsCornerInverted",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksRampsCornerInverted"
+   },
+   {
+    "id": "g276",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     37,
+     53,
+     1
+    ],
+    "b": [
+     37,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeamX",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamX"
+   },
+   {
+    "id": "g277",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     39,
+     53,
+     1
+    ],
+    "b": [
+     39,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeamT",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamT"
+   },
+   {
+    "id": "g278",
+    "kind": "box",
+    "subtract": false,
+    "material": "SoftwoodHewnLogItem",
+    "a": [
+     41,
+     53,
+     1
+    ],
+    "b": [
+     41,
+     53,
+     1
+    ],
+    "form": "DocksPillarBeamCorner",
+    "rot": 0,
+    "name": "SoftwoodHewnLogItem DocksPillarBeamCorner"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

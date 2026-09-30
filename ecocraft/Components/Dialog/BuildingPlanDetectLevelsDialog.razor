@@ -3,7 +3,8 @@
 @inject LocalizationService LocalizationService
 
 @* Niveaux déduits des dalles du bâtiment (ecoBuildingPlanner.detectLevels) : une ligne par dalle, du haut vers le bas.
-   Décocher une dalle la fusionne avec le niveau du dessous (hauteurs recalculées) ; le socle et le sol restent cochés. *@
+   Décocher une dalle la fusionne avec le niveau du dessous (hauteurs recalculées) ; le socle et le sol restent cochés.
+   Valider ne change que la pile des niveaux : ni pièce ni bloc créé. *@
 <MudDialog>
     <DialogContent>
         <MudStack Spacing="2">
@@ -69,7 +70,7 @@
         public bool LowSlab { get; set; }
         public bool Truncated { get; set; }
         public bool Matches { get; set; }   // la pile actuelle a déjà ces hauteurs
-        public bool Empty { get; set; }     // aucun niveau ne porte murs, sols, trous ou objets
+        public bool Empty { get; set; }     // aucun niveau ne porte d'objet
     }
 
     private List<DetectedLevel> Selected => Proposal.Levels.Where(l => l.Selected).ToList();

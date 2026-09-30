@@ -1,0 +1,33 @@
+{
+  "set": "ObjectsStorage",
+  "note": "Stockage et déchets : coffres, stocks, silos, cuves, poubelles, bennes, recycleur, filtres.",
+  "prefabs": [
+    "DistributionStationObject",
+    "IndustrialRefrigeratorObject",
+    "LargeLumberStockpileObject",
+    "LumberStockpileObject",
+    "PoweredStorageSiloObject",
+    "SmallStockpileObject",
+    "StockpileObject",
+    "StorageChestObject",
+    "StorageSiloObject",
+    "TinyStockpileObject",
+    "WallMountedChestObject",
+    "OutpostNettingObject",
+    "SteelLiquidTankObject",
+    "WoodenLiquidTankObject",
+    "ModernCompostBinObject",
+    "ModernGarbageBinObject",
+    "ModernRecyclingBinObject",
+    "PrimitiveBinObject",
+    "SteelBinObject",
+    "PrimitiveDumpObject",
+    "WoodenDumpsterObject",
+    "DumpsterCompostObject",
+    "DumpsterGarbageObject",
+    "DumpsterRecycleObject",
+    "RecyclerObject",
+    "WasteFilterObject",
+    "WaterFilterObject"
+  ]
+}

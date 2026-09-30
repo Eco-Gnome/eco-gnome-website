@@ -1,0 +1,40 @@
+{
+  "name": "T5 campus",
+  "grid": { "width": 46, "depth": 34 },
+  "defaults": { "wallMaterial": "AshlarLimestoneItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 14, "depth": 10, "baseZ": 0, "height": 3, "wallMaterial": "AshlarLimestoneItem", "wallThickness": 1, "floorMaterial": "AshlarLimestoneItem", "ceilingMaterial": "AshlarLimestoneItem" },
+    { "id": "v2", "x": 3, "y": 3, "width": 14, "depth": 10, "baseZ": 4, "height": 3, "wallMaterial": "AshlarLimestoneItem", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "AshlarLimestoneItem" },
+    { "id": "v3", "x": 21, "y": 3, "width": 12, "depth": 10, "baseZ": 0, "height": 3, "wallMaterial": "FlatSteelItem", "wallThickness": 1, "floorMaterial": "FlatSteelItem", "ceilingMaterial": "FlatSteelItem" },
+    { "id": "v4", "x": 21, "y": 3, "width": 12, "depth": 10, "baseZ": 4, "height": 3, "wallMaterial": "FlatSteelItem", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "FlatSteelItem" },
+    { "id": "v5", "x": 3, "y": 18, "width": 12, "depth": 10, "baseZ": 0, "height": 3, "wallMaterial": "CompositeOakLumberItem", "wallThickness": 1, "floorMaterial": "CompositeOakLumberItem", "ceilingMaterial": "CompositeOakLumberItem" },
+    { "id": "v6", "x": 21, "y": 18, "width": 10, "depth": 8, "baseZ": 0, "height": 3, "wallMaterial": "FramedGlassItem", "wallThickness": 1, "floorMaterial": "FlatSteelItem", "ceilingMaterial": "FlatSteelItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 3, "y": 3, "width": 14, "depth": 10, "baseZ": 8, "style": "hip", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "AshlarLimestoneItem", "parapet": false },
+    { "x": 21, "y": 3, "width": 12, "depth": 10, "baseZ": 8, "style": "flat", "ridgeAxis": "x", "pitch": 1, "overhang": 0, "material": "FlatSteelItem", "parapet": true },
+    { "x": 3, "y": 18, "width": 12, "depth": 10, "baseZ": 4, "style": "gable", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "CompositeOakLumberItem", "parapet": false },
+    { "x": 21, "y": 18, "width": 10, "depth": 8, "baseZ": 4, "style": "hip", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "FramedGlassItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [
+    { "x": 36, "y": 4, "baseZ": 0, "height": 3, "size": 1, "material": "FlatSteelItem", "count": 3, "stepX": 0, "stepY": 3 }
+  ],
+  "stairs": [
+    { "x": 5, "y": 10, "fromZ": 0, "toZ": 4, "direction": "east", "width": 1, "material": "AshlarLimestoneItem" },
+    { "x": 23, "y": 10, "fromZ": 0, "toZ": 4, "direction": "east", "width": 1, "material": "FlatSteelItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 6, "width": 2, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "south", "offset": 3, "width": 2, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v3", "side": "south", "offset": 5, "width": 2, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v3", "side": "north", "offset": 3, "width": 4, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v4", "side": "south", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v5", "side": "south", "offset": 5, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v5", "side": "east", "offset": 3, "width": 3, "height": 2, "sill": 1, "kind": "window" },
+    { "targetId": "v6", "side": "south", "offset": 4, "width": 2, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v6", "side": "west", "offset": 2, "width": 3, "height": 2, "sill": 1, "kind": "window" }
+  ]
+}

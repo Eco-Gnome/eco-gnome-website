@@ -1,0 +1,22 @@
+{
+  "name": "L shape",
+  "grid": { "width": 30, "depth": 24 },
+  "defaults": { "wallMaterial": "MortaredStoneItem" },
+  "volumes": [
+    { "id": "v1", "x": 2, "y": 2, "width": 16, "depth": 10, "baseZ": 0, "height": 3, "wallMaterial": "MortaredStoneItem", "wallThickness": 1, "floorMaterial": "MortaredStoneItem", "ceilingMaterial": "LumberItem" },
+    { "id": "v2", "x": 2, "y": 10, "width": 8, "depth": 12, "baseZ": 0, "height": 3, "wallMaterial": "MortaredStoneItem", "wallThickness": 1, "floorMaterial": "MortaredStoneItem", "ceilingMaterial": "LumberItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 2, "y": 2, "width": 16, "depth": 10, "baseZ": 5, "style": "gable", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "LumberItem", "parapet": false },
+    { "x": 2, "y": 10, "width": 8, "depth": 12, "baseZ": 5, "style": "gable", "ridgeAxis": "y", "pitch": 1, "overhang": 1, "material": "LumberItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 12, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 3, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v2", "side": "west", "offset": 5, "width": 2, "height": 1, "sill": 1, "kind": "window" }
+  ]
+}

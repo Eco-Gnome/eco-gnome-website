@@ -1,0 +1,23 @@
+{
+  "set": "ObjectsHomeLighting",
+  "note": "Éclairage : bougies, lampes à suif, torches, lampes et plafonniers acier. Verre des lampes (_Mode 3 Transparent) en parts verre (champ glass). Applique à torche en bois : torche sous un GameObject « Torch » inactif dans le prefab, non dessinée. Plafonniers et appliques ne touchent pas le sol (avertissements z attendus).",
+  "prefabs": [
+    "CandleStandObject",
+    "CarvedPumpkinObject",
+    "CeilingCandleObject",
+    "ElectricWallLampObject",
+    "SteelAbstractFixtureObject",
+    "SteelCeilingLightObject",
+    "SteelFloorLampObject",
+    "SteelHangingFixtureObject",
+    "SteelHangingLampObject",
+    "SteelSquareFixtureObject",
+    "SteelTableLampObject",
+    "TallowCandleObject",
+    "TallowLampObject",
+    "TallowWallLampObject",
+    "TorchStandObject",
+    "WallCandleObject",
+    "WoodenWallTorchStandObject"
+  ]
+}

@@ -77,7 +77,7 @@
                     {
                         <div class="@IssueClass(issue)" @onclick="@(() => OnFocusIssue.InvokeAsync(issue))">
                             <MudIcon Icon="@IssueIcon(issue.Severity)" Size="Size.Small"/>
-                            <span class="bp-issue-text">@LocalizationService.GetTranslation($"BuildingPlanner.Issue.{issue.Code}", issue.Args)</span>
+                            <span class="bp-issue-text">@LocalizationService.GetTranslation($"BuildingPlanner.Issue.{issue.Code}", issue.Args.Select(CategoryLabel).ToArray())</span>
                             <MudIcon Icon="@Icons.Material.Filled.CenterFocusStrong" Size="Size.Small" Class="bp-issue-focus"/>
                         </div>
                     }
@@ -120,7 +120,7 @@
                 if (collapsed) continue;
                 foreach (var line in g.OrderBy(l => ObjectLabel(l.Type)))
                 {
-                    @CostRow(line.Type, ObjectLabel(line.Type), line.Count, null)
+                    @CostRow(line.Type, ObjectLabel(line.Type), line.Count)
                 }
             }
             @CostFoot(Analysis.ObjectCounts.Select(l => (l.Type, l.Count)))
@@ -130,17 +130,17 @@
     case "materials":
         @if (Analysis is not null && Analysis.Materials.Count > 0)
         {
-            @* Liste d'achat des blocs : quantité par matériau (détail murs · sols · plafonds en sous-ligne), prix unitaire, total. *@
+            @* Liste d'achat des blocs : quantité par matériau, prix unitaire, total. *@
             @CostHead("BuildingPlanner.Material")
             foreach (var m in Analysis.Materials)
             {
-                @CostRow(m.Material, Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material, m.Total, Document?.IsArchitecture == true ? null : MaterialParts(m))
+                @CostRow(m.Material, Catalog?.Materials.FirstOrDefault(x => x.Name == m.Material)?.Label ?? m.Material, m.Count)
             }
-            @CostFoot(Analysis.Materials.Select(m => (m.Material, m.Total)))
+            @CostFoot(Analysis.Materials.Select(m => (m.Material, m.Count)))
         }
         else
         {
-            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.Pending")</div>
+            <div class="bp-muted">@LocalizationService.GetTranslation("BuildingPlanner.Results.NoMaterials")</div>
         }
         break;
 
@@ -168,7 +168,7 @@
 
     private static readonly string[] AssumptionKeys =
     [
-        "EmptyEdges", "Holes", "Levels", "Paint", "Pollution", "Culture", "Deed", "Efficiency", "Talents", "Modules", "Terrain", "Rotations", "Forms", "Tie",
+        "Rooms", "Forms", "EmptyEdges", "Holes", "Terrain", "View3d", "Paint", "Pollution", "Culture", "Deed", "Efficiency", "Talents", "Modules", "Rotations", "Tie",
     ];
 
     // Mécanique normale du jeu, déjà expliquée par les « i » du volet Housing : pas des avertissements.
@@ -179,8 +179,7 @@
 
     private static readonly Dictionary<string, string> IssueTheme = new(StringComparer.Ordinal)
     {
-        ["RoomSeedInWall"] = "Rooms", ["RoomNotEnclosed2D"] = "Rooms", ["RoomsShareSpace"] = "Rooms", ["MissingFloor"] = "Rooms", ["RoomTallerThanLevel"] = "Rooms",
-        ["MissingCeilingMaterial"] = "Rooms", ["CeilingConflict"] = "Rooms", ["DiagonalGap"] = "Rooms", ["NoRoomDefined"] = "Rooms", ["NoSupportBelow"] = "Rooms",
+        ["RoomSeedInWall"] = "Rooms", ["RoomsShareSpace"] = "Rooms", ["NoRoomDefined"] = "Rooms", ["NoSupportBelow"] = "Rooms",
         ["RoomTooBig"] = "Rooms", ["NoCeiling"] = "Rooms", ["VolumeTooSmall"] = "Rooms", ["RoomInvalid"] = "Rooms", ["EmptyEdges"] = "Rooms",
         ["BuildingTooHigh"] = "Rooms", ["TooManyRooms"] = "Rooms", ["SeedOutOfGrid"] = "Rooms",
         ["HousingNegated"] = "Housing", ["HousingObjectExcluded"] = "Housing", ["PrimaryCategoryTie"] = "Housing", ["HousingCapped"] = "Housing",
@@ -214,11 +213,7 @@
         return (total, missing);
     }
 
-    // Détail murs · sols · plafonds d'un matériau (parts non nulles), en sous-ligne.
-    private string MaterialParts(MaterialCostLine m) => string.Join(" · ", new[] { ("Walls", m.Walls), ("Floors", m.Floors), ("Ceilings", m.Ceilings) }
-        .Where(p => p.Item2 > 0).Select(p => $"{LocalizationService.GetTranslation($"BuildingPlanner.Materials.{p.Item1}")} {p.Item2}"));
-
-    // Lignes de coût des volets Matériaux et Mobilier : en-tête, ligne (icône, libellé + sous-ligne, ×quantité, prix unitaire, total), pied.
+    // Lignes de coût des volets Matériaux et Mobilier : en-tête, ligne (icône, libellé, ×quantité, prix unitaire, total), pied.
     // Le champ prix reprend les champs du calculateur de prix (rectangle-input, 0.##, virgule ou point) ; vide = moyenne du serveur en
     // placeholder, la croix efface la saisie et y revient.
     private RenderFragment CostHead(string firstKey) =>
@@ -230,13 +225,12 @@
             <span>@LocalizationService.GetTranslation("BuildingPlanner.Price.Total")</span>
         </div>;
 
-    private RenderFragment CostRow(string name, string label, int count, string? sub) =>
+    private RenderFragment CostRow(string name, string label, int count) =>
         @<div class="bp-orow bp-crow">
             <MudImage Src="@IconUrl(name)" FallbackSrc="/assets/eco-icons/EmptyIcon.png" Width="20" Height="20"/>
             <div class="bp-ellipsis">
                 @if (MaterialColor(name) is { } color) { <i class="bp-mat-dot" style="background: @color"></i> }
                 @label
-                @if (sub is not null) { <div class="bp-crow-sub bp-muted">@sub</div> }
             </div>
             <span class="bp-num bp-strong">×@count</span>
             <MudNumericField T="decimal?" Value="@Override(name)" ValueChanged="@(v => OnPriceChanged.InvokeAsync((name, v is { } p ? Math.Max(0, p) : null)))"

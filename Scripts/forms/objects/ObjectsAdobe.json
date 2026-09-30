@@ -1,0 +1,5 @@
+{
+  "set": "ObjectsAdobe",
+  "note": "Seul objet adobe du jeu (Player Built Objects/Building Additions/Doors/AdobeDoor).",
+  "prefabs": ["AdobeDoorObject"]
+}

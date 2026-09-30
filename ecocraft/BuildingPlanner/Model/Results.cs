@@ -40,8 +40,7 @@ public sealed class RoomAnalysis
     public float AverageTier { get; set; }
     public int EmptyEdgeCount { get; set; }
     public float AverageTierWithoutEmptyEdges { get; set; }
-    public int FootprintCellCount { get; set; }
-    public int Height { get; set; }
+    public int[] EmptyEdges { get; set; } = [];       // arêtes vides (tier 0), triplets du plan aplatis [x,y,z, …], z absolu (0 = terrain)
     public List<string> ObjectIds { get; set; } = [];
     public List<TableCheck> Tables { get; set; } = [];
     public RoomHousingResult? Housing { get; set; }
@@ -129,10 +128,7 @@ public sealed class PropertyHousingResult
 public sealed class MaterialCostLine
 {
     public required string Material { get; init; }
-    public int Walls { get; set; }
-    public int Floors { get; set; }
-    public int Ceilings { get; set; }
-    public int Total => Walls + Floors + Ceilings;
+    public int Count { get; set; }
 }
 
 public sealed class ObjectCostLine
@@ -154,6 +150,4 @@ public sealed class AnalysisResult
     public List<PlacedObjectResult> Objects { get; init; } = [];
     public int GridSizeY { get; init; }
     public bool HousingRulesAreDefaults { get; init; }
-    public List<int[]>? HouseRuns { get; init; }       // mode architecture : voxels maison [z, y, x0, len, matériau] (HouseRuns.Encode)
-    public List<string>? HouseMaterials { get; init; } // noms des matériaux indexés par HouseRuns
 }

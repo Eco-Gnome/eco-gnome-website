@@ -1,0 +1,37 @@
+{
+  "name": "Pueblo en adobe",
+  "grid": { "width": 28, "depth": 18 },
+  "defaults": { "wallMaterial": "AdobeItem" },
+  "volumes": [
+    { "id": "v1", "x": 3, "y": 3, "width": 14, "depth": 10, "baseZ": 0, "height": 3, "wallMaterial": "AdobeItem", "wallForm": "", "wallThickness": 2, "floorMaterial": "AdobeItem", "ceilingMaterial": "AdobeItem" },
+    { "id": "v2", "x": 4, "y": 4, "width": 12, "depth": 8, "baseZ": 4, "height": 3, "wallMaterial": "AdobeItem", "wallForm": "Wall", "wallThickness": 1, "floorMaterial": "", "ceilingMaterial": "AdobeItem" },
+    { "id": "v3", "x": 20, "y": 5, "width": 5, "depth": 5, "baseZ": 0, "height": 3, "wallMaterial": "MortaredStoneItem", "wallForm": "WallMid", "wallThickness": 1, "floorMaterial": "MortaredStoneItem", "ceilingMaterial": "MortaredStoneItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 4, "y": 4, "width": 12, "depth": 8, "baseZ": 8, "style": "flat", "ridgeAxis": "x", "overhang": 0, "material": "AdobeItem", "parapet": true },
+    { "x": 20, "y": 5, "width": 5, "depth": 5, "baseZ": 4, "style": "flat", "ridgeAxis": "x", "overhang": 0, "material": "MortaredStoneItem", "parapet": false }
+  ],
+  "partitions": [
+    { "id": "p1", "x0": 9, "y0": 4, "x1": 9, "y1": 11, "baseZ": 0, "height": 3, "material": "AdobeItem", "wallForm": "", "thickness": 1 },
+    { "id": "p2", "x0": 10, "y0": 7, "x1": 15, "y1": 7, "baseZ": 0, "height": 3, "material": "AdobeItem", "wallForm": "", "thickness": 1 },
+    { "id": "p3", "x0": 4, "y0": 7, "x1": 8, "y1": 7, "baseZ": 0, "height": 3, "material": "AdobeItem", "wallForm": "", "thickness": 1 }
+  ],
+  "columns": [],
+  "stairs": [
+    { "x": 11, "y": 10, "fromZ": 0, "toZ": 4, "direction": "east", "width": 1, "material": "AdobeItem" }
+  ],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 9, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "p2", "side": "north", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "p1", "side": "west", "offset": 1, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v1", "side": "east", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v2", "side": "south", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window", "door": "" },
+    { "targetId": "v3", "side": "south", "offset": 2, "width": 1, "height": 2, "sill": 0, "kind": "door", "door": "" }
+  ],
+  "blocks": [
+    { "x": 3, "y": 15, "width": 12, "depth": 1, "z": 1, "height": 1, "form": "FenceMid", "rot": 0, "material": "AdobeItem" }
+  ],
+  "furniture": []
+}

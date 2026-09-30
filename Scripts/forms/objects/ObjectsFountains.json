@@ -1,0 +1,31 @@
+{
+  "set": "ObjectsFountains",
+  "note": "Fontaines ashlar des sept pierres (petite et grande, eau = WaterColor.png du shader CalmWater), fontaines en granit, statues en calcaire. Bassin de jardin (GardenPond) : matériaux KojiPlants / Kojipond absents du checkout, tuiles unies (`plain`) aux teintes moyennes de son icône (plantes vertes, bassin en bois brun), eau du shader.",
+  "prefabs": [
+    "AshlarLargeBasaltFountainObject",
+    "AshlarLargeGneissFountainObject",
+    "AshlarLargeGraniteFountainObject",
+    "AshlarLargeLimestoneFountainObject",
+    "AshlarLargeSandstoneFountainObject",
+    "AshlarLargeShaleFountainObject",
+    "AshlarLargeStoneFountainObject",
+    "AshlarSmallBasaltFountainObject",
+    "AshlarSmallGneissFountainObject",
+    "AshlarSmallGraniteFountainObject",
+    "AshlarSmallLimestoneFountainObject",
+    "AshlarSmallSandstoneFountainObject",
+    "AshlarSmallShaleFountainObject",
+    "AshlarSmallStoneFountainObject",
+    "GraniteSpiralFountainObject",
+    "GraniteTerraceFountainObject",
+    "LimestoneBisonStatueObject",
+    "LimestoneOtterStatueObject",
+    "LimestoneOwlStatueObject",
+    "LimestoneWolfStatueObject",
+    "GardenPondObject"
+  ],
+  "plain": {
+    "5404b11ff7ab3634b84a163c1d3245b7": [0.351, 0.529, 0.324],
+    "4bb56fdc670555044a469fea67b0d051": [0.373, 0.281, 0.177]
+  }
+}

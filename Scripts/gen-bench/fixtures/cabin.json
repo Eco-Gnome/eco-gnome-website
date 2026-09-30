@@ -1,0 +1,20 @@
+{
+  "name": "Cabin",
+  "grid": { "width": 20, "depth": 16 },
+  "defaults": { "wallMaterial": "HewnLogItem" },
+  "volumes": [
+    { "id": "v1", "x": 4, "y": 4, "width": 10, "depth": 8, "baseZ": 0, "height": 3, "wallMaterial": "HewnLogItem", "wallThickness": 1, "floorMaterial": "HewnLogItem", "ceilingMaterial": "HewnLogItem" }
+  ],
+  "slabs": [],
+  "roofs": [
+    { "x": 4, "y": 4, "width": 10, "depth": 8, "baseZ": 5, "style": "gable", "ridgeAxis": "x", "pitch": 1, "overhang": 1, "material": "HewnLogItem", "parapet": false }
+  ],
+  "partitions": [],
+  "columns": [],
+  "stairs": [],
+  "openings": [
+    { "targetId": "v1", "side": "south", "offset": 4, "width": 1, "height": 2, "sill": 0, "kind": "door" },
+    { "targetId": "v1", "side": "north", "offset": 2, "width": 2, "height": 1, "sill": 1, "kind": "window" },
+    { "targetId": "v1", "side": "east", "offset": 2, "width": 1, "height": 1, "sill": 1, "kind": "window" }
+  ]
+}

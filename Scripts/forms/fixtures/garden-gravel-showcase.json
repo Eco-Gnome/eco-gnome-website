@@ -1,0 +1,107 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes GardenGravel",
+ "mode": "architecture",
+ "grid": {
+  "width": 38,
+  "depth": 14
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "GardenGravelItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "GardenGravelItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube patch 5x4"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "GardenGravelItem",
+    "a": [
+     8,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube path along x"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "GardenGravelItem",
+    "a": [
+     14,
+     8,
+     1
+    ],
+    "b": [
+     14,
+     11,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube path along y"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}

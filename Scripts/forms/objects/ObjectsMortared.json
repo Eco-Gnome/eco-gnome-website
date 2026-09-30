@@ -1,0 +1,15 @@
+{
+  "set": "ObjectsMortared",
+  "note": "Objets en mortared stone (spécialité Masonry) : portes, bancs, chaises, cheminées, tables et panneaux des quatre pierres du serveur. Basalt/Gneiss/Shale existent en prefab sans item serveur.",
+  "prefabs": [
+    "MortaredStoneDoorObject", "MortaredGraniteDoorObject", "MortaredLimestoneDoorObject", "MortaredSandstoneDoorObject",
+    "MortaredStoneBenchObject", "MortaredGraniteBenchObject", "MortaredLimestoneBenchObject", "MortaredSandstoneBenchObject",
+    "MortaredStoneChairObject", "MortaredGraniteChairObject", "MortaredLimestoneChairObject", "MortaredSandstoneChairObject",
+    "MortaredStoneFireplaceObject", "MortaredGraniteFireplaceObject", "MortaredLimestoneFireplaceObject", "MortaredSandstoneFireplaceObject",
+    "MortaredStoneTableObject", "MortaredGraniteTableObject", "MortaredLimestoneTableObject", "MortaredSandstoneTableObject",
+    "LargeHangingMortaredStoneSignObject", "LargeHangingMortaredGraniteSignObject", "LargeHangingMortaredLimestoneSignObject", "LargeHangingMortaredSandstoneSignObject",
+    "LargeStandingMortaredStoneSignObject", "LargeStandingMortaredGraniteSignObject", "LargeStandingMortaredLimestoneSignObject", "LargeStandingMortaredSandstoneSignObject",
+    "SmallHangingMortaredStoneSignObject", "SmallHangingMortaredGraniteSignObject", "SmallHangingMortaredLimestoneSignObject", "SmallHangingMortaredSandstoneSignObject",
+    "SmallStandingMortaredStoneSignObject", "SmallStandingMortaredGraniteSignObject", "SmallStandingMortaredLimestoneSignObject", "SmallStandingMortaredSandstoneSignObject"
+  ]
+}

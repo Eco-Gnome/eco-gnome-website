@@ -1,0 +1,28 @@
+{
+  "set": "ObjectsVehicles",
+  "note": "Véhicules, bateaux, ascenseurs (pose de repos, sans animation). Grue : flèche de 15 blocs, déborde de 10 blocs de son occupancy 3×3 (modèle du jeu, LODGroup à 0,1 près). Chalutier : coque de 14 blocs dans son occupancy (LODGroup : x, z et taille exacts). Barge en bois (WoodenBargeObject) : mesh et occupancy du prefab (x −6..0, comme le jeu la place) ; la liste serveur (x 0..6) en est le miroir X, corrigée côté site.",
+  "prefabs": [
+    "ExcavatorObject",
+    "HandPlowObject",
+    "IndustrialBargeObject",
+    "IndustrialElevatorObject",
+    "LargeCanoeObject",
+    "PoweredCartObject",
+    "ScorpionObject",
+    "SkidSteerObject",
+    "SmallCanoeObject",
+    "SmallWoodCartObject",
+    "SmallWoodenBoatObject",
+    "SteamTractorObject",
+    "SteamTruckObject",
+    "TruckObject",
+    "WheelbarrowObject",
+    "WoodCartObject",
+    "WoodenElevatorObject",
+    "WoodenTransportShipObject",
+    "WoodShopCartObject",
+    "CraneObject",
+    "MediumFishingTrawlerObject",
+    "WoodenBargeObject"
+  ]
+}

@@ -9,6 +9,7 @@ public sealed class RoomStats
     public Vec3i? FailCell { get; set; }
     public HashSet<Vec3i> EmptySpace { get; } = [];
     public HashSet<Vec3i> Walls { get; } = [];
+    public HashSet<Vec3i> EmptyEdges { get; } = [];                 // air en diagonale non atteint (tier 0), pièce contenue seulement
     public int WallCount { get; set; }
     public Dictionary<float, int> WallTierComposition { get; } = new();
     public int EmptyEdgeCount { get; set; }
@@ -83,6 +84,7 @@ public static class RoomChecker
         if (stats.Volume <= 2) { stats.FailCode = "VolumeTooSmall"; stats.FailCell = seed; return stats; }
 
         emptyEdges.ExceptWith(stats.EmptySpace);
+        stats.EmptyEdges.UnionWith(emptyEdges);
         stats.EmptyEdgeCount = emptyEdges.Count;
         if (emptyEdges.Count > 0) stats.WallTierComposition[0f] = stats.WallTierComposition.GetValueOrDefault(0f) + emptyEdges.Count;
 

@@ -1,0 +1,33 @@
+{
+  "set": "ObjectsCivic",
+  "note": "Objets de gouvernement et d'économie : capitole, bureaux, tribunaux, urnes, bornes de revendication, banque, trésor, magasin.",
+  "prefabs": [
+    "AmendmentsObject",
+    "BallotBoxObject",
+    "BankObject",
+    "BoardOfElectionsObject",
+    "CapitolObject",
+    "CensusBureauObject",
+    "ConstructionPostObject",
+    "ContractBoardObject",
+    "CountryClaimStakeObject",
+    "CourtTableObject",
+    "CurrencyExchangeObject",
+    "EmbassyDeskObject",
+    "ExecutiveOfficeObject",
+    "FederationClaimStakeObject",
+    "GovernmentOfficeObject",
+    "HomesteadClaimStakeObject",
+    "ImmigrationDeskObject",
+    "LargeCourtObject",
+    "MintObject",
+    "OutpostClaimStakeObject",
+    "OutpostTableObject",
+    "SmallCourtObject",
+    "StenographersTableObject",
+    "StoreObject",
+    "TownClaimStakeObject",
+    "TreasuryObject",
+    "ZoningOfficeObject"
+  ]
+}

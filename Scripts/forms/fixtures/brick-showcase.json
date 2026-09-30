@@ -1,0 +1,3185 @@
+{
+ "schemaVersion": 4,
+ "name": "Formes Brick",
+ "mode": "architecture",
+ "grid": {
+  "width": 64,
+  "depth": 37
+ },
+ "architecture": {
+  "height": 8,
+  "ops": [
+   {
+    "id": "g1",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     1,
+     1
+    ],
+    "b": [
+     1,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 0,
+    "name": "Stairs rot 0"
+   },
+   {
+    "id": "g2",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     1,
+     1
+    ],
+    "b": [
+     3,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 1,
+    "name": "Stairs rot 1"
+   },
+   {
+    "id": "g3",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     1,
+     1
+    ],
+    "b": [
+     5,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 2,
+    "name": "Stairs rot 2"
+   },
+   {
+    "id": "g4",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     1,
+     1
+    ],
+    "b": [
+     7,
+     1,
+     1
+    ],
+    "form": "Stairs",
+    "rot": 3,
+    "name": "Stairs rot 3"
+   },
+   {
+    "id": "g5",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     1,
+     1
+    ],
+    "b": [
+     10,
+     1,
+     1
+    ],
+    "form": "Window",
+    "rot": 0,
+    "name": "Window rot 0"
+   },
+   {
+    "id": "g6",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     1,
+     1
+    ],
+    "b": [
+     12,
+     1,
+     1
+    ],
+    "form": "Window",
+    "rot": 1,
+    "name": "Window rot 1"
+   },
+   {
+    "id": "g7",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     1,
+     1
+    ],
+    "b": [
+     14,
+     1,
+     1
+    ],
+    "form": "Window",
+    "rot": 2,
+    "name": "Window rot 2"
+   },
+   {
+    "id": "g8",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     1,
+     1
+    ],
+    "b": [
+     16,
+     1,
+     1
+    ],
+    "form": "Window",
+    "rot": 3,
+    "name": "Window rot 3"
+   },
+   {
+    "id": "g9",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     1,
+     1
+    ],
+    "b": [
+     19,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "RoofSide rot 0"
+   },
+   {
+    "id": "g10",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     1,
+     1
+    ],
+    "b": [
+     21,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "RoofSide rot 1"
+   },
+   {
+    "id": "g11",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     1,
+     1
+    ],
+    "b": [
+     23,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "RoofSide rot 2"
+   },
+   {
+    "id": "g12",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     1,
+     1
+    ],
+    "b": [
+     25,
+     1,
+     1
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "RoofSide rot 3"
+   },
+   {
+    "id": "g13",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     1,
+     1
+    ],
+    "b": [
+     28,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 0,
+    "name": "RoofTurn rot 0"
+   },
+   {
+    "id": "g14",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     1,
+     1
+    ],
+    "b": [
+     30,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 1,
+    "name": "RoofTurn rot 1"
+   },
+   {
+    "id": "g15",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     1,
+     1
+    ],
+    "b": [
+     32,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 2,
+    "name": "RoofTurn rot 2"
+   },
+   {
+    "id": "g16",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     1,
+     1
+    ],
+    "b": [
+     34,
+     1,
+     1
+    ],
+    "form": "RoofTurn",
+    "rot": 3,
+    "name": "RoofTurn rot 3"
+   },
+   {
+    "id": "g17",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     4,
+     1
+    ],
+    "b": [
+     1,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "RoofCorner rot 0"
+   },
+   {
+    "id": "g18",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     4,
+     1
+    ],
+    "b": [
+     3,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "RoofCorner rot 1"
+   },
+   {
+    "id": "g19",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     4,
+     1
+    ],
+    "b": [
+     5,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "RoofCorner rot 2"
+   },
+   {
+    "id": "g20",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     4,
+     1
+    ],
+    "b": [
+     7,
+     4,
+     1
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "RoofCorner rot 3"
+   },
+   {
+    "id": "g21",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     4,
+     1
+    ],
+    "b": [
+     10,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "RoofPeak rot 0"
+   },
+   {
+    "id": "g22",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     4,
+     1
+    ],
+    "b": [
+     12,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 1,
+    "name": "RoofPeak rot 1"
+   },
+   {
+    "id": "g23",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     4,
+     1
+    ],
+    "b": [
+     14,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 2,
+    "name": "RoofPeak rot 2"
+   },
+   {
+    "id": "g24",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     4,
+     1
+    ],
+    "b": [
+     16,
+     4,
+     1
+    ],
+    "form": "RoofPeak",
+    "rot": 3,
+    "name": "RoofPeak rot 3"
+   },
+   {
+    "id": "g25",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     4,
+     1
+    ],
+    "b": [
+     19,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 0,
+    "name": "BasicSlopeSide rot 0"
+   },
+   {
+    "id": "g26",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     4,
+     1
+    ],
+    "b": [
+     21,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 1,
+    "name": "BasicSlopeSide rot 1"
+   },
+   {
+    "id": "g27",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     4,
+     1
+    ],
+    "b": [
+     23,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 2,
+    "name": "BasicSlopeSide rot 2"
+   },
+   {
+    "id": "g28",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     4,
+     1
+    ],
+    "b": [
+     25,
+     4,
+     1
+    ],
+    "form": "BasicSlopeSide",
+    "rot": 3,
+    "name": "BasicSlopeSide rot 3"
+   },
+   {
+    "id": "g29",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     4,
+     1
+    ],
+    "b": [
+     28,
+     4,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 0,
+    "name": "BasicSlopePoint rot 0"
+   },
+   {
+    "id": "g30",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     4,
+     1
+    ],
+    "b": [
+     30,
+     4,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 1,
+    "name": "BasicSlopePoint rot 1"
+   },
+   {
+    "id": "g31",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     4,
+     1
+    ],
+    "b": [
+     32,
+     4,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 2,
+    "name": "BasicSlopePoint rot 2"
+   },
+   {
+    "id": "g32",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     4,
+     1
+    ],
+    "b": [
+     34,
+     4,
+     1
+    ],
+    "form": "BasicSlopePoint",
+    "rot": 3,
+    "name": "BasicSlopePoint rot 3"
+   },
+   {
+    "id": "g33",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     7,
+     1
+    ],
+    "b": [
+     1,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 0,
+    "name": "UnderSlopeSide rot 0"
+   },
+   {
+    "id": "g34",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     7,
+     1
+    ],
+    "b": [
+     3,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 1,
+    "name": "UnderSlopeSide rot 1"
+   },
+   {
+    "id": "g35",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     7,
+     1
+    ],
+    "b": [
+     5,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 2,
+    "name": "UnderSlopeSide rot 2"
+   },
+   {
+    "id": "g36",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     7,
+     1
+    ],
+    "b": [
+     7,
+     7,
+     1
+    ],
+    "form": "UnderSlopeSide",
+    "rot": 3,
+    "name": "UnderSlopeSide rot 3"
+   },
+   {
+    "id": "g37",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     7,
+     1
+    ],
+    "b": [
+     10,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 0,
+    "name": "UnderSlopePeak rot 0"
+   },
+   {
+    "id": "g38",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     7,
+     1
+    ],
+    "b": [
+     12,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 1,
+    "name": "UnderSlopePeak rot 1"
+   },
+   {
+    "id": "g39",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     7,
+     1
+    ],
+    "b": [
+     14,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 2,
+    "name": "UnderSlopePeak rot 2"
+   },
+   {
+    "id": "g40",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     7,
+     1
+    ],
+    "b": [
+     16,
+     7,
+     1
+    ],
+    "form": "UnderSlopePeak",
+    "rot": 3,
+    "name": "UnderSlopePeak rot 3"
+   },
+   {
+    "id": "g41",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     7,
+     1
+    ],
+    "b": [
+     19,
+     7,
+     1
+    ],
+    "form": "Brace",
+    "rot": 0,
+    "name": "Brace rot 0"
+   },
+   {
+    "id": "g42",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     7,
+     1
+    ],
+    "b": [
+     21,
+     7,
+     1
+    ],
+    "form": "Brace",
+    "rot": 1,
+    "name": "Brace rot 1"
+   },
+   {
+    "id": "g43",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     7,
+     1
+    ],
+    "b": [
+     23,
+     7,
+     1
+    ],
+    "form": "Brace",
+    "rot": 2,
+    "name": "Brace rot 2"
+   },
+   {
+    "id": "g44",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     7,
+     1
+    ],
+    "b": [
+     25,
+     7,
+     1
+    ],
+    "form": "Brace",
+    "rot": 3,
+    "name": "Brace rot 3"
+   },
+   {
+    "id": "g45",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     7,
+     1
+    ],
+    "b": [
+     28,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 0,
+    "name": "BraceTurn rot 0"
+   },
+   {
+    "id": "g46",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     7,
+     1
+    ],
+    "b": [
+     30,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 1,
+    "name": "BraceTurn rot 1"
+   },
+   {
+    "id": "g47",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     7,
+     1
+    ],
+    "b": [
+     32,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 2,
+    "name": "BraceTurn rot 2"
+   },
+   {
+    "id": "g48",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     7,
+     1
+    ],
+    "b": [
+     34,
+     7,
+     1
+    ],
+    "form": "BraceTurn",
+    "rot": 3,
+    "name": "BraceTurn rot 3"
+   },
+   {
+    "id": "g49",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     10,
+     1
+    ],
+    "b": [
+     1,
+     10,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 0,
+    "name": "BraceCorner rot 0"
+   },
+   {
+    "id": "g50",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     10,
+     1
+    ],
+    "b": [
+     3,
+     10,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 1,
+    "name": "BraceCorner rot 1"
+   },
+   {
+    "id": "g51",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     10,
+     1
+    ],
+    "b": [
+     5,
+     10,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 2,
+    "name": "BraceCorner rot 2"
+   },
+   {
+    "id": "g52",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     10,
+     1
+    ],
+    "b": [
+     7,
+     10,
+     1
+    ],
+    "form": "BraceCorner",
+    "rot": 3,
+    "name": "BraceCorner rot 3"
+   },
+   {
+    "id": "g53",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     10,
+     1
+    ],
+    "b": [
+     10,
+     10,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 0,
+    "name": "UnderBrace rot 0"
+   },
+   {
+    "id": "g54",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     10,
+     1
+    ],
+    "b": [
+     12,
+     10,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 1,
+    "name": "UnderBrace rot 1"
+   },
+   {
+    "id": "g55",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     10,
+     1
+    ],
+    "b": [
+     14,
+     10,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 2,
+    "name": "UnderBrace rot 2"
+   },
+   {
+    "id": "g56",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     10,
+     1
+    ],
+    "b": [
+     16,
+     10,
+     1
+    ],
+    "form": "UnderBrace",
+    "rot": 3,
+    "name": "UnderBrace rot 3"
+   },
+   {
+    "id": "g57",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     10,
+     1
+    ],
+    "b": [
+     19,
+     10,
+     1
+    ],
+    "form": "SmallCornerBrace",
+    "rot": 0,
+    "name": "SmallCornerBrace rot 0"
+   },
+   {
+    "id": "g58",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     10,
+     1
+    ],
+    "b": [
+     21,
+     10,
+     1
+    ],
+    "form": "SmallCornerBrace",
+    "rot": 1,
+    "name": "SmallCornerBrace rot 1"
+   },
+   {
+    "id": "g59",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     10,
+     1
+    ],
+    "b": [
+     23,
+     10,
+     1
+    ],
+    "form": "SmallCornerBrace",
+    "rot": 2,
+    "name": "SmallCornerBrace rot 2"
+   },
+   {
+    "id": "g60",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     10,
+     1
+    ],
+    "b": [
+     25,
+     10,
+     1
+    ],
+    "form": "SmallCornerBrace",
+    "rot": 3,
+    "name": "SmallCornerBrace rot 3"
+   },
+   {
+    "id": "g61",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     10,
+     1
+    ],
+    "b": [
+     28,
+     10,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 0,
+    "name": "SideBrace rot 0"
+   },
+   {
+    "id": "g62",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     10,
+     1
+    ],
+    "b": [
+     30,
+     10,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 1,
+    "name": "SideBrace rot 1"
+   },
+   {
+    "id": "g63",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     10,
+     1
+    ],
+    "b": [
+     32,
+     10,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 2,
+    "name": "SideBrace rot 2"
+   },
+   {
+    "id": "g64",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     10,
+     1
+    ],
+    "b": [
+     34,
+     10,
+     1
+    ],
+    "form": "SideBrace",
+    "rot": 3,
+    "name": "SideBrace rot 3"
+   },
+   {
+    "id": "g65",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     13,
+     1
+    ],
+    "b": [
+     1,
+     13,
+     1
+    ],
+    "form": "WindowEdge",
+    "rot": 0,
+    "name": "WindowEdge rot 0"
+   },
+   {
+    "id": "g66",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     13,
+     1
+    ],
+    "b": [
+     3,
+     13,
+     1
+    ],
+    "form": "WindowEdge",
+    "rot": 1,
+    "name": "WindowEdge rot 1"
+   },
+   {
+    "id": "g67",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     13,
+     1
+    ],
+    "b": [
+     5,
+     13,
+     1
+    ],
+    "form": "WindowEdge",
+    "rot": 2,
+    "name": "WindowEdge rot 2"
+   },
+   {
+    "id": "g68",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     13,
+     1
+    ],
+    "b": [
+     7,
+     13,
+     1
+    ],
+    "form": "WindowEdge",
+    "rot": 3,
+    "name": "WindowEdge rot 3"
+   },
+   {
+    "id": "g69",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     13,
+     1
+    ],
+    "b": [
+     10,
+     13,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 0,
+    "name": "UnderBraceCorner rot 0"
+   },
+   {
+    "id": "g70",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     13,
+     1
+    ],
+    "b": [
+     12,
+     13,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 1,
+    "name": "UnderBraceCorner rot 1"
+   },
+   {
+    "id": "g71",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     13,
+     1
+    ],
+    "b": [
+     14,
+     13,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 2,
+    "name": "UnderBraceCorner rot 2"
+   },
+   {
+    "id": "g72",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     13,
+     1
+    ],
+    "b": [
+     16,
+     13,
+     1
+    ],
+    "form": "UnderBraceCorner",
+    "rot": 3,
+    "name": "UnderBraceCorner rot 3"
+   },
+   {
+    "id": "g73",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     13,
+     1
+    ],
+    "b": [
+     19,
+     13,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 0,
+    "name": "UnderBraceTurn rot 0"
+   },
+   {
+    "id": "g74",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     13,
+     1
+    ],
+    "b": [
+     21,
+     13,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 1,
+    "name": "UnderBraceTurn rot 1"
+   },
+   {
+    "id": "g75",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     13,
+     1
+    ],
+    "b": [
+     23,
+     13,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 2,
+    "name": "UnderBraceTurn rot 2"
+   },
+   {
+    "id": "g76",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     13,
+     1
+    ],
+    "b": [
+     25,
+     13,
+     1
+    ],
+    "form": "UnderBraceTurn",
+    "rot": 3,
+    "name": "UnderBraceTurn rot 3"
+   },
+   {
+    "id": "g77",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     13,
+     1
+    ],
+    "b": [
+     28,
+     13,
+     1
+    ],
+    "form": "ThinFloorBottom",
+    "rot": 0,
+    "name": "ThinFloorBottom rot 0"
+   },
+   {
+    "id": "g78",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     13,
+     1
+    ],
+    "b": [
+     30,
+     13,
+     1
+    ],
+    "form": "ThinFloorBottom",
+    "rot": 1,
+    "name": "ThinFloorBottom rot 1"
+   },
+   {
+    "id": "g79",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     13,
+     1
+    ],
+    "b": [
+     32,
+     13,
+     1
+    ],
+    "form": "ThinFloorBottom",
+    "rot": 2,
+    "name": "ThinFloorBottom rot 2"
+   },
+   {
+    "id": "g80",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     13,
+     1
+    ],
+    "b": [
+     34,
+     13,
+     1
+    ],
+    "form": "ThinFloorBottom",
+    "rot": 3,
+    "name": "ThinFloorBottom rot 3"
+   },
+   {
+    "id": "g81",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     16,
+     1
+    ],
+    "b": [
+     1,
+     16,
+     1
+    ],
+    "form": "ThinFloorTop",
+    "rot": 0,
+    "name": "ThinFloorTop rot 0"
+   },
+   {
+    "id": "g82",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     16,
+     1
+    ],
+    "b": [
+     3,
+     16,
+     1
+    ],
+    "form": "ThinFloorTop",
+    "rot": 1,
+    "name": "ThinFloorTop rot 1"
+   },
+   {
+    "id": "g83",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     16,
+     1
+    ],
+    "b": [
+     5,
+     16,
+     1
+    ],
+    "form": "ThinFloorTop",
+    "rot": 2,
+    "name": "ThinFloorTop rot 2"
+   },
+   {
+    "id": "g84",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     16,
+     1
+    ],
+    "b": [
+     7,
+     16,
+     1
+    ],
+    "form": "ThinFloorTop",
+    "rot": 3,
+    "name": "ThinFloorTop rot 3"
+   },
+   {
+    "id": "g85",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     16,
+     1
+    ],
+    "b": [
+     10,
+     16,
+     1
+    ],
+    "form": "ThinWallEdge",
+    "rot": 0,
+    "name": "ThinWallEdge rot 0"
+   },
+   {
+    "id": "g86",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     16,
+     1
+    ],
+    "b": [
+     12,
+     16,
+     1
+    ],
+    "form": "ThinWallEdge",
+    "rot": 1,
+    "name": "ThinWallEdge rot 1"
+   },
+   {
+    "id": "g87",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     16,
+     1
+    ],
+    "b": [
+     14,
+     16,
+     1
+    ],
+    "form": "ThinWallEdge",
+    "rot": 2,
+    "name": "ThinWallEdge rot 2"
+   },
+   {
+    "id": "g88",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     16,
+     1
+    ],
+    "b": [
+     16,
+     16,
+     1
+    ],
+    "form": "ThinWallEdge",
+    "rot": 3,
+    "name": "ThinWallEdge rot 3"
+   },
+   {
+    "id": "g89",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     16,
+     1
+    ],
+    "b": [
+     19,
+     16,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 0,
+    "name": "WindowGrilles rot 0"
+   },
+   {
+    "id": "g90",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     16,
+     1
+    ],
+    "b": [
+     21,
+     16,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 1,
+    "name": "WindowGrilles rot 1"
+   },
+   {
+    "id": "g91",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     16,
+     1
+    ],
+    "b": [
+     23,
+     16,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 2,
+    "name": "WindowGrilles rot 2"
+   },
+   {
+    "id": "g92",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     16,
+     1
+    ],
+    "b": [
+     25,
+     16,
+     1
+    ],
+    "form": "WindowGrilles",
+    "rot": 3,
+    "name": "WindowGrilles rot 3"
+   },
+   {
+    "id": "g93",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     16,
+     1
+    ],
+    "b": [
+     28,
+     16,
+     1
+    ],
+    "form": "WindowGrillesEdge",
+    "rot": 0,
+    "name": "WindowGrillesEdge rot 0"
+   },
+   {
+    "id": "g94",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     16,
+     1
+    ],
+    "b": [
+     30,
+     16,
+     1
+    ],
+    "form": "WindowGrillesEdge",
+    "rot": 1,
+    "name": "WindowGrillesEdge rot 1"
+   },
+   {
+    "id": "g95",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     16,
+     1
+    ],
+    "b": [
+     32,
+     16,
+     1
+    ],
+    "form": "WindowGrillesEdge",
+    "rot": 2,
+    "name": "WindowGrillesEdge rot 2"
+   },
+   {
+    "id": "g96",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     16,
+     1
+    ],
+    "b": [
+     34,
+     16,
+     1
+    ],
+    "form": "WindowGrillesEdge",
+    "rot": 3,
+    "name": "WindowGrillesEdge rot 3"
+   },
+   {
+    "id": "g97",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     19,
+     1
+    ],
+    "b": [
+     1,
+     19,
+     1
+    ],
+    "form": "RampA",
+    "rot": 0,
+    "name": "RampA rot 0"
+   },
+   {
+    "id": "g98",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     19,
+     1
+    ],
+    "b": [
+     3,
+     19,
+     1
+    ],
+    "form": "RampA",
+    "rot": 1,
+    "name": "RampA rot 1"
+   },
+   {
+    "id": "g99",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     5,
+     19,
+     1
+    ],
+    "b": [
+     5,
+     19,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA rot 2"
+   },
+   {
+    "id": "g100",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     19,
+     1
+    ],
+    "b": [
+     7,
+     19,
+     1
+    ],
+    "form": "RampA",
+    "rot": 3,
+    "name": "RampA rot 3"
+   },
+   {
+    "id": "g101",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     19,
+     1
+    ],
+    "b": [
+     10,
+     19,
+     1
+    ],
+    "form": "RampB",
+    "rot": 0,
+    "name": "RampB rot 0"
+   },
+   {
+    "id": "g102",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     19,
+     1
+    ],
+    "b": [
+     12,
+     19,
+     1
+    ],
+    "form": "RampB",
+    "rot": 1,
+    "name": "RampB rot 1"
+   },
+   {
+    "id": "g103",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     14,
+     19,
+     1
+    ],
+    "b": [
+     14,
+     19,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB rot 2"
+   },
+   {
+    "id": "g104",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     19,
+     1
+    ],
+    "b": [
+     16,
+     19,
+     1
+    ],
+    "form": "RampB",
+    "rot": 3,
+    "name": "RampB rot 3"
+   },
+   {
+    "id": "g105",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     19,
+     1
+    ],
+    "b": [
+     19,
+     19,
+     1
+    ],
+    "form": "RampC",
+    "rot": 0,
+    "name": "RampC rot 0"
+   },
+   {
+    "id": "g106",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     19,
+     1
+    ],
+    "b": [
+     21,
+     19,
+     1
+    ],
+    "form": "RampC",
+    "rot": 1,
+    "name": "RampC rot 1"
+   },
+   {
+    "id": "g107",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     19,
+     1
+    ],
+    "b": [
+     23,
+     19,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC rot 2"
+   },
+   {
+    "id": "g108",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     25,
+     19,
+     1
+    ],
+    "b": [
+     25,
+     19,
+     1
+    ],
+    "form": "RampC",
+    "rot": 3,
+    "name": "RampC rot 3"
+   },
+   {
+    "id": "g109",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     28,
+     19,
+     1
+    ],
+    "b": [
+     28,
+     19,
+     1
+    ],
+    "form": "RampD",
+    "rot": 0,
+    "name": "RampD rot 0"
+   },
+   {
+    "id": "g110",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     30,
+     19,
+     1
+    ],
+    "b": [
+     30,
+     19,
+     1
+    ],
+    "form": "RampD",
+    "rot": 1,
+    "name": "RampD rot 1"
+   },
+   {
+    "id": "g111",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     32,
+     19,
+     1
+    ],
+    "b": [
+     32,
+     19,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD rot 2"
+   },
+   {
+    "id": "g112",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     34,
+     19,
+     1
+    ],
+    "b": [
+     34,
+     19,
+     1
+    ],
+    "form": "RampD",
+    "rot": 3,
+    "name": "RampD rot 3"
+   },
+   {
+    "id": "g113",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     23,
+     1
+    ],
+    "b": [
+     5,
+     23,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along x"
+   },
+   {
+    "id": "g114",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     24,
+     1
+    ],
+    "b": [
+     1,
+     26,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall L along y"
+   },
+   {
+    "id": "g115",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     8,
+     23,
+     1
+    ],
+    "b": [
+     12,
+     23,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T bar"
+   },
+   {
+    "id": "g116",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     24,
+     1
+    ],
+    "b": [
+     10,
+     26,
+     2
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall T stem"
+   },
+   {
+    "id": "g117",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     15,
+     23,
+     1
+    ],
+    "b": [
+     15,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of WindowGrilles"
+   },
+   {
+    "id": "g118",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     23,
+     1
+    ],
+    "b": [
+     18,
+     23,
+     2
+    ],
+    "form": "WindowGrilles",
+    "rot": 1,
+    "name": "WindowGrilles 3x2 in a wall"
+   },
+   {
+    "id": "g119",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     16,
+     23,
+     3
+    ],
+    "b": [
+     18,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above WindowGrilles"
+   },
+   {
+    "id": "g120",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     23,
+     1
+    ],
+    "b": [
+     19,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of WindowGrilles"
+   },
+   {
+    "id": "g121",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     22,
+     23,
+     1
+    ],
+    "b": [
+     22,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall left of Window"
+   },
+   {
+    "id": "g122",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     23,
+     1
+    ],
+    "b": [
+     25,
+     23,
+     2
+    ],
+    "form": "Window",
+    "rot": 1,
+    "name": "Window 3x2 in a wall"
+   },
+   {
+    "id": "g123",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     23,
+     23,
+     3
+    ],
+    "b": [
+     25,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall above Window"
+   },
+   {
+    "id": "g124",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     26,
+     23,
+     1
+    ],
+    "b": [
+     26,
+     23,
+     3
+    ],
+    "form": "Wall",
+    "rot": 0,
+    "name": "Wall right of Window"
+   },
+   {
+    "id": "g125",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     29,
+     23,
+     1
+    ],
+    "b": [
+     33,
+     26,
+     1
+    ],
+    "form": "Floor",
+    "rot": 0,
+    "name": "Floor 5x4"
+   },
+   {
+    "id": "g126",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     36,
+     23,
+     1
+    ],
+    "b": [
+     40,
+     23,
+     1
+    ],
+    "form": "Aqueduct",
+    "rot": 0,
+    "name": "Aqueduct run along x"
+   },
+   {
+    "id": "g127",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     40,
+     24,
+     1
+    ],
+    "b": [
+     40,
+     26,
+     1
+    ],
+    "form": "Aqueduct",
+    "rot": 0,
+    "name": "Aqueduct turn along y"
+   },
+   {
+    "id": "g128",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     43,
+     23,
+     1
+    ],
+    "b": [
+     43,
+     25,
+     1
+    ],
+    "form": "RampA",
+    "rot": 2,
+    "name": "RampA 3 wide, rising east"
+   },
+   {
+    "id": "g129",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     44,
+     23,
+     1
+    ],
+    "b": [
+     44,
+     25,
+     1
+    ],
+    "form": "RampB",
+    "rot": 2,
+    "name": "RampB 3 wide, rising east"
+   },
+   {
+    "id": "g130",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     45,
+     23,
+     1
+    ],
+    "b": [
+     45,
+     25,
+     1
+    ],
+    "form": "RampC",
+    "rot": 2,
+    "name": "RampC 3 wide, rising east"
+   },
+   {
+    "id": "g131",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     46,
+     23,
+     1
+    ],
+    "b": [
+     46,
+     25,
+     1
+    ],
+    "form": "RampD",
+    "rot": 2,
+    "name": "RampD 3 wide, rising east"
+   },
+   {
+    "id": "g132",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     49,
+     23,
+     1
+    ],
+    "b": [
+     49,
+     23,
+     3
+    ],
+    "form": "Column",
+    "rot": 0,
+    "name": "Column x3"
+   },
+   {
+    "id": "g133",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     51,
+     23,
+     1
+    ],
+    "b": [
+     51,
+     23,
+     3
+    ],
+    "form": "Chimney",
+    "rot": 0,
+    "name": "Chimney x3"
+   },
+   {
+    "id": "g134",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     53,
+     23,
+     1
+    ],
+    "b": [
+     53,
+     23,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube x1"
+   },
+   {
+    "id": "g135",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     55,
+     23,
+     1
+    ],
+    "b": [
+     55,
+     23,
+     1
+    ],
+    "form": "Stacked1",
+    "rot": 0,
+    "name": "Stacked1 x1"
+   },
+   {
+    "id": "g136",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     57,
+     23,
+     1
+    ],
+    "b": [
+     57,
+     23,
+     1
+    ],
+    "form": "Stacked2",
+    "rot": 0,
+    "name": "Stacked2 x1"
+   },
+   {
+    "id": "g137",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     59,
+     23,
+     1
+    ],
+    "b": [
+     59,
+     23,
+     1
+    ],
+    "form": "Stacked3",
+    "rot": 0,
+    "name": "Stacked3 x1"
+   },
+   {
+    "id": "g138",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     61,
+     23,
+     1
+    ],
+    "b": [
+     61,
+     23,
+     1
+    ],
+    "form": "Stacked4",
+    "rot": 0,
+    "name": "Stacked4 x1"
+   },
+   {
+    "id": "g139",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     29,
+     1
+    ],
+    "b": [
+     7,
+     33,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube base of the hip roof"
+   },
+   {
+    "id": "g140",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     2,
+     29,
+     2
+    ],
+    "b": [
+     6,
+     29,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g141",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     2,
+     33,
+     2
+    ],
+    "b": [
+     6,
+     33,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g142",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     30,
+     2
+    ],
+    "b": [
+     1,
+     32,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g143",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     30,
+     2
+    ],
+    "b": [
+     7,
+     32,
+     2
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g144",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     29,
+     2
+    ],
+    "b": [
+     1,
+     29,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g145",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     29,
+     2
+    ],
+    "b": [
+     7,
+     29,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g146",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     7,
+     33,
+     2
+    ],
+    "b": [
+     7,
+     33,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g147",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     1,
+     33,
+     2
+    ],
+    "b": [
+     1,
+     33,
+     2
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g148",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     30,
+     3
+    ],
+    "b": [
+     5,
+     30,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 1,
+    "name": "hip side N"
+   },
+   {
+    "id": "g149",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     32,
+     3
+    ],
+    "b": [
+     5,
+     32,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 3,
+    "name": "hip side S"
+   },
+   {
+    "id": "g150",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     2,
+     31,
+     3
+    ],
+    "b": [
+     2,
+     31,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 2,
+    "name": "hip side W"
+   },
+   {
+    "id": "g151",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     6,
+     31,
+     3
+    ],
+    "b": [
+     6,
+     31,
+     3
+    ],
+    "form": "RoofSide",
+    "rot": 0,
+    "name": "hip side E"
+   },
+   {
+    "id": "g152",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     2,
+     30,
+     3
+    ],
+    "b": [
+     2,
+     30,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 3,
+    "name": "hip corner NW"
+   },
+   {
+    "id": "g153",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     6,
+     30,
+     3
+    ],
+    "b": [
+     6,
+     30,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 2,
+    "name": "hip corner NE"
+   },
+   {
+    "id": "g154",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     6,
+     32,
+     3
+    ],
+    "b": [
+     6,
+     32,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 1,
+    "name": "hip corner SE"
+   },
+   {
+    "id": "g155",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     2,
+     32,
+     3
+    ],
+    "b": [
+     2,
+     32,
+     3
+    ],
+    "form": "RoofCorner",
+    "rot": 0,
+    "name": "hip corner SW"
+   },
+   {
+    "id": "g156",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     3,
+     31,
+     4
+    ],
+    "b": [
+     5,
+     31,
+     4
+    ],
+    "form": "RoofPeak",
+    "rot": 0,
+    "name": "hip ridge along x"
+   },
+   {
+    "id": "g157",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     29,
+     1
+    ],
+    "b": [
+     16,
+     33,
+     1
+    ],
+    "form": "RoofCube",
+    "rot": 0,
+    "name": "RoofCube ring"
+   },
+   {
+    "id": "g158",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     11,
+     30,
+     1
+    ],
+    "b": [
+     15,
+     32,
+     1
+    ],
+    "form": "Cube",
+    "rot": 0,
+    "name": "Cube core"
+   },
+   {
+    "id": "g159",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     10,
+     29,
+     2
+    ],
+    "b": [
+     16,
+     33,
+     2
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 1"
+   },
+   {
+    "id": "g160",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     11,
+     30,
+     3
+    ],
+    "b": [
+     15,
+     32,
+     3
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof course 2"
+   },
+   {
+    "id": "g161",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     12,
+     31,
+     4
+    ],
+    "b": [
+     14,
+     31,
+     4
+    ],
+    "form": "Roof",
+    "rot": 0,
+    "name": "Roof ridge"
+   },
+   {
+    "id": "g162",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     19,
+     31,
+     1
+    ],
+    "b": [
+     23,
+     31,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross along x"
+   },
+   {
+    "id": "g163",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     29,
+     1
+    ],
+    "b": [
+     21,
+     30,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross north arm"
+   },
+   {
+    "id": "g164",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     21,
+     32,
+     1
+    ],
+    "b": [
+     21,
+     33,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet cross south arm"
+   },
+   {
+    "id": "g165",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     26,
+     29,
+     1
+    ],
+    "b": [
+     28,
+     29,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along x"
+   },
+   {
+    "id": "g166",
+    "kind": "box",
+    "subtract": false,
+    "material": "BrickItem",
+    "a": [
+     26,
+     30,
+     1
+    ],
+    "b": [
+     26,
+     32,
+     1
+    ],
+    "form": "RoofPeakSet",
+    "rot": 0,
+    "name": "RoofPeakSet L along y"
+   }
+  ]
+ },
+ "defaults": {
+  "wallHeight": 3
+ },
+ "levels": [
+  {
+   "name": "RDC",
+   "height": 3,
+   "rooms": [],
+   "objects": []
+  }
+ ],
+ "groundIndex": 0,
+ "analysis": {
+  "residents": 1,
+  "propertyType": "Residence"
+ },
+ "prices": {}
+}
