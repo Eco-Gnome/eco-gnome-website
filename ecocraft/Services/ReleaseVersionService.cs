@@ -13,6 +13,19 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.5.2",
+            "2026-09-30",
+            "Building Planner: Real Game Blocks in 3D & Furniture",
+            """
+            - Real blocks in 3D: the 3D view now shows your building as it looks in game. Every block keeps its real shape (walls, roofs, stairs, windows, beams, docks, pipes…) and its real texture, for every construction material from Hewn Log to Framed Glass, plus roads, carpets and terrain.
+            - Furniture in 3D: more than 700 objects and doors are drawn with their in-game model instead of an icon, glass parts included.
+            - Hammer-like building: pick a material, then one of its shapes and a rotation, as with the hammer in game. In 2D, blocks show their material colour and icon, shaped blocks show a small form icon, and a legend lists the materials used.
+            - Rooms like in game: a room is simply the empty space enclosed by your walls, floors and roofs, with no more automatic floors or ceilings. A button fills the missing edges for you, and existing plans are converted automatically when opened.
+            - Levels and elevation: levels are detected from the building itself, shapes can close rooms in house mode, and the side elevation band is available in house mode too, with a level cursor and furniture seen through walls.
+            - Easier 3D navigation: rotate and zoom around the block you point at, click to select and edit a block, and a see-through cut that follows the camera.
+            """
+        ),
+        new ReleaseVersion(
             "1.5.1",
             "2026-09-11",
             "Building Planner: Architecture Mode & 3D View",
