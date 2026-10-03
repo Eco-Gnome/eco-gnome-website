@@ -14,6 +14,8 @@ public class EcoController(
     UserDbService userDbService,
     PriceCalculatorService priceCalculatorService,
     ItemOrTagDbService itemOrTagDbService,
+    DataContextDbService dataContextDbService,
+    ShoppingListService shoppingListService,
     IDbContextFactory<EcoCraftDbContext> dbContextFactory
 ) : ControllerBase
 {
@@ -81,6 +83,42 @@ public class EcoController(
         var userPrices = await userPriceDbService.GetByDataContextForEcoApiAsync(dataContext, true);
 
         return Ok(userPrices.Select(up => new EcoGnomeItem(up.ItemOrTag.Name, Math.Round((decimal)up.GetMarginPriceOrPrice()!, 2, MidpointRounding.AwayFromZero))));
+    }
+
+    [HttpGet("shopping-list")]
+    public async Task<IActionResult> GetShoppingList([FromQuery] string ecoServerId, [FromQuery] string ecoUserId, [FromQuery] string? name)
+    {
+        if (string.IsNullOrWhiteSpace(ecoServerId) || string.IsNullOrWhiteSpace(ecoUserId))
+            return BadRequest("ecoServerId and ecoUserId are required and cannot be empty.");
+
+        var userServer = (await userDbService.GetUserServerByEcoIdsAsync(ecoUserId, ecoServerId)).FirstOrDefault();
+        if (userServer is null)
+            return BadRequest("Can't find user or server. Did you register your user thanks to /eguser <secretId> ?");
+
+        var shoppingLists = userServer.DataContexts.Where(d => d.IsShoppingList).ToList();
+        if (string.IsNullOrWhiteSpace(name))
+            return Ok(new EcoGnomeShoppingList("", shoppingLists.Select(d => d.Name).ToList(), []));
+
+        // An exact name wins, so "Forge" can still be picked next to "Forge 2"
+        var matches = shoppingLists.Where(d => d.Name == name).ToList();
+        if (matches.Count == 0) matches = shoppingLists.Where(d => d.Name.StartsWith(name)).ToList();
+
+        if (matches.Count == 0)
+            return BadRequest("No shopping list starts with the name you provided.");
+
+        if (matches.Count > 1)
+            return BadRequest("Several shopping lists start with the name you provided. Please be more specific to select only one.");
+
+        var serverData = await serverDbService.GetServerWithShoppingListData(userServer.ServerId);
+        var shoppingList = await dataContextDbService.GetDataContextWithData(matches[0].Id, serverData);
+
+        // Negative outputs are the "Items to buy" of the shopping list page
+        var items = shoppingListService.GetAggregatedOutputs(shoppingList, shoppingList.GetRootShoppingListRecipes())
+            .Where(o => o.Value < 0)
+            .Select(o => new EcoGnomeShoppingItem(o.Key.Name, o.Key.IsTag, (int)Math.Ceiling(Math.Round(Math.Abs(o.Value), 4))))
+            .ToList();
+
+        return Ok(new EcoGnomeShoppingList(shoppingList.Name, [], items));
     }
 
     [HttpGet("categories-items-v2")]
@@ -281,6 +319,20 @@ public class EcoGnomeCategory(string name, OfferType offerType, List<EcoGnomeIte
     public string Name { get; set; } = name;
     public OfferType OfferType { get; set; } = offerType;
     public List<EcoGnomeItem> Items { get; set; } = items;
+}
+
+public class EcoGnomeShoppingList(string name, List<string> lists, List<EcoGnomeShoppingItem> items)
+{
+    public string Name { get; set; } = name;
+    public List<string> Lists { get; set; } = lists;
+    public List<EcoGnomeShoppingItem> Items { get; set; } = items;
+}
+
+public class EcoGnomeShoppingItem(string name, bool isTag, int quantity)
+{
+    public string Name { get; set; } = name;
+    public bool IsTag { get; set; } = isTag;
+    public int Quantity { get; set; } = quantity;
 }
 
 public class EcoGnomeServerPrice(string name, decimal? minPrice, decimal? defaultPrice, decimal? maxPrice)
