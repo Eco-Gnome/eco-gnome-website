@@ -253,7 +253,7 @@
                                     <MudAutocomplete T="Recipe"
                                                      @ref="_recipeAutocompleteRef"
                                                      Value="_emptyRecipe"
-                                                     Disabled="@(ContextService.CurrentServerData is null || ContextService.CurrentServerData.Recipes.Count == 0)"
+                                                     Disabled="@(_serverData is null || _serverData.Recipes.Count == 0)"
                                                      SearchFunc="SearchRecipes"
                                                      ValueChanged="AddShoppingListRecipe"
                                                      CoerceText="false"
@@ -438,6 +438,7 @@
     private DataContext? _selectedShoppingList;
     private DataContext? _referenceDataContext;
     private bool _isLoadingData;
+    private Server? _serverData;
     private List<ITreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
     private bool _expandedSkills;
@@ -583,12 +584,12 @@
 
     private List<Recipe> GetPossibleRecipesForIngredient(Element ingredient)
     {
-        if (ContextService.CurrentServerData is null)
+        if (_serverData is null)
         {
             return [];
         }
 
-        return ContextService.CurrentServerData.Recipes
+        return _serverData.Recipes
             .Where(r => r.Elements.Any(e => e.IsProduct()
                 && !e.DefaultIsReintegrated
                 && ShoppingListCoverageCalculator.CanSupplyIngredient(e.ItemOrTag, ingredient.ItemOrTag)))
@@ -650,7 +651,7 @@
 
     private async Task ApplyAutoExpandForMissingIngredients(EcoCraftDbContext context, IEnumerable<UserRecipe> parentRecipes)
     {
-        if (_selectedShoppingList is null || ContextService.CurrentServerData is null || !_isAutoExpandEnabled)
+        if (_selectedShoppingList is null || _serverData is null || !_isAutoExpandEnabled)
         {
             return;
         }
@@ -1364,7 +1365,9 @@
 
         try
         {
-            var serverData = ContextService.CurrentServerData;
+            // Reuse the full server data another page loaded, but keep this page's lighter copy to itself:
+            // shared, it would hide the full data the price calculator needs (Labor isn't loaded here).
+            var serverData = ContextService.CurrentServerData ?? (_serverData?.Id == ContextService.CurrentServer.Id ? _serverData : null);
             if (forceServerReload || serverData is null)
             {
                 serverData = await ServerDbService.GetServerWithShoppingListData(ContextService.CurrentServer.Id);
@@ -1378,7 +1381,7 @@
                 return;
             }
 
-            ContextService.CurrentServerData = serverData;
+            _serverData = serverData;
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
             var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
@@ -1404,13 +1407,13 @@
                 .ToList();
 
             _selectedShoppingList = null;
-            if (ContextService.CurrentServerData is not null)
+            if (_serverData is not null)
             {
                 foreach (var fallbackId in fallbackShoppingListIds)
                 {
                     try
                     {
-                        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(fallbackId, ContextService.CurrentServerData);
+                        _selectedShoppingList = await DataContextDbService.GetDataContextWithData(fallbackId, _serverData);
                         break;
                     }
                     catch (Exception)
@@ -1710,7 +1713,7 @@
 
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
     {
-        if (ContextService.CurrentServerData is null)
+        if (_serverData is null)
         {
             return Task.FromResult(Enumerable.Empty<Recipe>());
         }
@@ -1719,11 +1722,11 @@
 
         if (string.IsNullOrEmpty(value))
         {
-            result = ContextService.CurrentServerData.Recipes;
+            result = _serverData.Recipes;
         }
         else
         {
-            result = ContextService.CurrentServerData.Recipes
+            result = _serverData.Recipes
                 .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
         }
