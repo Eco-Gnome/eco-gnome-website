@@ -17,7 +17,6 @@
 @inject UserSettingDbService UserSettingDbService
 @inject UserPriceDbService UserPriceDbService
 @inject UserSkillDbService UserSkillDbService
-@inject UserTalentDbService UserTalentDbService
 @inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserMarginDbService UserMarginDbService
 @inject PriceCalculatorService PriceCalculatorService
@@ -179,50 +178,9 @@
                                                                  ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
                                             </MudTd>
                                             <MudTd Class="px-0">
-                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="2">
-                                                    @foreach (var talentGroup in context.Skill!.Talents.Where(t => context.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
-                                                    {
-                                                        var talents = talentGroup.ToList();
-                                                        var talent = talents.First();
-                                                        var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
-                                                        var currentReduction = userTalent is null ? 0m : talent.GetReductionPercentForLevel(userTalent.Level);
-                                                        var showReductionPercent = talent.HasReductionDisplay();
-                                                        var description = LocalizationService.GetTranslation(talent.LocalizedDescription);
-                                                        var tooltipTitle = showReductionPercent
-                                                            ? $"{LocalizationService.GetTranslation(talent)} [{currentReduction.ToString("0.##")}%]"
-                                                            : LocalizationService.GetTranslation(talent);
-
-                                                        <MudTooltip Text="@(string.IsNullOrWhiteSpace(description) ? tooltipTitle : $"{tooltipTitle} - {description}")" RootClass="d-flex">
-                                                            @if (talent.MaxLevel <= 1)
-                                                            {
-                                                                <MudLink OnClick="() => ToggleBinaryTalent(talents)" Class="d-flex" Style="align-items: center">
-                                                                    <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
-                                                                </MudLink>
-                                                            }
-                                                            else
-                                                            {
-                                                                var isMaxLevelReached = userTalent is not null && userTalent.Level >= talent.MaxLevel;
-                                                                var isMinLevelReached = userTalent is null;
-                                                                var currentLevel = userTalent?.Level ?? 0;
-
-                                                                <div class="talent-level-control">
-                                                                    <div class="talent-icon-wrapper">
-                                                                        <MudLink OnClick="() => IncreaseTalentLevel(talents)"
-                                                                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
-                                                                            +
-                                                                        </MudLink>
-                                                                        <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
-                                                                        <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
-                                                                        <MudLink OnClick="() => DecreaseTalentLevel(talents)"
-                                                                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
-                                                                            -
-                                                                        </MudLink>
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        </MudTooltip>
-                                                    }
-                                                </MudStack>
+                                                <TalentsControl DataContext="_selectedDataContext"
+                                                                UserSkill="context"
+                                                                OnChanged="@(() => RequestCalculate(CalculateTriggerOrigin.SkillChange))"/>
                                             </MudTd>
                                             <MudTd Class="px-0" Style="text-align: right">
                                                 <MudIconButton Icon="@Icons.Material.Filled.Clear"
@@ -1989,130 +1947,6 @@
         return Task.FromResult(result);
     }
 
-    private void RemoveTalentGroup(EcoCraftDbContext context, List<Talent> talents, DataContext dataContext)
-    {
-        foreach (var talent in talents)
-        {
-            var currentUserTalent = talent.GetCurrentUserTalent(dataContext);
-            if (currentUserTalent is not null)
-            {
-                UserServerDataService.RemoveUserTalent(context, currentUserTalent);
-            }
-        }
-    }
-
-    private async Task ToggleBinaryTalent(List<Talent> talents)
-    {
-        if (_selectedDataContext is null || talents.Count == 0)
-        {
-            return;
-        }
-
-        var isRemove = talents.All(t => t.GetCurrentUserTalent(_selectedDataContext) is not null);
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            if (isRemove)
-            {
-                RemoveTalentGroup(context, talents, _selectedDataContext);
-            }
-            else
-            {
-                foreach (var talent in talents)
-                {
-                    if (talent.GetCurrentUserTalent(_selectedDataContext) is null)
-                    {
-                        UserServerDataService.AddUserTalent(context, talent, _selectedDataContext);
-                    }
-                }
-            }
-
-            return Task.CompletedTask;
-        });
-
-        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
-    }
-
-    private async Task IncreaseTalentLevel(List<Talent> talents)
-    {
-        if (_selectedDataContext is null || talents.Count == 0)
-        {
-            return;
-        }
-
-        var firstTalent = talents.First();
-        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedDataContext);
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            if (existingUserTalent is null)
-            {
-                foreach (var talent in talents)
-                {
-                    UserServerDataService.AddUserTalent(context, talent, _selectedDataContext);
-                }
-            }
-            else if (existingUserTalent.Level < firstTalent.MaxLevel)
-            {
-                foreach (var talent in talents)
-                {
-                    var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
-                    if (userTalent is not null)
-                    {
-                        userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
-                        UserTalentDbService.UpdateLevel(context, userTalent);
-                    }
-                }
-            }
-
-            return Task.CompletedTask;
-        });
-
-        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
-    }
-
-    private async Task DecreaseTalentLevel(List<Talent> talents)
-    {
-        if (_selectedDataContext is null || talents.Count == 0)
-        {
-            return;
-        }
-
-        var firstTalent = talents.First();
-        var existingUserTalent = firstTalent.GetCurrentUserTalent(_selectedDataContext);
-
-        if (existingUserTalent is null)
-        {
-            return;
-        }
-
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            foreach (var talent in talents)
-            {
-                var userTalent = talent.GetCurrentUserTalent(_selectedDataContext);
-                if (userTalent is null)
-                {
-                    continue;
-                }
-
-                if (userTalent.Level <= 1)
-                {
-                    UserServerDataService.RemoveUserTalent(context, userTalent);
-                }
-                else
-                {
-                    userTalent.Level--;
-                    UserTalentDbService.UpdateLevel(context, userTalent);
-                }
-            }
-
-            return Task.CompletedTask;
-        });
-
-        await RequestCalculate(CalculateTriggerOrigin.SkillChange);
-    }
-
     private Task<IEnumerable<Recipe>> SearchRecipes(string value, CancellationToken token)
     {
         IEnumerable<Recipe> result;
@@ -2477,10 +2311,7 @@
 
                 if (!isIncrease)
                 {
-                    foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(selectedDataContext) is not null && targetLevel < t.Level))
-                    {
-                        UserServerDataService.RemoveUserTalent(context, talent.GetCurrentUserTalent(selectedDataContext)!);
-                    }
+                    UserServerDataService.RemoveTalentsAboveLevel(context, selectedDataContext, userSkill);
                 }
 
                 return Task.CompletedTask;

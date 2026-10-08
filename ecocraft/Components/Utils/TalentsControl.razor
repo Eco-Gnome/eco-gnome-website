@@ -1,0 +1,174 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@using Microsoft.EntityFrameworkCore
+@inject LocalizationService LocalizationService
+@inject UserServerDataService UserServerDataService
+@inject UserTalentDbService UserTalentDbService
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
+
+@* Talents of one skill row, shared by the price calculator and the shopping list: one icon per talent group
+   reached by the skill level, a toggle for single-level talents and +/- for the others. Several talents of
+   the same level can be picked (some server settings allow it). Changes are saved, then OnChanged is raised. *@
+<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="2">
+    @foreach (var talentGroup in UserSkill.Skill!.Talents.Where(t => UserSkill.Level >= t.Level).OrderBy(t => t.Level).GroupBy(t => t.TalentGroupName))
+    {
+        var talents = talentGroup.ToList();
+        var talent = talents.First();
+        var userTalent = talent.GetCurrentUserTalent(DataContext);
+        var currentReduction = userTalent is null ? 0m : talent.GetReductionPercentForLevel(userTalent.Level);
+        var showReductionPercent = talent.HasReductionDisplay();
+        var description = LocalizationService.GetTranslation(talent.LocalizedDescription);
+        var tooltipTitle = showReductionPercent
+            ? $"{LocalizationService.GetTranslation(talent)} [{currentReduction.ToString("0.##")}%]"
+            : LocalizationService.GetTranslation(talent);
+
+        <MudTooltip Text="@(string.IsNullOrWhiteSpace(description) ? tooltipTitle : $"{tooltipTitle} - {description}")" RootClass="d-flex">
+            @if (talent.MaxLevel <= 1)
+            {
+                <MudLink OnClick="() => ToggleBinaryTalent(talents)" Disabled="Disabled" Class="d-flex" Style="align-items: center">
+                    <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                </MudLink>
+            }
+            else
+            {
+                var isMaxLevelReached = Disabled || (userTalent is not null && userTalent.Level >= talent.MaxLevel);
+                var isMinLevelReached = Disabled || userTalent is null;
+                var currentLevel = userTalent?.Level ?? 0;
+
+                <div class="talent-level-control">
+                    <div class="talent-icon-wrapper">
+                        <MudLink OnClick="() => IncreaseTalentLevel(talents)"
+                                 Disabled="Disabled"
+                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
+                            +
+                        </MudLink>
+                        <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
+                        <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
+                        <MudLink OnClick="() => DecreaseTalentLevel(talents)"
+                                 Disabled="Disabled"
+                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
+                            -
+                        </MudLink>
+                    </div>
+                </div>
+            }
+        </MudTooltip>
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired] public DataContext DataContext { get; set; } = null!;
+    [Parameter, EditorRequired] public UserSkill UserSkill { get; set; } = null!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private async Task ToggleBinaryTalent(List<Talent> talents)
+    {
+        if (Disabled || talents.Count == 0)
+        {
+            return;
+        }
+
+        var isRemove = talents.All(t => t.GetCurrentUserTalent(DataContext) is not null);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var talent in talents)
+            {
+                var userTalent = talent.GetCurrentUserTalent(DataContext);
+                if (isRemove && userTalent is not null)
+                {
+                    UserServerDataService.RemoveUserTalent(context, userTalent);
+                }
+                else if (!isRemove && userTalent is null)
+                {
+                    UserServerDataService.AddUserTalent(context, talent, DataContext);
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task IncreaseTalentLevel(List<Talent> talents)
+    {
+        if (Disabled || talents.Count == 0)
+        {
+            return;
+        }
+
+        var firstTalent = talents.First();
+        var existingUserTalent = firstTalent.GetCurrentUserTalent(DataContext);
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            if (existingUserTalent is null)
+            {
+                foreach (var talent in talents)
+                {
+                    UserServerDataService.AddUserTalent(context, talent, DataContext);
+                }
+            }
+            else if (existingUserTalent.Level < firstTalent.MaxLevel)
+            {
+                foreach (var talent in talents)
+                {
+                    var userTalent = talent.GetCurrentUserTalent(DataContext);
+                    if (userTalent is not null)
+                    {
+                        userTalent.Level = Math.Min(userTalent.Level + 1, talent.MaxLevel);
+                        UserTalentDbService.UpdateLevel(context, userTalent);
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task DecreaseTalentLevel(List<Talent> talents)
+    {
+        if (Disabled || talents.Count == 0)
+        {
+            return;
+        }
+
+        var existingUserTalent = talents.First().GetCurrentUserTalent(DataContext);
+
+        if (existingUserTalent is null)
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        {
+            foreach (var talent in talents)
+            {
+                var userTalent = talent.GetCurrentUserTalent(DataContext);
+                if (userTalent is null)
+                {
+                    continue;
+                }
+
+                if (userTalent.Level <= 1)
+                {
+                    UserServerDataService.RemoveUserTalent(context, userTalent);
+                }
+                else
+                {
+                    userTalent.Level--;
+                    UserTalentDbService.UpdateLevel(context, userTalent);
+                }
+            }
+
+            return Task.CompletedTask;
+        });
+
+        await OnChanged.InvokeAsync();
+    }
+}

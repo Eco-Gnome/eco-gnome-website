@@ -91,6 +91,15 @@ public class UserServerDataService(
         userTalent.Talent.UserTalents.Remove(userTalent);
     }
 
+    // A lowered skill level drops the talents it no longer reaches.
+    public void RemoveTalentsAboveLevel(EcoCraftDbContext context, DataContext dataContext, UserSkill userSkill)
+    {
+        foreach (var talent in userSkill.Skill!.Talents.Where(t => t.GetCurrentUserTalent(dataContext) is not null && userSkill.Level < t.Level))
+        {
+            RemoveUserTalent(context, talent.GetCurrentUserTalent(dataContext)!);
+        }
+    }
+
     public void CreateUserMargin(EcoCraftDbContext context, DataContext dataContext, Server? server = null)
     {
         var effectiveServer = server;
