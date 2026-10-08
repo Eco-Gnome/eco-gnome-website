@@ -21,7 +21,7 @@
 
             @if (!moduleSlot.AllowsSeveralModules)
             {
-                <MudLink OnClick="() => CycleModule(moduleSlot)" Disabled="Disabled">
+                <MudLink OnClick="() => CycleModule(moduleSlot)">
                     <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
                         <EcoIcon Item="@installed.FirstOrDefault()"
                                  FallbackIcon="@MDIIcons.Filled.Cancel"
@@ -32,9 +32,9 @@
                 continue;
             }
 
-            <MudMenu Dense="true" Disabled="Disabled" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+            <MudMenu Dense="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
                 <ActivatorContent Context="menu">
-                    <MudLink OnClick="@(args => menu.ToggleAsync(args))" Disabled="Disabled">
+                    <MudLink OnClick="@(args => menu.ToggleAsync(args))">
                         <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
                             <div class="d-flex align-center pluginmodule-stack">
                                 @if (installed.Count == 0)
@@ -84,7 +84,6 @@
 
     [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
     [Parameter] public string? Class { get; set; }
-    [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<ModuleSelection> ModuleSelected { get; set; }
 
     private List<PluginModule> GetOrderedCandidates(ModuleSlot moduleSlot)
@@ -119,8 +118,6 @@
 
     private async Task Select(ModuleSlot moduleSlot, List<PluginModule> pluginModules)
     {
-        if (Disabled) return;
-
         await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, pluginModules));
     }
 

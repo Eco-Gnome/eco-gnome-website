@@ -352,7 +352,6 @@ public class ContextService(
             IsDefault = false,
             IsShoppingList = src.IsShoppingList,
             SourceDataContextId = src.SourceDataContextId,
-            IsSourceLinked = src.IsSourceLinked,
         };
 
         var newSkills = new Dictionary<Guid, UserSkill>();

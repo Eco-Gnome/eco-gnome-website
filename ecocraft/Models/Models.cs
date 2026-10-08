@@ -992,10 +992,9 @@ public class DataContext
     public string Name { get; set; }
     public bool IsDefault { get; set; }
     public bool IsShoppingList { get; set; }
-    // Shopping list only: the price calculator context its skills, talents and tables come from.
-    // When linked, they are re-applied from it on every load and can't be edited on the list.
+    // Shopping list only: the price calculator context its skills, talents and tables were imported
+    // from, which new recipes keep copying from.
     public Guid? SourceDataContextId { get; set; }
-    public bool IsSourceLinked { get; set; }
 
     public UserServer UserServer { get; set; }
     public List<UserSkill> UserSkills { get; init; } = [];

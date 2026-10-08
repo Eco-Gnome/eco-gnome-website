@@ -164,9 +164,6 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsShoppingList")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsSourceLinked")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");

@@ -26,27 +26,25 @@
         <MudTooltip Text="@(string.IsNullOrWhiteSpace(description) ? tooltipTitle : $"{tooltipTitle} - {description}")" RootClass="d-flex">
             @if (talent.MaxLevel <= 1)
             {
-                <MudLink OnClick="() => ToggleBinaryTalent(talents)" Disabled="Disabled" Class="d-flex" Style="align-items: center">
+                <MudLink OnClick="() => ToggleBinaryTalent(talents)" Class="d-flex" Style="align-items: center">
                     <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                 </MudLink>
             }
             else
             {
-                var isMaxLevelReached = Disabled || (userTalent is not null && userTalent.Level >= talent.MaxLevel);
-                var isMinLevelReached = Disabled || userTalent is null;
+                var isMaxLevelReached = userTalent is not null && userTalent.Level >= talent.MaxLevel;
+                var isMinLevelReached = userTalent is null;
                 var currentLevel = userTalent?.Level ?? 0;
 
                 <div class="talent-level-control">
                     <div class="talent-icon-wrapper">
                         <MudLink OnClick="() => IncreaseTalentLevel(talents)"
-                                 Disabled="Disabled"
                                  Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
                             +
                         </MudLink>
                         <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                         <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
                         <MudLink OnClick="() => DecreaseTalentLevel(talents)"
-                                 Disabled="Disabled"
                                  Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
                             -
                         </MudLink>
@@ -60,12 +58,11 @@
 @code {
     [Parameter, EditorRequired] public DataContext DataContext { get; set; } = null!;
     [Parameter, EditorRequired] public UserSkill UserSkill { get; set; } = null!;
-    [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback OnChanged { get; set; }
 
     private async Task ToggleBinaryTalent(List<Talent> talents)
     {
-        if (Disabled || talents.Count == 0)
+        if (talents.Count == 0)
         {
             return;
         }
@@ -95,7 +92,7 @@
 
     private async Task IncreaseTalentLevel(List<Talent> talents)
     {
-        if (Disabled || talents.Count == 0)
+        if (talents.Count == 0)
         {
             return;
         }
@@ -133,7 +130,7 @@
 
     private async Task DecreaseTalentLevel(List<Talent> talents)
     {
-        if (Disabled || talents.Count == 0)
+        if (talents.Count == 0)
         {
             return;
         }

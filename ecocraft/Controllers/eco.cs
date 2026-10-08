@@ -16,7 +16,6 @@ public class EcoController(
     ItemOrTagDbService itemOrTagDbService,
     DataContextDbService dataContextDbService,
     ShoppingListService shoppingListService,
-    ShoppingListDataService shoppingListDataService,
     IDbContextFactory<EcoCraftDbContext> dbContextFactory
 ) : ControllerBase
 {
@@ -112,13 +111,6 @@ public class EcoController(
 
         var serverData = await serverDbService.GetServerWithShoppingListData(userServer.ServerId);
         var shoppingList = await dataContextDbService.GetDataContextWithData(matches[0].Id, serverData);
-
-        // A list linked to a price calculator context takes its current skills, talents and tables
-        if (shoppingList.IsSourceLinked && userServer.DataContexts.Any(d => d.Id == shoppingList.SourceDataContextId && !d.IsShoppingList))
-        {
-            var source = await dataContextDbService.GetDataContextWithData(shoppingList.SourceDataContextId!.Value, serverData);
-            await EcoCraftDbContext.ContextSaveAsync(dbContextFactory, context => shoppingListDataService.ApplySourceDataContext(context, shoppingList, source));
-        }
 
         // Negative outputs are the "Items to buy" of the shopping list page
         var items = shoppingListService.GetAggregatedOutputs(shoppingList, shoppingList.GetRootShoppingListRecipes())

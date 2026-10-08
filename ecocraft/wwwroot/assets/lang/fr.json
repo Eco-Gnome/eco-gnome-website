@@ -428,10 +428,7 @@
     "ShoppingList": {
         "Source": {
             "Title": "Contexte du Price calculator",
-            "Import": "Importer",
-            "Link": "Lier",
-            "LinkTooltip": "Garder les métiers, talents et tables synchronisés avec ce contexte : ils se modifient alors dans le Price calculator.",
-            "LinkedTooltip": "À modifier dans le Price calculator (contexte « {0} »)"
+            "Import": "Importer"
         },
         "PageTitle": "Listes de course",
         "Settings": "Paramètres",

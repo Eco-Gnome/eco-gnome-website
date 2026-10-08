@@ -15,9 +15,8 @@ namespace ecocraft.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Contexte du price calculator d'où une shopping list reprend métiers, talents et tables, lié ou non.
+            // Contexte du price calculator d'où une shopping list a importé métiers, talents et tables.
             migrationBuilder.AddColumn<Guid>(name: "SourceDataContextId", table: "DataContext", type: "uuid", nullable: true);
-            migrationBuilder.AddColumn<bool>(name: "IsSourceLinked", table: "DataContext", type: "boolean", nullable: false, defaultValue: false);
             migrationBuilder.CreateIndex(name: "IX_DataContext_SourceDataContextId", table: "DataContext", column: "SourceDataContextId");
             migrationBuilder.AddForeignKey(
                 name: "FK_DataContext_DataContext_SourceDataContextId",
@@ -34,7 +33,6 @@ namespace ecocraft.Migrations
             migrationBuilder.DropForeignKey(name: "FK_DataContext_DataContext_SourceDataContextId", table: "DataContext");
             migrationBuilder.DropIndex(name: "IX_DataContext_SourceDataContextId", table: "DataContext");
             migrationBuilder.DropColumn(name: "SourceDataContextId", table: "DataContext");
-            migrationBuilder.DropColumn(name: "IsSourceLinked", table: "DataContext");
         }
     }
 }
