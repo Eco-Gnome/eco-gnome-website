@@ -678,6 +678,7 @@
             "CalculatedCostPerMinuteTooltip": "Calculated from table consumption, fuel energy and fuel price."
         },
         "NoModule": "No module",
+        "ModuleSameSkill": "Same skill as {0}",
         "MarginPercent": {
             "Tooltip": "The margin percent that will be applied on your sale price. Check the 'Margin Calculation Type' tooltip option for calculation details.",
             "MarginPercent": "Percent"

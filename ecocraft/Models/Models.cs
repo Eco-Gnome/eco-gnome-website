@@ -63,6 +63,17 @@ public class Recipe: IHasLocalizedName
         return dataContext.UserRecipes.FirstOrDefault(ur => ur.RecipeId == Id);
     }
 
+    // Tags carried by the recipe's products, for the ItemTags filter of talent and module bonuses.
+    public List<string> GetProductTagNames()
+    {
+        return Elements
+            .Where(e => e.IsProduct() && (object?)e.ItemOrTag is not null)
+            .SelectMany(e => e.ItemOrTag.AssociatedTags)
+            .Select(t => t.Name)
+            .Distinct()
+            .ToList();
+    }
+
     /// <summary>
     /// Effective craft time in minutes. When the craft time is driven by a world Layer (e.g. Oilfield for
     /// Petroleum), its real value cannot be computed from the exported data, so the user's override is used
@@ -173,15 +184,7 @@ public class DynamicValue
     // Names of the tags carried by the recipe's products — the target of the bonus ItemTags filters.
     private List<string> GetRecipeProductTags()
     {
-        var recipe = GetOwningRecipe();
-        if (recipe is null) return [];
-
-        return recipe.Elements
-            .Where(e => e.IsProduct() && (object?)e.ItemOrTag is not null)
-            .SelectMany(e => e.ItemOrTag.AssociatedTags)
-            .Select(t => t.Name)
-            .Distinct()
-            .ToList();
+        return GetOwningRecipe()?.GetProductTagNames() ?? [];
     }
 
     private IEnumerable<TalentBonus> GetMatchingBonuses(Modifier modifier, TalentBonusAction? action, Skill? recipeSkill, Lazy<List<string>> recipeProductTags)
@@ -858,8 +861,12 @@ public class CraftingTable: IHasLocalizedName, IHasIconName
 
 // A module slot type registered by the game (BasicModule, AdvancedModule, ...). Each crafting
 // table exposes a subset of slots; one module can be installed per slot, all active at once.
+// The specialty slot takes several modules: a player owning two tables of the same kind can put
+// the specialty module of one skill on each (see PluginModule.ConflictsWith).
 public class ModuleSlot: IHasLocalizedName
 {
+    public const string SpecialtyModuleName = "SpecialtyModule";
+
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; }
     [ForeignKey("LocalizedField")] public Guid? LocalizedNameId { get; set; }
@@ -870,6 +877,8 @@ public class ModuleSlot: IHasLocalizedName
     public Server Server { get; set; }
     public List<PluginModule> PluginModules { get; set; } = [];
     public List<CraftingTable> CraftingTables { get; set; } = [];
+
+    public bool AllowsSeveralModules => Name == SpecialtyModuleName;
 
     public override string ToString()
     {
@@ -906,6 +915,29 @@ public class PluginModule: IHasLocalizedName, IHasIconName
 
         return localizationService.GetTranslation(this)
                + (bonuses.Count > 0 ? $" [{string.Join(", ", bonuses)}]" : "");
+    }
+
+    // Whether one of the module's bonuses reaches this recipe (skill/tag filters).
+    public bool AppliesTo(Recipe recipe)
+    {
+        var productTags = new Lazy<List<string>>(() => recipe.GetProductTagNames());
+        return Bonuses.Any(b => b.PassesFilters(recipe.Skill, productTags));
+    }
+
+    // Two modules of a multi-module slot can't be installed together when they reach the same
+    // skill: a recipe is crafted on one table, so it must get one of them only. A module without
+    // a skill filter reaches every recipe and conflicts with any other.
+    public bool ConflictsWith(PluginModule other)
+    {
+        var skills = GetSkillTypes();
+        var otherSkills = other.GetSkillTypes();
+
+        return skills.Count == 0 || otherSkills.Count == 0 || skills.Overlaps(otherSkills);
+    }
+
+    private HashSet<string> GetSkillTypes()
+    {
+        return Bonuses.SelectMany(b => b.SkillTypes ?? []).ToHashSet();
     }
 
     public override string ToString()
@@ -1073,44 +1105,40 @@ public class UserCraftingTable
     public CraftingTable CraftingTable { get; set; }
     public ItemOrTag? FuelItem { get; set; }
 
-    // Installed modules: at most one per module slot, all applying their bonuses simultaneously.
+    // Installed modules: one per module slot (several in the specialty slot), all applying their
+    // bonuses simultaneously.
     public List<PluginModule> PluginModules { get; set; } = [];
 
-    public PluginModule? GetPluginModuleForSlot(ModuleSlot moduleSlot)
+    public List<PluginModule> GetInstalledPluginModules(ModuleSlot moduleSlot)
     {
-        return PluginModules.FirstOrDefault(pm => pm.ModuleSlotId == moduleSlot.Id);
+        return PluginModules.Where(pm => pm.ModuleSlotId == moduleSlot.Id).ToList();
     }
 
-    // Installs (or clears, when pluginModule is null) the module of one slot, enforcing the
-    // at-most-one-module-per-slot invariant in a single place. Returns false when nothing changed.
-    public bool SetPluginModuleForSlot(ModuleSlot moduleSlot, PluginModule? pluginModule)
+    // Replaces the modules of one slot, keeping at most one unless the slot allows several, so the
+    // invariant lives in a single place. Returns false when nothing changed.
+    public bool SetPluginModulesForSlot(ModuleSlot moduleSlot, List<PluginModule> pluginModules)
     {
-        var currentModule = GetPluginModuleForSlot(moduleSlot);
+        var target = moduleSlot.AllowsSeveralModules ? pluginModules : pluginModules.Take(1).ToList();
+        var current = GetInstalledPluginModules(moduleSlot);
 
-        if (currentModule?.Id == pluginModule?.Id)
+        if (current.Select(pm => pm.Id).ToHashSet().SetEquals(target.Select(pm => pm.Id)))
         {
             return false;
         }
 
-        if (currentModule is not null)
-        {
-            PluginModules.Remove(currentModule);
-        }
-
-        if (pluginModule is not null)
-        {
-            PluginModules.Add(pluginModule);
-        }
+        PluginModules.RemoveAll(pm => pm.ModuleSlotId == moduleSlot.Id);
+        PluginModules.AddRange(target);
 
         return true;
     }
 
     // Compact aggregate of the installed modules' bonuses grouped by action, level-1 values,
-    // e.g. "Craft time −30%, Resource cost −10%". Skill/tag filters are ignored: this is a
-    // table-level overview, the per-module tooltips carry the exact conditions.
-    public string GetModuleSummary(LocalizationService localizationService)
+    // e.g. "Craft time −30%, Resource cost −10%". With a recipe, only the modules reaching it are
+    // counted; otherwise filters are ignored and the per-module tooltips carry the exact conditions.
+    public string GetModuleSummary(LocalizationService localizationService, Recipe? recipe = null)
     {
         var parts = PluginModules
+            .Where(pm => recipe is null || pm.AppliesTo(recipe))
             .SelectMany(pm => pm.Bonuses)
             .GroupBy(b => b.Action)
             .OrderBy(g => g.Key)

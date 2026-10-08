@@ -2,9 +2,10 @@
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-@* One icon per module slot of the table. Clicking cycles through the modules the table accepts
-   for that slot (none -> first variant -> ... -> last variant -> none); the tooltip shows the
-   installed module's bonuses. One module per slot, all installed modules apply together. *@
+@* One icon per module slot of the table (one per installed module in the specialty slot). Clicking
+   opens a dropdown of the modules the table accepts for that slot: a single choice, or checkboxes in
+   the specialty slot, where a module reaching the same skill as a checked one is disabled. The
+   tooltip shows the installed modules' bonuses; all installed modules apply together. *@
 @{
     var orderedModuleSlots = UserCraftingTable.CraftingTable.GetOrderedModuleSlots()
         .Where(ms => UserCraftingTable.CraftingTable.GetPluginModulesForSlot(ms).Count > 0)
@@ -16,25 +17,71 @@
     <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@Class">
         @foreach (var moduleSlot in orderedModuleSlots)
         {
-            var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
+            var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot);
 
-            <MudLink OnClick="() => CycleModule(moduleSlot)">
-                <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
-                    <EcoIcon Item="@installed"
-                             FallbackIcon="@MDIIcons.Filled.Cancel"
-                             Size="24"
-                             Class="@($"{(installed is not null ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
-                </MudTooltip>
-            </MudLink>
+            <MudMenu Dense="true" Disabled="Disabled" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
+                <ActivatorContent>
+                    <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0" Style="@(Disabled ? "" : "cursor: pointer")">
+                            @if (installed.Count == 0)
+                            {
+                                <EcoIcon Item="null" FallbackIcon="@MDIIcons.Filled.Cancel" Size="24" Class="no-pluginmodule mt-1"/>
+                            }
+                            @foreach (var pluginModule in installed)
+                            {
+                                <EcoIcon Item="@pluginModule" Size="24" Class="has-pluginmodule mt-1"/>
+                            }
+                        </MudStack>
+                    </MudTooltip>
+                </ActivatorContent>
+                <ChildContent>
+                    @if (!moduleSlot.AllowsSeveralModules)
+                    {
+                        <MudMenuItem OnClick="@(() => Select(moduleSlot, []))">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@MDIIcons.Filled.Cancel" Size="Size.Small"/>
+                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    }
+                    @foreach (var candidate in GetOrderedCandidates(moduleSlot))
+                    {
+                        var isInstalled = installed.Any(pm => pm.Id == candidate.Id);
+                        var conflict = isInstalled ? null : installed.FirstOrDefault(pm => moduleSlot.AllowsSeveralModules && pm.ConflictsWith(candidate));
+
+                        <MudMenuItem OnClick="@(() => OnCandidateClicked(moduleSlot, candidate))"
+                                     AutoClose="@(!moduleSlot.AllowsSeveralModules)"
+                                     Disabled="@(conflict is not null)">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Style="min-width: 260px;">
+                                @if (moduleSlot.AllowsSeveralModules)
+                                {
+                                    <MudIcon Icon="@(isInstalled ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" Size="Size.Small"/>
+                                }
+                                <EcoIcon Item="@candidate" Size="24"/>
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.body2" Color="@(isInstalled ? Color.Primary : Color.Default)">@candidate.GetTooltip(LocalizationService)</MudText>
+                                    @if (conflict is not null)
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @LocalizationService.GetTranslation("PriceCalculator.ModuleSameSkill", LocalizationService.GetTranslation(conflict))
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudMenuItem>
+                    }
+                </ChildContent>
+            </MudMenu>
         }
     </MudStack>
 }
 
 @code {
-    public record ModuleSelection(ModuleSlot ModuleSlot, PluginModule? PluginModule);
+    public record ModuleSelection(ModuleSlot ModuleSlot, List<PluginModule> PluginModules);
 
     [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
     [Parameter] public string? Class { get; set; }
+    [Parameter] public bool Disabled { get; set; }
     [Parameter] public EventCallback<ModuleSelection> ModuleSelected { get; set; }
 
     private List<PluginModule> GetOrderedCandidates(ModuleSlot moduleSlot)
@@ -44,24 +91,35 @@
             .ToList();
     }
 
-    private async Task CycleModule(ModuleSlot moduleSlot)
+    private Task OnCandidateClicked(ModuleSlot moduleSlot, PluginModule candidate)
     {
-        var candidates = GetOrderedCandidates(moduleSlot);
-        if (candidates.Count == 0) return;
+        if (!moduleSlot.AllowsSeveralModules)
+        {
+            return Select(moduleSlot, [candidate]);
+        }
 
-        var installed = UserCraftingTable.GetPluginModuleForSlot(moduleSlot);
-        var currentIndex = installed is null ? -1 : candidates.FindIndex(pm => pm.Id == installed.Id);
-        var next = currentIndex + 1 < candidates.Count ? candidates[currentIndex + 1] : null;
+        var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot);
+        if (installed.RemoveAll(pm => pm.Id == candidate.Id) == 0)
+        {
+            installed.Add(candidate);
+        }
 
-        await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, next));
+        return Select(moduleSlot, installed);
     }
 
-    private string GetSlotTooltip(ModuleSlot moduleSlot, PluginModule? installed)
+    private async Task Select(ModuleSlot moduleSlot, List<PluginModule> pluginModules)
+    {
+        if (Disabled) return;
+
+        await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, pluginModules));
+    }
+
+    private string GetSlotTooltip(ModuleSlot moduleSlot, List<PluginModule> installed)
     {
         var slotName = LocalizationService.GetTranslation(moduleSlot);
 
-        return installed is not null
-            ? $"{slotName}: {installed.GetTooltip(LocalizationService)}"
+        return installed.Count > 0
+            ? $"{slotName}: {string.Join(" / ", installed.Select(pm => pm.GetTooltip(LocalizationService)))}"
             : $"{slotName}: {LocalizationService.GetTranslation("PriceCalculator.NoModule")}";
     }
 }

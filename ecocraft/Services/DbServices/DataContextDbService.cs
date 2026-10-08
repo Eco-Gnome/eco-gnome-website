@@ -135,16 +135,16 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 
 			// Silently drop installed modules deleted by a re-import or that the table no longer
 			// accepts, and keep at most one module per real slot (slots may have changed after a
-			// game update). Modules without a slot are kept as-is: v4 exports can legitimately
-			// carry slotless modules (e.g. legacy leveled upgrade items), and collapsing that
-			// group would arbitrarily discard the user's selections.
+			// game update), except in a slot taking several modules. Modules without a slot are kept
+			// as-is: v4 exports can legitimately carry slotless modules (e.g. legacy leveled upgrade
+			// items), and collapsing that group would arbitrarily discard the user's selections.
 			uct.PluginModules = uct.PluginModules
 				.Where(pm => pluginModules.ContainsKey(pm.Id))
 				.Select(pm => pluginModules[pm.Id])
 				.Where(pm => craftingTable.PluginModules.Any(ctpm => ctpm.Id == pm.Id))
 				.Where(pm => pm.ModuleSlotId is null || craftingTable.ModuleSlots.Any(ms => ms.Id == pm.ModuleSlotId))
 				.GroupBy(pm => pm.ModuleSlotId)
-				.SelectMany(g => g.Key is null ? g.AsEnumerable() : g.Take(1))
+				.SelectMany(g => g.Key is null || craftingTable.ModuleSlots.First(ms => ms.Id == g.Key).AllowsSeveralModules ? g.AsEnumerable() : g.Take(1))
 				.ToList();
 			// We don't care about the reverse of the installed modules
 		});

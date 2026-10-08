@@ -34,7 +34,9 @@
                     <MudStack Spacing="1">
                         <MudText Style="color: #888">@LocalizationService.GetTranslation("CraftingTable")</MudText>
                         @{
+                            // Only the modules reaching this recipe: the specialty slot may hold one module per skill.
                             var installedPluginModules = (_currentUserCraftingTable?.PluginModules ?? [])
+                                .Where(pm => pm.AppliesTo(Recipe))
                                 .OrderBy(pm => pm.ModuleSlot?.SortOrder ?? int.MaxValue)
                                 .ToList();
                         }
@@ -51,7 +53,7 @@
                         </MudStack>
                         @if (installedPluginModules.Count > 0)
                         {
-                            var moduleSummary = _currentUserCraftingTable!.GetModuleSummary(LocalizationService);
+                            var moduleSummary = _currentUserCraftingTable!.GetModuleSummary(LocalizationService, Recipe);
 
                             @if (moduleSummary.Length > 0)
                             {

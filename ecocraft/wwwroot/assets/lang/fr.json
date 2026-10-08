@@ -678,6 +678,7 @@
             "CalculatedCostPerMinuteTooltip": "Calculé à partir de la consommation de la table, de l'énergie du carburant et de son prix."
         },
         "NoModule": "Pas de module",
+        "ModuleSameSkill": "Même métier que {0}",
         "MarginPercent": {
             "Tooltip": "Le pourcentage de marge qui sera appliqué sur votre prix de vente. Vérifiez l'option d'infobulle 'Type de calcul de la marge' pour les détails du calcul.",
             "MarginPercent": "Pourcentage"

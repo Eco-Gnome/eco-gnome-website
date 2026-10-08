@@ -1514,11 +1514,11 @@
         Rebuild();
     }
 
-    // Installs (or clears) the module of one slot (v4 slot+bonus system); the per-slot invariant
-    // lives in UserCraftingTable.SetPluginModuleForSlot.
+    // Sets the modules of one slot (v4 slot+bonus system); the per-slot invariant
+    // lives in UserCraftingTable.SetPluginModulesForSlot.
     private async Task SelectPluginModule(UserCraftingTable shoppingListCraftingTable, CraftingTablePluginModuleControl.ModuleSelection selection)
     {
-        if (!shoppingListCraftingTable.SetPluginModuleForSlot(selection.ModuleSlot, selection.PluginModule))
+        if (!shoppingListCraftingTable.SetPluginModulesForSlot(selection.ModuleSlot, selection.PluginModules))
         {
             return;
         }
