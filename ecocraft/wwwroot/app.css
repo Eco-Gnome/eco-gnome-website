@@ -446,6 +446,12 @@
     filter: grayscale(100%);
 }
 
+/* Specialty slot: the installed modules overlap like a stack of cards. */
+.pluginmodule-stack > * + * {
+    margin-left: -14px;
+    filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.5));
+}
+
 .grey-filter {
     filter: grayscale(100%);
 }

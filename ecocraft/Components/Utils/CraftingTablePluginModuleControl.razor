@@ -36,7 +36,7 @@
                 <ActivatorContent Context="menu">
                     <MudLink OnClick="@(args => menu.ToggleAsync(args))" Disabled="Disabled">
                         <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
-                            <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                            <div class="d-flex align-center pluginmodule-stack">
                                 @if (installed.Count == 0)
                                 {
                                     <EcoIcon Item="null" FallbackIcon="@MDIIcons.Filled.Cancel" Size="24" Class="no-pluginmodule mt-1"/>
@@ -45,7 +45,7 @@
                                 {
                                     <EcoIcon Item="@pluginModule" Size="24" Class="has-pluginmodule mt-1"/>
                                 }
-                            </MudStack>
+                            </div>
                         </MudTooltip>
                     </MudLink>
                 </ActivatorContent>
