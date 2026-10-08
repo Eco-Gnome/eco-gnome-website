@@ -287,6 +287,8 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 			Name = dataContext.Name,
 			IsDefault =	dataContext.IsDefault,
 			IsShoppingList = dataContext.IsShoppingList,
+			SourceDataContextId = dataContext.SourceDataContextId,
+			IsSourceLinked = dataContext.IsSourceLinked,
 		};
 	}
 
@@ -306,6 +308,15 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		var entry = context.Entry(stub);
 		entry.State = EntityState.Unchanged;
 		entry.Property(x => x.Name).IsModified = true;
+	}
+
+	public void UpdateSource(EcoCraftDbContext context, DataContext dataContext)
+	{
+		var stub = new DataContext { Id = dataContext.Id, SourceDataContextId = dataContext.SourceDataContextId, IsSourceLinked = dataContext.IsSourceLinked };
+		var entry = context.Entry(stub);
+		entry.State = EntityState.Unchanged;
+		entry.Property(x => x.SourceDataContextId).IsModified = true;
+		entry.Property(x => x.IsSourceLinked).IsModified = true;
 	}
 
 	public void UpdateIsDefault(EcoCraftDbContext context, DataContext dataContext)

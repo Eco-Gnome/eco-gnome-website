@@ -426,6 +426,12 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			.HasForeignKey(us => us.UserServerId)
 			.OnDelete(DeleteBehavior.Cascade);
 
+		modelBuilder.Entity<DataContext>()
+			.HasOne<DataContext>()
+			.WithMany()
+			.HasForeignKey(dc => dc.SourceDataContextId)
+			.OnDelete(DeleteBehavior.SetNull);
+
 		// UserSetting
 		modelBuilder.Entity<UserSetting>()
 			.ToTable("UserSetting");

@@ -426,6 +426,13 @@
         "Max": "Max"
     },
     "ShoppingList": {
+        "Source": {
+            "Title": "Price calculator context",
+            "Import": "Import",
+            "Link": "Link",
+            "LinkTooltip": "Keep skills, talents and tables in sync with this context: they are then edited in the price calculator.",
+            "LinkedTooltip": "Edit in the price calculator (context \"{0}\")"
+        },
         "PageTitle": "Shopping Lists",
         "Settings": "Settings",
         "ItemsToBuy": "Items to buy:",

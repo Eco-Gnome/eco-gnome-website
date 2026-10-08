@@ -351,6 +351,8 @@ public class ContextService(
             Name = src.Name + localizationService.GetTranslation("DataContext.CopySuffix"),
             IsDefault = false,
             IsShoppingList = src.IsShoppingList,
+            SourceDataContextId = src.SourceDataContextId,
+            IsSourceLinked = src.IsSourceLinked,
         };
 
         var newSkills = new Dictionary<Guid, UserSkill>();

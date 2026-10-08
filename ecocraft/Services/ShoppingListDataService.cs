@@ -90,6 +90,88 @@ namespace ecocraft.Services
             SynchronizeRecipeChildren(context, shoppingList, parentRecipe);
         }
 
+        // Writes the source context's skill levels, talents and table setups into the list rows it
+        // also has (only the skills and tables the list's recipes use), then refreshes the sub-recipe
+        // quantities. Only what differs is saved.
+        public async Task ApplySourceDataContext(EcoCraftDbContext context, DataContext shoppingList, DataContext source)
+        {
+            foreach (var userSkill in shoppingList.UserSkills.Where(us => us.Skill is not null))
+            {
+                var sourceUserSkill = userSkill.Skill!.GetCurrentUserSkill(source);
+                if (sourceUserSkill is null) continue;
+
+                if (userSkill.Level != sourceUserSkill.Level)
+                {
+                    userSkill.Level = sourceUserSkill.Level;
+                    userSkillDbService.UpdateLevel(context, userSkill);
+                }
+
+                CopyTalents(context, shoppingList, userSkill.Skill!, source);
+            }
+
+            foreach (var userCraftingTable in shoppingList.UserCraftingTables)
+            {
+                var sourceUserCraftingTable = userCraftingTable.CraftingTable.GetCurrentUserCraftingTable(source);
+                if (sourceUserCraftingTable is null) continue;
+
+                var pluginModules = userCraftingTable.CraftingTable.PluginModules
+                    .Where(pm => sourceUserCraftingTable.PluginModules.Any(spm => spm.Id == pm.Id))
+                    .ToList();
+
+                if (pluginModules.Select(pm => pm.Id).ToHashSet().SetEquals(userCraftingTable.PluginModules.Select(pm => pm.Id))
+                    && userCraftingTable.FuelItemId == sourceUserCraftingTable.FuelItemId
+                    && userCraftingTable.AdditionalCraftMinuteFee == sourceUserCraftingTable.AdditionalCraftMinuteFee
+                    && userCraftingTable.TotalCraftMinuteFee == sourceUserCraftingTable.TotalCraftMinuteFee)
+                {
+                    continue;
+                }
+
+                userCraftingTable.PluginModules = pluginModules;
+                userCraftingTable.FuelItem = sourceUserCraftingTable.FuelItem;
+                userCraftingTable.FuelItemId = sourceUserCraftingTable.FuelItemId;
+                userCraftingTable.AdditionalCraftMinuteFee = sourceUserCraftingTable.AdditionalCraftMinuteFee;
+                userCraftingTable.TotalCraftMinuteFee = sourceUserCraftingTable.TotalCraftMinuteFee;
+                await userCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
+            }
+
+            SynchronizeRecipeTree(context, shoppingList);
+        }
+
+        private void CopyTalents(EcoCraftDbContext context, DataContext shoppingList, Skill skill, DataContext source)
+        {
+            foreach (var talent in skill.Talents)
+            {
+                var sourceUserTalent = talent.GetCurrentUserTalent(source);
+                var userTalent = talent.GetCurrentUserTalent(shoppingList);
+
+                if (sourceUserTalent is null && userTalent is not null)
+                {
+                    shoppingList.UserTalents.Remove(userTalent);
+                    talent.UserTalents.Remove(userTalent);
+                    userTalentDbService.Destroy(context, userTalent);
+                }
+                else if (sourceUserTalent is not null && userTalent is null)
+                {
+                    userTalent = new UserTalent
+                    {
+                        Talent = talent,
+                        TalentId = talent.Id,
+                        DataContext = shoppingList,
+                        DataContextId = shoppingList.Id,
+                        Level = sourceUserTalent.Level,
+                    };
+                    userTalentDbService.Create(context, userTalent);
+                    shoppingList.UserTalents.Add(userTalent);
+                    talent.UserTalents.Add(userTalent);
+                }
+                else if (sourceUserTalent is not null && userTalent!.Level != sourceUserTalent.Level)
+                {
+                    userTalent.Level = sourceUserTalent.Level;
+                    userTalentDbService.UpdateLevel(context, userTalent);
+                }
+            }
+        }
+
         private void RemoveUserRecipeInternal(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
         {
             var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
@@ -224,6 +306,11 @@ namespace ecocraft.Services
             userSkillDbService.Create(context, userSkill);
             shoppingList.UserSkills.Add(userSkill);
             skill.UserSkills.Add(userSkill);
+
+            if (sourceDataContext is not null)
+            {
+                CopyTalents(context, shoppingList, skill, sourceDataContext);
+            }
 
             return userSkill;
         }

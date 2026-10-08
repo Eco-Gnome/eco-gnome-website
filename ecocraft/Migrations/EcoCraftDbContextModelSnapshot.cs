@@ -164,14 +164,22 @@ namespace ecocraft.Migrations
                     b.Property<bool>("IsShoppingList")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsSourceLinked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid?>("SourceDataContextId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("UserServerId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SourceDataContextId");
 
                     b.HasIndex("UserServerId");
 
@@ -1337,6 +1345,11 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.DataContext", b =>
                 {
+                    b.HasOne("ecocraft.Models.DataContext", null)
+                        .WithMany()
+                        .HasForeignKey("SourceDataContextId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("DataContexts")
                         .HasForeignKey("UserServerId")

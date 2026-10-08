@@ -67,6 +67,39 @@
                 <ErrorBoundary>
                     <ChildContent>
                         <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
+                            <MudPaper Outlined="true" Class="pa-3 mb-2">
+                                <MudStack Spacing="2">
+                                    <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("ShoppingList.Source.Title")</MudText>
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                        <MudSelect T="Guid?"
+                                                   @bind-Value="_sourceSelectionId"
+                                                   ToStringFunc="@(id => ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.Id == id)?.Name ?? "")"
+                                                   Dense="true"
+                                                   Variant="Variant.Outlined"
+                                                   Disabled="IsLinked"
+                                                   Class="flex-grow-1">
+                                            @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
+                                            {
+                                                <MudSelectItem T="Guid?" Value="@dataContext.Id">@dataContext.Name</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                        <MudButton Color="Color.Primary"
+                                                   Variant="Variant.Filled"
+                                                   Disabled="@(_sourceSelectionId is null || IsLinked)"
+                                                   OnClick="ImportSource">
+                                            @LocalizationService.GetTranslation("ShoppingList.Source.Import")
+                                        </MudButton>
+                                    </MudStack>
+                                    <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.Source.LinkTooltip")">
+                                        <MudSwitch T="bool"
+                                                   Value="IsLinked"
+                                                   ValueChanged="SetLinked"
+                                                   Disabled="@(_sourceSelectionId is null)"
+                                                   Color="Color.Primary"
+                                                   Label="@LocalizationService.GetTranslation("ShoppingList.Source.Link")"/>
+                                    </MudTooltip>
+                                </MudStack>
+                            </MudPaper>
                             <MudExpansionPanels MultiExpansion="true">
                                 <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Skills")" @bind-Expanded="ExpandedSkills">
                                     <MudTable Items="_selectedShoppingList.UserSkills.Where(us => us.Skill is not null)"
@@ -83,6 +116,12 @@
                                                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                                     <EcoIcon Item="@context.Skill"/>
                                                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
+                                                    @if (IsLinkedSkill(context))
+                                                    {
+                                                        <MudTooltip Text="@LinkedTooltip">
+                                                            <MudIcon Icon="@Icons.Material.Filled.Link" Size="Size.Small" Color="Color.Primary"/>
+                                                        </MudTooltip>
+                                                    }
                                                 </MudStack>
                                             </MudTd>
                                             <MudTd Class="px-0">
@@ -96,11 +135,13 @@
                                                                  Max="@(context.Skill!.MaxLevel)"
                                                                  Variant="Variant.Outlined"
                                                                  Immediate="true"
+                                                                 Disabled="@IsLinkedSkill(context)"
                                                                  ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
                                             </MudTd>
                                             <MudTd Class="px-0">
                                                 <TalentsControl DataContext="_selectedShoppingList"
                                                                 UserSkill="context"
+                                                                Disabled="@IsLinkedSkill(context)"
                                                                 OnChanged="OnTalentsChanged"/>
                                             </MudTd>
                                         </RowTemplate>
@@ -121,10 +162,17 @@
                                                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                                                     <EcoIcon Item="@context.CraftingTable"/>
                                                     <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
+                                                    @if (IsLinkedCraftingTable(context))
+                                                    {
+                                                        <MudTooltip Text="@LinkedTooltip">
+                                                            <MudIcon Icon="@Icons.Material.Filled.Link" Size="Size.Small" Color="Color.Primary"/>
+                                                        </MudTooltip>
+                                                    }
                                                 </MudStack>
                                             </MudTd>
                                             <MudTd Class="pa-1">
                                                 <CraftingTablePluginModuleControl UserCraftingTable="context"
+                                                                                  Disabled="@IsLinkedCraftingTable(context)"
                                                                                   ModuleSelected="@(selection => SelectPluginModule(context, selection))"/>
                                             </MudTd>
                                         </RowTemplate>
@@ -398,7 +446,9 @@
 
 @code {
     private DataContext? _selectedShoppingList;
+    // Price calculator context the list copies skills, talents and tables from: its source, or the default context.
     private DataContext? _referenceDataContext;
+    private Guid? _sourceSelectionId;
     private bool _isLoadingData;
     private Server? _serverData;
     private List<ITreeItemData<UserRecipe>> TreeItems { get; set; } = [];
@@ -1346,8 +1396,9 @@
             _serverData = serverData;
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
 
-            var referenceDataContextId = ContextService.CurrentUserServer.DataContexts
-                .FirstOrDefault(d => !d.IsShoppingList && d.IsDefault)?.Id;
+            var calculatorDataContexts = ContextService.CurrentUserServer.DataContexts.Where(d => !d.IsShoppingList).ToList();
+            var referenceDataContextId = (calculatorDataContexts.FirstOrDefault(d => d.Id == _selectedShoppingList.SourceDataContextId)
+                                          ?? calculatorDataContexts.FirstOrDefault(d => d.IsDefault))?.Id;
             try
             {
                 _referenceDataContext = referenceDataContextId is not null
@@ -1357,6 +1408,13 @@
             catch (Exception)
             {
                 _referenceDataContext = null;
+            }
+
+            _sourceSelectionId = _referenceDataContext?.Id;
+            if (IsLinked)
+            {
+                await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+                    ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, _referenceDataContext!));
             }
 
             RebuildTree();
@@ -1474,6 +1532,63 @@
     private void Rebuild()
     {
         RebuildTree();
+        StateHasChanged();
+    }
+
+    private bool IsLinked => _selectedShoppingList is { IsSourceLinked: true }
+                             && _referenceDataContext is not null
+                             && _referenceDataContext.Id == _selectedShoppingList.SourceDataContextId;
+
+    private bool IsLinkedSkill(UserSkill userSkill) => IsLinked && userSkill.Skill!.GetCurrentUserSkill(_referenceDataContext!) is not null;
+
+    private bool IsLinkedCraftingTable(UserCraftingTable userCraftingTable) => IsLinked && userCraftingTable.CraftingTable.GetCurrentUserCraftingTable(_referenceDataContext!) is not null;
+
+    private string LinkedTooltip => LocalizationService.GetTranslation("ShoppingList.Source.LinkedTooltip", _referenceDataContext?.Name ?? "");
+
+    private Task ImportSource() => ApplySource(false);
+
+    private Task SetLinked(bool isLinked) => isLinked ? ApplySource(true) : SaveSource(_selectedShoppingList!.SourceDataContextId, false);
+
+    // Copies the selected context into the list (the skills and tables its recipes use) and makes it the
+    // context new recipes copy from; linked, it is re-applied on every load.
+    private async Task ApplySource(bool isLinked)
+    {
+        if (_selectedShoppingList is null || _serverData is null || _sourceSelectionId is not Guid sourceId)
+        {
+            return;
+        }
+
+        var source = await DataContextDbService.GetDataContextWithData(sourceId, _serverData);
+        await SaveSource(sourceId, isLinked, async context =>
+        {
+            await ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, source);
+            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+        });
+
+        _referenceDataContext = source;
+        Rebuild();
+    }
+
+    private async Task SaveSource(Guid? sourceId, bool isLinked, Func<EcoCraftDbContext, Task>? alsoSave = null)
+    {
+        // The chips hold their own instance of the list: keep it in sync.
+        var chipShoppingList = ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.Id == _selectedShoppingList!.Id);
+        foreach (var shoppingList in new[] { _selectedShoppingList!, chipShoppingList })
+        {
+            if (shoppingList is null) continue;
+            shoppingList.SourceDataContextId = sourceId;
+            shoppingList.IsSourceLinked = isLinked;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            DataContextDbService.UpdateSource(context, _selectedShoppingList!);
+            if (alsoSave is not null)
+            {
+                await alsoSave(context);
+            }
+        });
+
         StateHasChanged();
     }
 
