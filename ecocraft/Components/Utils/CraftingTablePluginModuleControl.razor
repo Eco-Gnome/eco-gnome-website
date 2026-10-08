@@ -2,10 +2,10 @@
 @using ecocraft.Services
 @inject LocalizationService LocalizationService
 
-@* One icon per module slot of the table (one per installed module in the specialty slot). Clicking
-   opens a dropdown of the modules the table accepts for that slot: a single choice, or checkboxes in
-   the specialty slot, where a module reaching the same skill as a checked one is disabled. The
-   tooltip shows the installed modules' bonuses; all installed modules apply together. *@
+@* One icon per module slot of the table. On a regular slot, clicking cycles through the modules the
+   table accepts (none -> first variant -> ... -> last variant -> none). The specialty slot shows one
+   icon per installed module and opens a checkbox dropdown, where a module reaching the same skill as
+   a checked one is disabled. The tooltip shows the installed modules' bonuses; all apply together. *@
 @{
     var orderedModuleSlots = UserCraftingTable.CraftingTable.GetOrderedModuleSlots()
         .Where(ms => UserCraftingTable.CraftingTable.GetPluginModulesForSlot(ms).Count > 0)
@@ -18,6 +18,19 @@
         @foreach (var moduleSlot in orderedModuleSlots)
         {
             var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot);
+
+            @if (!moduleSlot.AllowsSeveralModules)
+            {
+                <MudLink OnClick="() => CycleModule(moduleSlot)" Disabled="Disabled">
+                    <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
+                        <EcoIcon Item="@installed.FirstOrDefault()"
+                                 FallbackIcon="@MDIIcons.Filled.Cancel"
+                                 Size="24"
+                                 Class="@($"{(installed.Count > 0 ? "has-pluginmodule" : "no-pluginmodule")} mt-1")"/>
+                    </MudTooltip>
+                </MudLink>
+                continue;
+            }
 
             <MudMenu Dense="true" Disabled="Disabled" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
                 <ActivatorContent Context="menu">
@@ -37,28 +50,16 @@
                     </MudLink>
                 </ActivatorContent>
                 <ChildContent>
-                    @if (!moduleSlot.AllowsSeveralModules)
-                    {
-                        <MudMenuItem OnClick="@(() => Select(moduleSlot, []))">
-                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                <MudIcon Icon="@MDIIcons.Filled.Cancel" Size="Size.Small"/>
-                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.NoModule")</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    }
                     @foreach (var candidate in GetOrderedCandidates(moduleSlot))
                     {
                         var isInstalled = installed.Any(pm => pm.Id == candidate.Id);
-                        var conflict = isInstalled ? null : installed.FirstOrDefault(pm => moduleSlot.AllowsSeveralModules && pm.ConflictsWith(candidate));
+                        var conflict = isInstalled ? null : installed.FirstOrDefault(pm => pm.ConflictsWith(candidate));
 
-                        <MudMenuItem OnClick="@(() => OnCandidateClicked(moduleSlot, candidate))"
-                                     AutoClose="@(!moduleSlot.AllowsSeveralModules)"
+                        <MudMenuItem OnClick="@(() => ToggleModule(moduleSlot, candidate))"
+                                     AutoClose="false"
                                      Disabled="@(conflict is not null)">
                             <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Style="min-width: 260px;">
-                                @if (moduleSlot.AllowsSeveralModules)
-                                {
-                                    <MudIcon Icon="@(isInstalled ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" Size="Size.Small"/>
-                                }
+                                <MudIcon Icon="@(isInstalled ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" Size="Size.Small"/>
                                 <EcoIcon Item="@candidate" Size="24"/>
                                 <MudStack Spacing="0">
                                     <MudText Typo="Typo.body2" Color="@(isInstalled ? Color.Primary : Color.Default)">@candidate.GetTooltip(LocalizationService)</MudText>
@@ -93,13 +94,20 @@
             .ToList();
     }
 
-    private Task OnCandidateClicked(ModuleSlot moduleSlot, PluginModule candidate)
+    private Task CycleModule(ModuleSlot moduleSlot)
     {
-        if (!moduleSlot.AllowsSeveralModules)
-        {
-            return Select(moduleSlot, [candidate]);
-        }
+        var candidates = GetOrderedCandidates(moduleSlot);
+        if (candidates.Count == 0) return Task.CompletedTask;
 
+        var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot).FirstOrDefault();
+        var currentIndex = installed is null ? -1 : candidates.FindIndex(pm => pm.Id == installed.Id);
+        var next = currentIndex + 1 < candidates.Count ? candidates[currentIndex + 1] : null;
+
+        return Select(moduleSlot, next is null ? [] : [next]);
+    }
+
+    private Task ToggleModule(ModuleSlot moduleSlot, PluginModule candidate)
+    {
         var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot);
         if (installed.RemoveAll(pm => pm.Id == candidate.Id) == 0)
         {
