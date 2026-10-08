@@ -20,19 +20,21 @@
             var installed = UserCraftingTable.GetInstalledPluginModules(moduleSlot);
 
             <MudMenu Dense="true" Disabled="Disabled" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
-                <ActivatorContent>
-                    <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="0" Style="@(Disabled ? "" : "cursor: pointer")">
-                            @if (installed.Count == 0)
-                            {
-                                <EcoIcon Item="null" FallbackIcon="@MDIIcons.Filled.Cancel" Size="24" Class="no-pluginmodule mt-1"/>
-                            }
-                            @foreach (var pluginModule in installed)
-                            {
-                                <EcoIcon Item="@pluginModule" Size="24" Class="has-pluginmodule mt-1"/>
-                            }
-                        </MudStack>
-                    </MudTooltip>
+                <ActivatorContent Context="menu">
+                    <MudLink OnClick="@(args => menu.ToggleAsync(args))" Disabled="Disabled">
+                        <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                                @if (installed.Count == 0)
+                                {
+                                    <EcoIcon Item="null" FallbackIcon="@MDIIcons.Filled.Cancel" Size="24" Class="no-pluginmodule mt-1"/>
+                                }
+                                @foreach (var pluginModule in installed)
+                                {
+                                    <EcoIcon Item="@pluginModule" Size="24" Class="has-pluginmodule mt-1"/>
+                                }
+                            </MudStack>
+                        </MudTooltip>
+                    </MudLink>
                 </ActivatorContent>
                 <ChildContent>
                     @if (!moduleSlot.AllowsSeveralModules)
