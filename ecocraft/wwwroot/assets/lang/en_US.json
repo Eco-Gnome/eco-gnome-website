@@ -265,6 +265,7 @@
     "RelatedRecipes": "Related recipes",
     "Search": "Search",
     "JoinPage": {
+        "ConnectInGame": "To join {name}, click Connect to Eco Gnome in the Eco Gnome tab of a store in game, or ask an admin for its join code.",
         "MissingParameter": "Missing {param} parameter",
         "JoiningServer": "Joining server...",
         "ServerNotFound": "Unable to find server with ecoServerId={ecoServerId}. Did you registered your server ?",
@@ -614,7 +615,7 @@
         "InGamePseudo": "In-Game pseudo",
         "InGamePseudoTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
         "InGameId": "In-Game Id",
-        "InGameIdTooltip": "Automatically filled when completing user registration inside Eco thanks to the EcoGnomeMod.",
+        "InGameIdTooltip": "Your Eco account ID (SLG account, the same on every world), filled in when you connect from the Eco Gnome tab of a store in game.",
         "MyServers": "My servers",
         "Pseudo": "Pseudo",
         "PublicId": "Public Id",
@@ -1529,13 +1530,16 @@
         "DiscordTip": "Tip: sign in with Discord to find your account on any browser or device."
     },
     "Discord": {
+        "UnlinkTitle": "Unlink Discord?",
+        "UnlinkWarning": "Signing in with Discord will no longer bring back this account. You stay on it in this browser; on another browser or device, you will need its backup (User settings, download button).",
+        "UnlinkCancel": "Cancel",
         "SwitchTitle": "This Discord account is already linked",
         "SwitchWarning": "This Discord account is linked to the Eco Gnome account <b>{linked}</b>.<br><br>If you continue, this browser switches to <b>{linked}</b>, and the account you are on now, <b>{current}</b>, will no longer be reachable from here. Export its backup first (User settings, download button) if you want to keep it.",
         "SwitchConfirm": "Switch to this account",
         "SwitchCancel": "Stay on this account",
         "Login": "Sign in with Discord",
         "Explain": "Sign in with Discord to find this account on another browser or device.",
-        "LinkedAs": "Linked to Discord as {name}.",
+        "LinkedAs": "Linked to Discord as",
         "Unlink": "Unlink"
     },
     "MarketPrice": {

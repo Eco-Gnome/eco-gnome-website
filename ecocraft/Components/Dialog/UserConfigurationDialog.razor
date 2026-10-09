@@ -7,6 +7,7 @@
 @inject UserLoginService UserLoginService
 @inject EcoLinkService EcoLinkService
 @inject IConfiguration Configuration
+@inject IDialogService DialogService
 @inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
 @inject EcoCraftDbContext EcoCraftDbContext
@@ -69,14 +70,7 @@
 		{
 			@* Discord ne remplace pas le compte : il permet de le retrouver sur un autre navigateur ou appareil. *@
 			<MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="pb-3">
-				@if (_discordLogin is null)
-				{
-					<MudIcon Icon="@Icons.Custom.Brands.Discord"/>
-				}
-				else
-				{
-					<MudAvatar Size="Size.Small"><MudImage Src="@DiscordAuth.AvatarUrl(_discordLogin)" Alt="" /></MudAvatar>
-				}
+				<MudIcon Icon="@Icons.Custom.Brands.Discord"/>
 				@if (_discordLogin is null)
 				{
 					<MudText Typo="Typo.body2" Class="flex-grow-1">@LocalizationService.GetTranslation("Discord.Explain")</MudText>
@@ -84,7 +78,11 @@
 				}
 				else
 				{
-					<MudText Typo="Typo.body2" Class="flex-grow-1">@LocalizationService.GetTranslation("Discord.LinkedAs", _discordLogin.DisplayName)</MudText>
+					<MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+						<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("Discord.LinkedAs")</MudText>
+						<MudAvatar Size="Size.Small"><MudImage Src="@DiscordAuth.AvatarUrl(_discordLogin)" Alt="" /></MudAvatar>
+						<MudText Typo="Typo.body2"><b>@_discordLogin.DisplayName</b></MudText>
+					</MudStack>
 					<MudButton Variant="Variant.Text" Color="Color.Error" OnClick="UnlinkDiscord">@LocalizationService.GetTranslation("Discord.Unlink")</MudButton>
 				}
 			</MudStack>
@@ -190,6 +188,13 @@
 	// Délier ferme aussi la session Discord, sinon la prochaine visite rattacherait à nouveau le compte.
 	private async Task UnlinkDiscord()
 	{
+		var confirmed = await DialogService.ShowMessageBoxAsync(
+			LocalizationService.GetTranslation("Discord.UnlinkTitle"),
+			LocalizationService.GetTranslation("Discord.UnlinkWarning"),
+			yesText: LocalizationService.GetTranslation("Discord.Unlink"),
+			cancelText: LocalizationService.GetTranslation("Discord.UnlinkCancel"));
+		if (confirmed != true) return;
+
 		await UserLoginService.DetachAsync(ContextService.CurrentUser!.Id, DiscordAuth.Provider);
 		Navigation.NavigateTo("/auth/logout?returnUrl=%2F", forceLoad: true);
 	}

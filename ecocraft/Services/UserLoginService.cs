@@ -53,10 +53,13 @@ public partial class UserLoginService(IDbContextFactory<EcoCraftDbContext> facto
         return await context.UserLogins.FirstOrDefaultAsync(l => l.UserId == userId && l.Provider == provider);
     }
 
-    /// <summary>Attaches the Discord login to the user. An auto-generated pseudo is replaced by the Discord name.</summary>
+    /// <summary>Attaches the Discord login to the user, replacing the Discord it had: one Discord per account and one account
+    /// per Discord. An auto-generated pseudo is replaced by the Discord name.</summary>
     public async Task AttachAsync(User user, DiscordIdentity identity)
     {
         await using var context = await factory.CreateDbContextAsync();
+        await context.UserLogins.Where(l => l.UserId == user.Id && l.Provider == DiscordAuth.Provider).ExecuteDeleteAsync();
+
         context.UserLogins.Add(new UserLogin
         {
             UserId = user.Id,

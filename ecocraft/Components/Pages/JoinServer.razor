@@ -44,20 +44,16 @@
             return;
         }
         
+        // The Eco server id is public: it no longer makes anyone join. Players join by connecting from the store tab in game,
+        // or with the server's join code.
         if (ContextService.CurrentUser!.UserServers.Find(us => us.Server.Id == server.Id) is null)
         {
-            if (isOpen)
-            {
-                Navigation.NavigateTo("/");
-                return;
-            }
+            if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.ConnectInGame", server.Name), Severity.Info);
+            Navigation.NavigateTo("/");
+            return;
+        }
 
-            Snackbar.Add(LocalizationService.GetTranslation("JoinPage.Success", server.Name), Severity.Success);
-        }
-        else
-        {
-            if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.AlreadyJoined", server.Name), Severity.Warning);
-        }
+        if (!isOpen) Snackbar.Add(LocalizationService.GetTranslation("JoinPage.AlreadyJoined", server.Name), Severity.Warning);
 
         await ContextService.ChangeServer(server);
         Navigation.NavigateTo("/");

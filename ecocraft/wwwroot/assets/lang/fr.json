@@ -265,6 +265,7 @@
     "RelatedRecipes": "Recettes associées",
     "Search": "Recherche",
     "JoinPage": {
+        "ConnectInGame": "Pour rejoindre {name}, clique sur Se connecter à Eco Gnome dans l'onglet Eco Gnome d'un magasin en jeu, ou demande son code d'accès à un admin.",
         "MissingParameter": "Paramètre {param} manquant",
         "JoiningServer": "Joindre un serveur...",
         "ServerNotFound": "Impossible de trouver un serveur avec ecoServerId={ecoServerId}. Avez-vous enregistré votre serveur ?",
@@ -614,7 +615,7 @@
         "InGamePseudo": "Pseudo dans le jeu",
         "InGamePseudoTooltip": "Remplie automatiquement lors de l'enregistrement de l'utilisateur dans Eco grâce à l'EcoGnomeMod.",
         "InGameId": "Id en jeu",
-        "InGameIdTooltip": "Rempli automatiquement lors de l'enregistrement de l'utilisateur dans Eco grâce à l'EcoGnomeMod.",
+        "InGameIdTooltip": "L'identifiant de votre compte Eco (compte SLG, le même sur tous les mondes), rempli quand vous vous connectez depuis l'onglet Eco Gnome d'un magasin en jeu.",
         "MyServers": "Mes serveurs",
         "Pseudo": "Pseudo",
         "PublicId": "Id publique",
@@ -1529,13 +1530,16 @@
         "DiscordTip": "Astuce : connecte-toi avec Discord pour retrouver ton compte sur n'importe quel navigateur ou appareil."
     },
     "Discord": {
+        "UnlinkTitle": "Délier Discord ?",
+        "UnlinkWarning": "Se connecter avec Discord ne ramènera plus ce compte. Tu restes dessus dans ce navigateur ; sur un autre navigateur ou appareil, il faudra sa sauvegarde (Paramètres utilisateur, bouton de téléchargement).",
+        "UnlinkCancel": "Annuler",
         "SwitchTitle": "Ce compte Discord est déjà lié",
         "SwitchWarning": "Ce compte Discord est lié au compte Eco Gnome <b>{linked}</b>.<br><br>Si tu continues, ce navigateur passe sur <b>{linked}</b>, et le compte sur lequel tu es, <b>{current}</b>, ne sera plus accessible d'ici. Exporte d'abord sa sauvegarde (Paramètres utilisateur, bouton de téléchargement) si tu veux le garder.",
         "SwitchConfirm": "Passer sur ce compte",
         "SwitchCancel": "Rester sur ce compte",
         "Login": "Se connecter avec Discord",
         "Explain": "Connecte-toi avec Discord pour retrouver ce compte sur un autre navigateur ou appareil.",
-        "LinkedAs": "Relié à Discord en tant que {name}.",
+        "LinkedAs": "Relié à Discord en tant que",
         "Unlink": "Délier"
     },
     "MarketPrice": {

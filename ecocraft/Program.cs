@@ -120,6 +120,7 @@ builder.Services.AddScoped<EcoMarketService>();
 // Requêtes vers les serveurs web Eco (prix du marché). Adresses privées refusées, sauf en dev avec un serveur Eco local.
 var allowPrivateEcoAddresses = builder.Configuration.GetValue<bool>("EcoMarket:AllowPrivateAddresses");
 builder.Services.AddHttpClient(EcoMarketService.HttpClientName)
+    .ConfigureHttpClient(client => client.MaxResponseContentBufferSize = 5_000_000) // A market answer weighs a few hundred KB: anything far bigger is refused.
     .ConfigurePrimaryHttpMessageHandler(() => allowPrivateEcoAddresses
         ? new SocketsHttpHandler()
         : new SocketsHttpHandler { ConnectCallback = EcoMarketService.ConnectPublicOnlyAsync });
@@ -160,17 +161,24 @@ if (DiscordAuth.IsConfigured(builder.Configuration))
         options.ClientSecret = builder.Configuration["Discord:ClientSecret"]!;
         options.CallbackPath = "/auth/discord/callback";
         options.SaveTokens = false;
+        // The return from Discord is a top-level navigation: Lax is enough, and over plain http (local dev) browsers
+        // refuse the default SameSite=None cookie without Secure, which fails the login with "Correlation failed".
+        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
     });
 }
 
 builder.Services.AddCascadingAuthenticationState();
 
 // Derrière le reverse proxy : schéma https pour l'URL de retour OAuth, IP réelle pour la limite de débit.
+// Only the reverse proxy is trusted: it reaches the container from the host (loopback or a Docker bridge), so an address
+// a client writes in X-Forwarded-For itself is ignored.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
+    foreach (var network in new[] { "127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "::1/128", "fc00::/7" })
+        options.KnownNetworks.Add(Microsoft.AspNetCore.HttpOverrides.IPNetwork.Parse(network));
 });
 
 // Le mod envoie le JSON des données du serveur compressé en gzip.
