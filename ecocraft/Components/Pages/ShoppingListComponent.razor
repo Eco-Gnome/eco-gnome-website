@@ -166,13 +166,17 @@
                                                      Placeholder="@LocalizationService.GetTranslation("PriceCalculator.AddRecipe")"
                                                      Class="auto-complete-input flex-grow-1"
                                                      Dense="true"
-                                                     MaxItems="null"
+                                                     MaxItems="RecipeSearchMaxItems"
+                                                     DebounceInterval="200"
                                                      Variant="Variant.Outlined"
                                                      AnchorOrigin="Origin.BottomLeft"
                                                      TransformOrigin="Origin.TopLeft">
                                         <ItemTemplate>
                                             <RecipeSummary Recipe="context" Class="pl-2" />
                                         </ItemTemplate>
+                                        <MoreItemsTemplate>
+                                            <MudText Typo="Typo.caption" Class="pa-2 mud-text-secondary">@LocalizationService.GetTranslation("ShoppingList.RecipeSearchMore")</MudText>
+                                        </MoreItemsTemplate>
                                     </MudAutocomplete>
                                     <MudButton Variant="Variant.Text"
                                                Color="Color.Tertiary"
@@ -342,6 +346,9 @@
     private Server? _serverData;
 
     private const int StripMaxIcons = 6;
+    // Chaque résultat est un RecipeSummary (une dizaine de composants) : afficher toutes les recettes du serveur
+    // rendait l'ouverture du champ très lente. Au-delà, on invite à affiner la recherche.
+    private const int RecipeSearchMaxItems = 50;
     private bool _isAutoOpenPopoverOpen;
     // Lignes repliées de l'arbre (clés RecipeRowKey / IngredientRowKey) ; tout est déplié par défaut.
     private readonly HashSet<string> _collapsedRows = [];
@@ -1942,8 +1949,10 @@
         }
         else
         {
+            // Nom de la recette ou de son métier : taper un métier liste ses recettes.
             result = _serverData.Recipes
-                .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                .Where(r => LocalizationService.GetTranslation(r).Contains(value, StringComparison.InvariantCultureIgnoreCase)
+                            || (r.Skill is not null && LocalizationService.GetTranslation(r.Skill).Contains(value, StringComparison.InvariantCultureIgnoreCase)))
                 .ToList();
         }
 

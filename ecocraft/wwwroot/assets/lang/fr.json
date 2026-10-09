@@ -483,6 +483,7 @@
         "IHave": "J'en ai",
         "Remaining": "Reste",
         "AllInStock": "J'ai tout",
+        "RecipeSearchMore": "D'autres recettes existent : tapez un nom de recette ou de métier pour affiner.",
         "StopGuidedAutoExpandLabel": "Arrêter l'ouverture auto",
         "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees.",
         "VisualizeProductionChain": "Visualiser",
