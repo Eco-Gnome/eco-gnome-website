@@ -476,92 +476,550 @@
                  0 -1px 0 #000
 }
 
-.guided-choice-focus {
-    border: 1px solid rgba(255, 193, 7, 0.75);
-    border-radius: 8px;
-    padding: 2px 4px;
-    background-color: rgba(255, 193, 7, 0.12);
-    box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.25);
+/* Shopping list : bandeau, arbre en tableau, menu de choix, colonne droite (préfixe sl-). DA carrée : rayons 4 px. */
+.sl-muted {
+    color: var(--mud-palette-text-secondary);
 }
 
-.guided-choice-muted {
-    opacity: 0.45;
-    transition: opacity 0.15s ease;
+.sl-caption {
+    font-size: 11px;
+    color: var(--mud-palette-text-secondary);
 }
 
-.shopping-list-ingredient-scroll {
-    flex: 1 1 0;
-    min-width: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+.sl-warning {
+    color: var(--mud-palette-warning);
 }
 
-.shopping-list-tree {
-    overflow-x: hidden;
+.sl-right {
+    text-align: right;
 }
 
-.shopping-list-tree .mud-treeview-item-label {
+.sl-strip {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 10px 14px;
+}
+
+.sl-strip-button {
+    text-transform: none !important;
+}
+
+.sl-strip-button-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.15;
+}
+
+.sl-strip-button-title {
+    font-weight: 500;
+}
+
+.sl-strip-button-summary {
+    font-size: 11px;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-strip-separator {
+    width: 1px;
+    height: 28px;
+    background: var(--mud-palette-lines-default);
+}
+
+.sl-strip-label {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-strip-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sl-strip-icon {
+    position: relative;
+    width: 32px;
+    height: 32px;
+}
+
+.sl-strip-level {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: var(--mud-palette-appbar-background);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+}
+
+.sl-strip-module {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 3px;
+    box-shadow: 0 0 0 2px var(--mud-palette-surface);
+}
+
+.sl-strip-more {
+    width: 32px;
+    height: 32px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(255, 255, 255, .35);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, .06);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sl-strip-more:hover {
+    background: rgba(255, 255, 255, .12);
+    border-color: rgba(255, 255, 255, .6);
+}
+
+.sl-auto-open-anchor {
+    position: relative;
+}
+
+.sl-auto-open {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+}
+
+.sl-auto-open-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sl-auto-open-title {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.sl-auto-open-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.sl-auto-open-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 8px;
+}
+
+.sl-auto-open-option-title {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sl-auto-open-option-desc {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-auto-open-option-example {
+    font-size: 12px;
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* Arbre : une grille par ligne, colonnes Objet | Quantité | Obtenu via | ✕. */
+.sl-tree {
+    overflow-x: auto;
+}
+
+.sl-tree-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 90px minmax(160px, 280px) 40px;
+    gap: 0 12px;
+    align-items: center;
+    min-height: 46px;
+    min-width: 560px;
+    padding: 0 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.sl-tree-head {
+    min-height: 0;
+    padding: 6px 4px;
+    border-bottom-color: var(--mud-palette-lines-default);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-root {
+    background: rgba(255, 255, 255, .03);
+}
+
+.sl-root .sl-item-name {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.sl-menu-open {
+    background: rgba(66, 165, 245, .06);
+}
+
+.sl-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     min-width: 0;
 }
 
-.shopping-list-tree .mud-treeview-item-label > * {
-    width: 100%;
+.sl-chevron {
+    flex: none;
+    padding: 2px !important;
+}
+
+.sl-chevron-placeholder {
+    flex: none;
+    width: 24px;
+}
+
+.sl-item-text {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
+    line-height: 1.2;
 }
 
-.shopping-list-recipe-row {
-    flex: 1 1 auto;
-    width: 100%;
-    min-width: 0;
-    flex-wrap: nowrap;
-}
-
-.shopping-list-recipe-primary-product,
-.shopping-list-recipe-quantity {
-    flex: 0 0 auto;
-}
-
-.shopping-list-recipe-label {
-    flex: 0 1 190px;
-    min-width: 120px;
-    overflow: hidden;
-}
-
-.shopping-list-recipe-label .mud-typography {
-    max-width: 100%;
+.sl-item-name {
+    font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.shopping-list-ingredient-row {
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    gap: 4px;
+.sl-item-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sl-item-product {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-quantity-input {
+    width: 90px;
+}
+
+.sl-quantity-input input {
+    text-align: right;
+}
+
+.sl-chip {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 3px 4px 3px 3px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.sl-chip:disabled {
+    cursor: default;
+}
+
+.sl-chip:not(:disabled):hover {
+    background: rgba(255, 255, 255, .06);
+}
+
+.sl-chip-static {
+    cursor: default;
+}
+
+.sl-chip-icon {
+    flex: none;
+    border-radius: 2px;
+}
+
+.sl-chip-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sl-chip-sub {
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-chip-end {
+    flex: none;
+    margin-left: auto;
+}
+
+.sl-chip-buy {
+    padding-left: 6px;
+    border-color: rgba(255, 167, 38, .5);
+    color: var(--mud-palette-secondary);
+}
+
+.sl-chip-stock {
+    padding-left: 6px;
+    border-color: rgba(61, 203, 108, .5);
+    color: var(--mud-palette-success);
+}
+
+.sl-chip-tag {
+    border-color: rgba(66, 165, 245, .5);
+    color: var(--mud-palette-primary);
+}
+
+/* Menu de choix de recette, inséré sous la ligne de l'ingrédient. */
+.sl-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 6px 0 10px;
+    padding: 14px;
+    background: #41424c;
+    border: 1px solid rgba(66, 165, 245, .5);
+    border-radius: 4px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+}
+
+.sl-menu-pending {
+    border-color: var(--mud-palette-warning);
+}
+
+.sl-menu-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.sl-menu-title {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.sl-menu-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.sl-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .15);
+    cursor: pointer;
+}
+
+.sl-card:hover {
+    border-color: rgba(255, 255, 255, .18);
+}
+
+.sl-card.sl-chosen {
+    border-color: var(--mud-palette-primary);
+    background: rgba(66, 165, 245, .12);
+}
+
+.sl-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sl-card-io {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-card-element {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Colonne droite. */
+.sl-side-panels .mud-expand-panel {
+    margin: 0 0 16px 0 !important;
+}
+
+.sl-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-    min-width: max-content;
-    box-sizing: border-box;
+    padding-left: 14px;
 }
 
-.shopping-list-choice-container {
-    flex: 0 0 auto;
-    min-width: max-content;
+.sl-panel-title {
+    font-size: 15px;
+    font-weight: 500;
 }
 
-.shopping-list-choice-row {
-    flex-wrap: nowrap;
-    row-gap: 0;
-    flex: 0 0 auto;
-    width: max-content;
+.sl-panel-body {
+    display: flex;
+    flex-direction: column;
+    padding: 0 14px 10px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
 }
 
-.shopping-list-choice-row > * {
-    flex: 0 0 auto;
+.sl-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
 }
 
-.shopping-list-choice-row-pending {
-    max-width: none;
+.sl-tag-name {
+    display: flex;
+    flex-direction: column;
+    width: 110px;
+    min-width: 0;
+    line-height: 1.2;
+    font-size: 13px;
+}
+
+.sl-tag-choice {
+    font-size: 11px;
+    color: var(--mud-palette-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sl-tag-candidates {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.sl-tag-candidate {
+    position: relative;
+    display: flex;
+    border: 2px solid rgba(255, 255, 255, .18);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.sl-tag-candidate.sl-chosen {
+    border-color: var(--mud-palette-primary);
+    background: rgba(66, 165, 245, .12);
+}
+
+.sl-tag-star {
+    position: absolute;
+    top: -8px;
+    right: -7px;
+    width: 14px !important;
+    height: 14px !important;
+    color: rgba(255, 255, 255, .4);
+}
+
+.sl-tag-candidate.sl-chosen .sl-tag-star {
+    color: var(--mud-palette-primary);
+}
+
+.sl-buy-row {
+    display: grid;
+    grid-template-columns: 22px 26px minmax(0, 1fr) 48px 72px 52px;
+    gap: 0 8px;
+    align-items: center;
+    height: 40px;
+    font-size: 13px;
+}
+
+.sl-buy-head {
+    height: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.sl-buy-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sl-in-stock {
+    opacity: .45;
+}
+
+.sl-in-stock .sl-buy-name {
+    text-decoration: line-through;
+}
+
+.sl-stock-input {
+    margin: 0 !important;
+}
+
+.sl-stock-input input {
+    padding: 4px 6px !important;
+    text-align: right;
+    font-size: 13px;
+}
+
+.sl-remaining {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.sl-surplus-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 30px;
+    font-size: 13px;
+}
+
+.sl-surplus-quantity {
+    font-weight: 700;
+    color: var(--mud-palette-success);
 }
 
 .guided-choice-scroll-anchor {
