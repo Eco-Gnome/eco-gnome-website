@@ -23,8 +23,8 @@
                            Dense="true"
                            Variant="Variant.Outlined"
                            Style="width: 300px;">
-                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("ShoppingList.SourceDefault")</MudSelectItem>
-                    @foreach (var dataContext in CalculatorDataContexts)
+                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">@GetSourceName(null)</MudSelectItem>
+                    @foreach (var dataContext in CalculatorDataContexts.Where(d => !d.IsDefault))
                     {
                         <MudSelectItem T="Guid?" Value="@dataContext.Id">@GetSourceName(dataContext.Id)</MudSelectItem>
                     }
@@ -134,12 +134,15 @@
 
     protected override void OnInitialized()
     {
-        _sourceId = SourceId;
+        // Une source enregistrée égale au contexte par défaut s'affiche comme l'entrée « par défaut ».
+        _sourceId = CalculatorDataContexts.FirstOrDefault(d => d.Id == SourceId)?.IsDefault == true ? null : SourceId;
     }
 
+    // Pas de source (null) = le contexte par défaut du calculateur, affiché sous son nom avec ★ : il n'est pas
+    // proposé une seconde fois, et la liste suit le contexte par défaut même s'il change.
     private string GetSourceName(Guid? id)
     {
-        var dataContext = CalculatorDataContexts.FirstOrDefault(d => d.Id == id);
+        var dataContext = CalculatorDataContexts.FirstOrDefault(d => id is null ? d.IsDefault : d.Id == id);
         if (dataContext is null) return LocalizationService.GetTranslation("ShoppingList.SourceDefault");
         return dataContext.IsDefault ? $"★ {dataContext.Name}" : dataContext.Name;
     }
