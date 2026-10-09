@@ -13,6 +13,18 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.7.1",
+            "2026-10-09",
+            "Shopping List Redesign",
+            """
+            - Clearer recipe tree: each ingredient shows how you get it (recipe, Buy, In stock). Click it to pick a recipe from cards showing their ingredients, or "Buy it".
+            - Automatic opening: the three options are explained in one popover, and "Buy it" is no longer asked again during guided expansion.
+            - Stock and tags: enter what you already have to see what is left to buy, and pick the item bought for a tag with the blue star.
+            - Professions & tables: a summary strip opens a window with levels, talents, modules and the context to import from.
+            - Faster recipe search, which also matches profession names.
+            """
+        ),
+        new ReleaseVersion(
             "1.7.0",
             "2026-10-09",
             "Eco Integration Without Codes, Server Market Prices & Discord Login",
