@@ -1414,6 +1414,35 @@ namespace ecocraft.Migrations
                     b.ToTable("UserSetting", (string)null);
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserShoppingListItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ChosenItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DataContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemOrTagId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Stock")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChosenItemId");
+
+                    b.HasIndex("DataContextId");
+
+                    b.HasIndex("ItemOrTagId");
+
+                    b.ToTable("UserShoppingListItem", (string)null);
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2081,6 +2110,32 @@ namespace ecocraft.Migrations
                     b.Navigation("DataContext");
                 });
 
+            modelBuilder.Entity("ecocraft.Models.UserShoppingListItem", b =>
+                {
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ChosenItem")
+                        .WithMany()
+                        .HasForeignKey("ChosenItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ecocraft.Models.DataContext", "DataContext")
+                        .WithMany("UserShoppingListItems")
+                        .HasForeignKey("DataContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ecocraft.Models.ItemOrTag", "ItemOrTag")
+                        .WithMany()
+                        .HasForeignKey("ItemOrTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChosenItem");
+
+                    b.Navigation("DataContext");
+
+                    b.Navigation("ItemOrTag");
+                });
+
             modelBuilder.Entity("ecocraft.Models.UserSkill", b =>
                 {
                     b.HasOne("ecocraft.Models.DataContext", "DataContext")
@@ -2142,6 +2197,8 @@ namespace ecocraft.Migrations
                     b.Navigation("UserRecipes");
 
                     b.Navigation("UserSettings");
+
+                    b.Navigation("UserShoppingListItems");
 
                     b.Navigation("UserSkills");
 

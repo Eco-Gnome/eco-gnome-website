@@ -70,6 +70,8 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 			await UserAutomationInputs.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(UserAutomationTarget))
 			await UserAutomationTargets.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		else if (type == typeof(UserShoppingListItem))
+			await UserShoppingListItems.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(BuildingPlan))
 			await BuildingPlans.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
 		else if (type == typeof(Skill))
@@ -130,6 +132,7 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
     public DbSet<UserMargin> UserMargins { get; set; }
     public DbSet<UserAutomationInput> UserAutomationInputs { get; set; }
     public DbSet<UserAutomationTarget> UserAutomationTargets { get; set; }
+    public DbSet<UserShoppingListItem> UserShoppingListItems { get; set; }
     public DbSet<BuildingPlan> BuildingPlans { get; set; }
     public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
     public DbSet<EcoLinkRequest> EcoLinkRequests { get; set; }
@@ -487,6 +490,28 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
             .WithMany()
             .HasForeignKey(uat => uat.ItemOrTagId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // UserShoppingListItem
+        modelBuilder.Entity<UserShoppingListItem>()
+            .ToTable("UserShoppingListItem");
+
+        modelBuilder.Entity<UserShoppingListItem>()
+            .HasOne(usli => usli.DataContext)
+            .WithMany(dc => dc.UserShoppingListItems)
+            .HasForeignKey(usli => usli.DataContextId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserShoppingListItem>()
+            .HasOne(usli => usli.ItemOrTag)
+            .WithMany()
+            .HasForeignKey(usli => usli.ItemOrTagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserShoppingListItem>()
+            .HasOne(usli => usli.ChosenItem)
+            .WithMany()
+            .HasForeignKey(usli => usli.ChosenItemId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // UserCraftingTable
         modelBuilder.Entity<UserCraftingTable>()

@@ -1008,6 +1008,7 @@ public class DataContext
     public List<UserMargin> UserMargins { get; set; } = [];
     public List<UserAutomationInput> UserAutomationInputs { get; set; } = [];
     public List<UserAutomationTarget> UserAutomationTargets { get; set; } = [];
+    public List<UserShoppingListItem> UserShoppingListItems { get; set; } = [];
 
     public List<UserRecipe> GetRootShoppingListRecipes()
     {
@@ -1064,6 +1065,25 @@ public class UserAutomationTarget
 
     public DataContext DataContext { get; set; }
     public ItemOrTag ItemOrTag { get; set; }
+}
+
+// Réglage d'une ligne « À acheter » d'une shopping list : quantité déjà possédée (Stock, déduite du reste à acheter à
+// l'affichage seulement) et, pour un tag, l'objet acheté (ChosenItem ; null = le tag lui-même, n'importe quel objet).
+// Une ligne n'existe que si Stock > 0 ou ChosenItem est renseigné.
+public class UserShoppingListItem
+{
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
+    [ForeignKey("DataContext")] public Guid DataContextId { get; set; }
+    [ForeignKey("ItemOrTag")] public Guid ItemOrTagId { get; set; }
+    [ForeignKey("ChosenItem")] public Guid? ChosenItemId { get; set; }
+
+    public decimal Stock { get; set; }
+
+    public DataContext DataContext { get; set; }
+    public ItemOrTag ItemOrTag { get; set; }
+    public ItemOrTag? ChosenItem { get; set; }
+
+    public bool IsEmpty() => Stock <= 0 && ChosenItemId is null;
 }
 
 // Plan de bâtiment du planificateur, propre à un joueur sur un serveur (pas à un DataContext :
