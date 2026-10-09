@@ -13,6 +13,22 @@ public class ReleaseVersionService
     public static List<ReleaseVersion> ReleaseVersions =
     [
         new ReleaseVersion(
+            "1.7.0",
+            "2026-10-09",
+            "Eco Integration Without Codes, Server Market Prices & Discord Login",
+            """
+            - Connect Eco in one click: no more chat commands, join codes or secret keys. In game, open the Eco Gnome tab of any store: an admin clicks Register this server, a player clicks Connect to Eco Gnome, and a page opens on Eco Gnome to confirm. Players join the Eco Gnome server by themselves. Requires the Eco Gnome mod 1.7.0 (Eco 14.2).
+            - Server data arrives by itself: once registered, the Eco server sends its items, recipes and skills at each start, only when they changed. No more file to upload by hand (manual upload still works).
+            - Server market prices: Eco Gnome reads the average prices of your server's market (store offers and sales of the last days) and suggests them next to the buy prices you type. Click the store icon to use one. Admins set or test the Eco server's address in Server Management.
+            - New store tab in game: price actions as cards (Update prices, Rebuild offers, Send buy prices), shopping list buttons for every player, your contexts picked from a list, advanced settings folded away, and results shown in popups with clickable items.
+            - Send your buy prices from your stores: the prices of your store's buy offers become the prices you pay for your ingredients in Eco Gnome, tag offers included (a price on "Log" goes to every log you buy).
+            - Unpriced items (Eco 14.2): items Eco Gnome has no price for leave their store offers unpriced, so nothing is sold or bought at a made-up price. Rebuild offers shows what will be added and removed before touching the store, and a skill filter no longer removes the offers of other skills.
+            - Shopping lists in game: get your Eco Gnome shopping list as a paper in game, track your purchases and buy the whole list from a store in one go. A price calculator context can be imported into a shopping list, with its talents.
+            - Specialty modules: a crafting table takes one specialty module per skill, picked from a dropdown.
+            - Sign in with Discord (optional): find your account on any browser or device. Your Discord avatar replaces the generic icon, and your anonymous account keeps working without Discord.
+            """
+        ),
+        new ReleaseVersion(
             "1.5.2",
             "2026-09-30",
             "Building Planner: Real Game Blocks in 3D & Furniture",
