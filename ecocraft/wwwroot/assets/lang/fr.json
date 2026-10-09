@@ -645,6 +645,8 @@
         "3": "!"
     },
     "PriceCalculator": {
+        "Refresh": "Rafraîchir",
+        "WaitingForServerData": "En attente des données du serveur Eco (objets, recettes, métiers). Elles arrivent une minute ou deux après l'enregistrement ou le redémarrage du serveur : rafraîchis alors la page.",
         "MagickFix": "Correction Magique (A essayer avant de reset!)",
         "PageTitle": "Calculateur de prix",
         "ContextName": "Nom du contexte",
@@ -1502,5 +1504,56 @@
             "Remove": "Supprimer l'image",
             "None": "Aucune image. Elle est réduite à 1024 px et enregistrée avec le plan (pas dans le lien de partage court)."
         }
+    },
+    "LinkPage": {
+        "DataComing": "Le serveur Eco envoie maintenant ses données (objets, recettes, métiers). Ça prend une minute ou deux : ouvre Eco Gnome et rafraîchis la page quand elles sont là.",
+        "Title": "Relier Eco à Eco Gnome",
+        "UserQuestion": "Relier le joueur Eco <b>{player}</b> du serveur <b>{server}</b> à ton compte Eco Gnome <b>{account}</b> ?",
+        "UserExplain": "Une fois relié, l'onglet Eco Gnome de tes boutiques peut importer tes prix et envoyer tes prix d'achat, sans aucune commande.",
+        "ServerQuestion": "Enregistrer le serveur Eco <b>{server}</b> sur Eco Gnome ?",
+        "ServerExplain": "Le serveur enverra lui-même ses données (objets, recettes, métiers) à chaque démarrage, ainsi que les prix moyens de son marché. Les joueurs pourront ensuite se connecter depuis n'importe quelle boutique.",
+        "CreateServer": "Créer un nouveau serveur Eco Gnome",
+        "UseExistingServer": "Utiliser un de mes serveurs Eco Gnome",
+        "ServerName": "Serveur Eco Gnome",
+        "Confirm": "Confirmer",
+        "Reject": "Ce n'est pas moi",
+        "UserDone": "Ton compte est relié.",
+        "ServerDone": "Le serveur est enregistré sur Eco Gnome.",
+        "BackToEco": "Tu peux retourner sur Eco : l'onglet de la boutique se met à jour tout seul.",
+        "OpenEcoGnome": "Ouvrir Eco Gnome",
+        "Expired": "Ce lien a expiré ou a déjà servi. Clique à nouveau sur Connect dans Eco.",
+        "Rejected": "La demande est annulée. Rien n'a été relié.",
+        "ServerNotConnected": "Ce serveur Eco n'est pas enregistré sur Eco Gnome. Demande à un admin de l'enregistrer depuis l'onglet Eco Gnome d'un magasin.",
+        "ServerOwned": "Ce serveur Eco est déjà enregistré avec le serveur Eco Gnome {name}. Demande à l'un de ses admins de l'enregistrer.",
+        "NotAdmin": "Tu dois être admin de ce serveur Eco Gnome.",
+        "DiscordTip": "Astuce : connecte-toi avec Discord pour retrouver ton compte sur n'importe quel navigateur ou appareil."
+    },
+    "Discord": {
+        "SwitchTitle": "Ce compte Discord est déjà lié",
+        "SwitchWarning": "Ce compte Discord est lié au compte Eco Gnome <b>{linked}</b>.<br><br>Si tu continues, ce navigateur passe sur <b>{linked}</b>, et le compte sur lequel tu es, <b>{current}</b>, ne sera plus accessible d'ici. Exporte d'abord sa sauvegarde (Paramètres utilisateur, bouton de téléchargement) si tu veux le garder.",
+        "SwitchConfirm": "Passer sur ce compte",
+        "SwitchCancel": "Rester sur ce compte",
+        "Login": "Se connecter avec Discord",
+        "Explain": "Connecte-toi avec Discord pour retrouver ce compte sur un autre navigateur ou appareil.",
+        "LinkedAs": "Relié à Discord en tant que {name}.",
+        "Unlink": "Délier"
+    },
+    "MarketPrice": {
+        "Title": "Marché du serveur ({currency}, {date})",
+        "Traded": "vendu à {price} ({quantity} vendus sur {days} jours)",
+        "Sell": "les boutiques vendent à {price} ({shops} boutiques)",
+        "Buy": "les boutiques achètent à {price} ({shops} boutiques)",
+        "Use": "clique pour utiliser {price}"
+    },
+    "EcoMarketManagement": {
+        "Title": "Prix du marché du serveur Eco",
+        "Help": "Eco Gnome lit les prix moyens du marché du serveur Eco sur son serveur web (l'adresse annoncée par le mod à chaque démarrage), pour les suggérer à côté des prix d'achat. Ne renseigne une adresse que si celle annoncée est fausse, par exemple derrière un reverse proxy.",
+        "ReportedAddress": "Adresse annoncée par le mod",
+        "AddressOverride": "Adresse à utiliser à la place (optionnel)",
+        "Test": "Tester maintenant",
+        "LastUpdate": "Derniers prix lus : {date}",
+        "Never": "Aucun prix lu pour l'instant.",
+        "Ok": "Prix lus sur le serveur Eco.",
+        "Saved": "Adresse enregistrée."
     }
 }

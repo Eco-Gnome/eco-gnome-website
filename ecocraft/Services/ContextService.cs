@@ -1,9 +1,12 @@
 ﻿using ecocraft.Extensions;
 using ecocraft.Models;
 using ecocraft.Services.DbServices;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Services;
+
+public record DiscordSwitch(Guid LinkedUserId, Guid LinkedSecretId, string LinkedPseudo, string CurrentPseudo);
 
 public class ContextService(
     IDbContextFactory<EcoCraftDbContext> factory,
@@ -22,7 +25,9 @@ public class ContextService(
     UserDbService userDbService,
     UserServerDbService userServerDbService,
     LiveCircuitTracker liveCircuitTracker,
-    CircuitSession circuitSession)
+    CircuitSession circuitSession,
+    AuthenticationStateProvider authenticationStateProvider,
+    UserLoginService userLoginService)
 {
     private readonly List<Server> _defaultServers = [];
 
@@ -82,6 +87,14 @@ public class ContextService(
             server.MarginDefault = serverWithUsers.MarginDefault;
             server.MarginMax = serverWithUsers.MarginMax;
             server.LastDataUploadTime = serverWithUsers.LastDataUploadTime;
+            server.DataHash = serverWithUsers.DataHash;
+            server.MarketCurrency = serverWithUsers.MarketCurrency;
+            server.MarketWindowDays = serverWithUsers.MarketWindowDays;
+            server.MarketPricesUpdateTime = serverWithUsers.MarketPricesUpdateTime;
+            server.MarketLastFetchAttempt = serverWithUsers.MarketLastFetchAttempt;
+            server.MarketLastError = serverWithUsers.MarketLastError;
+            server.EcoWebUrl = serverWithUsers.EcoWebUrl;
+            server.EcoWebAddressOverride = serverWithUsers.EcoWebAddressOverride;
             server.JoinCode = serverWithUsers.JoinCode;
             server.ApiKey = serverWithUsers.ApiKey;
             server.IsAutomationPlannerEnabled = serverWithUsers.IsAutomationPlannerEnabled;
@@ -101,20 +114,48 @@ public class ContextService(
         OnContextChanged?.Invoke();
     }
 
+    // Avatar Discord du compte, s'il en a un rattaché : affiché à la place de l'icône générique dans l'en-tête.
+    public string? CurrentAvatarUrl { get; private set; }
+
+    /// <summary>Makes this browser use the account the Discord login is linked to. The caller reloads the page.</summary>
+    public async Task ConfirmDiscordSwitch()
+    {
+        if (PendingDiscordSwitch is not { } pending) return;
+        await localStorageService.AddItem("UserId", pending.LinkedUserId.ToString());
+        await localStorageService.AddItem("SecretUserId", pending.LinkedSecretId.ToString());
+        PendingDiscordSwitch = null;
+    }
+
+    public async Task RefreshAvatar()
+    {
+        var login = CurrentUser is null ? null : await userLoginService.GetAsync(CurrentUser.Id, DiscordAuth.Provider);
+        CurrentAvatarUrl = login is null ? null : DiscordAuth.AvatarUrl(login);
+    }
+
+    // Connexion Discord vers un autre compte que celui de ce navigateur, déjà utilisé : on demande avant de basculer,
+    // le compte du navigateur ne serait plus accessible d'ici (sauf avec sa sauvegarde).
+    public DiscordSwitch? PendingDiscordSwitch { get; private set; }
+
     public async Task InitializeUserContext()
     {
         var localUserId = await localStorageService.GetItem("UserId");
         var secretUserId = await localStorageService.GetItem("SecretUserId");
+        var localUser = Guid.TryParse(localUserId, out var localGuid) && Guid.TryParse(secretUserId, out var secretGuid)
+            ? await userDbService.GetByIdAndSecretAsync(localGuid, secretGuid)
+            : null;
 
-        if (!string.IsNullOrEmpty(localUserId))
+        // Connecté avec Discord : le compte rattaché passe avant celui du navigateur, c'est ce qui le suit d'un appareil à l'autre.
+        var discord = DiscordAuth.GetIdentity((await authenticationStateProvider.GetAuthenticationStateAsync()).User);
+        var discordUserId = discord is { } d ? await userLoginService.FindUserIdAsync(DiscordAuth.Provider, d.Key) : null;
+        if (discordUserId is { } linkedId && await userDbService.GetByIdAsync(linkedId) is { } linkedUser)
         {
-            var searchedUser = await userDbService.GetByIdAndSecretAsync(new Guid(localUserId), new Guid(secretUserId));
-
-            if (searchedUser is not null)
-            {
-                CurrentUser = searchedUser;
-            }
+            if (localUser is not null && localUser.Id != linkedUser.Id && localUser.LastActionDateTime is not null)
+                PendingDiscordSwitch = new DiscordSwitch(linkedUser.Id, linkedUser.SecretId, linkedUser.Pseudo, localUser.Pseudo);
+            else
+                CurrentUser = await userDbService.GetByIdAndSecretAsync(linkedUser.Id, linkedUser.SecretId);
         }
+
+        CurrentUser ??= localUser;
 
         if (CurrentUser is null)
         {
@@ -156,6 +197,15 @@ public class ContextService(
                 await JoinServer(defaultServer, isAdmin: true);
             }
         }
+
+        // Première connexion Discord : elle se rattache au compte de ce navigateur, qui garde toutes ses données.
+        if (discord is { } identity)
+        {
+            if (discordUserId is null) await userLoginService.AttachAsync(CurrentUser, identity);
+            else await userLoginService.RefreshAsync(identity);
+        }
+
+        await RefreshAvatar();
 
         await localStorageService.AddItem("UserId", CurrentUser.Id.ToString());
         await localStorageService.AddItem("SecretUserId", CurrentUser.SecretId.ToString());

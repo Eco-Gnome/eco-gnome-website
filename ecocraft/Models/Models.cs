@@ -963,6 +963,7 @@ public class User
 
     public List<UserServer> UserServers { get; set; } = [];
     public List<ModUploadHistory> ModUploadHistories { get; set; } = [];
+    public List<UserLogin> UserLogins { get; set; } = [];
 }
 
 public class UserServer
@@ -1340,6 +1341,16 @@ public class Server
     public decimal? MarginMax { get; set; }
     public DateTimeOffset CreationDateTime { get; set; }
     public DateTimeOffset? LastDataUploadTime { get; set; }
+    public string? DataHash { get; set; }                       // SHA-256 du dernier JSON importé par le mod : un envoi identique est ignoré.
+    // Prix du marché tirés du serveur Eco (route du mod sur son serveur web), mis en cache dans ServerMarketPrice.
+    public string? MarketCurrency { get; set; }
+    public int? MarketWindowDays { get; set; }
+    public DateTimeOffset? MarketPricesUpdateTime { get; set; }  // Dernière lecture réussie.
+    public DateTimeOffset? MarketLastFetchAttempt { get; set; }  // Dernière tentative, réussie ou non : un serveur injoignable n'est pas relancé à chaque page.
+    public string? MarketLastError { get; set; }
+    public string? EcoWebUrl { get; set; }                       // Adresse du serveur web Eco annoncée par le mod.
+    public string? EcoWebAddressOverride { get; set; }           // Adresse saisie par un admin, prioritaire.
+    public string? EcoWebSecretProtected { get; set; }           // Secret de signature des requêtes, chiffré (Data Protection).
 	public string JoinCode { get; set; }
 	public Guid ApiKey { get; set; } = Guid.NewGuid();
 

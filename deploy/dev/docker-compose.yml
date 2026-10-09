@@ -23,6 +23,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=${POSTGRES_PASSWORD};Include Error Detail=true;"
       DataProtection__KeysPath: /app/dpkeys
+      # Connexion Discord (optionnelle) : redirect https://<domaine de dev>/auth/discord/callback à déclarer sur discord.com/developers.
+      Discord__ClientId: ${DISCORD_CLIENT_ID:-}
+      Discord__ClientSecret: ${DISCORD_CLIENT_SECRET:-}
     volumes:
       - app-assets:/app/wwwroot/assets
       - app-videos:/app/wwwroot/videos

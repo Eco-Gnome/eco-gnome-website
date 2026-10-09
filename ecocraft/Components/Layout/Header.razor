@@ -90,9 +90,17 @@
 
         @* Tant que le joueur garde son pseudo généré (userXXXXXXXX), l'icône pulse et une tooltip l'invite à se renommer. *@
         <MudTooltip Text="@LocalizationService.GetTranslation("Header.RenameTooltip")" Disabled="@(!HasDefaultPseudo)" Color="Color.Tertiary">
-            <MudButton id="onboarding-profile" Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px" StartIcon="@Icons.Material.Filled.AccountCircle" IconColor="Color.Tertiary"
+            @* Compte rattaché à Discord : son avatar remplace l'icône générique. *@
+            <MudButton id="onboarding-profile" Variant="Variant.Filled" Style="max-width:300px;padding:10px 22px"
+                       StartIcon="@(ContextService.CurrentAvatarUrl is null ? Icons.Material.Filled.AccountCircle : null)" IconColor="Color.Tertiary"
                        Class="@(HasDefaultPseudo ? "rename-pulse" : "")"
-                       Size="Size.Large" OnClick="ConfigureUser">@ContextService.CurrentUser?.Pseudo</MudButton>
+                       Size="Size.Large" OnClick="ConfigureUser">
+                @if (ContextService.CurrentAvatarUrl is { } avatarUrl)
+                {
+                    <MudAvatar Size="Size.Small" Class="mr-2"><MudImage Src="@avatarUrl" Alt="" /></MudAvatar>
+                }
+                @ContextService.CurrentUser?.Pseudo
+            </MudButton>
         </MudTooltip>
 
         <MudSelect T="LanguageCode"

@@ -27,11 +27,24 @@
 @inject IJSRuntime JsRuntime
 @inject NavigationManager Navigation
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
+@inject ecocraft.Services.EcoLink.EcoMarketService EcoMarketService
 
 <PageTitle>@LocalizationService.GetTranslation("PriceCalculator.PageTitle") - Eco Gnome</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
     <MudGrid Style="height: auto">
+        @if (ContextService.CurrentServer is { LastDataUploadTime: null, EcoServerId: not null })
+        {
+            @* Serveur tout juste relié : le mod envoie ses données juste après, l'import prend un moment. *@
+            <MudItem xs="12" Class="px-4 pt-4">
+                <MudAlert Severity="Severity.Info" ContentAlignment="HorizontalAlignment.Left">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="3">
+                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("PriceCalculator.WaitingForServerData")</MudText>
+                        <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info" OnClick="@(() => Navigation.Refresh(forceReload: true))">@LocalizationService.GetTranslation("PriceCalculator.Refresh")</MudButton>
+                    </MudStack>
+                </MudAlert>
+            </MudItem>
+        }
         <MudItem xs="12" Class="px-4 pt-4">
             <MudStack Row Spacing="3">
                 @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
@@ -589,6 +602,10 @@
                                                                    OnClick="() => CopyToClipboard(contextUserPrice.Price)"
                                                                    Size="Size.Small"/>
                                                 }
+                                                @if (!context.IsTag && !isAutoCalculatedPrice)
+                                                {
+                                                    @MarketSuggestion(context, contextUserPrice)
+                                                }
                                             }
                                         </MudStack>
                                     </MudTd>
@@ -682,6 +699,10 @@
                                                                                tabindex="-1"
                                                                                OnClick="() => CopyToClipboard(itemUserPrice.Price)"
                                                                                Size="Size.Small"/>
+                                                            }
+                                                            @if (!isAutoCalculatedPrice)
+                                                            {
+                                                                @MarketSuggestion(item, itemUserPrice)
                                                             }
                                                         }
                                                     </MudStack>
@@ -1387,6 +1408,8 @@
 
         SyncCurrentServerCaloriePolicyFromServerData();
         SyncCurrentServerMarginPolicyFromServerData();
+
+        await LoadMarketPrices();
 
         _selectedDataContext = await DataContextDbService.GetDataContextWithData(_selectedDataContext.Id, ContextService.CurrentServerData!);
 
@@ -2928,6 +2951,55 @@
         });
 
         await RequestCalculate(CalculateTriggerOrigin.PriceInput);
+    }
+
+    // Prix moyens du serveur Eco, lus sur son serveur web : proposés en suggestion à côté des prix d'achat saisis à la main.
+    // Le cache s'affiche tout de suite ; la lecture du serveur Eco (quelques secondes au pire) se fait ensuite, sans bloquer la page.
+    private Dictionary<Guid, ServerMarketPrice> _marketPrices = [];
+
+    private async Task LoadMarketPrices()
+    {
+        var serverId = ContextService.CurrentServer!.Id;
+        _marketPrices = await EcoMarketService.GetCachedAsync(serverId);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                if (await EcoMarketService.RefreshAsync(serverId) is not null) return;
+                var fresh = await EcoMarketService.GetCachedAsync(serverId);
+                if (ContextService.CurrentServer?.Id != serverId) return;
+                await InvokeAsync(() => { _marketPrices = fresh; StateHasChanged(); });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e); // Une suggestion manquante ne doit jamais casser le calculateur.
+            }
+        });
+    }
+
+    private RenderFragment MarketSuggestion(ItemOrTag item, UserPrice userPrice) => __builder =>
+    {
+        if (!_marketPrices.TryGetValue(item.Id, out var market) || market.Suggestion is not { } suggestion) return;
+
+        <MudTooltip Text="@MarketTooltip(market, suggestion)">
+            <MudIconButton Icon="@MDIIcons.Outline.Store"
+                           tabindex="-1"
+                           Color="@(userPrice.Price == suggestion ? Color.Default : Color.Info)"
+                           OnClick="() => UpdatePriceCalculation(userPrice, Math.Clamp(suggestion, item.MinPrice ?? decimal.MinValue, item.MaxPrice ?? decimal.MaxValue))"
+                           Size="Size.Small"/>
+        </MudTooltip>
+    };
+
+    private string MarketTooltip(ServerMarketPrice market, decimal suggestion)
+    {
+        var server = ContextService.CurrentServer!;
+        var lines = new List<string> { LocalizationService.GetTranslation("MarketPrice.Title", server.MarketCurrency ?? "", server.MarketPricesUpdateTime?.ToString("yyyy-MM-dd HH:mm 'UTC'") ?? "") };
+        if (market.TradedAverage is { } traded) lines.Add(LocalizationService.GetTranslation("MarketPrice.Traded", traded.ToString("0.##"), market.TradedQuantity.ToString("0"), (server.MarketWindowDays ?? 0).ToString()));
+        if (market.SellAverage is { } sell) lines.Add(LocalizationService.GetTranslation("MarketPrice.Sell", sell.ToString("0.##"), market.SellShops.ToString()));
+        if (market.BuyAverage is { } buy) lines.Add(LocalizationService.GetTranslation("MarketPrice.Buy", buy.ToString("0.##"), market.BuyShops.ToString()));
+        lines.Add(LocalizationService.GetTranslation("MarketPrice.Use", suggestion.ToString("0.##")));
+        return string.Join(" · ", lines);
     }
 
     private async Task CopyToClipboard(decimal? price)

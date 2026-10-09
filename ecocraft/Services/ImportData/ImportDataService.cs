@@ -74,6 +74,7 @@ public partial class ImportDataService(
             errorCount += ImportRecipes(context, serverWithData, importedData.Recipes, out recipeErrorNames);
             ApplyBuildingData(serverWithData, importedData);
             serverWithData.LastDataUploadTime = DateTimeOffset.UtcNow;
+            serverWithData.DataHash = null; // L'envoi automatique du mod repose ensuite le hash de ce qu'il a envoyé.
         });
 
         return (errorCount, itemErrorNames.Concat(recipeErrorNames).ToArray());
@@ -96,6 +97,7 @@ public partial class ImportDataService(
             ApplyBuildingData(targetServerWithData, data);
 
             targetServerWithData.LastDataUploadTime = DateTimeOffset.UtcNow;
+            targetServerWithData.DataHash = null;
         });
     }
 

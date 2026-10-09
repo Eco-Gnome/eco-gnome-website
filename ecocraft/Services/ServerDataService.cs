@@ -56,6 +56,17 @@ public class ServerDataService(
                 us.EcoUserId = null;
                 us.Pseudo = null;
             }
+
+            // Plus de serveur Eco à interroger pour les prix du marché.
+            await context.Servers.Where(s => s.Id == server.Id).ExecuteUpdateAsync(s => s
+                .SetProperty(x => x.EcoWebUrl, (string?)null)
+                .SetProperty(x => x.EcoWebSecretProtected, (string?)null));
+            server.EcoWebUrl = null;
+
+            // Le serveur Eco et tous ses joueurs perdent leurs jetons d'API.
+            await context.EcoApiTokens
+                .Where(t => t.ServerId == server.Id && t.RevokedAt == null)
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, DateTimeOffset.UtcNow));
         });
     }
 }

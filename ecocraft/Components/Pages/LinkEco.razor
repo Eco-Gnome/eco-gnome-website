@@ -1,0 +1,229 @@
+@page "/link/{Code}"
+@using ecocraft.Extensions
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Services.DbServices
+@using ecocraft.Services.EcoLink
+@using Microsoft.EntityFrameworkCore
+@inject LocalizationService LocalizationService
+@inject ContextService ContextService
+@inject EcoLinkService EcoLinkService
+@inject ServerDbService ServerDbService
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration
+@inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
+
+<PageTitle>@LocalizationService.GetTranslation("LinkPage.Title") - Eco Gnome</PageTitle>
+
+@* Page ouverte par le mod Eco (bouton Connect) : le joueur confirme ici que la demande vient bien de lui. *@
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-6">
+    <MudPaper Class="pa-6" Elevation="3">
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.h5">@LocalizationService.GetTranslation("LinkPage.Title")</MudText>
+
+            @if (_loading)
+            {
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary"/>
+            }
+            else if (_done)
+            {
+                <MudAlert Severity="Severity.Success">@LocalizationService.GetTranslation(_request!.Kind == EcoLinkKind.User ? "LinkPage.UserDone" : "LinkPage.ServerDone")</MudAlert>
+                @if (_request.Kind == EcoLinkKind.Server)
+                {
+                    <MudAlert Severity="Severity.Info">@LocalizationService.GetTranslation("LinkPage.DataComing")</MudAlert>
+                }
+                <MudText>@LocalizationService.GetTranslation("LinkPage.BackToEco")</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/">@LocalizationService.GetTranslation("LinkPage.OpenEcoGnome")</MudButton>
+            }
+            else if (_error is not null)
+            {
+                <MudAlert Severity="Severity.Error">@_error</MudAlert>
+            }
+            else if (_request!.Kind == EcoLinkKind.User)
+            {
+                <MudText>@((MarkupString)LocalizationService.GetTranslation("LinkPage.UserQuestion", Html(_request.EcoUserName), Html(_request.EcoServerName), Html(ContextService.CurrentUser!.Pseudo)))</MudText>
+                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("LinkPage.UserExplain")</MudText>
+                @ConfirmButtons
+            }
+            else
+            {
+                <MudText>@((MarkupString)LocalizationService.GetTranslation("LinkPage.ServerQuestion", Html(_request.EcoServerName)))</MudText>
+
+                <MudRadioGroup T="bool" @bind-Value="_createServer">
+                    <MudRadio T="bool" Value="true" Color="Color.Primary">@LocalizationService.GetTranslation("LinkPage.CreateServer")</MudRadio>
+                    @if (_adminServers.Count > 0)
+                    {
+                        <MudRadio T="bool" Value="false" Color="Color.Primary">@LocalizationService.GetTranslation("LinkPage.UseExistingServer")</MudRadio>
+                    }
+                </MudRadioGroup>
+
+                @if (_createServer)
+                {
+                    <MudTextField @bind-Value="_newServerName" Label="@LocalizationService.GetTranslation("LinkPage.ServerName")" Variant="Variant.Outlined" MaxLength="100"/>
+                }
+                else
+                {
+                    <MudSelect T="UserServer" @bind-Value="_selectedAdminServer" Label="@LocalizationService.GetTranslation("LinkPage.ServerName")" Variant="Variant.Outlined" ToStringFunc="@(us => us?.Server.Name ?? "")">
+                        @foreach (var userServer in _adminServers)
+                        {
+                            <MudSelectItem T="UserServer" Value="userServer">@userServer.Server.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+
+                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("LinkPage.ServerExplain")</MudText>
+                @ConfirmButtons
+            }
+
+            @if (!_loading && !_done && DiscordAuth.IsConfigured(Configuration) && !_hasDiscord)
+            {
+                <MudDivider/>
+                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation("LinkPage.DiscordTip")</MudText>
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Custom.Brands.Discord" OnClick="LoginWithDiscord">@LocalizationService.GetTranslation("Discord.Login")</MudButton>
+            }
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    [Inject] private UserLoginService UserLoginService { get; set; } = default!;
+
+    private bool _loading = true;
+    private bool _done;
+    private bool _busy;
+    private bool _hasDiscord;
+    private string? _error;
+    private EcoLinkRequest? _request;
+    private Server? _linkedServer;
+    private bool _createServer = true;
+    private string _newServerName = "";
+    private List<UserServer> _adminServers = [];
+    private UserServer? _selectedAdminServer;
+
+    private RenderFragment ConfirmButtons => @<MudStack Row Justify="Justify.FlexEnd" Spacing="2">
+        <MudButton Variant="Variant.Text" Disabled="_busy" OnClick="Reject">@LocalizationService.GetTranslation("LinkPage.Reject")</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_busy" OnClick="Confirm">@LocalizationService.GetTranslation("LinkPage.Confirm")</MudButton>
+    </MudStack>;
+
+    static string Html(string? value) => System.Net.WebUtility.HtmlEncode(value ?? "");
+
+    protected override async Task OnInitializedAsync()
+    {
+        _request = await EcoLinkService.GetPendingByCodeAsync(Code);
+        _hasDiscord = await UserLoginService.GetAsync(ContextService.CurrentUser!.Id, DiscordAuth.Provider) is not null;
+
+        if (_request is null)
+        {
+            _error = LocalizationService.GetTranslation("LinkPage.Expired");
+        }
+        else if (_request.Kind == EcoLinkKind.User)
+        {
+            _linkedServer = await ServerDbService.GetByEcoServerIdAsync(_request.EcoServerId);
+            if (_linkedServer is null) _error = LocalizationService.GetTranslation("LinkPage.ServerNotConnected");
+        }
+        else
+        {
+            _newServerName = _request.EcoServerName;
+            _adminServers = ContextService.CurrentUser!.UserServers.Where(us => us.IsAdmin && !us.Server.IsDefault).ToList();
+
+            // Déjà relié à un serveur Eco Gnome : seul un de ses admins peut le reprendre.
+            var owner = await ServerDbService.GetByEcoServerIdAsync(_request.EcoServerId);
+            if (owner is not null && _adminServers.All(us => us.ServerId != owner.Id))
+            {
+                _error = LocalizationService.GetTranslation("LinkPage.ServerOwned", owner.Name);
+            }
+            else if (owner is not null)
+            {
+                _createServer = false;
+                _selectedAdminServer = _adminServers.First(us => us.ServerId == owner.Id);
+            }
+            else
+            {
+                _selectedAdminServer = _adminServers.FirstOrDefault();
+            }
+        }
+
+        _loading = false;
+    }
+
+    private async Task Confirm()
+    {
+        _busy = true;
+        try
+        {
+            if (_request!.Kind == EcoLinkKind.User) await ConfirmUser();
+            else await ConfirmServer();
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task ConfirmUser()
+    {
+        await ContextService.JoinServer(_linkedServer!);
+        var userServer = ContextService.CurrentUser!.UserServers.First(us => us.ServerId == _linkedServer!.Id);
+
+        var result = await EcoLinkService.ConfirmUserAsync(_request!.Id, userServer);
+        if (!HandleResult(result, null)) return;
+
+        await ContextService.ChangeServer(_linkedServer!);
+    }
+
+    private async Task ConfirmServer()
+    {
+        UserServer userServer;
+
+        if (_createServer)
+        {
+            if (_newServerName.Trim().Length < 3) return;
+
+            var newServer = new Server { Name = _newServerName.Trim(), IsDefault = false, CreationDateTime = DateTimeOffset.UtcNow };
+            newServer.GenerateJoinCode();
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+            {
+                ServerDbService.Create(context, newServer);
+                return Task.CompletedTask;
+            });
+
+            await ContextService.JoinServer(newServer, isAdmin: true);
+            userServer = ContextService.CurrentUser!.UserServers.First(us => us.ServerId == newServer.Id);
+        }
+        else
+        {
+            if (_selectedAdminServer is null) return;
+            userServer = _selectedAdminServer;
+        }
+
+        var adminServerIds = ContextService.CurrentUser!.UserServers.Where(us => us.IsAdmin).Select(us => us.ServerId).ToList();
+        var (result, otherServerName) = await EcoLinkService.ConfirmServerAsync(_request!.Id, userServer, adminServerIds);
+        if (!HandleResult(result, otherServerName)) return;
+
+        await ContextService.ChangeServer(userServer.Server);
+    }
+
+    private bool HandleResult(EcoLinkConfirmResult result, string? otherServerName)
+    {
+        _error = result switch
+        {
+            EcoLinkConfirmResult.Success => null,
+            EcoLinkConfirmResult.EcoServerOwnedByAnotherServer => LocalizationService.GetTranslation("LinkPage.ServerOwned", otherServerName ?? ""),
+            EcoLinkConfirmResult.NotServerAdmin => LocalizationService.GetTranslation("LinkPage.NotAdmin"),
+            _ => LocalizationService.GetTranslation("LinkPage.Expired"),
+        };
+        _done = _error is null;
+        return _done;
+    }
+
+    private async Task Reject()
+    {
+        await EcoLinkService.RejectAsync(_request!.Id);
+        _error = LocalizationService.GetTranslation("LinkPage.Rejected");
+    }
+
+    private void LoginWithDiscord() => Navigation.NavigateTo($"/auth/discord/login?returnUrl={Uri.EscapeDataString($"/link/{Code}")}", forceLoad: true);
+}

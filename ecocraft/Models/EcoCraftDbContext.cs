@@ -132,6 +132,10 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
     public DbSet<UserAutomationTarget> UserAutomationTargets { get; set; }
     public DbSet<BuildingPlan> BuildingPlans { get; set; }
     public DbSet<ModUploadHistory> ModUploadHistories { get; set; }
+    public DbSet<EcoLinkRequest> EcoLinkRequests { get; set; }
+    public DbSet<EcoApiToken> EcoApiTokens { get; set; }
+    public DbSet<ServerMarketPrice> ServerMarketPrices { get; set; }
+    public DbSet<UserLogin> UserLogins { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -680,6 +684,76 @@ public class EcoCraftDbContext(DbContextOptions<EcoCraftDbContext> options) : Db
 		modelBuilder.Entity<Server>()
 			.Property(s => s.HousingConfigJson)
 			.HasColumnType("jsonb");
+
+		modelBuilder.Entity<Server>()
+			.HasIndex(s => s.EcoServerId);
+
+		modelBuilder.Entity<UserServer>()
+			.HasIndex(us => us.EcoUserId);
+
+		// * Eco mod link
+		modelBuilder.Entity<EcoLinkRequest>()
+			.ToTable("EcoLinkRequest");
+
+		modelBuilder.Entity<EcoLinkRequest>()
+			.HasIndex(r => r.Code)
+			.IsUnique();
+
+		modelBuilder.Entity<EcoLinkRequest>()
+			.HasIndex(r => r.PollTokenHash)
+			.IsUnique();
+
+		modelBuilder.Entity<EcoApiToken>()
+			.ToTable("EcoApiToken");
+
+		modelBuilder.Entity<EcoApiToken>()
+			.HasIndex(t => t.TokenHash)
+			.IsUnique();
+
+		modelBuilder.Entity<EcoApiToken>()
+			.HasOne(t => t.Server)
+			.WithMany()
+			.HasForeignKey(t => t.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<EcoApiToken>()
+			.HasOne(t => t.UserServer)
+			.WithMany()
+			.HasForeignKey(t => t.UserServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ServerMarketPrice>()
+			.ToTable("ServerMarketPrice");
+
+		modelBuilder.Entity<ServerMarketPrice>()
+			.HasIndex(p => new { p.ServerId, p.ItemOrTagId })
+			.IsUnique();
+
+		modelBuilder.Entity<ServerMarketPrice>()
+			.HasOne(p => p.Server)
+			.WithMany()
+			.HasForeignKey(p => p.ServerId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ServerMarketPrice>()
+			.HasOne(p => p.ItemOrTag)
+			.WithMany()
+			.HasForeignKey(p => p.ItemOrTagId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		// UserLogin
+		modelBuilder.Entity<UserLogin>()
+			.ToTable("UserLogin");
+
+		modelBuilder.Entity<UserLogin>()
+			.HasIndex(l => new { l.Provider, l.ProviderKey })
+			.IsUnique();
+
+		modelBuilder.Entity<UserLogin>()
+			.HasOne(l => l.User)
+			.WithMany(u => u.UserLogins)
+			.HasForeignKey(l => l.UserId)
+			.OnDelete(DeleteBehavior.Cascade);
 
 		// * History
 		// ModUploadHistory

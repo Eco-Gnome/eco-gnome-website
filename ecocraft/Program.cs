@@ -13,6 +13,11 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Microsoft.AspNetCore.Components.Server.Circuits;
+using System.Threading.RateLimiting;
+using ecocraft.Controllers;
+using ecocraft.Services.EcoLink;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,6 +113,17 @@ builder.Services.AddScoped<EconomyViewerDisplayService>();
 builder.Services.AddScoped<BuildingPlannerCatalogService>();
 builder.Services.AddScoped<BuildingPlannerService>();
 builder.Services.AddSingleton<BuildingPlannerPromptService>();   // sans état : clé du fournisseur IA par serveur, déchiffrée à l'appel
+builder.Services.AddScoped<EcoLinkService>();
+builder.Services.AddScoped<EcoApiDataService>();
+builder.Services.AddScoped<EcoMarketService>();
+
+// Requêtes vers les serveurs web Eco (prix du marché). Adresses privées refusées, sauf en dev avec un serveur Eco local.
+var allowPrivateEcoAddresses = builder.Configuration.GetValue<bool>("EcoMarket:AllowPrivateAddresses");
+builder.Services.AddHttpClient(EcoMarketService.HttpClientName)
+    .ConfigurePrimaryHttpMessageHandler(() => allowPrivateEcoAddresses
+        ? new SocketsHttpHandler()
+        : new SocketsHttpHandler { ConnectCallback = EcoMarketService.ConnectPublicOnlyAsync });
+builder.Services.AddScoped<UserLoginService>();
 
 // Util Services
 builder.Services.AddScoped<LocalStorageService>();
@@ -125,17 +141,52 @@ builder.Services.AddAuthorization(config =>
         policy.Requirements.Add(new IsServerAdminRequirement()));
 });
 
-// Authentication Configuration
-/*builder.Services.AddAuthentication(options =>
+// Connexion Discord, optionnelle : le compte anonyme du navigateur reste l'identité de base. Sans Discord:ClientId
+// configuré, le bouton n'apparaît pas et seul le cookie (vide) est enregistré.
+var authentication = builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        // Configure your authentication scheme here
-        // For example, using cookies or JWT tokens
-        options.DefaultAuthenticateScheme = "YourAuthenticationScheme"; // Remplace par ton schéma
-        options.DefaultChallengeScheme = "YourAuthenticationScheme"; // Remplace par ton schéma
-    })
-    .AddYourAuthenticationScheme(); // Remplace par ta méthode d'authentification (ex. .AddCookie(), .AddJwtBearer(), etc.)*/
+        options.Cookie.Name = "ecognome.auth";
+        options.ExpireTimeSpan = TimeSpan.FromDays(180);
+        options.SlidingExpiration = true;
+    });
+
+if (DiscordAuth.IsConfigured(builder.Configuration))
+{
+    authentication.AddDiscord(options =>
+    {
+        options.ClientId = builder.Configuration["Discord:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Discord:ClientSecret"]!;
+        options.CallbackPath = "/auth/discord/callback";
+        options.SaveTokens = false;
+    });
+}
+
+builder.Services.AddCascadingAuthenticationState();
+
+// Derrière le reverse proxy : schéma https pour l'URL de retour OAuth, IP réelle pour la limite de débit.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+// Le mod envoie le JSON des données du serveur compressé en gzip.
+builder.Services.AddRequestDecompression();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(EcoLinkRateLimit.Policy, context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1) }));
+});
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
 app.UseRequestLocalization(locOptions!.Value);
@@ -200,11 +251,11 @@ app.UseStaticFiles(new StaticFileOptions
             ctx.Context.Response.Headers.CacheControl = "no-cache";
     }
 });
+app.UseRequestDecompression();
+app.UseAuthentication();
+app.UseRateLimiter();
 app.MapControllers();
 app.UseAntiforgery();
-
-//app.UseAuthentication();.
-//app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,8 +1,12 @@
 ﻿@using ecocraft.Models
 @using ecocraft.Services
 @using ecocraft.Services.DbServices
+@using ecocraft.Services.EcoLink
 @using Microsoft.EntityFrameworkCore
 @inject ContextService ContextService
+@inject UserLoginService UserLoginService
+@inject EcoLinkService EcoLinkService
+@inject IConfiguration Configuration
 @inject IJSRuntime JsRuntime
 @inject ISnackbar Snackbar
 @inject EcoCraftDbContext EcoCraftDbContext
@@ -60,6 +64,32 @@
 				</MudFileUpload>
 			</MudTooltip>
 		</MudStack>
+
+		@if (DiscordAuth.IsConfigured(Configuration))
+		{
+			@* Discord ne remplace pas le compte : il permet de le retrouver sur un autre navigateur ou appareil. *@
+			<MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="pb-3">
+				@if (_discordLogin is null)
+				{
+					<MudIcon Icon="@Icons.Custom.Brands.Discord"/>
+				}
+				else
+				{
+					<MudAvatar Size="Size.Small"><MudImage Src="@DiscordAuth.AvatarUrl(_discordLogin)" Alt="" /></MudAvatar>
+				}
+				@if (_discordLogin is null)
+				{
+					<MudText Typo="Typo.body2" Class="flex-grow-1">@LocalizationService.GetTranslation("Discord.Explain")</MudText>
+					<MudButton Variant="Variant.Outlined" OnClick="LoginWithDiscord">@LocalizationService.GetTranslation("Discord.Login")</MudButton>
+				}
+				else
+				{
+					<MudText Typo="Typo.body2" Class="flex-grow-1">@LocalizationService.GetTranslation("Discord.LinkedAs", _discordLogin.DisplayName)</MudText>
+					<MudButton Variant="Variant.Text" Color="Color.Error" OnClick="UnlinkDiscord">@LocalizationService.GetTranslation("Discord.Unlink")</MudButton>
+				}
+			</MudStack>
+		}
+
 		<MudText Typo="Typo.h5" Class="mt-3 pa-1">@LocalizationService.GetTranslation("UserConfigurationDialog.MyServers")</MudText>
 		<MudTable Items="ContextService.CurrentUser!.UserServers" Dense="true" Class="mb-6 mt-3">
 			<HeaderContent>
@@ -141,9 +171,28 @@
 
 @code {
 	private Dictionary<UserServer, bool> _askLeaveConfirmations = new Dictionary<UserServer, bool>();
+	private UserLogin? _discordLogin;
 
 	[CascadingParameter]
 	private IMudDialogInstance MudDialog { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		_discordLogin = await UserLoginService.GetAsync(ContextService.CurrentUser!.Id, DiscordAuth.Provider);
+	}
+
+	private void LoginWithDiscord()
+	{
+		var returnUrl = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+		Navigation.NavigateTo($"/auth/discord/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+	}
+
+	// Délier ferme aussi la session Discord, sinon la prochaine visite rattacherait à nouveau le compte.
+	private async Task UnlinkDiscord()
+	{
+		await UserLoginService.DetachAsync(ContextService.CurrentUser!.Id, DiscordAuth.Provider);
+		Navigation.NavigateTo("/auth/logout?returnUrl=%2F", forceLoad: true);
+	}
 
 	private async Task OnPseudoChanged(UserServer userServer, string newPseudo)
 	{
@@ -239,6 +288,8 @@
 			UserServerDbService.UpdateAll(context, userServer);
 			return Task.CompletedTask;
 		});
+
+		await EcoLinkService.RevokeUserTokensAsync([userServer.Id]);
 	}
 
 	private async Task ImportUser(IBrowserFile? file)
@@ -269,7 +320,8 @@
 						await LocalStorageService.AddItem("UserId", publicUserId);
 						await LocalStorageService.AddItem("SecretUserId", secretUserId);
 
-						Navigation.NavigateTo("/", forceLoad: true);
+						// Connecté avec Discord, c'est son compte qui primerait sur celui importé : on ferme la session.
+						Navigation.NavigateTo(_discordLogin is null ? "/" : "/auth/logout?returnUrl=%2F", forceLoad: true);
 					}
 				}
 				else

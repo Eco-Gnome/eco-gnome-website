@@ -41,6 +41,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=ecocraft;Include Error Detail=true;"
       DataProtection__KeysPath: /app/dpkeys
+      # Dev only: lets the site read market prices from an Eco server on this machine (http://host.docker.internal:3001).
+      EcoMarket__AllowPrivateAddresses: "true"
+      # Discord login: values in .env (not committed, see .env.example). Empty: no Discord button.
+      Discord__ClientId: ${DISCORD_CLIENT_ID:-}
+      Discord__ClientSecret: ${DISCORD_CLIENT_SECRET:-}
     volumes:
       - app-assets:/app/wwwroot/assets
       - app-videos:/app/wwwroot/videos

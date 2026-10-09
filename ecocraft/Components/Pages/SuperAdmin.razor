@@ -91,6 +91,7 @@
                     <HeaderContent>
                         <MudTh Class="super-admin-user-id-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.Id)">@LocalizationService.GetTranslation("SuperAdmin.IdCol")</MudTableSortLabel></MudTh>
                         <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Pseudo)">@LocalizationService.GetTranslation("SuperAdmin.UserTable.PseudoCol")</MudTableSortLabel></MudTh>
+                        <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => DiscordLogin(u)?.DisplayName ?? string.Empty)">Discord</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-online-col"><MudTableSortLabel SortBy="new Func<User, object>(u => _onlineUsers.GetValueOrDefault(u.Id))">@LocalizationService.GetTranslation("SuperAdmin.UserTable.OnlineCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.LastActionDateTime ?? DateTimeOffset.MinValue)">@LocalizationService.GetTranslation("SuperAdmin.LastActionDateCol")</MudTableSortLabel></MudTh>
                         <MudTh Class="super-admin-user-date-col"><MudTableSortLabel SortBy="new Func<User, object>(u => u.CreationDateTime)">@LocalizationService.GetTranslation("SuperAdmin.CreationDateCol")</MudTableSortLabel></MudTh>
@@ -111,6 +112,19 @@
                         </MudTd>
                         <MudTd>
                             @context.Pseudo
+                        </MudTd>
+                        <MudTd>
+                            @if (DiscordLogin(context) is { } discord)
+                            {
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudAvatar Size="Size.Small"><MudImage Src="@DiscordAuth.AvatarUrl(discord)" Alt="" /></MudAvatar>
+                                    <MudText Typo="Typo.body2">@discord.DisplayName</MudText>
+                                </MudStack>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
+                            }
                         </MudTd>
                         <MudTd Class="super-admin-user-online-col">
                             @if (_onlineUsers.TryGetValue(context.Id, out var tabs))
@@ -400,6 +414,8 @@
 
     private bool _isLoading;
     private List<User> _users = [];
+
+    private static UserLogin? DiscordLogin(User user) => user.UserLogins.FirstOrDefault(l => l.Provider == DiscordAuth.Provider);
     private HashSet<Guid> _usersWithSkill = [];
     private List<Server> _servers = [];
     private List<ModUploadHistory> _modUploadHistories = [];

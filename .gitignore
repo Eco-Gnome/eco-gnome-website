@@ -388,3 +388,6 @@ FodyWeavers.xsd
 Trace-*.json
 deploy/backups/
 /3d/
+
+# Local secrets read by docker compose (see .env.example)
+/.env

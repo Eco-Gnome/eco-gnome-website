@@ -645,6 +645,8 @@
         "3": " !"
     },
     "PriceCalculator": {
+        "Refresh": "Refresh",
+        "WaitingForServerData": "Waiting for the data of the Eco server (items, recipes, skills). It arrives a minute or two after the server is registered or restarted: refresh the page then.",
         "MagickFix": "Magick Fix (Try it before reset!)",
         "PageTitle": "Price Calculator",
         "ContextName": "Context Name",
@@ -1502,5 +1504,56 @@
             "Remove": "Remove image",
             "None": "No image. It is downscaled to 1024 px and saved with the plan (not in the short share link)."
         }
+    },
+    "LinkPage": {
+        "DataComing": "The Eco server now sends its data (items, recipes, skills). It takes a minute or two: open Eco Gnome and refresh the page once it's there.",
+        "Title": "Connect Eco to Eco Gnome",
+        "UserQuestion": "Link the Eco player <b>{player}</b> of the server <b>{server}</b> to your Eco Gnome account <b>{account}</b>?",
+        "UserExplain": "Once linked, the Eco Gnome tab of your stores can import your prices and send your buy prices, without any command.",
+        "ServerQuestion": "Register the Eco server <b>{server}</b> on Eco Gnome?",
+        "ServerExplain": "The server will send its data (items, recipes, skills) by itself at each start, and the average prices of its market. Players can then connect from any store.",
+        "CreateServer": "Create a new Eco Gnome server",
+        "UseExistingServer": "Use one of my Eco Gnome servers",
+        "ServerName": "Eco Gnome server",
+        "Confirm": "Confirm",
+        "Reject": "It's not me",
+        "UserDone": "Your account is linked.",
+        "ServerDone": "The server is registered on Eco Gnome.",
+        "BackToEco": "You can go back to Eco: the store tab updates by itself.",
+        "OpenEcoGnome": "Open Eco Gnome",
+        "Expired": "This link has expired or was already used. Click Connect again in Eco.",
+        "Rejected": "The request has been cancelled. Nothing was linked.",
+        "ServerNotConnected": "This Eco server is not registered on Eco Gnome. Ask an admin to register it from the Eco Gnome tab of a store.",
+        "ServerOwned": "This Eco server is already registered with the Eco Gnome server {name}. Ask one of its admins to register it.",
+        "NotAdmin": "You must be an admin of this Eco Gnome server.",
+        "DiscordTip": "Tip: sign in with Discord to find your account on any browser or device."
+    },
+    "Discord": {
+        "SwitchTitle": "This Discord account is already linked",
+        "SwitchWarning": "This Discord account is linked to the Eco Gnome account <b>{linked}</b>.<br><br>If you continue, this browser switches to <b>{linked}</b>, and the account you are on now, <b>{current}</b>, will no longer be reachable from here. Export its backup first (User settings, download button) if you want to keep it.",
+        "SwitchConfirm": "Switch to this account",
+        "SwitchCancel": "Stay on this account",
+        "Login": "Sign in with Discord",
+        "Explain": "Sign in with Discord to find this account on another browser or device.",
+        "LinkedAs": "Linked to Discord as {name}.",
+        "Unlink": "Unlink"
+    },
+    "MarketPrice": {
+        "Title": "Server market ({currency}, {date})",
+        "Traded": "traded at {price} ({quantity} sold over {days} days)",
+        "Sell": "shops sell at {price} ({shops} shops)",
+        "Buy": "shops buy at {price} ({shops} shops)",
+        "Use": "click to use {price}"
+    },
+    "EcoMarketManagement": {
+        "Title": "Eco server market prices",
+        "Help": "Eco Gnome reads the average prices of the Eco server's market from its web server (the address the mod reports at each start), to suggest them next to buy prices. Set an address only if the reported one is wrong, for example behind a reverse proxy.",
+        "ReportedAddress": "Address reported by the mod",
+        "AddressOverride": "Address to use instead (optional)",
+        "Test": "Test now",
+        "LastUpdate": "Last prices read: {date}",
+        "Never": "No prices read yet.",
+        "Ok": "Prices read from the Eco server.",
+        "Saved": "Address saved."
     }
 }

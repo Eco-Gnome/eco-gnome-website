@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecocraft.Models;
@@ -11,9 +12,11 @@ using ecocraft.Models;
 namespace ecocraft.Migrations
 {
     [DbContext(typeof(EcoCraftDbContext))]
-    partial class EcoCraftDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261009012756_AddUserLoginAvatarHash")]
+    partial class AddUserLoginAvatarHash
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,15 +171,10 @@ namespace ecocraft.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("SourceDataContextId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("UserServerId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SourceDataContextId");
 
                     b.HasIndex("UserServerId");
 
@@ -1553,11 +1551,6 @@ namespace ecocraft.Migrations
 
             modelBuilder.Entity("ecocraft.Models.DataContext", b =>
                 {
-                    b.HasOne("ecocraft.Models.DataContext", null)
-                        .WithMany()
-                        .HasForeignKey("SourceDataContextId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("ecocraft.Models.UserServer", "UserServer")
                         .WithMany("DataContexts")
                         .HasForeignKey("UserServerId")

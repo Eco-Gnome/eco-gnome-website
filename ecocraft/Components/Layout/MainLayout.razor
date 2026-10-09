@@ -3,6 +3,8 @@
 @using ecocraft.Services
 @inject ContextService ContextService
 @inject LocalizationService LocalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
 
 <MudThemeProvider Theme="_myDarkTheme" @bind-IsDarkMode="@_isDarkMode"/>
 <MudPopoverProvider />
@@ -25,7 +27,7 @@
     <MudMainContent Class="mt-16 pa-6">
         @if (!_isLoadingUserAndServer)
         {
-            if (ContextService.CurrentUserServer is not null)
+            if (ContextService.CurrentUserServer is not null || IsStandalonePage)
             {
                 @Body
             }
@@ -47,6 +49,9 @@
     private bool _isLoadingUserAndServer = true;
     private bool _menuOpened;
     private bool _isDarkMode = true;
+
+    // La page de liaison du mod doit s'afficher même pour un compte qui n'a encore rejoint aucun serveur.
+    private bool IsStandalonePage => Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("link/", StringComparison.OrdinalIgnoreCase);
 
     private void ToggleMenu()
     {
@@ -106,5 +111,34 @@
         // No idea why, very strange, but without this double StateHasChanged, PriceCalculator load fast, but Server-Management page does not, and requires a new StateHasChanged to update the header
         // Definitively linked to MudSelect not updating directly
         StateHasChanged();
+
+        if (ContextService.PendingDiscordSwitch is { } pending) await AskDiscordSwitch(pending);
+    }
+
+    // Le Discord est déjà rattaché à un autre compte : basculer rend le compte de ce navigateur inaccessible d'ici.
+    private async Task AskDiscordSwitch(DiscordSwitch pending)
+    {
+        var linked = System.Net.WebUtility.HtmlEncode(pending.LinkedPseudo);
+        var current = System.Net.WebUtility.HtmlEncode(pending.CurrentPseudo);
+        // Placeholders are filled in order: {linked} appears twice before {current}.
+        var message = new MarkupString(LocalizationService.GetTranslation("Discord.SwitchWarning", linked, linked, current));
+        var switchAccount = await DialogService.ShowMessageBoxAsync(
+            LocalizationService.GetTranslation("Discord.SwitchTitle"),
+            message,
+            yesText: LocalizationService.GetTranslation("Discord.SwitchConfirm"),
+            noText: LocalizationService.GetTranslation("Discord.SwitchCancel"),
+            options: new DialogOptions { BackdropClick = false, CloseOnEscapeKey = false });
+
+        var here = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        if (switchAccount == true)
+        {
+            await ContextService.ConfirmDiscordSwitch();
+            Navigation.NavigateTo(here, forceLoad: true);
+        }
+        else
+        {
+            // Rester : on ferme la session Discord, sinon la question reviendrait à chaque visite.
+            Navigation.NavigateTo($"/auth/logout?returnUrl={Uri.EscapeDataString(here)}", forceLoad: true);
+        }
     }
 }

@@ -23,6 +23,7 @@
 @inject UserServerDataService UserServerDataService
 @inject PriceCalculatorService PriceCalculatorService
 @inject BuildingPlannerPromptService PromptService
+@inject ecocraft.Services.EcoLink.EcoMarketService EcoMarketService
 @inject IDbContextFactory<EcoCraftDbContext> EcoCraftDbFactory
 
 <PageTitle>@LocalizationService.GetTranslation("NavMenu.NavAdmin") - Eco Gnome</PageTitle>
@@ -84,6 +85,30 @@
 							<MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Refresh" OnClick="@(() => RefreshApiKey())"/>
 						</MudTooltip>
 					</MudStack>
+					@if (ContextService.CurrentServer!.EcoServerId is not null)
+					{
+						<MudStack Spacing="1" Class="mt-2">
+							<MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("EcoMarketManagement.Title")</MudText>
+							<MudText Typo="Typo.body2">@LocalizationService.GetTranslation("EcoMarketManagement.Help")</MudText>
+							<MudStack Row AlignItems="AlignItems.Center">
+								<MudTextField Value="@ContextService.CurrentServer!.EcoWebUrl" ReadOnly Variant="Variant.Outlined" ShrinkLabel
+								              Label="@LocalizationService.GetTranslation("EcoMarketManagement.ReportedAddress")"/>
+								<MudTextField @bind-Value="_ecoWebAddressOverride" Variant="Variant.Outlined" ShrinkLabel Placeholder="http://my-eco-server.com:3001"
+								              Label="@LocalizationService.GetTranslation("EcoMarketManagement.AddressOverride")"
+								              OnBlur="SaveEcoWebAddressOverride"/>
+								<MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="_testingEcoMarket" OnClick="TestEcoMarket">@LocalizationService.GetTranslation("EcoMarketManagement.Test")</MudButton>
+							</MudStack>
+							<MudText Typo="Typo.caption">
+								@(ContextService.CurrentServer!.MarketPricesUpdateTime is { } lastRead
+									? LocalizationService.GetTranslation("EcoMarketManagement.LastUpdate", lastRead.ToString("yyyy-MM-dd HH:mm 'UTC'"))
+									: LocalizationService.GetTranslation("EcoMarketManagement.Never"))
+							</MudText>
+							@if (ContextService.CurrentServer!.MarketLastError is { } marketError)
+							{
+								<MudAlert Severity="Severity.Warning" Dense>@marketError</MudAlert>
+							}
+						</MudStack>
+					}
 					@if (ContextService.CurrentServer!.IsAiGenerationEnabled)
 					{
 					<MudStack Spacing="1" Class="mt-2">
@@ -736,6 +761,11 @@
 			ContextService.CurrentServer.EcoServerId = refreshedServer.EcoServerId;
 			ContextService.CurrentServer.JoinCode = refreshedServer.JoinCode;
 			ContextService.CurrentServer.ApiKey = refreshedServer.ApiKey;
+			ContextService.CurrentServer.EcoWebUrl = refreshedServer.EcoWebUrl;
+			ContextService.CurrentServer.EcoWebAddressOverride = refreshedServer.EcoWebAddressOverride;
+			ContextService.CurrentServer.MarketLastError = refreshedServer.MarketLastError;
+			ContextService.CurrentServer.MarketPricesUpdateTime = refreshedServer.MarketPricesUpdateTime;
+			_ecoWebAddressOverride = refreshedServer.EcoWebAddressOverride;
 			ContextService.CurrentServer.IsCalorieCostLocked = refreshedServer.IsCalorieCostLocked;
 			ContextService.CurrentServer.LockedCalorieCost = refreshedServer.LockedCalorieCost;
 			ContextService.CurrentServer.CalorieCostMin = refreshedServer.CalorieCostMin;
@@ -1141,6 +1171,43 @@
 		await ServerDataService.Dissociate(ContextService.CurrentServer!);
 
 		StateHasChanged();
+	}
+
+	private string? _ecoWebAddressOverride;
+	private bool _testingEcoMarket;
+
+	private async Task SaveEcoWebAddressOverride()
+	{
+		var server = ContextService.CurrentServer!;
+		var value = string.IsNullOrWhiteSpace(_ecoWebAddressOverride) ? null : _ecoWebAddressOverride.Trim();
+		if (value == server.EcoWebAddressOverride) return;
+
+		await EcoMarketService.SetAddressOverrideAsync(server.Id, value);
+		server.EcoWebAddressOverride = value;
+		Snackbar.Add(LocalizationService.GetTranslation("EcoMarketManagement.Saved"), Severity.Success);
+	}
+
+	private async Task TestEcoMarket()
+	{
+		_testingEcoMarket = true;
+		try
+		{
+			await SaveEcoWebAddressOverride();
+			var server = ContextService.CurrentServer!;
+			var error = await EcoMarketService.RefreshAsync(server.Id, force: true);
+
+			var refreshed = await ServerDbService.GetByIdAsync(server.Id);
+			server.MarketLastError = refreshed?.MarketLastError;
+			server.MarketPricesUpdateTime = refreshed?.MarketPricesUpdateTime;
+			server.MarketCurrency = refreshed?.MarketCurrency;
+			server.MarketWindowDays = refreshed?.MarketWindowDays;
+
+			if (error is null) Snackbar.Add(LocalizationService.GetTranslation("EcoMarketManagement.Ok"), Severity.Success);
+		}
+		finally
+		{
+			_testingEcoMarket = false;
+		}
 	}
 
 	private async Task RefreshApiKey()

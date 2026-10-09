@@ -23,6 +23,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=ecocraft;Username=ecocraft;Password=${POSTGRES_PASSWORD};Include Error Detail=true;"
       DataProtection__KeysPath: /app/dpkeys
+      # Connexion Discord (optionnelle) : application créée sur discord.com/developers, redirect https://eco-gnome.com/auth/discord/callback.
+      Discord__ClientId: ${DISCORD_CLIENT_ID:-}
+      Discord__ClientSecret: ${DISCORD_CLIENT_SECRET:-}
     volumes:
       - app-assets:/app/wwwroot/assets
       - app-videos:/app/wwwroot/videos

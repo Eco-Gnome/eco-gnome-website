@@ -1,8 +1,8 @@
 ﻿using ecocraft.Models;
 using ecocraft.Services;
 using ecocraft.Services.DbServices;
+using ecocraft.Services.EcoLink;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ecocraft.Controllers;
 
@@ -12,11 +12,8 @@ public class EcoController(
     UserPriceDbService userPriceDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
-    PriceCalculatorService priceCalculatorService,
     ItemOrTagDbService itemOrTagDbService,
-    DataContextDbService dataContextDbService,
-    ShoppingListService shoppingListService,
-    IDbContextFactory<EcoCraftDbContext> dbContextFactory
+    EcoApiDataService ecoApiDataService
 ) : ControllerBase
 {
     /*
@@ -95,30 +92,8 @@ public class EcoController(
         if (userServer is null)
             return BadRequest("Can't find user or server. Did you register your user thanks to /eguser <secretId> ?");
 
-        var shoppingLists = userServer.DataContexts.Where(d => d.IsShoppingList).ToList();
-        if (string.IsNullOrWhiteSpace(name))
-            return Ok(new EcoGnomeShoppingList("", shoppingLists.Select(d => d.Name).ToList(), []));
-
-        // An exact name wins, so "Forge" can still be picked next to "Forge 2"
-        var matches = shoppingLists.Where(d => d.Name == name).ToList();
-        if (matches.Count == 0) matches = shoppingLists.Where(d => d.Name.StartsWith(name)).ToList();
-
-        if (matches.Count == 0)
-            return BadRequest("No shopping list starts with the name you provided.");
-
-        if (matches.Count > 1)
-            return BadRequest("Several shopping lists start with the name you provided. Please be more specific to select only one.");
-
-        var serverData = await serverDbService.GetServerWithShoppingListData(userServer.ServerId);
-        var shoppingList = await dataContextDbService.GetDataContextWithData(matches[0].Id, serverData);
-
-        // Negative outputs are the "Items to buy" of the shopping list page
-        var items = shoppingListService.GetAggregatedOutputs(shoppingList, shoppingList.GetRootShoppingListRecipes())
-            .Where(o => o.Value < 0)
-            .Select(o => new EcoGnomeShoppingItem(o.Key.Name, o.Key.IsTag, (int)Math.Ceiling(Math.Round(Math.Abs(o.Value), 4))))
-            .ToList();
-
-        return Ok(new EcoGnomeShoppingList(shoppingList.Name, [], items));
+        var (list, error) = await ecoApiDataService.GetShoppingListAsync(userServer, name);
+        return list is null ? BadRequest(error) : Ok(list);
     }
 
     [HttpGet("categories-items-v2")]
@@ -128,52 +103,12 @@ public class EcoController(
         if (result.Result is not null) return result.Result;
 
         var (items, dataContext) = result.Value;
-        var filterSkills = filterSkill == "" ? [] : filterSkill.Split(',').ToList();
 
-        var categoryToBuy = GetCategoryToBuy(items, dataContext, filterSkills);
-
-        List<EcoGnomeCategory> categoriesToSell;
-        var categories = items.ToSell;
-
-        if (filterSkills.Count > 0)
-        {
-            categories = categories.Where(i =>
-                i.GetAssociatedItemsAndSelf().Any(iot =>
-                    iot.Elements.Any(e => e.Quantity is not null && e.IsProduct() && filterSkills.Contains(e.Recipe?.Skill?.Name)))
-            ).ToList();
-        }
-
-        if (groupBy != GroupBy.None)
-        {
-            var groupedCategories = groupBy switch
-            {
-                GroupBy.Margin => categories.GroupBy(i => i.GetCurrentUserPrice(dataContext)?.UserMargin?.Name ?? null),
-                GroupBy.Skill => categories.GroupBy(i => i.GetAssociatedItemsAndSelf().SelectMany(iot => iot.Elements).FirstOrDefault(e => e.Recipe?.Skill != null)?.Recipe.Skill?.Name),
-                _ => throw new ArgumentOutOfRangeException(nameof(groupBy), groupBy, null)
-            };
-
-            categoriesToSell = groupedCategories.Select(m => new EcoGnomeCategory(
-                groupBy switch { GroupBy.Margin => m.Key?.ToString() ?? "", GroupBy.Skill => m.Key?.ToString() ?? "", _ => "Production" },
-                OfferType.Sell,
-                m.Select(i => new EcoGnomeItem(
-                    i.Name,
-                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
-                )).ToList()
-            )).ToList();
-        }
-        else
-        {
-            categoriesToSell = [new EcoGnomeCategory(
-                filterSkill != "" ? filterSkill : "Production",
-                OfferType.Sell,
-                categories.Select(i => new EcoGnomeItem(
-                    i.Name,
-                    Math.Round(i.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 999999, 2, MidpointRounding.AwayFromZero)
-                )).ToList()
-            )];
-        }
-
-        return Ok(categoriesToSell.Concat([categoryToBuy]));
+        // Les mods antérieurs à la gestion des prix null attendent toujours un nombre : 999999 en vente, 0 en achat.
+        return Ok(EcoCategoryBuilder.Build(items, dataContext, filterSkill, groupBy, readableNames: false).Select(c => new EcoGnomeCategory(
+            c.Name,
+            c.OfferType,
+            c.Items.Select(i => new EcoGnomeItem(i.Name, i.Price ?? (c.OfferType == OfferType.Buy ? 0 : 999999))).ToList())));
     }
 
     private async Task<ActionResult<((List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) items, DataContext dataContext)>> GetItemsAndDataContext(string ecoServerId, string ecoUserId, string? context)
@@ -183,66 +118,7 @@ public class EcoController(
         if (result.Result is not null) return result.Result;
         var dataContext = result.Value!;
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-        dataContext.UserPrices.AddRange(await dbContext.UserPrices
-            .Where(up => up.DataContextId == dataContext.Id)
-            .Include(up => up.ItemOrTag)
-                .ThenInclude(i => i.AssociatedItems)
-            .Include(up => up.ItemOrTag)
-                .ThenInclude(i => i.Elements)
-                .ThenInclude(e => e.Quantity)
-            .Include(up => up.UserMargin)
-            .ToListAsync());
-
-        dataContext.UserElements.AddRange(await dbContext.UserElements
-            .Where(ue => ue.DataContextId == dataContext.Id)
-            .Include(ue => ue.Element)
-                .ThenInclude(e => e.Recipe)
-                .ThenInclude(r => r.Skill)
-            .Include(ue => ue.Element)
-                .ThenInclude(e => e.ItemOrTag)
-            .Include(ue => ue.Element)
-                .ThenInclude(e => e.Quantity)
-            .ToListAsync());
-
-        var items = priceCalculatorService.GetCategorizedItemOrTags(dataContext);
-
-        // Include tags that have a calculated price
-        var tagsWithPrice = dataContext.UserPrices
-            .Where(up => up.ItemOrTag.IsTag && up.GetMarginPriceOrPrice() is not null)
-            .Select(up => up.ItemOrTag)
-            .ToList();
-
-        var sellTags = tagsWithPrice.Where(t => t.AssociatedItems.Intersect(items.ToSell).Any()).Except(items.ToSell).ToList();
-        var buyTags = tagsWithPrice.Where(t => t.AssociatedItems.Intersect(items.ToBuy).Any()).Except(items.ToBuy).ToList();
-
-        items.ToSell.AddRange(sellTags);
-        items.ToBuy.AddRange(buyTags);
-
-        return (items, dataContext);
-    }
-
-    private static EcoGnomeCategory GetCategoryToBuy((List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell) items, DataContext dataContext, List<string> filterSkills)
-    {
-        var toBuy = items.ToBuy;
-
-        if (filterSkills.Count > 0)
-        {
-            toBuy = toBuy.Where(i =>
-                i.GetAssociatedItemsAndSelf().Any(iot =>
-                    iot.Elements.Any(e => e.Quantity is not null && e.IsIngredient() && filterSkills.Contains(e.Recipe?.Skill?.Name)))
-            ).ToList();
-        }
-
-        return new EcoGnomeCategory(
-            "Acquisition",
-            OfferType.Buy,
-            toBuy.SelectMany(t => t.IsTag ? t.GetAssociatedItemsAndSelf() : [t]).Distinct().Select(t => new EcoGnomeItem(
-                t.Name,
-                Math.Round(t.GetCurrentUserPrice(dataContext)?.GetMarginPriceOrPrice() ?? 0, 2, MidpointRounding.AwayFromZero)
-            )).ToList()
-        );
+        return (await ecoApiDataService.LoadCategorizedAsync(dataContext), dataContext);
     }
 
     [HttpGet("server-prices")]
@@ -283,20 +159,8 @@ public class EcoController(
         if (userServer is null)
             return BadRequest("Can't find user or server. Did you register your user thanks to /eguser <secretId> ?");
 
-        if (!string.IsNullOrWhiteSpace(dataContext))
-        {
-            var matches = userServer.DataContexts.Where(d => d.Name.StartsWith(dataContext)).ToList();
-
-            if (matches.Count == 0)
-                return BadRequest("No context starts with the name you provided. Leave it empty to use the default context.");
-
-            if (matches.Count > 1)
-                return BadRequest("Several contexts start with the name you provided. Please be more specific to select only one.");
-
-            return matches.First();
-        }
-
-        return userServer.DataContexts.First(d => d.IsDefault);
+        var (context, error) = EcoContextResolver.Resolve(userServer.DataContexts, dataContext);
+        return context is null ? BadRequest(error) : context;
     }
 }
 

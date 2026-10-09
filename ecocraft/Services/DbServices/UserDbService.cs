@@ -26,6 +26,7 @@ public class UserDbService(IDbContextFactory<EcoCraftDbContext> factory) : IGene
 		return await context.Users
 			.Include(u => u.UserServers)
 			.ThenInclude(us => us.Server)
+			.Include(u => u.UserLogins)
 			.OrderByDescending(u => u.CreationDateTime)
 			.ToListAsync();
 	}
