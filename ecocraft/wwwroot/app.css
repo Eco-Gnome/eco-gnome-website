@@ -561,12 +561,14 @@
     line-height: 16px;
 }
 
+/* Même coin que la pastille de niveau des métiers. */
 .sl-strip-module {
     position: absolute;
-    right: -5px;
-    bottom: -5px;
-    border-radius: 3px;
-    box-shadow: 0 0 0 2px var(--mud-palette-surface);
+    right: -4px;
+    bottom: -4px;
+    line-height: 0;
+    border-radius: 4px;
+    background: var(--mud-palette-appbar-background);
 }
 
 .sl-strip-more {
