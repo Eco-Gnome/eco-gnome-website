@@ -16,6 +16,7 @@
 @inject UserSkillDbService UserSkillDbService
 @inject UserCraftingTableDbService UserCraftingTableDbService
 @inject UserRecipeDbService UserRecipeDbService
+@inject UserShoppingListItemDbService UserShoppingListItemDbService
 @inject UserServerDataService UserServerDataService
 @inject ServerDbService ServerDbService
 @inject DataContextDbService DataContextDbService
@@ -66,176 +67,95 @@
             {
                 <ErrorBoundary>
                     <ChildContent>
-                        <MudItem md="12" lg="3" Class="pa-2 d-flex flex-column">
-                            <MudPaper Outlined="true" Class="pa-3 mb-2">
-                                <MudStack Spacing="2">
-                                    <MudText Typo="Typo.subtitle2">@LocalizationService.GetTranslation("ShoppingList.Source.Title")</MudText>
-                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                        <MudSelect T="Guid?"
-                                                   @bind-Value="_sourceSelectionId"
-                                                   ToStringFunc="@(id => ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => d.Id == id)?.Name ?? "")"
-                                                   Dense="true"
-                                                   Variant="Variant.Outlined"
-                                                   Class="flex-grow-1">
-                                            @foreach (var dataContext in ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList))
-                                            {
-                                                <MudSelectItem T="Guid?" Value="@dataContext.Id">@dataContext.Name</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                        <MudButton Color="Color.Primary"
-                                                   Variant="Variant.Filled"
-                                                   Disabled="@(_sourceSelectionId is null)"
-                                                   OnClick="ImportSource">
-                                            @LocalizationService.GetTranslation("ShoppingList.Source.Import")
-                                        </MudButton>
-                                    </MudStack>
-                                </MudStack>
-                            </MudPaper>
-                            <MudExpansionPanels MultiExpansion="true">
-                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.Skills")" @bind-Expanded="ExpandedSkills">
-                                    <MudTable Items="_selectedShoppingList.UserSkills.Where(us => us.Skill is not null)"
-                                              Hover="true"
-                                              Dense="true"
-                                              Class="mt-4">
-                                        <HeaderContent>
-                                            <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
-                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
-                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Talents")</MudTh>
-                                        </HeaderContent>
-                                        <RowTemplate>
-                                            <MudTd Class="pa-1">
-                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                                    <EcoIcon Item="@context.Skill"/>
-                                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
-                                                </MudStack>
-                                            </MudTd>
-                                            <MudTd Class="px-0">
-                                                <MudNumericField T="int"
-                                                                 Value="@context.Level"
-                                                                 Class="square-input flex-no-grow"
-                                                                 Format="0"
-                                                                 Step="1"
-                                                                 Culture="CultureInfo.InvariantCulture"
-                                                                 Min="1"
-                                                                 Max="@(context.Skill!.MaxLevel)"
-                                                                 Variant="Variant.Outlined"
-                                                                 Immediate="true"
-                                                                 ValueChanged="(int newValue) => OnLevelChanged(context, newValue)"/>
-                                            </MudTd>
-                                            <MudTd Class="px-0">
-                                                <TalentsControl DataContext="_selectedShoppingList"
-                                                                UserSkill="context"
-                                                                OnChanged="OnTalentsChanged"/>
-                                            </MudTd>
-                                        </RowTemplate>
-                                    </MudTable>
-                                </MudExpansionPanel>
-                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("ShoppingList.CraftingTables")" @bind-Expanded="ExpandedCraftingTables">
-                                    <MudTable Items="@_selectedShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
-                                              FixedHeader="true"
-                                              Hover="true"
-                                              Class="mt-4 mud-table-container-no-overflow-y"
-                                              Dense="true">
-                                        <HeaderContent>
-                                            <MudTh>@LocalizationService.GetTranslation("Name")</MudTh>
-                                            <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
-                                        </HeaderContent>
-                                        <RowTemplate>
-                                            <MudTd Class="pa-1">
-                                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                                                    <EcoIcon Item="@context.CraftingTable"/>
-                                                    <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
-                                                </MudStack>
-                                            </MudTd>
-                                            <MudTd Class="pa-1">
-                                                <CraftingTablePluginModuleControl UserCraftingTable="context"
-                                                                                  ModuleSelected="@(selection => SelectPluginModule(context, selection))"/>
-                                            </MudTd>
-                                        </RowTemplate>
-                                    </MudTable>
-                                </MudExpansionPanel>
-                                <MudExpansionPanel Text="@LocalizationService.GetTranslation("Options")" @bind-Expanded="ExpandedOptions">
-                                    <MudStack Class="pa-3">
-                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutoExpandTooltip")">
-                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.AutoExpandLabel")</MudText>
-                                            </MudTooltip>
-                                            <MudCheckBox T="bool"
-                                                         Value="_isAutoExpandEnabled"
-                                                         Variant="Variant.Outlined"
-                                                         ValueChanged="OnAutoExpandChanged"/>
-                                        </MudStack>
-                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AutoPropagateRecipeChoiceTooltip")">
-                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.AutoPropagateRecipeChoiceLabel")</MudText>
-                                            </MudTooltip>
-                                            <MudCheckBox T="bool"
-                                                         Value="_isRecipeChoicePropagationEnabled"
-                                                         Variant="Variant.Outlined"
-                                                         ValueChanged="OnRecipeChoicePropagationChanged"/>
-                                        </MudStack>
-                                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.GuidedAutoExpandTooltip")">
-                                                <MudText Class="tooltip-text">@LocalizationService.GetTranslation("ShoppingList.GuidedAutoExpandLabel")</MudText>
-                                            </MudTooltip>
-                                            <MudCheckBox T="bool"
-                                                         Value="_isGuidedAutoExpandEnabled"
-                                                         Variant="Variant.Outlined"
-                                                         ValueChanged="OnGuidedAutoExpandChanged"/>
-                                        </MudStack>
-                                    </MudStack>
-                                </MudExpansionPanel>
-                            </MudExpansionPanels>
-                        </MudItem>
-                        <MudItem md="6" lg="3" Class="pa-2 d-flex flex-column">
-                            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
+                        <MudItem xs="12" Class="px-4 pt-2">
+                            @* Bandeau en lecture seule : on modifie via « Métiers & tables » (fenêtre) et « Ouverture automatique » (popover). *@
+                            <MudPaper Class="sl-strip">
                                 @{
-                                    var aggregatedOutputs = ShoppingListService.GetAggregatedOutputs(_selectedShoppingList, _selectedShoppingList.GetRootShoppingListRecipes());
-
-                                    <MudStack>
-                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</MudText>
-
-                                        @foreach (var element in aggregatedOutputs.Where(o => o.Value < 0))
-                                        {
-                                            <MudStack Row>
-                                                <EcoIcon Item="element.Key"/>
-                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(element.Key)</MudText>
-                                                <MudNumericField T="decimal"
-                                                                 Class="rectangle-input"
-                                                                 Style="width: 111px;"
-                                                                 ReadOnly
-                                                                 HideSpinButtons
-                                                                 Value="@Math.Abs(element.Value)"
-                                                                 Format="0"
-                                                                 Variant="Variant.Outlined"/>
-                                            </MudStack>
-                                        }
-                                    </MudStack>
-                                    <MudStack Class="mt-4">
-                                        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</MudText>
-
-                                        @foreach (var element in aggregatedOutputs.Where(o => o.Value > 0))
-                                        {
-                                            <MudStack Row>
-                                                <EcoIcon Item="element.Key"/>
-                                                <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(element.Key)</MudText>
-                                                <MudNumericField T="decimal"
-                                                                 Class="rectangle-input"
-                                                                 Style="width: 111px;"
-                                                                 ReadOnly
-                                                                 HideSpinButtons
-                                                                 Value="@element.Value"
-                                                                 Format="0"
-                                                                 Variant="Variant.Outlined"/>
-                                            </MudStack>
-                                        }
-                                    </MudStack>
+                                    var stripSkills = _selectedShoppingList.UserSkills.Where(us => us.Skill is not null).ToList();
+                                    var stripTables = _selectedShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable)).ToList();
                                 }
+                                <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="OpenConfigDialog">
+                                    <MudIcon Icon="@MDIIcons.Outline.AccountHardHat" Class="mr-2"/>
+                                    <span class="sl-strip-button-text">
+                                        <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.ConfigButton")</span>
+                                        <span class="sl-strip-button-summary">@LocalizationService.GetTranslation("ShoppingList.ConfigSummary", stripSkills.Count.ToString(), stripTables.Count.ToString())</span>
+                                    </span>
+                                    <MudIcon Icon="@MDIIcons.Outline.Pencil" Size="Size.Small" Class="ml-2 sl-muted"/>
+                                </MudButton>
+                                <span class="sl-strip-separator"></span>
+                                <span class="sl-strip-label">@LocalizationService.GetTranslation("ShoppingList.StripSkills")</span>
+                                <div class="sl-strip-icons">
+                                    @foreach (var userSkill in stripSkills.Take(StripMaxIcons))
+                                    {
+                                        <MudTooltip Text="@LocalizationService.GetTranslation(userSkill.Skill)">
+                                            <div class="sl-strip-icon">
+                                                <EcoIcon Item="@userSkill.Skill" Size="32"/>
+                                                <span class="sl-strip-level">@userSkill.Level</span>
+                                            </div>
+                                        </MudTooltip>
+                                    }
+                                    @if (stripSkills.Count > StripMaxIcons)
+                                    {
+                                        var moreSkills = (stripSkills.Count - StripMaxIcons).ToString();
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.MoreSkills", moreSkills)">
+                                            <div class="sl-strip-more" @onclick="OpenConfigDialog">+@moreSkills</div>
+                                        </MudTooltip>
+                                    }
+                                </div>
+                                <span class="sl-strip-separator"></span>
+                                <span class="sl-strip-label">@LocalizationService.GetTranslation("ShoppingList.StripTables")</span>
+                                <div class="sl-strip-icons">
+                                    @foreach (var userCraftingTable in stripTables.Take(StripMaxIcons))
+                                    {
+                                        var firstModule = GetFirstSlotModule(userCraftingTable);
+                                        <MudTooltip Text="@LocalizationService.GetTranslation(userCraftingTable.CraftingTable)">
+                                            <div class="sl-strip-icon">
+                                                <EcoIcon Item="@userCraftingTable.CraftingTable" Size="32"/>
+                                                @if (firstModule is not null)
+                                                {
+                                                    <EcoIcon Item="@firstModule" Size="18" Class="sl-strip-module"/>
+                                                }
+                                            </div>
+                                        </MudTooltip>
+                                    }
+                                    @if (stripTables.Count > StripMaxIcons)
+                                    {
+                                        var moreTables = (stripTables.Count - StripMaxIcons).ToString();
+                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.MoreTables", moreTables)">
+                                            <div class="sl-strip-more" @onclick="OpenConfigDialog">+@moreTables</div>
+                                        </MudTooltip>
+                                    }
+                                </div>
+                                <span class="flex-grow-1"></span>
+                                <div class="sl-auto-open-anchor">
+                                    <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isAutoOpenPopoverOpen = !_isAutoOpenPopoverOpen)">
+                                        <MudIcon Icon="@MDIIcons.Filled.AutoFix" Class="mr-2"/>
+                                        <span class="sl-strip-button-text">
+                                            <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
+                                            <span class="sl-strip-button-summary">@GetAutoOpenSummary()</span>
+                                        </span>
+                                        <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
+                                    </MudButton>
+                                    <MudOverlay Visible="_isAutoOpenPopoverOpen" VisibleChanged="@(v => _isAutoOpenPopoverOpen = v)" AutoClose="true" LockScroll="false"/>
+                                    @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style. *@
+                                    <MudPopover Open="_isAutoOpenPopoverOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8"
+                                                Style="width: 460px; max-width: calc(100vw - 32px); background: #41424c; border-radius: 4px;">
+                                        <div class="sl-auto-open">
+                                            <div class="sl-auto-open-head">
+                                                <span class="sl-auto-open-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenTitle")</span>
+                                                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => _isAutoOpenPopoverOpen = false)"/>
+                                            </div>
+                                            @AutoOpenOption("ReuseChoices", _isAutoExpandEnabled, OnAutoExpandChanged)
+                                            @AutoOpenOption("Propagate", _isRecipeChoicePropagationEnabled, OnRecipeChoicePropagationChanged)
+                                            @AutoOpenOption("Guided", _isGuidedAutoExpandEnabled, OnGuidedAutoExpandChanged)
+                                        </div>
+                                    </MudPopover>
+                                </div>
                             </MudPaper>
                         </MudItem>
-                        <MudItem md="6" lg="6" Class="pa-2 d-flex flex-column">
-                            <MudPaper Style="background-color: var(--mud-palette-background)" Elevation="0" Class="flex-grow-1 pa-2">
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                        <MudItem xs="12" lg="8" Class="pa-2 pl-4">
+                            <MudPaper Class="pa-3">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="mb-2" Wrap="Wrap.Wrap">
                                     <MudAutocomplete T="Recipe"
                                                      @ref="_recipeAutocompleteRef"
                                                      Value="_emptyRecipe"
@@ -254,7 +174,7 @@
                                             <RecipeSummary Recipe="context" Class="pl-2" />
                                         </ItemTemplate>
                                     </MudAutocomplete>
-                                    <MudButton Variant="Variant.Outlined"
+                                    <MudButton Variant="Variant.Text"
                                                Color="Color.Tertiary"
                                                StartIcon="@MDIIcons.Filled.Sitemap"
                                                Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
@@ -263,7 +183,7 @@
                                     </MudButton>
                                     @if (ContextService.CurrentServer?.IsAutomationPlannerEnabled == true)
                                     {
-                                        <MudButton Variant="Variant.Outlined"
+                                        <MudButton Variant="Variant.Text"
                                                    Color="Color.Tertiary"
                                                    StartIcon="@MDIIcons.Filled.Factory"
                                                    Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
@@ -271,141 +191,135 @@
                                             @LocalizationService.GetTranslation("ShoppingList.AutomationButton")
                                         </MudButton>
                                     }
+                                    <MudButton Variant="Variant.Text"
+                                               StartIcon="@(_collapsedRows.Count > 0 ? MDIIcons.Filled.UnfoldMoreHorizontal : MDIIcons.Filled.UnfoldLessHorizontal)"
+                                               Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
+                                               OnClick="ToggleAllRows">
+                                        @LocalizationService.GetTranslation(_collapsedRows.Count > 0 ? "ShoppingList.ExpandAll" : "ShoppingList.CollapseAll")
+                                    </MudButton>
                                 </MudStack>
-                                <MudTreeView Items="TreeItems" Class="shopping-list-tree">
-                                    <ItemTemplate>
-                                        <MudTreeViewItem @key="context.Value.Id" Items="@context.Children" Expanded="@context.Expanded">
-                                            <BodyContent Context="other">
-                                                <MudStack Row Class="shopping-list-recipe-row" AlignItems="AlignItems.Center">
-                                                    @{
-                                                        var orderedProducts = GetOrderedProductsForDisplay(context.Value).ToList();
-                                                        var firstProduct = orderedProducts.First();
-                                                        var number = firstProduct.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
-
-                                                        <MudTooltip Text="@(number + " " + LocalizationService.GetTranslation(firstProduct.ItemOrTag))">
-                                                            <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-recipe-primary-product">
-                                                                <EcoIcon Size="48"
-                                                                         Item="firstProduct.ItemOrTag"
-                                                                         NumberTypo="Typo.h6"
-                                                                         NumberClass="mb-n1 text-shadow-black"
-                                                                         Number="number"/>
-                                                            </MudStack>
-                                                        </MudTooltip>
-                                                    }
-                                                    <MudStack Spacing="0" AlignItems="AlignItems.Start" Class="shopping-list-recipe-label">
-                                                        <MudStack Row AlignItems="AlignItems.Start">
-                                                            <MudText>@LocalizationService.GetTranslation(context.Value.Recipe) @LocalizationService.GetTranslation("Recipe")</MudText>
-                                                        </MudStack>
-                                                        <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                            @foreach (var product in orderedProducts.Skip(1))
-                                                            {
-                                                                var productNumber = product.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor;
-
-                                                                <MudTooltip Text="@LocalizationService.GetTranslation(product.ItemOrTag)">
-                                                                    <MudStack Row AlignItems="AlignItems.Center">
-                                                                        <EcoIcon Size="24"
-                                                                                 Item="product.ItemOrTag"
-                                                                                 NumberClass="mb-n1 tsb"
-                                                                                 Number="@productNumber"/>
-                                                                    </MudStack>
-                                                                </MudTooltip>
-                                                            }
-                                                        </MudStack>
-                                                    </MudStack>
-                                                    <MudStack AlignItems="AlignItems.Center" Row Class="shopping-list-recipe-quantity">
-                                                        @{
-                                                            var primaryProduct = GetOrderedProductsForDisplay(context.Value).First();
-                                                            var primaryProductPerCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList);
-                                                            var producedQuantity = primaryProductPerCraft * context.Value.RoundFactor;
-                                                            var quantityStep = primaryProductPerCraft >= 1 ? (int)Math.Round(primaryProductPerCraft) : 1;
-                                                        }
-                                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.QuantityToProduceTooltip")">
-                                                            <MudNumericField T="int"
-                                                                             Value="@((int)Math.Round(producedQuantity, MidpointRounding.AwayFromZero))"
-                                                                             ValueChanged="@(v => OnQuantityToProduceChanged(context.Value, primaryProduct, v))"
-                                                                             Format="0"
-                                                                             Step="quantityStep"
-                                                                             Culture="CultureInfo.InvariantCulture"
-                                                                             Variant="Variant.Filled"
-                                                                             Class="rectangle-input"
-                                                                             Min="1"
-                                                                             Style="width: 65px;"/>
-                                                        </MudTooltip>
-                                                    </MudStack>
-                                                    <div class="shopping-list-ingredient-scroll">
-                                                        <MudStack Row AlignItems="AlignItems.Center" Class="shopping-list-ingredient-row">
-                                                            @{
-                                                                var ingredientCoverage = ShoppingListCoverageCalculator.ComputeCoverage(context.Value, _selectedShoppingList!, context.Value.ChildrenUserRecipes);
-                                                            }
-                                                            @foreach (var ingredient in context.Value.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
-                                                            {
-                                                                var ingredientNumber = Math.Abs(ingredient.Quantity.GetDynamicValue(_selectedShoppingList) * context.Value.RoundFactor);
-                                                                var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
-                                                                var isFullfilled = ingredientCoverage.IsFulfilled(ingredient);
-                                                                var isGuidedPendingChoice = IsGuidedRunPausedForIngredient(context.Value, ingredient);
-                                                                var isGuidedMutedChoice = IsGuidedRunPaused && !isGuidedPendingChoice;
-
-                                                                <MudStack Row AlignItems="AlignItems.Center" Class="@GetChoiceContainerClass(isGuidedPendingChoice, isGuidedMutedChoice)">
-                                                                    <MudTooltip Text="@LocalizationService.GetTranslation(ingredient.ItemOrTag)">
-                                                                        <MudLink Color="Color.Default"
-                                                                                 OnClick="@(() => HandleIngredientClick(context, ingredient, possibleRecipes, isFullfilled))">
-                                                                            <MudStack Row AlignItems="AlignItems.Center">
-                                                                                <EcoIcon Size="32"
-                                                                                         Item="ingredient.ItemOrTag"
-                                                                                         NumberClass="mb-n1 text-shadow-black"
-                                                                                         Number="ingredientNumber"
-                                                                                         NumberColor="Color.Default"
-                                                                                         ForegroundIconColor="Color.Success"
-                                                                                         ForegroundIcon="@(isFullfilled ? MDIIcons.Filled.CheckBold : null)"/>
-                                                                            </MudStack>
-                                                                        </MudLink>
-                                                                    </MudTooltip>
-
-                                                                    @if (IsAddChildrenOpen(context, ingredient))
-                                                                    {
-                                                                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="@GetChoiceRowClass(isGuidedPendingChoice)">
-                                                                            <MudIcon Icon="@MDIIcons.Filled.ArrowRightBold"/>
-                                                                            @foreach (var recipe in possibleRecipes)
-                                                                            {
-                                                                                <MudTooltip>
-                                                                                    <ChildContent>
-                                                                                        <MudLink OnClick="@(() => AddChildRecipeFromManualSelection(context.Value, ingredient, recipe))">
-                                                                                            <EcoIcon Size="24" Item="recipe.CraftingTable"/>
-                                                                                        </MudLink>
-                                                                                    </ChildContent>
-                                                                                    <TooltipContent>
-                                                                                        <RecipeSummary Recipe="recipe" />
-                                                                                    </TooltipContent>
-                                                                                </MudTooltip>
-                                                                            }
-
-                                                                            @if (isGuidedPendingChoice)
-                                                                            {
-                                                                                <span class="guided-choice-scroll-anchor" @ref="_guidedPendingChoiceAnchorRef"></span>
-                                                                                <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandTooltip")">
-                                                                                    <MudIconButton Icon="@MDIIcons.Filled.StopCircle"
-                                                                                                   Color="Color.Warning"
-                                                                                                   Size="Size.Small"
-                                                                                                   OnClick="StopGuidedAutoExpandRun"/>
-                                                                                </MudTooltip>
-                                                                            }
-
-                                                                            <MudIcon Icon="@MDIIcons.Filled.ArrowLeftBold"/>
-                                                                        </MudStack>
-                                                                    }
-                                                                </MudStack>
-                                                            }
-                                                        </MudStack>
-                                                    </div>
-                                                    <MudIconButton Icon="@MDIIcons.Filled.Close"
-                                                                   Size="Size.Small"
-                                                                   OnClick="() => RemoveShoppingListRecipe(context.Value)"/>
-                                                </MudStack>
-                                            </BodyContent>
-                                        </MudTreeViewItem>
-                                    </ItemTemplate>
-                                </MudTreeView>
+                                <div class="sl-tree">
+                                    <div class="sl-tree-row sl-tree-head">
+                                        <span>@LocalizationService.GetTranslation("ShoppingList.ColumnItem")</span>
+                                        <span class="sl-right">@LocalizationService.GetTranslation("ShoppingList.ColumnQuantity")</span>
+                                        <span>@LocalizationService.GetTranslation("ShoppingList.ObtainedVia")</span>
+                                        <span></span>
+                                    </div>
+                                    @foreach (var rootRecipe in _selectedShoppingList.GetRootShoppingListRecipes())
+                                    {
+                                        @RecipeRow(rootRecipe, 0)
+                                    }
+                                </div>
                             </MudPaper>
+                        </MudItem>
+                        <MudItem xs="12" lg="4" Class="pa-2 pr-4">
+                            <MudStack Spacing="4">
+                                <MudExpansionPanels MultiExpansion="true" Class="sl-side-panels">
+                                    @if (_view.Tags.Count > 0)
+                                    {
+                                        <MudExpansionPanel @bind-Expanded="ExpandedTagsPanel" Gutters="false">
+                                            <TitleContent>
+                                                <div class="sl-panel-head">
+                                                    <MudIcon Icon="@MDIIcons.Outline.TagMultiple" Color="Color.Primary" Size="Size.Small"/>
+                                                    <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.TagsToConfigure")</span>
+                                                    <span class="sl-muted">@_view.Tags.Count</span>
+                                                    <span class="flex-grow-1"></span>
+                                                    <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.AnyOfTagCount", _view.Tags.Count(t => t.ChosenItem is null).ToString())</span>
+                                                </div>
+                                            </TitleContent>
+                                            <ChildContent>
+                                                <div class="sl-panel-body">
+                                                    <div class="sl-caption pb-1">@LocalizationService.GetTranslation("ShoppingList.TagsHelp")</div>
+                                                    @foreach (var tagRow in _view.Tags)
+                                                    {
+                                                        <div class="sl-tag-row">
+                                                            <EcoIcon Item="@tagRow.Tag" Size="28"/>
+                                                            <span class="sl-tag-name">
+                                                                <span>@LocalizationService.GetTranslation(tagRow.Tag) <span class="sl-muted">×@FormatQuantity(tagRow.Need)</span></span>
+                                                                <span class="sl-tag-choice">★ @(tagRow.ChosenItem is null ? LocalizationService.GetTranslation("ShoppingList.AnyOfTagLong") : LocalizationService.GetTranslation(tagRow.ChosenItem))</span>
+                                                            </span>
+                                                            <div class="sl-tag-candidates">
+                                                                @foreach (var candidate in GetTagCandidates(tagRow.Tag))
+                                                                {
+                                                                    var isChosen = candidate.IsTag ? tagRow.ChosenItem is null : tagRow.ChosenItem?.Id == candidate.Id;
+                                                                    <MudTooltip Text="@(candidate.IsTag ? LocalizationService.GetTranslation("ShoppingList.AnyOfTagLong") : LocalizationService.GetTranslation(candidate))">
+                                                                        <span class="@($"sl-tag-candidate{(isChosen ? " sl-chosen" : "")}")" @onclick="@(() => ChooseTagItem(tagRow.Tag, candidate.IsTag ? null : candidate))">
+                                                                            <EcoIcon Item="@candidate" Size="24"/>
+                                                                            <MudIcon Icon="@(isChosen ? MDIIcons.Filled.Star : MDIIcons.Outline.Star)" Class="sl-tag-star"/>
+                                                                        </span>
+                                                                    </MudTooltip>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </ChildContent>
+                                        </MudExpansionPanel>
+                                    }
+                                    <MudExpansionPanel @bind-Expanded="ExpandedBuyPanel" Gutters="false">
+                                        <TitleContent>
+                                            <div class="sl-panel-head">
+                                                <MudIcon Icon="@MDIIcons.Outline.Cart" Color="Color.Secondary" Size="Size.Small"/>
+                                                <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</span>
+                                                <span class="sl-muted">@_view.ToBuy.Count</span>
+                                                <span class="flex-grow-1"></span>
+                                                <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.InStockCount", _view.ToBuy.Count(r => r.IsInStock).ToString(), _view.ToBuy.Count.ToString())</span>
+                                            </div>
+                                        </TitleContent>
+                                        <ChildContent>
+                                            <div class="sl-panel-body">
+                                                <div class="sl-buy-row sl-buy-head">
+                                                    <span></span><span></span>
+                                                    <span>@LocalizationService.GetTranslation("ShoppingList.ColumnItem")</span>
+                                                    <span class="sl-right">@LocalizationService.GetTranslation("ShoppingList.Need")</span>
+                                                    <span class="sl-right">@LocalizationService.GetTranslation("ShoppingList.IHave")</span>
+                                                    <span class="sl-right">@LocalizationService.GetTranslation("ShoppingList.Remaining")</span>
+                                                </div>
+                                                @foreach (var buyRow in _view.ToBuy)
+                                                {
+                                                    <div class="@($"sl-buy-row{(buyRow.IsInStock ? " sl-in-stock" : "")}")">
+                                                        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AllInStock")">
+                                                            <MudIconButton Icon="@(buyRow.IsInStock ? MDIIcons.Filled.CheckboxMarked : buyRow.Stock > 0 ? MDIIcons.Filled.CheckboxIntermediate : MDIIcons.Outline.CheckboxBlank)"
+                                                                           Color="@(buyRow.Stock > 0 ? Color.Success : Color.Default)"
+                                                                           Size="Size.Small"
+                                                                           Class="pa-0"
+                                                                           OnClick="@(() => SetStock(buyRow.ItemOrTag, buyRow.IsInStock ? 0 : buyRow.Need))"/>
+                                                        </MudTooltip>
+                                                        <EcoIcon Item="@buyRow.ItemOrTag" Size="26"/>
+                                                        <span class="sl-buy-name">@LocalizationService.GetTranslation(buyRow.ItemOrTag)</span>
+                                                        <span class="sl-right sl-muted">@FormatQuantity(buyRow.Need)</span>
+                                                        <MudNumericField T="decimal"
+                                                                         Value="@buyRow.Stock"
+                                                                         ValueChanged="@(v => SetStock(buyRow.ItemOrTag, v))"
+                                                                         Min="0"
+                                                                         Format="0.##"
+                                                                         Culture="CultureInfo.InvariantCulture"
+                                                                         HideSpinButtons="true"
+                                                                         Variant="Variant.Outlined"
+                                                                         Margin="Margin.Dense"
+                                                                         Class="sl-stock-input"/>
+                                                        <span class="sl-right sl-remaining">@FormatQuantity(buyRow.Remaining)</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </ChildContent>
+                                    </MudExpansionPanel>
+                                </MudExpansionPanels>
+                                @if (_view.Surplus.Count > 0)
+                                {
+                                    <MudPaper Class="pa-3">
+                                        <MudText Typo="Typo.subtitle1" Class="mb-1">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</MudText>
+                                        @foreach (var (itemOrTag, quantity) in _view.Surplus)
+                                        {
+                                            <div class="sl-surplus-row">
+                                                <EcoIcon Item="@itemOrTag" Size="24"/>
+                                                <span class="flex-grow-1">@LocalizationService.GetTranslation(itemOrTag)</span>
+                                                <span class="sl-surplus-quantity">+@FormatQuantity(quantity)</span>
+                                            </div>
+                                        }
+                                    </MudPaper>
+                                }
+                            </MudStack>
                         </MudItem>
                     </ChildContent>
                     <ErrorContent>
@@ -424,41 +338,34 @@
     private DataContext? _selectedShoppingList;
     // Price calculator context the list copies skills, talents and tables from: its source, or the default context.
     private DataContext? _referenceDataContext;
-    private Guid? _sourceSelectionId;
     private bool _isLoadingData;
     private Server? _serverData;
-    private List<ITreeItemData<UserRecipe>> TreeItems { get; set; } = [];
 
-    private bool _expandedSkills;
-    private bool ExpandedSkills
+    private const int StripMaxIcons = 6;
+    private bool _isAutoOpenPopoverOpen;
+    // Lignes repliées de l'arbre (clés RecipeRowKey / IngredientRowKey) ; tout est déplié par défaut.
+    private readonly HashSet<string> _collapsedRows = [];
+    private ShoppingListView _view = ShoppingListView.Empty;
+
+    private bool _expandedTagsPanel;
+    private bool ExpandedTagsPanel
     {
-        get => _expandedSkills;
+        get => _expandedTagsPanel;
         set
         {
-            _expandedSkills = value;
-            _ = LocalStorageService.AddItem("ExpandedSkills", value.ToString());
+            _expandedTagsPanel = value;
+            _ = LocalStorageService.AddItem("ShoppingListTagsExpanded", value.ToString());
         }
     }
 
-    private bool _expandedCraftingTables;
-    private bool ExpandedCraftingTables
+    private bool _expandedBuyPanel;
+    private bool ExpandedBuyPanel
     {
-        get => _expandedCraftingTables;
+        get => _expandedBuyPanel;
         set
         {
-            _expandedCraftingTables = value;
-            _ = LocalStorageService.AddItem("ExpandedCraftingTables", value.ToString());
-        }
-    }
-
-    private bool _expandedOptions;
-    private bool ExpandedOptions
-    {
-        get => _expandedOptions;
-        set
-        {
-            _expandedOptions = value;
-            _ = LocalStorageService.AddItem("ExpandedShoppingListOptions", value.ToString());
+            _expandedBuyPanel = value;
+            _ = LocalStorageService.AddItem("ShoppingListBuyExpanded", value.ToString());
         }
     }
 
@@ -480,8 +387,9 @@
 
     private Recipe? _emptyRecipe;
     private MudAutocomplete<Recipe>? _recipeAutocompleteRef;
-    private ITreeItemData<UserRecipe>? _openedAddChildrenContext;
-    private Element? _openedAddChildrenIngredient;
+    // Menu de choix de recette ouvert sous un ingrédient (recette parente + ingrédient).
+    private Guid? _openedParentRecipeId;
+    private Guid? _openedIngredientId;
     private bool IsGuidedRunPaused => _isGuidedRunActive && _guidedPendingParentRecipeId.HasValue && _guidedPendingIngredientId.HasValue;
 
     protected override void OnInitialized()
@@ -491,9 +399,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _expandedSkills = await LocalStorageService.GetItem("ExpandedSkills") != "False";
-        _expandedCraftingTables = await LocalStorageService.GetItem("ExpandedCraftingTables") != "False";
-        _expandedOptions = await LocalStorageService.GetItem("ExpandedShoppingListOptions") != "False";
+        _expandedTagsPanel = await LocalStorageService.GetItem("ShoppingListTagsExpanded") != "False";
+        _expandedBuyPanel = await LocalStorageService.GetItem("ShoppingListBuyExpanded") != "False";
 
         var autoExpandSetting = await LocalStorageService.GetItem(AutoExpandStorageKey);
         if (string.IsNullOrEmpty(autoExpandSetting))
@@ -544,16 +451,62 @@
         }
     }
 
-    private void RebuildTree()
+    // Colonne de droite (tags, à acheter, surplus), recalculée à chaque changement de l'arbre, du stock ou d'un tag.
+    // Un tag dont l'objet est choisi est reporté sur cet objet (et additionné s'il est aussi acheté en direct) ;
+    // le stock est seulement déduit du reste à acheter, l'arbre n'en tient pas compte.
+    private void RebuildView()
     {
-        TreeItems.Clear();
-
-        if (_selectedShoppingList is not null) {
-            foreach (var rootShoppingListRecipe in _selectedShoppingList!.GetRootShoppingListRecipes())
-            {
-                TreeItems.Add(CreateTreeItemData(rootShoppingListRecipe));
-            }
+        if (_selectedShoppingList is null)
+        {
+            _view = ShoppingListView.Empty;
+            return;
         }
+
+        var outputs = ShoppingListService.GetAggregatedOutputs(_selectedShoppingList, _selectedShoppingList.GetRootShoppingListRecipes());
+        var settings = _selectedShoppingList.UserShoppingListItems.ToDictionary(usli => usli.ItemOrTagId);
+
+        var tags = new List<TagRow>();
+        var needs = new Dictionary<Guid, (ItemOrTag ItemOrTag, decimal Need)>();
+        foreach (var (itemOrTag, value) in outputs.Where(o => o.Value < 0))
+        {
+            var target = itemOrTag;
+            if (itemOrTag.IsTag)
+            {
+                var chosenItem = settings.GetValueOrDefault(itemOrTag.Id)?.ChosenItem;
+                tags.Add(new TagRow(itemOrTag, RoundNeed(value), chosenItem));
+                target = chosenItem ?? itemOrTag;
+            }
+
+            needs[target.Id] = (target, (needs.TryGetValue(target.Id, out var existing) ? existing.Need : 0) + Math.Abs(value));
+        }
+
+        var toBuy = needs.Values
+            .Select(n => new BuyRow(n.ItemOrTag, RoundNeed(n.Need), settings.GetValueOrDefault(n.ItemOrTag.Id)?.Stock ?? 0))
+            .ToList();
+
+        _view = new ShoppingListView(
+            tags.OrderBy(t => LocalizationService.GetTranslation(t.Tag)).ToList(),
+            toBuy,
+            toBuy.ToDictionary(r => r.ItemOrTag.Id),
+            outputs.Where(o => o.Value > 0).Select(o => (o.Key, o.Value)).ToList());
+    }
+
+    // Comme l'export vers le jeu (EcoApiDataService) : on achète des objets entiers.
+    private static decimal RoundNeed(decimal value) => Math.Ceiling(Math.Round(Math.Abs(value), 4));
+
+    private static string FormatQuantity(decimal value) => Math.Round(value, 2).ToString("0.##", CultureInfo.InvariantCulture);
+
+    private sealed record TagRow(ItemOrTag Tag, decimal Need, ItemOrTag? ChosenItem);
+
+    private sealed record BuyRow(ItemOrTag ItemOrTag, decimal Need, decimal Stock)
+    {
+        public decimal Remaining => Math.Max(0, Need - Stock);
+        public bool IsInStock => Stock >= Need;
+    }
+
+    private sealed record ShoppingListView(List<TagRow> Tags, List<BuyRow> ToBuy, Dictionary<Guid, BuyRow> BuyRowsById, List<(ItemOrTag ItemOrTag, decimal Quantity)> Surplus)
+    {
+        public static readonly ShoppingListView Empty = new([], [], [], []);
     }
 
     private static decimal GetIngredientQuantityGoal(UserRecipe userRecipe, Element ingredient, DataContext shoppingList)
@@ -695,62 +648,57 @@
         }
     }
 
-    private async Task HandleIngredientClick(ITreeItemData<UserRecipe> context, Element ingredient, List<Recipe> possibleRecipes, bool isFullfilled)
+    // « L'acheter » dans le menu de choix : l'ingrédient redevient une feuille, donc à acheter. Pendant une pause du
+    // mode guidé, c'est un refus de choisir : on arrête la course (les recettes déjà ajoutées restent).
+    private async Task SelectBuyForIngredient(UserRecipe parentRecipe, Element ingredient)
+    {
+        if (IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
+        {
+            StopGuidedAutoExpandRun();
+            return;
+        }
+
+        if (GetMatchingChildrenForIngredient(parentRecipe, ingredient).Count == 0)
+        {
+            CloseMenu();
+            return;
+        }
+
+        await RemoveIngredientChildren(parentRecipe, ingredient);
+    }
+
+    // Une recette choisie dans le menu remplace celle(s) de l'ingrédient ; propagation et mode guidé suivent les options.
+    private async Task SelectRecipeForIngredient(UserRecipe parentRecipe, Element ingredient, Recipe recipe)
     {
         if (_selectedShoppingList is null)
         {
             return;
         }
 
-        if (isFullfilled)
+        if (!IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
         {
-            await RemoveIngredientChildren(context.Value, ingredient);
-            return;
-        }
-
-        if (possibleRecipes.Count == 0)
-        {
-            return;
-        }
-
-        if (_isGuidedAutoExpandEnabled && IsIngredientAlreadyInBranch(context.Value, ingredient))
-        {
-            // When guided mode is enabled and the ingredient is already present in the current branch,
-            // we still allow explicit manual choice for multi-option tags instead of doing nothing.
-            if (possibleRecipes.Count > 1)
+            var existingChildren = GetMatchingChildrenForIngredient(parentRecipe, ingredient);
+            if (existingChildren.Count == 1 && existingChildren[0].RecipeId == recipe.Id)
             {
-                ToggleAddChildren(context, ingredient);
-            }
-
-            return;
-        }
-
-        if (_isGuidedRunActive && IsGuidedRunPausedForIngredient(context.Value, ingredient))
-        {
-            return;
-        }
-
-        if (_isGuidedAutoExpandEnabled)
-        {
-            await StartGuidedAutoExpandFromIngredient(context.Value, ingredient, possibleRecipes);
-            return;
-        }
-
-        if (possibleRecipes.Count == 1)
-        {
-            if (_isRecipeChoicePropagationEnabled)
-            {
-                await PropagateManualRecipeChoiceAcrossTree(ingredient, possibleRecipes[0]);
+                CloseMenu();
                 return;
             }
 
-            var quantityGoal = GetIngredientQuantityGoal(context.Value, ingredient, _selectedShoppingList);
-            await AddChildRecipe(context.Value, ingredient, quantityGoal, possibleRecipes[0]);
-            return;
+            if (existingChildren.Count > 0)
+            {
+                await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+                {
+                    foreach (var childRecipe in existingChildren)
+                    {
+                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe);
+                    }
+
+                    return Task.CompletedTask;
+                });
+            }
         }
 
-        // Manual mode keeps multi-choice explicit with inline recipe selection.
-        ToggleAddChildren(context, ingredient);
+        await AddChildRecipeFromManualSelection(parentRecipe, ingredient, recipe);
     }
 
     private async Task RemoveIngredientChildren(UserRecipe parentRecipe, Element ingredient)
@@ -782,8 +730,7 @@
             return Task.CompletedTask;
         });
 
-        _openedAddChildrenContext = null;
-        _openedAddChildrenIngredient = null;
+        CloseMenu();
         Rebuild();
     }
 
@@ -881,8 +828,7 @@
     {
         await PropagateRecipeChoiceAcrossTreeCore(sourceIngredient, chosenRecipe, runAutoExpandAfterApply: true);
 
-        _openedAddChildrenContext = null;
-        _openedAddChildrenIngredient = null;
+        CloseMenu();
         Rebuild();
     }
 
@@ -897,8 +843,7 @@
         {
             _guidedPendingParentRecipeId = null;
             _guidedPendingIngredientId = null;
-            _openedAddChildrenContext = null;
-            _openedAddChildrenIngredient = null;
+            CloseMenu();
 
             var createdRecipes = await ApplyRecipeChoiceToIngredient(userRecipe, ingredient, recipe, runAutoExpandAfterApply: false);
             foreach (var createdRecipe in createdRecipes)
@@ -915,6 +860,22 @@
             ResetGuidedRunState();
         }
 
+        // « Aller jusqu'aux ressources brutes » : le choix lance une course guidée qui ouvre toute la chaîne
+        // en dessous, et s'arrête sur le prochain ingrédient à plusieurs recettes.
+        if (_isGuidedAutoExpandEnabled)
+        {
+            CloseMenu();
+            _isGuidedRunActive = true;
+            var createdRecipes = await ApplyRecipeChoiceToIngredient(userRecipe, ingredient, recipe, runAutoExpandAfterApply: false);
+            foreach (var createdRecipe in createdRecipes)
+            {
+                EnqueueGuidedParent(createdRecipe);
+            }
+
+            await ContinueGuidedRunAsync();
+            return;
+        }
+
         if (_isRecipeChoicePropagationEnabled)
         {
             await PropagateManualRecipeChoiceAcrossTree(ingredient, recipe);
@@ -929,8 +890,7 @@
     {
         await AddChildRecipeCoreAndOptionallyAutoExpand(userRecipe, element, quantityGoal, recipe, runAutoExpandAfterAdd: true);
 
-        _openedAddChildrenContext = null;
-        _openedAddChildrenIngredient = null;
+        CloseMenu();
         Rebuild();
     }
 
@@ -949,26 +909,19 @@
         return createdRecipe!;
     }
 
-    private static int GetChildDisplayOrder(UserRecipe parentRecipe, UserRecipe childRecipe)
+    // Rattache chaque sous-recette au premier ingrédient (par Index) qu'elle peut fournir ; celles qui n'en fournissent
+    // aucun sont rangées sous Guid.Empty et affichées à part sous la recette.
+    private static Dictionary<Guid, List<UserRecipe>> GetChildrenByIngredient(UserRecipe parentRecipe)
     {
-        var matchingIngredientIndex = parentRecipe.Recipe.Elements
-            .Where(e => e.IsIngredient())
-            .Where(ingredient => childRecipe.Recipe.Elements.Any(product =>
+        var ingredients = parentRecipe.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index).ToList();
+
+        return parentRecipe.ChildrenUserRecipes
+            .OrderBy(childRecipe => childRecipe.Recipe.Name)
+            .GroupBy(childRecipe => ingredients.FirstOrDefault(ingredient => childRecipe.Recipe.Elements.Any(product =>
                 product.IsProduct() &&
                 !product.DefaultIsReintegrated &&
-                ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag)))
-            .Select(ingredient => ingredient.Index)
-            .DefaultIfEmpty(int.MaxValue)
-            .Min();
-
-        return matchingIngredientIndex;
-    }
-
-    private static IEnumerable<UserRecipe> GetOrderedChildrenForDisplay(UserRecipe parentRecipe)
-    {
-        return parentRecipe.ChildrenUserRecipes
-            .OrderBy(childRecipe => GetChildDisplayOrder(parentRecipe, childRecipe))
-            .ThenBy(childRecipe => childRecipe.Recipe.Name);
+                ShoppingListCoverageCalculator.CanSupplyIngredient(product.ItemOrTag, ingredient.ItemOrTag)))?.Id ?? Guid.Empty)
+            .ToDictionary(g => g.Key, g => g.ToList());
     }
 
     private static IEnumerable<Element> GetOrderedProductsForDisplay(UserRecipe userRecipe)
@@ -991,46 +944,14 @@
             .First();
     }
 
-    private ITreeItemData<UserRecipe> CreateTreeItemData(UserRecipe userRecipe)
+    private bool IsAddChildrenOpen(UserRecipe parentRecipe, Element ingredient)
     {
-        return new TreeItemData<UserRecipe>
-        {
-            Value = userRecipe,
-            Expanded = true,
-            Children = GetOrderedChildrenForDisplay(userRecipe).Select(CreateTreeItemData).ToList()
-        };
-    }
-
-    private static string GetChoiceContainerClass(bool isGuidedPendingChoice, bool isGuidedMutedChoice)
-    {
-        if (isGuidedPendingChoice)
-        {
-            return "shopping-list-choice-container guided-choice-focus";
-        }
-
-        if (isGuidedMutedChoice)
-        {
-            return "shopping-list-choice-container guided-choice-muted";
-        }
-
-        return "shopping-list-choice-container";
-    }
-
-    private static string GetChoiceRowClass(bool isGuidedPendingChoice)
-    {
-        return isGuidedPendingChoice
-            ? "shopping-list-choice-row shopping-list-choice-row-pending"
-            : "shopping-list-choice-row";
-    }
-
-    private bool IsAddChildrenOpen(ITreeItemData<UserRecipe> context, Element ingredient)
-    {
-        if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+        if (_openedParentRecipeId == parentRecipe.Id && _openedIngredientId == ingredient.Id)
         {
             return true;
         }
 
-        return IsGuidedRunPausedForIngredient(context.Value, ingredient);
+        return IsGuidedRunPausedForIngredient(parentRecipe, ingredient);
     }
 
     private bool IsGuidedRunPausedForIngredient(UserRecipe userRecipe, Element ingredient)
@@ -1040,23 +961,39 @@
                && _guidedPendingIngredientId == ingredient.Id;
     }
 
-    private void ToggleAddChildren(ITreeItemData<UserRecipe> context, Element ingredient)
+    private void ToggleAddChildren(UserRecipe parentRecipe, Element ingredient)
     {
-        if (IsGuidedRunPausedForIngredient(context.Value, ingredient))
+        if (IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
         {
             return;
         }
 
-        if (_openedAddChildrenContext == context && _openedAddChildrenIngredient == ingredient)
+        if (_openedParentRecipeId == parentRecipe.Id && _openedIngredientId == ingredient.Id)
         {
-            _openedAddChildrenContext = null;
-            _openedAddChildrenIngredient = null;
+            CloseMenu();
         }
         else
         {
-            _openedAddChildrenContext = context;
-            _openedAddChildrenIngredient = ingredient;
+            _openedParentRecipeId = parentRecipe.Id;
+            _openedIngredientId = ingredient.Id;
         }
+    }
+
+    private void CloseMenu()
+    {
+        _openedParentRecipeId = null;
+        _openedIngredientId = null;
+    }
+
+    private void CloseMenu(UserRecipe parentRecipe, Element ingredient)
+    {
+        if (IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
+        {
+            StopGuidedAutoExpandRun();
+            return;
+        }
+
+        CloseMenu();
     }
 
     private void StopGuidedAutoExpandRun()
@@ -1079,30 +1016,417 @@
         _guidedPendingChoiceAnchorRef = default;
         _guidedRunQueue.Clear();
         _guidedRunQueuedIds.Clear();
-        _openedAddChildrenContext = null;
-        _openedAddChildrenIngredient = null;
+        CloseMenu();
     }
 
-    private async Task StartGuidedAutoExpandFromIngredient(UserRecipe parentRecipe, Element ingredient, List<Recipe> possibleRecipes)
-    {
-        ResetGuidedRunState();
-        _isGuidedRunActive = true;
+    private static string RecipeRowKey(UserRecipe userRecipe) => $"r{userRecipe.Id}";
 
-        var chosenRecipe = ResolveGuidedRecipeChoice(ingredient, possibleRecipes);
-        if (chosenRecipe is null)
+    private static string IngredientRowKey(UserRecipe parentRecipe, Element ingredient) => $"{parentRecipe.Id}:{ingredient.Id}";
+
+    private void ToggleRow(string key)
+    {
+        if (!_collapsedRows.Remove(key))
         {
-            PauseGuidedRun(parentRecipe, ingredient);
+            _collapsedRows.Add(key);
+        }
+    }
+
+    // Tout replier (chaque recette et chaque ingrédient) ou, si quelque chose est déjà replié, tout déplier.
+    private void ToggleAllRows()
+    {
+        if (_collapsedRows.Count > 0 || _selectedShoppingList is null)
+        {
+            _collapsedRows.Clear();
+            return;
+        }
+
+        foreach (var userRecipe in _selectedShoppingList.UserRecipes)
+        {
+            _collapsedRows.Add(RecipeRowKey(userRecipe));
+            foreach (var ingredient in userRecipe.Recipe.Elements.Where(e => e.IsIngredient()))
+            {
+                _collapsedRows.Add(IngredientRowKey(userRecipe, ingredient));
+            }
+        }
+    }
+
+    private static string Indent(int depth) => $"padding-left: {depth * 28}px;";
+
+    private decimal GetTotalIngredientQuantity(ItemOrTag itemOrTag)
+    {
+        return _selectedShoppingList!.UserRecipes
+            .SelectMany(ur => ur.Recipe.Elements
+                .Where(e => e.IsIngredient() && e.ItemOrTag.Id == itemOrTag.Id)
+                .Select(e => GetIngredientQuantityGoal(ur, e, _selectedShoppingList)))
+            .Sum();
+    }
+
+    private ItemOrTag? GetChosenItem(ItemOrTag tag)
+    {
+        return _selectedShoppingList?.UserShoppingListItems.FirstOrDefault(usli => usli.ItemOrTagId == tag.Id)?.ChosenItem;
+    }
+
+    // Candidats d'un tag : le tag lui-même (« n'importe quel objet », choix par défaut) puis ses objets.
+    private List<ItemOrTag> GetTagCandidates(ItemOrTag tag)
+    {
+        return tag.AssociatedItems
+            .OrderBy(item => LocalizationService.GetTranslation(item))
+            .Prepend(tag)
+            .ToList();
+    }
+
+    private Task ChooseTagItem(ItemOrTag tag, ItemOrTag? item)
+    {
+        return UpdateShoppingListItem(tag, usli =>
+        {
+            usli.ChosenItem = item;
+            usli.ChosenItemId = item?.Id;
+        });
+    }
+
+    private Task SetStock(ItemOrTag itemOrTag, decimal stock)
+    {
+        return UpdateShoppingListItem(itemOrTag, usli => usli.Stock = Math.Max(0, stock));
+    }
+
+    // Une ligne n'existe en base que tant qu'elle porte un stock ou un choix de tag.
+    private async Task UpdateShoppingListItem(ItemOrTag itemOrTag, Action<UserShoppingListItem> change)
+    {
+        if (_selectedShoppingList is null)
+        {
+            return;
+        }
+
+        var shoppingListItem = _selectedShoppingList.UserShoppingListItems.FirstOrDefault(usli => usli.ItemOrTagId == itemOrTag.Id);
+        var isNew = shoppingListItem is null;
+        shoppingListItem ??= new UserShoppingListItem
+        {
+            DataContext = _selectedShoppingList,
+            DataContextId = _selectedShoppingList.Id,
+            ItemOrTag = itemOrTag,
+            ItemOrTagId = itemOrTag.Id,
+        };
+        change(shoppingListItem);
+
+        if (isNew && shoppingListItem.IsEmpty())
+        {
             Rebuild();
             return;
         }
 
-        var createdRecipes = await ApplyRecipeChoiceToIngredient(parentRecipe, ingredient, chosenRecipe, runAutoExpandAfterApply: false);
-        foreach (var createdRecipe in createdRecipes)
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            EnqueueGuidedParent(createdRecipe);
+            if (isNew)
+            {
+                UserShoppingListItemDbService.Create(context, shoppingListItem);
+            }
+            else if (shoppingListItem.IsEmpty())
+            {
+                UserShoppingListItemDbService.Destroy(context, shoppingListItem);
+            }
+            else
+            {
+                UserShoppingListItemDbService.Update(context, shoppingListItem);
+            }
+
+            return Task.CompletedTask;
+        });
+
+        if (isNew)
+        {
+            _selectedShoppingList.UserShoppingListItems.Add(shoppingListItem);
+        }
+        else if (shoppingListItem.IsEmpty())
+        {
+            _selectedShoppingList.UserShoppingListItems.Remove(shoppingListItem);
         }
 
-        await ContinueGuidedRunAsync();
+        Rebuild();
+    }
+
+    private static PluginModule? GetFirstSlotModule(UserCraftingTable userCraftingTable)
+    {
+        return userCraftingTable.CraftingTable.GetOrderedModuleSlots()
+            .Select(moduleSlot => userCraftingTable.GetInstalledPluginModules(moduleSlot).FirstOrDefault())
+            .FirstOrDefault();
+    }
+
+    private string GetAutoOpenSummary()
+    {
+        var parts = new List<string>();
+        if (_isAutoExpandEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.ReuseChoicesShort"));
+        if (_isRecipeChoicePropagationEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.PropagateShort"));
+        if (_isGuidedAutoExpandEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.GuidedShort"));
+
+        return parts.Count > 0 ? string.Join(" · ", parts) : LocalizationService.GetTranslation("ShoppingList.AutoOpenSummaryNone");
+    }
+
+    private RenderFragment AutoOpenOption(string key, bool value, Func<bool, Task> onChanged) => __builder =>
+    {
+        <div class="sl-auto-open-option">
+            <MudSwitch T="bool" Value="value" ValueChanged="@((bool v) => onChanged(v))" Color="Color.Primary"/>
+            <div class="sl-auto-open-text">
+                <span class="sl-auto-open-option-title">@LocalizationService.GetTranslation($"ShoppingList.{key}Title")</span>
+                <span class="sl-auto-open-option-desc">@LocalizationService.GetTranslation($"ShoppingList.{key}Desc")</span>
+                <span class="sl-auto-open-option-example">@LocalizationService.GetTranslation($"ShoppingList.{key}Example")</span>
+            </div>
+        </div>
+    };
+
+    // Ligne d'une recette : racine (quantité à produire modifiable, ✕) ou sous-recette affichée à part (plusieurs
+    // recettes pour un même ingrédient). Dépliée, elle montre ses ingrédients.
+    private RenderFragment RecipeRow(UserRecipe userRecipe, int depth) => __builder =>
+    {
+        var orderedProducts = GetOrderedProductsForDisplay(userRecipe).ToList();
+        var primaryProduct = orderedProducts.First();
+        var perCraft = primaryProduct.Quantity.GetDynamicValue(_selectedShoppingList!);
+        var producedQuantity = perCraft * userRecipe.RoundFactor;
+        var key = RecipeRowKey(userRecipe);
+        var isExpanded = !_collapsedRows.Contains(key);
+        var isRoot = depth == 0;
+
+        <div class="@($"sl-tree-row{(isRoot ? " sl-root" : "")}")">
+            <div class="sl-item" style="@Indent(depth)">
+                <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" OnClick="@(() => ToggleRow(key))"/>
+                <EcoIcon Item="@primaryProduct.ItemOrTag" Size="32"/>
+                <span class="sl-item-text">
+                    <span class="sl-item-name">@LocalizationService.GetTranslation(primaryProduct.ItemOrTag)</span>
+                    @if (orderedProducts.Count > 1)
+                    {
+                        <span class="sl-item-products">
+                            @foreach (var product in orderedProducts.Skip(1))
+                            {
+                                <MudTooltip Text="@LocalizationService.GetTranslation(product.ItemOrTag)">
+                                    <span class="sl-item-product">+@FormatQuantity(product.Quantity.GetDynamicValue(_selectedShoppingList!) * userRecipe.RoundFactor) <EcoIcon Item="@product.ItemOrTag" Size="16"/></span>
+                                </MudTooltip>
+                            }
+                        </span>
+                    }
+                </span>
+            </div>
+            @if (isRoot)
+            {
+                <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.QuantityToProduceTooltip")">
+                    <MudNumericField T="int"
+                                     Value="@((int)Math.Round(producedQuantity, MidpointRounding.AwayFromZero))"
+                                     ValueChanged="@(v => OnQuantityToProduceChanged(userRecipe, primaryProduct, v))"
+                                     Format="0"
+                                     Step="@(perCraft >= 1 ? (int)Math.Round(perCraft) : 1)"
+                                     Culture="CultureInfo.InvariantCulture"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Class="sl-quantity-input"
+                                     Min="1"/>
+                </MudTooltip>
+            }
+            else
+            {
+                <span class="sl-right">@FormatQuantity(producedQuantity)</span>
+            }
+            <div class="sl-chip sl-chip-static">
+                <EcoIcon Item="@userRecipe.Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
+                <span class="sl-chip-label">@LocalizationService.GetTranslation(userRecipe.Recipe)</span>
+            </div>
+            <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="() => RemoveShoppingListRecipe(userRecipe)"/>
+        </div>
+        @if (isExpanded)
+        {
+            @RecipeChildren(userRecipe, depth + 1)
+        }
+    };
+
+    private RenderFragment RecipeChildren(UserRecipe userRecipe, int depth) => __builder =>
+    {
+        var childrenByIngredient = GetChildrenByIngredient(userRecipe);
+        var coverage = ShoppingListCoverageCalculator.ComputeCoverage(userRecipe, _selectedShoppingList!, userRecipe.ChildrenUserRecipes);
+        var ingredients = userRecipe.Recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index).ToList();
+        var orphanRecipes = childrenByIngredient.GetValueOrDefault(Guid.Empty) ?? new List<UserRecipe>();
+
+        @foreach (var ingredient in ingredients)
+        {
+            var ingredientChildren = childrenByIngredient.GetValueOrDefault(ingredient.Id) ?? new List<UserRecipe>();
+            @IngredientRow(userRecipe, ingredient, ingredientChildren, coverage.IsFulfilled(ingredient), depth)
+        }
+        @foreach (var orphanRecipe in orphanRecipes)
+        {
+            @RecipeRow(orphanRecipe, depth)
+        }
+    };
+
+    // Ligne d'un ingrédient : la puce « Obtenu via » ouvre le menu de choix ; s'il est fabriqué, la ligne se déplie
+    // sur les ingrédients de sa sous-recette (ou sur chaque sous-recette s'il y en a plusieurs).
+    private RenderFragment IngredientRow(UserRecipe parentRecipe, Element ingredient, List<UserRecipe> children, bool isFulfilled, int depth) => __builder =>
+    {
+        var key = IngredientRowKey(parentRecipe, ingredient);
+        var hasChildren = children.Count > 0;
+        var isExpanded = hasChildren && !_collapsedRows.Contains(key);
+        var quantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList!);
+        var possibleRecipes = GetPossibleRecipesForIngredient(ingredient);
+        var isMenuOpen = IsAddChildrenOpen(parentRecipe, ingredient);
+
+        <div class="@($"sl-tree-row{(isMenuOpen ? " sl-menu-open" : "")}")">
+            <div class="sl-item" style="@Indent(depth)">
+                @if (hasChildren)
+                {
+                    <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" OnClick="@(() => ToggleRow(key))"/>
+                }
+                else
+                {
+                    <span class="sl-chevron-placeholder"></span>
+                }
+                <EcoIcon Item="@ingredient.ItemOrTag" Size="32"/>
+                <span class="sl-item-text">
+                    <span class="sl-item-name">@LocalizationService.GetTranslation(ingredient.ItemOrTag)</span>
+                    @if (hasChildren && !isFulfilled)
+                    {
+                        <span class="sl-caption sl-warning">@LocalizationService.GetTranslation("ShoppingList.PartiallyCovered", FormatQuantity(GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList!)), FormatQuantity(quantity))</span>
+                    }
+                    else if (!hasChildren && possibleRecipes.Count >= 2)
+                    {
+                        <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.RecipesPossible", possibleRecipes.Count.ToString())</span>
+                    }
+                </span>
+            </div>
+            <span class="sl-right">@FormatQuantity(quantity)</span>
+            @IngredientChip(parentRecipe, ingredient, children, possibleRecipes)
+            <span></span>
+        </div>
+        @if (isMenuOpen)
+        {
+            @RecipeMenu(parentRecipe, ingredient, children, possibleRecipes, depth + 1)
+        }
+        @if (isExpanded && children.Count == 1)
+        {
+            @RecipeChildren(children[0], depth + 1)
+        }
+        @if (isExpanded && children.Count > 1)
+        {
+            @foreach (var childRecipe in children)
+            {
+                @RecipeRow(childRecipe, depth + 1)
+            }
+        }
+    };
+
+    // Puce « Obtenu via » : fabriqué (table + recette), tag (★ objet choisi), en stock, ou à acheter.
+    private RenderFragment IngredientChip(UserRecipe parentRecipe, Element ingredient, List<UserRecipe> children, List<Recipe> possibleRecipes) => __builder =>
+    {
+        var canChoose = possibleRecipes.Count > 0 || children.Count > 0;
+        var isTag = children.Count == 0 && ingredient.ItemOrTag.IsTag;
+        var chosenItem = isTag ? GetChosenItem(ingredient.ItemOrTag) : null;
+        var isInStock = children.Count == 0 && !isTag && _view.BuyRowsById.GetValueOrDefault(ingredient.ItemOrTag.Id)?.IsInStock == true;
+        var chipClass = children.Count > 0 ? "sl-chip" : isTag ? "sl-chip sl-chip-tag" : isInStock ? "sl-chip sl-chip-stock" : "sl-chip sl-chip-buy";
+
+        <button type="button" class="@chipClass" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
+            @if (children.Count > 0)
+            {
+                <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
+                <span class="sl-chip-label">@LocalizationService.GetTranslation(children[0].Recipe)@(children.Count > 1 ? $" +{children.Count - 1}" : "")</span>
+            }
+            else if (isTag)
+            {
+                <EcoIcon Item="@(chosenItem ?? ingredient.ItemOrTag)" Size="22" Class="sl-chip-icon"/>
+                <MudIcon Icon="@MDIIcons.Filled.Star" Size="Size.Small"/>
+                <span class="sl-chip-label">@(chosenItem is null ? LocalizationService.GetTranslation("ShoppingList.AnyOfTag") : LocalizationService.GetTranslation(chosenItem))</span>
+                <span class="sl-chip-sub">@LocalizationService.GetTranslation("ShoppingList.TagCaption", LocalizationService.GetTranslation(ingredient.ItemOrTag))</span>
+            }
+            else if (isInStock)
+            {
+                <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Size="Size.Small"/>
+                <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.InStock")</span>
+            }
+            else
+            {
+                <MudIcon Icon="@MDIIcons.Outline.Cart" Size="Size.Small"/>
+                <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.Buy")</span>
+            }
+            @if (canChoose)
+            {
+                <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="sl-chip-end"/>
+            }
+        </button>
+    };
+
+    // Menu de choix inséré sous l'ingrédient : « L'acheter » d'abord, puis une carte par recette possible
+    // (icône de la table, nom de la recette, ingrédients → produit par craft).
+    private RenderFragment RecipeMenu(UserRecipe parentRecipe, Element ingredient, List<UserRecipe> children, List<Recipe> possibleRecipes, int depth) => __builder =>
+    {
+        var isPending = IsGuidedRunPausedForIngredient(parentRecipe, ingredient);
+
+        <div class="@($"sl-menu{(isPending ? " sl-menu-pending" : "")}")" style="@($"margin-left: {depth * 28}px;")">
+            <div class="sl-menu-head">
+                <EcoIcon Item="@ingredient.ItemOrTag" Size="28"/>
+                <span class="sl-menu-title">@LocalizationService.GetTranslation("ShoppingList.HowToObtain", LocalizationService.GetTranslation(ingredient.ItemOrTag))</span>
+                <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.HowToObtainSub", possibleRecipes.Count.ToString(), FormatQuantity(GetTotalIngredientQuantity(ingredient.ItemOrTag)))</span>
+                <span class="flex-grow-1"></span>
+                @if (isPending)
+                {
+                    <span class="guided-choice-scroll-anchor" @ref="_guidedPendingChoiceAnchorRef"></span>
+                    <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandTooltip")">
+                        <MudButton Variant="Variant.Text" Color="Color.Warning" Size="Size.Small" StartIcon="@MDIIcons.Filled.StopCircle" OnClick="StopGuidedAutoExpandRun">
+                            @LocalizationService.GetTranslation("ShoppingList.StopGuidedAutoExpandLabel")
+                        </MudButton>
+                    </MudTooltip>
+                }
+                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => CloseMenu(parentRecipe, ingredient))"/>
+            </div>
+            <div class="sl-menu-cards">
+                <div class="@($"sl-card{(children.Count == 0 ? " sl-chosen" : "")}")" @onclick="@(() => SelectBuyForIngredient(parentRecipe, ingredient))">
+                    <div class="sl-card-title">
+                        <EcoIcon Item="@ingredient.ItemOrTag" Size="32"/>
+                        <span>@LocalizationService.GetTranslation("ShoppingList.BuyIt")</span>
+                    </div>
+                </div>
+                @foreach (var recipe in possibleRecipes)
+                {
+                    var product = GetPreferredProductMatch(recipe, ingredient);
+                    <div class="@($"sl-card{(children.Any(c => c.RecipeId == recipe.Id) ? " sl-chosen" : "")}")" @onclick="@(() => SelectRecipeForIngredient(parentRecipe, ingredient, recipe))">
+                        <div class="sl-card-title">
+                            <EcoIcon Item="@recipe.CraftingTable" Size="32"/>
+                            <span>@LocalizationService.GetTranslation(recipe)</span>
+                        </div>
+                        <div class="sl-card-io">
+                            @foreach (var recipeIngredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
+                            {
+                                <span class="sl-card-element">@FormatQuantity(Math.Abs(recipeIngredient.Quantity.GetDynamicValue(_selectedShoppingList!)))<EcoIcon Item="@recipeIngredient.ItemOrTag" Size="20"/></span>
+                            }
+                            <MudIcon Icon="@MDIIcons.Filled.ArrowRight" Size="Size.Small"/>
+                            <span class="sl-card-element">@FormatQuantity(product.Quantity.GetDynamicValue(_selectedShoppingList!))<EcoIcon Item="@product.ItemOrTag" Size="20"/></span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    };
+
+    private async Task OpenConfigDialog()
+    {
+        if (_selectedShoppingList is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ShoppingListConfigDialog>
+        {
+            { x => x.ShoppingList, _selectedShoppingList },
+            { x => x.SourceId, GetSelectedSourceId() },
+            { x => x.HasReferenceDataContext, () => _referenceDataContext is not null },
+            { x => x.OnSourceChanged, OnSourceChanged },
+            { x => x.OnImport, ImportSource },
+            { x => x.OnLevelChanged, OnLevelChanged },
+            { x => x.OnTalentsChanged, OnTalentsChanged },
+            { x => x.OnModuleSelected, SelectPluginModule },
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
+
+        await DialogService.ShowAsync<ShoppingListConfigDialog>(LocalizationService.GetTranslation("ShoppingList.ConfigTitle"), parameters, options);
+    }
+
+    // Source enregistrée de la liste, si elle existe encore parmi les contextes du calculateur.
+    private Guid? GetSelectedSourceId()
+    {
+        return ContextService.CurrentUserServer!.DataContexts
+            .FirstOrDefault(d => !d.IsShoppingList && d.Id == _selectedShoppingList?.SourceDataContextId)?.Id;
     }
 
     private async Task<List<UserRecipe>> ApplyRecipeChoiceToIngredient(UserRecipe parentRecipe, Element ingredient, Recipe chosenRecipe, bool runAutoExpandAfterApply)
@@ -1149,8 +1473,7 @@
             _shouldScrollToGuidedPendingChoice = true;
         }
 
-        _openedAddChildrenContext = null;
-        _openedAddChildrenIngredient = null;
+        CloseMenu();
     }
 
     private void EnqueueGuidedParent(UserRecipe parentRecipe)
@@ -1343,7 +1666,7 @@
         {
             _selectedShoppingList = null;
             _referenceDataContext = null;
-            TreeItems.Clear();
+            _view = ShoppingListView.Empty;
             return;
         }
 
@@ -1365,30 +1688,15 @@
             {
                 _selectedShoppingList = null;
                 _referenceDataContext = null;
-                TreeItems.Clear();
+                _view = ShoppingListView.Empty;
                 return;
             }
 
             _serverData = serverData;
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
+            await LoadReferenceDataContext();
 
-            var calculatorDataContexts = ContextService.CurrentUserServer.DataContexts.Where(d => !d.IsShoppingList).ToList();
-            var referenceDataContextId = (calculatorDataContexts.FirstOrDefault(d => d.Id == _selectedShoppingList.SourceDataContextId)
-                                          ?? calculatorDataContexts.FirstOrDefault(d => d.IsDefault))?.Id;
-            try
-            {
-                _referenceDataContext = referenceDataContextId is not null
-                    ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, serverData)
-                    : null;
-            }
-            catch (Exception)
-            {
-                _referenceDataContext = null;
-            }
-
-            _sourceSelectionId = _referenceDataContext?.Id;
-
-            RebuildTree();
+            RebuildView();
         }
         catch (Exception)
         {
@@ -1415,7 +1723,7 @@
             }
 
             _referenceDataContext = null;
-            RebuildTree();
+            RebuildView();
         }
         finally
         {
@@ -1502,20 +1810,34 @@
 
     private void Rebuild()
     {
-        RebuildTree();
+        RebuildView();
         StateHasChanged();
     }
 
-    // Copies the selected context into the list (the skills and tables its recipes use) and makes it the
-    // context new recipes copy from.
-    private async Task ImportSource()
+    // Context new recipes copy their skills and tables from: the list's source, or else the default calculator context.
+    private async Task LoadReferenceDataContext()
     {
-        if (_selectedShoppingList is null || _serverData is null || _sourceSelectionId is not Guid sourceId)
+        var referenceDataContextId = GetSelectedSourceId()
+                                     ?? ContextService.CurrentUserServer!.DataContexts.FirstOrDefault(d => !d.IsShoppingList && d.IsDefault)?.Id;
+        try
+        {
+            _referenceDataContext = referenceDataContextId is not null && _serverData is not null
+                ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, _serverData)
+                : null;
+        }
+        catch (Exception)
+        {
+            _referenceDataContext = null;
+        }
+    }
+
+    // Saves the list's source (null = the default context); it only applies to what recipes add from now on.
+    private async Task OnSourceChanged(Guid? sourceId)
+    {
+        if (_selectedShoppingList is null)
         {
             return;
         }
-
-        var source = await DataContextDbService.GetDataContextWithData(sourceId, _serverData);
 
         // The chips hold their own instance of the list: keep it in sync.
         _selectedShoppingList.SourceDataContextId = sourceId;
@@ -1525,14 +1847,29 @@
             chipShoppingList.SourceDataContextId = sourceId;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
             DataContextDbService.UpdateSource(context, _selectedShoppingList);
-            await ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, source);
+            return Task.CompletedTask;
+        });
+
+        await LoadReferenceDataContext();
+    }
+
+    // Copies the reference context into the list's skills and tables, once.
+    private async Task ImportSource()
+    {
+        if (_selectedShoppingList is null || _referenceDataContext is null)
+        {
+            return;
+        }
+
+        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        {
+            await ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, _referenceDataContext);
             await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
         });
 
-        _referenceDataContext = source;
         Rebuild();
     }
 

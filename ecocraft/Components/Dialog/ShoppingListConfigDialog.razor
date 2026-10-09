@@ -1,0 +1,159 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@using System.Globalization
+@inject LocalizationService LocalizationService
+@inject ContextService ContextService
+
+@* Métiers & tables d'une shopping list : les blocs de la page (TalentsControl, CraftingTablePluginModuleControl,
+   partagés avec le calculateur de prix) dans une fenêtre. Les métiers et tables suivent les recettes de la liste :
+   pas d'ajout ni de retrait ici. Chaque changement passe par la page, qui relance le calcul de l'arbre. *@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ConfigTitle")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="0" Class="pa-4 mb-4" Style="background-color: var(--mud-palette-background);">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="4" Wrap="Wrap.Wrap">
+                <MudSelect T="Guid?"
+                           Value="_sourceId"
+                           ValueChanged="OnSourceSelected"
+                           Label="@LocalizationService.GetTranslation("ShoppingList.SourceContext")"
+                           ToStringFunc="@GetSourceName"
+                           Dense="true"
+                           Variant="Variant.Outlined"
+                           Style="width: 300px;">
+                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">@LocalizationService.GetTranslation("ShoppingList.SourceDefault")</MudSelectItem>
+                    @foreach (var dataContext in CalculatorDataContexts)
+                    {
+                        <MudSelectItem T="Guid?" Value="@dataContext.Id">@GetSourceName(dataContext.Id)</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@MDIIcons.Filled.Download"
+                           Disabled="!CanImport"
+                           OnClick="@(() => Run(OnImport))">
+                    @LocalizationService.GetTranslation("ShoppingList.ImportNow")
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+        <MudGrid Spacing="4">
+            <MudItem xs="12" md="6">
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.Skills")} ({Skills.Count})")" Expanded="true">
+                        <MudTable Items="Skills"
+                                  Hover="true"
+                                  Dense="true"
+                                  RowClassFunc="@((_, i) => i % 2 == 1 ? "row-odd" : "")">
+                            <HeaderContent>
+                                <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
+                                <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
+                                <MudTh Class="pl-1">@LocalizationService.GetTranslation("Talents")</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Class="pa-1">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                        <EcoIcon Item="@context.Skill"/>
+                                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
+                                    </MudStack>
+                                </MudTd>
+                                <MudTd Class="px-0">
+                                    <MudNumericField T="int"
+                                                     Value="@context.Level"
+                                                     Class="square-input flex-no-grow"
+                                                     Format="0"
+                                                     Step="1"
+                                                     Culture="CultureInfo.InvariantCulture"
+                                                     Min="1"
+                                                     Max="@(context.Skill!.MaxLevel)"
+                                                     Variant="Variant.Outlined"
+                                                     Immediate="true"
+                                                     ValueChanged="@((int level) => Run(() => OnLevelChanged(context, level)))"/>
+                                </MudTd>
+                                <MudTd Class="px-0">
+                                    <TalentsControl DataContext="ShoppingList"
+                                                    UserSkill="context"
+                                                    OnChanged="@(() => Run(OnTalentsChanged))"/>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text="@($"{LocalizationService.GetTranslation("PriceCalculator.CraftingTables")} ({ShoppingList.UserCraftingTables.Count})")" Expanded="true">
+                        <MudTable Items="@ShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable))"
+                                  Hover="true"
+                                  Dense="true"
+                                  Class="mud-table-container-no-overflow-y"
+                                  RowClassFunc="@((_, i) => i % 2 == 1 ? "row-odd" : "")">
+                            <HeaderContent>
+                                <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
+                                <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Class="pa-1">
+                                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                                        <EcoIcon Item="@context.CraftingTable"/>
+                                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
+                                    </MudStack>
+                                </MudTd>
+                                <MudTd Class="pa-1">
+                                    <CraftingTablePluginModuleControl UserCraftingTable="context"
+                                                                      ModuleSelected="@(selection => Run(() => OnModuleSelected(context, selection)))"/>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public required IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter, EditorRequired] public required DataContext ShoppingList { get; set; }
+    // Contexte du calculateur choisi comme source (null = le contexte par défaut).
+    [Parameter] public Guid? SourceId { get; set; }
+    // Contexte effectivement repris (la source, sinon le contexte par défaut) : sans lui, rien à importer.
+    [Parameter] public Func<bool> HasReferenceDataContext { get; set; } = () => false;
+    [Parameter, EditorRequired] public required Func<Guid?, Task> OnSourceChanged { get; set; }
+    [Parameter, EditorRequired] public required Func<Task> OnImport { get; set; }
+    [Parameter, EditorRequired] public required Func<UserSkill, int, Task> OnLevelChanged { get; set; }
+    [Parameter, EditorRequired] public required Func<Task> OnTalentsChanged { get; set; }
+    [Parameter, EditorRequired] public required Func<UserCraftingTable, CraftingTablePluginModuleControl.ModuleSelection, Task> OnModuleSelected { get; set; }
+
+    private Guid? _sourceId;
+
+    private List<UserSkill> Skills => ShoppingList.UserSkills.Where(us => us.Skill is not null).ToList();
+    private IEnumerable<DataContext> CalculatorDataContexts => ContextService.CurrentUserServer!.DataContexts.Where(d => !d.IsShoppingList);
+    private bool CanImport => HasReferenceDataContext();
+
+    protected override void OnInitialized()
+    {
+        _sourceId = SourceId;
+    }
+
+    private string GetSourceName(Guid? id)
+    {
+        var dataContext = CalculatorDataContexts.FirstOrDefault(d => d.Id == id);
+        if (dataContext is null) return LocalizationService.GetTranslation("ShoppingList.SourceDefault");
+        return dataContext.IsDefault ? $"★ {dataContext.Name}" : dataContext.Name;
+    }
+
+    private async Task OnSourceSelected(Guid? id)
+    {
+        _sourceId = id;
+        await Run(() => OnSourceChanged(id));
+    }
+
+    // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après chaque changement.
+    private async Task Run(Func<Task> action)
+    {
+        await action();
+        StateHasChanged();
+    }
+}
