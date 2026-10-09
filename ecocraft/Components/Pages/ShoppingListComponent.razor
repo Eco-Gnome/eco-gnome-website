@@ -387,8 +387,10 @@
     private bool _isGuidedRunActive;
     private readonly Queue<Guid> _guidedRunQueue = new();
     private readonly HashSet<Guid> _guidedRunQueuedIds = [];
-    // Ingrédients pour lesquels « L'acheter » a été choisi pendant la course guidée : elle passe au choix suivant.
-    private readonly HashSet<(Guid ParentRecipeId, Guid IngredientId)> _guidedRunBoughtIngredients = [];
+    // Objets pour lesquels « L'acheter » a été choisi dans la liste ouverte : les courses guidées ne les redemandent
+    // plus, comme une recette déjà choisie est reprise. ponytail: en mémoire seulement (perdu au rechargement de la
+    // page), à persister par liste si le besoin se confirme.
+    private readonly HashSet<Guid> _boughtItemOrTagIds = [];
     private Guid? _guidedPendingParentRecipeId;
     private Guid? _guidedPendingIngredientId;
     private ElementReference _guidedPendingChoiceAnchorRef;
@@ -657,18 +659,14 @@
         }
     }
 
-    // « L'acheter » dans le menu de choix : l'ingrédient redevient une feuille, donc à acheter. Pendant une pause du
-    // mode guidé, la course l'écarte (ainsi que ses identiques si la propagation est active) et passe au choix suivant.
+    // « L'acheter » dans le menu de choix : l'ingrédient redevient une feuille, donc à acheter. Le choix est retenu
+    // pour l'objet : les courses guidées ne le redemandent plus. Pendant une pause, la course passe au choix suivant.
     private async Task SelectBuyForIngredient(UserRecipe parentRecipe, Element ingredient)
     {
+        _boughtItemOrTagIds.Add(ingredient.ItemOrTag.Id);
+
         if (IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
         {
-            _guidedRunBoughtIngredients.Add((parentRecipe.Id, ingredient.Id));
-            if (_isRecipeChoicePropagationEnabled)
-            {
-                _guidedRunBoughtIngredients.UnionWith(GetMatchingIngredientTargetsForPropagation(ingredient));
-            }
-
             _guidedPendingParentRecipeId = null;
             _guidedPendingIngredientId = null;
             CloseMenu();
@@ -692,6 +690,8 @@
         {
             return;
         }
+
+        _boughtItemOrTagIds.Remove(ingredient.ItemOrTag.Id);
 
         if (!IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
         {
@@ -1034,7 +1034,6 @@
         _guidedPendingChoiceAnchorRef = default;
         _guidedRunQueue.Clear();
         _guidedRunQueuedIds.Clear();
-        _guidedRunBoughtIngredients.Clear();
         CloseMenu();
     }
 
@@ -1492,6 +1491,8 @@
             _shouldScrollToGuidedPendingChoice = true;
         }
 
+        // Le menu de l'ingrédient en attente doit être visible, même sous une ligne repliée.
+        _collapsedRows.Clear();
         CloseMenu();
     }
 
@@ -1546,7 +1547,7 @@
                 var producedQuantity = GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList);
                 if (producedQuantity >= requiredQuantity
                     || IsIngredientAlreadyInBranch(parentRecipe, ingredient)
-                    || _guidedRunBoughtIngredients.Contains((parentRecipe.Id, ingredient.Id)))
+                    || _boughtItemOrTagIds.Contains(ingredient.ItemOrTag.Id))
                 {
                     continue;
                 }
@@ -1714,6 +1715,11 @@
             }
 
             _serverData = serverData;
+            if (_selectedShoppingList?.Id != targetShoppingListId)
+            {
+                _boughtItemOrTagIds.Clear();
+            }
+
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
             await LoadReferenceDataContext();
 
