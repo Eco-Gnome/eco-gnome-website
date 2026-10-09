@@ -387,6 +387,8 @@
     private bool _isGuidedRunActive;
     private readonly Queue<Guid> _guidedRunQueue = new();
     private readonly HashSet<Guid> _guidedRunQueuedIds = [];
+    // Ingrédients pour lesquels « L'acheter » a été choisi pendant la course guidée : elle passe au choix suivant.
+    private readonly HashSet<(Guid ParentRecipeId, Guid IngredientId)> _guidedRunBoughtIngredients = [];
     private Guid? _guidedPendingParentRecipeId;
     private Guid? _guidedPendingIngredientId;
     private ElementReference _guidedPendingChoiceAnchorRef;
@@ -656,12 +658,21 @@
     }
 
     // « L'acheter » dans le menu de choix : l'ingrédient redevient une feuille, donc à acheter. Pendant une pause du
-    // mode guidé, c'est un refus de choisir : on arrête la course (les recettes déjà ajoutées restent).
+    // mode guidé, la course l'écarte (ainsi que ses identiques si la propagation est active) et passe au choix suivant.
     private async Task SelectBuyForIngredient(UserRecipe parentRecipe, Element ingredient)
     {
         if (IsGuidedRunPausedForIngredient(parentRecipe, ingredient))
         {
-            StopGuidedAutoExpandRun();
+            _guidedRunBoughtIngredients.Add((parentRecipe.Id, ingredient.Id));
+            if (_isRecipeChoicePropagationEnabled)
+            {
+                _guidedRunBoughtIngredients.UnionWith(GetMatchingIngredientTargetsForPropagation(ingredient));
+            }
+
+            _guidedPendingParentRecipeId = null;
+            _guidedPendingIngredientId = null;
+            CloseMenu();
+            await ContinueGuidedRunAsync();
             return;
         }
 
@@ -1023,6 +1034,7 @@
         _guidedPendingChoiceAnchorRef = default;
         _guidedRunQueue.Clear();
         _guidedRunQueuedIds.Clear();
+        _guidedRunBoughtIngredients.Clear();
         CloseMenu();
     }
 
@@ -1532,7 +1544,9 @@
             {
                 var requiredQuantity = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
                 var producedQuantity = GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList);
-                if (producedQuantity >= requiredQuantity || IsIngredientAlreadyInBranch(parentRecipe, ingredient))
+                if (producedQuantity >= requiredQuantity
+                    || IsIngredientAlreadyInBranch(parentRecipe, ingredient)
+                    || _guidedRunBoughtIngredients.Contains((parentRecipe.Id, ingredient.Id)))
                 {
                     continue;
                 }
