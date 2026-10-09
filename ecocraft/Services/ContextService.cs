@@ -21,6 +21,7 @@ public class ContextService(
     UserPriceDbService userPriceDbService,
     UserRecipeDbService userRecipeDbService,
     UserElementDbService userElementDbService,
+    UserShoppingListItemDbService userShoppingListItemDbService,
     ServerDbService serverDbService,
     UserDbService userDbService,
     UserServerDbService userServerDbService,
@@ -568,6 +569,16 @@ public class ContextService(
             foreach (var r in newRecipes.Values)   userRecipeDbService.Create(context, r);
             foreach (var e in newElements.Values)  userElementDbService.Create(context, e);
             foreach (var p in newPrices.Values)    userPriceDbService.Create(context, p);
+            foreach (var usli in src.UserShoppingListItems)
+            {
+                userShoppingListItemDbService.Create(context, new UserShoppingListItem
+                {
+                    DataContext = newCtx,
+                    ItemOrTag = usli.ItemOrTag,
+                    ChosenItem = usli.ChosenItem,
+                    Stock = usli.Stock,
+                });
+            }
             return Task.CompletedTask;
         });
 

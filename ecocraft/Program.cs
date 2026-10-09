@@ -93,6 +93,7 @@ builder.Services.AddScoped<UserTalentDbService>();
 builder.Services.AddScoped<UserSkillDbService>();
 builder.Services.AddScoped<UserAutomationInputDbService>();
 builder.Services.AddScoped<UserAutomationTargetDbService>();
+builder.Services.AddScoped<UserShoppingListItemDbService>();
 builder.Services.AddScoped<DataContextDbService>();
 builder.Services.AddScoped<ModUploadHistoryDbService>();
 builder.Services.AddScoped<BuildingPlanDbService>();
