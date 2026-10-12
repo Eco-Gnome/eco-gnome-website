@@ -385,6 +385,10 @@
     // plus, comme une recette déjà choisie est reprise. ponytail: en mémoire seulement (perdu au rechargement de la
     // page), à persister par liste si le besoin se confirme.
     private readonly HashSet<Guid> _boughtItemOrTagIds = [];
+    private const int ShoppingListItemSaveDebounceMs = 150;
+    private readonly Dictionary<Guid, CancellationTokenSource> _shoppingListItemSaveDebounce = [];
+    private readonly HashSet<Guid> _unsavedShoppingListItemIds = [];
+    private readonly SemaphoreSlim _shoppingListItemSaveLock = new(1, 1);
     private Guid? _guidedPendingParentRecipeId;
     private Guid? _guidedPendingIngredientId;
     private ElementReference _guidedPendingChoiceAnchorRef;
@@ -1102,58 +1106,105 @@
     }
 
     // Une ligne n'existe en base que tant qu'elle porte un stock ou un choix de tag.
-    private async Task UpdateShoppingListItem(ItemOrTag itemOrTag, Action<UserShoppingListItem> change)
+    // Comme les niveaux de métier du Price calculator : le changement s'applique tout de suite en mémoire, l'écriture
+    // en base attend un moment de calme (la molette envoie une valeur par cran) et une seule écriture tourne à la fois,
+    // sinon chaque cran créait sa propre ligne.
+    private Task UpdateShoppingListItem(ItemOrTag itemOrTag, Action<UserShoppingListItem> change)
     {
         if (_selectedShoppingList is null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
-        var shoppingListItem = _selectedShoppingList.UserShoppingListItems.FirstOrDefault(usli => usli.ItemOrTagId == itemOrTag.Id);
-        var isNew = shoppingListItem is null;
-        shoppingListItem ??= new UserShoppingListItem
+        var shoppingList = _selectedShoppingList;
+        var shoppingListItem = shoppingList.UserShoppingListItems.FirstOrDefault(usli => usli.ItemOrTagId == itemOrTag.Id);
+        if (shoppingListItem is null)
         {
-            DataContext = _selectedShoppingList,
-            DataContextId = _selectedShoppingList.Id,
-            ItemOrTag = itemOrTag,
-            ItemOrTagId = itemOrTag.Id,
-        };
+            shoppingListItem = new UserShoppingListItem
+            {
+                DataContext = shoppingList,
+                DataContextId = shoppingList.Id,
+                ItemOrTag = itemOrTag,
+                ItemOrTagId = itemOrTag.Id,
+            };
+            shoppingList.UserShoppingListItems.Add(shoppingListItem);
+            _unsavedShoppingListItemIds.Add(shoppingListItem.Id);
+        }
+
         change(shoppingListItem);
+        Rebuild();
 
-        if (isNew && shoppingListItem.IsEmpty())
+        _ = PersistShoppingListItemDebounced(shoppingList, shoppingListItem);
+        return Task.CompletedTask;
+    }
+
+    private async Task PersistShoppingListItemDebounced(DataContext shoppingList, UserShoppingListItem shoppingListItem)
+    {
+        var debounceCts = new CancellationTokenSource();
+        if (_shoppingListItemSaveDebounce.Remove(shoppingListItem.Id, out var previousCts))
         {
-            Rebuild();
+            previousCts.Cancel();
+        }
+
+        _shoppingListItemSaveDebounce[shoppingListItem.Id] = debounceCts;
+
+        try
+        {
+            await Task.Delay(ShoppingListItemSaveDebounceMs, debounceCts.Token);
+        }
+        catch (TaskCanceledException)
+        {
             return;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+        _shoppingListItemSaveDebounce.Remove(shoppingListItem.Id);
+
+        await _shoppingListItemSaveLock.WaitAsync();
+        try
         {
-            if (isNew)
+            var isUnsaved = _unsavedShoppingListItemIds.Contains(shoppingListItem.Id);
+            var isEmpty = shoppingListItem.IsEmpty();
+            if (!isUnsaved || !isEmpty)
             {
-                UserShoppingListItemDbService.Create(context, shoppingListItem);
+                await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+                {
+                    if (isUnsaved)
+                    {
+                        UserShoppingListItemDbService.Create(context, shoppingListItem);
+                    }
+                    else if (isEmpty)
+                    {
+                        UserShoppingListItemDbService.Destroy(context, shoppingListItem);
+                    }
+                    else
+                    {
+                        UserShoppingListItemDbService.Update(context, shoppingListItem);
+                    }
+
+                    return Task.CompletedTask;
+                });
             }
-            else if (shoppingListItem.IsEmpty())
+
+            // Une ligne vidée sort de la liste, sauf si elle a repris une valeur pendant l'écriture : elle sera alors
+            // recréée par l'écriture suivante, déjà programmée.
+            if (isEmpty && shoppingListItem.IsEmpty())
             {
-                UserShoppingListItemDbService.Destroy(context, shoppingListItem);
+                shoppingList.UserShoppingListItems.Remove(shoppingListItem);
+                _unsavedShoppingListItemIds.Remove(shoppingListItem.Id);
+            }
+            else if (isEmpty)
+            {
+                _unsavedShoppingListItemIds.Add(shoppingListItem.Id);
             }
             else
             {
-                UserShoppingListItemDbService.Update(context, shoppingListItem);
+                _unsavedShoppingListItemIds.Remove(shoppingListItem.Id);
             }
-
-            return Task.CompletedTask;
-        });
-
-        if (isNew)
-        {
-            _selectedShoppingList.UserShoppingListItems.Add(shoppingListItem);
         }
-        else if (shoppingListItem.IsEmpty())
+        finally
         {
-            _selectedShoppingList.UserShoppingListItems.Remove(shoppingListItem);
+            _shoppingListItemSaveLock.Release();
         }
-
-        Rebuild();
     }
 
     private static PluginModule? GetFirstSlotModule(UserCraftingTable userCraftingTable)
