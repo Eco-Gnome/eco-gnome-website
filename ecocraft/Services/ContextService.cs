@@ -330,6 +330,22 @@ public class ContextService(
         CurrentUser!.UserServers.Add(userServer);
 
         await AddDataContext(userServer, true);
+
+        // Une liste de course d'office aussi, pour ne pas arriver sur une page vierge.
+        var shoppingList = new DataContext
+        {
+            Name = localizationService.GetTranslation("ShoppingList.NewShoppingList") + 1,
+            UserServer = userServer,
+            IsShoppingList = true,
+        };
+
+        await EcoCraftDbContext.ContextSaveAsync(factory, context =>
+        {
+            dataContextDbService.Create(context, shoppingList);
+            return Task.CompletedTask;
+        });
+
+        userServer.DataContexts.Add(shoppingList);
     }
 
     public async Task<DataContext> AddDataContext(UserServer userServer, bool isDefault = false)
