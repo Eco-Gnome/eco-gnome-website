@@ -781,12 +781,6 @@
     white-space: nowrap;
 }
 
-.sl-chip-sub {
-    font-size: 11px;
-    white-space: nowrap;
-    color: var(--mud-palette-text-secondary);
-}
-
 .sl-chip-end {
     flex: none;
     margin-left: auto;
@@ -796,11 +790,6 @@
     padding-left: 6px;
     border-color: rgba(61, 203, 108, .5);
     color: var(--mud-palette-success);
-}
-
-.sl-chip-tag {
-    border-color: rgba(66, 165, 245, .5);
-    color: var(--mud-palette-primary);
 }
 
 /* Menu de choix de recette, inséré sous la ligne de l'ingrédient. */
