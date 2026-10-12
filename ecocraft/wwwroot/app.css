@@ -736,10 +736,6 @@
     width: 100%;
 }
 
-.sl-quantity-input input {
-    text-align: right;
-}
-
 .sl-chip {
     justify-self: start;
     display: flex;
