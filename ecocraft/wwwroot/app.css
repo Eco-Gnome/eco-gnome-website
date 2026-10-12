@@ -760,8 +760,14 @@
     background: rgba(255, 255, 255, .06);
 }
 
-.sl-chip-static {
-    cursor: default;
+.sl-via {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 13px;
 }
 
 .sl-chip-icon {
@@ -784,12 +790,6 @@
 .sl-chip-end {
     flex: none;
     margin-left: auto;
-}
-
-.sl-chip-buy {
-    padding-left: 6px;
-    border-color: rgba(255, 167, 38, .5);
-    color: var(--mud-palette-secondary);
 }
 
 .sl-chip-stock {

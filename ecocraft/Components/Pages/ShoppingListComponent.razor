@@ -68,14 +68,13 @@
                 <ErrorBoundary>
                     <ChildContent>
                         <MudItem xs="12" Class="px-4 pt-2">
-                            @* Bandeau en lecture seule : on modifie via « Métiers & tables » (fenêtre) et « Ouverture automatique » (popover). *@
+                            @* Bandeau en lecture seule : on modifie via « Métiers & tables » (fenêtre) et « Règles d'automatisation » (popover). *@
                             <MudPaper Class="sl-strip">
                                 @{
                                     var stripSkills = _selectedShoppingList.UserSkills.Where(us => us.Skill is not null).ToList();
                                     var stripTables = _selectedShoppingList.UserCraftingTables.OrderBy(c => LocalizationService.GetTranslation(c.CraftingTable)).ToList();
                                 }
                                 <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="OpenConfigDialog">
-                                    <MudIcon Icon="@MDIIcons.Outline.AccountHardHat" Class="mr-2"/>
                                     <span class="sl-strip-button-text">
                                         <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.ConfigButton")</span>
                                         <span class="sl-strip-button-summary">@LocalizationService.GetTranslation("ShoppingList.ConfigSummary", stripSkills.Count.ToString(), stripTables.Count.ToString())</span>
@@ -129,11 +128,7 @@
                                 <span class="flex-grow-1"></span>
                                 <div class="sl-auto-open-anchor">
                                     <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isAutoOpenPopoverOpen = !_isAutoOpenPopoverOpen)">
-                                        <MudIcon Icon="@MDIIcons.Filled.AutoFix" Class="mr-2"/>
-                                        <span class="sl-strip-button-text">
-                                            <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
-                                            <span class="sl-strip-button-summary">@GetAutoOpenSummary()</span>
-                                        </span>
+                                        <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
                                         <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
                                     </MudButton>
                                     <MudOverlay Visible="_isAutoOpenPopoverOpen" VisibleChanged="@(v => _isAutoOpenPopoverOpen = v)" AutoClose="true" LockScroll="false"/>
@@ -1169,16 +1164,6 @@
             .FirstOrDefault();
     }
 
-    private string GetAutoOpenSummary()
-    {
-        var parts = new List<string>();
-        if (_isAutoExpandEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.ReuseChoicesShort"));
-        if (_isRecipeChoicePropagationEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.PropagateShort"));
-        if (_isGuidedAutoExpandEnabled) parts.Add(LocalizationService.GetTranslation("ShoppingList.GuidedShort"));
-
-        return parts.Count > 0 ? string.Join(" · ", parts) : LocalizationService.GetTranslation("ShoppingList.AutoOpenSummaryNone");
-    }
-
     private RenderFragment AutoOpenOption(string key, bool value, Func<bool, Task> onChanged) => __builder =>
     {
         <div class="sl-auto-open-option">
@@ -1241,7 +1226,7 @@
             {
                 <span class="sl-right">@FormatQuantity(producedQuantity)</span>
             }
-            <div class="sl-chip sl-chip-static">
+            <div class="sl-via">
                 <EcoIcon Item="@userRecipe.Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation(userRecipe.Recipe)</span>
             </div>
@@ -1326,37 +1311,47 @@
         }
     };
 
-    // Puce « Obtenu via » : fabriqué (table + recette), tag (★ objet choisi), en stock, ou à acheter.
+    // « Obtenu via » : fabriqué (table + recette) ou acheté, en texte avec l'engrenage du choix s'il y a des recettes ;
+    // tag (★ objet choisi) et en stock restent des puces.
     private RenderFragment IngredientChip(UserRecipe parentRecipe, Element ingredient, List<UserRecipe> children, List<Recipe> possibleRecipes) => __builder =>
     {
         var canChoose = possibleRecipes.Count > 0 || children.Count > 0;
         var isTag = children.Count == 0 && ingredient.ItemOrTag.IsTag;
         var chosenItem = isTag ? GetChosenItem(ingredient.ItemOrTag) : null;
         var isInStock = children.Count == 0 && !isTag && _view.BuyRowsById.GetValueOrDefault(ingredient.ItemOrTag.Id)?.IsInStock == true;
-        var chipClass = children.Count > 0 ? "sl-chip" : isTag ? "sl-chip sl-chip-tag" : isInStock ? "sl-chip sl-chip-stock" : "sl-chip sl-chip-buy";
 
-        <button type="button" class="@chipClass" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
-            @if (children.Count > 0)
-            {
-                <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
-                <span class="sl-chip-label">@LocalizationService.GetTranslation(children[0].Recipe)@(children.Count > 1 ? $" +{children.Count - 1}" : "")</span>
-            }
-            else if (isTag)
+        if (!isTag && !isInStock)
+        {
+            <div class="sl-via">
+                @if (children.Count > 0)
+                {
+                    <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
+                    <span class="sl-chip-label">@LocalizationService.GetTranslation(children[0].Recipe)@(children.Count > 1 ? $" +{children.Count - 1}" : "")</span>
+                }
+                else
+                {
+                    <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.Buy")</span>
+                }
+                @if (canChoose)
+                {
+                    <MudIconButton Icon="@MDIIcons.Filled.Cog" Color="Color.Primary" Size="Size.Small" OnClick="@(() => ToggleAddChildren(parentRecipe, ingredient))"/>
+                }
+            </div>
+            return;
+        }
+
+        <button type="button" class="@(isTag ? "sl-chip sl-chip-tag" : "sl-chip sl-chip-stock")" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
+            @if (isTag)
             {
                 <EcoIcon Item="@(chosenItem ?? ingredient.ItemOrTag)" Size="22" Class="sl-chip-icon"/>
                 <MudIcon Icon="@MDIIcons.Filled.Star" Size="Size.Small"/>
                 <span class="sl-chip-label">@(chosenItem is null ? LocalizationService.GetTranslation("ShoppingList.AnyOfTag") : LocalizationService.GetTranslation(chosenItem))</span>
                 <span class="sl-chip-sub">@LocalizationService.GetTranslation("ShoppingList.TagCaption", LocalizationService.GetTranslation(ingredient.ItemOrTag))</span>
             }
-            else if (isInStock)
+            else
             {
                 <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Size="Size.Small"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.InStock")</span>
-            }
-            else
-            {
-                <MudIcon Icon="@MDIIcons.Outline.Cart" Size="Size.Small"/>
-                <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.Buy")</span>
             }
             @if (canChoose)
             {
