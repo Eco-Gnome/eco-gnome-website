@@ -1337,7 +1337,17 @@
                 {
                     <span class="sl-chevron-placeholder"></span>
                 }
-                <EcoIcon Item="@ingredient.ItemOrTag" Size="32"/>
+                @if (possibleRecipes.Count > 0 || hasChildren)
+                {
+                    @* Même action que l'engrenage de « Obtenu via ». *@
+                    <span class="sl-icon-action" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
+                        <EcoIcon Item="@ingredient.ItemOrTag" Size="32"/>
+                    </span>
+                }
+                else
+                {
+                    <EcoIcon Item="@ingredient.ItemOrTag" Size="32"/>
+                }
                 <span class="sl-item-text">
                     <span class="sl-item-name">@LocalizationService.GetTranslation(ingredient.ItemOrTag)</span>
                     @if (hasChildren && !isFulfilled)

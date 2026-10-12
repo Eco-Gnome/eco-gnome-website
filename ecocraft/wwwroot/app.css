@@ -760,6 +760,11 @@
     background: rgba(255, 255, 255, .06);
 }
 
+.sl-icon-action {
+    display: flex;
+    cursor: pointer;
+}
+
 .sl-via {
     justify-self: start;
     display: flex;
