@@ -385,10 +385,11 @@
     // plus, comme une recette déjà choisie est reprise. ponytail: en mémoire seulement (perdu au rechargement de la
     // page), à persister par liste si le besoin se confirme.
     private readonly HashSet<Guid> _boughtItemOrTagIds = [];
-    private const int ShoppingListItemSaveDebounceMs = 150;
-    private readonly Dictionary<Guid, CancellationTokenSource> _shoppingListItemSaveDebounce = [];
+    // Écritures différées (stock, choix de tag, quantité) : clé = Id de la ligne, une seule écriture à la fois.
+    private const int SaveDebounceMs = 150;
+    private readonly Dictionary<Guid, CancellationTokenSource> _saveDebounce = [];
+    private readonly SemaphoreSlim _saveLock = new(1, 1);
     private readonly HashSet<Guid> _unsavedShoppingListItemIds = [];
-    private readonly SemaphoreSlim _shoppingListItemSaveLock = new(1, 1);
     private Guid? _guidedPendingParentRecipeId;
     private Guid? _guidedPendingIngredientId;
     private ElementReference _guidedPendingChoiceAnchorRef;
@@ -1108,7 +1109,7 @@
     // Une ligne n'existe en base que tant qu'elle porte un stock ou un choix de tag.
     // Comme les niveaux de métier du Price calculator : le changement s'applique tout de suite en mémoire, l'écriture
     // en base attend un moment de calme (la molette envoie une valeur par cran) et une seule écriture tourne à la fois,
-    // sinon chaque cran créait sa propre ligne.
+    // sinon chaque cran créait sa propre ligne (WaitForSaveDebounce).
     private Task UpdateShoppingListItem(ItemOrTag itemOrTag, Action<UserShoppingListItem> change)
     {
         if (_selectedShoppingList is null)
@@ -1138,28 +1139,38 @@
         return Task.CompletedTask;
     }
 
-    private async Task PersistShoppingListItemDebounced(DataContext shoppingList, UserShoppingListItem shoppingListItem)
+    // Attend SaveDebounceMs sans nouveau changement de la même ligne ; false si un changement plus récent a pris la main.
+    private async Task<bool> WaitForSaveDebounce(Guid key)
     {
         var debounceCts = new CancellationTokenSource();
-        if (_shoppingListItemSaveDebounce.Remove(shoppingListItem.Id, out var previousCts))
+        if (_saveDebounce.Remove(key, out var previousCts))
         {
             previousCts.Cancel();
         }
 
-        _shoppingListItemSaveDebounce[shoppingListItem.Id] = debounceCts;
+        _saveDebounce[key] = debounceCts;
 
         try
         {
-            await Task.Delay(ShoppingListItemSaveDebounceMs, debounceCts.Token);
+            await Task.Delay(SaveDebounceMs, debounceCts.Token);
         }
         catch (TaskCanceledException)
+        {
+            return false;
+        }
+
+        _saveDebounce.Remove(key);
+        return true;
+    }
+
+    private async Task PersistShoppingListItemDebounced(DataContext shoppingList, UserShoppingListItem shoppingListItem)
+    {
+        if (!await WaitForSaveDebounce(shoppingListItem.Id))
         {
             return;
         }
 
-        _shoppingListItemSaveDebounce.Remove(shoppingListItem.Id);
-
-        await _shoppingListItemSaveLock.WaitAsync();
+        await _saveLock.WaitAsync();
         try
         {
             var isUnsaved = _unsavedShoppingListItemIds.Contains(shoppingListItem.Id);
@@ -1203,7 +1214,7 @@
         }
         finally
         {
-            _shoppingListItemSaveLock.Release();
+            _saveLock.Release();
         }
     }
 
@@ -1633,16 +1644,44 @@
         }
     }
 
-    private async Task OnQuantityToCraftChanged(UserRecipe userRecipe, int value)
+    // Même écriture différée que le stock : à la molette, chaque cran recalculait et enregistrait tout le sous-arbre
+    // (et l'ouverture automatique pouvait ajouter deux fois la même sous-recette). Les sous-recettes suivent après coup.
+    private Task OnQuantityToCraftChanged(UserRecipe userRecipe, int value)
     {
         userRecipe.RoundFactor = value;
+        Rebuild();
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+        _ = PersistQuantityToCraftDebounced(_selectedShoppingList!, userRecipe);
+        return Task.CompletedTask;
+    }
+
+    private async Task PersistQuantityToCraftDebounced(DataContext shoppingList, UserRecipe userRecipe)
+    {
+        if (!await WaitForSaveDebounce(userRecipe.Id))
         {
-            UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
-            ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, _selectedShoppingList!, userRecipe);
-            await ApplyAutoExpandForMissingIngredients(context, new[] { userRecipe });
-        });
+            return;
+        }
+
+        await _saveLock.WaitAsync();
+        try
+        {
+            // Recette retirée entre-temps.
+            if (!shoppingList.UserRecipes.Contains(userRecipe))
+            {
+                return;
+            }
+
+            await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
+            {
+                UserRecipeDbService.UpdateRoundFactor(context, userRecipe);
+                ShoppingListDataService.SynchronizeRecipeSubtreeFrom(context, shoppingList, userRecipe);
+                await ApplyAutoExpandForMissingIngredients(context, new[] { userRecipe });
+            });
+        }
+        finally
+        {
+            _saveLock.Release();
+        }
 
         Rebuild();
     }
