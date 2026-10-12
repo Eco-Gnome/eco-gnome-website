@@ -295,8 +295,7 @@
                                                                          Culture="CultureInfo.InvariantCulture"
                                                                          HideSpinButtons="true"
                                                                          Variant="Variant.Outlined"
-                                                                         Margin="Margin.Dense"
-                                                                         Class="sl-stock-input"/>
+                                                                         Class="rectangle-input sl-stock-input"/>
                                                         <span class="sl-right sl-remaining">@FormatQuantity(buyRow.Remaining)</span>
                                                     </div>
                                                 }
@@ -1217,8 +1216,7 @@
                                      Step="@(perCraft >= 1 ? (int)Math.Round(perCraft) : 1)"
                                      Culture="CultureInfo.InvariantCulture"
                                      Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     Class="sl-quantity-input"
+                                     Class="rectangle-input sl-quantity-input"
                                      Min="1"/>
                 </MudTooltip>
             }
@@ -1227,7 +1225,7 @@
                 <span class="sl-right">@FormatQuantity(producedQuantity)</span>
             }
             <div class="sl-via">
-                <EcoIcon Item="@userRecipe.Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
+                <EcoIcon Item="@userRecipe.Recipe.CraftingTable" Size="28" Class="sl-chip-icon"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation(userRecipe.Recipe)</span>
             </div>
             <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="() => RemoveShoppingListRecipe(userRecipe)"/>
@@ -1335,14 +1333,14 @@
         <div class="sl-via">
             @if (children.Count > 0)
             {
-                <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="22" Class="sl-chip-icon"/>
+                <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="28" Class="sl-chip-icon"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation(children[0].Recipe)@(children.Count > 1 ? $" +{children.Count - 1}" : "")</span>
             }
             else
             {
                 @if (isTag)
                 {
-                    <EcoIcon Item="@(GetChosenItem(ingredient.ItemOrTag) ?? ingredient.ItemOrTag)" Size="22" Class="sl-chip-icon"/>
+                    <EcoIcon Item="@(GetChosenItem(ingredient.ItemOrTag) ?? ingredient.ItemOrTag)" Size="28" Class="sl-chip-icon"/>
                 }
                 <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.Buy")</span>
             }

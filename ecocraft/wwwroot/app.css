@@ -729,7 +729,11 @@
 }
 
 .sl-quantity-input {
-    width: 90px;
+    width: 80px;
+}
+
+.sl-quantity-input .mud-input {
+    width: 100%;
 }
 
 .sl-quantity-input input {
@@ -989,8 +993,11 @@
     margin: 0 !important;
 }
 
+.sl-stock-input .mud-input {
+    width: 100%;
+}
+
 .sl-stock-input input {
-    padding: 4px 6px !important;
     text-align: right;
     font-size: 13px;
 }
