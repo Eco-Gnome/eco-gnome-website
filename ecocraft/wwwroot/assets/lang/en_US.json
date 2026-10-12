@@ -429,7 +429,7 @@
     "ShoppingList": {
         "PageTitle": "Shopping Lists",
         "ItemsToBuy": "To buy",
-        "ItemsProduced": "Surplus produced",
+        "ItemsProduced": "Produced items",
         "QuantityToProduceTooltip": "Number of items to produce (rounded up to whole crafts, so a bit more may be produced)",
         "AddShoppingList": "Add shopping list",
         "NewShoppingList": "Shopping list #",
