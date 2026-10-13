@@ -278,10 +278,11 @@
                                                 {
                                                     <div class="@($"sl-buy-row{(buyRow.IsInStock ? " sl-in-stock" : "")}")">
                                                         <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AllInStock")">
-                                                            <MudIconButton Icon="@(buyRow.IsInStock ? MDIIcons.Filled.CheckboxMarked : buyRow.Stock > 0 ? MDIIcons.Filled.CheckboxIntermediate : MDIIcons.Outline.CheckboxBlank)"
-                                                                           Color="@(buyRow.Stock > 0 ? Color.Success : Color.Default)"
+                                                            <MudIconButton Icon="@MDIIcons.Filled.CheckCircle"
+                                                                           Color="@(buyRow.IsInStock ? Color.Success : Color.Default)"
                                                                            Size="Size.Small"
                                                                            Class="pa-0"
+                                                                           Style="@(buyRow.IsInStock ? null : "opacity: 0.35")"
                                                                            OnClick="@(() => SetStock(buyRow.ItemOrTag, buyRow.IsInStock ? 0 : buyRow.Need))"/>
                                                         </MudTooltip>
                                                         <EcoIcon Item="@buyRow.ItemOrTag" Size="26"/>
