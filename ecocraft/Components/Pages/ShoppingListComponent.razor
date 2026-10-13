@@ -1383,7 +1383,7 @@
     };
 
     // « Obtenu via » : fabriqué (table + recette) ou acheté (icône de l'objet choisi pour un tag, le choix lui-même se
-    // fait dans l'encadré des tags), en texte avec l'engrenage du choix s'il y a des recettes ; en stock reste une puce.
+    // fait dans l'encadré des tags), en puce grise qui ouvre le choix s'il y a des recettes ; en stock reste une puce verte.
     private RenderFragment IngredientChip(UserRecipe parentRecipe, Element ingredient, List<UserRecipe> children, List<Recipe> possibleRecipes) => __builder =>
     {
         var canChoose = possibleRecipes.Count > 0 || children.Count > 0;
@@ -1403,7 +1403,7 @@
             return;
         }
 
-        <div class="sl-via">
+        <button type="button" class="sl-chip" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
             @if (children.Count > 0)
             {
                 <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="28" Class="sl-chip-icon"/>
@@ -1415,13 +1415,17 @@
                 {
                     <EcoIcon Item="@(GetChosenItem(ingredient.ItemOrTag) ?? ingredient.ItemOrTag)" Size="28" Class="sl-chip-icon"/>
                 }
+                else
+                {
+                    <MudIcon Icon="@MDIIcons.Outline.Cart" Size="Size.Small"/>
+                }
                 <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.Buy")</span>
             }
             @if (canChoose)
             {
-                <MudIconButton Icon="@MDIIcons.Filled.Cog" Color="Color.Primary" Size="Size.Small" OnClick="@(() => ToggleAddChildren(parentRecipe, ingredient))"/>
+                <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="sl-chip-end"/>
             }
-        </div>
+        </button>
     };
 
     // Menu de choix inséré sous l'ingrédient : « L'acheter » d'abord, puis une carte par recette possible
