@@ -21,6 +21,15 @@
     flex: 0 1 auto;
 }
 
+/* Bordure grise des champs (liste des serveurs, Réglages) plutôt que le blanc par défaut des boutons outlined. */
+::deep .bp-toolbar .mud-button-outlined {
+    border-color: var(--mud-palette-lines-inputs);
+}
+
+::deep .bp-toolbar .mud-button-outlined:hover {
+    border-color: var(--mud-palette-text-primary);
+}
+
 /* La puce de tier fait 32 px de haut alors que la ligne du champ dense en fait 19 : le contenu
    descendait sous la bordure. On la ramène à la hauteur de la ligne. */
 ::deep .bp-toolbar .mud-select div.mud-input-slot .mud-chip,

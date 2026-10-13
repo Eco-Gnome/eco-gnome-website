@@ -504,6 +504,11 @@
 
 .sl-strip-button {
     text-transform: none !important;
+    border-color: var(--mud-palette-lines-inputs) !important;
+}
+
+.sl-strip-button:hover {
+    border-color: var(--mud-palette-text-primary) !important;
 }
 
 .sl-strip-button-text {
