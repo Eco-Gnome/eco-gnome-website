@@ -34,7 +34,7 @@
 
             <MudMenu Dense="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
                 <ActivatorContent Context="menu">
-                    <MudLink OnClick="@(args => menu.ToggleAsync(args))">
+                    <MudLink OnClick="@(args => Disabled ? Task.CompletedTask : menu.ToggleAsync(args))">
                         <MudTooltip Text="@GetSlotTooltip(moduleSlot, installed)">
                             <div class="d-flex align-center pluginmodule-stack">
                                 @if (installed.Count == 0)
@@ -85,6 +85,8 @@
     [Parameter, EditorRequired] public UserCraftingTable UserCraftingTable { get; set; } = null!;
     [Parameter] public string? Class { get; set; }
     [Parameter] public EventCallback<ModuleSelection> ModuleSelected { get; set; }
+    // Read only: icons and tooltips stay, clicks do nothing.
+    [Parameter] public bool Disabled { get; set; }
 
     private List<PluginModule> GetOrderedCandidates(ModuleSlot moduleSlot)
     {
@@ -118,6 +120,8 @@
 
     private async Task Select(ModuleSlot moduleSlot, List<PluginModule> pluginModules)
     {
+        if (Disabled) return;
+
         await ModuleSelected.InvokeAsync(new ModuleSelection(moduleSlot, pluginModules));
     }
 

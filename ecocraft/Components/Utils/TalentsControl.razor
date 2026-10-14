@@ -38,16 +38,22 @@
 
                 <div class="talent-level-control">
                     <div class="talent-icon-wrapper">
-                        <MudLink OnClick="() => IncreaseTalentLevel(talents)"
-                                 Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
-                            +
-                        </MudLink>
+                        @if (!Disabled)
+                        {
+                            <MudLink OnClick="() => IncreaseTalentLevel(talents)"
+                                     Class="@($"talent-level-action talent-level-action-up {(isMaxLevelReached ? "disabled" : "")}")">
+                                +
+                            </MudLink>
+                        }
                         <EcoIcon Item="talent" Size="32" Class="@($"{(userTalent is null ? "no-talent" : "has-talent")}")"/>
                         <MudText Typo="Typo.caption" Class="talent-current-level">@currentLevel</MudText>
-                        <MudLink OnClick="() => DecreaseTalentLevel(talents)"
-                                 Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
-                            -
-                        </MudLink>
+                        @if (!Disabled)
+                        {
+                            <MudLink OnClick="() => DecreaseTalentLevel(talents)"
+                                     Class="@($"talent-level-action talent-level-action-down {(isMinLevelReached ? "disabled" : "")}")">
+                                -
+                            </MudLink>
+                        }
                     </div>
                 </div>
             }
@@ -59,10 +65,12 @@
     [Parameter, EditorRequired] public DataContext DataContext { get; set; } = null!;
     [Parameter, EditorRequired] public UserSkill UserSkill { get; set; } = null!;
     [Parameter] public EventCallback OnChanged { get; set; }
+    // Read only: talents and levels are shown, nothing can be changed.
+    [Parameter] public bool Disabled { get; set; }
 
     private async Task ToggleBinaryTalent(List<Talent> talents)
     {
-        if (talents.Count == 0)
+        if (Disabled || talents.Count == 0)
         {
             return;
         }
