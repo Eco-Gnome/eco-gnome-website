@@ -167,7 +167,13 @@
                                                      AnchorOrigin="Origin.BottomLeft"
                                                      TransformOrigin="Origin.TopLeft">
                                         <ItemTemplate>
-                                            <RecipeSummary Recipe="context" Class="pl-2" />
+                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                                <RecipeSummary Recipe="context" Class="pl-2" />
+                                                @if (IsOutsideLinkedContext(context))
+                                                {
+                                                    @OutsideContextTag()
+                                                }
+                                            </MudStack>
                                         </ItemTemplate>
                                         <MoreItemsTemplate>
                                             <MudText Typo="Typo.caption" Class="pa-2 mud-text-secondary">@LocalizationService.GetTranslation("ShoppingList.RecipeSearchMore")</MudText>
@@ -335,7 +341,8 @@
 
 @code {
     private DataContext? _selectedShoppingList;
-    // Price calculator context the list copies skills, talents and tables from: its source, or the default context.
+    // Skills, talents and tables (only) of the price calculator context the list copies from: the linked context,
+    // or else the default context.
     private DataContext? _referenceDataContext;
     private bool _isLoadingData;
     private Server? _serverData;
@@ -708,7 +715,7 @@
                 {
                     foreach (var childRecipe in existingChildren)
                     {
-                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe);
+                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe, LinkedSource);
                     }
 
                     return Task.CompletedTask;
@@ -742,7 +749,7 @@
         {
             foreach (var childRecipe in childrenToRemove)
             {
-                ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, childRecipe);
+                ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, childRecipe, LinkedSource);
             }
 
             return Task.CompletedTask;
@@ -824,7 +831,7 @@
                 {
                     foreach (var childRecipe in existingChildren)
                     {
-                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe);
+                        ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList, childRecipe, LinkedSource);
                     }
 
                     var quantityGoal = GetIngredientQuantityGoal(parentRecipe, ingredient, _selectedShoppingList);
@@ -1458,13 +1465,17 @@
                         <span>@LocalizationService.GetTranslation("ShoppingList.BuyIt")</span>
                     </div>
                 </div>
-                @foreach (var recipe in possibleRecipes)
+                @foreach (var recipe in possibleRecipes.OrderBy(IsOutsideLinkedContext))
                 {
                     var product = GetPreferredProductMatch(recipe, ingredient);
                     <div class="@($"sl-card{(children.Any(c => c.RecipeId == recipe.Id) ? " sl-chosen" : "")}")" @onclick="@(() => SelectRecipeForIngredient(parentRecipe, ingredient, recipe))">
                         <div class="sl-card-title">
                             <EcoIcon Item="@recipe.CraftingTable" Size="32"/>
                             <span>@LocalizationService.GetTranslation(recipe)</span>
+                            @if (IsOutsideLinkedContext(recipe))
+                            {
+                                @OutsideContextTag()
+                            }
                         </div>
                         <div class="sl-card-io">
                             @foreach (var recipeIngredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
@@ -1491,9 +1502,8 @@
         {
             { x => x.ShoppingList, _selectedShoppingList },
             { x => x.SourceId, GetSelectedSourceId() },
-            { x => x.HasReferenceDataContext, () => _referenceDataContext is not null },
+            { x => x.LinkedSource, () => LinkedSource },
             { x => x.OnSourceChanged, OnSourceChanged },
-            { x => x.OnImport, ImportSource },
             { x => x.OnLevelChanged, OnLevelChanged },
             { x => x.OnTalentsChanged, OnTalentsChanged },
             { x => x.OnModuleSelected, SelectPluginModule },
@@ -1509,6 +1519,25 @@
         return ContextService.CurrentUserServer!.DataContexts
             .FirstOrDefault(d => !d.IsShoppingList && d.Id == _selectedShoppingList?.SourceDataContextId)?.Id;
     }
+
+    // Réglages du contexte lié (null si la liste n'est pas liée) : ses métiers et tables restent dans la liste.
+    private DataContext? LinkedSource => GetSelectedSourceId() is not null ? _referenceDataContext : null;
+
+    // Liste liée : recette dont le métier n'est pas dans le contexte (une recette sans métier y est toujours).
+    private bool IsOutsideLinkedContext(Recipe recipe)
+    {
+        return LinkedSource is { } source && recipe.Skill is not null && recipe.Skill.GetCurrentUserSkill(source) is null;
+    }
+
+    private RenderFragment OutsideContextTag() => __builder =>
+    {
+        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.OutsideContextRecipeTooltip")">
+            <span class="sl-caption d-inline-flex align-center" style="gap: 2px; white-space: nowrap;">
+                <MudIcon Icon="@MDIIcons.Filled.LinkOff" Style="font-size: 14px;"/>
+                @LocalizationService.GetTranslation("ShoppingList.OutsideContextRecipe")
+            </span>
+        </MudTooltip>
+    };
 
     private async Task<List<UserRecipe>> ApplyRecipeChoiceToIngredient(UserRecipe parentRecipe, Element ingredient, Recipe chosenRecipe, bool runAutoExpandAfterApply)
     {
@@ -1814,6 +1843,14 @@
             _selectedShoppingList = await DataContextDbService.GetDataContextWithData(targetShoppingListId, serverData);
             await LoadReferenceDataContext();
 
+            // A linked list picks up what changed in its calculator context since it was last opened.
+            if (LinkedSource is { } linkedSource)
+            {
+                var shoppingListToSync = _selectedShoppingList;
+                await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
+                    ShoppingListDataService.ApplySourceDataContext(context, shoppingListToSync, linkedSource));
+            }
+
             RebuildView();
         }
         catch (Exception)
@@ -1919,7 +1956,7 @@
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
         {
-            ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, userRecipe);
+            ShoppingListDataService.RemoveUserRecipe(context, _selectedShoppingList!, userRecipe, LinkedSource);
             return Task.CompletedTask;
         });
 
@@ -1932,7 +1969,7 @@
         StateHasChanged();
     }
 
-    // Context new recipes copy their skills and tables from: the list's source, or else the default calculator context.
+    // Settings new recipes copy their skills and tables from: the linked context, or else the default calculator context.
     private async Task LoadReferenceDataContext()
     {
         var referenceDataContextId = GetSelectedSourceId()
@@ -1940,7 +1977,7 @@
         try
         {
             _referenceDataContext = referenceDataContextId is not null && _serverData is not null
-                ? await DataContextDbService.GetDataContextWithData(referenceDataContextId.Value, _serverData)
+                ? await DataContextDbService.GetDataContextSettingsAsync(referenceDataContextId.Value, _serverData)
                 : null;
         }
         catch (Exception)
@@ -1949,7 +1986,8 @@
         }
     }
 
-    // Saves the list's source (null = the default context); it only applies to what recipes add from now on.
+    // Links the list to a calculator context (or another one), or unlinks it (null). Linking copies the whole
+    // context; unlinking keeps the settings the recipes use, now editable, and drops the others.
     private async Task OnSourceChanged(Guid? sourceId)
     {
         if (_selectedShoppingList is null)
@@ -1965,27 +2003,22 @@
             chipShoppingList.SourceDataContextId = sourceId;
         }
 
-        await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, context =>
-        {
-            DataContextDbService.UpdateSource(context, _selectedShoppingList);
-            return Task.CompletedTask;
-        });
-
         await LoadReferenceDataContext();
-    }
-
-    // Copies the reference context into the list's skills and tables, once.
-    private async Task ImportSource()
-    {
-        if (_selectedShoppingList is null || _referenceDataContext is null)
-        {
-            return;
-        }
+        var linkedSource = LinkedSource;
 
         await EcoCraftDbContext.ContextSaveAsync(EcoCraftDbFactory, async context =>
         {
-            await ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, _referenceDataContext);
-            await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            DataContextDbService.UpdateSource(context, _selectedShoppingList);
+
+            if (linkedSource is not null)
+            {
+                await ShoppingListDataService.ApplySourceDataContext(context, _selectedShoppingList, linkedSource);
+                await ApplyAutoExpandForMissingIngredients(context, _selectedShoppingList.UserRecipes);
+            }
+            else
+            {
+                ShoppingListDataService.RemoveUnusedSettings(context, _selectedShoppingList);
+            }
         });
 
         Rebuild();
@@ -2071,7 +2104,8 @@
             .Where(slr => slr.ParentUserRecipe is not null)
             .Select(slr => slr.RecipeId)
             .ToHashSet();
-        result = result.Where(r => !selectedRecipeIds.Contains(r.Id)).OrderBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
+        // Liste liée : les recettes faisables avec les métiers du contexte d'abord.
+        result = result.Where(r => !selectedRecipeIds.Contains(r.Id)).OrderBy(IsOutsideLinkedContext).ThenBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
 
         return Task.FromResult(result);
     }

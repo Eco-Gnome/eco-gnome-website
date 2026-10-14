@@ -60,6 +60,50 @@ public class DataContextDbService(IDbContextFactory<EcoCraftDbContext> factory)
 		return dataContext;
 	}
 
+	// Skills, talents and tables of a context only, read by a shopping list that copies them. Rows point to the
+	// server's objects, but the server's reverse lists (Skill.UserSkills…) are left alone: they belong to the
+	// context the page loaded with GetDataContextWithData (e.g. the price calculator's).
+	public async Task<DataContext> GetDataContextSettingsAsync(Guid id, Server server)
+	{
+		await using var context = await factory.CreateDbContextAsync();
+
+		var dataContext = await context.DataContexts
+			.AsNoTrackingWithIdentityResolution()
+			.AsSplitQuery()
+			.Where(s => s.Id == id)
+			.Include(s => s.UserSkills)
+			.Include(s => s.UserTalents)
+			.Include(s => s.UserCraftingTables)
+			.ThenInclude(s => s.PluginModules)
+			.FirstAsync();
+
+		var skills = server.Skills.ToDictionary(s => s.Id);
+		var talents = server.Skills.SelectMany(s => s.Talents).ToDictionary(s => s.Id);
+		var craftingTables = server.CraftingTables.ToDictionary(s => s.Id);
+		var pluginModules = server.PluginModules.ToDictionary(s => s.Id);
+		var itemOrTags = server.ItemOrTags.ToDictionary(s => s.Id);
+
+		dataContext.UserSkills.RemoveAll(us => us.SkillId is Guid skillId && !skills.ContainsKey(skillId));
+		dataContext.UserSkills.ForEach(us => us.Skill = us.SkillId is Guid skillId ? skills[skillId] : null);
+
+		dataContext.UserTalents.RemoveAll(ut => !talents.ContainsKey(ut.TalentId));
+		dataContext.UserTalents.ForEach(ut => ut.Talent = talents[ut.TalentId]);
+
+		dataContext.UserCraftingTables.RemoveAll(uct => !craftingTables.ContainsKey(uct.CraftingTableId));
+		dataContext.UserCraftingTables.ForEach(uct =>
+		{
+			uct.CraftingTable = craftingTables[uct.CraftingTableId];
+			uct.FuelItem = uct.FuelItemId is Guid fuelItemId && itemOrTags.TryGetValue(fuelItemId, out var fuelItem) && !fuelItem.IsTag ? fuelItem : null;
+			uct.FuelItemId = uct.FuelItem?.Id;
+			uct.PluginModules = uct.PluginModules
+				.Where(pm => pluginModules.ContainsKey(pm.Id))
+				.Select(pm => pluginModules[pm.Id])
+				.ToList();
+		});
+
+		return dataContext;
+	}
+
 	private void Reconciliate(DataContext dataContext, Server server)
 	{
 		server.Skills.ForEach(s => s.UserSkills.Clear());

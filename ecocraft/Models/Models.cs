@@ -993,8 +993,8 @@ public class DataContext
     public string Name { get; set; }
     public bool IsDefault { get; set; }
     public bool IsShoppingList { get; set; }
-    // Shopping list only: the price calculator context its skills, talents and tables were imported
-    // from, which new recipes keep copying from.
+    // Shopping list only: the price calculator context it is linked to. The list holds a read-only copy of
+    // all its skills, talents and tables, refreshed each time the list is opened (null = not linked).
     public Guid? SourceDataContextId { get; set; }
 
     public UserServer UserServer { get; set; }

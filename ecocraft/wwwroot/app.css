@@ -481,6 +481,11 @@
     color: var(--mud-palette-text-secondary);
 }
 
+/* Fenêtre « Métiers & tables » : réglage du contexte lié qu'aucune recette de la liste n'utilise. */
+.sl-unused-row > td {
+    opacity: 0.55;
+}
+
 .sl-caption {
     font-size: 11px;
     color: var(--mud-palette-text-secondary);

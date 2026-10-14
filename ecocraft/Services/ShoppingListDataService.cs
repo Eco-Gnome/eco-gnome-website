@@ -72,9 +72,10 @@ namespace ecocraft.Services
             return userRecipe;
         }
 
-        public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
+        // A linked list keeps the skills and tables of its source (linkedSource) even when no recipe uses them.
+        public void RemoveUserRecipe(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, DataContext? linkedSource = null)
         {
-            RemoveUserRecipeInternal(context, shoppingList, shoppingListRecipe);
+            RemoveUserRecipeInternal(context, shoppingList, shoppingListRecipe, linkedSource);
         }
 
         public void SynchronizeRecipeTree(EcoCraftDbContext context, DataContext shoppingList)
@@ -90,15 +91,15 @@ namespace ecocraft.Services
             SynchronizeRecipeChildren(context, shoppingList, parentRecipe);
         }
 
-        // Writes the source context's skill levels, talents and table setups into the list rows it
-        // also has (only the skills and tables the list's recipes use), then refreshes the sub-recipe
-        // quantities. Only what differs is saved.
+        // Mirrors the linked context into the list: every skill (level, talents) and table (modules, fuel,
+        // fees) of the source, kept even when no recipe uses it. List rows the source no longer has are
+        // dropped, unless a recipe still needs them (they become "outside the context"). Then refreshes the
+        // sub-recipe quantities. Only what differs is saved; the source is never written.
         public async Task ApplySourceDataContext(EcoCraftDbContext context, DataContext shoppingList, DataContext source)
         {
-            foreach (var userSkill in shoppingList.UserSkills.Where(us => us.Skill is not null))
+            foreach (var sourceUserSkill in source.UserSkills.Where(us => us.Skill is not null))
             {
-                var sourceUserSkill = userSkill.Skill!.GetCurrentUserSkill(source);
-                if (sourceUserSkill is null) continue;
+                var userSkill = GetOrCreateUserSkill(context, shoppingList, sourceUserSkill.Skill!, source);
 
                 if (userSkill.Level != sourceUserSkill.Level)
                 {
@@ -109,10 +110,9 @@ namespace ecocraft.Services
                 CopyTalents(context, shoppingList, userSkill.Skill!, source);
             }
 
-            foreach (var userCraftingTable in shoppingList.UserCraftingTables)
+            foreach (var sourceUserCraftingTable in source.UserCraftingTables)
             {
-                var sourceUserCraftingTable = userCraftingTable.CraftingTable.GetCurrentUserCraftingTable(source);
-                if (sourceUserCraftingTable is null) continue;
+                var userCraftingTable = await GetOrCreateUserCraftingTable(context, shoppingList, sourceUserCraftingTable.CraftingTable, source);
 
                 var pluginModules = userCraftingTable.CraftingTable.PluginModules
                     .Where(pm => sourceUserCraftingTable.PluginModules.Any(spm => spm.Id == pm.Id))
@@ -134,7 +134,32 @@ namespace ecocraft.Services
                 await userCraftingTableDbService.UpdateAllAsync(context, userCraftingTable);
             }
 
+            RemoveUnusedSettings(context, shoppingList, source);
             SynchronizeRecipeTree(context, shoppingList);
+        }
+
+        // Drops the list's skills and tables that no recipe uses, except those of the linked source.
+        // Unlinking calls it without a source: the list is driven by its recipes again.
+        public void RemoveUnusedSettings(EcoCraftDbContext context, DataContext shoppingList, DataContext? source = null)
+        {
+            var recipes = shoppingList.UserRecipes.Select(ur => ur.Recipe).ToList();
+
+            foreach (var userCraftingTable in shoppingList.UserCraftingTables
+                         .Where(uct => recipes.All(r => r.CraftingTableId != uct.CraftingTableId)
+                                       && (source is null || uct.CraftingTable.GetCurrentUserCraftingTable(source) is null))
+                         .ToList())
+            {
+                RemoveUserCraftingTable(context, shoppingList, userCraftingTable);
+            }
+
+            foreach (var userSkill in shoppingList.UserSkills
+                         .Where(us => us.Skill is not null
+                                      && recipes.All(r => r.SkillId != us.SkillId)
+                                      && (source is null || us.Skill.GetCurrentUserSkill(source) is null))
+                         .ToList())
+            {
+                RemoveUserSkill(context, shoppingList, userSkill);
+            }
         }
 
         private void CopyTalents(EcoCraftDbContext context, DataContext shoppingList, Skill skill, DataContext source)
@@ -172,7 +197,7 @@ namespace ecocraft.Services
             }
         }
 
-        private void RemoveUserRecipeInternal(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe)
+        private void RemoveUserRecipeInternal(EcoCraftDbContext context, DataContext shoppingList, UserRecipe shoppingListRecipe, DataContext? linkedSource)
         {
             var currentUserCraftingTableId = shoppingListRecipe.Recipe.CraftingTable.GetCurrentUserCraftingTable(shoppingList)?.Id;
             var currentUserSkillId = shoppingListRecipe.Recipe.Skill?.GetCurrentUserSkill(shoppingList)?.Id;
@@ -193,7 +218,7 @@ namespace ecocraft.Services
 
             foreach (var recipe in childrenRecipes)
             {
-                RemoveUserRecipeInternal(context, shoppingList, recipe);
+                RemoveUserRecipeInternal(context, shoppingList, recipe, linkedSource);
             }
 
             userRecipeDbService.Destroy(context, shoppingListRecipe);
@@ -201,7 +226,9 @@ namespace ecocraft.Services
             var currentUserCraftingTable = currentUserCraftingTableId is not null
                 ? shoppingList.UserCraftingTables.FirstOrDefault(uct => uct.Id == currentUserCraftingTableId)
                 : null;
-            if (currentUserCraftingTable is not null && currentUserCraftingTable.CraftingTable.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
+            if (currentUserCraftingTable is not null
+                && currentUserCraftingTable.CraftingTable.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null)
+                && (linkedSource is null || currentUserCraftingTable.CraftingTable.GetCurrentUserCraftingTable(linkedSource) is null))
             {
                 RemoveUserCraftingTable(context, shoppingList, currentUserCraftingTable);
             }
@@ -209,7 +236,9 @@ namespace ecocraft.Services
             var currentUserSkill = currentUserSkillId is not null
                 ? shoppingList.UserSkills.FirstOrDefault(us => us.Id == currentUserSkillId)
                 : null;
-            if (currentUserSkill is not null && currentUserSkill.Skill!.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null))
+            if (currentUserSkill is not null
+                && currentUserSkill.Skill!.Recipes.All(r => r.GetCurrentUserRecipe(shoppingList) is null)
+                && (linkedSource is null || currentUserSkill.Skill.GetCurrentUserSkill(linkedSource) is null))
             {
                 RemoveUserSkill(context, shoppingList, currentUserSkill);
             }

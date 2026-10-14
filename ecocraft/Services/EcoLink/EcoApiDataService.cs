@@ -12,7 +12,8 @@ public class EcoApiDataService(
     UserPriceDbService userPriceDbService,
     ServerDbService serverDbService,
     DataContextDbService dataContextDbService,
-    ShoppingListService shoppingListService)
+    ShoppingListService shoppingListService,
+    ShoppingListDataService shoppingListDataService)
 {
     /// <summary>Loads the context's prices and elements and splits its items into what the user buys and what they sell.</summary>
     public async Task<(List<ItemOrTag> ToBuy, List<ItemOrTag> ToSell)> LoadCategorizedAsync(DataContext dataContext)
@@ -132,6 +133,13 @@ public class EcoApiDataService(
 
         var serverData = await serverDbService.GetServerWithShoppingListData(userServer.ServerId);
         var shoppingList = await dataContextDbService.GetDataContextWithData(matches[0].Id, serverData);
+
+        // A linked list first picks up what changed in its price calculator context, as the page does when opened
+        if (shoppingList.SourceDataContextId is Guid sourceId)
+        {
+            var source = await dataContextDbService.GetDataContextSettingsAsync(sourceId, serverData);
+            await EcoCraftDbContext.ContextSaveAsync(factory, context => shoppingListDataService.ApplySourceDataContext(context, shoppingList, source));
+        }
 
         // Negative outputs are the "Items to buy" of the shopping list page
         var items = shoppingListService.GetAggregatedOutputs(shoppingList, shoppingList.GetRootShoppingListRecipes())
