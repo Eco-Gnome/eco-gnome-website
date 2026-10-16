@@ -233,8 +233,8 @@
                 @label
             </div>
             <span class="bp-num bp-strong">×@count</span>
-            <MudNumericField T="decimal?" Value="@Override(name)" ValueChanged="@(v => OnPriceChanged.InvokeAsync((name, v is { } p ? Math.Max(0, p) : null)))"
-                             Immediate="true" DebounceInterval="250" Format="0.##" Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
+            <TypingNumericField T="decimal?" Value="@Override(name)" ValueChanged="@(v => OnPriceChanged.InvokeAsync((name, v is { } p ? Math.Max(0, p) : null)))"
+                             Immediate="true" DebounceInterval="1000" Format="0.##" Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
                              Min="0" HideSpinButtons="true" Clearable="true" Variant="Variant.Outlined"
                              Placeholder="@(DefaultPrice(name) is { } d ? Math.Round(d, 2, MidpointRounding.AwayFromZero).ToString("0.##") : "—")"
                              Class="rectangle-input small-adornment bp-price"/>

@@ -140,14 +140,14 @@
                                                         ? "PriceCalculator.PriceTooltip.isItemEmptyPrice"
                                                         : "PriceCalculator.PriceTooltip.isAutoCalculatedPrice") + (context.IsMarginPrice ? " " + LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.IsMarginPrice") : ""))">
                                         <MudStack Row Spacing="1">
-                                            <MudNumericField T="decimal?"
+                                            <TypingNumericField T="decimal?"
                                                              Class="rectangle-input small-adornment"
                                                              Style="@($"width: 90px; color: var({(context.IsMarginPrice ? "--mud-palette-tertiary" : "--mud-palette-primary")})")"
                                                              Disabled="@(!canContributePrice || AdminServerMode)"
                                                              HideSpinButtons="@(!canContributePrice || AdminServerMode)"
                                                              Value="@context.Price"
                                                              Immediate="true"
-                                                             DebounceInterval="150"
+                                                             DebounceInterval="1000"
                                                              Format="0.##"
                                                              Variant="Variant.Outlined"
                                                              Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
@@ -205,12 +205,12 @@
                                     {
                                         <MudTooltip Text="@LocalizationService.GetTranslation("RecipeDialog.CraftTimeLayer")">
                                             <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
-                                                <MudNumericField T="decimal?"
+                                                <TypingNumericField T="decimal?"
                                                                  Class="rectangle-input small-adornment"
                                                                  Style="width: 90px;"
                                                                  Value="@(_currentUserRecipe.CraftMinutesOverride * 60)"
                                                                  Immediate="true"
-                                                                 DebounceInterval="150"
+                                                                 DebounceInterval="1000"
                                                                  Format="0.##"
                                                                  Min="0"
                                                                  Variant="Variant.Outlined"

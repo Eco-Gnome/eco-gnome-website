@@ -98,13 +98,13 @@
                                 </MudTd>
                                 <MudTd Class="crafting-table-additional-cost-cell">
                                     <div class="crafting-table-additional-cost-value">
-                                        <MudNumericField T="decimal"
+                                        <TypingNumericField T="decimal"
                                                          Class="rectangle-input small-adornment-with-spin"
                                                          Style="width: 80px;"
                                                          Value="UserCraftingTable.AdditionalCraftMinuteFee"
                                                          ValueChanged="UpdateAdditionalCraftMinuteFee"
                                                          Immediate="true"
-                                                         DebounceInterval="300"
+                                                         DebounceInterval="1000"
                                                          Format="0.##"
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimal"
                                                          Variant="Variant.Outlined"/>

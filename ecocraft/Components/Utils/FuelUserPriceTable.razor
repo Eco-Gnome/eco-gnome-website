@@ -27,6 +27,7 @@
                                   ValueChanged="OnSearchTextChanged"
                                   Clearable
                                   Immediate
+                                  DebounceInterval="300"
                                   Placeholder="@LocalizationService.GetTranslation("PriceCalculator.FuelSearch")"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.Search"
@@ -97,14 +98,14 @@
                                                               ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
                                                               : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
 
-                                <MudNumericField T="decimal?"
+                                <TypingNumericField T="decimal?"
                                                  Class="@($"rectangle-input small-adornment {(context.IsTag || isAutoCalculatedPrice ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
                                                  Style="width: 111px;"
                                                  Disabled="@(context.IsTag || isAutoCalculatedPrice)"
                                                  HideSpinButtons="@(context.IsTag || isAutoCalculatedPrice)"
                                                  Value="contextUserPrice.Price"
                                                  Immediate="true"
-                                                 DebounceInterval="@InputDebounceMs"
+                                                 DebounceInterval="1000"
                                                  Format="0.##"
                                                  Variant="Variant.Outlined"
                                                  Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
@@ -196,7 +197,7 @@
                                                               : isMinPrice
                                                                   ? LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMinPrice")
                                                                   : LocalizationService.GetTranslation("PriceCalculator.PriceTooltip.isMaxPrice"))">
-                                        <MudNumericField T="decimal?"
+                                        <TypingNumericField T="decimal?"
                                                          Class="@($"rectangle-input small-adornment {(isAutoCalculatedPrice ? "" : "small-adornment-with-spin")} {(isMinPrice ? "min-price" : isMaxPrice ? "max-price" : "")}")"
                                                          Style="width: 85px;"
                                                          HideSpinButtons="@isAutoCalculatedPrice"
@@ -204,7 +205,7 @@
                                                          Disabled="@isAutoCalculatedPrice"
                                                          Value="itemUserPrice.Price"
                                                          Immediate="true"
-                                                         DebounceInterval="@InputDebounceMs"
+                                                         DebounceInterval="1000"
                                                          Min="item.MinPrice"
                                                          Max="item.MaxPrice"
                                                          Converter="@CultureInvariantConverter.DotOrCommaDecimalNull"
@@ -260,7 +261,6 @@
     [Parameter, EditorRequired] public Func<decimal?, Task> CopyToClipboard { get; set; } = null!;
     [Parameter] public ItemOrTag? SelectedFuelToBuy { get; set; }
     [Parameter] public int FuelItemCount { get; set; }
-    [Parameter] public int InputDebounceMs { get; set; } = 250;
     [Parameter] public bool Expanded { get; set; }
     [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
     [Parameter] public bool ShowDetailedTags { get; set; }
