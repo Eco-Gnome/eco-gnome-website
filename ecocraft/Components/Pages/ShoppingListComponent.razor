@@ -1513,6 +1513,7 @@
             { x => x.Item, item },
             { x => x.Recipes, recipes },
             { x => x.OnAddRecipe, AddShoppingListRecipe },
+            { x => x.OnRemoveRecipe, RemoveShoppingListRootRecipe },
             { x => x.IsInList, r => _selectedShoppingList!.UserRecipes.Any(ur => ur.ParentUserRecipe is null && ur.RecipeId == r.Id) },
             { x => x.IsOutsideContext, IsOutsideLinkedContext },
             { x => x.OutsideTag, OutsideContextTag() },
@@ -1971,6 +1972,15 @@
         });
 
         Rebuild();
+    }
+
+    // Fenêtre des recettes : retire la recette de la racine, toutes ses occurrences si elle y est plusieurs fois.
+    private async Task RemoveShoppingListRootRecipe(Recipe recipe)
+    {
+        foreach (var userRecipe in _selectedShoppingList!.UserRecipes.Where(ur => ur.ParentUserRecipe is null && ur.RecipeId == recipe.Id).ToList())
+        {
+            await RemoveShoppingListRecipe(userRecipe);
+        }
     }
 
     private void Rebuild()

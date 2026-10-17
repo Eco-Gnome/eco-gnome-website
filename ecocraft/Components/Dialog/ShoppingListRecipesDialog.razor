@@ -4,7 +4,7 @@
 @inject LocalizationService LocalizationService
 
 @* Recettes d'un métier ou d'une table de la shopping list (bandeau, fenêtre « Métiers & tables ») : la coche ronde
-   ajoute la recette à la liste, verte si elle y est déjà en racine. La fenêtre reste ouverte pour en ajouter d'autres. *@
+   ajoute la recette à la liste, verte si elle y est déjà en racine (un clic l'en retire). La fenêtre reste ouverte. *@
 <MudDialog Style="min-height: 500px;">
     <TitleContent>
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -22,22 +22,15 @@
                         {
                             @OutsideTag
                         }
-                        @if (IsInList(context))
-                        {
-                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.RecipeInList")">
-                                <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
-                            </MudTooltip>
-                        }
-                        else
-                        {
-                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AddRecipeToList")">
-                                <MudIconButton Icon="@MDIIcons.Filled.CheckCircle"
-                                               Size="Size.Small"
-                                               Class="pa-0"
-                                               Style="opacity: 0.35"
-                                               OnClick="@(() => AddRecipe(context))"/>
-                            </MudTooltip>
-                        }
+                        @{ var isInList = IsInList(context); }
+                        <MudTooltip Text="@LocalizationService.GetTranslation(isInList ? "ShoppingList.RemoveRecipeFromList" : "ShoppingList.AddRecipeToList")">
+                            <MudIconButton Icon="@MDIIcons.Filled.CheckCircle"
+                                           Color="@(isInList ? Color.Success : Color.Default)"
+                                           Size="Size.Small"
+                                           Class="pa-0"
+                                           Style="@(isInList ? null : "opacity: 0.35")"
+                                           OnClick="@(() => ToggleRecipe(context, isInList))"/>
+                        </MudTooltip>
                     </MudStack>
                 </RowAction>
             </RecipeList>
@@ -52,14 +45,15 @@
     [Parameter, EditorRequired] public required IHasIconName Item { get; set; }
     [Parameter, EditorRequired] public required List<Recipe> Recipes { get; set; }
     [Parameter, EditorRequired] public required Func<Recipe, Task> OnAddRecipe { get; set; }
+    [Parameter, EditorRequired] public required Func<Recipe, Task> OnRemoveRecipe { get; set; }
     [Parameter, EditorRequired] public required Func<Recipe, bool> IsInList { get; set; }
     [Parameter, EditorRequired] public required Func<Recipe, bool> IsOutsideContext { get; set; }
     [Parameter, EditorRequired] public required RenderFragment OutsideTag { get; set; }
 
-    // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après l'ajout.
-    private async Task AddRecipe(Recipe recipe)
+    // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après le changement.
+    private async Task ToggleRecipe(Recipe recipe, bool isInList)
     {
-        await OnAddRecipe(recipe);
+        await (isInList ? OnRemoveRecipe(recipe) : OnAddRecipe(recipe));
         StateHasChanged();
     }
 }

@@ -482,7 +482,7 @@
         "Remaining": "Reste",
         "AllInStock": "J'ai tout",
         "AddRecipeToList": "Ajouter à la liste",
-        "RecipeInList": "Déjà dans la liste",
+        "RemoveRecipeFromList": "Retirer de la liste",
         "RecipeSearchMore": "D'autres recettes existent : tapez un nom de recette ou de métier pour affiner.",
         "StopGuidedAutoExpandLabel": "Arrêter l'ouverture auto",
         "StopGuidedAutoExpandTooltip": "Arrete l'expansion guidee en cours et conserve les recettes deja ajoutees.",
