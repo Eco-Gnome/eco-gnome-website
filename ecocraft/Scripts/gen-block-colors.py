@@ -27,7 +27,7 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ICONS = os.path.join(ROOT, "ecocraft", "wwwroot", "assets", "eco-icons")
 OUT = os.path.join(ROOT, "ecocraft", "BuildingPlanner", "BlockColors.Generated.cs")
-DEFAULT_EXPORT = os.path.join(os.path.dirname(ROOT), "eco_gnome_data_v5_fix-static.json")
+DEFAULT_EXPORT = os.path.join(ROOT, "ecocraft", "eco_gnome_data.json")
 
 # Doit rester aligné sur Tier0Materials de BuildingPlannerCatalogService : les seuls blocs sans tier
 # proposés dans les listes de matériaux.
