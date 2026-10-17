@@ -68,7 +68,7 @@
                 <ErrorBoundary>
                     <ChildContent>
                         <MudItem xs="12" Class="px-4 pt-2">
-                            @* Bandeau en lecture seule : on modifie via « Métiers & tables » (fenêtre) et « Règles d'automatisation » (popover). *@
+                            @* Bandeau en lecture seule : on modifie via « Métiers & tables » (fenêtre). *@
                             <MudPaper Class="sl-strip">
                                 @{
                                     var stripSkills = _selectedShoppingList.UserSkills.Where(us => us.Skill is not null).ToList();
@@ -125,27 +125,6 @@
                                         </MudTooltip>
                                     }
                                 </div>
-                                <span class="flex-grow-1"></span>
-                                <div class="sl-auto-open-anchor">
-                                    <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isAutoOpenPopoverOpen = !_isAutoOpenPopoverOpen)">
-                                        <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
-                                        <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
-                                    </MudButton>
-                                    <MudOverlay Visible="_isAutoOpenPopoverOpen" VisibleChanged="@(v => _isAutoOpenPopoverOpen = v)" AutoClose="true" LockScroll="false"/>
-                                    @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style. *@
-                                    <MudPopover Open="_isAutoOpenPopoverOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8"
-                                                Style="width: 460px; max-width: calc(100vw - 32px); background: #41424c; border-radius: 4px;">
-                                        <div class="sl-auto-open">
-                                            <div class="sl-auto-open-head">
-                                                <span class="sl-auto-open-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenTitle")</span>
-                                                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => _isAutoOpenPopoverOpen = false)"/>
-                                            </div>
-                                            @AutoOpenOption("ReuseChoices", _isAutoExpandEnabled, OnAutoExpandChanged)
-                                            @AutoOpenOption("Propagate", _isRecipeChoicePropagationEnabled, OnRecipeChoicePropagationChanged)
-                                            @AutoOpenOption("Guided", _isGuidedAutoExpandEnabled, OnGuidedAutoExpandChanged)
-                                        </div>
-                                    </MudPopover>
-                                </div>
                             </MudPaper>
                         </MudItem>
                         <MudItem xs="12" lg="8" Class="pa-2 pl-4">
@@ -180,7 +159,6 @@
                                         </MoreItemsTemplate>
                                     </MudAutocomplete>
                                     <MudButton Variant="Variant.Text"
-                                               Color="Color.Tertiary"
                                                StartIcon="@MDIIcons.Filled.Sitemap"
                                                Disabled="@(_selectedShoppingList.UserRecipes.Count == 0)"
                                                OnClick="OpenProductionChainGraph">
@@ -202,6 +180,26 @@
                                                OnClick="ToggleAllRows">
                                         @LocalizationService.GetTranslation(_collapsedRows.Count > 0 ? "ShoppingList.ExpandAll" : "ShoppingList.CollapseAll")
                                     </MudButton>
+                                    <div class="sl-auto-open-anchor">
+                                        <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isAutoOpenPopoverOpen = !_isAutoOpenPopoverOpen)">
+                                            <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
+                                            <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
+                                        </MudButton>
+                                        <MudOverlay Visible="_isAutoOpenPopoverOpen" VisibleChanged="@(v => _isAutoOpenPopoverOpen = v)" AutoClose="true" LockScroll="false"/>
+                                        @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style. *@
+                                        <MudPopover Open="_isAutoOpenPopoverOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8"
+                                                    Style="width: 460px; max-width: calc(100vw - 32px); background: #41424c; border-radius: 4px;">
+                                            <div class="sl-auto-open">
+                                                <div class="sl-auto-open-head">
+                                                    <span class="sl-auto-open-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenTitle")</span>
+                                                    <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => _isAutoOpenPopoverOpen = false)"/>
+                                                </div>
+                                                @AutoOpenOption("ReuseChoices", _isAutoExpandEnabled, OnAutoExpandChanged)
+                                                @AutoOpenOption("Propagate", _isRecipeChoicePropagationEnabled, OnRecipeChoicePropagationChanged)
+                                                @AutoOpenOption("Guided", _isGuidedAutoExpandEnabled, OnGuidedAutoExpandChanged)
+                                            </div>
+                                        </MudPopover>
+                                    </div>
                                 </MudStack>
                                 <div class="sl-tree">
                                     <div class="sl-tree-row sl-tree-head">
@@ -234,14 +232,14 @@
                                             </TitleContent>
                                             <ChildContent>
                                                 <div class="sl-panel-body">
-                                                    <div class="sl-caption pb-1">@LocalizationService.GetTranslation("ShoppingList.TagsHelp")</div>
                                                     @foreach (var tagRow in _view.Tags)
                                                     {
                                                         <div class="sl-tag-row">
                                                             <EcoIcon Item="@tagRow.Tag" Size="28"/>
                                                             <span class="sl-tag-name">
                                                                 <span>@LocalizationService.GetTranslation(tagRow.Tag) <span class="sl-muted">×@FormatQuantity(tagRow.Need)</span></span>
-                                                                <span class="sl-tag-choice">★ @(tagRow.ChosenItem is null ? LocalizationService.GetTranslation("ShoppingList.AnyOfTagLong") : LocalizationService.GetTranslation(tagRow.ChosenItem))</span>
+                                                                @{ var tagChoice = tagRow.ChosenItem is null ? LocalizationService.GetTranslation("ShoppingList.AnyOfTag") : LocalizationService.GetTranslation(tagRow.ChosenItem); }
+                                                                <span class="sl-tag-choice" title="@tagChoice">★ @tagChoice</span>
                                                             </span>
                                                             <div class="sl-tag-candidates">
                                                                 @foreach (var candidate in GetTagCandidates(tagRow.Tag))
@@ -1077,15 +1075,6 @@
 
     private static string Indent(int depth) => $"padding-left: {depth * 28}px;";
 
-    private decimal GetTotalIngredientQuantity(ItemOrTag itemOrTag)
-    {
-        return _selectedShoppingList!.UserRecipes
-            .SelectMany(ur => ur.Recipe.Elements
-                .Where(e => e.IsIngredient() && e.ItemOrTag.Id == itemOrTag.Id)
-                .Select(e => GetIngredientQuantityGoal(ur, e, _selectedShoppingList)))
-            .Sum();
-    }
-
     private ItemOrTag? GetChosenItem(ItemOrTag tag)
     {
         return _selectedShoppingList?.UserShoppingListItems.FirstOrDefault(usli => usli.ItemOrTagId == tag.Id)?.ChosenItem;
@@ -1445,7 +1434,7 @@
             <div class="sl-menu-head">
                 <EcoIcon Item="@ingredient.ItemOrTag" Size="28"/>
                 <span class="sl-menu-title">@LocalizationService.GetTranslation("ShoppingList.HowToObtain", LocalizationService.GetTranslation(ingredient.ItemOrTag))</span>
-                <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.HowToObtainSub", possibleRecipes.Count.ToString(), FormatQuantity(GetTotalIngredientQuantity(ingredient.ItemOrTag)))</span>
+                <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.RecipesPossible", possibleRecipes.Count.ToString())</span>
                 <span class="flex-grow-1"></span>
                 @if (isPending)
                 {
@@ -1507,6 +1496,7 @@
             { x => x.OnLevelChanged, OnLevelChanged },
             { x => x.OnTalentsChanged, OnTalentsChanged },
             { x => x.OnModuleSelected, SelectPluginModule },
+            { x => x.OnOpenAutoOpenRules, () => { _isAutoOpenPopoverOpen = true; StateHasChanged(); } },
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
 

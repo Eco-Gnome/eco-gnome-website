@@ -3,7 +3,7 @@
         "Steps": {
             "Skills": {
                 "Title": "Ajoute tes métiers",
-                "Desc": "Commence ici : choisis les professions que tu pratiques."
+                "Desc": "Commence ici : choisis les métiers que tu pratiques."
             },
             "Buy": {
                 "Title": "Renseigne les prix d'achat",
@@ -194,7 +194,7 @@
         "SiteTitle": "Outils pour le jeu vidéo Eco",
         "PleaseJoin": "Veuillez rejoindre un serveur"
     },
-    "Name": "Nom du serveur",
+    "Name": "Nom",
     "Level": "Niveau",
     "Talents": "Talents",
     "Upgrade": "Mise à niveau",
@@ -436,12 +436,11 @@
         "NameLabel": "Nom de la liste de course",
         "ConfirmDeleteShoppingList": "Êtes vous sur de vouloir supprimer la liste de course {name} ?",
         "ConfigButton": "Métiers & tables",
-        "ConfigTitle": "Compétences & tables d'artisanat",
+        "ConfigTitle": "Métiers & tables d'artisanat",
         "ConfigSummary": "{0} métiers · {1} tables",
         "LinkedContext": "Contexte lié (calculateur de prix)",
         "NotLinked": "Aucun",
         "LinkedContextHelp": "Liée : la liste reprend tous les métiers, talents et tables de ce contexte, à chaque ouverture de la liste. Ils se modifient dans le calculateur de prix ; les métiers et tables des recettes hors contexte gardent leurs propres réglages. Aucun : les réglages utilisés par les recettes de la liste sont gardés et redeviennent modifiables, les autres sont retirés.",
-        "OpenInPriceCalculator": "Ouvrir dans le calculateur de prix",
         "FromContext": "Du contexte « {0} »",
         "OutsideContext": "Hors contexte",
         "EditInPriceCalculator": "Repris du contexte lié : modifiable dans le calculateur de prix. En grisé : utilisé par aucune recette de la liste, gardé pour les recettes à venir.",
@@ -473,10 +472,9 @@
         "RecipesPossible": "{0} recettes possibles",
         "PartiallyCovered": "{0} / {1} couverts",
         "HowToObtain": "Comment obtenir : {0} ?",
-        "HowToObtainSub": "{0} recettes possibles · total {1} dans la liste",
+        "AnyOfTag": "Indifférent",
         "AnyOfTagLong": "N'importe quel objet du tag",
         "TagsToConfigure": "Tags à configurer",
-        "TagsHelp": "★ = ce que vous achetez. Choisir le tag lui-même (1er carré) = n'importe quel objet du tag.",
         "AnyOfTagCount": "{0} indifférent(s)",
         "InStockCount": "{0}/{1} en stock",
         "Need": "Besoin",

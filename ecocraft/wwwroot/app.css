@@ -486,6 +486,11 @@
     opacity: 0.55;
 }
 
+/* Même largeur de colonnes pour les groupes « Du contexte » et « Hors contexte » (tableaux séparés). */
+.sl-config-table .mud-table-root {
+    table-layout: fixed;
+}
+
 .sl-caption {
     font-size: 11px;
     color: var(--mud-palette-text-secondary);

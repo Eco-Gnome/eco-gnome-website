@@ -4,8 +4,6 @@
 @using System.Globalization
 @inject LocalizationService LocalizationService
 @inject ContextService ContextService
-@inject LocalStorageService LocalStorageService
-@inject NavigationManager Navigation
 
 @* Métiers & tables d'une shopping list : les blocs de la page (TalentsControl, CraftingTablePluginModuleControl,
    partagés avec le calculateur de prix) dans une fenêtre. Liste liée à un contexte du calculateur : ses métiers et
@@ -36,16 +34,13 @@
                 <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.LinkedContextHelp")">
                     <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small"/>
                 </MudTooltip>
-                @if (Source is not null)
-                {
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               StartIcon="@MDIIcons.Filled.OpenInNew"
-                               Class="ml-2"
-                               OnClick="OpenInPriceCalculator">
-                        @LocalizationService.GetTranslation("ShoppingList.OpenInPriceCalculator")
-                    </MudButton>
-                }
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           EndIcon="@MDIIcons.Filled.ChevronDown"
+                           Class="ml-2"
+                           OnClick="OpenAutoOpenRules">
+                    @LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")
+                </MudButton>
             </MudStack>
         </MudPaper>
         <MudGrid Spacing="4">
@@ -105,6 +100,7 @@
     [Parameter, EditorRequired] public required Func<UserSkill, int, Task> OnLevelChanged { get; set; }
     [Parameter, EditorRequired] public required Func<Task> OnTalentsChanged { get; set; }
     [Parameter, EditorRequired] public required Func<UserCraftingTable, CraftingTablePluginModuleControl.ModuleSelection, Task> OnModuleSelected { get; set; }
+    [Parameter, EditorRequired] public required Action OnOpenAutoOpenRules { get; set; }
 
     private Guid? _sourceId;
 
@@ -139,12 +135,11 @@
         await Run(() => OnSourceChanged(id));
     }
 
-    // Le calculateur rouvre le dernier contexte choisi (clé « DataContextId ») : on lui donne le contexte lié.
-    private async Task OpenInPriceCalculator()
+    // Les règles d'automatisation sont un popover de la page : on ferme la fenêtre et la page l'ouvre.
+    private void OpenAutoOpenRules()
     {
-        await LocalStorageService.AddItem("DataContextId", _sourceId.ToString());
         MudDialog.Close();
-        Navigation.NavigateTo("/");
+        OnOpenAutoOpenRules();
     }
 
     // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après chaque changement.
@@ -173,7 +168,13 @@
         <MudTable Items="skills"
                   Hover="true"
                   Dense="true"
+                  Class="sl-config-table"
                   RowClassFunc="@((us, i) => $"{(i % 2 == 1 ? "row-odd" : "")} {(isLinked && IsUnused(us) ? "sl-unused-row" : "")}")">
+            <ColGroup>
+                <col/>
+                <col style="width: 84px;"/>
+                <col style="width: 240px;"/>
+            </ColGroup>
             <HeaderContent>
                 <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
                 <MudTh Class="pl-1">@LocalizationService.GetTranslation("Level")</MudTh>
@@ -215,8 +216,12 @@
         <MudTable Items="tables"
                   Hover="true"
                   Dense="true"
-                  Class="mud-table-container-no-overflow-y"
+                  Class="mud-table-container-no-overflow-y sl-config-table"
                   RowClassFunc="@((uct, i) => $"{(i % 2 == 1 ? "row-odd" : "")} {(isLinked && IsUnused(uct) ? "sl-unused-row" : "")}")">
+            <ColGroup>
+                <col/>
+                <col style="width: 240px;"/>
+            </ColGroup>
             <HeaderContent>
                 <MudTh Class="pl-2">@LocalizationService.GetTranslation("Name")</MudTh>
                 <MudTh Class="pl-1">@LocalizationService.GetTranslation("Upgrade")</MudTh>
