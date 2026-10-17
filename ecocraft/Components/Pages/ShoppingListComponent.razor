@@ -180,26 +180,9 @@
                                                OnClick="ToggleAllRows">
                                         @LocalizationService.GetTranslation(_collapsedRows.Count > 0 ? "ShoppingList.ExpandAll" : "ShoppingList.CollapseAll")
                                     </MudButton>
-                                    <div class="sl-auto-open-anchor">
-                                        <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isAutoOpenPopoverOpen = !_isAutoOpenPopoverOpen)">
-                                            <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
-                                            <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
-                                        </MudButton>
-                                        <MudOverlay Visible="_isAutoOpenPopoverOpen" VisibleChanged="@(v => _isAutoOpenPopoverOpen = v)" AutoClose="true" LockScroll="false"/>
-                                        @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style. *@
-                                        <MudPopover Open="_isAutoOpenPopoverOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8"
-                                                    Style="width: 460px; max-width: calc(100vw - 32px); background: #41424c; border-radius: 4px;">
-                                            <div class="sl-auto-open">
-                                                <div class="sl-auto-open-head">
-                                                    <span class="sl-auto-open-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenTitle")</span>
-                                                    <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => _isAutoOpenPopoverOpen = false)"/>
-                                                </div>
-                                                @AutoOpenOption("ReuseChoices", _isAutoExpandEnabled, OnAutoExpandChanged)
-                                                @AutoOpenOption("Propagate", _isRecipeChoicePropagationEnabled, OnRecipeChoicePropagationChanged)
-                                                @AutoOpenOption("Guided", _isGuidedAutoExpandEnabled, OnGuidedAutoExpandChanged)
-                                            </div>
-                                        </MudPopover>
-                                    </div>
+                                    <ShoppingListAutoOpenRules ReuseChoices="_isAutoExpandEnabled" ReuseChoicesChanged="OnAutoExpandChanged"
+                                                               Propagate="_isRecipeChoicePropagationEnabled" PropagateChanged="OnRecipeChoicePropagationChanged"
+                                                               Guided="_isGuidedAutoExpandEnabled" GuidedChanged="OnGuidedAutoExpandChanged"/>
                                 </MudStack>
                                 <div class="sl-tree">
                                     <div class="sl-tree-row sl-tree-head">
@@ -349,7 +332,6 @@
     // Chaque résultat est un RecipeSummary (une dizaine de composants) : afficher toutes les recettes du serveur
     // rendait l'ouverture du champ très lente. Au-delà, on invite à affiner la recherche.
     private const int RecipeSearchMaxItems = 50;
-    private bool _isAutoOpenPopoverOpen;
     // Lignes repliées de l'arbre (clés RecipeRowKey / IngredientRowKey) ; tout est déplié par défaut.
     private readonly HashSet<string> _collapsedRows = [];
     private ShoppingListView _view = ShoppingListView.Empty;
@@ -1222,18 +1204,6 @@
             .FirstOrDefault();
     }
 
-    private RenderFragment AutoOpenOption(string key, bool value, Func<bool, Task> onChanged) => __builder =>
-    {
-        <div class="sl-auto-open-option">
-            <MudSwitch T="bool" Value="value" ValueChanged="@((bool v) => onChanged(v))" Color="Color.Primary"/>
-            <div class="sl-auto-open-text">
-                <span class="sl-auto-open-option-title">@LocalizationService.GetTranslation($"ShoppingList.{key}Title")</span>
-                <span class="sl-auto-open-option-desc">@LocalizationService.GetTranslation($"ShoppingList.{key}Desc")</span>
-                <span class="sl-auto-open-option-example">@LocalizationService.GetTranslation($"ShoppingList.{key}Example")</span>
-            </div>
-        </div>
-    };
-
     // Ligne d'une recette : racine (quantité à produire modifiable, ✕) ou sous-recette affichée à part (plusieurs
     // recettes pour un même ingrédient). Dépliée, elle montre ses ingrédients.
     private RenderFragment RecipeRow(UserRecipe userRecipe, int depth) => __builder =>
@@ -1496,7 +1466,12 @@
             { x => x.OnLevelChanged, OnLevelChanged },
             { x => x.OnTalentsChanged, OnTalentsChanged },
             { x => x.OnModuleSelected, SelectPluginModule },
-            { x => x.OnOpenAutoOpenRules, () => { _isAutoOpenPopoverOpen = true; StateHasChanged(); } },
+            { x => x.IsAutoExpandEnabled, () => _isAutoExpandEnabled },
+            { x => x.IsRecipeChoicePropagationEnabled, () => _isRecipeChoicePropagationEnabled },
+            { x => x.IsGuidedAutoExpandEnabled, () => _isGuidedAutoExpandEnabled },
+            { x => x.OnAutoExpandChanged, OnAutoExpandChanged },
+            { x => x.OnRecipeChoicePropagationChanged, OnRecipeChoicePropagationChanged },
+            { x => x.OnGuidedAutoExpandChanged, OnGuidedAutoExpandChanged },
             { x => x.OnOpenRecipes, OpenRecipesDialog },
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };

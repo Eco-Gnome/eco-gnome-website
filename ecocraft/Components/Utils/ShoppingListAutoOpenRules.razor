@@ -1,0 +1,48 @@
+@using ecocraft.Services
+@inject LocalizationService LocalizationService
+
+@* Bouton « Règles d'automatisation » de la shopping list et son popover, dans la page et dans la fenêtre
+   « Métiers & tables ». Les réglages restent à la page : chaque changement lui est renvoyé. *@
+<div class="sl-auto-open-anchor">
+    <MudButton Variant="Variant.Outlined" Class="sl-strip-button" OnClick="@(() => _isOpen = !_isOpen)">
+        <span class="sl-strip-button-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")</span>
+        <MudIcon Icon="@MDIIcons.Filled.ChevronDown" Size="Size.Small" Class="ml-2"/>
+    </MudButton>
+    <MudOverlay Visible="_isOpen" VisibleChanged="@(v => _isOpen = v)" AutoClose="true" LockScroll="false"/>
+    @* Le Class d'un MudPopover téléporté n'est pas atteignable par le CSS scoped : largeur/fond en Style. *@
+    <MudPopover Open="_isOpen" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Elevation="8"
+                Style="width: 460px; max-width: calc(100vw - 32px); background: #41424c; border-radius: 4px;">
+        <div class="sl-auto-open">
+            <div class="sl-auto-open-head">
+                <span class="sl-auto-open-title">@LocalizationService.GetTranslation("ShoppingList.AutoOpenTitle")</span>
+                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => _isOpen = false)"/>
+            </div>
+            @Option("ReuseChoices", ReuseChoices, ReuseChoicesChanged)
+            @Option("Propagate", Propagate, PropagateChanged)
+            @Option("Guided", Guided, GuidedChanged)
+        </div>
+    </MudPopover>
+</div>
+
+@code {
+    [Parameter] public bool ReuseChoices { get; set; }
+    [Parameter] public EventCallback<bool> ReuseChoicesChanged { get; set; }
+    [Parameter] public bool Propagate { get; set; }
+    [Parameter] public EventCallback<bool> PropagateChanged { get; set; }
+    [Parameter] public bool Guided { get; set; }
+    [Parameter] public EventCallback<bool> GuidedChanged { get; set; }
+
+    private bool _isOpen;
+
+    private RenderFragment Option(string key, bool value, EventCallback<bool> onChanged) => __builder =>
+    {
+        <div class="sl-auto-open-option">
+            <MudSwitch T="bool" Value="value" ValueChanged="onChanged" Color="Color.Primary"/>
+            <div class="sl-auto-open-text">
+                <span class="sl-auto-open-option-title">@LocalizationService.GetTranslation($"ShoppingList.{key}Title")</span>
+                <span class="sl-auto-open-option-desc">@LocalizationService.GetTranslation($"ShoppingList.{key}Desc")</span>
+                <span class="sl-auto-open-option-example">@LocalizationService.GetTranslation($"ShoppingList.{key}Example")</span>
+            </div>
+        </div>
+    };
+}

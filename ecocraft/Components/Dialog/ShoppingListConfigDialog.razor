@@ -34,13 +34,11 @@
                 <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.LinkedContextHelp")">
                     <MudIcon Icon="@MDIIcons.Outline.Information" Color="Color.Warning" Size="Size.Small"/>
                 </MudTooltip>
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Primary"
-                           EndIcon="@MDIIcons.Filled.ChevronDown"
-                           Class="ml-2"
-                           OnClick="OpenAutoOpenRules">
-                    @LocalizationService.GetTranslation("ShoppingList.AutoOpenButton")
-                </MudButton>
+                <div class="ml-2">
+                    <ShoppingListAutoOpenRules ReuseChoices="IsAutoExpandEnabled()" ReuseChoicesChanged="@((bool v) => OnAutoExpandChanged(v))"
+                                               Propagate="IsRecipeChoicePropagationEnabled()" PropagateChanged="@((bool v) => OnRecipeChoicePropagationChanged(v))"
+                                               Guided="IsGuidedAutoExpandEnabled()" GuidedChanged="@((bool v) => OnGuidedAutoExpandChanged(v))"/>
+                </div>
             </MudStack>
         </MudPaper>
         <MudGrid Spacing="4">
@@ -100,7 +98,13 @@
     [Parameter, EditorRequired] public required Func<UserSkill, int, Task> OnLevelChanged { get; set; }
     [Parameter, EditorRequired] public required Func<Task> OnTalentsChanged { get; set; }
     [Parameter, EditorRequired] public required Func<UserCraftingTable, CraftingTablePluginModuleControl.ModuleSelection, Task> OnModuleSelected { get; set; }
-    [Parameter, EditorRequired] public required Action OnOpenAutoOpenRules { get; set; }
+    // Règles d'automatisation : lues sur la page à chaque rendu, la fenêtre se redessine après chaque changement.
+    [Parameter, EditorRequired] public required Func<bool> IsAutoExpandEnabled { get; set; }
+    [Parameter, EditorRequired] public required Func<bool> IsRecipeChoicePropagationEnabled { get; set; }
+    [Parameter, EditorRequired] public required Func<bool> IsGuidedAutoExpandEnabled { get; set; }
+    [Parameter, EditorRequired] public required Func<bool, Task> OnAutoExpandChanged { get; set; }
+    [Parameter, EditorRequired] public required Func<bool, Task> OnRecipeChoicePropagationChanged { get; set; }
+    [Parameter, EditorRequired] public required Func<bool, Task> OnGuidedAutoExpandChanged { get; set; }
     // Ouvre les recettes d'un métier ou d'une table (Skill ou CraftingTable) ; rend la main à sa fermeture.
     [Parameter, EditorRequired] public required Func<IHasIconName, List<Recipe>, Task> OnOpenRecipes { get; set; }
 
@@ -135,13 +139,6 @@
     {
         _sourceId = id;
         await Run(() => OnSourceChanged(id));
-    }
-
-    // Les règles d'automatisation sont un popover de la page : on ferme la fenêtre et la page l'ouvre.
-    private void OpenAutoOpenRules()
-    {
-        MudDialog.Close();
-        OnOpenAutoOpenRules();
     }
 
     // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après chaque changement.
