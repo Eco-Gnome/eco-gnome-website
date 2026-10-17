@@ -12,6 +12,10 @@
         <MudTh Class="@ColumnClass"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r))">@LocalizationService.GetTranslation("RecipeList.RecipeName")</MudTableSortLabel></MudTh>
         <MudTh Class="@ColumnClass"><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.Skill))">@LocalizationService.GetTranslation("Skill")</MudTableSortLabel></MudTh>
         <MudTh Class="@ColumnClass"><MudTableSortLabel SortBy="new Func<Recipe, object>(r => LocalizationService.GetTranslation(r.CraftingTable))">@LocalizationService.GetTranslation("CraftingTable")</MudTableSortLabel></MudTh>
+        @if (RowAction is not null)
+        {
+            <MudTh/>
+        }
     </HeaderContent>
     <RowTemplate>
         <MudTh Class="@ColumnClass">
@@ -39,6 +43,10 @@
                 <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
             </MudStack>
         </MudTh>
+        @if (RowAction is not null)
+        {
+            <MudTd Style="text-align: right; white-space: nowrap;">@RowAction(context)</MudTd>
+        }
     </RowTemplate>
     <ChildRowContent>
         @if (_openedDetails.Contains(context))
@@ -85,6 +93,8 @@
     [Parameter] public List<Recipe> Recipes { get; set; } = [];
     [Parameter] public string? Class { get; set; }
     [Parameter] public bool UniformColumns { get; set; }
+    // Colonne d'action en fin de ligne (ex. ajout à la shopping list) ; absente si null.
+    [Parameter] public RenderFragment<Recipe>? RowAction { get; set; }
 
     private List<Recipe> _openedDetails = [];
     private string? ColumnClass => UniformColumns ? "recipe-list-uniform-column" : null;

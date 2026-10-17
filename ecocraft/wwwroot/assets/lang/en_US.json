@@ -481,6 +481,8 @@
         "IHave": "I have",
         "Remaining": "Left",
         "AllInStock": "I have it all",
+        "AddRecipeToList": "Add to the list",
+        "RecipeInList": "Already in the list",
         "RecipeSearchMore": "More recipes available: type a recipe or skill name to narrow down.",
         "StopGuidedAutoExpandLabel": "Stop auto-expand",
         "StopGuidedAutoExpandTooltip": "Stop the current guided auto-expand run and keep all recipes already added.",

@@ -1,0 +1,65 @@
+@using ecocraft.Models
+@using ecocraft.Services
+@using ecocraft.Components.Utils
+@inject LocalizationService LocalizationService
+
+@* Recettes d'un métier ou d'une table de la shopping list (bandeau, fenêtre « Métiers & tables ») : la coche ronde
+   ajoute la recette à la liste, verte si elle y est déjà en racine. La fenêtre reste ouverte pour en ajouter d'autres. *@
+<MudDialog Style="min-height: 500px;">
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            <EcoIcon Item="@Item" Size="64" />
+            <MudText Typo="Typo.h6">@LocalizationService.GetTranslation(Item as IHasLocalizedName)</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack>
+            <MudText>@LocalizationService.GetTranslation("RelatedRecipes")</MudText>
+            <RecipeList Recipes="@Recipes">
+                <RowAction>
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Spacing="2">
+                        @if (IsOutsideContext(context))
+                        {
+                            @OutsideTag
+                        }
+                        @if (IsInList(context))
+                        {
+                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.RecipeInList")">
+                                <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Color="Color.Success" Size="Size.Small"/>
+                            </MudTooltip>
+                        }
+                        else
+                        {
+                            <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.AddRecipeToList")">
+                                <MudIconButton Icon="@MDIIcons.Filled.CheckCircle"
+                                               Size="Size.Small"
+                                               Class="pa-0"
+                                               Style="opacity: 0.35"
+                                               OnClick="@(() => AddRecipe(context))"/>
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                </RowAction>
+            </RecipeList>
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+
+    // Un Skill ou un CraftingTable.
+    [Parameter, EditorRequired] public required IHasIconName Item { get; set; }
+    [Parameter, EditorRequired] public required List<Recipe> Recipes { get; set; }
+    [Parameter, EditorRequired] public required Func<Recipe, Task> OnAddRecipe { get; set; }
+    [Parameter, EditorRequired] public required Func<Recipe, bool> IsInList { get; set; }
+    [Parameter, EditorRequired] public required Func<Recipe, bool> IsOutsideContext { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment OutsideTag { get; set; }
+
+    // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après l'ajout.
+    private async Task AddRecipe(Recipe recipe)
+    {
+        await OnAddRecipe(recipe);
+        StateHasChanged();
+    }
+}

@@ -101,6 +101,8 @@
     [Parameter, EditorRequired] public required Func<Task> OnTalentsChanged { get; set; }
     [Parameter, EditorRequired] public required Func<UserCraftingTable, CraftingTablePluginModuleControl.ModuleSelection, Task> OnModuleSelected { get; set; }
     [Parameter, EditorRequired] public required Action OnOpenAutoOpenRules { get; set; }
+    // Ouvre les recettes d'un métier ou d'une table (Skill ou CraftingTable) ; rend la main à sa fermeture.
+    [Parameter, EditorRequired] public required Func<IHasIconName, List<Recipe>, Task> OnOpenRecipes { get; set; }
 
     private Guid? _sourceId;
 
@@ -182,10 +184,12 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd Class="pa-1">
-                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                        <EcoIcon Item="@context.Skill"/>
-                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
-                    </MudStack>
+                    <MudLink Color="Color.Default" OnClick="@(() => Run(() => OnOpenRecipes(context.Skill!, context.Skill!.Recipes)))">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                            <EcoIcon Item="@context.Skill"/>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.Skill)</MudText>
+                        </MudStack>
+                    </MudLink>
                 </MudTd>
                 <MudTd Class="px-0">
                     <MudNumericField T="int"
@@ -228,10 +232,12 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd Class="pa-1">
-                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                        <EcoIcon Item="@context.CraftingTable"/>
-                        <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
-                    </MudStack>
+                    <MudLink Color="Color.Default" OnClick="@(() => Run(() => OnOpenRecipes(context.CraftingTable, context.CraftingTable.Recipes)))">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                            <EcoIcon Item="@context.CraftingTable"/>
+                            <MudText Typo="Typo.body2">@LocalizationService.GetTranslation(context.CraftingTable)</MudText>
+                        </MudStack>
+                    </MudLink>
                 </MudTd>
                 <MudTd Class="pa-1">
                     <CraftingTablePluginModuleControl UserCraftingTable="context"

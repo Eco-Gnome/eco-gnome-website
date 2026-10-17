@@ -87,7 +87,7 @@
                                     @foreach (var userSkill in stripSkills.Take(StripMaxIcons))
                                     {
                                         <MudTooltip Text="@LocalizationService.GetTranslation(userSkill.Skill)">
-                                            <div class="sl-strip-icon">
+                                            <div class="sl-strip-icon" @onclick="@(() => OpenRecipesDialog(userSkill.Skill!, userSkill.Skill!.Recipes))">
                                                 <EcoIcon Item="@userSkill.Skill" Size="32"/>
                                                 <span class="sl-strip-level">@userSkill.Level</span>
                                             </div>
@@ -108,7 +108,7 @@
                                     {
                                         var firstModule = GetFirstSlotModule(userCraftingTable);
                                         <MudTooltip Text="@LocalizationService.GetTranslation(userCraftingTable.CraftingTable)">
-                                            <div class="sl-strip-icon">
+                                            <div class="sl-strip-icon" @onclick="@(() => OpenRecipesDialog(userCraftingTable.CraftingTable, userCraftingTable.CraftingTable.Recipes))">
                                                 <EcoIcon Item="@userCraftingTable.CraftingTable" Size="32"/>
                                                 @if (firstModule is not null)
                                                 {
@@ -1497,10 +1497,30 @@
             { x => x.OnTalentsChanged, OnTalentsChanged },
             { x => x.OnModuleSelected, SelectPluginModule },
             { x => x.OnOpenAutoOpenRules, () => { _isAutoOpenPopoverOpen = true; StateHasChanged(); } },
+            { x => x.OnOpenRecipes, OpenRecipesDialog },
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Large };
 
         await DialogService.ShowAsync<ShoppingListConfigDialog>(LocalizationService.GetTranslation("ShoppingList.ConfigTitle"), parameters, options);
+    }
+
+    // Recettes d'un métier ou d'une table, à ajouter à la liste. Attend la fermeture : la fenêtre config, si c'est elle
+    // qui l'a ouverte, se redessine ensuite (un ajout peut créer un métier ou une table).
+    private async Task OpenRecipesDialog(IHasIconName item, List<Recipe> recipes)
+    {
+        var parameters = new DialogParameters<ShoppingListRecipesDialog>
+        {
+            { x => x.Item, item },
+            { x => x.Recipes, recipes },
+            { x => x.OnAddRecipe, AddShoppingListRecipe },
+            { x => x.IsInList, r => _selectedShoppingList!.UserRecipes.Any(ur => ur.ParentUserRecipe is null && ur.RecipeId == r.Id) },
+            { x => x.IsOutsideContext, IsOutsideLinkedContext },
+            { x => x.OutsideTag, OutsideContextTag() },
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<ShoppingListRecipesDialog>(LocalizationService.GetTranslation(item as IHasLocalizedName), parameters, options);
+        await dialog.Result;
     }
 
     // Source enregistrée de la liste, si elle existe encore parmi les contextes du calculateur.
