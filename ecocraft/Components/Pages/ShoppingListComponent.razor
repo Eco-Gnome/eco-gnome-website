@@ -463,6 +463,9 @@
             return;
         }
 
+        // Les panneaux de droite apparaissent et disparaissent : leurs en-têtes sortent de la tabulation à chaque rendu.
+        await JsRuntime.InvokeVoidAsync("removeFromTabOrder", ".sl-side-panels .mud-expand-panel-header");
+
         if (_shouldScrollToGuidedPendingChoice && IsGuidedRunPaused)
         {
             _shouldScrollToGuidedPendingChoice = false;
