@@ -676,14 +676,19 @@
     border-bottom: 1px solid rgba(255, 255, 255, .06);
 }
 
+/* En-têtes de tableau comme ceux du calculateur de prix (MudTable). */
+.sl-tree-head,
+.sl-buy-head {
+    background: #303038;
+    font-size: .875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
 .sl-tree-head {
     min-height: 0;
-    padding: 6px 4px;
+    padding: 8px 4px;
     border-bottom-color: var(--mud-palette-lines-default);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--mud-palette-text-secondary);
 }
 
 .sl-root {
@@ -923,26 +928,18 @@
     align-items: center;
     gap: 8px;
     width: 100%;
-    padding-left: 14px;
-}
-
-.sl-panel-title {
-    font-size: 15px;
-    font-weight: 500;
 }
 
 .sl-panel-body {
     display: flex;
     flex-direction: column;
-    padding: 0 14px 10px;
-    border-top: 1px solid rgba(255, 255, 255, .08);
 }
 
 .sl-tag-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 0;
+    padding: 5px 8px;
 }
 
 .sl-tag-name {
@@ -1002,16 +999,12 @@
     gap: 0 8px;
     align-items: center;
     height: 40px;
+    padding: 0 8px;
     font-size: 13px;
 }
 
 .sl-buy-head {
-    height: 28px;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--mud-palette-text-secondary);
+    height: 36px;
 }
 
 .sl-buy-name {
@@ -1051,6 +1044,7 @@
     align-items: center;
     gap: 8px;
     height: 30px;
+    padding: 0 8px;
     font-size: 13px;
 }
 

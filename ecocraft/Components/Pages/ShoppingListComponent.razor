@@ -200,11 +200,11 @@
                                 <MudExpansionPanels MultiExpansion="true" Class="sl-side-panels">
                                     @if (_view.Tags.Count > 0)
                                     {
-                                        <MudExpansionPanel @bind-Expanded="ExpandedTagsPanel" Gutters="false">
+                                        <MudExpansionPanel @bind-Expanded="ExpandedTagsPanel">
                                             <TitleContent>
                                                 <div class="sl-panel-head">
                                                     <MudIcon Icon="@MDIIcons.Outline.TagMultiple" Size="Size.Small"/>
-                                                    <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.TagsToConfigure")</span>
+                                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.TagsToConfigure")</MudText>
                                                     <span class="sl-muted">@_view.Tags.Count</span>
                                                     <span class="flex-grow-1"></span>
                                                     <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.AnyOfTagCount", _view.Tags.Count(t => t.ChosenItem is null).ToString())</span>
@@ -239,11 +239,11 @@
                                             </ChildContent>
                                         </MudExpansionPanel>
                                     }
-                                    <MudExpansionPanel @bind-Expanded="ExpandedBuyPanel" Gutters="false">
+                                    <MudExpansionPanel @bind-Expanded="ExpandedBuyPanel">
                                         <TitleContent>
                                             <div class="sl-panel-head">
                                                 <MudIcon Icon="@MDIIcons.Outline.Cart" Size="Size.Small"/>
-                                                <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</span>
+                                                <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</MudText>
                                                 <span class="sl-muted">@_view.ToBuy.Count</span>
                                                 <span class="flex-grow-1"></span>
                                                 <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.InStockCount", _view.ToBuy.Count(r => r.IsInStock).ToString(), _view.ToBuy.Count.ToString())</span>
@@ -290,11 +290,11 @@
                                     </MudExpansionPanel>
                                     @if (_view.Surplus.Count > 0)
                                     {
-                                        <MudExpansionPanel @bind-Expanded="ExpandedSurplusPanel" Gutters="false">
+                                        <MudExpansionPanel @bind-Expanded="ExpandedSurplusPanel">
                                             <TitleContent>
                                                 <div class="sl-panel-head">
                                                     <MudIcon Icon="@MDIIcons.Filled.PackageVariantClosed" Size="Size.Small"/>
-                                                    <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</span>
+                                                    <MudText Typo="Typo.h6">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</MudText>
                                                     <span class="sl-muted">@_view.Surplus.Count</span>
                                                 </div>
                                             </TitleContent>
