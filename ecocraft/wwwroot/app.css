@@ -914,6 +914,16 @@
     flex: none;
 }
 
+/* Cartes : nom de la recette et métier sur une ligne chacun, rognés par « … » (texte complet au survol). */
+.sl-card-text > .ellipsis-title,
+.sl-card-text .sl-skill > :last-child {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .sl-recipe-option .sl-skill {
     flex: none;
     width: 120px;

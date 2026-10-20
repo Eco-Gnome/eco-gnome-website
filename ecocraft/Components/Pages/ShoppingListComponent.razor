@@ -1450,7 +1450,7 @@
                         <div class="sl-card-title">
                             <EcoIcon Item="@recipe.CraftingTable" Size="32"/>
                             <span class="sl-card-text">
-                                <span>@LocalizationService.GetTranslation(recipe)</span>
+                                <span class="ellipsis-title">@LocalizationService.GetTranslation(recipe)</span>
                                 @SkillLabel(recipe)
                             </span>
                         </div>
@@ -1540,17 +1540,19 @@
             return;
         }
 
+        var skillName = LocalizationService.GetTranslation(recipe.Skill);
         <span class="sl-skill">
-            <EcoIcon Item="@recipe.Skill" Size="20"/>
+            <EcoIcon Item="@recipe.Skill" Size="16"/>
             @if (IsOutsideLinkedContext(recipe))
             {
-                <MudTooltip Text="@OutsideContextTooltip">
-                    <span class="sl-skill-outside">@LocalizationService.GetTranslation(recipe.Skill)</span>
+                @* Le nom complet en tête de l'explication : il peut être rogné dans les cartes. *@
+                <MudTooltip Text="@($"{skillName} : {OutsideContextTooltip}")">
+                    <span class="sl-skill-outside">@skillName</span>
                 </MudTooltip>
             }
             else
             {
-                <span>@LocalizationService.GetTranslation(recipe.Skill)</span>
+                <span class="ellipsis-title">@skillName</span>
             }
         </span>
     };
