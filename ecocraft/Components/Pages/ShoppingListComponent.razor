@@ -1449,8 +1449,10 @@
                     <div class="@($"sl-card{(children.Any(c => c.RecipeId == recipe.Id) ? " sl-chosen" : "")}")" @onclick="@(() => SelectRecipeForIngredient(parentRecipe, ingredient, recipe))">
                         <div class="sl-card-title">
                             <EcoIcon Item="@recipe.CraftingTable" Size="32"/>
-                            <span class="sl-card-name">@LocalizationService.GetTranslation(recipe)</span>
-                            @SkillLabel(recipe)
+                            <span class="sl-card-text">
+                                <span>@LocalizationService.GetTranslation(recipe)</span>
+                                @SkillLabel(recipe)
+                            </span>
                         </div>
                         <div class="sl-card-io">
                             @foreach (var recipeIngredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
@@ -1530,7 +1532,7 @@
         return LinkedSource is { } source && recipe.Skill is not null && recipe.Skill.GetCurrentUserSkill(source) is null;
     }
 
-    // Métier de la recette, calé en haut à droite, en petit sur deux lignes au besoin : nom en orange (avec explication) s'il est hors du contexte lié.
+    // Métier de la recette, en petit (sous le nom dans les cartes, en colonne dans la recherche) : nom en orange (avec explication) s'il est hors du contexte lié.
     private RenderFragment SkillLabel(Recipe recipe) => __builder =>
     {
         if (recipe.Skill is null)
