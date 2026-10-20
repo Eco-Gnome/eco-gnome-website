@@ -881,15 +881,29 @@
     font-weight: 500;
 }
 
-/* Métier d'une recette, calé à droite (cartes du menu, champ « Ajouter une recette »). */
+.sl-card-name {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Métier d'une recette, en haut à droite (cartes du menu, champ « Ajouter une recette ») : information secondaire,
+   en petit et sur deux lignes au besoin pour prendre peu de largeur. */
 .sl-skill {
     display: inline-flex;
+    flex: none;
+    align-self: flex-start;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    max-width: 110px;
     margin-left: auto;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 400;
-    white-space: nowrap;
+    line-height: 1.2;
+    text-align: right;
+}
+
+.sl-skill > * {
+    min-width: 0;
 }
 
 .sl-skill-outside {
