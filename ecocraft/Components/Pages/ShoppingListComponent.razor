@@ -146,16 +146,13 @@
                                                      AnchorOrigin="Origin.BottomLeft"
                                                      TransformOrigin="Origin.TopLeft">
                                         <ItemTemplate>
-                                            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                            <div class="sl-recipe-option">
                                                 <RecipeSummary Recipe="context" Class="pl-2" />
-                                                @if (IsOutsideLinkedContext(context))
-                                                {
-                                                    @OutsideContextTag()
-                                                }
-                                            </MudStack>
+                                                @SkillLabel(context)
+                                            </div>
                                         </ItemTemplate>
                                         <MoreItemsTemplate>
-                                            <MudText Typo="Typo.caption" Class="pa-2 mud-text-secondary">@LocalizationService.GetTranslation("ShoppingList.RecipeSearchMore")</MudText>
+                                            <MudText Typo="Typo.caption" Class="pa-2 mud-text-secondary">@LocalizationService.GetTranslation("ShoppingList.RecipeSearchMore", _recipeSearchMoreCount.ToString())</MudText>
                                         </MoreItemsTemplate>
                                     </MudAutocomplete>
                                     <MudButton Variant="Variant.Text"
@@ -206,7 +203,7 @@
                                         <MudExpansionPanel @bind-Expanded="ExpandedTagsPanel" Gutters="false">
                                             <TitleContent>
                                                 <div class="sl-panel-head">
-                                                    <MudIcon Icon="@MDIIcons.Outline.TagMultiple" Color="Color.Primary" Size="Size.Small"/>
+                                                    <MudIcon Icon="@MDIIcons.Outline.TagMultiple" Size="Size.Small"/>
                                                     <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.TagsToConfigure")</span>
                                                     <span class="sl-muted">@_view.Tags.Count</span>
                                                     <span class="flex-grow-1"></span>
@@ -245,7 +242,7 @@
                                     <MudExpansionPanel @bind-Expanded="ExpandedBuyPanel" Gutters="false">
                                         <TitleContent>
                                             <div class="sl-panel-head">
-                                                <MudIcon Icon="@MDIIcons.Outline.Cart" Color="Color.Secondary" Size="Size.Small"/>
+                                                <MudIcon Icon="@MDIIcons.Outline.Cart" Size="Size.Small"/>
                                                 <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.ItemsToBuy")</span>
                                                 <span class="sl-muted">@_view.ToBuy.Count</span>
                                                 <span class="flex-grow-1"></span>
@@ -269,6 +266,7 @@
                                                                            Color="@(buyRow.IsInStock ? Color.Success : Color.Default)"
                                                                            Size="Size.Small"
                                                                            Class="pa-0"
+                                                                           tabindex="-1"
                                                                            Style="@(buyRow.IsInStock ? null : "opacity: 0.35")"
                                                                            OnClick="@(() => SetStock(buyRow.ItemOrTag, buyRow.IsInStock ? 0 : buyRow.Need))"/>
                                                         </MudTooltip>
@@ -290,21 +288,31 @@
                                             </div>
                                         </ChildContent>
                                     </MudExpansionPanel>
+                                    @if (_view.Surplus.Count > 0)
+                                    {
+                                        <MudExpansionPanel @bind-Expanded="ExpandedSurplusPanel" Gutters="false">
+                                            <TitleContent>
+                                                <div class="sl-panel-head">
+                                                    <MudIcon Icon="@MDIIcons.Filled.PackageVariantClosed" Size="Size.Small"/>
+                                                    <span class="sl-panel-title">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</span>
+                                                    <span class="sl-muted">@_view.Surplus.Count</span>
+                                                </div>
+                                            </TitleContent>
+                                            <ChildContent>
+                                                <div class="sl-panel-body">
+                                                    @foreach (var (itemOrTag, quantity) in _view.Surplus)
+                                                    {
+                                                        <div class="sl-surplus-row">
+                                                            <EcoIcon Item="@itemOrTag" Size="24"/>
+                                                            <span class="flex-grow-1">@LocalizationService.GetTranslation(itemOrTag)</span>
+                                                            <span class="sl-surplus-quantity">+@FormatQuantity(quantity)</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </ChildContent>
+                                        </MudExpansionPanel>
+                                    }
                                 </MudExpansionPanels>
-                                @if (_view.Surplus.Count > 0)
-                                {
-                                    <MudPaper Class="pa-3">
-                                        <MudText Typo="Typo.subtitle1" Class="mb-1">@LocalizationService.GetTranslation("ShoppingList.ItemsProduced")</MudText>
-                                        @foreach (var (itemOrTag, quantity) in _view.Surplus)
-                                        {
-                                            <div class="sl-surplus-row">
-                                                <EcoIcon Item="@itemOrTag" Size="24"/>
-                                                <span class="flex-grow-1">@LocalizationService.GetTranslation(itemOrTag)</span>
-                                                <span class="sl-surplus-quantity">+@FormatQuantity(quantity)</span>
-                                            </div>
-                                        }
-                                    </MudPaper>
-                                }
                             </MudStack>
                         </MudItem>
                     </ChildContent>
@@ -332,6 +340,7 @@
     // Chaque résultat est un RecipeSummary (une dizaine de composants) : afficher toutes les recettes du serveur
     // rendait l'ouverture du champ très lente. Au-delà, on invite à affiner la recherche.
     private const int RecipeSearchMaxItems = 50;
+    private int _recipeSearchMoreCount;
     // Lignes repliées de l'arbre (clés RecipeRowKey / IngredientRowKey) ; tout est déplié par défaut.
     private readonly HashSet<string> _collapsedRows = [];
     private ShoppingListView _view = ShoppingListView.Empty;
@@ -355,6 +364,17 @@
         {
             _expandedBuyPanel = value;
             _ = LocalStorageService.AddItem("ShoppingListBuyExpanded", value.ToString());
+        }
+    }
+
+    private bool _expandedSurplusPanel;
+    private bool ExpandedSurplusPanel
+    {
+        get => _expandedSurplusPanel;
+        set
+        {
+            _expandedSurplusPanel = value;
+            _ = LocalStorageService.AddItem("ShoppingListSurplusExpanded", value.ToString());
         }
     }
 
@@ -399,6 +419,7 @@
     {
         _expandedTagsPanel = await LocalStorageService.GetItem("ShoppingListTagsExpanded") != "False";
         _expandedBuyPanel = await LocalStorageService.GetItem("ShoppingListBuyExpanded") != "False";
+        _expandedSurplusPanel = await LocalStorageService.GetItem("ShoppingListSurplusExpanded") != "False";
 
         var autoExpandSetting = await LocalStorageService.GetItem(AutoExpandStorageKey);
         if (string.IsNullOrEmpty(autoExpandSetting))
@@ -1218,7 +1239,7 @@
 
         <div class="@($"sl-tree-row{(isRoot ? " sl-root" : "")}")">
             <div class="sl-item" style="@Indent(depth)">
-                <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" OnClick="@(() => ToggleRow(key))"/>
+                <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" tabindex="-1" OnClick="@(() => ToggleRow(key))"/>
                 <EcoIcon Item="@primaryProduct.ItemOrTag" Size="32"/>
                 <span class="sl-item-text">
                     <span class="sl-item-name">@LocalizationService.GetTranslation(primaryProduct.ItemOrTag)</span>
@@ -1257,7 +1278,7 @@
                 <EcoIcon Item="@userRecipe.Recipe.CraftingTable" Size="28" Class="sl-chip-icon"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation(userRecipe.Recipe)</span>
             </div>
-            <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="() => RemoveShoppingListRecipe(userRecipe)"/>
+            <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" tabindex="-1" OnClick="() => RemoveShoppingListRecipe(userRecipe)"/>
         </div>
         @if (isExpanded)
         {
@@ -1298,7 +1319,7 @@
             <div class="sl-item" style="@Indent(depth)">
                 @if (hasChildren)
                 {
-                    <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" OnClick="@(() => ToggleRow(key))"/>
+                    <MudIconButton Icon="@(isExpanded ? MDIIcons.Filled.ChevronDown : MDIIcons.Filled.ChevronRight)" Size="Size.Small" Class="sl-chevron" tabindex="-1" OnClick="@(() => ToggleRow(key))"/>
                 }
                 else
                 {
@@ -1320,10 +1341,6 @@
                     @if (hasChildren && !isFulfilled)
                     {
                         <span class="sl-caption sl-warning">@LocalizationService.GetTranslation("ShoppingList.PartiallyCovered", FormatQuantity(GetProducedQuantityForIngredient(parentRecipe, ingredient, _selectedShoppingList!)), FormatQuantity(quantity))</span>
-                    }
-                    else if (!hasChildren && possibleRecipes.Count >= 2)
-                    {
-                        <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.RecipesPossible", possibleRecipes.Count.ToString())</span>
                     }
                 </span>
             </div>
@@ -1358,7 +1375,7 @@
 
         if (isInStock)
         {
-            <button type="button" class="sl-chip sl-chip-stock" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
+            <button type="button" class="sl-chip sl-chip-stock" tabindex="-1" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
                 <MudIcon Icon="@MDIIcons.Filled.CheckCircle" Size="Size.Small"/>
                 <span class="sl-chip-label">@LocalizationService.GetTranslation("ShoppingList.InStock")</span>
                 @if (canChoose)
@@ -1369,7 +1386,7 @@
             return;
         }
 
-        <button type="button" class="sl-chip" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
+        <button type="button" class="sl-chip" tabindex="-1" disabled="@(!canChoose)" @onclick="@(() => ToggleAddChildren(parentRecipe, ingredient))">
             @if (children.Count > 0)
             {
                 <EcoIcon Item="@children[0].Recipe.CraftingTable" Size="28" Class="sl-chip-icon"/>
@@ -1404,7 +1421,6 @@
             <div class="sl-menu-head">
                 <EcoIcon Item="@ingredient.ItemOrTag" Size="28"/>
                 <span class="sl-menu-title">@LocalizationService.GetTranslation("ShoppingList.HowToObtain", LocalizationService.GetTranslation(ingredient.ItemOrTag))</span>
-                <span class="sl-caption">@LocalizationService.GetTranslation("ShoppingList.RecipesPossible", possibleRecipes.Count.ToString())</span>
                 <span class="flex-grow-1"></span>
                 @if (isPending)
                 {
@@ -1415,7 +1431,7 @@
                         </MudButton>
                     </MudTooltip>
                 }
-                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" OnClick="@(() => CloseMenu(parentRecipe, ingredient))"/>
+                <MudIconButton Icon="@MDIIcons.Filled.Close" Size="Size.Small" tabindex="-1" OnClick="@(() => CloseMenu(parentRecipe, ingredient))"/>
             </div>
             <div class="sl-menu-cards">
                 <div class="@($"sl-card{(children.Count == 0 ? " sl-chosen" : "")}")" @onclick="@(() => SelectBuyForIngredient(parentRecipe, ingredient))">
@@ -1431,11 +1447,8 @@
                         <div class="sl-card-title">
                             <EcoIcon Item="@recipe.CraftingTable" Size="32"/>
                             <span>@LocalizationService.GetTranslation(recipe)</span>
-                            @if (IsOutsideLinkedContext(recipe))
-                            {
-                                @OutsideContextTag()
-                            }
                         </div>
+                        @SkillLabel(recipe)
                         <div class="sl-card-io">
                             @foreach (var recipeIngredient in recipe.Elements.Where(e => e.IsIngredient()).OrderBy(e => e.Index))
                             {
@@ -1490,8 +1503,7 @@
             { x => x.OnAddRecipe, AddShoppingListRecipe },
             { x => x.OnRemoveRecipe, RemoveShoppingListRootRecipe },
             { x => x.IsInList, r => _selectedShoppingList!.UserRecipes.Any(ur => ur.ParentUserRecipe is null && ur.RecipeId == r.Id) },
-            { x => x.IsOutsideContext, IsOutsideLinkedContext },
-            { x => x.OutsideTag, OutsideContextTag() },
+            { x => x.SkillWarning, r => IsOutsideLinkedContext(r) ? OutsideContextTooltip : null },
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, CloseButton = true, MaxWidth = MaxWidth.Medium };
 
@@ -1515,15 +1527,30 @@
         return LinkedSource is { } source && recipe.Skill is not null && recipe.Skill.GetCurrentUserSkill(source) is null;
     }
 
-    private RenderFragment OutsideContextTag() => __builder =>
+    // Métier de la recette, calé à droite de la ligne : nom en orange (avec explication) s'il est hors du contexte lié.
+    private RenderFragment SkillLabel(Recipe recipe) => __builder =>
     {
-        <MudTooltip Text="@LocalizationService.GetTranslation("ShoppingList.OutsideContextRecipeTooltip")">
-            <span class="sl-caption d-inline-flex align-center" style="gap: 2px; white-space: nowrap;">
-                <MudIcon Icon="@MDIIcons.Filled.LinkOff" Style="font-size: 14px;"/>
-                @LocalizationService.GetTranslation("ShoppingList.OutsideContextRecipe")
-            </span>
-        </MudTooltip>
+        if (recipe.Skill is null)
+        {
+            return;
+        }
+
+        <span class="sl-skill">
+            <EcoIcon Item="@recipe.Skill" Size="24"/>
+            @if (IsOutsideLinkedContext(recipe))
+            {
+                <MudTooltip Text="@OutsideContextTooltip">
+                    <span class="sl-skill-outside">@LocalizationService.GetTranslation(recipe.Skill)</span>
+                </MudTooltip>
+            }
+            else
+            {
+                <span>@LocalizationService.GetTranslation(recipe.Skill)</span>
+            }
+        </span>
     };
+
+    private string OutsideContextTooltip => LocalizationService.GetTranslation("ShoppingList.OutsideContextRecipeTooltip");
 
     private async Task<List<UserRecipe>> ApplyRecipeChoiceToIngredient(UserRecipe parentRecipe, Element ingredient, Recipe chosenRecipe, bool runAutoExpandAfterApply)
     {
@@ -2100,9 +2127,10 @@
             .Select(slr => slr.RecipeId)
             .ToHashSet();
         // Liste liée : les recettes faisables avec les métiers du contexte d'abord.
-        result = result.Where(r => !selectedRecipeIds.Contains(r.Id)).OrderBy(IsOutsideLinkedContext).ThenBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name);
+        var recipes = result.Where(r => !selectedRecipeIds.Contains(r.Id)).OrderBy(IsOutsideLinkedContext).ThenBy(r => r.Skill?.Name ?? "zzz").ThenBy(r => r.Name).ToList();
+        _recipeSearchMoreCount = recipes.Count - RecipeSearchMaxItems;
 
-        return Task.FromResult(result);
+        return Task.FromResult<IEnumerable<Recipe>>(recipes);
     }
 
 

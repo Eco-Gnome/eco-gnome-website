@@ -876,6 +876,28 @@
     font-weight: 500;
 }
 
+/* Métier d'une recette, calé à droite (cartes du menu, champ « Ajouter une recette »). */
+.sl-skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.sl-skill-outside {
+    color: var(--mud-palette-warning);
+}
+
+.sl-recipe-option {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
 .sl-card-io {
     display: flex;
     align-items: center;

@@ -34,7 +34,16 @@
         <MudTh Class="@ColumnClass">
             <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                 <EcoIcon Item="@context.Skill" Size="32" />
-                <MudText Typo="Typo.body2">@(context.Skill is not null ? LocalizationService.GetTranslation(context.Skill) : "")</MudText>
+                @if (SkillWarning?.Invoke(context) is { } skillWarning)
+                {
+                    <MudTooltip Text="@skillWarning">
+                        <MudText Typo="Typo.body2" Color="Color.Warning">@LocalizationService.GetTranslation(context.Skill)</MudText>
+                    </MudTooltip>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">@(context.Skill is not null ? LocalizationService.GetTranslation(context.Skill) : "")</MudText>
+                }
             </MudStack>
         </MudTh>
         <MudTh Class="@ColumnClass">
@@ -95,6 +104,8 @@
     [Parameter] public bool UniformColumns { get; set; }
     // Colonne d'action en fin de ligne (ex. ajout à la shopping list) ; absente si null.
     [Parameter] public RenderFragment<Recipe>? RowAction { get; set; }
+    // Explication affichée au survol du métier, alors écrit en orange (ex. hors du contexte lié) ; null = rien à signaler.
+    [Parameter] public Func<Recipe, string?>? SkillWarning { get; set; }
 
     private List<Recipe> _openedDetails = [];
     private string? ColumnClass => UniformColumns ? "recipe-list-uniform-column" : null;

@@ -15,13 +15,9 @@
     <DialogContent>
         <MudStack>
             <MudText>@LocalizationService.GetTranslation("RelatedRecipes")</MudText>
-            <RecipeList Recipes="@Recipes">
+            <RecipeList Recipes="@Recipes" SkillWarning="@SkillWarning">
                 <RowAction>
                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd" Spacing="2">
-                        @if (IsOutsideContext(context))
-                        {
-                            @OutsideTag
-                        }
                         @{ var isInList = IsInList(context); }
                         <MudTooltip Text="@LocalizationService.GetTranslation(isInList ? "ShoppingList.RemoveRecipeFromList" : "ShoppingList.AddRecipeToList")">
                             <MudIconButton Icon="@MDIIcons.Filled.CheckCircle"
@@ -47,8 +43,8 @@
     [Parameter, EditorRequired] public required Func<Recipe, Task> OnAddRecipe { get; set; }
     [Parameter, EditorRequired] public required Func<Recipe, Task> OnRemoveRecipe { get; set; }
     [Parameter, EditorRequired] public required Func<Recipe, bool> IsInList { get; set; }
-    [Parameter, EditorRequired] public required Func<Recipe, bool> IsOutsideContext { get; set; }
-    [Parameter, EditorRequired] public required RenderFragment OutsideTag { get; set; }
+    // Recette hors du contexte lié : explication, son métier est écrit en orange.
+    [Parameter, EditorRequired] public required Func<Recipe, string?> SkillWarning { get; set; }
 
     // La fenêtre n'est pas dans l'arbre de rendu de la page : elle se redessine elle-même après le changement.
     private async Task ToggleRecipe(Recipe recipe, bool isInList)
