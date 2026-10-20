@@ -509,7 +509,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px 20px;
-    padding: 10px 14px;
+    padding: 10px 24px;
 }
 
 .sl-strip-button {
@@ -660,6 +660,17 @@
     color: var(--mud-palette-text-secondary);
 }
 
+/* Zone principale calée sur les panneaux de droite (MudExpansionPanel) : barre d'outils de la hauteur d'un en-tête
+   de panneau, à 24 px du bord comme les titres ; tableau à 6 px du bord comme le contenu des panneaux. */
+.sl-main {
+    padding: 0 6px 6px;
+}
+
+.sl-main-toolbar {
+    min-height: 64px;
+    padding: 8px 18px;
+}
+
 /* Arbre : une grille par ligne, colonnes Objet | Quantité | Obtenu via | ✕. */
 .sl-tree {
     overflow-x: auto;
@@ -672,7 +683,7 @@
     align-items: center;
     min-height: 46px;
     min-width: 560px;
-    padding: 0 4px;
+    padding: 0 8px;
     border-bottom: 1px solid rgba(255, 255, 255, .06);
 }
 
@@ -687,7 +698,7 @@
 
 .sl-tree-head {
     min-height: 0;
-    padding: 8px 4px;
+    padding: 8px;
     border-bottom-color: var(--mud-palette-lines-default);
 }
 

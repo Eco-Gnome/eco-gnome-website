@@ -127,9 +127,9 @@
                                 </div>
                             </MudPaper>
                         </MudItem>
-                        <MudItem xs="12" lg="8" Class="pa-2 pl-4">
-                            <MudPaper Class="pa-3">
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="mb-2" Wrap="Wrap.Wrap">
+                        <MudItem xs="12" lg="8" Class="pa-2 pt-4 pl-4">
+                            <MudPaper Class="sl-main">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="sl-main-toolbar" Wrap="Wrap.Wrap">
                                     <MudAutocomplete T="Recipe"
                                                      @ref="_recipeAutocompleteRef"
                                                      Value="_emptyRecipe"
@@ -195,7 +195,7 @@
                                 </div>
                             </MudPaper>
                         </MudItem>
-                        <MudItem xs="12" lg="4" Class="pa-2 pr-4">
+                        <MudItem xs="12" lg="4" Class="pa-2 pt-4 pr-4">
                             <MudStack Spacing="4">
                                 <MudExpansionPanels MultiExpansion="true" Class="sl-side-panels">
                                     @if (_view.Tags.Count > 0)
